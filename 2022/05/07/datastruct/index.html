@@ -1,0 +1,1798 @@
+<!DOCTYPE html>
+<html>
+  <!-- meta/link... -->
+  
+
+
+
+<head>
+  <meta http-equiv="content-type" content="text/html; charset=utf-8">
+  <meta content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=0" name="viewport">
+  <!-- Global site tag (gtag.js) - Google Analytics -->
+
+
+  <title>数据结构在汇编语言下的表现 | Deutschball&#39;s blog</title>
+
+  <link rel="icon" type="image/png" href="https://raw.githubusercontent.com/DeutschBall/test/master/emp.png">
+  <link rel="stylesheet" href="https://at.alicdn.com/t/font_1911880_c1nvbyezg17.css">
+  <link href="https://cdn.jsdelivr.net/gh/inkss/fontawesome@5.15.3/css/all.min.css" rel="stylesheet">
+  <link href="/js/swiper/swiper@5.4.1.min.css" rel="stylesheet">
+  
+  
+    <script>
+        var themeModelId = '';
+        if (themeModelId) {
+            localStorage.setItem('modelId', themeModelId);
+        }
+    </script>
+    
+    <script src="https://cdn.jsdelivr.net/gh/yuang01/live2d-widget@latest/autoload.js"></script>
+    <script>
+        var live2dOpen = eval('true') || false;
+        if (!live2dOpen) {
+            localStorage.setItem('waifu-display', 1609323474481);
+        }
+    </script>
+  
+  
+  
+<link rel="stylesheet" href="/css/animate.min.css">
+
+  
+<link rel="stylesheet" href="/css/style.css">
+
+  
+  
+    
+<link rel="stylesheet" href="/js/fancybox/jquery.fancybox.min.css">
+
+  
+  
+    
+<link rel="stylesheet" href="/js/shareJs/share.min.css">
+
+  
+  <style>
+        @media (max-width: 992px) {
+            #waifu {
+                display: none;
+            }
+        }
+    </style>
+    <script src="//cdn.bootcss.com/pace/1.0.2/pace.min.js"></script>
+    <link href="//cdn.bootcss.com/pace/1.0.2/themes/pink/pace-theme-flash.css" rel="stylesheet">
+
+    
+        <script src="/js/valine/av-min@3.0.4.js"></script>
+        <script src="https://cdn.jsdelivr.net/gh/HCLonely/Valine@latest/dist/Valine.min.js"></script>
+    
+
+    <!-- import link -->
+    
+        
+            
+        
+            
+        
+    
+    <!-- import script -->
+    
+        
+            
+        
+            
+        
+    
+
+<!-- hexo injector head_end start -->
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.12.0/dist/katex.min.css">
+<!-- hexo injector head_end end --><meta name="generator" content="Hexo 6.1.0"></head>
+
+  
+  <!-- 依赖于jquery和vue -->
+  
+    
+<script src="https://cdn.jsdelivr.net/npm/jquery@3.5.1/dist/jquery.min.js"></script>
+
+  
+
+  
+    
+<script src="https://cdn.jsdelivr.net/npm/vue@2.6.11/dist/vue.min.js"></script>
+
+  
+  
+  <body>
+    <!-- 预加载动画 -->
+    <!-- 页面预加载动画 -->
+
+<div id='loader'>
+  <link rel="stylesheet" href="/js/loaded/index.css" >
+  <div class="loading-left-bg"></div>
+  <div class="loading-right-bg"></div>
+  <div class="spinner-box">
+    <div class="configure-border-1">
+      <div class="configure-core"></div>
+    </div>
+    <div class="configure-border-2">
+      <div class="configure-core"></div>
+    </div>
+    <div class="loading-word">loading...</div>
+  </div>
+</div>
+
+<script>
+  var endLoading = function () {
+    document.body.style.overflow = 'auto';
+    document.getElementById('loader').classList.add("loading");
+  }
+  window.addEventListener('DOMContentLoaded',endLoading);
+  
+</script>
+
+    
+    <!-- 判断是否为暗黑风格 -->
+    <!-- 判断是否为黑夜模式 -->
+<script>
+  let isDark = JSON.parse(localStorage.getItem('dark')) || JSON.parse('true');
+
+  if (isDark) {
+    $(document.body).addClass('darkModel');
+  }
+</script>
+
+    <!-- 需要在上面加载的js -->
+    <script>
+  function loadScript(src, cb) {
+    return new Promise(resolve => {
+      setTimeout(function () {
+        var HEAD = document.getElementsByTagName("head")[0] || document.documentElement;
+        var script = document.createElement("script");
+        script.setAttribute("type", "text/javascript");
+        if (cb) {
+          if (JSON.stringify(cb)) {
+            for (let p in cb) {
+              if (p == "onload") {
+                script[p] = () => {
+                  cb[p]()
+                  resolve()
+                }
+              } else {
+                script[p] = cb[p]
+                script.onload = resolve
+              }
+            }
+          } else {
+            script.onload = () => {
+              cb()
+              resolve()
+            };
+          }
+        } else {
+          script.onload = resolve
+        }
+        script.setAttribute("src", src);
+        HEAD.appendChild(script);
+      });
+    });
+  }
+
+  //https://github.com/filamentgroup/loadCSS
+  var loadCSS = function (href, before, media, attributes) {
+    return new Promise(resolve => {
+      setTimeout(function () {
+        var link = document.createElement('link');
+        link.rel = "stylesheet";
+        link.href = src;
+        link.onload = resolve;
+        document.getElementsByTagName("head")[0].appendChild(link);
+      });
+    });
+  };
+
+</script> 
+
+<!-- 轮播图所需要的js -->
+<script src="/js/swiper/swiper.min.js"></script>
+<script src="/js/swiper/vue-awesome-swiper.js"></script>
+<script src="/js/swiper/swiper.animate1.0.3.min.js"></script>
+
+<script type="text/javascript">
+  Vue.use(window.VueAwesomeSwiper)
+</script>
+
+
+  <script src="/js/vue-typed-js/index.js"></script>
+
+
+<!-- 首页的公告滚动插件的js需要重新加载 -->
+<script src="/js/vue-seamless-scroll/index.js"></script>
+
+<!-- 打字机效果js -->
+<script src="https://cdn.jsdelivr.net/npm/typed.js@2.0.11"></script>
+
+
+    <div id="safearea">
+      <main class="main" id="pjax-container">
+        <!-- 头部导航 -->
+        
+<header class="header   " 
+  id="navHeader"
+  style="position: fixed;
+  left: 0; top: 0; z-index: 10;width: 100%;"
+>
+  <div class="header-content">
+    <div class="bars">
+      <div id="appDrawer" class="sidebar-image">
+  <div class="drawer-box-icon">
+    <i class="fas fa-bars" aria-hidden="true" @click="showDialogDrawer"></i>
+  </div>
+  
+  <transition name="fade">
+    <div class="drawer-box_mask" v-cloak style="display: none;" v-show="visible" @click.self="cancelDialogDrawer">
+    </div>
+  </transition>
+  <div class="drawer-box" :class="{'active': visible}">
+    <div class="drawer-box-head bg-color">
+      <img class="drawer-box-head_logo lazyload placeholder" src="https://raw.githubusercontent.com/DeutschBall/test/master/emp.png" class="lazyload placeholder" data-srcset="https://raw.githubusercontent.com/DeutschBall/test/master/emp.png" srcset="https://img2.baidu.com/it/u=2037979560,2772131037&fm=26&fmt=auto&gp=0.jpg" alt="logo">
+      <h3 class="drawer-box-head_title">Deutschball&#39;s blog</h3>
+      <h5 class="drawer-box-head_desc"></h5>
+    </div>
+    
+    <div class="drawer-box-content">
+      <ul class="drawer-box-content_menu">
+        
+        
+          <li class="drawer-box-content_item">
+            <a target="_blank" rel="noopener" href="https://github.com/DeutschBall">
+              <i class="fas fa-github" aria-hidden="true"></i>
+              <span>Github</span>
+            </a>
+          </li>
+        
+      </ul>
+    </div>
+  </div>
+</div>
+
+<script>
+  var body = document.body || document.documentElement || window;
+  var vm = new Vue({
+    el: '#appDrawer',
+    data: {
+      visible: false,
+      top: 0,
+      openArr: [],
+    },
+    computed: {
+    },
+    mounted() {
+    },
+    methods: {
+      isOpen(index) {
+        if (this.openArr.includes(index)) {
+          return true;
+        } else {
+          return false;
+        }
+      },
+      openOrCloseMenu(curIndex) {
+        const index = this.openArr.indexOf(curIndex);
+        if (index !== -1) {
+          this.openArr.splice(index, 1);
+        } else {
+          this.openArr.push(curIndex);
+        }
+      },
+      showDialogDrawer() {
+        this.visible = true;
+        // 防止页面滚动，只能让弹框滚动
+        this.top = $(document).scrollTop()
+        body.style.cssText = 'width: 100%; height: 100%;overflow: hidden;';
+      },
+      cancelDialogDrawer() {
+        this.visible = false;
+        body.removeAttribute('style');
+        $(document).scrollTop(this.top)
+      }
+    },
+    created() {}
+  })
+</script>
+
+    </div>
+    <div class="blog-title" id="author-avatar">
+      
+        <div class="avatar">
+          <img src="https://raw.githubusercontent.com/DeutschBall/test/master/emp.png" class="lazyload placeholder" data-srcset="https://raw.githubusercontent.com/DeutschBall/test/master/emp.png" srcset="https://img2.baidu.com/it/u=2037979560,2772131037&fm=26&fmt=auto&gp=0.jpg" alt="logo">
+        </div>
+      
+      <a href="/" class="logo">Deutschball&#39;s blog</a>
+    </div>
+    <nav class="navbar">
+      <ul class="menu">
+        
+      </ul>
+      
+      
+        <div id="appSearch">
+  <div class="search"  @click="showDialog()"><i class="fas fa-search" aria-hidden="true"></i></div>
+  <transition name="fade">
+    <div class="message-box_wrapper" style="display: none;" v-cloak v-show="dialogVisible" @click.self="cancelDialogVisible()">
+      <div class="message-box animated bounceInDown">
+        <h2>
+          <span>
+            <i class="fas fa-search" aria-hidden="true"></i>
+            <span class="title">Search</span>
+          </span>
+          <i class="fas fa-times close" pointer style="float:right;" aria-hidden="true" @click.self="cancelDialogVisible()"></i>
+        </h2>
+        <form class="site-search-form">
+          <input type="text"
+            placeholder="Please enter keywords"
+            id="local-search-input" 
+            @click="getSearchFile()"
+            class="st-search-input"
+            v-model="searchInput"
+          />
+        </form>
+        <div class="result-wrapper">
+          <div id="local-search-result" class="local-search-result-cls"></div>
+        </div>
+      </div>
+    </div>
+  </transition>
+</div>
+<script src="/js/local_search.js"></script>
+<script>
+  var body = document.body || document.documentElement || window;
+  var vm = new Vue({
+    el: '#appSearch',
+    data: {
+      dialogVisible: false,
+      searchInput: '',
+      top: 0,
+    },
+    computed: {
+    },
+    mounted() {
+      window.addEventListener('pjax:complete', () => {
+        this.cancelDialogVisible();
+      })
+    },
+    methods: {
+      showDialog() {
+        this.dialogVisible = true;
+        // 防止页面滚动，只能让弹框滚动
+        this.top = $(document).scrollTop()
+        body.style.cssText = 'overflow: hidden;';
+      },
+      getSearchFile() {
+        if (!this.searchInput) {
+          getSearchFile("/search.xml");
+        }
+      },
+      cancelDialogVisible() {
+        this.dialogVisible = false;
+        body.removeAttribute('style');
+        $(document).scrollTop(this.top)
+      },
+    },
+    created() {}
+  })
+</script>
+<!-- 解决刷新页面闪烁问题，可以在元素上添加display: none, 或者用vue.extend方法，详情：https://blog.csdn.net/qq_31393401/article/details/81017912 -->
+<!-- 下面是搜索基本写法 -->
+<!-- <script type="text/javascript" id="local.search.active">
+  var inputArea = document.querySelector("#local-search-input");
+  inputArea.onclick   = function(){ getSearchFile(); this.onclick = null }
+  inputArea.onkeydown = function(){ if(event.keyCode == 13) return false }
+</script> -->
+
+      
+
+    </nav>
+  </div>
+  
+    <a target="_blank" rel="noopener" href="https://github.com/DeutschBall" class="github-corner color-primary" aria-label="View source on GitHub"><svg width="60" height="60" viewBox="0 0 250 250" style="fill:#fff; position: absolute; top: 0; border: 0; right: 0;" aria-hidden="true"><path d="M0,0 L115,115 L130,115 L142,142 L250,250 L250,0 Z"></path><path d="M128.3,109.0 C113.8,99.7 119.0,89.6 119.0,89.6 C122.0,82.7 120.5,78.6 120.5,78.6 C119.2,72.0 123.4,76.3 123.4,76.3 C127.3,80.9 125.5,87.3 125.5,87.3 C122.9,97.6 130.6,101.9 134.4,103.2" fill="currentColor" style="transform-origin: 130px 106px;" class="octo-arm"></path><path d="M115.0,115.0 C114.9,115.1 118.7,116.5 119.8,115.4 L133.7,101.6 C136.9,99.2 139.9,98.4 142.2,98.6 C133.8,88.0 127.5,74.4 143.8,58.0 C148.5,53.4 154.0,51.2 159.7,51.0 C160.3,49.4 163.2,43.6 171.4,40.1 C171.4,40.1 176.1,42.5 178.8,56.2 C183.1,58.6 187.2,61.8 190.9,65.4 C194.5,69.0 197.7,73.2 200.1,77.6 C213.8,80.2 216.3,84.9 216.3,84.9 C212.7,93.1 206.9,96.0 205.4,96.6 C205.1,102.4 203.0,107.8 198.3,112.5 C181.9,128.9 168.3,122.5 157.7,114.1 C157.9,116.9 156.7,120.9 152.7,124.9 L141.0,136.5 C139.8,137.7 141.6,141.9 141.8,141.8 Z" fill="currentColor" class="octo-body"></path></svg></a><style>.github-corner:hover .octo-arm{animation:octocat-wave 560ms ease-in-out}@keyframes octocat-wave{0%,100%{transform:rotate(0)}20%,60%{transform:rotate(-25deg)}40%,80%{transform:rotate(10deg)}}@media (max-width:500px){.github-corner:hover .octo-arm{animation:none}.github-corner .octo-arm{animation:octocat-wave 560ms ease-in-out}}</style>
+  
+  
+</header>
+        <!-- 内容区域 -->
+        
+ <!-- prismjs 代码高亮 -->
+ 
+
+
+<div class="bg-dark-floor" style="position: fixed;left: 0;top: 0;width: 100%;height: 100%;z-index: -1;"></div>
+
+
+  <!-- 文章详情页顶部图片和标题 -->
+
+
+
+
+<div class="post-detail-header" id="thumbnail_canvas" style="background-repeat: no-repeat; background-size: cover; 
+  background-position: center center;position: relative;background-image:url('/medias/3.jpg')">
+  <div class="post-detail-header-mask"></div>
+  <canvas id="header_canvas"style="position:absolute;bottom:0;pointer-events:none;"></canvas>
+  
+  <div class="post-detail-header_info-box">
+    <div class="title-box">
+      <span class="title">
+        数据结构在汇编语言下的表现
+      </span>
+    </div>
+    
+    
+      
+        <span class="post-detail-header_date">
+          <i class="fas fa-calendar"></i> Published in：2022-05-07 |
+        </span>
+      
+
+      
+
+      
+    
+  </div>
+  
+  
+    <script src="/js/bubble/bubble.js"></script>
+  
+</div>
+
+
+
+
+
+<div class="row justify-position" 
+  style="padding-top: 0px;">
+  <div class="main-content">
+    <article class="post post-detail">
+      <div class="post-content">
+        <h1 id="数据结构在汇编语言下的表现"><a href="#数据结构在汇编语言下的表现" class="headerlink" title="数据结构在汇编语言下的表现"></a>数据结构在汇编语言下的表现</h1><h2 id="数组"><a href="#数组" class="headerlink" title="数组"></a>数组</h2><h3 id="栈上数组"><a href="#栈上数组" class="headerlink" title="栈上数组"></a>栈上数组</h3><p><code>main.c</code></p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line"><span class="type">void</span> <span class="title function_">func</span><span class="params">()</span>&#123;</span><br><span class="line">    <span class="type">int</span> local_array[<span class="number">3</span>];</span><br><span class="line">    <span class="type">int</span> index=<span class="number">2</span>;</span><br><span class="line">    local_array[<span class="number">0</span>]=<span class="number">10</span>;</span><br><span class="line">    local_array[<span class="number">1</span>]=<span class="number">20</span>;</span><br><span class="line">    local_array[<span class="number">2</span>]=<span class="number">30</span>;</span><br><span class="line">    local_array[index]=<span class="number">40</span>;</span><br><span class="line">&#125;</span><br><span class="line"><span class="type">int</span> <span class="title function_">main</span><span class="params">()</span>&#123; </span><br><span class="line">    func();</span><br><span class="line">    <span class="keyword">return</span> <span class="number">0</span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">gcc main.c -O0 -o main.exe</span><br><span class="line">ida64 main.exe					<span class="comment">#需要将ida的根目录添加到环境变量path</span></span><br></pre></td></tr></table></figure>
+<p><code>func</code>函数的反汇编:</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br></pre></td><td class="code"><pre><span class="line">.text:0000000000401560</span><br><span class="line">.text:0000000000401560 ; =============== S U B R O U T I N E =======================================</span><br><span class="line">.text:0000000000401560</span><br><span class="line">.text:0000000000401560 ; 64位windows上不再有__fastcall和_cdecl等调用约定的区别,只有一个同一的微软x64调用约定</span><br><span class="line">.text:0000000000401560 ; Attributes: bp-based frame</span><br><span class="line">.text:0000000000401560</span><br><span class="line">.text:0000000000401560 ; void __fastcall func()</span><br><span class="line">.text:0000000000401560                 public func</span><br><span class="line">.text:0000000000401560 func            proc near               ; CODE XREF: main+D↓p</span><br><span class="line">.text:0000000000401560</span><br><span class="line">.text:0000000000401560 var_10          = dword ptr -10h			</span><br><span class="line">.text:0000000000401560 var_C           = dword ptr -0Ch</span><br><span class="line">.text:0000000000401560 var_8           = dword ptr -8</span><br><span class="line">.text:0000000000401560 var_4           = dword ptr -4</span><br><span class="line">.text:0000000000401560</span><br><span class="line">.text:0000000000401560                 push    rbp</span><br><span class="line">.text:0000000000401561                 mov     rbp, rsp</span><br><span class="line">.text:0000000000401564                 sub     rsp, 10h        ; 栈上开0x10=16字节的空间,用于存放局部变量(int local_array[3] 数组和int index变量,恰好4个int*一个int占用4字节)</span><br><span class="line">.text:0000000000401568                 mov     [rbp+var_4], 2  ; int index=2,可以判断var_4变量对应index</span><br><span class="line">.text:000000000040156F                 mov     [rbp+var_10], 0Ah ; 0x0Ah=10,对应local_array[0]=10;可以判断var_10对应local_array[0]</span><br><span class="line">.text:0000000000401576                 mov     [rbp+var_C], 14h ; 同理var_C=local_array[1]</span><br><span class="line">.text:000000000040157D                 mov     [rbp+var_8], 1Eh ; 同理var_8=local_array[2]</span><br><span class="line">.text:0000000000401584                 mov     eax, [rbp+var_4] ; 把index变量放在寄存器中,为0x401589的寻址做准备</span><br><span class="line">.text:0000000000401587                 cdqe					  ;将eax寄存器拓展为rax寄存器,该指令只作用于eax寄存器</span><br><span class="line">.text:0000000000401589                 mov     [rbp+rax*4+var_10], 28h ; local_array[index]=40</span><br><span class="line">.text:0000000000401591                 nop</span><br><span class="line">.text:0000000000401592                 add     rsp, 10h			;函数执行完毕,退栈</span><br><span class="line">.text:0000000000401596                 pop     rbp				;还原rbp原始功能</span><br><span class="line">.text:0000000000401597                 retn</span><br><span class="line">.text:0000000000401597 func            endp</span><br><span class="line">.text:0000000000401597</span><br></pre></td></tr></table></figure>
+<p>函数栈帧基于rbp帧指针,主函数没有对其传递参数,栈帧中 有返回值,rbp保存值,还有四个变量</p>
+<p><img src="https://raw.githubusercontent.com/DeutschBall/test/master/image-20220502203420528.png" class="lazyload placeholder" data-srcset="https://raw.githubusercontent.com/DeutschBall/test/master/image-20220502203420528.png" srcset="https://img2.baidu.com/it/u=2037979560,2772131037&fm=26&fmt=auto&gp=0.jpg" alt="image-20220502203420528"></p>
+<p><img src="https://raw.githubusercontent.com/DeutschBall/test/master/image-20220502204300823.png" class="lazyload placeholder" data-srcset="https://raw.githubusercontent.com/DeutschBall/test/master/image-20220502204300823.png" srcset="https://img2.baidu.com/it/u=2037979560,2772131037&fm=26&fmt=auto&gp=0.jpg" alt="image-20220502204300823"></p>
+<p>源程序中写的数组<code>int local_array[3]</code>被拆成了3个独立的int变量</p>
+<p>只有在<code>.text:0000000000401589                 mov     [rbp+rax*4+var_10], 28h</code>这里可以隐约看出实在对数组进行寻址操作</p>
+<p><code>var_10(rbp,rax,4)=M[rbp+rax*4+var_10]</code></p>
+<p><code>rax</code>中存放的是index的值,用rax<em>4是因为一个int占4字节,<code>rbp+var_10</code>是数组的基地址,`rax</em>4`是偏移量</p>
+<p>在分析出<code>var_8,var_C,var_10</code>同属于一个基地址<code>var_10</code>的数组结构后,可以在func函数的栈帧视图下高亮这三个变量,使用右键菜单的<code>array</code>选项将其合并为一个数组</p>
+<p><img src="https://raw.githubusercontent.com/DeutschBall/test/master/image-20220502205958995.png" class="lazyload placeholder" data-srcset="https://raw.githubusercontent.com/DeutschBall/test/master/image-20220502205958995.png" srcset="https://img2.baidu.com/it/u=2037979560,2772131037&fm=26&fmt=auto&gp=0.jpg" alt="image-20220502205958995"></p>
+<p><img src="https://raw.githubusercontent.com/DeutschBall/test/master/image-20220502205827491.png" class="lazyload placeholder" data-srcset="https://raw.githubusercontent.com/DeutschBall/test/master/image-20220502205827491.png" srcset="https://img2.baidu.com/it/u=2037979560,2772131037&fm=26&fmt=auto&gp=0.jpg" alt="image-20220502205827491"></p>
+<p>​    合并后回到反汇编视图</p>
+<p><img src="https://raw.githubusercontent.com/DeutschBall/test/master/image-20220502210142961.png" class="lazyload placeholder" data-srcset="https://raw.githubusercontent.com/DeutschBall/test/master/image-20220502210142961.png" srcset="https://img2.baidu.com/it/u=2037979560,2772131037&fm=26&fmt=auto&gp=0.jpg" alt="image-20220502210142961"></p>
+<p>发现三个变量合并为一个<code>var_10</code>,其地址<code>rbp-10h</code>,刚好和<code>var_4</code>相差<code>0xC=12字节</code>即三个int类型变量</p>
+<p>然后可以在反汇编视图下使用右键菜单的<code>rename</code>功能将变量命名有意义</p>
+<p><img src="https://raw.githubusercontent.com/DeutschBall/test/master/image-20220502210513069.png" class="lazyload placeholder" data-srcset="https://raw.githubusercontent.com/DeutschBall/test/master/image-20220502210513069.png" srcset="https://img2.baidu.com/it/u=2037979560,2772131037&fm=26&fmt=auto&gp=0.jpg" alt="image-20220502210513069"></p>
+<p>rename之后后文相关位置都会重新命名</p>
+<h3 id="全局数组"><a href="#全局数组" class="headerlink" title="全局数组"></a>全局数组</h3><p><code>main.c</code></p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line"><span class="type">int</span> global_array[<span class="number">3</span>];</span><br><span class="line"><span class="type">void</span> <span class="title function_">func</span><span class="params">()</span>&#123;</span><br><span class="line">    </span><br><span class="line">    <span class="type">int</span> index=<span class="number">2</span>;</span><br><span class="line">    global_array[<span class="number">0</span>]=<span class="number">10</span>;</span><br><span class="line">    global_array[<span class="number">1</span>]=<span class="number">20</span>;</span><br><span class="line">    global_array[<span class="number">2</span>]=<span class="number">30</span>;</span><br><span class="line">    local_array[index]=<span class="number">40</span>;</span><br><span class="line">&#125;</span><br><span class="line"><span class="type">int</span> <span class="title function_">main</span><span class="params">()</span>&#123; </span><br><span class="line">    func();</span><br><span class="line">    <span class="keyword">return</span> <span class="number">0</span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p><code>func</code>函数的反汇编:</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br></pre></td><td class="code"><pre><span class="line">.text:0000000000401560</span><br><span class="line">.text:0000000000401560 ; =============== S U B R O U T I N E =======================================</span><br><span class="line">.text:0000000000401560</span><br><span class="line">.text:0000000000401560 ; Attributes: bp-based frame				;局部变量和参数在栈帧中的地址基于rbp帧指针</span><br><span class="line">.text:0000000000401560</span><br><span class="line">.text:0000000000401560 ; void __fastcall func()</span><br><span class="line">.text:0000000000401560                 public func</span><br><span class="line">.text:0000000000401560 func            proc near               ; CODE XREF: main+D↓p</span><br><span class="line">.text:0000000000401560</span><br><span class="line">.text:0000000000401560 var_4           = dword ptr -4			;局部变量只有一个,只能对应index</span><br><span class="line">.text:0000000000401560</span><br><span class="line">.text:0000000000401560                 push    rbp</span><br><span class="line">.text:0000000000401561                 mov     rbp, rsp</span><br><span class="line">.text:0000000000401564                 sub     rsp, 10h				</span><br><span class="line">.text:0000000000401568                 mov     [rbp+var_4], 2		;int index=2</span><br><span class="line">.text:000000000040156F                 lea     rax, global_array		;R[rax]=&amp;global_array,将global_array的地址放在rax</span><br><span class="line">.text:0000000000401576                 mov     dword ptr [rax], 0Ah  ;寄存器寻址,然后dword ptr指定双字访问内存,global_array[0]=10</span><br><span class="line">.text:000000000040157C                 lea     rax, global_array	;重复R[rax]=&amp;global_array,目的是防止上一次装载和本次之间rax有变化</span><br><span class="line">.text:0000000000401583                 mov     dword ptr [rax+4], 14h ;寄存器+立即数寻址,双字访问内存</span><br><span class="line">.text:000000000040158A                 lea     rax, global_array</span><br><span class="line">.text:0000000000401591                 mov     dword ptr [rax+8], 1Eh</span><br><span class="line">.text:0000000000401598                 lea     rax, global_array</span><br><span class="line">.text:000000000040159F                 mov     edx, [rbp+var_4]		 ;将var_4的拷贝到edx寄存器中</span><br><span class="line">.text:00000000004015A2                 movsxd  rdx, edx				;edx有符号拓展到rdx</span><br><span class="line">.text:00000000004015A5                 mov     dword ptr [rax+rdx*4], 28h ; 基址比例变址寻址,然后放入40</span><br><span class="line">.text:00000000004015AC                 nop</span><br><span class="line">.text:00000000004015AD                 add     rsp, 10h</span><br><span class="line">.text:00000000004015B1                 pop     rbp</span><br><span class="line">.text:00000000004015B2                 retn</span><br><span class="line">.text:00000000004015B2 func            endp</span><br><span class="line">.text:00000000004015B2</span><br></pre></td></tr></table></figure>
+<p>问题是<code>global_array</code>貌似没有体现出声明来就直接使用了,左键双击<code>global_array</code></p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br></pre></td><td class="code"><pre><span class="line">.bss:0000000000407970                 public global_array</span><br><span class="line">.bss:0000000000407970 global_array     db    ? ;               ; DATA XREF: func+F↑o</span><br><span class="line">.bss:0000000000407970                                         ; func+1C↑o ...</span><br><span class="line">.bss:0000000000407971                 db    ? ;</span><br><span class="line">.bss:0000000000407972                 db    ? ;</span><br><span class="line">.bss:0000000000407973                 db    ? ;</span><br><span class="line">.bss:0000000000407974                 db    ? ;</span><br><span class="line">.bss:0000000000407975                 db    ? ;</span><br><span class="line">.bss:0000000000407976                 db    ? ;</span><br><span class="line">.bss:0000000000407977                 db    ? ;</span><br><span class="line">.bss:0000000000407978                 db    ? ;</span><br><span class="line">.bss:0000000000407979                 db    ? ;</span><br><span class="line">.bss:000000000040797A                 db    ? ;</span><br><span class="line">.bss:000000000040797B                 db    ? ;</span><br><span class="line">.bss:000000000040797C                 db    ? ;</span><br><span class="line">.bss:000000000040797D                 db    ? ;</span><br><span class="line">.bss:000000000040797E                 db    ? ;</span><br><span class="line">.bss:000000000040797F                 db    ? ;</span><br></pre></td></tr></table></figure>
+<p>发现<code>global_array</code>是位于bss段的,确实<code>global_array</code>在声明的时候并没有初始化,就应该放在bss段</p>
+<p><code>global_array</code>以<code>db=define byte</code>即字节为单位,在bss段留了<code>0407970~040797F</code>一共16个字节的空间</p>
+<p>如果在<code>func</code>函数的反汇编视图下修改<code>global_array</code>的名字改成空即显示ida给他命的哑名<code>unk_407970</code>,unk为unknown未知的缩写</p>
+<p>如果在源代码中不写全局函数<code>global_array</code>,改用三个int类型变量</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line"><span class="type">int</span> l0;</span><br><span class="line"><span class="type">int</span> l1;</span><br><span class="line"><span class="type">int</span> l2;</span><br><span class="line"><span class="type">void</span> <span class="title function_">func</span><span class="params">()</span>&#123;</span><br><span class="line">    l0=<span class="number">10</span>;</span><br><span class="line">    l1=<span class="number">20</span>;</span><br><span class="line">    l2=<span class="number">30</span>;</span><br><span class="line">&#125;</span><br><span class="line"><span class="type">int</span> <span class="title function_">main</span><span class="params">()</span>&#123; </span><br><span class="line">    func();</span><br><span class="line">    <span class="keyword">return</span> <span class="number">0</span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>此时三个全局变量在bss段中的分布</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br></pre></td><td class="code"><pre><span class="line">.bss:0000000000407970                 public l2</span><br><span class="line">.bss:0000000000407970 l2              db    ? ;               ; DATA XREF: func+1E↑o</span><br><span class="line">.bss:0000000000407971                 db    ? ;</span><br><span class="line">.bss:0000000000407972                 db    ? ;</span><br><span class="line">.bss:0000000000407973                 db    ? ;</span><br><span class="line">.bss:0000000000407974                 public l0</span><br><span class="line">.bss:0000000000407974 l0              db    ? ;               ; DATA XREF: func+4↑o</span><br><span class="line">.bss:0000000000407975                 db    ? ;</span><br><span class="line">.bss:0000000000407976                 db    ? ;</span><br><span class="line">.bss:0000000000407977                 db    ? ;</span><br><span class="line">.bss:0000000000407978                 public l1</span><br><span class="line">.bss:0000000000407978 l1              db    ? ;               ; DATA XREF: func+11↑o</span><br><span class="line">.bss:0000000000407979                 db    ? ;</span><br><span class="line">.bss:000000000040797A                 db    ? ;</span><br><span class="line">.bss:000000000040797B                 db    ? ;</span><br><span class="line">.bss:000000000040797C                 db    ? ;</span><br><span class="line">.bss:000000000040797D                 db    ? ;</span><br><span class="line">.bss:000000000040797E                 db    ? ;</span><br><span class="line">.bss:000000000040797F                 db    ? ;</span><br><span class="line">.bss:0000000000407980                 public __native_startup_state</span><br><span class="line">...</span><br></pre></td></tr></table></figure>
+<p>很诡异的是三个变量的分布是没有顺序的,l2和l0都分到了4个db即4字节的空间,但是l1却分到了8字节的空间</p>
+<p>如果试图使用<code>*(&amp;l0+2)</code>来得到l2实际上会算得<code>*(0x407974+2*sizeof(int))=*(0x40797C)</code></p>
+<p>而实际上<code>l2</code>在<code>0x407970</code>,刚才指针运算得到的值是属于l1”管理”的</p>
+<h3 id="堆上数组"><a href="#堆上数组" class="headerlink" title="堆上数组"></a>堆上数组</h3><figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;stdlib.h&gt;</span></span></span><br><span class="line"><span class="type">void</span> <span class="title function_">func</span><span class="params">()</span>&#123;</span><br><span class="line">    <span class="type">int</span> *heap_array=(<span class="type">int</span> *)<span class="built_in">malloc</span>(<span class="number">3</span>*<span class="keyword">sizeof</span>(<span class="type">int</span>));</span><br><span class="line">    <span class="type">int</span> index=<span class="number">2</span>;</span><br><span class="line">    heap_array[<span class="number">0</span>]=<span class="number">10</span>;</span><br><span class="line">    heap_array[<span class="number">1</span>]=<span class="number">20</span>;</span><br><span class="line">    heap_array[<span class="number">2</span>]=<span class="number">30</span>;</span><br><span class="line">    heap_array[index]=<span class="number">40</span>;</span><br><span class="line">    <span class="built_in">free</span>(heap_array);</span><br><span class="line">&#125;</span><br><span class="line"><span class="type">int</span> <span class="title function_">main</span><span class="params">()</span>&#123; </span><br><span class="line">    func();</span><br><span class="line">    <span class="keyword">return</span> <span class="number">0</span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p><code>func</code>函数反汇编</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br></pre></td><td class="code"><pre><span class="line">.text:0000000000401560</span><br><span class="line">.text:0000000000401560 ; =============== S U B R O U T I N E =======================================</span><br><span class="line">.text:0000000000401560</span><br><span class="line">.text:0000000000401560 ; Attributes: bp-based frame</span><br><span class="line">.text:0000000000401560</span><br><span class="line">.text:0000000000401560                 public func</span><br><span class="line">.text:0000000000401560 func            proc near               ; CODE XREF: main+D↓p</span><br><span class="line">.text:0000000000401560</span><br><span class="line">.text:0000000000401560 var_C           = dword ptr -0Ch			;var_C显然为index</span><br><span class="line">.text:0000000000401560 Block           = qword ptr -8			;Block为堆上申请空间的指针</span><br><span class="line">.text:0000000000401560</span><br><span class="line">.text:0000000000401560                 push    rbp</span><br><span class="line">.text:0000000000401561                 mov     rbp, rsp</span><br><span class="line">.text:0000000000401564                 sub     rsp, 30h		;蜜汁操作,栈上分配了0x30h=48字节的巨大空间,但是只有两个局部变量</span><br><span class="line">.text:0000000000401568                 mov     ecx, 0Ch        ; Size,第一个参数使用ecx寄存器传递,这里0x0C=12字节相当于给出了堆上数组的大小</span><br><span class="line">.text:000000000040156D                 call    malloc			;malloc遵守 微软64位调用约定</span><br><span class="line">.text:0000000000401572                 mov     [rbp+Block], rax	;rax寄存器带着malloc函数的返回值,即堆上地址的指针,赋值给Block</span><br><span class="line">.text:0000000000401576                 mov     [rbp+var_C], 2	;int index=2</span><br><span class="line">.text:000000000040157D                 mov     rax, [rbp+Block]	;将堆上指针放到rax中</span><br><span class="line">.text:0000000000401581                 mov     dword ptr [rax], 0Ah	;字访问rax指向的地址,放入10</span><br><span class="line">.text:0000000000401587                 mov     rax, [rbp+Block]		;将堆上指针再次放到rax中</span><br><span class="line">.text:000000000040158B                 add     rax, 4				;rax中的指针副本后移4字节,恰好移过一个int</span><br><span class="line">.text:000000000040158F                 mov     dword ptr [rax], 14h		;单字访问rax指向的地址,放入20</span><br><span class="line">.text:0000000000401595                 mov     rax, [rbp+Block]	</span><br><span class="line">.text:0000000000401599                 add     rax, 8</span><br><span class="line">.text:000000000040159D                 mov     dword ptr [rax], 1Eh</span><br><span class="line">.text:00000000004015A3                 mov     eax, [rbp+var_C]			;将index放到eax中</span><br><span class="line">.text:00000000004015A6                 cdqe								;拓展eax到rax</span><br><span class="line">.text:00000000004015A8                 lea     rdx, ds:0[rax*4]			;将ds:0+rax*4这个地址放到rdx寄存器</span><br><span class="line">.text:00000000004015B0                 mov     rax, [rbp+Block]			;rax寄存器获得Block堆指针的拷贝</span><br><span class="line">.text:00000000004015B4                 add     rax, rdx					;rax指向Block+4*rax即heap_array[index]</span><br><span class="line">.text:00000000004015B7                 mov     dword ptr [rax], 28h ; 单字访问rax指向的地址,放入40</span><br><span class="line">.text:00000000004015BD                 mov     rax, [rbp+Block]			;rax获得Block堆指针拷贝</span><br><span class="line">.text:00000000004015C1                 mov     rcx, rax        ; rcx获得拷贝,准备作为参数传递给free函数</span><br><span class="line">.text:00000000004015C4                 call    free</span><br><span class="line">.text:00000000004015C9                 nop</span><br><span class="line">.text:00000000004015CA                 add     rsp, 30h</span><br><span class="line">.text:00000000004015CE                 pop     rbp</span><br><span class="line">.text:00000000004015CF                 retn</span><br><span class="line">.text:00000000004015CF func            endp</span><br><span class="line">.text:00000000004015CF</span><br></pre></td></tr></table></figure>
+<p><img src="https://diveintosystems.org/book/C2-C_depth/_images/program_memory.png" class="lazyload placeholder" data-srcset="https://diveintosystems.org/book/C2-C_depth/_images/program_memory.png" srcset="https://img2.baidu.com/it/u=2037979560,2772131037&fm=26&fmt=auto&gp=0.jpg" alt="The parts of program memory showing a stack variable pointing to dynamically allocated heap memory."></p>
+<p>堆上数组的特征还是比较明显的</p>
+<p>综上,使用变量下标访问数组时更容易察觉数组结构的存在,而使用常量下标访问数组时汇更像访问独立的变量</p>
+<h2 id="结构体"><a href="#结构体" class="headerlink" title="结构体"></a>结构体</h2><h3 id="对齐"><a href="#对齐" class="headerlink" title="对齐"></a>对齐</h3><p>对齐在大多数情况下不是硬性要求,不对齐的话x86-64的硬件也是可以干活的,</p>
+<p>但是为了提高性能intel建议对齐,编译器默认情况下是会自动对齐的</p>
+<h4 id="基本数据类型的对齐规则"><a href="#基本数据类型的对齐规则" class="headerlink" title="基本数据类型的对齐规则:"></a>基本数据类型的对齐规则:</h4><p>某种类型的对象,其地址必须是K的倍数</p>
+<p><img src="https://raw.githubusercontent.com/DeutschBall/test/master/image-20220503010303191.png" class="lazyload placeholder" data-srcset="https://raw.githubusercontent.com/DeutschBall/test/master/image-20220503010303191.png" srcset="https://img2.baidu.com/it/u=2037979560,2772131037&fm=26&fmt=auto&gp=0.jpg" alt="image-20220503010303191"></p>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;stdio.h&gt;</span></span></span><br><span class="line"><span class="function"><span class="type">void</span> <span class="title">func</span><span class="params">()</span> </span>&#123;</span><br><span class="line">	<span class="type">char</span> achar;</span><br><span class="line">	<span class="type">char</span> bchar;</span><br><span class="line">	<span class="type">int</span> aint;</span><br><span class="line">	<span class="built_in">printf</span>(<span class="string">&quot;%x,%x,%x&quot;</span>, &amp;achar, &amp;bchar, &amp;aint);</span><br><span class="line">    <span class="keyword">return</span> ;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="type">int</span> <span class="title">main</span><span class="params">()</span> </span>&#123;</span><br><span class="line">	<span class="built_in">func</span>();</span><br><span class="line">	<span class="keyword">return</span> <span class="number">0</span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">gcc -O0 -g -o main.out</span><br><span class="line">gdb -tui -q main.out</span><br></pre></td></tr></table></figure>
+<p>使用gdb进行调试,观察运行时的堆栈</p>
+<p>1.在func函数处下断点</p>
+<p><img src="https://raw.githubusercontent.com/DeutschBall/test/master/image-20220503013023486.png" class="lazyload placeholder" data-srcset="https://raw.githubusercontent.com/DeutschBall/test/master/image-20220503013023486.png" srcset="https://img2.baidu.com/it/u=2037979560,2772131037&fm=26&fmt=auto&gp=0.jpg" alt="image-20220503013023486"></p>
+<p>2.在断点处停下,打印观察</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line">(gdb) r</span><br><span class="line">Starting program: /mnt/c/Users/86135/Desktop/reverse/mytest/main.exe</span><br><span class="line"></span><br><span class="line">Breakpoint 1, func () at main.c:7</span><br><span class="line">(gdb) p <span class="variable">$rbp</span></span><br><span class="line"><span class="variable">$1</span> = (void *) 0x7fffffffdc90</span><br><span class="line">(gdb) p &amp;achar</span><br><span class="line"><span class="variable">$2</span> = 0x7fffffffdc8f <span class="string">&quot;&quot;</span></span><br><span class="line">(gdb) p &amp;bchar</span><br><span class="line"><span class="variable">$3</span> = 0x7fffffffdc8e <span class="string">&quot;&quot;</span></span><br><span class="line">(gdb) p &amp;aint</span><br><span class="line"><span class="variable">$4</span> = (int *) 0x7fffffffdc88</span><br></pre></td></tr></table></figure>
+<p>帧指针<code>rbp</code>指向<code>0x7fffffffdc90</code></p>
+<p>achar是一个char类型,无对齐要求,必然在紧接着帧指针下方<code>0x7fffffffdc8f</code>,bchar同理在achar下方<code>0x7fffffffdc8e</code></p>
+<p>但是aint并没有紧挨着bchar在<code>0x7fffffffdc8d</code>,而是在<code>0x7fffffffdc88</code></p>
+<p>栈向下增长,但是小端模式下,栈中的元素的起始位置是低地址,然后向高地址增长,比如aint就从<code>0x7fffffffdc88</code>然后向高地址增长直到<code>0x7fffffffdc8b</code></p>
+<p><code>func</code>函数的栈帧:</p>
+<div class="table-container">
+<table>
+<thead>
+<tr>
+<th>地址</th>
+<th>相对rbp的偏移量</th>
+<th>存储内容</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td></td>
+<td><code>1</code></td>
+<td>返回值地址</td>
+</tr>
+<tr>
+<td><code>0x7fffffffdc90</code></td>
+<td><code>0</code></td>
+<td><code>rbp</code>帧指针保存地址</td>
+</tr>
+<tr>
+<td><code>0x7fffffffdc8f</code></td>
+<td><code>-1</code></td>
+<td><code>achar</code></td>
+</tr>
+<tr>
+<td><code>0x7fffffffdc8e</code></td>
+<td><code>-2</code></td>
+<td><code>bchar</code></td>
+</tr>
+<tr>
+<td></td>
+<td><code>-3</code></td>
+<td></td>
+</tr>
+<tr>
+<td></td>
+<td><code>-4</code></td>
+<td></td>
+</tr>
+<tr>
+<td><code>0x7fffffffdc8b</code></td>
+<td><code>-5</code></td>
+<td><code>aint</code>高位</td>
+</tr>
+<tr>
+<td></td>
+<td><code>-6</code></td>
+<td><code>aint</code></td>
+</tr>
+<tr>
+<td></td>
+<td><code>-7</code></td>
+<td><code>aint</code></td>
+</tr>
+<tr>
+<td><code>0x7fffffffdc88</code></td>
+<td><code>-8</code></td>
+<td><code>aint</code>低位</td>
+</tr>
+<tr>
+<td></td>
+<td><code>-9</code></td>
+<td></td>
+</tr>
+<tr>
+<td></td>
+<td><code>-10</code></td>
+<td></td>
+</tr>
+<tr>
+<td></td>
+<td>…</td>
+<td></td>
+</tr>
+<tr>
+<td></td>
+<td>…</td>
+</tr>
+</tbody>
+</table>
+</div>
+<p>这里aint就没有从-6到-3,而是为了对齐采用-8到-5</p>
+<blockquote>
+<h4 id="小端模式"><a href="#小端模式" class="headerlink" title="小端模式"></a>小端模式</h4><p>小端模式:假如<code>int aint=10d=0xAh=0x0000 0000 0000 0000 0000 0000 0000 1010 b</code></p>
+<p>那么<code>0x7fffffffdc88</code>这个低地址上应该存放<code>aint</code>的低八位即<code>0000 1010b=0x10h</code></p>
+<p>为了观察这个事情</p>
+<p>使用几乎相同的程序</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;stdio.h&gt;</span></span></span><br><span class="line"></span><br><span class="line"><span class="type">void</span> <span class="title function_">func</span><span class="params">()</span> &#123;</span><br><span class="line">	<span class="type">char</span> achar;</span><br><span class="line">	<span class="type">char</span> bchar;</span><br><span class="line">	<span class="type">int</span> aint=<span class="number">10</span>;<span class="comment">//注意此处给aint赋值10,小端模式下应该存放在&amp;aint的第一个字节单元</span></span><br><span class="line">	<span class="built_in">printf</span>(<span class="string">&quot;%x,%x,%x&quot;</span>, &amp;achar, &amp;bchar, &amp;aint);</span><br><span class="line"> <span class="keyword">return</span> ;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="type">int</span> <span class="title function_">main</span><span class="params">()</span> &#123;</span><br><span class="line">	func();</span><br><span class="line">	<span class="keyword">return</span> <span class="number">0</span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>使用gdb在第7行下断点,然后运行到第七行的时候停下,打印&amp;aint,结果为<code>0x7fffffffe2e8</code>,然后<code>x/1 0x7fffffffe2e8</code>打印从该地址开始的第一个单元(单位字节)</p>
+<p><img src="https://raw.githubusercontent.com/DeutschBall/test/master/image-20220503020706566.png" class="lazyload placeholder" data-srcset="https://raw.githubusercontent.com/DeutschBall/test/master/image-20220503020706566.png" srcset="https://img2.baidu.com/it/u=2037979560,2772131037&fm=26&fmt=auto&gp=0.jpg" alt="image-20220503020706566"></p>
+<p>结果为10,即证明低地址存放低位,小端模式</p>
+</blockquote>
+<h4 id="结构体的对齐规则"><a href="#结构体的对齐规则" class="headerlink" title="结构体的对齐规则"></a>结构体的对齐规则</h4><p>结构体各项目依然满足基本数据类型的对齐方式</p>
+<p>结构体自身也有对齐要求,其==基地址必须是最大成员大小的整数倍==</p>
+<p><code>main.c</code></p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;stdio.h&gt;</span></span></span><br><span class="line"><span class="keyword">typedef</span> <span class="class"><span class="keyword">struct</span>&#123;</span></span><br><span class="line">	<span class="type">char</span> name;</span><br><span class="line">	<span class="type">int</span> from;</span><br><span class="line">	<span class="type">int</span> to;</span><br><span class="line">&#125;Edge;</span><br><span class="line"><span class="type">void</span> <span class="title function_">func</span><span class="params">()</span>&#123;</span><br><span class="line">	<span class="type">char</span> a ;</span><br><span class="line">	Edge e;</span><br><span class="line">	<span class="type">char</span> b;</span><br><span class="line">	<span class="built_in">printf</span>(<span class="string">&quot;%x,%x,%x&quot;</span>,&amp;a,&amp;e,&amp;b);</span><br><span class="line">	<span class="keyword">return</span> ;</span><br><span class="line">&#125;</span><br><span class="line"><span class="type">int</span> <span class="title function_">main</span><span class="params">()</span>&#123;	</span><br><span class="line">	func();</span><br><span class="line">	 <span class="keyword">return</span> <span class="number">0</span>;</span><br><span class="line"> &#125;</span><br></pre></td></tr></table></figure>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">gcc -O0 -g -o main.exe</span><br><span class="line">gdb -tui -q main.exe</span><br></pre></td></tr></table></figure>
+<p>在<code>func</code>函数处下断点然后在该断点处停下,打印观察</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line">(gdb) p &amp;e</span><br><span class="line"><span class="variable">$4</span> = (Edge *) 0x7fffffffdc80</span><br><span class="line">(gdb) p &amp;e.name</span><br><span class="line"><span class="variable">$5</span> = 0x7fffffffdc80 <span class="string">&quot;&quot;</span>						;e.name的位置</span><br><span class="line">(gdb) p &amp;e.from</span><br><span class="line"><span class="variable">$6</span> = (int *) 0x7fffffffdc84					;e.from的位置</span><br><span class="line">(gdb) p &amp;e.to</span><br><span class="line"><span class="variable">$7</span> = (int *) 0x7fffffffdc88					;e.to的位置</span><br><span class="line">(gdb) p &amp;b</span><br><span class="line"><span class="variable">$8</span> = 0x7fffffffdc7f <span class="string">&quot;&quot;</span>						;char b的位置</span><br><span class="line">(gdb) p &amp;a</span><br><span class="line"><span class="variable">$9</span> = 0x7fffffffdc8f <span class="string">&quot;&quot;</span>					    ;char a的位置</span><br><span class="line">(gdb) p <span class="variable">$rbp</span></span><br><span class="line"><span class="variable">$10</span> = (void *) 0x7fffffffdc90				;帧指针位置</span><br></pre></td></tr></table></figure>
+<p><code>func</code>函数的栈帧</p>
+<p><img src="https://raw.githubusercontent.com/DeutschBall/test/master/image-20220503111359404.png" class="lazyload placeholder" data-srcset="https://raw.githubusercontent.com/DeutschBall/test/master/image-20220503111359404.png" srcset="https://img2.baidu.com/it/u=2037979560,2772131037&fm=26&fmt=auto&gp=0.jpg" alt="image-20220503111359404"></p>
+<p><strong>首先在结构体内部安排对齐</strong>:</p>
+<p><code>name</code>放在偏移量为0的位置,然后<code>int from</code>放在偏移量为4的倍数的最小位置,显然是4,然后<code>int to</code>同理放在8,from和name之间就空出了3字节,原因就是考虑对齐</p>
+<p><strong>然后对结构体整体安排对齐</strong>:</p>
+<blockquote>
+<p><strong>为什么要进行整体对齐?</strong></p>
+<p>如果不进行此步,只进行内部对齐,那么考虑如下情形</p>
+<p><img src="https://raw.githubusercontent.com/DeutschBall/test/master/image-20220503112100035.png" class="lazyload placeholder" data-srcset="https://raw.githubusercontent.com/DeutschBall/test/master/image-20220503112100035.png" srcset="https://img2.baidu.com/it/u=2037979560,2772131037&fm=26&fmt=auto&gp=0.jpg" alt="image-20220503112100035"></p>
+<p>左右两种排列方法均满足结构体内对齐,对于右侧,<code>e.from</code>的起始地址是<code>0x7fffffffdc85</code>显然不满足int的对齐规则,而左侧经过整体对齐,<code>e.from</code>在<code>0x7fffffffdc84</code>是可以整除4的,满足int的对齐规则</p>
+<p>此时sizeof(e)=12,而不是1+4+4=9</p>
+</blockquote>
+<p>整体对齐要求结构体的起始地址必须是最大成员大小的整数倍,在这里是int,4字节</p>
+<p>因此结构体e的起始地址应当是能够整除4的并且距离rbp最近的并且能够放得下结构体e的地方,显然是<code>0x7fffffffdc80</code></p>
+<blockquote>
+<p>整体对齐只是考虑了最大成员大小的整数倍,一定能保证所有成员的对齐吗?</p>
+<p>由于任意基本数据类型的大小都是2的幂次,因此最大成员的大小一定是任意成员大小的整数倍,那么起始地址是最大成员大小的整数倍的同时,也一定是任意成员大小的整数倍</p>
+</blockquote>
+<h4 id="pragma-pack-n-指定对齐"><a href="#pragma-pack-n-指定对齐" class="headerlink" title="#pragma pack(n)指定对齐"></a>#pragma pack(n)指定对齐</h4><p>如果不写该语句则默认n=8字节对齐,所有对象的对齐方式改为:</p>
+<p>地址值是$min\{自己大小,n\}的整数倍$</p>
+<p>同样的程序在一开始时加入</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#<span class="keyword">pragma</span> pack(1)</span></span><br></pre></td></tr></table></figure>
+<p>指定一字节对齐,任意对象的地址是$min\{自己大小,1\}的整数倍=1的整数倍$,即没有对齐</p>
+<p>然后使用gdb调试观察</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line">(gdb) p <span class="variable">$rbp</span></span><br><span class="line"><span class="variable">$1</span> = (void *) 0x7fffffffe2f0</span><br><span class="line">(gdb) p sizeof(e)</span><br><span class="line"><span class="variable">$2</span> = 9</span><br><span class="line">(gdb) p &amp;a</span><br><span class="line"><span class="variable">$3</span> = 0x7fffffffe2ef <span class="string">&quot;&quot;</span></span><br><span class="line">(gdb) p &amp;b</span><br><span class="line"><span class="variable">$4</span> = 0x7fffffffe2e5 <span class="string">&quot;&quot;</span></span><br><span class="line">(gdb) p &amp;e.name</span><br><span class="line"><span class="variable">$5</span> = 0x7fffffffe2e6 <span class="string">&quot;&quot;</span></span><br><span class="line">(gdb) p &amp;e.from</span><br><span class="line"><span class="variable">$6</span> = (int *) 0x7fffffffe2e7</span><br><span class="line">(gdb) p &amp;e.to</span><br><span class="line"><span class="variable">$7</span> = (int *) 0x7fffffffe2eb</span><br></pre></td></tr></table></figure>
+<p><img src="https://raw.githubusercontent.com/DeutschBall/test/master/image-20220503115539724.png" class="lazyload placeholder" data-srcset="https://raw.githubusercontent.com/DeutschBall/test/master/image-20220503115539724.png" srcset="https://img2.baidu.com/it/u=2037979560,2772131037&fm=26&fmt=auto&gp=0.jpg" alt="image-20220503115539724"></p>
+<p>此时栈帧就非常紧凑了,从rbp向下顺次紧密排列</p>
+<blockquote>
+<p>反汇编观察栈的分布</p>
+<p>无对齐时的func函数的反汇编视图</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br></pre></td><td class="code"><pre><span class="line">.text:0000000000001139 func            proc near               ; CODE XREF: main+9↓p</span><br><span class="line">.text:0000000000001139</span><br><span class="line">.text:0000000000001139 var_B           = byte ptr -0Bh</span><br><span class="line">.text:0000000000001139 var_A           = byte ptr -0Ah		;var_A放在rbp-10</span><br><span class="line">.text:0000000000001139 var_1           = byte ptr -1</span><br><span class="line">.text:0000000000001139</span><br><span class="line">.text:0000000000001139 ; __unwind &#123;</span><br><span class="line">.text:0000000000001139                 push    rbp</span><br><span class="line">.text:000000000000113A                 mov     rbp, rsp</span><br><span class="line">.text:000000000000113D                 sub     rsp, 10h				;此处申请了16字节的栈空间</span><br><span class="line">.text:0000000000001141                 lea     rcx, [rbp+var_B]</span><br><span class="line">.text:0000000000001145                 lea     rdx, [rbp+var_A]</span><br><span class="line">.text:0000000000001149                 lea     rax, [rbp+var_1]</span><br><span class="line">.text:000000000000114D                 mov     rsi, rax</span><br><span class="line">.text:0000000000001150                 lea     rax, format     ; &quot;%x,%x,%x&quot;</span><br><span class="line">.text:0000000000001157                 mov     rdi, rax        ; format</span><br><span class="line">.text:000000000000115A                 mov     eax, 0</span><br><span class="line">.text:000000000000115F                 call    _printf</span><br><span class="line">.text:0000000000001164                 nop</span><br><span class="line">.text:0000000000001165                 leave</span><br><span class="line">.text:0000000000001166                 retn</span><br><span class="line">.text:0000000000001166 ; &#125; // starts at 1139</span><br><span class="line">.text:0000000000001166 func            endp</span><br></pre></td></tr></table></figure>
+<p>默认对齐时的<code>func</code>函数反汇编视图</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br></pre></td><td class="code"><pre><span class="line">.text:0000000000001139 func            proc near               ; CODE XREF: main+9↓p</span><br><span class="line">.text:0000000000001139</span><br><span class="line">.text:0000000000001139 var_11          = byte ptr -11h</span><br><span class="line">.text:0000000000001139 var_10          = byte ptr -10h			;var_10放在rbp-16</span><br><span class="line">.text:0000000000001139 var_1           = byte ptr -1</span><br><span class="line">.text:0000000000001139</span><br><span class="line">.text:0000000000001139 ; __unwind &#123;</span><br><span class="line">.text:0000000000001139                 push    rbp</span><br><span class="line">.text:000000000000113A                 mov     rbp, rsp</span><br><span class="line">.text:000000000000113D                 sub     rsp, 20h			;此处申请了32字节的栈空间</span><br><span class="line">.text:0000000000001141                 lea     rcx, [rbp+var_11]</span><br><span class="line">.text:0000000000001145                 lea     rdx, [rbp+var_10]</span><br><span class="line">.text:0000000000001149                 lea     rax, [rbp+var_1]</span><br><span class="line">.text:000000000000114D                 mov     rsi, rax</span><br><span class="line">.text:0000000000001150                 lea     rax, format     ; &quot;%x,%x,%x&quot;</span><br><span class="line">.text:0000000000001157                 mov     rdi, rax        ; format</span><br><span class="line">.text:000000000000115A                 mov     eax, 0</span><br><span class="line">.text:000000000000115F                 call    _printf</span><br><span class="line">.text:0000000000001164                 nop</span><br><span class="line">.text:0000000000001165                 leave</span><br><span class="line">.text:0000000000001166                 retn</span><br><span class="line">.text:0000000000001166 ; &#125; // starts at 1139</span><br><span class="line">.text:0000000000001166 func            endp</span><br></pre></td></tr></table></figure>
+</blockquote>
+<h4 id="全局结构体"><a href="#全局结构体" class="headerlink" title="全局结构体"></a>全局结构体</h4><p>以网络流中可能会用到的边结构体举例</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">typedef</span> <span class="class"><span class="keyword">struct</span>&#123;</span></span><br><span class="line">	<span class="type">int</span> from;		<span class="comment">//源</span></span><br><span class="line">	<span class="type">int</span> to;			<span class="comment">//目的</span></span><br><span class="line">	<span class="type">long</span> <span class="type">long</span> dist;<span class="comment">//距离</span></span><br><span class="line">	<span class="type">long</span> <span class="type">long</span> flow;<span class="comment">//流量</span></span><br><span class="line">&#125;Edge;<span class="comment">//边结构体</span></span><br><span class="line"></span><br><span class="line">Edge e;</span><br><span class="line"><span class="type">void</span> <span class="title function_">init</span><span class="params">()</span>&#123;<span class="comment">//初始化边e</span></span><br><span class="line">	e.from=<span class="number">1</span>;</span><br><span class="line">	e.to=<span class="number">2</span>;</span><br><span class="line">	e.dist=<span class="number">1e12</span>;</span><br><span class="line">	e.flow=<span class="number">1e13</span>;</span><br><span class="line">&#125;</span><br><span class="line"><span class="type">int</span> <span class="title function_">main</span><span class="params">()</span>&#123;</span><br><span class="line">	init();</span><br><span class="line">&#125;</span><br><span class="line"></span><br></pre></td></tr></table></figure>
+<h5 id="ida观察带gdb调试信息的exe文件"><a href="#ida观察带gdb调试信息的exe文件" class="headerlink" title="ida观察带gdb调试信息的exe文件"></a>ida观察带gdb调试信息的exe文件</h5><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">gcc main.c -g -O0 -o main.exe</span><br><span class="line">ida64 main.exe</span><br></pre></td></tr></table></figure>
+<p><code>init</code>函数的反汇编</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br></pre></td><td class="code"><pre><span class="line">.text:0000000000401560 ; void __cdecl init()</span><br><span class="line">.text:0000000000401560                 public init</span><br><span class="line">.text:0000000000401560 init            proc near               ; CODE XREF: main+D↓p</span><br><span class="line">.text:0000000000401560                 push    rbp</span><br><span class="line">.text:0000000000401561                 mov     rbp, rsp</span><br><span class="line">.text:0000000000401564                 lea     rax, e			;把e的地址放在rax中</span><br><span class="line">.text:000000000040156B                 mov     dword ptr [rax], 1	;把1放在rax指向地址的第一个字</span><br><span class="line">.text:0000000000401571                 lea     rax, e				</span><br><span class="line">.text:0000000000401578                 mov     dword ptr [rax+4], 2	;把2放在rax指向地址偏移4字节之后的字中</span><br><span class="line">.text:000000000040157F                 lea     rax, e</span><br><span class="line">.text:0000000000401586                 mov     rdx, 0E8D4A51000h	;把1e12放在rdx中</span><br><span class="line">.text:0000000000401590                 mov     [rax+8], rdx			;把rdx中的值放在rax+8位置,宽度以rdx的64位为准</span><br><span class="line">.text:0000000000401594                 lea     rax, e</span><br><span class="line">.text:000000000040159B                 mov     rcx, 9184E72A000h	;把1e13放在rcx中</span><br><span class="line">.text:00000000004015A5                 mov     [rax+10h], rcx		;把rcx中的值放在rax+10位置,64位宽</span><br><span class="line">.text:00000000004015A9                 nop</span><br><span class="line">.text:00000000004015AA                 pop     rbp</span><br><span class="line">.text:00000000004015AB                 retn</span><br><span class="line">.text:00000000004015AB init            endp</span><br></pre></td></tr></table></figure>
+<p>值得庆幸的是e被ida识别为一个Edge结构体的对象,这是因为使用<code>gcc -g</code>命令,编译形成的exe带有gbd调试信息</p>
+<p>可以看出使用e的基地址+成员的偏移量进行结构体成员访问</p>
+<p>其中e在bss段:</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">.bss:0000000000407970                 public e</span><br><span class="line">.bss:0000000000407970 ; Edge e</span><br><span class="line">.bss:0000000000407970 e               Edge &lt;?&gt;                ; DATA XREF: init+4↑o</span><br><span class="line">.bss:0000000000407970                                         ; init+11↑o ...</span><br><span class="line">.bss:0000000000407988                 public __native_startup_state</span><br><span class="line">...</span><br></pre></td></tr></table></figure>
+<p>e在bss段的地址<code>[0x407970,407987]</code>共24字节</p>
+<blockquote>
+<p>默认8字节对齐下,最大成员long long正好8字节,因此任何成员都是按照地址是自己大小倍数进行对齐的</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">typedef</span> <span class="class"><span class="keyword">struct</span>&#123;</span></span><br><span class="line">	<span class="type">int</span> from;		<span class="comment">//源</span></span><br><span class="line">	<span class="type">int</span> to;			<span class="comment">//目的</span></span><br><span class="line">	<span class="type">long</span> <span class="type">long</span> dist;<span class="comment">//距离</span></span><br><span class="line">	<span class="type">long</span> <span class="type">long</span> flow;<span class="comment">//流量</span></span><br><span class="line">&#125;Edge;<span class="comment">//边结构体</span></span><br></pre></td></tr></table></figure>
+<p>from和to恰好占用第一个8字节,然后dist占用第二个8字节,然后flow占用第三个8字节,合计24字节</p>
+</blockquote>
+<p>双击Edge可以观察其Structures视图</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">00000000 Edge            struc ; (sizeof=0x18, align=0x8, copyof_102)	;大小0x18=24字节,8字节对齐</span><br><span class="line">00000000                                         ; XREF: .bss:e/r</span><br><span class="line">00000000 from            dd ?	;dword双字类型</span><br><span class="line">00000004 to              dd ?	;dword双字类型</span><br><span class="line">00000008 dist            dq ?	;quad四字类型</span><br><span class="line">00000010 flow            dq ?	;quad四字类型</span><br><span class="line">00000018 Edge            ends</span><br></pre></td></tr></table></figure>
+<h5 id="ida观察不带调试信息的exe"><a href="#ida观察不带调试信息的exe" class="headerlink" title="ida观察不带调试信息的exe"></a>ida观察不带调试信息的exe</h5><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">gcc main.c -O0 -o main.exe			;不使用-g</span><br><span class="line">ida64 main.exe</span><br></pre></td></tr></table></figure>
+<p><code>init</code>函数的反汇编</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br></pre></td><td class="code"><pre><span class="line">.text:0000000000401560                 public init</span><br><span class="line">.text:0000000000401560 init            proc near               ; CODE XREF: main+D↓p</span><br><span class="line">.text:0000000000401560                 push    rbp</span><br><span class="line">.text:0000000000401561                 mov     rbp, rsp</span><br><span class="line">.text:0000000000401564                 lea     rax, e</span><br><span class="line">.text:000000000040156B                 mov     dword ptr [rax], 1</span><br><span class="line">.text:0000000000401571                 lea     rax, e</span><br><span class="line">.text:0000000000401578                 mov     dword ptr [rax+4], 2</span><br><span class="line">.text:000000000040157F                 lea     rax, e</span><br><span class="line">.text:0000000000401586                 mov     rdx, 0E8D4A51000h</span><br><span class="line">.text:0000000000401590                 mov     [rax+8], rdx</span><br><span class="line">.text:0000000000401594                 lea     rax, e</span><br><span class="line">.text:000000000040159B                 mov     rcx, 9184E72A000h</span><br><span class="line">.text:00000000004015A5                 mov     [rax+10h], rcx</span><br><span class="line">.text:00000000004015A9                 nop</span><br><span class="line">.text:00000000004015AA                 pop     rbp</span><br><span class="line">.text:00000000004015AB                 retn</span><br><span class="line">.text:00000000004015AB init            endp</span><br></pre></td></tr></table></figure>
+<p>到此和刚才带有调试信息的情况几乎相同,但是当我们双击e试图观察e是个什么东西时</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br></pre></td><td class="code"><pre><span class="line">.bss:0000000000407970                 public e</span><br><span class="line">.bss:0000000000407970 e               db    ? ;               ; DATA XREF: init+4↑o</span><br><span class="line">.bss:0000000000407970                                         ; init+11↑o ...</span><br><span class="line">.bss:0000000000407971                 db    ? ;</span><br><span class="line">.bss:0000000000407972                 db    ? ;</span><br><span class="line">.bss:0000000000407973                 db    ? ;</span><br><span class="line">.bss:0000000000407974                 db    ? ;</span><br><span class="line">.bss:0000000000407975                 db    ? ;</span><br><span class="line">.bss:0000000000407976                 db    ? ;</span><br><span class="line">.bss:0000000000407977                 db    ? ;</span><br><span class="line">.bss:0000000000407978                 db    ? ;</span><br><span class="line">.bss:0000000000407979                 db    ? ;</span><br><span class="line">.bss:000000000040797A                 db    ? ;</span><br><span class="line">.bss:000000000040797B                 db    ? ;</span><br><span class="line">.bss:000000000040797C                 db    ? ;</span><br><span class="line">.bss:000000000040797D                 db    ? ;</span><br><span class="line">.bss:000000000040797E                 db    ? ;</span><br><span class="line">.bss:000000000040797F                 db    ? ;</span><br><span class="line">.bss:0000000000407980                 db    ? ;</span><br><span class="line">.bss:0000000000407981                 db    ? ;</span><br><span class="line">.bss:0000000000407982                 db    ? ;</span><br><span class="line">.bss:0000000000407983                 db    ? ;</span><br><span class="line">.bss:0000000000407984                 db    ? ;</span><br><span class="line">.bss:0000000000407985                 db    ? ;</span><br><span class="line">.bss:0000000000407986                 db    ? ;</span><br><span class="line">.bss:0000000000407987                 db    ? ;</span><br><span class="line">.bss:0000000000407988                 public __native_startup_state</span><br><span class="line">...</span><br></pre></td></tr></table></figure>
+<p>e退化为bss段上的24个字节,看不出结构体的痕迹了,</p>
+<p>但是至少我们可以知道有这么一个叫做e的集合,它管理着24个字节</p>
+<p>此时的结构体更像是一个鱼龙混杂的数组,有着不同大小的元素</p>
+<h4 id="栈上结构体"><a href="#栈上结构体" class="headerlink" title="栈上结构体"></a>栈上结构体</h4><figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">typedef</span> <span class="class"><span class="keyword">struct</span>&#123;</span></span><br><span class="line">	<span class="type">int</span> from;</span><br><span class="line">	<span class="type">int</span> to;</span><br><span class="line">	<span class="type">long</span> <span class="type">long</span> dist;</span><br><span class="line">	<span class="type">long</span> <span class="type">long</span> flow;</span><br><span class="line">&#125;Edge;</span><br><span class="line">Edge <span class="title function_">newEdge</span><span class="params">(<span class="type">int</span> u,<span class="type">int</span> v,<span class="type">long</span> <span class="type">long</span> d,<span class="type">long</span> <span class="type">long</span> f)</span>&#123;<span class="comment">//获取新的边对象,功能模仿构造函数</span></span><br><span class="line">	Edge e;</span><br><span class="line">	e.from=u;</span><br><span class="line">	e.to=v;</span><br><span class="line">	e.dist=d;</span><br><span class="line">	e.flow=f;</span><br><span class="line">	<span class="keyword">return</span> e;</span><br><span class="line">&#125;</span><br><span class="line"><span class="type">int</span> <span class="title function_">main</span><span class="params">()</span>&#123;</span><br><span class="line">	Edge e=newEdge(<span class="number">1</span>,<span class="number">2</span>,<span class="number">1e12</span>,<span class="number">1e13</span>);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<h5 id="带调试信息"><a href="#带调试信息" class="headerlink" title="带调试信息"></a>带调试信息</h5><p><code>newEdge</code>函数的反汇编视图</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br></pre></td><td class="code"><pre><span class="line">.text:0000000000401560 ; Edge *__cdecl newEdge(Edge *__return_ptr __struct_ptr retstr, int u, int v, __int64 d, __int64 f)</span><br><span class="line">.text:0000000000401560                 public newEdge</span><br><span class="line">.text:0000000000401560 newEdge         proc near               ; CODE XREF: main+38↓p</span><br><span class="line">.text:0000000000401560</span><br><span class="line">.text:0000000000401560 e               = Edge ptr -20h			;可以识别出结构体e</span><br><span class="line">.text:0000000000401560 arg_0           = qword ptr  10h			;蜜汁操作,多一个arg_0参数</span><br><span class="line">.text:0000000000401560 u               = dword ptr  18h			;由于带调试信息,ida认识四个参数名</span><br><span class="line">.text:0000000000401560 v               = dword ptr  20h</span><br><span class="line">.text:0000000000401560 d               = qword ptr  28h</span><br><span class="line">.text:0000000000401560 f               = qword ptr  30h</span><br><span class="line">.text:0000000000401560</span><br><span class="line">.text:0000000000401560                 push    rbp</span><br><span class="line">.text:0000000000401561                 mov     rbp, rsp</span><br><span class="line">.text:0000000000401564                 sub     rsp, 20h</span><br><span class="line">.text:0000000000401568                 mov     [rbp+arg_0], rcx</span><br><span class="line">.text:000000000040156C                 mov     [rbp+u], edx</span><br><span class="line">.text:000000000040156F                 mov     [rbp+v], r8d</span><br><span class="line">.text:0000000000401573                 mov     [rbp+d], r9</span><br><span class="line">.text:0000000000401577                 mov     eax, [rbp+u]</span><br><span class="line">.text:000000000040157A                 mov     [rbp+e.from], eax</span><br><span class="line">.text:000000000040157D                 mov     eax, [rbp+v]</span><br><span class="line">.text:0000000000401580                 mov     [rbp+e.to], eax</span><br><span class="line">.text:0000000000401583                 mov     rax, [rbp+d]</span><br><span class="line">.text:0000000000401587                 mov     [rbp+e.dist], rax</span><br><span class="line">.text:000000000040158B                 mov     rax, [rbp+f]</span><br><span class="line">.text:000000000040158F                 mov     [rbp+e.flow], rax</span><br><span class="line">.text:0000000000401593                 mov     rcx, [rbp+arg_0]</span><br><span class="line">.text:0000000000401597                 mov     rax, qword ptr [rbp+e.from]</span><br><span class="line">.text:000000000040159B                 mov     rdx, [rbp+e.dist]</span><br><span class="line">.text:000000000040159F                 mov     [rcx], rax</span><br><span class="line">.text:00000000004015A2                 mov     [rcx+8], rdx</span><br><span class="line">.text:00000000004015A6                 mov     rax, [rbp+e.flow]</span><br><span class="line">.text:00000000004015AA                 mov     [rcx+10h], rax</span><br><span class="line">.text:00000000004015AE                 mov     rax, [rbp+arg_0]</span><br><span class="line">.text:00000000004015B2                 add     rsp, 20h</span><br><span class="line">.text:00000000004015B6                 pop     rbp</span><br><span class="line">.text:00000000004015B7                 retn</span><br><span class="line">.text:00000000004015B7 newEdge         endp</span><br></pre></td></tr></table></figure>
+<h5 id="不带调试信息"><a href="#不带调试信息" class="headerlink" title="不带调试信息"></a>不带调试信息</h5><figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">typedef</span> <span class="class"><span class="keyword">struct</span>&#123;</span></span><br><span class="line">	<span class="type">int</span> from;</span><br><span class="line">	<span class="type">int</span> to;</span><br><span class="line">	<span class="type">long</span> <span class="type">long</span> dist;</span><br><span class="line">	<span class="type">long</span> <span class="type">long</span> flow;</span><br><span class="line">&#125;Edge;</span><br><span class="line">Edge <span class="title function_">newEdge</span><span class="params">(<span class="type">int</span> u,<span class="type">int</span> v,<span class="type">long</span> <span class="type">long</span> d,<span class="type">long</span> <span class="type">long</span> f)</span>&#123;<span class="comment">//获取新的边对象,功能模仿构造函数</span></span><br><span class="line">	Edge e;</span><br><span class="line">	e.from=u;</span><br><span class="line">	e.to=v;</span><br><span class="line">	e.dist=d;</span><br><span class="line">	e.flow=f;</span><br><span class="line">	<span class="keyword">return</span> e;</span><br><span class="line">&#125;</span><br><span class="line"><span class="type">int</span> <span class="title function_">main</span><span class="params">()</span>&#123;</span><br><span class="line">	Edge e=newEdge(<span class="number">1</span>,<span class="number">2</span>,<span class="number">1e12</span>,<span class="number">1e13</span>);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p><code>main</code>函数反汇编视图</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br></pre></td><td class="code"><pre><span class="line">.text:00000000004015B8 ; int __cdecl main(int argc, const char **argv, const char **envp)</span><br><span class="line">.text:00000000004015B8                 public main</span><br><span class="line">.text:00000000004015B8 main            proc near               ; CODE XREF: __tmainCRTStartup+22F↑p</span><br><span class="line">.text:00000000004015B8</span><br><span class="line">.text:00000000004015B8 var_30          = qword ptr -30h			</span><br><span class="line">.text:00000000004015B8 var_20          = byte ptr -20h</span><br><span class="line">.text:00000000004015B8</span><br><span class="line">.text:00000000004015B8                 push    rbp</span><br><span class="line">.text:00000000004015B9                 mov     rbp, rsp</span><br><span class="line">.text:00000000004015BC                 sub     rsp, 50h				</span><br><span class="line">.text:00000000004015C0                 call    __main				</span><br><span class="line">.text:00000000004015C5                 lea     rax, [rbp+var_20]	;&amp;var_20-&gt;rax</span><br><span class="line">.text:00000000004015C9                 mov     rdx, 9184E72A000h	 ;1e13-&gt;rdx</span><br><span class="line">.text:00000000004015D3                 mov     [rsp+50h+var_30], rdx ;1e13-&gt;rdx-&gt;*(var_30+50h)</span><br><span class="line">.text:00000000004015D8                 mov     r9, 0E8D4A51000h		;1e12-&gt;r9</span><br><span class="line">.text:00000000004015E2                 mov     r8d, 2				;2放在r8</span><br><span class="line">.text:00000000004015E8                 mov     edx, 1				;1放在rdx</span><br><span class="line">.text:00000000004015ED                 mov     rcx, rax				;rax是var_20的栈地址</span><br><span class="line">.text:00000000004015F0                 call    newEdge</span><br><span class="line">.text:00000000004015F5                 mov     eax, 0</span><br><span class="line">.text:00000000004015FA                 add     rsp, 50h</span><br><span class="line">.text:00000000004015FE                 pop     rbp</span><br><span class="line">.text:00000000004015FF                 retn</span><br><span class="line">.text:00000000004015FF main            endp</span><br></pre></td></tr></table></figure>
+
+      </div>
+      <div class="post-tags-categories">
+        
+        <div class="tags">
+          
+            <a href="/tags/%E9%80%86%E5%90%91%E5%B7%A5%E7%A8%8B/" class="">
+              逆向工程
+            </a>
+          
+        </div>
+        
+      </div>
+      
+    </article>
+    <!-- 上一篇文章和下一篇文章 -->
+    
+      <!-- 文章详情页的上一页和下一页 -->
+<div class="post-nav">
+
+
+
+
+
+  
+  <div class="post-nav-next post-nav-item">
+    <div class="post-nav-img" style="background-size: cover; 
+      background-position: center center;">
+      <img class="lazyload lazyload placeholder" src="/medias/6.jpg" class="lazyload placeholder" data-srcset="/medias/6.jpg" srcset="https://img2.baidu.com/it/u=2037979560,2772131037&fm=26&fmt=auto&gp=0.jpg" src="" alt="">
+    </div>
+    <a href="/2022/05/07/xctf-reverse-%E6%96%B0%E6%89%8B12%E9%A2%98/" class="post-nav-link">
+      <div class="title">
+        Next: <i class="fas fa-angle-right"></i>
+        <div class="title-text">xctf攻防世界-reverse-新手村</div>
+      </div>
+      <!-- <div class="content">
+        xctf攻防世界-reverse-新手村
+002logmeinmain函数12345678910111213141516
+      </div> -->
+    </a>
+  </div>
+
+</div>
+
+    
+    
+
+    <!-- 打赏 -->
+    
+
+    <!-- 分享 -->
+    
+      <!-- https://github.com/overtrue/share.js -->
+<!-- 文章详情页的分享 -->
+<div class="social-share" data-sites="twitter,facebook,google,qq,qzone,wechat,weibo,douban,linkedin" data-wechat-qrcode-helper="<p>微信扫一扫即可分享！</p>"></div>
+
+<script src="/js/shareJs/social-share.min.js"></script>
+</script>
+
+<style>
+  .social-share {
+    margin: 20px 0;
+  }
+</style>
+
+
+    
+    
+    <!-- 评论 -->
+    <!-- 评论 -->
+
+  <div id="myComment">
+    
+      
+<section id="comments" style="padding: 1em; margin: 15px auto;"
+	class="animated bounceInUp">
+	<div id="vcomment" class="comment"></div>
+</section>
+<style>
+	#comments {
+		background: rgba(255,255,255,0.9);
+	}
+	#veditor {
+		background-image: url('https://raw.githubusercontent.com/DeutschBall/test/master/R.3c3e443dfe9ddbddc93730c482ed0461');
+		background-size: contain;
+		background-repeat: no-repeat;
+		background-position: right;
+		background-color: rgba(255, 255, 255, 0);
+		resize: vertical;
+	}
+	#veditor:focus{
+		background-position-y: 200px;
+		transition: all 0.2s ease-in-out 0s;
+	}
+	#vcomment .vcards .vcard .vh .vhead .vtag.vvisitor {
+		background-color: #42b983;
+	}
+	.v[data-class=v] .vbtn:active, .v[data-class=v] .vbtn:hover {
+		color: #42b983;
+		border-color: #42b983;
+	}
+	#vcomment .vcards .vcard .vhead .vsys i {
+		display: none;
+	}
+	/* 底部valine链接 */
+	#vcomment .vpower {
+		display: none;
+	}
+	
+	/* 底下注释是修改 名称和邮箱和网址输入框的样式 */
+	/* #vcomment .vheader {
+		display: flex;
+		justify-content: space-around;
+	}
+	
+	#vcomment .vheader .vnick {
+		width: 31%;
+		border: 2px solid #dedede;
+		padding-left: 10px;
+		padding-right: 10px;
+		border-radius: 5px
+	}
+
+	#vcomment .vheader .vmail {
+		width: 31%;
+		border: 2px solid #dedede;
+		padding-left: 10px;
+		padding-right: 10px;
+		border-radius: 5px
+	}
+
+	#vcomment .vheader .vlink {
+		width: 31%;
+		border: 2px solid #dedede;
+		padding-left: 10px;
+		padding-right: 10px;
+		border-radius: 5px
+	} */
+
+	img.vimg {
+		transition: all 1s;
+		/* 头像旋转时间为 1s */
+	}
+
+	img.vimg:hover {
+		transform: rotate(360deg);
+		-webkit-transform: rotate(360deg);
+		-moz-transform: rotate(360deg);
+		-o-transform: rotate(360deg);
+		-ms-transform: rotate(360deg);
+	}
+
+	#vcomment .vcards .vcard {
+		padding: 15px 20px 0 20px;
+		border-radius: 10px;
+		margin-bottom: 15px;
+		box-shadow: 0 0 4px 1px rgba(0, 0, 0, .12);
+		transition: all .3s
+	}
+
+	#vcomment .vcards .vcard:hover {
+		box-shadow: 0 0 8px 3px rgba(0, 0, 0, .12)
+	}
+
+	#vcomment .vcards .vcard .vh .vcard {
+		border: none;
+		box-shadow: none;
+	}
+</style>
+    
+  </div>
+
+<!-- comment script in themes\hexo-theme-bamboo\layout\_partial\scripts\index.ejs -->
+
+
+  </div>
+
+  <!-- 目录 -->
+  <!-- 文章详情页右侧目录 -->
+
+  <div class="toc-aside">
+    <div class="toc-main">
+      <div class="toc-aside-title">
+        <i class="fas fa-list-ul" aria-hidden="true"></i><span>catalog</span>
+        
+          <div class="toc-open-close">catalog</div>
+        
+      </div>
+      <div class="toc-content">
+        <div class="toc"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 手机端目录按钮 -->
+  <div id="toc-mobile-btn">
+    <i class="fas fa-list-ul" aria-hidden="true"></i>
+  </div>
+
+
+<script>
+  function closeToc(init) {
+    $(".toc-aside").css({'width': 0, 'padding': 0, 'transition': init ?  'noe' : 'width 0.3s' });
+    $(".toc-content").css({'width': 0});
+    $(".toc-aside-title span, .toc-aside-title i").css({'display': 'none'});
+    $(".main-content").css({'width': '75%', 'margin': '10px auto'});
+  };
+  function openToc() {
+    $(".main-content").css({'width': '65%', 'margin-right': '10px', 'margin-left': 'calc(35% - 350px)'});
+    $(".toc-aside").css({'width': '300px', 'padding': '0 10px', 'transition': 'width 0.3s'});
+    $(".toc-content").css({'width': '300px'});
+    $(".toc-aside-title span, .toc-aside-title i").css({'display': 'inline-block'});
+  }
+  function openBtnClickFn () {
+    let openOrCloseBtn = $('.toc-aside .toc-aside-title .toc-open-close');
+    let open = eval('' || 'true');
+    openOrCloseBtn.click(function() {
+      if (open) {
+        closeToc();
+        open = false;
+      } else {
+        openToc();
+        open = true;
+      }
+    });
+  };
+  openBtnClickFn();
+  initCloseTocWidth(true);
+
+  function initCloseTocWidth(init) {
+    if (window.innerWidth >= 992) {
+      let isClose = false;
+      isClose && closeToc(init)
+    }
+  }
+
+  document.addEventListener('pjax:complete', function () {
+    $(".toc-aside").css({'transition': 'no'});
+  })
+  document.addEventListener('pjax:complete', function () {
+    openBtnClickFn();
+  })
+  
+</script>
+
+  <!-- 图片放大 Wrap images with fancybox support -->
+  <script src="/js/wrapImage.js"></script>
+</div>
+
+<!-- 文章详情页背景图 -->
+<div id="appBgSwiper" style="position: fixed;left: 0;top: 0;width: 100%;height: 100%;z-index: -2;"
+	:style="{'background-color': bgColor ? bgColor : 'transparent'}">
+	<transition-group tag="ul" :name="names">
+		<li v-for='(image,index) in img' :key='index' v-show="index === mark" class="bg-swiper-box">
+			<img :src="image" class="bg-swiper-img no-lazy">
+		</li>
+	</transition-group>
+</div>
+<script>
+	var vm = new Vue({
+		el: '#appBgSwiper',
+		data: {
+			names: '' || 'fade' || 'fade', // translate-fade fade
+			mark: 0,
+			img: [],
+			bgColor: '',
+			time: null
+		},
+		methods: {   //添加方法
+			change(i, m) {
+				if (i > m) {
+					// this.names = 'fade';
+				} else if (i < m) {
+					// this.names = 'fade';
+				} else {
+					return;
+				}
+				this.mark = i;
+			},
+			prev() {
+				// this.names = 'fade';
+				this.mark--;
+				if (this.mark === -1) {
+					this.mark = 3;
+					return
+				}
+			},
+			next() {
+				// this.names = 'fade';
+				this.mark++;
+				if (this.mark === this.img.length) {
+					this.mark = 0;
+					return
+				}
+			},
+			autoPlay() {
+				// this.names = 'fade';
+				this.mark++;
+				if (this.mark === this.img.length) {
+					this.mark = 0;
+					return
+				}
+			},
+			play() {
+				let bgImgDelay = '' || '180000'
+				let delay = parseInt(bgImgDelay) || 180000;
+				this.time = setInterval(this.autoPlay, delay);
+			},
+			enter() {
+				clearInterval(this.time);
+			},
+			leave() {
+				this.play();
+			}
+		},
+		created() {
+			this.play()
+		},
+		beforeDestroy() {
+			clearInterval(this.time);
+		},
+		mounted() {
+			let prop = '' || '';
+			let isImg = prop.includes('.bmp') || prop.includes('.jpg') || prop.includes('.png') || prop.includes('.tif') || prop.includes('.gif') || prop.includes('.pcx') || prop.includes('.tga') || prop.includes('.exif') || prop.includes('.fpx') || prop.includes('.psd') || prop.includes('.cdr') || prop.includes('.pcd') || prop.includes('.dxf') || prop.includes('.ufo') || prop.includes('.eps') || prop.includes('.ai') || prop.includes('.raw') || prop.includes('.WMF') || prop.includes('.webp') || prop.includes('.jpeg') || prop.includes('http://') || prop.includes('https://')
+			if (isImg) {
+				let img = prop.split(',');
+				let configRoot = '/'
+				let arrImg = [];
+				img.forEach(el => {
+					var Expression = /http(s)?:\/\/([\w-]+\.)+[\w-]+(\/[\w- .\/?%&=]*)?/;
+					var objExp = new RegExp(Expression);
+
+					if (objExp.test(el)) {
+						// http or https
+						arrImg.push(el);
+					} else {
+						// 非http or https开头
+						// 本地文件
+						let firstStr = el.charAt(0);
+						if (firstStr == '/') {
+							el = el.substr(1); // 删除第一个字符 '/',因为 configRoot最后一个字符为 /
+						}
+						el = configRoot + el;
+						arrImg.push(el);
+					}
+				})
+				this.img = arrImg;
+			} else {
+				this.bgColor = prop;
+			}
+		}
+	})
+</script>
+
+<style>
+	.bg-swiper-box {
+		position: absolute;
+		display: block;
+		width: 100%;
+		height: 100%;
+	}
+
+	.bg-swiper-img {
+		object-fit: cover;
+		width: 100%;
+		height: 100%;
+	}
+</style>
+
+
+  <script>
+  // https://github.com/theme-next/hexo-theme-next/blob/master/layout/_third-party/math/mathjax.swig
+  if (typeof MathJax === 'undefined') {
+    window.MathJax = {
+      loader: {
+        source: {
+          '[tex]/amsCd': '[tex]/amscd',
+          '[tex]/AMScd': '[tex]/amscd'
+        }
+      },
+      tex: {
+        inlineMath: {'[+]': [['$', '$']]},
+        tags: 'ams'
+      },
+      options: {
+        renderActions: {
+          findScript: [10, doc => {
+            document.querySelectorAll('script[type^="math/tex"]').forEach(node => {
+              const display = !!node.type.match(/; *mode=display/);
+              const math = new doc.options.MathItem(node.textContent, doc.inputJax[0], display);
+              const text = document.createTextNode('');
+              node.parentNode.replaceChild(text, node);
+              math.start = {node: text, delim: '', n: 0};
+              math.end = {node: text, delim: '', n: 0};
+              doc.math.push(math);
+            });
+          }, '', false],
+          insertedScript: [200, () => {
+            document.querySelectorAll('mjx-container').forEach(node => {
+              let target = node.parentNode;
+              if (target.nodeName.toLowerCase() === 'li') {
+                target.parentNode.classList.add('has-jax');
+              }
+            });
+          }, '', false]
+        }
+      }
+    };
+    (function () {
+      var script = document.createElement('script');
+      script.src = 'https://cdn.jsdelivr.net/npm/mathjax@3.0/es5/tex-mml-chtml.js';
+      script.defer = true;
+      document.head.appendChild(script);
+    })();
+  } else {
+    // 文章章节标题不能为 “MathJax” ，否则会报错。
+    MathJax.startup.document.state(0);
+    MathJax.texReset();
+    MathJax.typeset();
+  }
+</script>
+
+
+
+
+  <script>
+  function loadMermaid() {
+    if (document.getElementsByClassName('mermaid').length) {
+      if (window.mermaidJsLoad) mermaid.init()
+      else {
+        loadScript('https://cdn.jsdelivr.net/npm/mermaid/dist/mermaid.min.js').then(() => {
+          window.mermaidJsLoad = true
+          mermaid.initialize({
+            theme: 'default',
+          })
+          if ('true') {
+            mermaid.init();
+          }
+        })
+      }
+    }
+  };
+  document.addEventListener("DOMContentLoaded", function () {
+    loadMermaid();
+  })
+
+  document.addEventListener('pjax:complete', function () {
+    loadMermaid();
+  })
+  
+</script>
+
+
+      </main>
+    </div>
+
+    <!-- 页脚 -->
+    
+  
+  <div class="footer bg-color">
+    <div class="footer-main">
+      
+        
+          <div class="link">
+            
+          </div>
+        
+      
+        
+          <div class="footer-copyright">
+            <p>Copyright © 2019 - 2020 <a target="_blank" rel="noopener" href="https://github.com/yuang01">Deutschball</a> | Powered by <a target="_blank" rel="noopener" href="https://hexo.io/zh-cn/docs/">Deutschball</a> | Theme <a target="_blank" rel="noopener" href="https://github.com/yuang01/theme">Bamboo</a> </p>
+
+          </div>
+        
+      
+        
+          
+        
+      
+        
+          <div class="footer-custom">
+            
+          </div>
+        
+      
+    </div>
+  </div>
+
+
+
+    <!-- 渲染暗黑按钮 -->
+    
+    <!-- 渲染回到顶部按钮 -->
+    
+      <div class="goTop top-btn-color" pointer>
+  <i class="fas fa-arrow-up" aria-hidden="true"></i>
+</div>
+<script src="/js/goTop.js"></script>
+
+    
+    <!-- 渲染左下角音乐播放器 -->
+    
+      <link rel="stylesheet" href="/js/aplayer/APlayer@1.10.1.min.css">
+<style>
+.aplayer .aplayer-lrc p {
+  
+  font-size: 12px;
+  font-weight: 700;
+  line-height: 16px !important;
+}
+
+.aplayer .aplayer-lrc p.aplayer-lrc-current {
+  
+  font-size: 15px;
+  color: #42b983;
+}
+
+
+.aplayer.aplayer-fixed.aplayer-narrow .aplayer-body {
+  left: -66px !important;
+}
+
+.aplayer.aplayer-fixed.aplayer-narrow .aplayer-body:hover {
+  left: 0px !important;
+}
+
+
+</style>
+<meting-js  
+  class=""
+  server="netease"
+  type="song"
+  id="1886422838"
+  fixed='true'
+  autoplay='true'
+  theme='#42b983'
+  loop='one'
+  order='random'
+  preload='auto'
+  volume='0.1'
+  list-folded='true'
+>
+</meting-js>
+
+<!-- <style>
+  #aplayer {
+    position: fixed;
+    left: 0;
+    bottom: 300px;
+  }
+</style> -->
+<script src="https://cdn.jsdelivr.net/npm/aplayer@1.10.1/dist/APlayer.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/meting@2/dist/Meting.min.js"></script>
+    
+
+    <!-- 图片放大 -->
+    
+      <script src="/js/fancybox/jquery.fancybox.min.js"></script>
+    
+
+    <!-- 百度解析 -->
+    <!-- Baidu Analytics -->
+
+    <!-- Baidu Push -->
+
+<script>
+    (function () {
+        var bp = document.createElement('script');
+        var curProtocol = window.location.protocol.split(':')[0];
+        if (curProtocol === 'https') {
+            bp.src = 'https://zz.bdstatic.com/linksubmit/push.js';
+        } else {
+            bp.src = 'http://push.zhanzhang.baidu.com/push.js';
+        }
+        var s = document.getElementsByTagName("script")[0];
+        s.parentNode.insertBefore(bp, s);
+    })();
+</script>
+
+    
+    <!-- 背景彩带 -->
+    
+      <script type="text/javascript" size="100" alpha='0.4' zIndex="-1" src="/js/ribbon.min.js"></script>
+    
+
+    <script src="/js/utils/index.js"></script>
+    <script src="/js/app.js"></script>
+    
+    <!-- 文章目录所需js -->
+<link href="/js/tocbot/tocbot.css" rel="stylesheet">
+<script src="/js/tocbot/tocbot.min.js"></script>
+
+<script>
+  var headerEl = 'h2, h3, h4, h5, h6',  //headers 
+    content = '.post-detail',//文章容器
+    idArr = {};  //标题数组以确定是否增加索引id
+  //add #id
+  var option = {
+    // Where to render the table of contents.
+    tocSelector: '.toc',
+    // Where to grab the headings to build the table of contents.
+    contentSelector: content,
+    // Which headings to grab inside of the contentSelector element.
+    headingSelector: headerEl,
+    scrollSmooth: true,
+    scrollSmoothOffset: -80,
+    headingsOffset: -($(window).height() * 0.4 - 45),
+    positionFixedSelector: '.toc-main',
+    positionFixedClass: 'is-position-fixed',
+    fixedSidebarOffset: 'auto',
+    activeLinkClass: 'is-active-link',
+    // onClick: function (e) {},
+  }
+  if ($('.toc').length > 0) {
+
+    $(content).children(headerEl).each(function () {
+      //去除空格以及多余标点
+      var headerId = $(this).text().replace(/[\s|\~|`|\!|\@|\#|\$|\%|\^|\&|\*|\(|\)|\_|\+|\=|\||\|\[|\]|\{|\}|\;|\:|\"|\'|\,|\<|\.|\>|\/|\?|\：|\，|\。]/g, '');
+
+      headerId = headerId.toLowerCase();
+      if (idArr[headerId]) {
+        //id已经存在
+        $(this).attr('id', headerId + '-' + idArr[headerId]);
+        idArr[headerId]++;
+      }
+      else {
+        //id未存在
+        idArr[headerId] = 1;
+        $(this).attr('id', headerId);
+      }
+    });
+
+    document.addEventListener("DOMContentLoaded", function () {
+      tocbot.init(option);
+      mobileTocClick();
+    });
+
+  }
+
+  window.tocScrollFn = function () {
+    return bamboo.throttle(function () {
+      findHeadPosition();
+    }, 100)()
+  }
+  window.addEventListener('scroll', tocScrollFn);
+
+  const findHeadPosition = function (top) {
+    if ($('.toc-list').length <= 0) {
+      return false;
+    }
+    setTimeout(() => {  // or DOMContentLoaded 
+      autoScrollToc();
+    }, 0);
+  }
+
+  const autoScrollToc = function () {
+    const $activeItem = document.querySelector('.is-active-link');
+    const $cardToc = document.querySelector('.toc-content');
+    const activePosition = $activeItem.getBoundingClientRect().top
+    const sidebarScrollTop = $cardToc.scrollTop
+    if (activePosition > (document.documentElement.clientHeight - 100)) {
+      $cardToc.scrollTop = sidebarScrollTop + 150
+    }
+    if (activePosition < 100) {
+      $cardToc.scrollTop = sidebarScrollTop - 150
+    }
+  }
+
+  document.addEventListener('pjax:send', function () {
+    if ($('.toc').length) {
+      tocbot.destroy();
+    }
+  });
+
+  document.addEventListener('pjax:complete', function () {
+    if ($('.toc').length) {
+      tocbot.init(option);
+      mobileTocClick();
+    }
+  });
+  
+  // 手机端toc按钮点击出现目录
+  const mobileTocClick = function () {
+    const $cardTocLayout = document.getElementsByClassName('toc-aside')[0];
+    const $cardToc = $cardTocLayout.getElementsByClassName('toc-content')[0];
+    let right = '45px';
+    if (window.innerWidth >= 551 && window.innerWidth <= 992) {
+      right = '100px'
+    }
+    const mobileToc = {
+      open: () => {
+        $cardTocLayout.style.cssText = 'animation: toc-open .3s; opacity: 1; right: ' + right
+      },
+
+      close: () => {
+        $cardTocLayout.style.animation = 'toc-close .2s'
+        setTimeout(() => {
+          $cardTocLayout.style.cssText = "opacity:''; animation: ''; right: ''"
+        }, 100)
+      }
+    }
+    document.getElementById('toc-mobile-btn').addEventListener('click', () => {
+      if (window.getComputedStyle($cardTocLayout).getPropertyValue('opacity') === '0') mobileToc.open()
+      else mobileToc.close()
+    })
+
+    $cardToc.addEventListener('click', (e) => {
+      if (window.innerWidth < 992) { // 小于992px的时候
+        mobileToc.close()
+      }
+    })
+  }
+</script>
+
+<style>
+  .is-position-fixed {
+    position: sticky !important;
+    top: 74px;
+  }
+
+  .toc-main ul {
+    counter-reset: show-list;
+  }
+
+  .toc-main ul li::before {
+    content: counter(item)".";
+    display: block;
+    position: absolute;
+    left: 12px;
+    top: 0;
+  }
+</style> 
+
+<!-- 设置导航背景 -->
+<script>
+  let setHeaderClass = () => {
+    const headerMenuTransparent = true;
+    if (!headerMenuTransparent) { return; }
+    const nav = $('#navHeader');
+    const navTop = nav.outerHeight();
+    const winTop = $(window).scrollTop();
+    if(winTop > navTop) {
+      nav.addClass('header-bg-color');
+    }
+    else {
+      nav.removeClass('header-bg-color');
+    }
+  };
+
+  let scrollCollect = () => {
+    return bamboo.throttle(function (e) {
+      setHeaderClass();
+    }, 200)()
+  }
+
+  let initHeaderBg = () => {
+    setHeaderClass();
+  }
+
+  setHeaderClass();
+  window.addEventListener('scroll', scrollCollect);
+
+  document.addEventListener('pjax:send', function () {
+    window.removeEventListener('scroll', scrollCollect)
+  })
+  document.addEventListener('pjax:complete', function () {
+    window.addEventListener('scroll', scrollCollect);
+    setHeaderClass();
+  })
+</script> 
+
+<!-- 渲染issues标签里的内容 -->
+<script>
+  function loadIssuesJS() {
+    if ($(".post-detail").find(".issues-api").length == 0) {
+      return;
+    } 
+    loadScript('/js/issues/index.js');
+  };
+  $(function () {
+    loadIssuesJS();
+  });
+  document.addEventListener('pjax:complete', function () {
+    if (typeof IssuesAPI == "undefined") {
+      loadIssuesJS();
+    }
+  })
+</script>
+
+<!-- 输入框打字特效 -->
+<!-- 输入框打字特效 -->
+
+  <script src="/js/activate-power-mode.js"></script>
+  <script>
+    POWERMODE.colorful = true;  // 打开随机颜色特效
+    POWERMODE.shake = false;    // 关闭输入框抖动
+    document.body.addEventListener('input', POWERMODE);//监听打字事件
+  </script>
+
+
+<!-- markdown代码一键复制功能 -->
+
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/v-plugs-ayu/lib/ayu.css">
+  <script src="https://cdn.jsdelivr.net/npm/v-plugs-ayu/lib/ayu.umd.min.js"></script>
+  <script src="/js/clipboard/clipboard.min.js"></script>
+  <div id="appCopy">
+  </div>
+  <script data-pjax>
+    var vm = new Vue({
+      el: '#appCopy',
+      data: {
+      },
+      computed: {
+      },
+      mounted() {
+        const that = this;
+        var copy = 'copy';
+        /* code */
+        var initCopyCode = function () {
+          var copyHtml = '';
+          copyHtml += '<button class="btn-copy" data-clipboard-snippet="" style="position:absolute;top:0;right:0;z-index:1;">';
+          copyHtml += '<i class="fas fa-copy"></i><span>' + copy + '</span>';
+          copyHtml += '</button>';
+          $(".post-detail pre").not('.gutter pre').wrap("<div class='codeBox' style='position:relative;width:100%;'></div>")
+          $(".post-detail pre").not('.gutter pre').before(copyHtml);
+          new ClipboardJS('.btn-copy', {
+            target: function (trigger) {
+              return trigger.nextElementSibling;
+            }
+          });
+        }
+        initCopyCode();
+        $('.btn-copy').unbind('click').bind('click', function () {
+          doSomething();
+        })
+        $(document).unbind('keypress').bind('keypress', function (e) {
+          if (e.ctrlKey && e.keyCode == 67) {
+            doSomething();
+          }
+        })
+
+        function doSomething() {
+          that.$notify({
+            title: "成功",
+            content: "copy that",
+            type: 'success'
+          })
+        }
+      },
+      methods: {
+      },
+      created() { }
+    })
+  </script>
+  
+
+<!-- 图片懒加载 -->
+<script defer src="https://cdn.jsdelivr.net/npm/vanilla-lazyload@17.1.0/dist/lazyload.min.js"></script>
+<script>
+  // https://www.npmjs.com/package/vanilla-lazyload
+  // Set the options globally
+  // to make LazyLoad self-initialize
+  window.lazyLoadOptions = {
+    elements_selector: ".lazyload",
+    threshold: 0
+  };
+  // Listen to the initialization event
+  // and get the instance of LazyLoad
+  window.addEventListener(
+    "LazyLoad::Initialized",
+    function (event) {
+      window.lazyLoadInstance = event.detail.instance;
+    },
+    false
+  );
+  document.addEventListener('DOMContentLoaded', function () {
+    lazyLoadInstance.update();
+  });
+  document.addEventListener('pjax:complete', function () {
+    lazyLoadInstance.update();
+  });
+</script>
+
+
+<!-- 卡片滚动动画 -->
+   
+
+<!-- 评论所需js -->
+
+  
+    <!-- 弹幕所需的css和js -->
+    
+<!-- 具体js，请前往valine/script.ejs查看 -->
+
+    <script>
+  var requiredFields = '';
+  requiredFields = requiredFields.split(',');
+  comment_el = '.comment';
+  let looperValine = null;
+  load_valine = function () {
+    if ($(comment_el).length) {
+      var valine = new Valine({
+        el: '#vcomment',
+        path: window.location.pathname,
+        notify: false,
+        verify: false,
+        app_id: "",
+        app_key: "",
+        placeholder: "客官，说点什么吧",
+        avatar: "",
+        master: "",   //博主邮箱md5
+        tagMeta: ["博主","小伙伴","访客"],     //标识字段名
+        friends: "",
+        metaPlaceholder: { "nick": "昵称/QQ号", "mail": "邮箱" },
+        requiredFields: requiredFields,
+        enableQQ: true,
+      });
+      function debounce(fn) {
+        var timerID = null
+        return function () {
+          var arg = arguments[0]   //获取事件
+          if (timerID) {
+            clearTimeout(timerID)
+          }
+          timerID = setTimeout(function () {
+            fn(arg)              //事件传入函数
+          }, 200)
+        }
+      }
+      //查询评论 valine.Q('*').limit(7) -- 查询所有，限制7条, 下面的的代码是查询当前页面
+      var themeDanmu = eval('false');
+      var themeLoop = eval('false');
+      var themeLooperTime = '5000' || 5000;
+      var speed = '40' || 20;
+      var isBarrager = true;
+      if (themeDanmu == true) {
+        do_barrager();
+        if ($('.danmuBox').length <= 0) {
+          $('.navbar').append('<div class="danmuBox"><div class="danmuBtn open"><span class="danmuCircle"></span><span class="danmuText">弹幕</span></div></div>');
+        }
+        $('.danmuBtn').on('click', debounce(
+          function () {
+            if ($('.danmuBtn').hasClass('open')) {
+              $('.danmuBtn').removeClass('open')
+              clearInterval(looperValine);
+              $.fn.barrager.removeAll();
+            } else {
+              $('.danmuBtn').addClass("open");
+              do_barrager();
+            }
+          }
+        ))
+      }
+      function do_barrager() {
+        isBarrager && valine.Q(window.location.pathname).find().then(function (comments) {
+          // var num = 0; // 可以记录条数，循环调用的时候只取最新的评论放入弹幕中
+          var run_once = true;
+          var looper_time = themeLooperTime;
+          var total = comments.length;
+          // var looper = null;
+          var index = 0;
+          if (total > 0) {
+            barrager();
+          } else {
+            // 当评论数为0的时候，自动关闭弹幕
+            // $('.danmuBtn').removeClass('open');
+          }
+          function barrager() {
+            if (run_once) {
+              //如果是首次执行,则设置一个定时器,并且把首次执行置为false
+              looperValine = setInterval(barrager, looper_time);
+              run_once = false;
+            }
+            var content = comments[index]._serverData.comment;
+            var email = comments[index]._serverData.mail;
+            var link = comments[index]._serverData.link;
+            var newcontent = content.substring(0, 50).replace(/<[^>]+>/g, "");
+            //发布一个弹幕
+            const item = {
+              img: `https://q1.qlogo.cn/g?b=qq&nk=${email}&s=640`, //图片 
+              info: newcontent, //文字 
+              href: link, //链接 
+              close: true, //显示关闭按钮 
+              speed: speed, //延迟,单位秒,默认6 
+              color: '#fff', //颜色,默认白色 
+              old_ie_color: '#000000', //ie低版兼容色,不能与网页背景相同,默认黑色
+            }
+            $('body').barrager(item);
+            //索引自增
+            index++;
+            //所有弹幕发布完毕，清除计时器。
+            if (index == total) {
+              clearInterval(looperValine);
+              if (themeLoop === true) {
+                setTimeout(function () {
+                  do_barrager();
+                }, 5000);
+              } else {
+                $('.danmuBtn').removeClass('open');
+              }
+              return false;
+            }
+
+          }
+        })
+      }
+    }
+  };
+  $(document).ready(load_valine);
+  document.addEventListener('pjax:send', function (e) {
+    
+  })
+  document.addEventListener('pjax:complete', function () {
+    load_valine();
+  });
+</script>
+
+  
+
+
+<!-- 鼠标点击特效 -->
+<!-- 爱心点击 -->
+
+  
+    <canvas class="fireworks" style="position: fixed;left: 0;top: 0;z-index: 999; pointer-events: none;" ></canvas>
+    <script src="//cdn.bootcss.com/animejs/2.2.0/anime.min.js"></script>
+    <script src="/js/cursor/explosion.min.js"></script>
+  
+
+
+
+
+
+    <!-- pjax -->
+    
+
+<!-- pjax -->
+
+
+  <script src="/js/pjax@0.2.8/index.js"></script>
+  
+    <!-- 样式位于：source/css/_third-party/pjaxanimate.styl -->
+
+<div class="pjax-animate">
+  
+    <div class="loading-circle"><div id="loader-circle"></div></div>
+    <script>
+      window.ShowLoading = function() {
+        $(".loading-circle").css("display", "block");
+      };
+      window.HideLoading = function() {
+        $(".loading-circle").css("display", "none");
+      }
+    </script>
+  
+	<script>
+    document.addEventListener('pjax:complete', function () {
+      window.HideLoading();
+    })
+    document.addEventListener('pjax:send', function () {
+      window.ShowLoading();
+    })
+    document.addEventListener('pjax:error', function () {
+      window.HideLoading();
+    })
+	</script>
+</div>
+
+  
+
+  <script>
+    var pjax = new Pjax({
+      elements: 'a[href]:not([href^="#"]):not([href="javascript:void(0)"]):not([no-pjax])',   // 拦截正常带链接的 a 标签
+      selectors: ["#pjax-container","title"],                                   // 根据实际需要确认重载区域
+      cacheBust: false,   // url 地址追加时间戳，用以避免浏览器缓存
+      timeout: 5000
+    });
+
+    document.addEventListener('pjax:send', function (e) {
+
+      try {
+        var currentUrl = window.location.pathname;
+        var targetUrl = e.triggerElement.href;
+        var banUrl = [""];
+        if (banUrl[0] != "") {
+          banUrl.forEach(item => {
+            if(currentUrl.indexOf(item) != -1 || targetUrl.indexOf(item) != -1) {
+              window.location.href = targetUrl;
+            }
+          });
+        }
+      } catch (error) {}
+
+      $(window).unbind('resize');
+      $(window).unbind('scroll');
+      $(document).unbind('scroll');
+      $(document).unbind('click');
+      $('body').unbind('click');
+
+    })
+    
+    document.addEventListener('pjax:complete', function () {
+      $('script[data-pjax], .pjax-reload script').each(function () {
+        $(this).parent().append($(this).remove());
+      });
+    });
+
+    document.addEventListener('pjax:error', function (e) {
+      window.location.href = e.triggerElement.href;
+    })
+    
+    // 刷新不从顶部开始
+    document.addEventListener("DOMContentLoaded", function () {
+      history.scrollRestoration = 'auto';
+    })
+  </script>
+
+
+
+  </body>
+</html>
