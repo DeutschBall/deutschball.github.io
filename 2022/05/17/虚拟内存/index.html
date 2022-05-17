@@ -1,0 +1,2045 @@
+<!DOCTYPE html>
+<html>
+  <!-- meta/link... -->
+  
+
+
+
+<head>
+  <meta http-equiv="content-type" content="text/html; charset=utf-8">
+  <meta content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=0" name="viewport">
+  <!-- Global site tag (gtag.js) - Google Analytics -->
+
+
+  <title>CSAPP-chapter9 虚拟内存 | Deutschball&#39;s blog</title>
+
+  <link rel="icon" type="image/png" href="https://raw.githubusercontent.com/DeutschBall/test/master/emp.png">
+  <link rel="stylesheet" href="https://at.alicdn.com/t/font_1911880_c1nvbyezg17.css">
+  <link href="https://cdn.jsdelivr.net/gh/inkss/fontawesome@5.15.3/css/all.min.css" rel="stylesheet">
+  <link href="/js/swiper/swiper@5.4.1.min.css" rel="stylesheet">
+  
+  
+    <script>
+        var themeModelId = '';
+        if (themeModelId) {
+            localStorage.setItem('modelId', themeModelId);
+        }
+    </script>
+    
+    <script src="https://cdn.jsdelivr.net/gh/yuang01/live2d-widget@latest/autoload.js"></script>
+    <script>
+        var live2dOpen = eval('true') || false;
+        if (!live2dOpen) {
+            localStorage.setItem('waifu-display', 1609323474481);
+        }
+    </script>
+  
+  
+  
+<link rel="stylesheet" href="/css/animate.min.css">
+
+  
+<link rel="stylesheet" href="/css/style.css">
+
+  
+  
+    
+<link rel="stylesheet" href="/js/fancybox/jquery.fancybox.min.css">
+
+  
+  
+    
+<link rel="stylesheet" href="/js/shareJs/share.min.css">
+
+  
+  <style>
+        @media (max-width: 992px) {
+            #waifu {
+                display: none;
+            }
+        }
+    </style>
+    <script src="//cdn.bootcss.com/pace/1.0.2/pace.min.js"></script>
+    <link href="//cdn.bootcss.com/pace/1.0.2/themes/pink/pace-theme-flash.css" rel="stylesheet">
+
+    
+        <script src="/js/valine/av-min@3.0.4.js"></script>
+        <script src="https://cdn.jsdelivr.net/gh/HCLonely/Valine@latest/dist/Valine.min.js"></script>
+    
+
+    <!-- import link -->
+    
+        
+            
+        
+            
+        
+    
+    <!-- import script -->
+    
+        
+            
+        
+            
+        
+    
+
+<!-- hexo injector head_end start -->
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.12.0/dist/katex.min.css">
+<!-- hexo injector head_end end --><meta name="generator" content="Hexo 6.1.0"></head>
+
+  
+  <!-- 依赖于jquery和vue -->
+  
+    
+<script src="https://cdn.jsdelivr.net/npm/jquery@3.5.1/dist/jquery.min.js"></script>
+
+  
+
+  
+    
+<script src="https://cdn.jsdelivr.net/npm/vue@2.6.11/dist/vue.min.js"></script>
+
+  
+  
+  <body>
+    <!-- 预加载动画 -->
+    <!-- 页面预加载动画 -->
+
+<div id='loader'>
+  <link rel="stylesheet" href="/js/loaded/index.css" >
+  <div class="loading-left-bg"></div>
+  <div class="loading-right-bg"></div>
+  <div class="spinner-box">
+    <div class="configure-border-1">
+      <div class="configure-core"></div>
+    </div>
+    <div class="configure-border-2">
+      <div class="configure-core"></div>
+    </div>
+    <div class="loading-word">loading...</div>
+  </div>
+</div>
+
+<script>
+  var endLoading = function () {
+    document.body.style.overflow = 'auto';
+    document.getElementById('loader').classList.add("loading");
+  }
+  window.addEventListener('DOMContentLoaded',endLoading);
+  
+</script>
+
+    
+    <!-- 判断是否为暗黑风格 -->
+    <!-- 判断是否为黑夜模式 -->
+<script>
+  let isDark = JSON.parse(localStorage.getItem('dark')) || JSON.parse('true');
+
+  if (isDark) {
+    $(document.body).addClass('darkModel');
+  }
+</script>
+
+    <!-- 需要在上面加载的js -->
+    <script>
+  function loadScript(src, cb) {
+    return new Promise(resolve => {
+      setTimeout(function () {
+        var HEAD = document.getElementsByTagName("head")[0] || document.documentElement;
+        var script = document.createElement("script");
+        script.setAttribute("type", "text/javascript");
+        if (cb) {
+          if (JSON.stringify(cb)) {
+            for (let p in cb) {
+              if (p == "onload") {
+                script[p] = () => {
+                  cb[p]()
+                  resolve()
+                }
+              } else {
+                script[p] = cb[p]
+                script.onload = resolve
+              }
+            }
+          } else {
+            script.onload = () => {
+              cb()
+              resolve()
+            };
+          }
+        } else {
+          script.onload = resolve
+        }
+        script.setAttribute("src", src);
+        HEAD.appendChild(script);
+      });
+    });
+  }
+
+  //https://github.com/filamentgroup/loadCSS
+  var loadCSS = function (href, before, media, attributes) {
+    return new Promise(resolve => {
+      setTimeout(function () {
+        var link = document.createElement('link');
+        link.rel = "stylesheet";
+        link.href = src;
+        link.onload = resolve;
+        document.getElementsByTagName("head")[0].appendChild(link);
+      });
+    });
+  };
+
+</script> 
+
+<!-- 轮播图所需要的js -->
+<script src="/js/swiper/swiper.min.js"></script>
+<script src="/js/swiper/vue-awesome-swiper.js"></script>
+<script src="/js/swiper/swiper.animate1.0.3.min.js"></script>
+
+<script type="text/javascript">
+  Vue.use(window.VueAwesomeSwiper)
+</script>
+
+
+  <script src="/js/vue-typed-js/index.js"></script>
+
+
+<!-- 首页的公告滚动插件的js需要重新加载 -->
+<script src="/js/vue-seamless-scroll/index.js"></script>
+
+<!-- 打字机效果js -->
+<script src="https://cdn.jsdelivr.net/npm/typed.js@2.0.11"></script>
+
+
+    <div id="safearea">
+      <main class="main" id="pjax-container">
+        <!-- 头部导航 -->
+        
+<header class="header   " 
+  id="navHeader"
+  style="position: fixed;
+  left: 0; top: 0; z-index: 10;width: 100%;"
+>
+  <div class="header-content">
+    <div class="bars">
+      <div id="appDrawer" class="sidebar-image">
+  <div class="drawer-box-icon">
+    <i class="fas fa-bars" aria-hidden="true" @click="showDialogDrawer"></i>
+  </div>
+  
+  <transition name="fade">
+    <div class="drawer-box_mask" v-cloak style="display: none;" v-show="visible" @click.self="cancelDialogDrawer">
+    </div>
+  </transition>
+  <div class="drawer-box" :class="{'active': visible}">
+    <div class="drawer-box-head bg-color">
+      <img class="drawer-box-head_logo lazyload placeholder" src="https://raw.githubusercontent.com/DeutschBall/test/master/emp.png" class="lazyload placeholder" data-srcset="https://raw.githubusercontent.com/DeutschBall/test/master/emp.png" srcset="https://img2.baidu.com/it/u=2037979560,2772131037&fm=26&fmt=auto&gp=0.jpg" alt="logo">
+      <h3 class="drawer-box-head_title">Deutschball&#39;s blog</h3>
+      <h5 class="drawer-box-head_desc"></h5>
+    </div>
+    
+    <div class="drawer-box-content">
+      <ul class="drawer-box-content_menu">
+        
+        
+          <li class="drawer-box-content_item">
+            <a target="_blank" rel="noopener" href="https://github.com/DeutschBall">
+              <i class="fas fa-github" aria-hidden="true"></i>
+              <span>Github</span>
+            </a>
+          </li>
+        
+      </ul>
+    </div>
+  </div>
+</div>
+
+<script>
+  var body = document.body || document.documentElement || window;
+  var vm = new Vue({
+    el: '#appDrawer',
+    data: {
+      visible: false,
+      top: 0,
+      openArr: [],
+    },
+    computed: {
+    },
+    mounted() {
+    },
+    methods: {
+      isOpen(index) {
+        if (this.openArr.includes(index)) {
+          return true;
+        } else {
+          return false;
+        }
+      },
+      openOrCloseMenu(curIndex) {
+        const index = this.openArr.indexOf(curIndex);
+        if (index !== -1) {
+          this.openArr.splice(index, 1);
+        } else {
+          this.openArr.push(curIndex);
+        }
+      },
+      showDialogDrawer() {
+        this.visible = true;
+        // 防止页面滚动，只能让弹框滚动
+        this.top = $(document).scrollTop()
+        body.style.cssText = 'width: 100%; height: 100%;overflow: hidden;';
+      },
+      cancelDialogDrawer() {
+        this.visible = false;
+        body.removeAttribute('style');
+        $(document).scrollTop(this.top)
+      }
+    },
+    created() {}
+  })
+</script>
+
+    </div>
+    <div class="blog-title" id="author-avatar">
+      
+        <div class="avatar">
+          <img src="https://raw.githubusercontent.com/DeutschBall/test/master/emp.png" class="lazyload placeholder" data-srcset="https://raw.githubusercontent.com/DeutschBall/test/master/emp.png" srcset="https://img2.baidu.com/it/u=2037979560,2772131037&fm=26&fmt=auto&gp=0.jpg" alt="logo">
+        </div>
+      
+      <a href="/" class="logo">Deutschball&#39;s blog</a>
+    </div>
+    <nav class="navbar">
+      <ul class="menu">
+        
+      </ul>
+      
+      
+        <div id="appSearch">
+  <div class="search"  @click="showDialog()"><i class="fas fa-search" aria-hidden="true"></i></div>
+  <transition name="fade">
+    <div class="message-box_wrapper" style="display: none;" v-cloak v-show="dialogVisible" @click.self="cancelDialogVisible()">
+      <div class="message-box animated bounceInDown">
+        <h2>
+          <span>
+            <i class="fas fa-search" aria-hidden="true"></i>
+            <span class="title">Search</span>
+          </span>
+          <i class="fas fa-times close" pointer style="float:right;" aria-hidden="true" @click.self="cancelDialogVisible()"></i>
+        </h2>
+        <form class="site-search-form">
+          <input type="text"
+            placeholder="Please enter keywords"
+            id="local-search-input" 
+            @click="getSearchFile()"
+            class="st-search-input"
+            v-model="searchInput"
+          />
+        </form>
+        <div class="result-wrapper">
+          <div id="local-search-result" class="local-search-result-cls"></div>
+        </div>
+      </div>
+    </div>
+  </transition>
+</div>
+<script src="/js/local_search.js"></script>
+<script>
+  var body = document.body || document.documentElement || window;
+  var vm = new Vue({
+    el: '#appSearch',
+    data: {
+      dialogVisible: false,
+      searchInput: '',
+      top: 0,
+    },
+    computed: {
+    },
+    mounted() {
+      window.addEventListener('pjax:complete', () => {
+        this.cancelDialogVisible();
+      })
+    },
+    methods: {
+      showDialog() {
+        this.dialogVisible = true;
+        // 防止页面滚动，只能让弹框滚动
+        this.top = $(document).scrollTop()
+        body.style.cssText = 'overflow: hidden;';
+      },
+      getSearchFile() {
+        if (!this.searchInput) {
+          getSearchFile("/search.xml");
+        }
+      },
+      cancelDialogVisible() {
+        this.dialogVisible = false;
+        body.removeAttribute('style');
+        $(document).scrollTop(this.top)
+      },
+    },
+    created() {}
+  })
+</script>
+<!-- 解决刷新页面闪烁问题，可以在元素上添加display: none, 或者用vue.extend方法，详情：https://blog.csdn.net/qq_31393401/article/details/81017912 -->
+<!-- 下面是搜索基本写法 -->
+<!-- <script type="text/javascript" id="local.search.active">
+  var inputArea = document.querySelector("#local-search-input");
+  inputArea.onclick   = function(){ getSearchFile(); this.onclick = null }
+  inputArea.onkeydown = function(){ if(event.keyCode == 13) return false }
+</script> -->
+
+      
+
+    </nav>
+  </div>
+  
+    <a target="_blank" rel="noopener" href="https://github.com/DeutschBall" class="github-corner color-primary" aria-label="View source on GitHub"><svg width="60" height="60" viewBox="0 0 250 250" style="fill:#fff; position: absolute; top: 0; border: 0; right: 0;" aria-hidden="true"><path d="M0,0 L115,115 L130,115 L142,142 L250,250 L250,0 Z"></path><path d="M128.3,109.0 C113.8,99.7 119.0,89.6 119.0,89.6 C122.0,82.7 120.5,78.6 120.5,78.6 C119.2,72.0 123.4,76.3 123.4,76.3 C127.3,80.9 125.5,87.3 125.5,87.3 C122.9,97.6 130.6,101.9 134.4,103.2" fill="currentColor" style="transform-origin: 130px 106px;" class="octo-arm"></path><path d="M115.0,115.0 C114.9,115.1 118.7,116.5 119.8,115.4 L133.7,101.6 C136.9,99.2 139.9,98.4 142.2,98.6 C133.8,88.0 127.5,74.4 143.8,58.0 C148.5,53.4 154.0,51.2 159.7,51.0 C160.3,49.4 163.2,43.6 171.4,40.1 C171.4,40.1 176.1,42.5 178.8,56.2 C183.1,58.6 187.2,61.8 190.9,65.4 C194.5,69.0 197.7,73.2 200.1,77.6 C213.8,80.2 216.3,84.9 216.3,84.9 C212.7,93.1 206.9,96.0 205.4,96.6 C205.1,102.4 203.0,107.8 198.3,112.5 C181.9,128.9 168.3,122.5 157.7,114.1 C157.9,116.9 156.7,120.9 152.7,124.9 L141.0,136.5 C139.8,137.7 141.6,141.9 141.8,141.8 Z" fill="currentColor" class="octo-body"></path></svg></a><style>.github-corner:hover .octo-arm{animation:octocat-wave 560ms ease-in-out}@keyframes octocat-wave{0%,100%{transform:rotate(0)}20%,60%{transform:rotate(-25deg)}40%,80%{transform:rotate(10deg)}}@media (max-width:500px){.github-corner:hover .octo-arm{animation:none}.github-corner .octo-arm{animation:octocat-wave 560ms ease-in-out}}</style>
+  
+  
+</header>
+        <!-- 内容区域 -->
+        
+ <!-- prismjs 代码高亮 -->
+ 
+
+
+<div class="bg-dark-floor" style="position: fixed;left: 0;top: 0;width: 100%;height: 100%;z-index: -1;"></div>
+
+
+  <!-- 文章详情页顶部图片和标题 -->
+
+
+
+
+<div class="post-detail-header" id="thumbnail_canvas" style="background-repeat: no-repeat; background-size: cover; 
+  background-position: center center;position: relative;background-image:url('/medias/10.jpg')">
+  <div class="post-detail-header-mask"></div>
+  <canvas id="header_canvas"style="position:absolute;bottom:0;pointer-events:none;"></canvas>
+  
+  <div class="post-detail-header_info-box">
+    <div class="title-box">
+      <span class="title">
+        CSAPP-chapter9 虚拟内存
+      </span>
+    </div>
+    
+    
+      
+        <span class="post-detail-header_date">
+          <i class="fas fa-calendar"></i> Published in：2022-05-17 |
+        </span>
+      
+
+      
+
+      
+    
+  </div>
+  
+  
+    <script src="/js/bubble/bubble.js"></script>
+  
+</div>
+
+
+
+
+
+<div class="row justify-position" 
+  style="padding-top: 0px;">
+  <div class="main-content">
+    <article class="post post-detail">
+      <div class="post-content">
+        <h1 id="虚拟内存"><a href="#虚拟内存" class="headerlink" title="虚拟内存"></a>虚拟内存</h1><h2 id="从物理寻址到虚拟寻址"><a href="#从物理寻址到虚拟寻址" class="headerlink" title="从物理寻址到虚拟寻址"></a>从物理寻址到虚拟寻址</h2><p>虚拟内存是一伙子异想天开的人造出来的巧夺天工,在虚拟内存之前,是符合普通人认知的物理内存</p>
+<p>计算机主存(目前可以直接认为成内存条)可以看成是一个巨大的数组,他有M个连续的单元,每个单元大小是一个字节,各个单元线性分布</p>
+<p><img src="https://raw.githubusercontent.com/DeutschBall/test/master/image-20220516182449307.png" class="lazyload placeholder" data-srcset="https://raw.githubusercontent.com/DeutschBall/test/master/image-20220516182449307.png" srcset="https://img2.baidu.com/it/u=2037979560,2772131037&fm=26&fmt=auto&gp=0.jpg" alt="image-20220516182449307"></p>
+<p>物理寻址就是直接在内存条上寻址,CPU想要读写哪个单元的内容,只需要指定该单元的编号,或者说下标</p>
+<blockquote>
+<p>物理寻址的一个相对完整的过程:</p>
+<p>1.CPU指定物理地址,将该地址信息送到地址总线</p>
+<p>2.CPU指定对该地址是读还是写操作,将该控制信息发往控制总线</p>
+<p>3.CPU从数据总线上对相应内存单元进行读写操作</p>
+</blockquote>
+<p>既然物理寻址方法如此自然易懂,为什么还要引入一个相对晦涩的虚拟寻址呢?</p>
+<p>其中的一个原因是,内存条太小了,想要把一些磁盘空间也乔装打扮一下当成内存使用</p>
+<p>还有更高级的原因,比如更方便地管理内存</p>
+<p>虚拟空间是对上层而言的概念,而物理空间是对下层而言的,</p>
+<p>用户感到的是虚拟空间,有限的内存上似乎可以运行无限多的进程,开无限多的进程独立地址空间,</p>
+<p>而对操作系统来说,实际上的”资源”就只有内存条那固定死的地址空间.</p>
+<p>操作系统通过及时地将用户暂时不用的进程的物理空间换给其他进程的虚拟空间使用,让用户产生错觉认为内存很大.</p>
+<p>当用户又要继续使用刚才暂时不用的进程时,此时该进程占用的”资源”刚才被操作系统从内存中搬到磁盘中,然后交给了别的进程.</p>
+<p>因此操作系统又会启动缺页处理,把磁盘中该进程的信息重新搬回来放到内存中使用.</p>
+<p>这就好比用工荒,又好比小学时做过的一道数学题</p>
+<blockquote>
+<p>400个士兵守一个方形的城池,每时每刻都有士兵阵亡.</p>
+<p>如何保证敌人每时每刻看到每面墙上都有至少100个士兵在防守的假象?</p>
+<p>400个士兵均分4组站在4个角楼上就可以造成每面城墙有200名士兵的假象</p>
+<p>东北角的士兵就同时起到忽悠东面和北面两个方向敌人的作用</p>
+<p>在虚拟内存概念中,主存就起到了这个东北角士兵的作用</p>
+</blockquote>
+<p>虚拟寻址相对于物理寻址多了一个硬件MMU(内存管理单元)和一个步骤即地址翻译.</p>
+<p>并且CPU指定的虚拟地址有可能并不放在主存中,而是放在磁盘中,这就发生了缺页,操作系统会一系列操作给他整的不缺喽然后继续执行,这都是后话了</p>
+<p>最简化的虚拟寻址模型:</p>
+<p><img src="https://raw.githubusercontent.com/DeutschBall/test/master/image-20220516182852208.png" class="lazyload placeholder" data-srcset="https://raw.githubusercontent.com/DeutschBall/test/master/image-20220516182852208.png" srcset="https://img2.baidu.com/it/u=2037979560,2772131037&fm=26&fmt=auto&gp=0.jpg" alt="image-20220516182852208"></p>
+<blockquote>
+<p>一个相对完整的虚拟寻址过程:</p>
+<p>1.CPU指定一个虚拟地址,发往MMU内存管理单元(MMU也是CPU中集成的一部分)</p>
+<p>2.MMU将虚拟地址翻译成物理地址,送往地址总线(由于MMU是CPU的一部分,因此还是CPU将该物理地址送往地址总线)</p>
+<p>3.CPU指定对该物理地址的读或者写操作,将控制信息送往控制总线</p>
+<p>4.CPU通过数据总线对该内存单元进行读或者写操作</p>
+</blockquote>
+<h2 id="地址空间"><a href="#地址空间" class="headerlink" title="地址空间"></a>地址空间</h2><h3 id="物理地址空间和虚拟地址空间"><a href="#物理地址空间和虚拟地址空间" class="headerlink" title="物理地址空间和虚拟地址空间"></a>物理地址空间和虚拟地址空间</h3><p>一个512MB的内存条上的地址空间即物理地址空间是多大?</p>
+<p>一个单元一个字节,$512MB=512<em>2^{10}KB=512</em>2^{20}B=2^{29}B$即物理地址空间编号范围为:$[0,2^{29})$</p>
+<p>物理地址空间就是内存条上的地址空间数</p>
+<p>虚拟地址空间是指想要给用户造成的假象中,让用户感觉出来的内存大小,实际上是磁盘上的一个连续巨大数组</p>
+<blockquote>
+<p>还是以士兵守城举例,一共400个活人,每面墙上分100个士兵,不可能再多了,这就是物理地址空间</p>
+<p>但是士兵都站在角楼可以造成每面墙都有200个士兵的假象,这就是虚拟空间</p>
+</blockquote>
+<p>通常虚拟地址空间会比物理空间大,否则虚拟空间没有存在的意义</p>
+<blockquote>
+<p>绷不住了</p>
+<p><img src="https://raw.githubusercontent.com/DeutschBall/test/master/image-20220516204149979.png" class="lazyload placeholder" data-srcset="https://raw.githubusercontent.com/DeutschBall/test/master/image-20220516204149979.png" srcset="https://img2.baidu.com/it/u=2037979560,2772131037&fm=26&fmt=auto&gp=0.jpg" alt=""></p>
+</blockquote>
+<p>为什么不直接把物理空间做大?物理空间即内存条,相对磁盘贵得多.如果有钱自然可以整一个不用磁盘,只用内存(还涉及到断点是否能保存的问题)的计算机,现在对于私人电脑而言,比如联想拯救者y9000p2021h,显然不现实</p>
+<h3 id="数据对象和地址空间的关系"><a href="#数据对象和地址空间的关系" class="headerlink" title="数据对象和地址空间的关系"></a>数据对象和地址空间的关系</h3><p>数据对象就是存放在地址空间上的数据,其在地址空间中的位置或者说下标就是其属性</p>
+<p>比如一个char一个字节,存放在一个内存单元中,</p>
+<p>一个int四个i直接,存放在四个连续的内存单元中,</p>
+<p>每个数据对象都会有一个虚拟地址空间地址,当其所在进程被实际运行时,它有可能在物理空间中有一个物理空间地址</p>
+<h2 id="虚拟内存作为缓存工具"><a href="#虚拟内存作为缓存工具" class="headerlink" title="虚拟内存作为缓存工具"></a>虚拟内存作为缓存工具</h2><h3 id="分页"><a href="#分页" class="headerlink" title="分页"></a>分页</h3><p>虚拟空间比物理空间大,自然不能一股脑塞进物理空间里.</p>
+<p>应该是用到虚拟空间的某一块就从虚拟空间中把这一块搬到物理空间中</p>
+<blockquote>
+<p>这就好比一个有5个坑的厕所但是有20个人要扔炸弹,自然要挑最急或者最先排队的5个人去扔炸弹,20个人一起扔炸弹有很大可能把炸弹扔别人身上或者扔外边</p>
+</blockquote>
+<p>这里选5个人一组去扔炸弹就好比从虚拟空间中选出一部分块放到物理内存中接收CPU的访问</p>
+<blockquote>
+<p>为什么CPU不能直接去磁盘访问?</p>
+<p>这从量上举例</p>
+<p>就好比中国有13亿人口就要挖13个上厕所的坑,</p>
+<p>其一正常人不是每时每刻都在扔炸弹,就好比磁盘中的数据不是每时每刻都要被CPU访问</p>
+<p>其二建13亿个厕所走到路上得随处可见的坑(我密恐犯了),类比计算机中就需要从CPU到磁盘之间部署总线,磁盘一般比较大,比如1个T,那么地址总线宽度就得$log_2 1T$</p>
+<p>从质上举例子,内存速度远快于磁盘,</p>
+<p>CPU去访问内存,然后内存去访问磁盘,就好比师长向团长下达命令,团长去团里下命令,要找士兵许三多,</p>
+<p>但是CPU去访问磁盘就好比师长直接向师广大士兵下达命令,找许三多这个人.</p>
+</blockquote>
+<p>规范的术语:</p>
+<p>虚拟内存(Virtual memory,VM)</p>
+<p>物理内存分割成的块叫做物理页(Physical Page,PP)</p>
+<p>虚拟内存分割成的块叫做虚拟页(Virtual Page,VP)</p>
+<p>虚拟内存分割成块是因为物理内存放不下,那为什么物理内存也要分块?</p>
+<blockquote>
+<p>这就好比20个人去一个10个坑厕所扔炸弹,20个人里有10男10女,扔炸弹这种事做不到男女搭配干活不累,需要5个坑放在男厕所,5个坑放在女厕所,然后10男分两组去男厕扔炸弹,女同理</p>
+<p>都是人但是因为性别就得分开扔炸弹</p>
+<p>有些连续虚拟内存块就得分开了放到物理内存里</p>
+</blockquote>
+<p>虚拟内存中的一个虚拟页在被使用的时候要搬到物理内存中,复制到一个物理页上,</p>
+<p>用不到的虚拟页其对应的物理页有可能就被让给其他虚拟页使用</p>
+<p>可以说某一时刻一个正在被使用的物理页是一个虚拟页的快照,</p>
+<p>当然物理页可以修改,这会导致物理页和其对应的虚拟页内容有差异,这种情况下应该怎么办呢?当该物理页将要被让给其他虚拟页时需要将改动写回其对应的虚拟页</p>
+<h3 id="页属性"><a href="#页属性" class="headerlink" title="页属性"></a>页属性</h3><p>页属性:物理页和虚拟页有相同的大小$P=2^p$字节</p>
+<p>由于物理地址空间比虚拟地址空间小,因此显然物理页数量比虚拟页数量少</p>
+<p>根据虚拟页是否被使用以及是否正在被使用,虚拟页可以分成三种</p>
+<p><img src="https://raw.githubusercontent.com/DeutschBall/test/master/image-20220516193505725.png" class="lazyload placeholder" data-srcset="https://raw.githubusercontent.com/DeutschBall/test/master/image-20220516193505725.png" srcset="https://img2.baidu.com/it/u=2037979560,2772131037&fm=26&fmt=auto&gp=0.jpg" alt="image-20220516193505725"></p>
+<p>分配与否就是指该虚拟页是否存储了信息</p>
+<p>缓存与否就是该虚拟页是否被复制到物理页供CPU访问</p>
+<p><img src="https://raw.githubusercontent.com/DeutschBall/test/master/image-20220516193749579.png" class="lazyload placeholder" data-srcset="https://raw.githubusercontent.com/DeutschBall/test/master/image-20220516193749579.png" srcset="https://img2.baidu.com/it/u=2037979560,2772131037&fm=26&fmt=auto&gp=0.jpg" alt="image-20220516193749579"></p>
+<blockquote>
+<p>什么是缓存?</p>
+<p>看电影的时候也会遇到”缓存”这个概念,缓存有点一劳永逸的概念,第一次加载需要花费一些时间,但是以后对相同内容的重复访问就快得多了</p>
+<p>什么叫”缓存在DRAM中”,就是指虚拟页已经拷贝到内存上建立了物理页,方便CPU直接访问内存而不用与磁盘打交道</p>
+<p>因此内存条在存储系统中可以看成是CPU和磁盘之间的缓存器,就好比cache是CPU和磁盘之间的缓存器,只不过内存比cache大得多慢得多</p>
+</blockquote>
+<p>显然VP数量多与PP,VP的二进制地址编号更长</p>
+<h3 id="幼年的页表"><a href="#幼年的页表" class="headerlink" title="幼年的页表"></a>幼年的页表</h3><p>CPU或者说虚拟内存系统怎么知道它想要访问的虚拟页是否已经被拷贝到内存条上成为物理页了呢?</p>
+<blockquote>
+<p>这就好比班主任要约谈某个倒霉蛋,但是班主任怎么知道这个倒霉蛋有没有来学校呢?班主任会先看一下签到表判断一下倒霉蛋来没来,来了则直接约谈,没来则先从家里叫到学校然后再约谈</p>
+</blockquote>
+<p>让虚拟内存系统掌握目前有哪些虚拟页拷贝成了物理页,要在==主存上==放一个页表(Page Table,PT)</p>
+<blockquote>
+<p>为什么要放到主存上?</p>
+<p>还能放到哪里呢?CPU的寄存器里?磁盘里?</p>
+<p>寄存器稀松了了的几个,每一个最多存放一个64位数4字节,而一个页表表项数成千上万,每个表项都是以字节为单位.显然CPU寄存器放不开?</p>
+<p>放磁盘里那和CPU直接访问磁盘上的数据有啥区别?</p>
+<p>也只能放在内存里了</p>
+</blockquote>
+<p>页表项(PTE)数是根据虚拟内存确定的,虚拟页有几个,就有多少个页表项</p>
+<p><img src="https://raw.githubusercontent.com/DeutschBall/test/master/image-20220516194906654.png" class="lazyload placeholder" data-srcset="https://raw.githubusercontent.com/DeutschBall/test/master/image-20220516194906654.png" srcset="https://img2.baidu.com/it/u=2037979560,2772131037&fm=26&fmt=auto&gp=0.jpg" alt="image-20220516194906654"></p>
+<p>页表项按照顺序表方式排列,下标从0到<code>虚拟页数-1</code>,与虚拟页一一对应</p>
+<p>有效位表明该虚拟页是否已经在物理内存中创建了物理页,</p>
+<p>页表项剩下的部分是物理页号,光知道一个虚拟页创建了一个物理页还不够,还得知道这个物理页在哪里</p>
+<blockquote>
+<p>这就好比20个爷们去只有5个坑的男厕扔炸弹,厕所所长为了方便惩罚扔不准炸弹的爷们,给五个坑标上0,1,2,3,4,然后让每个人扔炸弹的时候报告自己对哪个坑输出,</p>
+<p>然后厕所所长记录一张如厕表,<code>坑[0]=老八,坑[1]=张三...</code>就能根据坑号责任到人,</p>
+<p>如果1号坑的爷们占着坑不扔炸弹,所长就则给外面的人说1号坑闲置,来个爷们把上一个爷们给挤掉</p>
+<p>如果1号坑的爷们快速地扔完炸弹走了,所长就把1号坑标记为闲置状态</p>
+</blockquote>
+<p>之所以说”幼年的页表”,是因为实际上的页表项目还要记录很多信息,这里只是最简化的页表</p>
+<h3 id="页命中"><a href="#页命中" class="headerlink" title="页命中"></a>页命中</h3><p>CPU想要访问某个虚拟地址,但是这个虚拟地址对应的页是否已经被缓存到内存中了呢?</p>
+<p>如果是则”命中”</p>
+<blockquote>
+<p>这就好比20个爷们去一个5坑男厕,一个找茬想让老八表演绝活,但是绝活只能靠在厕所中食用炸弹完成,于是找茬的去问所长,老八是否正在坑上,</p>
+<p>所长也挺好奇的,查了一下如厕表,发现<code>坑[0]=老八</code>,老八确实正在扔炸弹,这就命中了</p>
+<p>否则所长就要让外面的老八挤掉一个站着茅坑不扔炸弹的张三然后表演绝活</p>
+</blockquote>
+<p>在计算机上怎么判定是不是呢?</p>
+<p><img src="https://raw.githubusercontent.com/DeutschBall/test/master/image-20220516200840582.png" class="lazyload placeholder" data-srcset="https://raw.githubusercontent.com/DeutschBall/test/master/image-20220516200840582.png" srcset="https://img2.baidu.com/it/u=2037979560,2772131037&fm=26&fmt=auto&gp=0.jpg" alt="image-20220516200840582"></p>
+<p>根据CPU给出的虚拟地址首先查虚拟页表,先看有效位,如果为1则命中,根据页表项后面的物理页号去物理内存中去访问物理页</p>
+<p>如果有效位为0则表明该虚拟地址对应的页还没有拷贝到物理内存里,触发缺页异常,这都是后话了</p>
+<blockquote>
+<p>虚拟地址和虚拟页的关系?</p>
+<p>虚拟页是一个虚拟单元集合,一个虚拟页集合了一些连续的虚拟单元,每个虚拟单元都有一个虚拟地址</p>
+<p>虚拟页的地址就是第一个虚拟单元的虚拟地址</p>
+<p>因此给定一个虚拟地址查页表的时候应该是查询该虚拟地址是否属于某个虚拟页的<strong>辖区</strong></p>
+</blockquote>
+<h3 id="缺页"><a href="#缺页" class="headerlink" title="缺页"></a>缺页</h3><p>没有命中的情况就是缺页</p>
+<p><strong>什么情况下判定为缺页?</strong></p>
+<p><img src="https://raw.githubusercontent.com/DeutschBall/test/master/image-20220516201903715.png" class="lazyload placeholder" data-srcset="https://raw.githubusercontent.com/DeutschBall/test/master/image-20220516201903715.png" srcset="https://img2.baidu.com/it/u=2037979560,2772131037&fm=26&fmt=auto&gp=0.jpg" alt="image-20220516201903715"></p>
+<p>cpu指定的虚拟地址查页表后发现有效位为0,立刻引发缺页中断</p>
+<p><strong>缺页了怎么整才能让它不缺?</strong></p>
+<p>我原来认为缺页了CPU就直接越俎代庖地去访问磁盘了,这经过前文的学习显然是想当然</p>
+<p>缺页之后选择一个”不是很重要”的物理页(比如PP3)给他扬了,修改指向该物理页PP3的页表项PTE4,有效位置0,</p>
+<blockquote>
+<p>此举的目的是当先前的虚拟页VP4再次使用时,需要重新拷贝到物理页.如果此时不即使修改PTE4的有效位则再次使用VP4时一查表,发现已经缓存好了,直接访问PP3了,可是PP3实际上是VP3的拷贝</p>
+<p>这里”选择一个不是很重要的物理页”涉及到页面调度算法,这是另一本黑叔叔,&lt;&lt;现代操作系统&gt;&gt;中的内容</p>
+</blockquote>
+<p>然后用需要用到的虚拟页VP3拷贝到该物理页PP3位置,挤掉VP4,</p>
+<p>修改对应的页表项PP4,有效位 置1然后物理页表地址写上刚才拷贝到的物理页的地址PP3</p>
+<p><img src="https://raw.githubusercontent.com/DeutschBall/test/master/image-20220516202424662.png" class="lazyload placeholder" data-srcset="https://raw.githubusercontent.com/DeutschBall/test/master/image-20220516202424662.png" srcset="https://img2.baidu.com/it/u=2037979560,2772131037&fm=26&fmt=auto&gp=0.jpg" alt="image-20220516202424662"></p>
+<p>都改完之后,重新执行刚才的指令,此时虚拟地址就已经被缓存了,不会再发生缺页了</p>
+<p>一些规范术语:</p>
+<p>交换或者页面调度:再内存和磁盘之间传送页</p>
+<p>页面调入或者磁盘换入,页从磁盘传送到内存,方向都是相对于内存而言的,</p>
+<blockquote>
+<p>方向总是相对于更靠近CPU的器件而言的</p>
+</blockquote>
+<p>按需页面调度:只有不得不进行页面调度即发生了缺页时,才进行页面调度的调度方式</p>
+<blockquote>
+<p>现代操作系统一般使用按需页面调度</p>
+</blockquote>
+<h2 id="虚拟内存作为内存管理工具"><a href="#虚拟内存作为内存管理工具" class="headerlink" title="虚拟内存作为内存管理工具"></a>虚拟内存作为内存管理工具</h2><p>每个进程都有自己独立的==虚拟==地址空间,注意不是物理地址空间</p>
+<p>这就要求每个进程都有独立的页表</p>
+<p>物理空间只有一个,就是内存条,或者说主存</p>
+<p>进程的虚拟地址空间看似是连续地开了一大片,实际上有可能在物理内存上东一块西一块.</p>
+<p>不同的进程可以有共享的物理页,这时动态库的物质基础</p>
+<p><img src="https://raw.githubusercontent.com/DeutschBall/test/master/image-20220516205620915.png" class="lazyload placeholder" data-srcset="https://raw.githubusercontent.com/DeutschBall/test/master/image-20220516205620915.png" srcset="https://img2.baidu.com/it/u=2037979560,2772131037&fm=26&fmt=auto&gp=0.jpg" alt="image-20220516205620915"></p>
+<blockquote>
+<p>这里有一个问题,如果两个进程的代码段都是从虚拟地址的<code>0x400000</code>开始,岂不是对应了磁盘上的同一虚拟页?</p>
+<p>==可以提出一种猜想==</p>
+<p>进程的虚拟地址空间是要小于磁盘上全部的虚拟地址空间的</p>
+<p>进程的虚拟地址并不是磁盘上的虚拟地址空间的下标,</p>
+<p>而是相对于磁盘上几个连续的页面组成的一个子虚拟地址空间而言的</p>
+<p>该子虚拟空间从0开始重新编号</p>
+</blockquote>
+<h2 id="虚拟内存作为内存保护工具"><a href="#虚拟内存作为内存保护工具" class="headerlink" title="虚拟内存作为内存保护工具"></a>虚拟内存作为内存保护工具</h2><p>啥是内存保护?</p>
+<p>比如用户不允许修改内核的数据</p>
+<p>只读数据无法被修改,代码段也不许被修改</p>
+<p>不允许修改其他内存的虚拟地址空间</p>
+<blockquote>
+<p>进程的虚拟地址空间独立,很自然的就保证了进程不允许修改其他内存的虚拟地址空间,</p>
+<p>这就好比让两个在水上步行球中的人打架,两个球距离最近也就是相切,不会相互嵌入</p>
+<p>这个球就好比进程独立的虚拟地址空间</p>
+</blockquote>
+<p>…</p>
+<p>幼年的页表成熟了一些,成了带许可位的页表</p>
+<p><img src="https://raw.githubusercontent.com/DeutschBall/test/master/image-20220516210523521.png" class="lazyload placeholder" data-srcset="https://raw.githubusercontent.com/DeutschBall/test/master/image-20220516210523521.png" srcset="https://img2.baidu.com/it/u=2037979560,2772131037&fm=26&fmt=auto&gp=0.jpg" alt="image-20220516210523521"></p>
+<p>在页表项中加上许可位,就可以限制进程对该页读写访问,</p>
+<p>sup许可位限制普通用户和管理员的区别</p>
+<p>违反这些许可条件的指令将会导致段错误</p>
+<h2 id="地址翻译"><a href="#地址翻译" class="headerlink" title="地址翻译"></a>地址翻译</h2><p>符号约定</p>
+<p><img src="https://raw.githubusercontent.com/DeutschBall/test/master/image-20220516225933019.png" class="lazyload placeholder" data-srcset="https://raw.githubusercontent.com/DeutschBall/test/master/image-20220516225933019.png" srcset="https://img2.baidu.com/it/u=2037979560,2772131037&fm=26&fmt=auto&gp=0.jpg" alt="image-20220516225933019"></p>
+<p>地址翻译就是从虚拟地址计算出物理地址的过程</p>
+<p><img src="https://raw.githubusercontent.com/DeutschBall/test/master/image-20220516214911937.png" class="lazyload placeholder" data-srcset="https://raw.githubusercontent.com/DeutschBall/test/master/image-20220516214911937.png" srcset="https://img2.baidu.com/it/u=2037979560,2772131037&fm=26&fmt=auto&gp=0.jpg" alt="image-20220516214911937"></p>
+<blockquote>
+<p> 咱就是说这个MAP函数这么抽象有必要这样写一下吗</p>
+</blockquote>
+<p>这个映射是在MMU中完成的</p>
+<h3 id="最简单的地址翻译"><a href="#最简单的地址翻译" class="headerlink" title="最简单的地址翻译"></a>最简单的地址翻译</h3><p><img src="https://raw.githubusercontent.com/DeutschBall/test/master/image-20220516220103992.png" class="lazyload placeholder" data-srcset="https://raw.githubusercontent.com/DeutschBall/test/master/image-20220516220103992.png" srcset="https://img2.baidu.com/it/u=2037979560,2772131037&fm=26&fmt=auto&gp=0.jpg" alt="image-20220516220103992"></p>
+<p>每个进程可以有自己的独立页表,需要一个页表基址寄存器指向页表基地址,作用类似于段寄存器</p>
+<blockquote>
+<p>一个精确到存储单元的虚拟地址分成虚拟页号和虚拟页偏移量两部分</p>
+<p>确定到页用到页号,确定到页上的一个单元需要页偏移量</p>
+<p>由于物理页大小和虚拟页大小相同,因此物理页偏移量和虚拟页偏移量是相同的</p>
+<p>虚拟页数量一般会大于物理页数量,因此虚拟页号长度一般长于物理页号,即$n&gt;m$</p>
+</blockquote>
+<p>翻译过程:</p>
+<p>1.CPU指定一个虚拟地址给MMU</p>
+<p>2.MMU将该虚拟地址的$[p,n-1]$位作为虚拟页号去查页表,剩下$[0,p-1]$位作为页偏移量</p>
+<p>3.虚拟页号查页表对应项,如果有效位是0则缺页中断,否则命中,如果命中则:</p>
+<p>4.从页表中读取物理页号$[p,m-1]$,和页偏移量$[0,p-1]$拼成物理地址</p>
+<p>5.CPU将该物理地址放到地址总线上,准备访问内存</p>
+<h3 id="考虑高速缓存的地址翻译"><a href="#考虑高速缓存的地址翻译" class="headerlink" title="考虑高速缓存的地址翻译"></a>考虑高速缓存的地址翻译</h3><p>原来的地址翻译,CPU直接访问内存,现在在CPU和内存之间再加一级缓存,L1高速缓存</p>
+<p><img src="https://raw.githubusercontent.com/DeutschBall/test/master/image-20220516221624510.png" class="lazyload placeholder" data-srcset="https://raw.githubusercontent.com/DeutschBall/test/master/image-20220516221624510.png" srcset="https://img2.baidu.com/it/u=2037979560,2772131037&fm=26&fmt=auto&gp=0.jpg" alt="image-20220516221624510"></p>
+<p>处理器只能发出虚拟地址,MMU翻译成物理地址,处理器不能直接发出物理地址</p>
+<p>页表还是存放在内存中,高速缓存存放的是很少一部分的<strong>页表项目</strong>还有<strong>数据</strong></p>
+<p>1.处理器发出虚拟地址VA之后进入MMU进行翻译,得到一个虚拟页号</p>
+<p>2.如果没有L1则下一步要根据虚拟页号,到内存中访问页表了,而现在有L1,要先检查L1中有没有该虚拟页号对应的页表条目.</p>
+<p>3.如果L1命中,并且对应页表条目有效位为1,则不再访问内存,直接从L1中取出该页表条目的<strong>物理页号</strong>给MMU.</p>
+<p>4.如果L1不命中,则还需访问内存,从真正的页表中找到该虚拟页号对应的页表条目,然后根据有效位判断是否缺页,</p>
+<p>如果内存也命中即有效位为1则不缺页,将该<strong>页表条目</strong>返回L1,从L1中挤出一条相对不重要的记录.</p>
+<p>然后MMU再访问L1获得页表条目的物理页号,(这次L1必然命中),然后拼成物理地址</p>
+<p>如果发生缺页,也是内存和磁盘之间页的传递,与L1没有关系,无需讨论</p>
+<p><strong>然后CPU访问物理地址也因L1有所变化</strong></p>
+<p>在没有L1时,MMU拿到物理地址之后会加到地址总线上,但是现在MMU拿到物理地址后还是会先查L1,如果L1命中,则直接取出数据通过内部总线传递给CPU,免去了访问内存和外总线的过程</p>
+<p>当L1不命中时才会查内存上的物理地址,然后取出其上的地址,然后在L1中挤掉一个相对不重要的记录,存入该物理地址及其数据的键值对</p>
+<h3 id="TLB加速翻译的地址翻译"><a href="#TLB加速翻译的地址翻译" class="headerlink" title="TLB加速翻译的地址翻译"></a>TLB加速翻译的地址翻译</h3><p>TLB:翻译后备缓冲器(Translation Lookaside Buffer)</p>
+<p>这个玩意儿是加速翻译的,啥意思呢.</p>
+<blockquote>
+<p>如果五秒前我问了别人,”你好”用英语怎么说并获得了回答,</p>
+<p>五秒后我要对一个米国人打招呼,这时需要翻译</p>
+<p>但凡比鱼聪明点的人都还记得”你好”用英语怎么说,这就是TLB命中</p>
+<p>但是如果五秒前我尝试寄了十个甚至更多的英语单词,其中即使包括”你好”,五秒后我也不一定能想起来,这就是后来的翻译挤掉了前面翻译的缓存,然后TLB不命中</p>
+<p>此时想不起来就应该再问懂哥儿,”你好”用英语怎么说,然后记住,方便奉承下一个米国人用,这就是TLB不命中之后干的事</p>
+</blockquote>
+<p><img src="https://raw.githubusercontent.com/DeutschBall/test/master/image-20220516224400351.png" class="lazyload placeholder" data-srcset="https://raw.githubusercontent.com/DeutschBall/test/master/image-20220516224400351.png" srcset="https://img2.baidu.com/it/u=2037979560,2772131037&fm=26&fmt=auto&gp=0.jpg" alt="image-20220516224400351"></p>
+<p>处理器指定一个虚拟地址交给MMU,MMU首先不会尝试查L1或者内存中的页表进行翻译,而是首先访问TLB,看看刚才是不是已经翻译过并且还记得,如果命中则直接用刚才记住的翻译得到物理地址</p>
+<p>如果TLB没有命中则老老实实去查高速缓存页表项,要是再不命中则老老实实去查内存页表,要是还不命中则缺页</p>
+<p>可气的是,总有一伙子人能设计地这些缓冲几乎百发百中</p>
+<h3 id="手工模拟地址翻译"><a href="#手工模拟地址翻译" class="headerlink" title="手工模拟地址翻译"></a>手工模拟地址翻译</h3><h4 id="题目环境"><a href="#题目环境" class="headerlink" title="题目环境"></a>题目环境</h4><p>考虑上TLB,L1缓存,手工模拟一个地址翻译过程</p>
+<p>系统参数:</p>
+<p><img src="https://raw.githubusercontent.com/DeutschBall/test/master/image-20220516232636330.png" class="lazyload placeholder" data-srcset="https://raw.githubusercontent.com/DeutschBall/test/master/image-20220516232636330.png" srcset="https://img2.baidu.com/it/u=2037979560,2772131037&fm=26&fmt=auto&gp=0.jpg" alt="image-20220516232636330"></p>
+<p>这里几路相联,几个组实际上就是将线性的缓存器改成了阵列,按照行列存储</p>
+<blockquote>
+<p>每个页面大小$64Bytes=2^6Bytes$,一个内存单元$1Bytes$,因此一个页管理$2^6$个地址,页内偏移量就得是一个6位二进制数,剩下的高位才是页号</p>
+<p><img src="https://raw.githubusercontent.com/DeutschBall/test/master/image-20220516232919987.png" class="lazyload placeholder" data-srcset="https://raw.githubusercontent.com/DeutschBall/test/master/image-20220516232919987.png" srcset="https://img2.baidu.com/it/u=2037979560,2772131037&fm=26&fmt=auto&gp=0.jpg" alt="image-20220516232919987"></p>
+<p>TLB中缓存的是刚才查过的翻译,可以认为是<code>[VPN,PPN]</code>键值对,MMU给出一个VPN,如果TLB中有键为该VPN的键值对,则TLB给出PPN值,此时TLB命中,</p>
+<p>否则TLB不命中则需要查L1或者内存页表进行地址翻译</p>
+<p>这里给出了一个假定的TLB缓存情况</p>
+<p><img src="https://raw.githubusercontent.com/DeutschBall/test/master/image-20220516233348777.png" class="lazyload placeholder" data-srcset="https://raw.githubusercontent.com/DeutschBall/test/master/image-20220516233348777.png" srcset="https://img2.baidu.com/it/u=2037979560,2772131037&fm=26&fmt=auto&gp=0.jpg" alt="image-20220516233348777"></p>
+<p>页表是单级结构,这里给出了假定的页表的情况</p>
+<p><img src="https://raw.githubusercontent.com/DeutschBall/test/master/image-20220516233340796.png" class="lazyload placeholder" data-srcset="https://raw.githubusercontent.com/DeutschBall/test/master/image-20220516233340796.png" srcset="https://img2.baidu.com/it/u=2037979560,2772131037&fm=26&fmt=auto&gp=0.jpg" alt="image-20220516233340796"></p>
+<p>高速缓存L1通过物理地址字段进行寻址,这里给出了假定的缓存情况</p>
+<p><img src="https://raw.githubusercontent.com/DeutschBall/test/master/image-20220516233523416.png" class="lazyload placeholder" data-srcset="https://raw.githubusercontent.com/DeutschBall/test/master/image-20220516233523416.png" srcset="https://img2.baidu.com/it/u=2037979560,2772131037&fm=26&fmt=auto&gp=0.jpg" alt="image-20220516233523416"></p>
+</blockquote>
+<h4 id="将虚拟地址0x03d7翻译成物理地址"><a href="#将虚拟地址0x03d7翻译成物理地址" class="headerlink" title="将虚拟地址0x03d7翻译成物理地址"></a>将虚拟地址<code>0x03d7</code>翻译成物理地址</h4><h5 id="0xA虚拟地址格式"><a href="#0xA虚拟地址格式" class="headerlink" title="0xA虚拟地址格式"></a>0xA虚拟地址格式</h5><p><img src="https://raw.githubusercontent.com/DeutschBall/test/master/image-20220516235021410.png" class="lazyload placeholder" data-srcset="https://raw.githubusercontent.com/DeutschBall/test/master/image-20220516235021410.png" srcset="https://img2.baidu.com/it/u=2037979560,2772131037&fm=26&fmt=auto&gp=0.jpg" alt="image-20220516235021410"></p>
+<h5 id="0xB地址翻译"><a href="#0xB地址翻译" class="headerlink" title="0xB地址翻译"></a>0xB地址翻译</h5><p><img src="https://raw.githubusercontent.com/DeutschBall/test/master/image-20220516235143678.png" class="lazyload placeholder" data-srcset="https://raw.githubusercontent.com/DeutschBall/test/master/image-20220516235143678.png" srcset="https://img2.baidu.com/it/u=2037979560,2772131037&fm=26&fmt=auto&gp=0.jpg" alt="image-20220516235143678"></p>
+<p>TLB命中,物理页号<code>0x0D</code>拼接页偏移得到物理地址</p>
+<p><img src="https://raw.githubusercontent.com/DeutschBall/test/master/image-20220516235504854.png" class="lazyload placeholder" data-srcset="https://raw.githubusercontent.com/DeutschBall/test/master/image-20220516235504854.png" srcset="https://img2.baidu.com/it/u=2037979560,2772131037&fm=26&fmt=auto&gp=0.jpg" alt="image-20220516235504854"></p>
+<p>只要是TLB中能找到的记录,都不会缺页,这是因为,最近的记忆会挤掉老的记忆,TLB中只要能找到,说明最近被翻译过</p>
+<div class="table-container">
+<table>
+<thead>
+<tr>
+<th>参数</th>
+<th>值</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>VPN</td>
+<td><code>0xf</code></td>
+</tr>
+<tr>
+<td>TLB索引(TLBi)</td>
+<td><code>0x3</code></td>
+</tr>
+<tr>
+<td>TLB标记(TLBt)</td>
+<td><code>0x3</code></td>
+</tr>
+<tr>
+<td>TLB命中?</td>
+<td>是</td>
+</tr>
+<tr>
+<td>缺页</td>
+<td>否</td>
+</tr>
+<tr>
+<td>PPN</td>
+<td><code>0xd</code></td>
+</tr>
+</tbody>
+</table>
+</div>
+<h5 id="0xC物理地址格式"><a href="#0xC物理地址格式" class="headerlink" title="0xC物理地址格式"></a>0xC物理地址格式</h5><div class="table-container">
+<table>
+<thead>
+<tr>
+<th>0</th>
+<th>0</th>
+<th>1</th>
+<th>1</th>
+<th>0</th>
+<th>1</th>
+<th>0</th>
+<th>1</th>
+<th>0</th>
+<th>1</th>
+<th>1</th>
+<th>1</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td></td>
+</tr>
+</tbody>
+</table>
+</div>
+<h5 id="0xD物理内存引用"><a href="#0xD物理内存引用" class="headerlink" title="0xD物理内存引用"></a>0xD物理内存引用</h5><p><img src="https://raw.githubusercontent.com/DeutschBall/test/master/image-20220517000150935.png" class="lazyload placeholder" data-srcset="https://raw.githubusercontent.com/DeutschBall/test/master/image-20220517000150935.png" srcset="https://img2.baidu.com/it/u=2037979560,2772131037&fm=26&fmt=auto&gp=0.jpg" alt="image-20220517000150935"></p>
+<p><img src="https://raw.githubusercontent.com/DeutschBall/test/master/image-20220517000501697.png" class="lazyload placeholder" data-srcset="https://raw.githubusercontent.com/DeutschBall/test/master/image-20220517000501697.png" srcset="https://img2.baidu.com/it/u=2037979560,2772131037&fm=26&fmt=auto&gp=0.jpg" alt="image-20220517000501697"></p>
+<p>缓存命中</p>
+<div class="table-container">
+<table>
+<thead>
+<tr>
+<th>参数</th>
+<th>值</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>字节偏移CO</td>
+<td><code>0x3</code></td>
+</tr>
+<tr>
+<td>缓存索引CI</td>
+<td><code>0x5</code></td>
+</tr>
+<tr>
+<td>缓存标记CT</td>
+<td><code>0xD</code></td>
+</tr>
+<tr>
+<td>缓存命中</td>
+<td>是</td>
+</tr>
+<tr>
+<td>返回的缓存字节</td>
+<td><code>0x1D</code></td>
+</tr>
+</tbody>
+</table>
+</div>
+<h3 id="多级页表的地址翻译"><a href="#多级页表的地址翻译" class="headerlink" title="多级页表的地址翻译"></a>多级页表的地址翻译</h3><h4 id="以两级页表为例"><a href="#以两级页表为例" class="headerlink" title="以两级页表为例"></a>以两级页表为例</h4><p>单级页表 的时候,一条页表项对应一个虚拟页,一张页表就可以管理整个虚拟内存的页</p>
+<p>如果虚拟地址空间更大,页更多,则页表项目更多,而页表也是存放在内存中的,如果页表也大到内存装不下该当如何?</p>
+<blockquote>
+<p>这就好比刚上大学的时候所有的<strong>学习资料</strong>都可以放在一个文件夹里</p>
+<p>但是日积月累,学习资料文件夹变得臃肿,想要找到一个文件就像大海捞针</p>
+<p>因此应该建立子文件夹,比如<code>/reverse</code>,<code>/pwn</code>,<code>/web</code>等等</p>
+<p>时间长了每个子文件夹又会臃肿,又可以根据时间或者难易程度建立子子文件夹</p>
+</blockquote>
+<p>高级页表的表项是低级页表的索引</p>
+<p><img src="https://raw.githubusercontent.com/DeutschBall/test/master/image-20220516231018326.png" class="lazyload placeholder" data-srcset="https://raw.githubusercontent.com/DeutschBall/test/master/image-20220516231018326.png" srcset="https://img2.baidu.com/it/u=2037979560,2772131037&fm=26&fmt=auto&gp=0.jpg" alt="image-20220516231018326"></p>
+<p>这里二级页表和前面的单级页表作用类似,直接索引虚拟页,但是也有些许区别</p>
+<blockquote>
+<p>单级页表结构中只有一个页表,第i个页表项就指向第i个虚拟页</p>
+</blockquote>
+<p>这里二级页表有多个,每个二级页表只对应虚拟内存中的连续的1024个虚拟页,二级页表的表项都是从0开始编号的但是虚拟内存中的页是统一编号的</p>
+<p>一级页表的作用是索引二级页表</p>
+<p>一级页表的表项,其有效位标志着对应二级页表对应的1024个虚拟页都没有被缓存过</p>
+<blockquote>
+<p>但凡这1024个虚拟页中有一个被缓存,其在二级页表中的表项的有效位为1,则该二级页表对应一级页表中的表项有效位就得是1</p>
+</blockquote>
+<p>只有一级页表是常驻内存的,只有有效位为1表项对应的二级页表才会被搬进内存,不用的时候还得被挤出去</p>
+<h4 id="k级页表的地址翻译"><a href="#k级页表的地址翻译" class="headerlink" title="k级页表的地址翻译"></a>k级页表的地址翻译</h4><p><img src="https://raw.githubusercontent.com/DeutschBall/test/master/image-20220516231949258.png" class="lazyload placeholder" data-srcset="https://raw.githubusercontent.com/DeutschBall/test/master/image-20220516231949258.png" srcset="https://img2.baidu.com/it/u=2037979560,2772131037&fm=26&fmt=auto&gp=0.jpg" alt="image-20220516231949258"></p>
+<p>一级页表表项中存放的是二级页表的索引,二级页表表项中存放的是三级页表的索引,以此类推,直到最低级页表,其表项才是物理地址,</p>
+<p>从高级页表一直索引到低级页表的过程中,但凡有一个页表项的有效位为0则引发缺页</p>
+<p>缺页也是逐级修复的,</p>
+<p>只有最低级页表项才存放实际的物理页号,然后物理页号和页偏移拼起来组成物理地址</p>
+<p>可气的是,虽然有这么多级,但是总有人能设计得它的速度能和单级页表媲美</p>
+<h3 id="英特尔酷睿i7-Linux内存系统地址翻译"><a href="#英特尔酷睿i7-Linux内存系统地址翻译" class="headerlink" title="英特尔酷睿i7/Linux内存系统地址翻译"></a>英特尔酷睿i7/Linux内存系统地址翻译</h3><p>多级页表结构,每个进程允许有自己私有的页表层次结构</p>
+<p>页大小采用4KB,四级页表结构</p>
+<p>这里第一次见到”CR3控制寄存器”,其作用是指向一级页表的起始位置,CR3是每个进程上下文的一部分,每个进程都有自己独立的页表结构,执行A进程时CR3就应该指向A进程的一级页表起始位置</p>
+<blockquote>
+<p>一级页表可以有多个吗?</p>
+<p>还是说只有一个一级页表,管理所有的二级页表,然后进程从二级页表开始有自己的独立地址空间</p>
+</blockquote>
+<p><img src="https://raw.githubusercontent.com/DeutschBall/test/master/image-20220517073701065.png" class="lazyload placeholder" data-srcset="https://raw.githubusercontent.com/DeutschBall/test/master/image-20220517073701065.png" srcset="https://img2.baidu.com/it/u=2037979560,2772131037&fm=26&fmt=auto&gp=0.jpg" alt="image-20220517073701065"></p>
+<p>高级页表(除了直接管理虚拟内存的最低级页表),其结构如下:</p>
+<p><img src="https://raw.githubusercontent.com/DeutschBall/test/master/image-20220517073820824.png" class="lazyload placeholder" data-srcset="https://raw.githubusercontent.com/DeutschBall/test/master/image-20220517073820824.png" srcset="https://img2.baidu.com/it/u=2037979560,2772131037&fm=26&fmt=auto&gp=0.jpg" alt="image-20220517073820824"></p>
+<p>最低级页表结构如下</p>
+<p><img src="https://raw.githubusercontent.com/DeutschBall/test/master/image-20220517073849861.png" class="lazyload placeholder" data-srcset="https://raw.githubusercontent.com/DeutschBall/test/master/image-20220517073849861.png" srcset="https://img2.baidu.com/it/u=2037979560,2772131037&fm=26&fmt=auto&gp=0.jpg" alt="image-20220517073849861"></p>
+<h2 id="Linux虚拟内存系统"><a href="#Linux虚拟内存系统" class="headerlink" title="Linux虚拟内存系统"></a>Linux虚拟内存系统</h2><p>进程的虚拟内存</p>
+<p><img src="https://raw.githubusercontent.com/DeutschBall/test/master/image-20220517074643634.png" class="lazyload placeholder" data-srcset="https://raw.githubusercontent.com/DeutschBall/test/master/image-20220517074643634.png" srcset="https://img2.baidu.com/it/u=2037979560,2772131037&fm=26&fmt=auto&gp=0.jpg" alt="image-20220517074643634"></p>
+<p>进程虚拟内存部分(用户栈向下)是进程的独立的虚拟地址空间,</p>
+<p>内核虚拟空间被所有进程共享,共享的实现是通过页表的一些表项指向相同的物理地址,然后页表项上标明内核虚拟内存只读</p>
+<p>共享库等技术的实现也是基于虚拟内存的,但都是后话了</p>
+<h3 id="Linux虚拟内存区域组成"><a href="#Linux虚拟内存区域组成" class="headerlink" title="Linux虚拟内存区域组成"></a>Linux虚拟内存区域组成</h3><p>虚拟内存分段,被分段的虚拟内存区域就一定已经被分配了</p>
+<p>只要是存在的虚拟页就一定属于某个段,</p>
+<p>未使用的虚拟页不会被记录,没有页表指向该位置</p>
+<p><img src="https://raw.githubusercontent.com/DeutschBall/test/master/image-20220517080056415.png" class="lazyload placeholder" data-srcset="https://raw.githubusercontent.com/DeutschBall/test/master/image-20220517080056415.png" srcset="https://img2.baidu.com/it/u=2037979560,2772131037&fm=26&fmt=auto&gp=0.jpg" alt="image-20220517080056415"></p>
+<p><code>task_struct</code>指向内核运行该进程的所有信息</p>
+<blockquote>
+<p>PID,指向用户栈的指针rsp,可执行目标文件名字,程序计数器rip</p>
+</blockquote>
+<p><code>mm_struct</code>描述虚拟内存的当前状态,其中的两个字段<code>pgd,mmap</code></p>
+<p><code>pgd</code>指向一级页表的基址</p>
+<p><code>mmap</code>指向<code>vm_area_structs</code>链表,该链表的每一个链表项都描述了当前虚拟内存地址空间的一个段.</p>
+<blockquote>
+<p>每个<code>vm_area_struct</code>链表项都有五部分组成</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">vm_start:段起始地址</span><br><span class="line">vm_end:段结束地址</span><br><span class="line">vm_prot:段的读写权限</span><br><span class="line">vm_flags:段共享或者进程私有标志等信息</span><br><span class="line">vm_next:指向下一个段</span><br></pre></td></tr></table></figure>
+</blockquote>
+<p>当该进程被执行的时候,pgd会被放到<code>CR3</code>寄存器中</p>
+<h3 id="Linux缺页异常处理"><a href="#Linux缺页异常处理" class="headerlink" title="Linux缺页异常处理"></a>Linux缺页异常处理</h3><p><img src="https://raw.githubusercontent.com/DeutschBall/test/master/image-20220517081116670.png" class="lazyload placeholder" data-srcset="https://raw.githubusercontent.com/DeutschBall/test/master/image-20220517081116670.png" srcset="https://img2.baidu.com/it/u=2037979560,2772131037&fm=26&fmt=auto&gp=0.jpg" alt="image-20220517081116670"></p>
+<p>CPU指定一个虚拟地址,然后去<code>vm_area_struct</code>各个表项去查该虚拟地址是否属于$[vm_{start},vm_{end}]$之间,如果各个链表项都不包含该地址则说明该地址没有被分配,发生段错误</p>
+<p>如果没有发生段错误则检查该内存访问的性质,是读还是写,如果对只读区域进行写入则报告保护异常</p>
+<p>上述两种情况都通过了则表明这是真的缺页了,使用某种页调度算法牺牲一个物理页,用这个缺页挤掉</p>
+<h2 id="内存映射"><a href="#内存映射" class="headerlink" title="内存映射"></a>内存映射</h2><p>啥是内存映射呢?</p>
+<p>以共享虚拟内存举例</p>
+<p>两个进程的页表相互独立,但是可以指向物理内存中的同一区域,比如共享库</p>
+<p><strong>通过将一个虚拟内存区与磁盘上一个对象关联起来,以初始化这个虚拟内存区域的内容,这个过程称为内存映射</strong></p>
+<h3 id="共享对象"><a href="#共享对象" class="headerlink" title="共享对象"></a>共享对象</h3><p>如果同时打开多个终端bash,它们会共享同一块只读代码区.多个程序调用库函数printf,但是实际最后调用到的printf只在物理内存中唯一存在</p>
+<p>通过一个例子说明共享对象的过程</p>
+<p>一开始时共享对象也只是虚拟内存上的一些页或者说段,尚未被任何进程映射.</p>
+<p>现在进程1将共享对象映射到自己虚拟内存中的某个位置,并在物理内存中建立了物理页</p>
+<p><img src="https://raw.githubusercontent.com/DeutschBall/test/master/image-20220517083739843.png" class="lazyload placeholder" data-srcset="https://raw.githubusercontent.com/DeutschBall/test/master/image-20220517083739843.png" srcset="https://img2.baidu.com/it/u=2037979560,2772131037&fm=26&fmt=auto&gp=0.jpg" alt="image-20220517083739843"></p>
+<p>现在进程2也想映射共享对象,内核判断进程1已经映射过该共享对象,即共享对象已经存在于物理内存中,那么只需让进程2的相关页表项指向该共享对象在内存中快照的物理页</p>
+<p><img src="https://raw.githubusercontent.com/DeutschBall/test/master/image-20220517084031704.png" class="lazyload placeholder" data-srcset="https://raw.githubusercontent.com/DeutschBall/test/master/image-20220517084031704.png" srcset="https://img2.baidu.com/it/u=2037979560,2772131037&fm=26&fmt=auto&gp=0.jpg" alt="image-20220517084031704"></p>
+<p><strong>私有写时复制对象</strong></p>
+<p>什么时候一个对象不得不每个进程分别映射到不同的物理内存了,什么时候才会真的在物理内存上开两个对象的空间</p>
+<p>在两个进程都没有尝试向私有对象写东西时,私有对象表现得和共享对象没有区别,物理内存中也只存在一份拷贝,因为这足以满足读的要求</p>
+<p><img src="https://raw.githubusercontent.com/DeutschBall/test/master/image-20220517084442357.png" class="lazyload placeholder" data-srcset="https://raw.githubusercontent.com/DeutschBall/test/master/image-20220517084442357.png" srcset="https://img2.baidu.com/it/u=2037979560,2772131037&fm=26&fmt=auto&gp=0.jpg" alt="image-20220517084442357"></p>
+<p>当其中一个进程试图写私有对象时,由于要保证进程的虚拟地址空间独立,因此不得不将该私有对象做一个拷贝,在内存中存放两个私有对象,两个进程的页表项目各自挑一个指向</p>
+<p><img src="https://raw.githubusercontent.com/DeutschBall/test/master/image-20220517084658157.png" class="lazyload placeholder" data-srcset="https://raw.githubusercontent.com/DeutschBall/test/master/image-20220517084658157.png" srcset="https://img2.baidu.com/it/u=2037979560,2772131037&fm=26&fmt=auto&gp=0.jpg" alt="image-20220517084658157"></p>
+<h3 id="fork函数"><a href="#fork函数" class="headerlink" title="fork函数"></a>fork函数</h3><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">pid_t fork(void);//子进程返回0,父进程返回子进程的pid,出错返回-1</span><br></pre></td></tr></table></figure>
+<blockquote>
+<p>1.子进程获得一个pid</p>
+<p>2.子进程得到与父进程<strong>一模一样</strong>的<strong>用户级</strong>虚拟地址空间<strong>拷贝</strong></p>
+<blockquote>
+<p>用户级虚拟地址空间包括</p>
+<p>代码段</p>
+<p>数据段</p>
+<p>堆</p>
+<p>共享库</p>
+<p>用户栈</p>
+</blockquote>
+<p>3.子进程获得与父进程任何打开的文件描述符的副本</p>
+</blockquote>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;unistd.h&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;stdio.h&gt;</span></span></span><br><span class="line"><span class="type">int</span> global=<span class="number">10</span>;<span class="comment">//观察父子进程是否有相同的.data节拷贝</span></span><br><span class="line"><span class="type">int</span> <span class="title function_">main</span><span class="params">()</span>&#123;</span><br><span class="line">    <span class="type">int</span> local=<span class="number">20</span>;<span class="comment">//观察父子进程是否有相同的栈区拷贝</span></span><br><span class="line">    <span class="built_in">printf</span>(<span class="string">&quot;actived\n&quot;</span>);<span class="comment">//观察fork前的部分是否会被子进程执行</span></span><br><span class="line">    <span class="type">pid_t</span> pid=fork();</span><br><span class="line">    </span><br><span class="line">    <span class="keyword">if</span>(pid==<span class="number">0</span>)&#123;<span class="comment">//根据pid判断是父进程还是子进程,fork对父进程返回子进程的pid,不为0,如果为0则说明当前进程为子进程</span></span><br><span class="line">        <span class="built_in">printf</span>(<span class="string">&quot;child process,%d,%d\n&quot;</span>,global++,local++);<span class="comment">//打印后自增的目的是观察父子进程是否有独立的虚拟地址空间</span></span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">else</span>&#123;</span><br><span class="line">        <span class="built_in">printf</span>(<span class="string">&quot;father process,%d,%d\n&quot;</span>,global++,local++);</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">return</span> <span class="number">0</span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>运行结果:</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">actived					<span class="comment">#fork函数前只有父进程,fork之后才会两个进程都执行</span></span><br><span class="line">father process,10,20	 </span><br><span class="line">child process,10,20		<span class="comment">#子进程获得父进程虚拟地址空间的拷贝,但是两者独立,父进程地址空间内的变量自增不会影响子进程的地址空间</span></span><br></pre></td></tr></table></figure>
+<p>子进程和父进程都打印到控制台表明两者共享文件描述符1(标准输出)</p>
+<p><img src="https://raw.githubusercontent.com/DeutschBall/test/master/image-20220517091716338.png" class="lazyload placeholder" data-srcset="https://raw.githubusercontent.com/DeutschBall/test/master/image-20220517091716338.png" srcset="https://img2.baidu.com/it/u=2037979560,2772131037&fm=26&fmt=auto&gp=0.jpg" alt="image-20220517091716338"></p>
+<h2 id="内存动态分配"><a href="#内存动态分配" class="headerlink" title="内存动态分配"></a>内存动态分配</h2><p>动态内存分配器(dynamic memory allocator),维护进程的堆区</p>
+<p><img src="https://raw.githubusercontent.com/DeutschBall/test/master/image-20220517093706745.png" class="lazyload placeholder" data-srcset="https://raw.githubusercontent.com/DeutschBall/test/master/image-20220517093706745.png" srcset="https://img2.baidu.com/it/u=2037979560,2772131037&fm=26&fmt=auto&gp=0.jpg" alt="image-20220517093706745"></p>
+<p>堆顶指针为brk,堆的生长方向与栈相反,堆从低地址向高地址生长,栈从高地址向低地址生长</p>
+<p>都是小端模式</p>
+<p>分配器将堆看成一组大小不同的块集合,每个块是一个连续的虚拟内存片</p>
+<p>已分配的块就是正在被使用的块,空闲块就是尚未被使用的块,可以被分配</p>
+<p>根据<strong>谁来释放分配块</strong>,分配器可以分成两种</p>
+<p><strong>显式分配器</strong>:比如C语言的malloc和free,C++的new和delete,要求程序员手动释放分配块</p>
+<p><strong>隐式分配器</strong>:分配器自动回收不再使用的分配块,因此隐式分配器又叫垃圾收集器,比如Java中的分配器</p>
+<p>关于分配器的实现,这个实验是一定要做到的,但不是现在</p>
+
+      </div>
+      <div class="post-tags-categories">
+        
+        <div class="tags">
+          
+            <a href="/tags/CSAPP/" class="">
+              CSAPP
+            </a>
+          
+        </div>
+        
+      </div>
+      
+    </article>
+    <!-- 上一篇文章和下一篇文章 -->
+    
+      <!-- 文章详情页的上一页和下一页 -->
+<div class="post-nav">
+
+
+
+
+
+  
+  <div class="post-nav-next post-nav-item">
+    <div class="post-nav-img" style="background-size: cover; 
+      background-position: center center;">
+      <img class="lazyload lazyload placeholder" src="/medias/3.jpg" class="lazyload placeholder" data-srcset="/medias/3.jpg" srcset="https://img2.baidu.com/it/u=2037979560,2772131037&fm=26&fmt=auto&gp=0.jpg" src="" alt="">
+    </div>
+    <a href="/2022/05/07/datastruct/" class="post-nav-link">
+      <div class="title">
+        Next: <i class="fas fa-angle-right"></i>
+        <div class="title-text">数据结构在汇编语言下的表现</div>
+      </div>
+      <!-- <div class="content">
+        数据结构在汇编语言下的表现数组栈上数组main.c
+123456789101112void func()&#123;  
+      </div> -->
+    </a>
+  </div>
+
+</div>
+
+    
+    
+
+    <!-- 打赏 -->
+    
+
+    <!-- 分享 -->
+    
+      <!-- https://github.com/overtrue/share.js -->
+<!-- 文章详情页的分享 -->
+<div class="social-share" data-sites="twitter,facebook,google,qq,qzone,wechat,weibo,douban,linkedin" data-wechat-qrcode-helper="<p>微信扫一扫即可分享！</p>"></div>
+
+<script src="/js/shareJs/social-share.min.js"></script>
+</script>
+
+<style>
+  .social-share {
+    margin: 20px 0;
+  }
+</style>
+
+
+    
+    
+    <!-- 评论 -->
+    <!-- 评论 -->
+
+  <div id="myComment">
+    
+      
+<section id="comments" style="padding: 1em; margin: 15px auto;"
+	class="animated bounceInUp">
+	<div id="vcomment" class="comment"></div>
+</section>
+<style>
+	#comments {
+		background: rgba(255,255,255,0.9);
+	}
+	#veditor {
+		background-image: url('https://raw.githubusercontent.com/DeutschBall/test/master/R.3c3e443dfe9ddbddc93730c482ed0461');
+		background-size: contain;
+		background-repeat: no-repeat;
+		background-position: right;
+		background-color: rgba(255, 255, 255, 0);
+		resize: vertical;
+	}
+	#veditor:focus{
+		background-position-y: 200px;
+		transition: all 0.2s ease-in-out 0s;
+	}
+	#vcomment .vcards .vcard .vh .vhead .vtag.vvisitor {
+		background-color: #42b983;
+	}
+	.v[data-class=v] .vbtn:active, .v[data-class=v] .vbtn:hover {
+		color: #42b983;
+		border-color: #42b983;
+	}
+	#vcomment .vcards .vcard .vhead .vsys i {
+		display: none;
+	}
+	/* 底部valine链接 */
+	#vcomment .vpower {
+		display: none;
+	}
+	
+	/* 底下注释是修改 名称和邮箱和网址输入框的样式 */
+	/* #vcomment .vheader {
+		display: flex;
+		justify-content: space-around;
+	}
+	
+	#vcomment .vheader .vnick {
+		width: 31%;
+		border: 2px solid #dedede;
+		padding-left: 10px;
+		padding-right: 10px;
+		border-radius: 5px
+	}
+
+	#vcomment .vheader .vmail {
+		width: 31%;
+		border: 2px solid #dedede;
+		padding-left: 10px;
+		padding-right: 10px;
+		border-radius: 5px
+	}
+
+	#vcomment .vheader .vlink {
+		width: 31%;
+		border: 2px solid #dedede;
+		padding-left: 10px;
+		padding-right: 10px;
+		border-radius: 5px
+	} */
+
+	img.vimg {
+		transition: all 1s;
+		/* 头像旋转时间为 1s */
+	}
+
+	img.vimg:hover {
+		transform: rotate(360deg);
+		-webkit-transform: rotate(360deg);
+		-moz-transform: rotate(360deg);
+		-o-transform: rotate(360deg);
+		-ms-transform: rotate(360deg);
+	}
+
+	#vcomment .vcards .vcard {
+		padding: 15px 20px 0 20px;
+		border-radius: 10px;
+		margin-bottom: 15px;
+		box-shadow: 0 0 4px 1px rgba(0, 0, 0, .12);
+		transition: all .3s
+	}
+
+	#vcomment .vcards .vcard:hover {
+		box-shadow: 0 0 8px 3px rgba(0, 0, 0, .12)
+	}
+
+	#vcomment .vcards .vcard .vh .vcard {
+		border: none;
+		box-shadow: none;
+	}
+</style>
+    
+  </div>
+
+<!-- comment script in themes\hexo-theme-bamboo\layout\_partial\scripts\index.ejs -->
+
+
+  </div>
+
+  <!-- 目录 -->
+  <!-- 文章详情页右侧目录 -->
+
+  <div class="toc-aside">
+    <div class="toc-main">
+      <div class="toc-aside-title">
+        <i class="fas fa-list-ul" aria-hidden="true"></i><span>catalog</span>
+        
+          <div class="toc-open-close">catalog</div>
+        
+      </div>
+      <div class="toc-content">
+        <div class="toc"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 手机端目录按钮 -->
+  <div id="toc-mobile-btn">
+    <i class="fas fa-list-ul" aria-hidden="true"></i>
+  </div>
+
+
+<script>
+  function closeToc(init) {
+    $(".toc-aside").css({'width': 0, 'padding': 0, 'transition': init ?  'noe' : 'width 0.3s' });
+    $(".toc-content").css({'width': 0});
+    $(".toc-aside-title span, .toc-aside-title i").css({'display': 'none'});
+    $(".main-content").css({'width': '75%', 'margin': '10px auto'});
+  };
+  function openToc() {
+    $(".main-content").css({'width': '65%', 'margin-right': '10px', 'margin-left': 'calc(35% - 350px)'});
+    $(".toc-aside").css({'width': '300px', 'padding': '0 10px', 'transition': 'width 0.3s'});
+    $(".toc-content").css({'width': '300px'});
+    $(".toc-aside-title span, .toc-aside-title i").css({'display': 'inline-block'});
+  }
+  function openBtnClickFn () {
+    let openOrCloseBtn = $('.toc-aside .toc-aside-title .toc-open-close');
+    let open = eval('' || 'true');
+    openOrCloseBtn.click(function() {
+      if (open) {
+        closeToc();
+        open = false;
+      } else {
+        openToc();
+        open = true;
+      }
+    });
+  };
+  openBtnClickFn();
+  initCloseTocWidth(true);
+
+  function initCloseTocWidth(init) {
+    if (window.innerWidth >= 992) {
+      let isClose = false;
+      isClose && closeToc(init)
+    }
+  }
+
+  document.addEventListener('pjax:complete', function () {
+    $(".toc-aside").css({'transition': 'no'});
+  })
+  document.addEventListener('pjax:complete', function () {
+    openBtnClickFn();
+  })
+  
+</script>
+
+  <!-- 图片放大 Wrap images with fancybox support -->
+  <script src="/js/wrapImage.js"></script>
+</div>
+
+<!-- 文章详情页背景图 -->
+<div id="appBgSwiper" style="position: fixed;left: 0;top: 0;width: 100%;height: 100%;z-index: -2;"
+	:style="{'background-color': bgColor ? bgColor : 'transparent'}">
+	<transition-group tag="ul" :name="names">
+		<li v-for='(image,index) in img' :key='index' v-show="index === mark" class="bg-swiper-box">
+			<img :src="image" class="bg-swiper-img no-lazy">
+		</li>
+	</transition-group>
+</div>
+<script>
+	var vm = new Vue({
+		el: '#appBgSwiper',
+		data: {
+			names: '' || 'fade' || 'fade', // translate-fade fade
+			mark: 0,
+			img: [],
+			bgColor: '',
+			time: null
+		},
+		methods: {   //添加方法
+			change(i, m) {
+				if (i > m) {
+					// this.names = 'fade';
+				} else if (i < m) {
+					// this.names = 'fade';
+				} else {
+					return;
+				}
+				this.mark = i;
+			},
+			prev() {
+				// this.names = 'fade';
+				this.mark--;
+				if (this.mark === -1) {
+					this.mark = 3;
+					return
+				}
+			},
+			next() {
+				// this.names = 'fade';
+				this.mark++;
+				if (this.mark === this.img.length) {
+					this.mark = 0;
+					return
+				}
+			},
+			autoPlay() {
+				// this.names = 'fade';
+				this.mark++;
+				if (this.mark === this.img.length) {
+					this.mark = 0;
+					return
+				}
+			},
+			play() {
+				let bgImgDelay = '' || '180000'
+				let delay = parseInt(bgImgDelay) || 180000;
+				this.time = setInterval(this.autoPlay, delay);
+			},
+			enter() {
+				clearInterval(this.time);
+			},
+			leave() {
+				this.play();
+			}
+		},
+		created() {
+			this.play()
+		},
+		beforeDestroy() {
+			clearInterval(this.time);
+		},
+		mounted() {
+			let prop = '' || '';
+			let isImg = prop.includes('.bmp') || prop.includes('.jpg') || prop.includes('.png') || prop.includes('.tif') || prop.includes('.gif') || prop.includes('.pcx') || prop.includes('.tga') || prop.includes('.exif') || prop.includes('.fpx') || prop.includes('.psd') || prop.includes('.cdr') || prop.includes('.pcd') || prop.includes('.dxf') || prop.includes('.ufo') || prop.includes('.eps') || prop.includes('.ai') || prop.includes('.raw') || prop.includes('.WMF') || prop.includes('.webp') || prop.includes('.jpeg') || prop.includes('http://') || prop.includes('https://')
+			if (isImg) {
+				let img = prop.split(',');
+				let configRoot = '/'
+				let arrImg = [];
+				img.forEach(el => {
+					var Expression = /http(s)?:\/\/([\w-]+\.)+[\w-]+(\/[\w- .\/?%&=]*)?/;
+					var objExp = new RegExp(Expression);
+
+					if (objExp.test(el)) {
+						// http or https
+						arrImg.push(el);
+					} else {
+						// 非http or https开头
+						// 本地文件
+						let firstStr = el.charAt(0);
+						if (firstStr == '/') {
+							el = el.substr(1); // 删除第一个字符 '/',因为 configRoot最后一个字符为 /
+						}
+						el = configRoot + el;
+						arrImg.push(el);
+					}
+				})
+				this.img = arrImg;
+			} else {
+				this.bgColor = prop;
+			}
+		}
+	})
+</script>
+
+<style>
+	.bg-swiper-box {
+		position: absolute;
+		display: block;
+		width: 100%;
+		height: 100%;
+	}
+
+	.bg-swiper-img {
+		object-fit: cover;
+		width: 100%;
+		height: 100%;
+	}
+</style>
+
+
+  <script>
+  // https://github.com/theme-next/hexo-theme-next/blob/master/layout/_third-party/math/mathjax.swig
+  if (typeof MathJax === 'undefined') {
+    window.MathJax = {
+      loader: {
+        source: {
+          '[tex]/amsCd': '[tex]/amscd',
+          '[tex]/AMScd': '[tex]/amscd'
+        }
+      },
+      tex: {
+        inlineMath: {'[+]': [['$', '$']]},
+        tags: 'ams'
+      },
+      options: {
+        renderActions: {
+          findScript: [10, doc => {
+            document.querySelectorAll('script[type^="math/tex"]').forEach(node => {
+              const display = !!node.type.match(/; *mode=display/);
+              const math = new doc.options.MathItem(node.textContent, doc.inputJax[0], display);
+              const text = document.createTextNode('');
+              node.parentNode.replaceChild(text, node);
+              math.start = {node: text, delim: '', n: 0};
+              math.end = {node: text, delim: '', n: 0};
+              doc.math.push(math);
+            });
+          }, '', false],
+          insertedScript: [200, () => {
+            document.querySelectorAll('mjx-container').forEach(node => {
+              let target = node.parentNode;
+              if (target.nodeName.toLowerCase() === 'li') {
+                target.parentNode.classList.add('has-jax');
+              }
+            });
+          }, '', false]
+        }
+      }
+    };
+    (function () {
+      var script = document.createElement('script');
+      script.src = 'https://cdn.jsdelivr.net/npm/mathjax@3.0/es5/tex-mml-chtml.js';
+      script.defer = true;
+      document.head.appendChild(script);
+    })();
+  } else {
+    // 文章章节标题不能为 “MathJax” ，否则会报错。
+    MathJax.startup.document.state(0);
+    MathJax.texReset();
+    MathJax.typeset();
+  }
+</script>
+
+
+
+
+  <script>
+  function loadMermaid() {
+    if (document.getElementsByClassName('mermaid').length) {
+      if (window.mermaidJsLoad) mermaid.init()
+      else {
+        loadScript('https://cdn.jsdelivr.net/npm/mermaid/dist/mermaid.min.js').then(() => {
+          window.mermaidJsLoad = true
+          mermaid.initialize({
+            theme: 'default',
+          })
+          if ('true') {
+            mermaid.init();
+          }
+        })
+      }
+    }
+  };
+  document.addEventListener("DOMContentLoaded", function () {
+    loadMermaid();
+  })
+
+  document.addEventListener('pjax:complete', function () {
+    loadMermaid();
+  })
+  
+</script>
+
+
+      </main>
+    </div>
+
+    <!-- 页脚 -->
+    
+  
+  <div class="footer bg-color">
+    <div class="footer-main">
+      
+        
+          <div class="link">
+            
+          </div>
+        
+      
+        
+          <div class="footer-copyright">
+            <p>Copyright © 2019 - 2020 <a target="_blank" rel="noopener" href="https://github.com/yuang01">Deutschball</a> | Powered by <a target="_blank" rel="noopener" href="https://hexo.io/zh-cn/docs/">Deutschball</a> | Theme <a target="_blank" rel="noopener" href="https://github.com/yuang01/theme">Bamboo</a> </p>
+
+          </div>
+        
+      
+        
+          
+        
+      
+        
+          <div class="footer-custom">
+            
+          </div>
+        
+      
+    </div>
+  </div>
+
+
+
+    <!-- 渲染暗黑按钮 -->
+    
+    <!-- 渲染回到顶部按钮 -->
+    
+      <div class="goTop top-btn-color" pointer>
+  <i class="fas fa-arrow-up" aria-hidden="true"></i>
+</div>
+<script src="/js/goTop.js"></script>
+
+    
+    <!-- 渲染左下角音乐播放器 -->
+    
+      <link rel="stylesheet" href="/js/aplayer/APlayer@1.10.1.min.css">
+<style>
+.aplayer .aplayer-lrc p {
+  
+  font-size: 12px;
+  font-weight: 700;
+  line-height: 16px !important;
+}
+
+.aplayer .aplayer-lrc p.aplayer-lrc-current {
+  
+  font-size: 15px;
+  color: #42b983;
+}
+
+
+.aplayer.aplayer-fixed.aplayer-narrow .aplayer-body {
+  left: -66px !important;
+}
+
+.aplayer.aplayer-fixed.aplayer-narrow .aplayer-body:hover {
+  left: 0px !important;
+}
+
+
+</style>
+<meting-js  
+  class=""
+  server="netease"
+  type="song"
+  id="1886422838"
+  fixed='true'
+  autoplay='true'
+  theme='#42b983'
+  loop='one'
+  order='random'
+  preload='auto'
+  volume='0.1'
+  list-folded='true'
+>
+</meting-js>
+
+<!-- <style>
+  #aplayer {
+    position: fixed;
+    left: 0;
+    bottom: 300px;
+  }
+</style> -->
+<script src="https://cdn.jsdelivr.net/npm/aplayer@1.10.1/dist/APlayer.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/meting@2/dist/Meting.min.js"></script>
+    
+
+    <!-- 图片放大 -->
+    
+      <script src="/js/fancybox/jquery.fancybox.min.js"></script>
+    
+
+    <!-- 百度解析 -->
+    <!-- Baidu Analytics -->
+
+    <!-- Baidu Push -->
+
+<script>
+    (function () {
+        var bp = document.createElement('script');
+        var curProtocol = window.location.protocol.split(':')[0];
+        if (curProtocol === 'https') {
+            bp.src = 'https://zz.bdstatic.com/linksubmit/push.js';
+        } else {
+            bp.src = 'http://push.zhanzhang.baidu.com/push.js';
+        }
+        var s = document.getElementsByTagName("script")[0];
+        s.parentNode.insertBefore(bp, s);
+    })();
+</script>
+
+    
+    <!-- 背景彩带 -->
+    
+      <script type="text/javascript" size="100" alpha='0.4' zIndex="-1" src="/js/ribbon.min.js"></script>
+    
+
+    <script src="/js/utils/index.js"></script>
+    <script src="/js/app.js"></script>
+    
+    <!-- 文章目录所需js -->
+<link href="/js/tocbot/tocbot.css" rel="stylesheet">
+<script src="/js/tocbot/tocbot.min.js"></script>
+
+<script>
+  var headerEl = 'h2, h3, h4, h5, h6',  //headers 
+    content = '.post-detail',//文章容器
+    idArr = {};  //标题数组以确定是否增加索引id
+  //add #id
+  var option = {
+    // Where to render the table of contents.
+    tocSelector: '.toc',
+    // Where to grab the headings to build the table of contents.
+    contentSelector: content,
+    // Which headings to grab inside of the contentSelector element.
+    headingSelector: headerEl,
+    scrollSmooth: true,
+    scrollSmoothOffset: -80,
+    headingsOffset: -($(window).height() * 0.4 - 45),
+    positionFixedSelector: '.toc-main',
+    positionFixedClass: 'is-position-fixed',
+    fixedSidebarOffset: 'auto',
+    activeLinkClass: 'is-active-link',
+    // onClick: function (e) {},
+  }
+  if ($('.toc').length > 0) {
+
+    $(content).children(headerEl).each(function () {
+      //去除空格以及多余标点
+      var headerId = $(this).text().replace(/[\s|\~|`|\!|\@|\#|\$|\%|\^|\&|\*|\(|\)|\_|\+|\=|\||\|\[|\]|\{|\}|\;|\:|\"|\'|\,|\<|\.|\>|\/|\?|\：|\，|\。]/g, '');
+
+      headerId = headerId.toLowerCase();
+      if (idArr[headerId]) {
+        //id已经存在
+        $(this).attr('id', headerId + '-' + idArr[headerId]);
+        idArr[headerId]++;
+      }
+      else {
+        //id未存在
+        idArr[headerId] = 1;
+        $(this).attr('id', headerId);
+      }
+    });
+
+    document.addEventListener("DOMContentLoaded", function () {
+      tocbot.init(option);
+      mobileTocClick();
+    });
+
+  }
+
+  window.tocScrollFn = function () {
+    return bamboo.throttle(function () {
+      findHeadPosition();
+    }, 100)()
+  }
+  window.addEventListener('scroll', tocScrollFn);
+
+  const findHeadPosition = function (top) {
+    if ($('.toc-list').length <= 0) {
+      return false;
+    }
+    setTimeout(() => {  // or DOMContentLoaded 
+      autoScrollToc();
+    }, 0);
+  }
+
+  const autoScrollToc = function () {
+    const $activeItem = document.querySelector('.is-active-link');
+    const $cardToc = document.querySelector('.toc-content');
+    const activePosition = $activeItem.getBoundingClientRect().top
+    const sidebarScrollTop = $cardToc.scrollTop
+    if (activePosition > (document.documentElement.clientHeight - 100)) {
+      $cardToc.scrollTop = sidebarScrollTop + 150
+    }
+    if (activePosition < 100) {
+      $cardToc.scrollTop = sidebarScrollTop - 150
+    }
+  }
+
+  document.addEventListener('pjax:send', function () {
+    if ($('.toc').length) {
+      tocbot.destroy();
+    }
+  });
+
+  document.addEventListener('pjax:complete', function () {
+    if ($('.toc').length) {
+      tocbot.init(option);
+      mobileTocClick();
+    }
+  });
+  
+  // 手机端toc按钮点击出现目录
+  const mobileTocClick = function () {
+    const $cardTocLayout = document.getElementsByClassName('toc-aside')[0];
+    const $cardToc = $cardTocLayout.getElementsByClassName('toc-content')[0];
+    let right = '45px';
+    if (window.innerWidth >= 551 && window.innerWidth <= 992) {
+      right = '100px'
+    }
+    const mobileToc = {
+      open: () => {
+        $cardTocLayout.style.cssText = 'animation: toc-open .3s; opacity: 1; right: ' + right
+      },
+
+      close: () => {
+        $cardTocLayout.style.animation = 'toc-close .2s'
+        setTimeout(() => {
+          $cardTocLayout.style.cssText = "opacity:''; animation: ''; right: ''"
+        }, 100)
+      }
+    }
+    document.getElementById('toc-mobile-btn').addEventListener('click', () => {
+      if (window.getComputedStyle($cardTocLayout).getPropertyValue('opacity') === '0') mobileToc.open()
+      else mobileToc.close()
+    })
+
+    $cardToc.addEventListener('click', (e) => {
+      if (window.innerWidth < 992) { // 小于992px的时候
+        mobileToc.close()
+      }
+    })
+  }
+</script>
+
+<style>
+  .is-position-fixed {
+    position: sticky !important;
+    top: 74px;
+  }
+
+  .toc-main ul {
+    counter-reset: show-list;
+  }
+
+  .toc-main ul li::before {
+    content: counter(item)".";
+    display: block;
+    position: absolute;
+    left: 12px;
+    top: 0;
+  }
+</style> 
+
+<!-- 设置导航背景 -->
+<script>
+  let setHeaderClass = () => {
+    const headerMenuTransparent = true;
+    if (!headerMenuTransparent) { return; }
+    const nav = $('#navHeader');
+    const navTop = nav.outerHeight();
+    const winTop = $(window).scrollTop();
+    if(winTop > navTop) {
+      nav.addClass('header-bg-color');
+    }
+    else {
+      nav.removeClass('header-bg-color');
+    }
+  };
+
+  let scrollCollect = () => {
+    return bamboo.throttle(function (e) {
+      setHeaderClass();
+    }, 200)()
+  }
+
+  let initHeaderBg = () => {
+    setHeaderClass();
+  }
+
+  setHeaderClass();
+  window.addEventListener('scroll', scrollCollect);
+
+  document.addEventListener('pjax:send', function () {
+    window.removeEventListener('scroll', scrollCollect)
+  })
+  document.addEventListener('pjax:complete', function () {
+    window.addEventListener('scroll', scrollCollect);
+    setHeaderClass();
+  })
+</script> 
+
+<!-- 渲染issues标签里的内容 -->
+<script>
+  function loadIssuesJS() {
+    if ($(".post-detail").find(".issues-api").length == 0) {
+      return;
+    } 
+    loadScript('/js/issues/index.js');
+  };
+  $(function () {
+    loadIssuesJS();
+  });
+  document.addEventListener('pjax:complete', function () {
+    if (typeof IssuesAPI == "undefined") {
+      loadIssuesJS();
+    }
+  })
+</script>
+
+<!-- 输入框打字特效 -->
+<!-- 输入框打字特效 -->
+
+  <script src="/js/activate-power-mode.js"></script>
+  <script>
+    POWERMODE.colorful = true;  // 打开随机颜色特效
+    POWERMODE.shake = false;    // 关闭输入框抖动
+    document.body.addEventListener('input', POWERMODE);//监听打字事件
+  </script>
+
+
+<!-- markdown代码一键复制功能 -->
+
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/v-plugs-ayu/lib/ayu.css">
+  <script src="https://cdn.jsdelivr.net/npm/v-plugs-ayu/lib/ayu.umd.min.js"></script>
+  <script src="/js/clipboard/clipboard.min.js"></script>
+  <div id="appCopy">
+  </div>
+  <script data-pjax>
+    var vm = new Vue({
+      el: '#appCopy',
+      data: {
+      },
+      computed: {
+      },
+      mounted() {
+        const that = this;
+        var copy = 'copy';
+        /* code */
+        var initCopyCode = function () {
+          var copyHtml = '';
+          copyHtml += '<button class="btn-copy" data-clipboard-snippet="" style="position:absolute;top:0;right:0;z-index:1;">';
+          copyHtml += '<i class="fas fa-copy"></i><span>' + copy + '</span>';
+          copyHtml += '</button>';
+          $(".post-detail pre").not('.gutter pre').wrap("<div class='codeBox' style='position:relative;width:100%;'></div>")
+          $(".post-detail pre").not('.gutter pre').before(copyHtml);
+          new ClipboardJS('.btn-copy', {
+            target: function (trigger) {
+              return trigger.nextElementSibling;
+            }
+          });
+        }
+        initCopyCode();
+        $('.btn-copy').unbind('click').bind('click', function () {
+          doSomething();
+        })
+        $(document).unbind('keypress').bind('keypress', function (e) {
+          if (e.ctrlKey && e.keyCode == 67) {
+            doSomething();
+          }
+        })
+
+        function doSomething() {
+          that.$notify({
+            title: "成功",
+            content: "copy that",
+            type: 'success'
+          })
+        }
+      },
+      methods: {
+      },
+      created() { }
+    })
+  </script>
+  
+
+<!-- 图片懒加载 -->
+<script defer src="https://cdn.jsdelivr.net/npm/vanilla-lazyload@17.1.0/dist/lazyload.min.js"></script>
+<script>
+  // https://www.npmjs.com/package/vanilla-lazyload
+  // Set the options globally
+  // to make LazyLoad self-initialize
+  window.lazyLoadOptions = {
+    elements_selector: ".lazyload",
+    threshold: 0
+  };
+  // Listen to the initialization event
+  // and get the instance of LazyLoad
+  window.addEventListener(
+    "LazyLoad::Initialized",
+    function (event) {
+      window.lazyLoadInstance = event.detail.instance;
+    },
+    false
+  );
+  document.addEventListener('DOMContentLoaded', function () {
+    lazyLoadInstance.update();
+  });
+  document.addEventListener('pjax:complete', function () {
+    lazyLoadInstance.update();
+  });
+</script>
+
+
+<!-- 卡片滚动动画 -->
+   
+
+<!-- 评论所需js -->
+
+  
+    <!-- 弹幕所需的css和js -->
+    
+<!-- 具体js，请前往valine/script.ejs查看 -->
+
+    <script>
+  var requiredFields = '';
+  requiredFields = requiredFields.split(',');
+  comment_el = '.comment';
+  let looperValine = null;
+  load_valine = function () {
+    if ($(comment_el).length) {
+      var valine = new Valine({
+        el: '#vcomment',
+        path: window.location.pathname,
+        notify: false,
+        verify: false,
+        app_id: "",
+        app_key: "",
+        placeholder: "客官，说点什么吧",
+        avatar: "",
+        master: "",   //博主邮箱md5
+        tagMeta: ["博主","小伙伴","访客"],     //标识字段名
+        friends: "",
+        metaPlaceholder: { "nick": "昵称/QQ号", "mail": "邮箱" },
+        requiredFields: requiredFields,
+        enableQQ: true,
+      });
+      function debounce(fn) {
+        var timerID = null
+        return function () {
+          var arg = arguments[0]   //获取事件
+          if (timerID) {
+            clearTimeout(timerID)
+          }
+          timerID = setTimeout(function () {
+            fn(arg)              //事件传入函数
+          }, 200)
+        }
+      }
+      //查询评论 valine.Q('*').limit(7) -- 查询所有，限制7条, 下面的的代码是查询当前页面
+      var themeDanmu = eval('false');
+      var themeLoop = eval('false');
+      var themeLooperTime = '5000' || 5000;
+      var speed = '40' || 20;
+      var isBarrager = true;
+      if (themeDanmu == true) {
+        do_barrager();
+        if ($('.danmuBox').length <= 0) {
+          $('.navbar').append('<div class="danmuBox"><div class="danmuBtn open"><span class="danmuCircle"></span><span class="danmuText">弹幕</span></div></div>');
+        }
+        $('.danmuBtn').on('click', debounce(
+          function () {
+            if ($('.danmuBtn').hasClass('open')) {
+              $('.danmuBtn').removeClass('open')
+              clearInterval(looperValine);
+              $.fn.barrager.removeAll();
+            } else {
+              $('.danmuBtn').addClass("open");
+              do_barrager();
+            }
+          }
+        ))
+      }
+      function do_barrager() {
+        isBarrager && valine.Q(window.location.pathname).find().then(function (comments) {
+          // var num = 0; // 可以记录条数，循环调用的时候只取最新的评论放入弹幕中
+          var run_once = true;
+          var looper_time = themeLooperTime;
+          var total = comments.length;
+          // var looper = null;
+          var index = 0;
+          if (total > 0) {
+            barrager();
+          } else {
+            // 当评论数为0的时候，自动关闭弹幕
+            // $('.danmuBtn').removeClass('open');
+          }
+          function barrager() {
+            if (run_once) {
+              //如果是首次执行,则设置一个定时器,并且把首次执行置为false
+              looperValine = setInterval(barrager, looper_time);
+              run_once = false;
+            }
+            var content = comments[index]._serverData.comment;
+            var email = comments[index]._serverData.mail;
+            var link = comments[index]._serverData.link;
+            var newcontent = content.substring(0, 50).replace(/<[^>]+>/g, "");
+            //发布一个弹幕
+            const item = {
+              img: `https://q1.qlogo.cn/g?b=qq&nk=${email}&s=640`, //图片 
+              info: newcontent, //文字 
+              href: link, //链接 
+              close: true, //显示关闭按钮 
+              speed: speed, //延迟,单位秒,默认6 
+              color: '#fff', //颜色,默认白色 
+              old_ie_color: '#000000', //ie低版兼容色,不能与网页背景相同,默认黑色
+            }
+            $('body').barrager(item);
+            //索引自增
+            index++;
+            //所有弹幕发布完毕，清除计时器。
+            if (index == total) {
+              clearInterval(looperValine);
+              if (themeLoop === true) {
+                setTimeout(function () {
+                  do_barrager();
+                }, 5000);
+              } else {
+                $('.danmuBtn').removeClass('open');
+              }
+              return false;
+            }
+
+          }
+        })
+      }
+    }
+  };
+  $(document).ready(load_valine);
+  document.addEventListener('pjax:send', function (e) {
+    
+  })
+  document.addEventListener('pjax:complete', function () {
+    load_valine();
+  });
+</script>
+
+  
+
+
+<!-- 鼠标点击特效 -->
+<!-- 爱心点击 -->
+
+  
+    <canvas class="fireworks" style="position: fixed;left: 0;top: 0;z-index: 999; pointer-events: none;" ></canvas>
+    <script src="//cdn.bootcss.com/animejs/2.2.0/anime.min.js"></script>
+    <script src="/js/cursor/explosion.min.js"></script>
+  
+
+
+
+
+
+    <!-- pjax -->
+    
+
+<!-- pjax -->
+
+
+  <script src="/js/pjax@0.2.8/index.js"></script>
+  
+    <!-- 样式位于：source/css/_third-party/pjaxanimate.styl -->
+
+<div class="pjax-animate">
+  
+    <div class="loading-circle"><div id="loader-circle"></div></div>
+    <script>
+      window.ShowLoading = function() {
+        $(".loading-circle").css("display", "block");
+      };
+      window.HideLoading = function() {
+        $(".loading-circle").css("display", "none");
+      }
+    </script>
+  
+	<script>
+    document.addEventListener('pjax:complete', function () {
+      window.HideLoading();
+    })
+    document.addEventListener('pjax:send', function () {
+      window.ShowLoading();
+    })
+    document.addEventListener('pjax:error', function () {
+      window.HideLoading();
+    })
+	</script>
+</div>
+
+  
+
+  <script>
+    var pjax = new Pjax({
+      elements: 'a[href]:not([href^="#"]):not([href="javascript:void(0)"]):not([no-pjax])',   // 拦截正常带链接的 a 标签
+      selectors: ["#pjax-container","title"],                                   // 根据实际需要确认重载区域
+      cacheBust: false,   // url 地址追加时间戳，用以避免浏览器缓存
+      timeout: 5000
+    });
+
+    document.addEventListener('pjax:send', function (e) {
+
+      try {
+        var currentUrl = window.location.pathname;
+        var targetUrl = e.triggerElement.href;
+        var banUrl = [""];
+        if (banUrl[0] != "") {
+          banUrl.forEach(item => {
+            if(currentUrl.indexOf(item) != -1 || targetUrl.indexOf(item) != -1) {
+              window.location.href = targetUrl;
+            }
+          });
+        }
+      } catch (error) {}
+
+      $(window).unbind('resize');
+      $(window).unbind('scroll');
+      $(document).unbind('scroll');
+      $(document).unbind('click');
+      $('body').unbind('click');
+
+    })
+    
+    document.addEventListener('pjax:complete', function () {
+      $('script[data-pjax], .pjax-reload script').each(function () {
+        $(this).parent().append($(this).remove());
+      });
+    });
+
+    document.addEventListener('pjax:error', function (e) {
+      window.location.href = e.triggerElement.href;
+    })
+    
+    // 刷新不从顶部开始
+    document.addEventListener("DOMContentLoaded", function () {
+      history.scrollRestoration = 'auto';
+    })
+  </script>
+
+
+
+  </body>
+</html>
