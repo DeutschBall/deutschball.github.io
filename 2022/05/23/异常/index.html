@@ -1,0 +1,2075 @@
+<!DOCTYPE html>
+<html>
+  <!-- meta/link... -->
+  
+
+
+
+<head>
+  <meta http-equiv="content-type" content="text/html; charset=utf-8">
+  <meta content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=0" name="viewport">
+  <!-- Global site tag (gtag.js) - Google Analytics -->
+
+
+  <title>CSAPP-chapter8 异常与进程 | Deutschball&#39;s blog</title>
+
+  <link rel="icon" type="image/png" href="https://raw.githubusercontent.com/DeutschBall/test/master/emp.png">
+  <link rel="stylesheet" href="https://at.alicdn.com/t/font_1911880_c1nvbyezg17.css">
+  <link href="https://cdn.jsdelivr.net/gh/inkss/fontawesome@5.15.3/css/all.min.css" rel="stylesheet">
+  <link href="/js/swiper/swiper@5.4.1.min.css" rel="stylesheet">
+  
+  
+    <script>
+        var themeModelId = '';
+        if (themeModelId) {
+            localStorage.setItem('modelId', themeModelId);
+        }
+    </script>
+    
+    <script src="https://cdn.jsdelivr.net/gh/yuang01/live2d-widget@latest/autoload.js"></script>
+    <script>
+        var live2dOpen = eval('true') || false;
+        if (!live2dOpen) {
+            localStorage.setItem('waifu-display', 1609323474481);
+        }
+    </script>
+  
+  
+  
+<link rel="stylesheet" href="/css/animate.min.css">
+
+  
+<link rel="stylesheet" href="/css/style.css">
+
+  
+  
+    
+<link rel="stylesheet" href="/js/fancybox/jquery.fancybox.min.css">
+
+  
+  
+    
+<link rel="stylesheet" href="/js/shareJs/share.min.css">
+
+  
+  <style>
+        @media (max-width: 992px) {
+            #waifu {
+                display: none;
+            }
+        }
+    </style>
+    <script src="//cdn.bootcss.com/pace/1.0.2/pace.min.js"></script>
+    <link href="//cdn.bootcss.com/pace/1.0.2/themes/pink/pace-theme-flash.css" rel="stylesheet">
+
+    
+        <script src="/js/valine/av-min@3.0.4.js"></script>
+        <script src="https://cdn.jsdelivr.net/gh/HCLonely/Valine@latest/dist/Valine.min.js"></script>
+    
+
+    <!-- import link -->
+    
+        
+            
+        
+            
+        
+    
+    <!-- import script -->
+    
+        
+            
+        
+            
+        
+    
+
+<!-- hexo injector head_end start -->
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.12.0/dist/katex.min.css">
+<!-- hexo injector head_end end --><meta name="generator" content="Hexo 6.1.0"></head>
+
+  
+  <!-- 依赖于jquery和vue -->
+  
+    
+<script src="https://cdn.jsdelivr.net/npm/jquery@3.5.1/dist/jquery.min.js"></script>
+
+  
+
+  
+    
+<script src="https://cdn.jsdelivr.net/npm/vue@2.6.11/dist/vue.min.js"></script>
+
+  
+  
+  <body>
+    <!-- 预加载动画 -->
+    <!-- 页面预加载动画 -->
+
+<div id='loader'>
+  <link rel="stylesheet" href="/js/loaded/index.css" >
+  <div class="loading-left-bg"></div>
+  <div class="loading-right-bg"></div>
+  <div class="spinner-box">
+    <div class="configure-border-1">
+      <div class="configure-core"></div>
+    </div>
+    <div class="configure-border-2">
+      <div class="configure-core"></div>
+    </div>
+    <div class="loading-word">loading...</div>
+  </div>
+</div>
+
+<script>
+  var endLoading = function () {
+    document.body.style.overflow = 'auto';
+    document.getElementById('loader').classList.add("loading");
+  }
+  window.addEventListener('DOMContentLoaded',endLoading);
+  
+</script>
+
+    
+    <!-- 判断是否为暗黑风格 -->
+    <!-- 判断是否为黑夜模式 -->
+<script>
+  let isDark = JSON.parse(localStorage.getItem('dark')) || JSON.parse('true');
+
+  if (isDark) {
+    $(document.body).addClass('darkModel');
+  }
+</script>
+
+    <!-- 需要在上面加载的js -->
+    <script>
+  function loadScript(src, cb) {
+    return new Promise(resolve => {
+      setTimeout(function () {
+        var HEAD = document.getElementsByTagName("head")[0] || document.documentElement;
+        var script = document.createElement("script");
+        script.setAttribute("type", "text/javascript");
+        if (cb) {
+          if (JSON.stringify(cb)) {
+            for (let p in cb) {
+              if (p == "onload") {
+                script[p] = () => {
+                  cb[p]()
+                  resolve()
+                }
+              } else {
+                script[p] = cb[p]
+                script.onload = resolve
+              }
+            }
+          } else {
+            script.onload = () => {
+              cb()
+              resolve()
+            };
+          }
+        } else {
+          script.onload = resolve
+        }
+        script.setAttribute("src", src);
+        HEAD.appendChild(script);
+      });
+    });
+  }
+
+  //https://github.com/filamentgroup/loadCSS
+  var loadCSS = function (href, before, media, attributes) {
+    return new Promise(resolve => {
+      setTimeout(function () {
+        var link = document.createElement('link');
+        link.rel = "stylesheet";
+        link.href = src;
+        link.onload = resolve;
+        document.getElementsByTagName("head")[0].appendChild(link);
+      });
+    });
+  };
+
+</script> 
+
+<!-- 轮播图所需要的js -->
+<script src="/js/swiper/swiper.min.js"></script>
+<script src="/js/swiper/vue-awesome-swiper.js"></script>
+<script src="/js/swiper/swiper.animate1.0.3.min.js"></script>
+
+<script type="text/javascript">
+  Vue.use(window.VueAwesomeSwiper)
+</script>
+
+
+  <script src="/js/vue-typed-js/index.js"></script>
+
+
+<!-- 首页的公告滚动插件的js需要重新加载 -->
+<script src="/js/vue-seamless-scroll/index.js"></script>
+
+<!-- 打字机效果js -->
+<script src="https://cdn.jsdelivr.net/npm/typed.js@2.0.11"></script>
+
+
+    <div id="safearea">
+      <main class="main" id="pjax-container">
+        <!-- 头部导航 -->
+        
+<header class="header   " 
+  id="navHeader"
+  style="position: fixed;
+  left: 0; top: 0; z-index: 10;width: 100%;"
+>
+  <div class="header-content">
+    <div class="bars">
+      <div id="appDrawer" class="sidebar-image">
+  <div class="drawer-box-icon">
+    <i class="fas fa-bars" aria-hidden="true" @click="showDialogDrawer"></i>
+  </div>
+  
+  <transition name="fade">
+    <div class="drawer-box_mask" v-cloak style="display: none;" v-show="visible" @click.self="cancelDialogDrawer">
+    </div>
+  </transition>
+  <div class="drawer-box" :class="{'active': visible}">
+    <div class="drawer-box-head bg-color">
+      <img class="drawer-box-head_logo lazyload placeholder" src="https://raw.githubusercontent.com/DeutschBall/test/master/emp.png" class="lazyload placeholder" data-srcset="https://raw.githubusercontent.com/DeutschBall/test/master/emp.png" srcset="https://img2.baidu.com/it/u=2037979560,2772131037&fm=26&fmt=auto&gp=0.jpg" alt="logo">
+      <h3 class="drawer-box-head_title">Deutschball&#39;s blog</h3>
+      <h5 class="drawer-box-head_desc"></h5>
+    </div>
+    
+    <div class="drawer-box-content">
+      <ul class="drawer-box-content_menu">
+        
+        
+          <li class="drawer-box-content_item">
+            <a target="_blank" rel="noopener" href="https://github.com/DeutschBall">
+              <i class="fas fa-github" aria-hidden="true"></i>
+              <span>Github</span>
+            </a>
+          </li>
+        
+      </ul>
+    </div>
+  </div>
+</div>
+
+<script>
+  var body = document.body || document.documentElement || window;
+  var vm = new Vue({
+    el: '#appDrawer',
+    data: {
+      visible: false,
+      top: 0,
+      openArr: [],
+    },
+    computed: {
+    },
+    mounted() {
+    },
+    methods: {
+      isOpen(index) {
+        if (this.openArr.includes(index)) {
+          return true;
+        } else {
+          return false;
+        }
+      },
+      openOrCloseMenu(curIndex) {
+        const index = this.openArr.indexOf(curIndex);
+        if (index !== -1) {
+          this.openArr.splice(index, 1);
+        } else {
+          this.openArr.push(curIndex);
+        }
+      },
+      showDialogDrawer() {
+        this.visible = true;
+        // 防止页面滚动，只能让弹框滚动
+        this.top = $(document).scrollTop()
+        body.style.cssText = 'width: 100%; height: 100%;overflow: hidden;';
+      },
+      cancelDialogDrawer() {
+        this.visible = false;
+        body.removeAttribute('style');
+        $(document).scrollTop(this.top)
+      }
+    },
+    created() {}
+  })
+</script>
+
+    </div>
+    <div class="blog-title" id="author-avatar">
+      
+        <div class="avatar">
+          <img src="https://raw.githubusercontent.com/DeutschBall/test/master/emp.png" class="lazyload placeholder" data-srcset="https://raw.githubusercontent.com/DeutschBall/test/master/emp.png" srcset="https://img2.baidu.com/it/u=2037979560,2772131037&fm=26&fmt=auto&gp=0.jpg" alt="logo">
+        </div>
+      
+      <a href="/" class="logo">Deutschball&#39;s blog</a>
+    </div>
+    <nav class="navbar">
+      <ul class="menu">
+        
+      </ul>
+      
+      
+        <div id="appSearch">
+  <div class="search"  @click="showDialog()"><i class="fas fa-search" aria-hidden="true"></i></div>
+  <transition name="fade">
+    <div class="message-box_wrapper" style="display: none;" v-cloak v-show="dialogVisible" @click.self="cancelDialogVisible()">
+      <div class="message-box animated bounceInDown">
+        <h2>
+          <span>
+            <i class="fas fa-search" aria-hidden="true"></i>
+            <span class="title">Search</span>
+          </span>
+          <i class="fas fa-times close" pointer style="float:right;" aria-hidden="true" @click.self="cancelDialogVisible()"></i>
+        </h2>
+        <form class="site-search-form">
+          <input type="text"
+            placeholder="Please enter keywords"
+            id="local-search-input" 
+            @click="getSearchFile()"
+            class="st-search-input"
+            v-model="searchInput"
+          />
+        </form>
+        <div class="result-wrapper">
+          <div id="local-search-result" class="local-search-result-cls"></div>
+        </div>
+      </div>
+    </div>
+  </transition>
+</div>
+<script src="/js/local_search.js"></script>
+<script>
+  var body = document.body || document.documentElement || window;
+  var vm = new Vue({
+    el: '#appSearch',
+    data: {
+      dialogVisible: false,
+      searchInput: '',
+      top: 0,
+    },
+    computed: {
+    },
+    mounted() {
+      window.addEventListener('pjax:complete', () => {
+        this.cancelDialogVisible();
+      })
+    },
+    methods: {
+      showDialog() {
+        this.dialogVisible = true;
+        // 防止页面滚动，只能让弹框滚动
+        this.top = $(document).scrollTop()
+        body.style.cssText = 'overflow: hidden;';
+      },
+      getSearchFile() {
+        if (!this.searchInput) {
+          getSearchFile("/search.xml");
+        }
+      },
+      cancelDialogVisible() {
+        this.dialogVisible = false;
+        body.removeAttribute('style');
+        $(document).scrollTop(this.top)
+      },
+    },
+    created() {}
+  })
+</script>
+<!-- 解决刷新页面闪烁问题，可以在元素上添加display: none, 或者用vue.extend方法，详情：https://blog.csdn.net/qq_31393401/article/details/81017912 -->
+<!-- 下面是搜索基本写法 -->
+<!-- <script type="text/javascript" id="local.search.active">
+  var inputArea = document.querySelector("#local-search-input");
+  inputArea.onclick   = function(){ getSearchFile(); this.onclick = null }
+  inputArea.onkeydown = function(){ if(event.keyCode == 13) return false }
+</script> -->
+
+      
+
+    </nav>
+  </div>
+  
+    <a target="_blank" rel="noopener" href="https://github.com/DeutschBall" class="github-corner color-primary" aria-label="View source on GitHub"><svg width="60" height="60" viewBox="0 0 250 250" style="fill:#fff; position: absolute; top: 0; border: 0; right: 0;" aria-hidden="true"><path d="M0,0 L115,115 L130,115 L142,142 L250,250 L250,0 Z"></path><path d="M128.3,109.0 C113.8,99.7 119.0,89.6 119.0,89.6 C122.0,82.7 120.5,78.6 120.5,78.6 C119.2,72.0 123.4,76.3 123.4,76.3 C127.3,80.9 125.5,87.3 125.5,87.3 C122.9,97.6 130.6,101.9 134.4,103.2" fill="currentColor" style="transform-origin: 130px 106px;" class="octo-arm"></path><path d="M115.0,115.0 C114.9,115.1 118.7,116.5 119.8,115.4 L133.7,101.6 C136.9,99.2 139.9,98.4 142.2,98.6 C133.8,88.0 127.5,74.4 143.8,58.0 C148.5,53.4 154.0,51.2 159.7,51.0 C160.3,49.4 163.2,43.6 171.4,40.1 C171.4,40.1 176.1,42.5 178.8,56.2 C183.1,58.6 187.2,61.8 190.9,65.4 C194.5,69.0 197.7,73.2 200.1,77.6 C213.8,80.2 216.3,84.9 216.3,84.9 C212.7,93.1 206.9,96.0 205.4,96.6 C205.1,102.4 203.0,107.8 198.3,112.5 C181.9,128.9 168.3,122.5 157.7,114.1 C157.9,116.9 156.7,120.9 152.7,124.9 L141.0,136.5 C139.8,137.7 141.6,141.9 141.8,141.8 Z" fill="currentColor" class="octo-body"></path></svg></a><style>.github-corner:hover .octo-arm{animation:octocat-wave 560ms ease-in-out}@keyframes octocat-wave{0%,100%{transform:rotate(0)}20%,60%{transform:rotate(-25deg)}40%,80%{transform:rotate(10deg)}}@media (max-width:500px){.github-corner:hover .octo-arm{animation:none}.github-corner .octo-arm{animation:octocat-wave 560ms ease-in-out}}</style>
+  
+  
+</header>
+        <!-- 内容区域 -->
+        
+ <!-- prismjs 代码高亮 -->
+ 
+
+
+<div class="bg-dark-floor" style="position: fixed;left: 0;top: 0;width: 100%;height: 100%;z-index: -1;"></div>
+
+
+  <!-- 文章详情页顶部图片和标题 -->
+
+
+
+
+<div class="post-detail-header" id="thumbnail_canvas" style="background-repeat: no-repeat; background-size: cover; 
+  background-position: center center;position: relative;background-image:url('/medias/15.jpg')">
+  <div class="post-detail-header-mask"></div>
+  <canvas id="header_canvas"style="position:absolute;bottom:0;pointer-events:none;"></canvas>
+  
+  <div class="post-detail-header_info-box">
+    <div class="title-box">
+      <span class="title">
+        CSAPP-chapter8 异常与进程
+      </span>
+    </div>
+    
+    
+      
+        <span class="post-detail-header_date">
+          <i class="fas fa-calendar"></i> Published in：2022-05-23 |
+        </span>
+      
+
+      
+
+      
+    
+  </div>
+  
+  
+    <script src="/js/bubble/bubble.js"></script>
+  
+</div>
+
+
+
+
+
+<div class="row justify-position" 
+  style="padding-top: 0px;">
+  <div class="main-content">
+    <article class="post post-detail">
+      <div class="post-content">
+        <h1 id="CSAPP-chapter8"><a href="#CSAPP-chapter8" class="headerlink" title="CSAPP-chapter8"></a>CSAPP-chapter8</h1><p>感觉大一上学期c语言还有下学期基于c语言的基础课程设计学得好失败.</p>
+<p>当时一个位图放缩,我既不懂位图格式,也不懂二进制文件,还不熟悉glibc函数.</p>
+<p>本学期操作系统,更是云里雾里,对虚拟内存,进程等概念从未听过,却上来就要讲缺页置换算法,调度算法等等各种算法</p>
+<p>对于CSAPP这本书,只能说相见恨晚,应当替代大一下的基础课程设计,作为计组和操作系统先修课.</p>
+<p>欠的债在大二下才还上,可以说亡羊补牢?</p>
+<h2 id="异常"><a href="#异常" class="headerlink" title="异常"></a>异常</h2><h3 id="控制流"><a href="#控制流" class="headerlink" title="控制流"></a>控制流</h3><p>一个没有跳转,正常执行的程序,其执行过程中程序计数器PC总是连续变化的,</p>
+<p>假设指令序列为</p>
+<script type="math/tex; mode=display">
+I_1,I_2....,I_n</script><p>指令对应的地址为</p>
+<script type="math/tex; mode=display">
+A_1,A_2,...,A_n</script><p>由于x86上的指令采用变长编码方式,因此$A_1,A_2,…,A_n$有可能不是等差数列,但是可以啃腚的是他们连续,</p>
+<p>程序计数器PC的值构成的序列被称为控制流,如果程序一直顺序进行没有调用跳转返回,并且没有发生异常,则PC的值一直连续,这样的控制流称为”平滑的”</p>
+<p>当程序中有跳转,函数调用,函数返回,或者异常时,控制流不再平滑,此时控制流被称为”异常控制流”(ECF)<br>异常控制流包括跳转,调用,返回,异常等</p>
+<h3 id="异常的定义"><a href="#异常的定义" class="headerlink" title="异常的定义"></a>异常的定义</h3><p>先说一些必要的废话</p>
+<p>定义:异常就是控制流中的突变,按照这个定义,跳转,调用,返回,异常处理程序都是</p>
+<p>异常是异常控制流(ECF)的一种,需要硬件和操作系统协同实现.</p>
+<h3 id="异常处理的过程"><a href="#异常处理的过程" class="headerlink" title="异常处理的过程"></a>异常处理的过程</h3><h4 id="序幕-异常的触发"><a href="#序幕-异常的触发" class="headerlink" title="序幕:异常的触发"></a>序幕:异常的触发</h4><p>异常是<strong>如何触发</strong>的呢?</p>
+<p>处理器中的<strong>重大</strong>状态变化,状态可以是某些寄存器中的某些位等,被处理器检测到(检测电平的变化对于处理器来说易如反掌,可以实现)</p>
+<blockquote>
+<p>就好像一个人走着走着感觉低血糖了 ,这人自然就感觉到了,然后对低血糖的对策应该吃点糖.这吃点糖就是异常处理程序</p>
+<p>吃完糖然后缓过来了继续走路</p>
+<p>这就是控制还给之前正在执行的指令</p>
+<p>如果低血糖非常厉害,人直接寄了,相当于发生了终止,先前的进程不再进行</p>
+</blockquote>
+<h4 id="开端-异常的察觉与定性"><a href="#开端-异常的察觉与定性" class="headerlink" title="开端:异常的察觉与定性"></a>开端:异常的察觉与定性</h4><p>处理器根据状态位的变化判断,发生甚么事了</p>
+<blockquote>
+<p>就好像这个走路的人走着走着感觉头晕,无力,快要饿死,这三种状态一组合,人就知道发生了低血糖</p>
+</blockquote>
+<p><img src="https://raw.githubusercontent.com/DeutschBall/test/master/image-20220518201336935.png" class="lazyload placeholder" data-srcset="https://raw.githubusercontent.com/DeutschBall/test/master/image-20220518201336935.png" srcset="https://img2.baidu.com/it/u=2037979560,2772131037&fm=26&fmt=auto&gp=0.jpg" alt="image-20220518201336935"></p>
+<p>每种事件在制作处理器时都已经交给处理器一个编号,发生某种事件处理器就可以知道对应哪个编号</p>
+<blockquote>
+<p>就好比从小就教给这个人,</p>
+<p>高血糖编号0,</p>
+<p>低血糖编号1,</p>
+<p>尿急编号2,…</p>
+<p>然后有一天这个人犯了低血糖,他就知道自己犯了编号为1的毛病</p>
+<p>但是这个人知道了自己犯了1号病有啥意义呢?实践生活中也确实没有这样整,应该是怪没有意义的</p>
+<p>那么给<strong>事件编号的意义</strong>又是啥?</p>
+<p>这种编号感觉类似协议,处理器调用异常处理程序的时候只需要根据特定的编号去调用特定的处理程序,而处理程序的代码不是处理器管,是操作系统维护的异常表管的,那么处理器用什么信息去查表调用相关的异常处理程序呢?</p>
+<p>如果现实中也是这样,人知道了自己犯了1号毛病,去了门诊直接说”我犯了1号病”,大夫就知道应该开葡萄糖的药,不需要病人<strong>费一大堆话描述</strong>“我犯了 头晕无力饿 的病”</p>
+<p>同样,处理器在查表之前将自己的各种状态量化成一个魔数,把最困难的事自己解决了,然后用这个魔数去查表岂不是轻轻松松</p>
+<p>但是现实生活中并没有给低血糖这种病编号,看起来这种方法很简单快捷,为什么不用?</p>
+<p>一是人生活中要记的事情已经太多,病的编号记不住,二是病人觉得是1号病但是大夫可能不这样认为,有可能是更大的毛病</p>
+<p>但是对机器来说,没有这么多的可能,根据状态位的变化,已经可以清楚地确定发生了甚么,并且每种毛病的编号都已经被写入硬件,永远牢记,因此可以使用这种方式</p>
+</blockquote>
+<h4 id="发展-根据事件号查异常表"><a href="#发展-根据事件号查异常表" class="headerlink" title="发展:根据事件号查异常表"></a>发展:根据事件号查异常表</h4><p>处理器确定事件及事件编号之后,要根据事件编号采取相应的异常处理程序,这时需要去查异常表</p>
+<blockquote>
+<p>异常表是由操作系统启动时分配和初始化的,存放在主存中,事件编号作为下标,异常处理程序的地址作为表项</p>
+</blockquote>
+<p>用事件编号作为下标去查异常表,获得的表项是异常处理程序的地址,然后控制交给该异常处理程序</p>
+<blockquote>
+<p>整个查表的过程与页表的工作方式很像</p>
+<p>单级页表的下标是虚拟页号VPN,页表项是物理页号</p>
+<p>处理器怎么知道表在哪里的呢?</p>
+<p>异常表的起始地址会专门被一个寄存器—异常表基址寄存器(exception table base regsiter)保存,这个寄存器在CPU里</p>
+<p>查表的时候</p>
+<p><img src="https://raw.githubusercontent.com/DeutschBall/test/master/image-20220518203658495.png" class="lazyload placeholder" data-srcset="https://raw.githubusercontent.com/DeutschBall/test/master/image-20220518203658495.png" srcset="https://img2.baidu.com/it/u=2037979560,2772131037&fm=26&fmt=auto&gp=0.jpg" alt="image-20220518203658495"></p>
+<p>etbr寄存器中存放基址,异常号(可能存放在某个寄存器中)作为偏移量,两个加起来去访问数组项</p>
+</blockquote>
+<h4 id="高潮-异常处理"><a href="#高潮-异常处理" class="headerlink" title="高潮:异常处理"></a>高潮:异常处理</h4><p>刚才查完异常表之后处理器已经获得了异常处理程序的首地址,处理器只需要把PC值改为该异常处理程序的首地址</p>
+<p>看到这里不禁疑惑,如果异常不是很严重可以被处理,处理完了怎么回到刚才的程序呢?谁来保存刚才进程的执行现场呢?</p>
+<p>CSAPP用异常处理和函数调用的对比解决了这个疑惑</p>
+<p>执行异常处理程序之前,处理器会将<strong>返回时的指令地址</strong>,以及其他一些状态(通用寄存器,堆栈指针,程序状态字等等)统统滴压入<strong>内核栈</strong>,注意不是用户栈</p>
+<blockquote>
+<p>这里从异常处理程序返回时的指令地址只有两种,要么是触发异常的指令地址,要么是下一条指令,</p>
+<p>具体是那一条要根据事件类型确定,即根据事件编号确定.</p>
+<p>这是后话</p>
+<p>为什么要压入内核栈?我的猜测是</p>
+<p>异常处理程序要运行在内核状态,访问内核栈方便</p>
+<p>为什么异常处理程序要运行在内核状态?我的猜测是</p>
+<p>异常处理程序需要请求一些内核的资源,比如缺页异常处理程序会进行磁盘到内存换页的操作,设计了IO操作.而这些在用户状态没有权限做到</p>
+</blockquote>
+<p>上述进程信息都压内核栈保存之后,PC置为异常处理程序的地址,控制交给异常处理程序(或者说异常处理程序占用处理器)</p>
+<h4 id="结局-异常处理完了返回"><a href="#结局-异常处理完了返回" class="headerlink" title="结局:异常处理完了返回"></a>结局:异常处理完了返回</h4><blockquote>
+<p>首先考虑一个人大街上走着低血糖了可能怎么处理</p>
+<p>一是轻微的,吃块糖缓过来接着走</p>
+<p>二是稍微严重,回家歇着了,改天再出来</p>
+<p>三是非常严重,人暴毙了(虽然几率不大),这辈子不可能再走路了,也省了处理的麻烦</p>
+</blockquote>
+<p>根据引发异常的事件类型,异常处理完后的返回也可以分成三种</p>
+<p>1.返回给当前指令(触发异常的指令),重新进行,比如缺页异常</p>
+<p>2.返回给当前指令的下一条指令</p>
+<blockquote>
+<p>下一条指不发生异常时下一条应该执行的指令</p>
+</blockquote>
+<p>3.发生异常的程序被中断,不再执行</p>
+<h2 id="异常的类别"><a href="#异常的类别" class="headerlink" title="异常的类别"></a>异常的类别</h2><p>异常就四种,中断,陷阱,故障,终止</p>
+<p><img src="https://raw.githubusercontent.com/DeutschBall/test/master/image-20220518210426662.png" class="lazyload placeholder" data-srcset="https://raw.githubusercontent.com/DeutschBall/test/master/image-20220518210426662.png" srcset="https://img2.baidu.com/it/u=2037979560,2772131037&fm=26&fmt=auto&gp=0.jpg" alt="image-20220518210426662"></p>
+<p>其中只有属于异步异常的中断发生在CPU之外,只能由IO设备产生,比如按下键盘,点击鼠标,打印到屏幕,等等各种事件</p>
+<p>陷阱是有意为之的,目的是从是处理器从用户态陷入内核态(通过修改某种标志位),作用是拥有使用任意资源的权限,比如syscall指令</p>
+<p>故障和终止都是不希望发生的,区别是故障算是比较轻微的异常,比如缺页,通过牺牲物理页换入缺页就可以解决</p>
+<p>但是终止就是比较严重的异常,程序无法继续运行了,比如栈缓冲区溢出被金丝雀检测到</p>
+<h3 id="中断"><a href="#中断" class="headerlink" title="中断"></a>中断</h3><p>此处的”中断”更确切的是说”外部中断”或者”硬件中断”,即IO外设导致的中断,不是程序有意产生的中断</p>
+<p>up九曲阑干举例是键盘输入导致的中断</p>
+<p><img src="https://raw.githubusercontent.com/DeutschBall/test/master/image-20220518211331500.png" class="lazyload placeholder" data-srcset="https://raw.githubusercontent.com/DeutschBall/test/master/image-20220518211331500.png" srcset="https://img2.baidu.com/it/u=2037979560,2772131037&fm=26&fmt=auto&gp=0.jpg" alt="image-20220518211331500"></p>
+<p>在这个计算机的模型机中,内存总线和IO总线不是一路,但是汇集到IO桥,然后IO桥通过系统总线连接到CPU中的总线接口,总线接口是与CPU内部寄存器相连的</p>
+<blockquote>
+<p>IO总线上挂着的都是IO外设,比如USB,显示器,键鼠,磁盘等等,计算机就算没有这些东西也可以运行</p>
+</blockquote>
+<p>按下键盘的时候,键盘控制器会向处理器的中断引脚发送中断信号,并且会把异常号通过IO总线,IO桥,系统总线传递给CPU,</p>
+<p>中断信号的目的是提醒CPU应该处理中断了,异常号的作用是告诉CPU是键盘出现异常,而不是鼠标</p>
+<p>中断信号和异常号都是CPU判断异常事件需要用到的信息</p>
+<p>由于键盘发送信号和CPU处理指令是<strong>异步</strong>的,因此当键盘发送中断信号的时候,CPU有可能还在执行一条命令.CPU必须完成了手头上那一条命令之后,才可以处理中断.</p>
+<p>完成手头上的指令后,CPU检测到中断引脚那里发生了电位变化,因此知道发生中断了,然后通过异常号知道是哪个IO设备发生了中断,根据这两个信息CPU就能确定发生了什么事,下面就可以异常处理了</p>
+<p>异常处理完之后,应该返回什么地方呢?由于刚才手头上的最后一条指令已经被彻底执行了,自然应该返回下一条指令.</p>
+<blockquote>
+<p>这就好比</p>
+<p>正在写作业,突然有人敲门,为了防止当前正在解决的数学问题思路被打断重来,我先做完这道题,然后去处理访客的问题</p>
+<p>到了门口得先问问是谁在敲门,是熟人就开门</p>
+<p>然后得端茶倒水儿,把客人招待好,等客人走了把门一关回去接着做下一道题</p>
+<p>这里数学题就相当于CPU正在执行的指令,</p>
+<p>敲门这个信号就相当于中断引脚上的电位变化,</p>
+<p>做完这道题再去开门就相当于CPU执行完当前一条指令然后再去处理中断,</p>
+<p>询问访客姓名和敲门合起来,相当于CPU确定事件号,</p>
+<p>招待客人的过程相当于执行中断处理程序</p>
+<p>客人走了继续做下一道题相当于中断处理完成之后返回下一条指令</p>
+</blockquote>
+<p>综上,中断处理过程的流程图表示为</p>
+<p><img src="https://raw.githubusercontent.com/DeutschBall/test/master/image-20220518212631468.png" class="lazyload placeholder" data-srcset="https://raw.githubusercontent.com/DeutschBall/test/master/image-20220518212631468.png" srcset="https://img2.baidu.com/it/u=2037979560,2772131037&fm=26&fmt=auto&gp=0.jpg" alt="image-20220518212631468"></p>
+<p>从数学作业的角度来说,中间招待客人的时候,数学作业没有被处理,但是作业本子也不知道这个做题的是玩电脑去了还是蹲坑去了还是招待客人去了.反正这不重要.重要的是不管中间干了啥,数学作业都是被完整做完的.</p>
+<p>因为访客和做作业是异步的,所以招待客人和数学作业玩不玩成一点关系都没有</p>
+<p>从正在执行的进程角度看,发生中断被抢占CPU和被其他进程抢占CPU没有区别,进程也没有因为中断被改变什么</p>
+<h3 id="陷阱-系统调用"><a href="#陷阱-系统调用" class="headerlink" title="陷阱(系统调用)"></a>陷阱(系统调用)</h3><p>陷阱又可以理解为软件<strong>主动</strong>产生的”软中断”,是有意为之的</p>
+<p><strong>系统调用</strong>,陷阱最重要的用途是在用户程序和内核之间提供一个像过程一样的接口，又叫做系统调用。 </p>
+<blockquote>
+<p>在网上搜索的时候,感觉有一种<strong>广义</strong>的”系统调用”,表示一整个从用户程序到硬件然后再返回用户程序的过程</p>
+<p>感觉还有一种<strong>狭义</strong>的系统调用,就是导致CPU从用户态改变到内核态那关键的一条汇编指令<code>int $0x80</code></p>
+</blockquote>
+<p><strong>系统级函数</strong>,比如<code>open(),read(),close()</code>等等,涉及IO操作,显然只在用户态是干不成事情的,需要使用内核的资源,需要陷入内核态,因此需要去执行系统调用</p>
+<p>我们写的程序怎么陷入内核态呢?在c源代码层面上只需要调用glibc中的系统级函数</p>
+<p><strong>汇编语言层面观察系统级函数write的实现</strong></p>
+<blockquote>
+<p>CSAPP上给出的x86-64linux系统调用号表(感觉这里系统级函数和系统调用的概念有些混淆,应该是广义的系统调用)</p>
+<p><img src="https://raw.githubusercontent.com/DeutschBall/test/master/image-20220518215022569.png" class="lazyload placeholder" data-srcset="https://raw.githubusercontent.com/DeutschBall/test/master/image-20220518215022569.png" srcset="https://img2.baidu.com/it/u=2037979560,2772131037&fm=26&fmt=auto&gp=0.jpg" alt="image-20220518215022569"></p>
+<p>调用write</p>
+<p><img src="https://raw.githubusercontent.com/DeutschBall/test/master/image-20220519074321305.png" class="lazyload placeholder" data-srcset="https://raw.githubusercontent.com/DeutschBall/test/master/image-20220519074321305.png" srcset="https://img2.baidu.com/it/u=2037979560,2772131037&fm=26&fmt=auto&gp=0.jpg" alt="image-20220519074321305"></p>
+<p>系统调用号用rax传递</p>
+<p>文件描述符用rdi传递</p>
+<p>字符串用rsi传递</p>
+<p>字符串长度用rdx传递</p>
+<p><strong>syscall即侠义的系统调用</strong></p>
+</blockquote>
+<h4 id="在用户视角下系统调用过程示意图"><a href="#在用户视角下系统调用过程示意图" class="headerlink" title="在用户视角下系统调用过程示意图"></a>在<strong>用户视角下</strong>系统调用过程示意图</h4><p><img src="https://raw.githubusercontent.com/DeutschBall/test/master/image-20220519073514392.png" class="lazyload placeholder" data-srcset="https://raw.githubusercontent.com/DeutschBall/test/master/image-20220519073514392.png" srcset="https://img2.baidu.com/it/u=2037979560,2772131037&fm=26&fmt=auto&gp=0.jpg" alt="image-20220519073514392"></p>
+<blockquote>
+<p>程序员视角意味着”陷阱处理程序”是一个抽象的概念,程序员知道系统要做这么一个陷阱处理,但是具体做了啥程序员不知道,</p>
+<p>程序员可以知道的是自己的程序会调用syscall,然后CPU的使用权就不属于自己的程序了,而是属于陷阱处理.程序员还知道的是陷阱处理之后的结果,比如调用write之后将缓冲区<code>char buffer[20];</code>中的字符打印到了屏幕上</p>
+</blockquote>
+<p><strong>废话:为什么要有陷阱(系统调用)这种异常?</strong></p>
+<p><img src="https://raw.githubusercontent.com/DeutschBall/test/master/image-20220522191723763.png" class="lazyload placeholder" data-srcset="https://raw.githubusercontent.com/DeutschBall/test/master/image-20220522191723763.png" srcset="https://img2.baidu.com/it/u=2037979560,2772131037&fm=26&fmt=auto&gp=0.jpg" alt="image-20220522191723763"></p>
+<p><strong>c库函数,系统级函数,系统调用的关系</strong></p>
+<p><img src="https://raw.githubusercontent.com/DeutschBall/test/master/image-20220522170002447.png" class="lazyload placeholder" data-srcset="https://raw.githubusercontent.com/DeutschBall/test/master/image-20220522170002447.png" srcset="https://img2.baidu.com/it/u=2037979560,2772131037&fm=26&fmt=auto&gp=0.jpg" alt="image-20220522170002447"></p>
+<p><strong>c库函数</strong></p>
+<p>libc和glibc都是Linux下的c函数库</p>
+<blockquote>
+<p><strong>glibc</strong>是linux下面c标准库的实现，即GNU C Library。glibc本身是GNU旗下的C标准库，<strong>后来逐渐成为了Linux的标准c库，而Linux下原来的标准c库Linux libc逐渐不再被维护</strong>。Linux下面的标准c库不仅有这一个，如uclibc、klibc，以及上面被提到的Linux libc，但是<strong>glibc无疑是用得最多的</strong>。glibc在/lib目录下的.so文件为libc.so.6。</p>
+</blockquote>
+<p>c函数库中的函数非常多,可以按照有没有涉及系统调用进行分类</p>
+<blockquote>
+<p>涉及系统调用的<code>printf,scanf,malloc,free</code>等,这些函数都是<strong>系统级函数</strong>,这些函数执行系统调用陷入内核</p>
+<p>不涉及系统调用的<code>itoa,strstr</code>等</p>
+</blockquote>
+<p>关于库函数和内核函数的区别,这个问题中文站点搜了好多,全在扯淡,最后参考了 <a target="_blank" rel="noopener" href="https://stackoverflow.com/questions/31873923/difference-fork-and-sys-fork">stackoverflow</a></p>
+<blockquote>
+<p>比如内核函数sys_fork就是c库函数fork系统调用入口,即当我们的的代码中使用<code>fork</code>函数的时候,fork函数会去自己调用<code>sys_fork</code>而不是调用<code>sys_write</code></p>
+<blockquote>
+<p>为啥要这样套娃呢?</p>
+<p>因为<code>sys_call</code>是内核函数,依赖于系统</p>
+<p>但是<code>fork</code>是c库函数,要求POSIX可移植</p>
+<p>这就好似协议分层,<code>fork</code>所在高层只管调用内核提供的一个叫<code>sys_fork</code>函数,内核具体怎么实现这个函数不关心</p>
+<p>而内核也不知道上层会有什么,只管根据人的需要涉及<code>sys_fork</code>的参数返回值,功能等等</p>
+<p>fork函数大体的调用链(踢皮球链)</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">fork() -&gt; glibc wrapper -&gt; raw syscall invocation -&gt; transition to kernel mode -&gt; syscall lookup -&gt; sys_fork() -&gt; do_fork().</span><br></pre></td></tr></table></figure>
+</blockquote>
+</blockquote>
+<p><strong>内核函数</strong></p>
+<p>kernel函数即内核函数</p>
+<blockquote>
+<p><a target="_blank" rel="noopener" href="https://www.tutorialspoint.com/assembly_programming/assembly_system_calls.htm">Assembly - System Calls (tutorialspoint.com)</a>给出了一个x86linux上调用write时,在内核函数层面发生的事情</p>
+<p>x86linux内核函数表:</p>
+<p><img src="https://raw.githubusercontent.com/DeutschBall/test/master/image-20220518215333246.png" class="lazyload placeholder" data-srcset="https://raw.githubusercontent.com/DeutschBall/test/master/image-20220518215333246.png" srcset="https://img2.baidu.com/it/u=2037979560,2772131037&fm=26&fmt=auto&gp=0.jpg" alt="image-20220518215333246"></p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">mov	edx,4		; message length						;要打印的信息长度用edx传递</span><br><span class="line">mov	ecx,msg		; message to write						;要打印的信息msg用ecx寄存器传递</span><br><span class="line">mov	ebx,1		; file descriptor (stdout)				;文件描述符,魔数1表示标准输出,即显示器</span><br><span class="line">mov	eax,4		; system call number (sys_write)		;eax存放内核函数号,决定调用sys_write函数</span><br><span class="line">int	0x80		; call kernel						   ;陷入内核,根据先前放在eax中的系统调用号决定执行什么命令</span><br></pre></td></tr></table></figure>
+</blockquote>
+<p><strong>系统命令和系统调用的关系</strong></p>
+<p>系统命令比如<code>ls</code>,<code>ifconfig</code>,<code>mv</code>,<code>cp</code>等等是由一个或者多个c库函数实现的,可能其中会用到系统调用.系统命令和系统调用之间还有一段距离</p>
+<p>CSAPP上就有练习题让我们用<code>&lt;stdio.h&gt;</code>等头文件里面c库函数写一个<code>mv</code>命令之类的</p>
+<h4 id="操作系统视角下的系统调用过程"><a href="#操作系统视角下的系统调用过程" class="headerlink" title="操作系统视角下的系统调用过程"></a>操作系统视角下的系统调用过程</h4><p>用户进程通过eax寄存器将内核函数号交给<code>system_call</code>函数,这时已经下到kernel模式了</p>
+<p><code>system_call</code>函数的作用是,根据内核函数号去查<code>system_call_table</code>表,执行相应的sys_开头的内核函数,</p>
+<p>内核函数执行完毕之后执行<code>syscall_exit</code>返回到<code>system_call</code>函数</p>
+<p><code>system_call</code>函数执行<code>resume_userspace</code>返回用户空间</p>
+<h4 id="系统调用的整个过程"><a href="#系统调用的整个过程" class="headerlink" title="系统调用的整个过程"></a>系统调用的整个过程</h4><p><img src="https://raw.githubusercontent.com/DeutschBall/test/master/image-20220522212228880.png" class="lazyload placeholder" data-srcset="https://raw.githubusercontent.com/DeutschBall/test/master/image-20220522212228880.png" srcset="https://img2.baidu.com/it/u=2037979560,2772131037&fm=26&fmt=auto&gp=0.jpg" alt="image-20220522212228880"></p>
+<p>例如<code>getpid</code>函数系统调用的简化过程</p>
+<p><img src="https://raw.githubusercontent.com/DeutschBall/test/master/image-20220522210953699.png" class="lazyload placeholder" data-srcset="https://raw.githubusercontent.com/DeutschBall/test/master/image-20220522210953699.png" srcset="https://img2.baidu.com/it/u=2037979560,2772131037&fm=26&fmt=auto&gp=0.jpg" alt="image-20220522210953699"></p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">getpid()</span><br><span class="line">	int 0x80</span><br><span class="line">		system_call</span><br><span class="line">			sys_getpid()</span><br></pre></td></tr></table></figure>
+<h4 id="实验-添加系统调用"><a href="#实验-添加系统调用" class="headerlink" title="实验:添加系统调用"></a>实验:添加系统调用</h4><p>添加一个系统调用不只是向系统调用号表中添加一个表项,要考虑内核中整个系统调用过程</p>
+<p>1.根据系统调用类型查系统调用号表获得系统调用号</p>
+<p>2.系统调用号查内核函数跳转表找到应该执行的内核函数</p>
+<p>3.执行内核函数</p>
+<p>各部分的具体作用和位置如下</p>
+<h5 id="系统调用号表unistd-32-h"><a href="#系统调用号表unistd-32-h" class="headerlink" title="系统调用号表unistd_32.h"></a>系统调用号表<code>unistd_32.h</code></h5><blockquote>
+<p>前置知识:c语言宏定义</p>
+</blockquote>
+<p>在我校的操作系统实验中,使用的操作系统内核版本是<code>linux-2.6.32.60</code></p>
+<p>在<code>/usr/src/linux-2.6.32.60/arch/x86/include/asm/unistd_32.h</code>位置</p>
+<p>该文件中全是宏定义,形如<code>#define __NR_exit          1</code>,将每一个系统调用号魔数定义为一个有实际意义的字面量</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#<span class="keyword">ifndef</span> _ASM_X86_UNISTD_32_H</span></span><br><span class="line"><span class="meta">#<span class="keyword">define</span> _ASM_X86_UNISTD_32_H</span></span><br><span class="line"></span><br><span class="line"><span class="comment">/*</span></span><br><span class="line"><span class="comment"> * This file contains the system call numbers.</span></span><br><span class="line"><span class="comment"> */</span></span><br><span class="line"></span><br><span class="line"><span class="meta">#<span class="keyword">define</span> __NR_restart_syscall      0</span></span><br><span class="line"><span class="meta">#<span class="keyword">define</span> __NR_exit		  1</span></span><br><span class="line"><span class="meta">#<span class="keyword">define</span> __NR_fork		  2</span></span><br><span class="line"><span class="meta">#<span class="keyword">define</span> __NR_read		  3</span></span><br><span class="line"><span class="meta">#<span class="keyword">define</span> __NR_write		  4</span></span><br><span class="line">...</span><br><span class="line">    </span><br><span class="line"><span class="meta">#<span class="keyword">define</span> NR_syscalls 337			<span class="comment">//系统调用总个数</span></span></span><br><span class="line">    </span><br><span class="line">...</span><br></pre></td></tr></table></figure>
+<blockquote>
+<p>感觉类似于DNS协议</p>
+<p>将ip地址号映射到一个方便人类记忆的域名</p>
+<p>将一个域名解析到一个ip地址号</p>
+</blockquote>
+<h5 id="内核函数跳转表syscall-table-32-S"><a href="#内核函数跳转表syscall-table-32-S" class="headerlink" title="内核函数跳转表syscall_table_32.S"></a>内核函数跳转表<code>syscall_table_32.S</code></h5><blockquote>
+<blockquote>
+<p>前置知识x86汇编语言</p>
+</blockquote>
+<p>.S:汇编语言源程序;预处理,汇编</p>
+<p>也就是说该文件是汇编写的</p>
+</blockquote>
+<p>内核函数跳转表以系统调用好表中的系统调用号为下标,总个数也是在<code>unistd_32.h</code>中宏定义的<code>#define NR_syscalls 337</code></p>
+<p> 系统调用号和内核函数跳转表项是一个萝卜一个坑的关系,修改系统调用号就得修改跳转表项,因此现有的不要乱改</p>
+<p>如果系统调用号没有对应下标的内核跳转表表项,则默认指向函数调用表中,教材中说是<code>sys_ni_syscall()</code></p>
+<p>在我校的操作系统实验课程的安排中,这个内核函数跳转表的位置在<code>/usr/src/linux-2.6.32.60/arch/x86/kernel/syscall_table_32.S</code></p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line">ENTRY(sys_call_table)</span><br><span class="line">	.<span class="type">long</span> sys_restart_syscall	<span class="comment">/* 0 - old &quot;setup()&quot; system call, used for restarting */</span></span><br><span class="line">	.<span class="type">long</span> sys_exit</span><br><span class="line">	.<span class="type">long</span> ptregs_fork</span><br><span class="line">	.<span class="type">long</span> sys_read</span><br><span class="line">	.<span class="type">long</span> sys_write</span><br><span class="line">	.<span class="type">long</span> sys_open		<span class="comment">/* 5 */</span></span><br><span class="line">	.<span class="type">long</span> sys_close</span><br><span class="line">	.<span class="type">long</span> sys_waitpid</span><br></pre></td></tr></table></figure>
+<p>这个跳转表也比较类似CSAPP第三章上介绍的switch跳转表</p>
+<p><img src="https://raw.githubusercontent.com/DeutschBall/test/master/image-20220523075250116.png" class="lazyload placeholder" data-srcset="https://raw.githubusercontent.com/DeutschBall/test/master/image-20220523075250116.png" srcset="https://img2.baidu.com/it/u=2037979560,2772131037&fm=26&fmt=auto&gp=0.jpg" alt="image-20220523075250116"></p>
+<blockquote>
+<p>系统调用号表和内核函数跳转表有一一对应关系</p>
+<p><img src="https://raw.githubusercontent.com/DeutschBall/test/master/image-20220522215928689.png" class="lazyload placeholder" data-srcset="https://raw.githubusercontent.com/DeutschBall/test/master/image-20220522215928689.png" srcset="https://img2.baidu.com/it/u=2037979560,2772131037&fm=26&fmt=auto&gp=0.jpg" alt="image-20220522215928689"></p>
+</blockquote>
+<h5 id="内核函数声明syscalls-h"><a href="#内核函数声明syscalls-h" class="headerlink" title="内核函数声明syscalls.h"></a>内核函数声明<code>syscalls.h</code></h5><p>该声明在<code>/usr/src/linux-2.6.32.60/include/linux/syscalls.h</code>中</p>
+<p>就是一个头文件,里面都是函数声明,在链接时起到引用的作用</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line">asmlinkage <span class="type">long</span> <span class="title function_">sys_time</span><span class="params">(<span class="type">time_t</span> __user *tloc)</span>;</span><br><span class="line">asmlinkage <span class="type">long</span> <span class="title function_">sys_stime</span><span class="params">(<span class="type">time_t</span> __user *tptr)</span>;</span><br><span class="line">asmlinkage <span class="type">long</span> <span class="title function_">sys_gettimeofday</span><span class="params">(<span class="keyword">struct</span> timeval __user *tv,</span></span><br><span class="line"><span class="params">				<span class="keyword">struct</span> timezone __user *tz)</span>;</span><br><span class="line">asmlinkage <span class="type">long</span> <span class="title function_">sys_settimeofday</span><span class="params">(<span class="keyword">struct</span> timeval __user *tv,</span></span><br><span class="line"><span class="params">				<span class="keyword">struct</span> timezone __user *tz)</span>;</span><br><span class="line">asmlinkage <span class="type">long</span> <span class="title function_">sys_adjtimex</span><span class="params">(<span class="keyword">struct</span> timex __user *txc_p)</span>;</span><br><span class="line"></span><br><span class="line">asmlinkage <span class="type">long</span> <span class="title function_">sys_times</span><span class="params">(<span class="keyword">struct</span> tms __user *tbuf)</span>;</span><br><span class="line"></span><br><span class="line">asmlinkage <span class="type">long</span> <span class="title function_">sys_gettid</span><span class="params">(<span class="type">void</span>)</span>;</span><br><span class="line">asmlinkage <span class="type">long</span> <span class="title function_">sys_nanosleep</span><span class="params">(<span class="keyword">struct</span> timespec __user *rqtp, <span class="keyword">struct</span> timespec __user *rmtp)</span>;</span><br><span class="line">...</span><br></pre></td></tr></table></figure>
+<blockquote>
+<p>关于asmlinkage修饰符:</p>
+<blockquote>
+<p>需要前置知识,x86汇编语言和调用约定</p>
+</blockquote>
+<p>类似位置的修饰符我们见过<code>__cdecl</code>,<code>__fastcall</code>,这里<code>asmlinkage</code>也是一种调用约定的修饰符,试想如果不声明该修饰符,则linux上按照System V AMD64 ABI约定的函数传参方法,前六个参数是通过<code>edi,esi,edx,ecx,r8d,r9d</code>这六个寄存器传递的,返回值是通过eax寄存器传递的.</p>
+<p>而对于内核函数</p>
+<p><code>asmlinkage</code>是一个宏定义<code>#define asmlinkage CPP_ASMLINKAGE __attribute__((regparm(0)))</code>,</p>
+<p>其作用是使用<code>eax,ebx,ecx</code>传递参数,<code>eax</code>始终传递系统调用号(内核函数号)</p>
+<p><img src="https://raw.githubusercontent.com/DeutschBall/test/master/image-20220523084202556.png" class="lazyload placeholder" data-srcset="https://raw.githubusercontent.com/DeutschBall/test/master/image-20220523084202556.png" srcset="https://img2.baidu.com/it/u=2037979560,2772131037&fm=26&fmt=auto&gp=0.jpg" alt="eax传递内核函数号"></p>
+<p>比如write函数从用户态下到内核态system_call时的调用过程</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">mov	edx,4		; message length						;要打印的信息长度用edx传递</span><br><span class="line">mov	ecx,msg		; message to write						;要打印的信息msg用ecx寄存器传递</span><br><span class="line">mov	ebx,1		; file descriptor (stdout)				;文件描述符,魔数1表示标准输出,即显示器</span><br><span class="line">mov	eax,4		; system call number (sys_write)		;eax存放内核函数号,决定调用sys_write函数</span><br><span class="line">int	0x80		; call kernel						   ;陷入内核,根据先前放在eax中的系统调用号决定执行什么命令</span><br></pre></td></tr></table></figure>
+</blockquote>
+<h5 id="内核函数实现sys-c"><a href="#内核函数实现sys-c" class="headerlink" title="内核函数实现sys.c"></a>内核函数实现<code>sys.c</code></h5><p>内核函数的定义实现在<code>/usr/src/linux-2.6.32.60/kernel/sys.c</code>里</p>
+<p>该源文件开幕就是版权声明,是谁的版权不用说</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">/*</span></span><br><span class="line"><span class="comment"> *  linux/kernel/sys.c</span></span><br><span class="line"><span class="comment"> *</span></span><br><span class="line"><span class="comment"> *  Copyright (C) 1991, 1992  Linus Torvalds</span></span><br><span class="line"><span class="comment"> */</span></span><br></pre></td></tr></table></figure>
+<p>然后include了一大堆头文件,其中就有<code>syscalls.h</code></p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;linux/module.h&gt;</span></span></span><br><span class="line">.....</span><br><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;linux/syscalls.h&gt;</span></span></span><br><span class="line">....</span><br><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;asm/unistd.h&gt;</span></span></span><br></pre></td></tr></table></figure>
+<p>然后就见鬼了,一个<code>sys_</code>开头的函数实现都没有找到,这样<code>syscalls.h</code>岂不是include了个寂寞</p>
+<p>在<code>syscalls.h</code>的宏定义中我们可以找到答案</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#<span class="keyword">define</span> SYSCALL_DEFINE0(name)	   asmlinkage long sys_##name(void)</span></span><br><span class="line"><span class="meta">#<span class="keyword">define</span> SYSCALL_DEFINE1(name, ...) SYSCALL_DEFINEx(1, _##name, __VA_ARGS__)</span></span><br><span class="line">...</span><br><span class="line"><span class="meta">#<span class="keyword">define</span> SYSCALL_DEFINE6(name, ...) SYSCALL_DEFINEx(6, _##name, __VA_ARGS__)</span></span><br><span class="line"></span><br><span class="line">...</span><br><span class="line">  </span><br><span class="line"><span class="meta">#<span class="keyword">define</span> SYSCALL_DEFINE(name) asmlinkage long sys_##name</span></span><br><span class="line"><span class="meta">#<span class="keyword">define</span> __SYSCALL_DEFINEx(x, name, ...)					\</span></span><br><span class="line"><span class="meta">	asmlinkage long sys##name(__SC_DECL##x(__VA_ARGS__));		\</span></span><br><span class="line"><span class="meta">	static inline long SYSC##name(__SC_DECL##x(__VA_ARGS__));	\</span></span><br><span class="line"><span class="meta">	asmlinkage long SyS##name(__SC_LONG##x(__VA_ARGS__))		\</span></span><br><span class="line"><span class="meta">	&#123;								\</span></span><br><span class="line"><span class="meta">		__SC_TEST##x(__VA_ARGS__);				\</span></span><br><span class="line"><span class="meta">		return (long) SYSC##name(__SC_CAST##x(__VA_ARGS__));	\</span></span><br><span class="line"><span class="meta">	&#125;								\</span></span><br><span class="line"><span class="meta">	SYSCALL_ALIAS(sys##name, SyS##name);				\</span></span><br><span class="line"><span class="meta">	static inline long SYSC##name(__SC_DECL##x(__VA_ARGS__))</span></span><br><span class="line"></span><br></pre></td></tr></table></figure>
+<p>即<code>asmlinkage long sys_##name</code>这种格式的函数接口都被统一地宏定义为<code>__SYSCALL_DEFINEx(x, name, ...)</code></p>
+<blockquote>
+<p>统一定义成<code>SYSCALL_DEFINE0</code>到<code>SYSCALL_DEFINE6</code>这7种宏定义,作用是是实现起来方便</p>
+</blockquote>
+<p>而<code>sys.c</code>中就有<code>__SYSCALL_DEFINEx(x,name,...)</code>这类函数的实现</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><span class="line">SYSCALL_DEFINE3(setpriority, <span class="type">int</span>, which, <span class="type">int</span>, who, <span class="type">int</span>, niceval)</span><br><span class="line">&#123;</span><br><span class="line">...</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="comment">/*</span></span><br><span class="line"><span class="comment"> * Ugh. To avoid negative return values, &quot;getpriority()&quot; will</span></span><br><span class="line"><span class="comment"> * not return the normal nice-value, but a negated value that</span></span><br><span class="line"><span class="comment"> * has been offset by 20 (ie it returns 40..1 instead of -20..19)</span></span><br><span class="line"><span class="comment"> * to stay compatible.</span></span><br><span class="line"><span class="comment"> */</span></span><br><span class="line">SYSCALL_DEFINE2(getpriority, <span class="type">int</span>, which, <span class="type">int</span>, who)</span><br><span class="line">&#123;</span><br><span class="line">...</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>我们自定义的内核函数又少又简单,没有必要也遵守这种宏定义,直接在<code>sys.c</code>中按照<code>syscalls.h</code>中的函数声明去实现函数即可.反正宏定义只是起别名,叫绰号和叫原名都不会错</p>
+<h5 id="我们需要做的"><a href="#我们需要做的" class="headerlink" title="我们需要做的"></a>我们需要做的</h5><p>考虑上述各部分的作用,我们需要做的</p>
+<p><strong>1.添加系统调用表<code>unistd_32.h</code>项</strong></p>
+<p>修改之前:</p>
+<p><img src="https://raw.githubusercontent.com/DeutschBall/test/master/image-20220522222645579.png" class="lazyload placeholder" data-srcset="https://raw.githubusercontent.com/DeutschBall/test/master/image-20220522222645579.png" srcset="https://img2.baidu.com/it/u=2037979560,2772131037&fm=26&fmt=auto&gp=0.jpg" alt="image-20220522222645579"></p>
+<p>格式比着葫芦画个瓢,修改之后</p>
+<p><img src="https://raw.githubusercontent.com/DeutschBall/test/master/QQ%E6%88%AA%E5%9B%BE20220522222731.png" class="lazyload placeholder" data-srcset="https://raw.githubusercontent.com/DeutschBall/test/master/QQ%E6%88%AA%E5%9B%BE20220522222731.png" srcset="https://img2.baidu.com/it/u=2037979560,2772131037&fm=26&fmt=auto&gp=0.jpg" alt="QQ截图20220522222731"></p>
+<p>注意下面<code>#define NR_syscalls 338</code>也得跟着改,</p>
+<p>这个值表示的是系统调用的总数,由于系统调用号从0开始编号,因此当我们新增一个337号时,总数有338个</p>
+<p><strong>2.添加内核函数跳转表<code>syscall_table_32.S</code>表项</strong></p>
+<p><img src="https://raw.githubusercontent.com/DeutschBall/test/master/QQ%E6%88%AA%E5%9B%BE20220522223100.png" class="lazyload placeholder" data-srcset="https://raw.githubusercontent.com/DeutschBall/test/master/QQ%E6%88%AA%E5%9B%BE20220522223100.png" srcset="https://img2.baidu.com/it/u=2037979560,2772131037&fm=26&fmt=auto&gp=0.jpg" alt="QQ截图20220522223100"></p>
+<p>只需要在最后一行添加一项,格式比着葫芦画个瓢</p>
+<p><strong>3.在<code>syscalls.h</code>中增加一条函数声明</strong></p>
+<p>注意以root打开文件才有权限修改</p>
+<p><img src="https://raw.githubusercontent.com/DeutschBall/test/master/image-20220523073622059.png" class="lazyload placeholder" data-srcset="https://raw.githubusercontent.com/DeutschBall/test/master/image-20220523073622059.png" srcset="https://img2.baidu.com/it/u=2037979560,2772131037&fm=26&fmt=auto&gp=0.jpg" alt="image-20220523073622059"></p>
+<p><strong>4.在<code>sys.c</code>中增加内核函数的实现</strong></p>
+<p><img src="https://raw.githubusercontent.com/DeutschBall/test/master/image-20220523074428529.png" class="lazyload placeholder" data-srcset="https://raw.githubusercontent.com/DeutschBall/test/master/image-20220523074428529.png" srcset="https://img2.baidu.com/it/u=2037979560,2772131037&fm=26&fmt=auto&gp=0.jpg" alt="image-20220523074428529"></p>
+<p>这里最后手残写了一个S一开始没发现,编译就是不通过,在形成<code>sys.o</code>时报错,回来看笔记才发现多一个S</p>
+<p><strong>5.编译内核</strong></p>
+<blockquote>
+<p>前置知识</p>
+<p>linux内核</p>
+<p>链接</p>
+<p>makefile的编写</p>
+<p>我几乎都不会</p>
+</blockquote>
+<p>学校给的实验环境中写好了makefile,好长一个,整个内核的编译,我唧己啃腚写不出来.</p>
+<p>并且makefile涉及链接操作,在CSAPP第七章有比较详细的介绍,这是后话了</p>
+<p>然后就是makefile的语法,这我目前也不会,这也是后话了</p>
+<p>总之就是</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">make menuconfig <span class="comment">#修改一下内核名称这种无关紧要的东西,其他的不敢改也不会改,在这里我</span></span><br><span class="line">make	<span class="comment">#执行makefile文件,开始漫长的编译过程</span></span><br><span class="line">make modules_install</span><br><span class="line">make install</span><br></pre></td></tr></table></figure>
+<p>如果上述四步都能完整执行,真的烧高香了</p>
+<p>编译完了会形成一个vmlinux.o目标模块,链接后会形成vmlinux这么一个32位ELF可执行文件</p>
+<p><img src="https://raw.githubusercontent.com/DeutschBall/test/master/image-20220523115115233.png" class="lazyload placeholder" data-srcset="https://raw.githubusercontent.com/DeutschBall/test/master/image-20220523115115233.png" srcset="https://img2.baidu.com/it/u=2037979560,2772131037&fm=26&fmt=auto&gp=0.jpg" alt="image-20220523115115233"></p>
+<p>后面两步完了之后会在<code>/lib/modules</code>下面生成</p>
+<p><img src="https://raw.githubusercontent.com/DeutschBall/test/master/QQ%E6%88%AA%E5%9B%BE20220523115917.png" class="lazyload placeholder" data-srcset="https://raw.githubusercontent.com/DeutschBall/test/master/QQ%E6%88%AA%E5%9B%BE20220523115917.png" srcset="https://img2.baidu.com/it/u=2037979560,2772131037&fm=26&fmt=auto&gp=0.jpg" alt="QQ截图20220523115917"></p>
+<p><code>2.6.32-28-generic</code>是系统原来自带的</p>
+<p><code>2.6.32.60XXXXXXXXXXXXh</code>是实验一生成的</p>
+<p><code>2.6.32.60XXXXXXXXXXXXf</code>是本次实验生成的</p>
+<p>然后使用<code>update-initramfs -c -k 2.6.32.60XXXXXXXXXXf</code>生成”虚拟盘文件”</p>
+<p>我们正在玩一个大型橙光游戏,动辄编译个把小时,以防万一,此时拍一个快照吧</p>
+<p><img src="https://raw.githubusercontent.com/DeutschBall/test/master/image-20220523121014189.png" class="lazyload placeholder" data-srcset="https://raw.githubusercontent.com/DeutschBall/test/master/image-20220523121014189.png" srcset="https://img2.baidu.com/it/u=2037979560,2772131037&fm=26&fmt=auto&gp=0.jpg" alt="image-20220523121014189"></p>
+<p><strong>6.修改<code>grub.cfg</code></strong></p>
+<p><code>grub.cfg</code>在<code>/boot/grub/grub.cfg</code></p>
+<p>比着葫芦画瓢,照抄一个稍微改一下</p>
+<p><img src="https://raw.githubusercontent.com/DeutschBall/test/master/QQ%E6%88%AA%E5%9B%BE20220523120814.png" class="lazyload placeholder" data-srcset="https://raw.githubusercontent.com/DeutschBall/test/master/QQ%E6%88%AA%E5%9B%BE20220523120814.png" srcset="https://img2.baidu.com/it/u=2037979560,2772131037&fm=26&fmt=auto&gp=0.jpg" alt="QQ截图20220523120814"></p>
+<p>完了保存重启</p>
+<p><strong>7.验证</strong></p>
+<p><code>/mnt/hgfs/share</code>中这样写</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;stdio.h&gt;</span></span></span><br><span class="line"><span class="type">int</span> <span class="title function_">main</span><span class="params">()</span>&#123;</span><br><span class="line">    <span class="built_in">printf</span>(<span class="string">&quot;test sjf&#x27;s syscall,%d\n&quot;</span>,syscall(<span class="number">337</span>,<span class="number">13</span>));<span class="comment">//调用337号系统调用</span></span><br><span class="line">    <span class="keyword">return</span> <span class="number">0</span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p><img src="https://raw.githubusercontent.com/DeutschBall/test/master/image-20220523130855962.png" class="lazyload placeholder" data-srcset="https://raw.githubusercontent.com/DeutschBall/test/master/image-20220523130855962.png" srcset="https://img2.baidu.com/it/u=2037979560,2772131037&fm=26&fmt=auto&gp=0.jpg" alt="image-20220523130855962"></p>
+<p>然后使用<code>dmesg</code>命令查看我们在自定义的内核函数中的输出<code>printk</code>,最后一行是这样的</p>
+<p><img src="https://raw.githubusercontent.com/DeutschBall/test/master/image-20220523131010973.png" class="lazyload placeholder" data-srcset="https://raw.githubusercontent.com/DeutschBall/test/master/image-20220523131010973.png" srcset="https://img2.baidu.com/it/u=2037979560,2772131037&fm=26&fmt=auto&gp=0.jpg" alt="image-20220523131010973"></p>
+<p>这与我们编写的是相同的,证明我们自己新增的系统调用的整个过程奏效了</p>
+<h3 id="故障"><a href="#故障" class="headerlink" title="故障"></a>故障</h3><p>由错误情况引起,可能被故障处理程序修正.</p>
+<p><img src="https://raw.githubusercontent.com/DeutschBall/test/master/image-20220519073802747.png" class="lazyload placeholder" data-srcset="https://raw.githubusercontent.com/DeutschBall/test/master/image-20220519073802747.png" srcset="https://img2.baidu.com/it/u=2037979560,2772131037&fm=26&fmt=auto&gp=0.jpg" alt="image-20220519073802747"></p>
+<p>比如缺页异常</p>
+<h3 id="终止"><a href="#终止" class="headerlink" title="终止"></a>终止</h3><p>发生致命错误,程序直接寄掉,处理程序将控制返回<code>abort</code>历程</p>
+<p><img src="https://raw.githubusercontent.com/DeutschBall/test/master/image-20220519073854260.png" class="lazyload placeholder" data-srcset="https://raw.githubusercontent.com/DeutschBall/test/master/image-20220519073854260.png" srcset="https://img2.baidu.com/it/u=2037979560,2772131037&fm=26&fmt=auto&gp=0.jpg" alt="image-20220519073854260"></p>
+<h3 id="异常号"><a href="#异常号" class="headerlink" title="异常号"></a>异常号</h3><p>发现异常的时候会用事件号查事件表.这里的异常号不是事件号,而是对每个异常都进行编号</p>
+<p><code>0~31</code>号异常由Intel架构师定义</p>
+<p><code>32~255</code>号异常由操作系统设计师定义</p>
+<p><img src="https://raw.githubusercontent.com/DeutschBall/test/master/image-20220519074127003.png" class="lazyload placeholder" data-srcset="https://raw.githubusercontent.com/DeutschBall/test/master/image-20220519074127003.png" srcset="https://img2.baidu.com/it/u=2037979560,2772131037&fm=26&fmt=auto&gp=0.jpg" alt="image-20220519074127003"></p>
+<h2 id="进程"><a href="#进程" class="headerlink" title="进程"></a>进程</h2><p>进程上下文:程序正确运行所需的状态组合,包括堆栈,代码和数据,通用寄存器,程序计数器,环境变量,打开的文件描述符集合</p>
+<h3 id="私有虚拟地址空间"><a href="#私有虚拟地址空间" class="headerlink" title="私有虚拟地址空间"></a>私有虚拟地址空间</h3><p>用户栈往下的部分都是进程独立的虚拟地址空间</p>
+<p><img src="https://raw.githubusercontent.com/DeutschBall/test/master/image-20220519075052410.png" class="lazyload placeholder" data-srcset="https://raw.githubusercontent.com/DeutschBall/test/master/image-20220519075052410.png" srcset="https://img2.baidu.com/it/u=2037979560,2772131037&fm=26&fmt=auto&gp=0.jpg" alt="image-20220519075052410"></p>
+<p>私有虚拟地址空间,不是私有物理地址空间.</p>
+<p>共享库在主存中只有一块物理地址空间,但是在两个进程虚拟地址空间中映射到不同部分</p>
+<h3 id="用户态和内核态"><a href="#用户态和内核态" class="headerlink" title="用户态和内核态"></a>用户态和内核态</h3><p>设置两种状态的作用是,限制进程对内核数据结构的访问修改,只有操作系统进程可以运行在内核态.用户应用进程永远不可能运行在内核态,用户应用进程只能通过系统调用,请操作系统去完成目的.</p>
+<p>异常处理程序都运行在内核态</p>
+<p>用户态和内核态怎么区分的?通过CPU中某个控制寄存器中的某个模式位</p>
+<h3 id="上下文切换"><a href="#上下文切换" class="headerlink" title="上下文切换"></a>上下文切换</h3><p>高层次的异常</p>
+<p>进程上下文包括堆栈,数据和代码,各种寄存器,程序状态字,内核栈,内核各种数据结构比如页表</p>
+<p>上下文切换的意思是,挂起当前正在运行的进程,保存其运行现场,然后执行其他进程.当该进程再次被<strong>调度</strong>时还原其运行现场</p>
+<p>发生上下文切换时,操作系统会1.保存当前进程的上下文(放在内存里),2.恢复先前某个被挂起的进程执行现场3.控制交给该进程</p>
+<p>上下文切换发生的时机:</p>
+<p>1.系统调用可能引发上下文切换,比如当前进程使用系统级函数<code>write</code>向标准输出打印,这个过程对于CPU来说非常漫长.CPU会切换到执行另一个进程,不会等待数据写到显示器.更加明显的是<code>sleep</code>系统调用,不妨把话说得更明白些,直接让进程睡觉.</p>
+<blockquote>
+<p><img src="https://raw.githubusercontent.com/DeutschBall/test/master/image-20220519080431478.png" class="lazyload placeholder" data-srcset="https://raw.githubusercontent.com/DeutschBall/test/master/image-20220519080431478.png" srcset="https://img2.baidu.com/it/u=2037979560,2772131037&fm=26&fmt=auto&gp=0.jpg" alt="image-20220519080431478"></p>
+</blockquote>
+<p>2.软件中断,进程时间片用光了,该让给另一个进程执行了.</p>
+<p>在程序员视角,进程的状态只有三种</p>
+<p><img src="https://raw.githubusercontent.com/DeutschBall/test/master/image-20220519082556372.png" class="lazyload placeholder" data-srcset="https://raw.githubusercontent.com/DeutschBall/test/master/image-20220519082556372.png" srcset="https://img2.baidu.com/it/u=2037979560,2772131037&fm=26&fmt=auto&gp=0.jpg" alt="image-20220519082556372"></p>
+<h3 id="进程控制"><a href="#进程控制" class="headerlink" title="进程控制"></a>进程控制</h3><p>控制进程的函数都是系统级函数</p>
+<h4 id="获取进程ID"><a href="#获取进程ID" class="headerlink" title="获取进程ID"></a>获取进程ID</h4><figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#<span class="keyword">define</span> pid_t int</span></span><br><span class="line"><span class="type">pid_t</span> <span class="title function_">getpid</span><span class="params">(<span class="type">void</span>)</span>;		<span class="comment">//获取当前进程id</span></span><br><span class="line"><span class="type">pid_t</span> <span class="title function_">getppid</span><span class="params">(<span class="type">void</span>)</span>;	<span class="comment">//获得父进程id</span></span><br></pre></td></tr></table></figure>
+<p><code>proc.c</code></p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;unistd.h&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;stdio.h&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;stdlib.h&gt;</span></span></span><br><span class="line"><span class="type">int</span> <span class="title function_">main</span><span class="params">()</span>&#123;</span><br><span class="line">    <span class="type">int</span> pid=getpid();</span><br><span class="line">    <span class="type">int</span> ppid=getppid();</span><br><span class="line">    <span class="built_in">printf</span>(<span class="string">&quot;pid=%d,ppid=%d&quot;</span>,pid,ppid);</span><br><span class="line">    <span class="keyword">return</span> <span class="number">0</span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>在bash shell命令行上编译运行</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line">┌──(kali㉿Executor)-[/mnt/c/Users/86135/desktop/os]</span><br><span class="line">└─$ ps</span><br><span class="line">  PID TTY          TIME CMD</span><br><span class="line">    9 pts/0    00:00:00 bash</span><br><span class="line">   41 pts/0    00:00:00 ps</span><br><span class="line"></span><br><span class="line">┌──(kali㉿Executor)-[/mnt/c/Users/86135/desktop/os]</span><br><span class="line">└─$ ./proc</span><br><span class="line">pid=42,ppid=9</span><br></pre></td></tr></table></figure>
+<p>bash调用ps程序,因此bash是ps的父进程</p>
+<p>由于proc进程是由bash创建的,因此bash是proc的父进程</p>
+<p>进程号只会越来越大,不会重复利用一个已经完成的进程的进程号</p>
+<h4 id="创建进程"><a href="#创建进程" class="headerlink" title="创建进程"></a>创建进程</h4><figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="type">pid_t</span> <span class="title function_">fork</span><span class="params">(<span class="type">void</span>)</span>;<span class="comment">//子进程返回0,父进程返回子进程pid</span></span><br></pre></td></tr></table></figure>
+<p>非常疑惑的一点是为什么一个函数调用可以返回两次</p>
+<blockquote>
+<p>对两个进程分别返回一次</p>
+</blockquote>
+<p><code>proc.c</code></p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;unistd.h&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;stdio.h&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;stdlib.h&gt;</span></span></span><br><span class="line"><span class="type">int</span> <span class="title function_">main</span><span class="params">()</span>&#123;</span><br><span class="line">    <span class="built_in">printf</span>(<span class="string">&quot;in father process 0\n&quot;</span>);	<span class="comment">//fork之前只会被父进程执行一次</span></span><br><span class="line">    <span class="type">int</span> pid=fork();						<span class="comment">//此处子进程和父进程并行</span></span><br><span class="line">    <span class="keyword">if</span>(pid==<span class="number">0</span>)&#123;		<span class="comment">//对于子进程来说,它确实有一个正整数进程号,但是fork返回的不是</span></span><br><span class="line">        <span class="built_in">printf</span>(<span class="string">&quot;in son process 1\n&quot;</span>);</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">if</span>(pid!=<span class="number">0</span>)&#123; </span><br><span class="line">        <span class="built_in">printf</span>(<span class="string">&quot;in father process 1\n&quot;</span>);</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>运行结果:</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">┌──(kali㉿Executor)-[/mnt/c/Users/86135/desktop/os]</span><br><span class="line">└─$ ./proc</span><br><span class="line"><span class="keyword">in</span> father process 0</span><br><span class="line"><span class="keyword">in</span> father process 1</span><br><span class="line"><span class="keyword">in</span> son process 1</span><br></pre></td></tr></table></figure>
+<p>不管什么进程,其进程号都是正数,不可能是0.fork对子进程的返回值为0并不代表一个进程号,而是区分子进程和父进程的标志</p>
+<p>根据fork的返回值不同,这是一模一样的代码区分是父进程在执行还是子进程在执行的唯一标志</p>
+<blockquote>
+<p>这里c风格fork创建进程和C++中使用thread创建线程差别很大</p>
+<p>thread创建线程,只需创建一个thread对象,对其构造函数传递一个函数,后面该函数就会自己开一条线程执行,thread对象就是线程的句柄.可以在函数线程之外,比如主线程处,通过thread对象,很自然地操作线程的行为比如detach或者join</p>
+<p>而在这里唯一能区分线程的句柄就是一个整数pid,并且这个pid位于进程之中,只能在运行时通过pid判断是哪一个进程.不能在进程之外操作进程的行为</p>
+</blockquote>
+<p>fork之后原来的进程照旧执行,一个新的进程会拥有原进程的一模一样的虚拟地址空间的<strong>拷贝</strong>,包括代码数据寄存器堆栈等等.子进程和父进程的虚拟地址空间相互独立</p>
+<p><code>proc.c</code></p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;unistd.h&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;stdio.h&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;stdlib.h&gt;</span></span></span><br><span class="line"><span class="type">int</span> global=<span class="number">10</span>;</span><br><span class="line"><span class="type">int</span> <span class="title function_">main</span><span class="params">()</span>&#123;</span><br><span class="line">    <span class="type">int</span> local=<span class="number">20</span>;</span><br><span class="line">    <span class="type">int</span> pid=fork();</span><br><span class="line">    <span class="keyword">if</span>(pid==<span class="number">0</span>)&#123;</span><br><span class="line">        <span class="built_in">printf</span>(<span class="string">&quot;in son process: &quot;</span>);</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">else</span>&#123;</span><br><span class="line">        <span class="built_in">printf</span>(<span class="string">&quot;in father process: &quot;</span>);</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="built_in">printf</span>(<span class="string">&quot;global=%d,local=%d\n&quot;</span>,global++,local++);<span class="comment">//这里有修改</span></span><br><span class="line"></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">┌──(kali㉿Executor)-[/mnt/c/Users/86135/desktop/os]</span><br><span class="line">└─$ ./proc</span><br><span class="line"><span class="keyword">in</span> father process: global=10,<span class="built_in">local</span>=20</span><br><span class="line"><span class="keyword">in</span> son process: global=10,<span class="built_in">local</span>=20	<span class="comment">#两个打印相同说明global有两个,local有两个</span></span><br></pre></td></tr></table></figure>
+<p>父进程和子进程都打印到屏幕说明父子进程共享父进程已经打开的文件描述符1</p>
+<p>用进程图描述fork是比较直观的</p>
+<p><img src="https://raw.githubusercontent.com/DeutschBall/test/master/image-20220519084511671.png" class="lazyload placeholder" data-srcset="https://raw.githubusercontent.com/DeutschBall/test/master/image-20220519084511671.png" srcset="https://img2.baidu.com/it/u=2037979560,2772131037&fm=26&fmt=auto&gp=0.jpg" alt="image-20220519084511671"></p>
+<h5 id="进程图如何实现"><a href="#进程图如何实现" class="headerlink" title="进程图如何实现"></a>进程图如何实现</h5><p>1.main上多个分支</p>
+<p><img src="https://raw.githubusercontent.com/DeutschBall/test/master/image-20220519092351240.png" class="lazyload placeholder" data-srcset="https://raw.githubusercontent.com/DeutschBall/test/master/image-20220519092351240.png" srcset="https://img2.baidu.com/it/u=2037979560,2772131037&fm=26&fmt=auto&gp=0.jpg" alt="image-20220519092351240"></p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;unistd.h&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;stdio.h&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;stdlib.h&gt;</span></span></span><br><span class="line"><span class="type">int</span> <span class="title function_">main</span><span class="params">()</span>&#123;</span><br><span class="line">    </span><br><span class="line">    <span class="type">int</span> pids[<span class="number">5</span>];</span><br><span class="line">    <span class="type">int</span> fpid=getpid();<span class="comment">//fpid在fork之前先计算好,此后即使所有子进程都拷贝,也只是拷贝的父进程号</span></span><br><span class="line">    <span class="keyword">if</span>(fpid==getpid())&#123;<span class="comment">//getpid在每个进程都不同,只有父进程中才会有fpid=getpid</span></span><br><span class="line">        <span class="keyword">for</span>(<span class="type">int</span> i=<span class="number">0</span>;i&lt;<span class="number">5</span>;++i)&#123;</span><br><span class="line">            pids[i]=fork();<span class="comment">//实际上后来的子进程的pids也会存有数据,原因是父进程在创建第i个子进程时,pids已经写入前i-1个子进程号了</span></span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">if</span>(fpid==getpid())&#123;<span class="comment">//getpid在每个进程都不同,只有父进程中才会有fpid=getpid</span></span><br><span class="line">        <span class="built_in">printf</span>(<span class="string">&quot;in father process,pid=%d\n&quot;</span>,fpid);</span><br><span class="line">        <span class="keyword">for</span>(<span class="type">int</span> i=<span class="number">0</span>;i&lt;<span class="number">5</span>;++i)&#123;</span><br><span class="line">            <span class="built_in">printf</span>(<span class="string">&quot;pid%d=%d,&quot;</span>,i,pids[i]);</span><br><span class="line">        &#125;</span><br><span class="line">        <span class="built_in">printf</span>(<span class="string">&quot;\n&quot;</span>);</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">return</span> <span class="number">0</span>;</span><br><span class="line"></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>这样实际上的进程图</p>
+<p><img src="https://raw.githubusercontent.com/DeutschBall/test/master/image-20220519093748088.png" class="lazyload placeholder" data-srcset="https://raw.githubusercontent.com/DeutschBall/test/master/image-20220519093748088.png" srcset="https://img2.baidu.com/it/u=2037979560,2772131037&fm=26&fmt=auto&gp=0.jpg" alt="image-20220519093748088"></p>
+<p>运行结果:</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">┌──(kali㉿Executor)-[/mnt/c/Users/86135/desktop/os]</span><br><span class="line">└─$ ./proc</span><br><span class="line"><span class="keyword">in</span> father process,pid=222</span><br><span class="line">pid0=223,pid1=224,pid2=226,pid3=230,pid4=235,</span><br></pre></td></tr></table></figure>
+<p>2.main和第一个子进程同时分支</p>
+<p><img src="https://raw.githubusercontent.com/DeutschBall/test/master/image-20220519093425314.png" class="lazyload placeholder" data-srcset="https://raw.githubusercontent.com/DeutschBall/test/master/image-20220519093425314.png" srcset="https://img2.baidu.com/it/u=2037979560,2772131037&fm=26&fmt=auto&gp=0.jpg" alt="image-20220519093425314"></p>
+<p>这个很容易实现</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">fork();</span><br><span class="line">fork();</span><br></pre></td></tr></table></figure>
+<h5 id="fork前后"><a href="#fork前后" class="headerlink" title="fork前后"></a><strong>fork前后</strong></h5><p><code>proc.c</code></p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;unistd.h&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;stdio.h&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;stdlib.h&gt;</span></span></span><br><span class="line"><span class="type">int</span> global=<span class="number">10</span>;</span><br><span class="line"><span class="type">int</span> <span class="title function_">main</span><span class="params">()</span>&#123;</span><br><span class="line">    <span class="type">int</span> local=<span class="number">20</span>;</span><br><span class="line">    <span class="type">int</span> pid0=getpid();          <span class="comment">//fork之前getpid</span></span><br><span class="line">    <span class="type">int</span> forkid=fork();          <span class="comment">//forkid只是用来</span></span><br><span class="line">    <span class="type">int</span> pid1=getpid();          <span class="comment">//fork之后getpid</span></span><br><span class="line">   </span><br><span class="line">    <span class="keyword">if</span>(forkid==<span class="number">0</span>)&#123;</span><br><span class="line">        <span class="built_in">printf</span>(<span class="string">&quot;in son process,pid0=%d,pid1=%d,forkid=%d\n&quot;</span>,pid0,pid1,forkid);</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">else</span>&#123;</span><br><span class="line">        <span class="built_in">printf</span>(<span class="string">&quot;in father process,pid0=%d,pid1=%d,forkid=%d\n&quot;</span>,pid0,pid1,forkid);</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">return</span> <span class="number">0</span>;</span><br><span class="line"></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>运行结果:</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">┌──(kali㉿Executor)-[/mnt/c/Users/86135/desktop/os]</span><br><span class="line">└─$ ./proc</span><br><span class="line"><span class="keyword">in</span> father process,pid0=116,pid1=116,forkid=117</span><br><span class="line"><span class="keyword">in</span> son process,pid0=116,pid1=117,forkid=0</span><br></pre></td></tr></table></figure>
+<p>不管是父进程还是子进程,<code>pid0=116</code>相同,而<code>pid1</code>却不同,这是因为,pid0是fork之前执行的,当fork执行时,pid0已经被计算出了,作为一个局部变量压栈了,子进程不会再去计算pid0,而是从父进程堆栈的拷贝上直接拿.</p>
+<p>但是pid1的情况不同,fork之后,子进程已经获得了父进程堆栈的拷贝,此后两个进程地址空间独立,后来的pid1就是分别计算之后分别存放在自己的堆栈里</p>
+<p>看起来像是数据不管是fork前后都会被复制,实际上只复制了fork前的数据,此后进程各自维护自己的数据</p>
+<h4 id="终止进程"><a href="#终止进程" class="headerlink" title="终止进程"></a>终止进程</h4><figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="type">void</span> <span class="title function_">exit</span><span class="params">(<span class="type">int</span> status)</span>;<span class="comment">//以status状态码返回</span></span><br></pre></td></tr></table></figure>
+<p><code>proc.c</code></p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;unistd.h&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;stdio.h&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;stdlib.h&gt;</span></span></span><br><span class="line"><span class="type">int</span> <span class="title function_">main</span><span class="params">()</span>&#123;</span><br><span class="line">    <span class="type">int</span> forkid=fork();</span><br><span class="line">    <span class="type">int</span> pid=getpid();</span><br><span class="line">    <span class="keyword">if</span>(forkid==<span class="number">0</span>)&#123;</span><br><span class="line">        <span class="built_in">printf</span>(<span class="string">&quot;in son process,pid=%d\n&quot;</span>,pid);</span><br><span class="line">        <span class="built_in">exit</span>(<span class="number">0</span>);			<span class="comment">//让子进程结束运行</span></span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">else</span>&#123;</span><br><span class="line">        <span class="built_in">printf</span>(<span class="string">&quot;in father process,pid=%d\n&quot;</span>,pid);</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="built_in">printf</span>(<span class="string">&quot;process %d is still running\n&quot;</span>,pid);		<span class="comment">//此句打印表明还在运行的进程</span></span><br><span class="line"></span><br><span class="line">    <span class="keyword">return</span> <span class="number">0</span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">┌──(kali㉿Executor)-[/mnt/c/Users/86135/desktop/os]</span><br><span class="line">└─$ ./proc</span><br><span class="line"><span class="keyword">in</span> father process,pid=134</span><br><span class="line">process 134 is still running</span><br><span class="line"><span class="keyword">in</span> son process,pid=135</span><br></pre></td></tr></table></figure>
+<h4 id="回收子进程"><a href="#回收子进程" class="headerlink" title="回收子进程"></a>回收子进程</h4><p>进程终止之后并不会立刻消失地无影无踪,而是处于一种等待被父进程回收的状态,父进程回收终止子进程时,内核将子进程的exit状态传递给父进程.子进程被回收后才会消失地无影无踪</p>
+<p>如果父进程一直没有回收已经终止的子进程,子进程就一直存在,称为”僵死进程”</p>
+<p>如果父进程提前结束呢?内核会安排init进程成为孤儿进程的父进程</p>
+<p>这就好比未成年的孩子父母双亡,被警察局送给孤儿院收养</p>
+<p>这里起孤儿院作用的init进程,其pid=1,在系统启动时被内核创建,除非关机,否则永不终止.是所有进程的老祖宗.孤儿进程终止后,init会回收之</p>
+<h5 id="waitpid"><a href="#waitpid" class="headerlink" title="waitpid"></a>waitpid</h5><figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="type">pid_t</span> <span class="title function_">waitpid</span><span class="params">(<span class="type">pid_t</span> pid,<span class="type">int</span> *statusp,<span class="type">int</span> options)</span>;</span><br></pre></td></tr></table></figure>
+<blockquote>
+<p><strong>Attention!!!</strong>当第三个参数options不设置的时候,函数的默认行为是:<strong>挂起调用进程，直到有满足条件的子进程终止</strong>。</p>
+<p>参数意义:</p>
+<p><strong>1.<code>pid_t pid</code></strong></p>
+<p>如果<code>pid&gt;0</code>则等待该指定pid的子进程终止</p>
+<p>如果<code>pid=-1</code>则等待该进程的<strong>所有子进程</strong>,如果有其中的一个终止则waitpid返回该终止子进程的pid</p>
+<p><code>proc.c</code></p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;unistd.h&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;stdio.h&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;stdlib.h&gt;</span></span></span><br><span class="line"><span class="type">int</span> <span class="title function_">main</span><span class="params">()</span>&#123;</span><br><span class="line"><span class="type">int</span> fpid=getpid();</span><br><span class="line"><span class="type">int</span> forkid=fork();</span><br><span class="line"><span class="keyword">if</span>(forkid==<span class="number">0</span>)&#123;<span class="comment">//子进程中</span></span><br><span class="line"><span class="built_in">printf</span>(<span class="string">&quot;in son process,id=%d\n&quot;</span>,getpid());</span><br><span class="line">  <span class="type">int</span> n=<span class="number">1000000</span>;</span><br><span class="line">  <span class="keyword">while</span>(n--);<span class="comment">//拖延时间</span></span><br><span class="line">  <span class="built_in">exit</span>(<span class="number">0</span>);</span><br><span class="line">&#125;</span><br><span class="line"><span class="keyword">else</span>&#123;<span class="comment">//父进程中</span></span><br><span class="line">  <span class="built_in">printf</span>(<span class="string">&quot;in father process,id=%d\n&quot;</span>,fpid);</span><br><span class="line">  waitpid(forkid,<span class="number">0</span>,<span class="number">0</span>);<span class="comment">//指定等待唯一的子进程返回			//只指定第一个参数,其他使用缺省值</span></span><br><span class="line">  <span class="built_in">printf</span>(<span class="string">&quot;son process %d exit\n&quot;</span>,forkid);</span><br><span class="line">&#125;</span><br><span class="line"><span class="built_in">printf</span>(<span class="string">&quot;process %d is still running\n&quot;</span>,getpid());</span><br><span class="line"><span class="keyword">return</span> <span class="number">0</span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>运行结果:</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">┌──(kali㉿Executor)-[/mnt/c/Users/86135/desktop/os]</span><br><span class="line">└─$ ./proc</span><br><span class="line"><span class="keyword">in</span> father process,<span class="built_in">id</span>=273</span><br><span class="line"><span class="keyword">in</span> son process,<span class="built_in">id</span>=274		<span class="comment">#父进程需要等待子进程完成</span></span><br><span class="line">son process 274 <span class="built_in">exit</span></span><br><span class="line">process 273 is still running</span><br></pre></td></tr></table></figure>
+<p><strong>2.<code>int *stausp</code></strong></p>
+<p>如果statusp非空,则waitpid就会在statusp中记录子进程的exit status,使用指针引用传递</p>
+<p><code>proc.c</code></p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;unistd.h&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;stdio.h&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;stdlib.h&gt;</span></span></span><br><span class="line"><span class="type">int</span> <span class="title function_">main</span><span class="params">()</span>&#123;</span><br><span class="line"><span class="type">int</span> fpid=getpid();</span><br><span class="line"><span class="type">int</span> forkid=fork();<span class="comment">//区分父子进程</span></span><br><span class="line"><span class="keyword">if</span>(forkid==<span class="number">0</span>)&#123;<span class="comment">//子进程中</span></span><br><span class="line"><span class="built_in">printf</span>(<span class="string">&quot;in son process,id=%d\n&quot;</span>,getpid());</span><br><span class="line">  <span class="type">int</span> n=<span class="number">1000000</span>;</span><br><span class="line"><span class="keyword">while</span>(n--);<span class="comment">//拖延时间</span></span><br><span class="line">  <span class="built_in">exit</span>(<span class="number">1</span>);<span class="comment">//子进程以status=0状态终止</span></span><br><span class="line">&#125;</span><br><span class="line"><span class="keyword">else</span>&#123;<span class="comment">//父进程中</span></span><br><span class="line">  <span class="type">int</span> status=<span class="number">999</span>;<span class="comment">//设置status初始值</span></span><br><span class="line">  <span class="built_in">printf</span>(<span class="string">&quot;in father process,id=%d\n&quot;</span>,fpid);</span><br><span class="line">  waitpid(forkid,&amp;status,<span class="number">0</span>);<span class="comment">//使用status承载子进程的exit状态值		//缺省第三个参数</span></span><br><span class="line">  <span class="built_in">printf</span>(<span class="string">&quot;son process %d exit with status= %d\n&quot;</span>,forkid,status);</span><br><span class="line">  <span class="built_in">printf</span>(<span class="string">&quot;WIFEXITED(status)=%d\n&quot;</span>,WIFEXITED(status));</span><br><span class="line">  <span class="built_in">printf</span>(<span class="string">&quot;WEXITSTATUS(status)=%d\n&quot;</span>,WEXITSTATUS(status));</span><br><span class="line"><span class="built_in">printf</span>(<span class="string">&quot;WIFSIGNALED(status)=%d\n&quot;</span>,WIFSIGNALED(status));</span><br><span class="line">  <span class="built_in">printf</span>(<span class="string">&quot;WTERMSIG(status)=%d\n&quot;</span>,WTERMSIG(status));</span><br><span class="line"><span class="built_in">printf</span>(<span class="string">&quot;WIFSTOPPED(status)=%d\n&quot;</span>,WIFSTOPPED(status));</span><br><span class="line"><span class="built_in">printf</span>(<span class="string">&quot;WSTOPSIG(status)=%d\n&quot;</span>,WSTOPSIG(status));</span><br><span class="line"><span class="built_in">printf</span>(<span class="string">&quot;WIFCONTINUED(status)=%d\n&quot;</span>,WIFCONTINUED(status));</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="built_in">printf</span>(<span class="string">&quot;process %d is still running\n&quot;</span>,getpid());</span><br><span class="line"></span><br><span class="line"><span class="keyword">return</span> <span class="number">0</span>;</span><br><span class="line"></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>运行结果:</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line">┌──(kali㉿Executor)-[/mnt/c/Users/86135/desktop/os]</span><br><span class="line">└─$ ./proc</span><br><span class="line"><span class="keyword">in</span> father process,<span class="built_in">id</span>=41</span><br><span class="line"><span class="keyword">in</span> son process,<span class="built_in">id</span>=42</span><br><span class="line">son process 42 <span class="built_in">exit</span> with status= 256	</span><br><span class="line">WIFEXITED(status)=1</span><br><span class="line">WEXITSTATUS(status)=1	<span class="comment">#这是exit(status)中的status</span></span><br><span class="line">WIFSIGNALED(status)=0</span><br><span class="line">WTERMSIG(status)=0</span><br><span class="line">WIFSTOPPED(status)=0</span><br><span class="line">WSTOPSIG(status)=1</span><br><span class="line">WIFCONTINUED(status)=0</span><br><span class="line">process 41 is still running</span><br></pre></td></tr></table></figure>
+<blockquote>
+<p>解释status的几个宏定义</p>
+<p><img src="https://raw.githubusercontent.com/DeutschBall/test/master/image-20220521075243518.png" class="lazyload placeholder" data-srcset="https://raw.githubusercontent.com/DeutschBall/test/master/image-20220521075243518.png" srcset="https://img2.baidu.com/it/u=2037979560,2772131037&fm=26&fmt=auto&gp=0.jpg" alt="image-20220521075243518"></p>
+<p>奇怪的是,status明明是一个整数,为什么还能使用类似函数调用的宏,得到不同的结果?</p>
+<p>推测status这个双字整形的每一位都携带着某种信息,实际上相当于一个布尔值的返回值集合,这些宏定义通过按位运算相当于在这个返回值集合中取了一部分值做运算</p>
+</blockquote>
+<p><strong>3.<code>int options</code>修改子进程的处理方式</strong></p>
+<p>在<code>waitflags.h</code>中有这么几个宏定义</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">/* Bits in the third argument to `waitpid&#x27;.  */</span>				<span class="comment">//waitpid的第三个参数 其中的一些位</span></span><br><span class="line"><span class="meta">#<span class="keyword">define</span>	WNOHANG		1	<span class="comment">/* Don&#x27;t block waiting.  */</span>						<span class="comment">//01</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">define</span>	WUNTRACED	2	<span class="comment">/* Report status of stopped children.  */</span>		  <span class="comment">//10</span></span></span><br></pre></td></tr></table></figure>
+<p>函数的默认行为是:<strong>挂起调用进程，直到有满足条件的子进程终止</strong></p>
+<p>指定options之后,函数的行为:</p>
+<div class="table-container">
+<table>
+<thead>
+<tr>
+<th>options</th>
+<th>作用</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>WNOHANG</code></td>
+<td>如果指定的子进程或者等待集合中的子进程都没有终止则立即返回0</td>
+</tr>
+<tr>
+<td><code>WUNTRACED</code></td>
+<td>挂起父进程,直到等待集合中的一个进程变成已终止<strong>或者被停止</strong>,返回该子进程pid</td>
+</tr>
+<tr>
+<td><code>WCONTINUED</code></td>
+<td>挂起父进程,直到等待集合中一个正在运行的进程终止或者等待集合中一个被停职的进程收到SIGCONT信号重新开始</td>
+</tr>
+<tr>
+<td>`WNOHANG</td>
+<td>WUNTRACED`</td>
+<td>立即返回.如果等待集合中的子进程都没有被停止或者终止,返回0.如果有一个子进程停止或者终止,返回该子进程pid</td>
+</tr>
+<tr>
+<td></td>
+</tr>
+</tbody>
+</table>
+</div>
+</blockquote>
+<p>如果调用<code>waitpid</code>的进程没有任何子进程则<code>waitpid</code>返回-1,并设置<code>errno=EINTR</code></p>
+<h6 id="wait"><a href="#wait" class="headerlink" title="wait"></a>wait</h6><figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;sys/types.h&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;sys/wait.h&gt;</span></span></span><br><span class="line"></span><br><span class="line"><span class="type">pid_t</span> <span class="title function_">wait</span><span class="params">(<span class="type">int</span> *statusup)</span>;</span><br></pre></td></tr></table></figure>
+<p><code>wait(&amp;status)</code>等价于<code>waitpid(-1,&amp;status,0)</code></p>
+<p>父进程挂起,等待子进程之一终止则返回其pid</p>
+<h5 id="sleep"><a href="#sleep" class="headerlink" title="sleep"></a>sleep</h5><figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;unistd.h&gt;</span></span></span><br><span class="line"><span class="type">unsigned</span> <span class="type">int</span> <span class="title function_">sleep</span><span class="params">(<span class="type">unsigned</span> <span class="type">int</span> secs)</span>;</span><br></pre></td></tr></table></figure>
+<p>休眠secs秒,睡够了觉则sleep返回0否则返回还要睡多久</p>
+<h5 id="pause"><a href="#pause" class="headerlink" title="pause"></a>pause</h5><figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;unistd.h&gt;</span></span></span><br><span class="line"><span class="type">int</span> <span class="title function_">pause</span><span class="params">(<span class="type">void</span>)</span>;</span><br></pre></td></tr></table></figure>
+<p>让调用者进程休眠,直到该进程接收到信号</p>
+<h4 id="加载并运行程序execve"><a href="#加载并运行程序execve" class="headerlink" title="加载并运行程序execve"></a>加载并运行程序execve</h4><figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;unistd.h&gt;</span></span></span><br><span class="line"><span class="type">int</span> <span class="title function_">execve</span><span class="params">(<span class="type">const</span> <span class="type">char</span> * filename,<span class="type">const</span> <span class="type">char</span> *argv[],<span class="type">const</span> <span class="type">char</span> * envp[])</span>;<span class="comment">//成功则不返回,失败则返回-1</span></span><br></pre></td></tr></table></figure>
+<p>执行filename指向的文件,参数为argv,环境为envp</p>
+<p>例如:</p>
+<p><code>execve.c</code></p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;stdio.h&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;unistd.h&gt;</span></span></span><br><span class="line"><span class="type">int</span> <span class="title function_">main</span><span class="params">()</span>&#123;</span><br><span class="line">    execve(<span class="string">&quot;/bin/sh&quot;</span>,<span class="number">0</span>,<span class="number">0</span>);</span><br><span class="line">    <span class="keyword">return</span> <span class="number">0</span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">kali@Executor:/mnt/c/Users/86135/desktop/os$ gcc execve.c -O0 -o execve</span><br><span class="line"></span><br><span class="line">kali@Executor:/mnt/c/Users/86135/desktop/os$ ./execve</span><br><span class="line">$ </span><br></pre></td></tr></table></figure>
+<p>执行之后shell由bash换成了sh</p>
+<blockquote>
+<p>关于参数<code>const char *envp[]</code></p>
+<p><img src="https://raw.githubusercontent.com/DeutschBall/test/master/image-20220521094616486.png" class="lazyload placeholder" data-srcset="https://raw.githubusercontent.com/DeutschBall/test/master/image-20220521094616486.png" srcset="https://img2.baidu.com/it/u=2037979560,2772131037&fm=26&fmt=auto&gp=0.jpg" alt="image-20220521094616486"></p>
+<p>必须使用get或者set方法访问或者修改环境</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;stdlib.h&gt;</span></span></span><br><span class="line"><span class="type">char</span> *<span class="title function_">getenv</span><span class="params">(<span class="type">const</span> <span class="type">char</span> *name)</span>;<span class="comment">//返回name键对应的value值</span></span><br><span class="line"><span class="type">int</span> <span class="title function_">putenv</span><span class="params">(<span class="type">char</span> *str)</span>;<span class="comment">//这里str的格式为name=value,将[name,value]键值对放在环境表中,如果name键存在则覆盖之</span></span><br><span class="line"><span class="type">int</span> <span class="title function_">setenv</span><span class="params">(<span class="type">const</span> <span class="type">char</span> *name,<span class="type">const</span> <span class="type">char</span> *newvalue,<span class="type">int</span> overwrite)</span>;<span class="comment">//[name,newvalue]键值对放在环境表中,如果name键存在则根据overwrite是否为1决定是否覆盖</span></span><br><span class="line"><span class="type">int</span> <span class="title function_">unsetenv</span><span class="params">(<span class="type">const</span> <span class="type">char</span> *name)</span>;<span class="comment">//清除环境表中的[name,value]键值对,如果name键不存在则什么都不会发生</span></span><br></pre></td></tr></table></figure>
+<p><code>myecho.c</code></p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br></pre></td><td class="code"><pre><span class="line">&gt;<span class="meta">#<span class="keyword">include</span> <span class="string">&lt;stdio.h&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;stdlib.h&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;string.h&gt;</span></span></span><br><span class="line"></span><br><span class="line"><span class="type">int</span> <span class="title function_">main</span><span class="params">(<span class="type">int</span> argc,<span class="type">char</span> *argv[])</span>&#123;</span><br><span class="line"></span><br><span class="line"> <span class="built_in">printf</span>(<span class="string">&quot;%s\n&quot;</span>,getenv(<span class="string">&quot;HOME&quot;</span>));<span class="comment">//home起始目录</span></span><br><span class="line"> <span class="built_in">printf</span>(<span class="string">&quot;%s\n&quot;</span>,getenv(<span class="string">&quot;SHELL&quot;</span>));<span class="comment">//用户首选shell名</span></span><br><span class="line">    <span class="built_in">printf</span>(<span class="string">&quot;%s\n&quot;</span>,getenv(<span class="string">&quot;PWD&quot;</span>));<span class="comment">//当前工作目录绝对路径</span></span><br><span class="line">   </span><br><span class="line">    setenv(<span class="string">&quot;SHELL&quot;</span>,<span class="string">&quot;/bin/sh&quot;</span>,<span class="number">0</span>);<span class="comment">//将用户首选的shell改成/bin/sh,overwrite=0表示如果已经存在name=SHELL的键则啥也不干</span></span><br><span class="line"> <span class="built_in">printf</span>(<span class="string">&quot;%s\n&quot;</span>,getenv(<span class="string">&quot;SHELL&quot;</span>));</span><br><span class="line">   </span><br><span class="line">    setenv(<span class="string">&quot;SHELL&quot;</span>,<span class="string">&quot;/bin/sh&quot;</span>,<span class="number">1</span>);<span class="comment">//将用户首选的shell改成/bin/sh,overwrite=1表示如果已经存在name=SHELL的键则覆盖原来的value</span></span><br><span class="line"> <span class="built_in">printf</span>(<span class="string">&quot;%s\n&quot;</span>,getenv(<span class="string">&quot;SHELL&quot;</span>));</span><br><span class="line">    <span class="keyword">return</span> <span class="number">0</span>;</span><br><span class="line">   &#125;</span><br></pre></td></tr></table></figure>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line">&gt;┌──(kali㉿Executor)-[/mnt/c/Users/86135/desktop/os]</span><br><span class="line">└─$ gcc myecho.c -Og -o myecho</span><br><span class="line"></span><br><span class="line">┌──(kali㉿Executor)-[/mnt/c/Users/86135/desktop/os]</span><br><span class="line">└─$ ./myecho</span><br><span class="line">/home/kali</span><br><span class="line">/bin/bash</span><br><span class="line">/mnt/c/Users/86135/desktop/os</span><br><span class="line">/bin/bash</span><br><span class="line">/bin/sh</span><br></pre></td></tr></table></figure>
+<p><code>setenv</code>还可以新建环境变量,如果<code>name</code>键没有找到则新建环境变量</p>
+<p>环境变量表</p>
+<p><img src="https://raw.githubusercontent.com/DeutschBall/test/master/image-20220521100230271.png" class="lazyload placeholder" data-srcset="https://raw.githubusercontent.com/DeutschBall/test/master/image-20220521100230271.png" srcset="https://img2.baidu.com/it/u=2037979560,2772131037&fm=26&fmt=auto&gp=0.jpg" alt="image-20220521100230271"></p>
+<p>在当前进程中修改环境变量对当前进程无效,但是对该进程后续建立的子进程有效</p>
+<blockquote>
+<p>这里注意<code>putenv</code>和<code>setenv</code>在<code>overwrite=1</code>时的区别</p>
+<p>一是参数的格式,<code>putenv</code>中<code>char *str</code>让写的是<code>name=value</code>这种格式,而<code>setenv</code>中<code>name</code>和<code>value</code>分开成为两个参数</p>
+<p>二是参数的类型,<code>putenv</code>中的参数没有<code>const</code>修饰,这就意味着<strong>str是可以被修改的</strong></p>
+<p>而<code>setenv</code>中的name和newvalue都带有const修饰,不可修改</p>
+<p>实际上<code>putenv</code>不会为新的环境变量另外开空间,而是直接把传入的参数(不管是堆上还是栈上还是全局的)填入环境表</p>
+<p><code>setenv</code>则会另开空间拷贝一份环境变量放进环境表</p>
+<p>比如下面例子</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;stdio.h&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;stdlib.h&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;string.h&gt;</span></span></span><br><span class="line"></span><br><span class="line"><span class="type">int</span> <span class="title function_">main</span><span class="params">(<span class="type">int</span> argc,<span class="type">char</span> *argv[])</span>&#123;</span><br><span class="line">    <span class="type">char</span> str[]=<span class="string">&quot;myid=deutschball&quot;</span>;</span><br><span class="line">    putenv(str);</span><br><span class="line">    <span class="built_in">printf</span>(<span class="string">&quot;%s\n&quot;</span>,getenv(<span class="string">&quot;myid&quot;</span>));</span><br><span class="line">    <span class="built_in">strcpy</span>(str,<span class="string">&quot;myid=dustball&quot;</span>);				<span class="comment">//此处修改str将会导致环境表中键myid的值变化</span></span><br><span class="line">    <span class="built_in">printf</span>(<span class="string">&quot;%s\n&quot;</span>,getenv(<span class="string">&quot;myid&quot;</span>));</span><br><span class="line"></span><br><span class="line">    <span class="type">char</span> name[]=<span class="string">&quot;myunit&quot;</span>;</span><br><span class="line">    <span class="type">char</span> value[]=<span class="string">&quot;empire&quot;</span>;</span><br><span class="line">    setenv(name,value,<span class="number">0</span>);</span><br><span class="line">    <span class="built_in">printf</span>(<span class="string">&quot;%s\n&quot;</span>,getenv(name));</span><br><span class="line">    <span class="built_in">strcpy</span>(value,<span class="string">&quot;rebel&quot;</span>);</span><br><span class="line">    <span class="built_in">printf</span>(<span class="string">&quot;%s\n&quot;</span>,getenv(name));</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">    <span class="keyword">return</span> <span class="number">0</span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line">┌──(kali㉿Executor)-[/mnt/c/Users/86135/desktop/os]</span><br><span class="line">└─$ gcc myecho.c -Og -o myecho</span><br><span class="line"></span><br><span class="line">┌──(kali㉿Executor)-[/mnt/c/Users/86135/desktop/os]</span><br><span class="line">└─$ ./myecho</span><br><span class="line">deutschball</span><br><span class="line">dustball					<span class="comment">#此处值发生了变化</span></span><br><span class="line">empire</span><br><span class="line">empire						<span class="comment">#此处值不发生改变</span></span><br></pre></td></tr></table></figure>
+</blockquote>
+</blockquote>
+<p>此处应有一个编个shell的实验,但是工程量太大,现在不想写,留作后话吧</p>
+
+      </div>
+      <div class="post-tags-categories">
+        
+        <div class="tags">
+          
+            <a href="/tags/CSAPP-OS/" class="">
+              CSAPP,OS
+            </a>
+          
+        </div>
+        
+      </div>
+      
+    </article>
+    <!-- 上一篇文章和下一篇文章 -->
+    
+      <!-- 文章详情页的上一页和下一页 -->
+<div class="post-nav">
+
+
+
+
+
+  
+  <div class="post-nav-next post-nav-item">
+    <div class="post-nav-img" style="background-size: cover; 
+      background-position: center center;">
+      <img class="lazyload lazyload placeholder" src="/medias/10.jpg" class="lazyload placeholder" data-srcset="/medias/10.jpg" srcset="https://img2.baidu.com/it/u=2037979560,2772131037&fm=26&fmt=auto&gp=0.jpg" src="" alt="">
+    </div>
+    <a href="/2022/05/17/%E8%99%9A%E6%8B%9F%E5%86%85%E5%AD%98/" class="post-nav-link">
+      <div class="title">
+        Next: <i class="fas fa-angle-right"></i>
+        <div class="title-text">CSAPP-chapter9 虚拟内存</div>
+      </div>
+      <!-- <div class="content">
+        虚拟内存从物理寻址到虚拟寻址虚拟内存是一伙子异想天开的人造出来的巧夺天工,在虚拟内存之前,是符合普通人认知的物理内存
+计
+      </div> -->
+    </a>
+  </div>
+
+</div>
+
+    
+    
+
+    <!-- 打赏 -->
+    
+
+    <!-- 分享 -->
+    
+      <!-- https://github.com/overtrue/share.js -->
+<!-- 文章详情页的分享 -->
+<div class="social-share" data-sites="twitter,facebook,google,qq,qzone,wechat,weibo,douban,linkedin" data-wechat-qrcode-helper="<p>微信扫一扫即可分享！</p>"></div>
+
+<script src="/js/shareJs/social-share.min.js"></script>
+</script>
+
+<style>
+  .social-share {
+    margin: 20px 0;
+  }
+</style>
+
+
+    
+    
+    <!-- 评论 -->
+    <!-- 评论 -->
+
+  <div id="myComment">
+    
+      
+<section id="comments" style="padding: 1em; margin: 15px auto;"
+	class="animated bounceInUp">
+	<div id="vcomment" class="comment"></div>
+</section>
+<style>
+	#comments {
+		background: rgba(255,255,255,0.9);
+	}
+	#veditor {
+		background-image: url('https://raw.githubusercontent.com/DeutschBall/test/master/R.3c3e443dfe9ddbddc93730c482ed0461');
+		background-size: contain;
+		background-repeat: no-repeat;
+		background-position: right;
+		background-color: rgba(255, 255, 255, 0);
+		resize: vertical;
+	}
+	#veditor:focus{
+		background-position-y: 200px;
+		transition: all 0.2s ease-in-out 0s;
+	}
+	#vcomment .vcards .vcard .vh .vhead .vtag.vvisitor {
+		background-color: #42b983;
+	}
+	.v[data-class=v] .vbtn:active, .v[data-class=v] .vbtn:hover {
+		color: #42b983;
+		border-color: #42b983;
+	}
+	#vcomment .vcards .vcard .vhead .vsys i {
+		display: none;
+	}
+	/* 底部valine链接 */
+	#vcomment .vpower {
+		display: none;
+	}
+	
+	/* 底下注释是修改 名称和邮箱和网址输入框的样式 */
+	/* #vcomment .vheader {
+		display: flex;
+		justify-content: space-around;
+	}
+	
+	#vcomment .vheader .vnick {
+		width: 31%;
+		border: 2px solid #dedede;
+		padding-left: 10px;
+		padding-right: 10px;
+		border-radius: 5px
+	}
+
+	#vcomment .vheader .vmail {
+		width: 31%;
+		border: 2px solid #dedede;
+		padding-left: 10px;
+		padding-right: 10px;
+		border-radius: 5px
+	}
+
+	#vcomment .vheader .vlink {
+		width: 31%;
+		border: 2px solid #dedede;
+		padding-left: 10px;
+		padding-right: 10px;
+		border-radius: 5px
+	} */
+
+	img.vimg {
+		transition: all 1s;
+		/* 头像旋转时间为 1s */
+	}
+
+	img.vimg:hover {
+		transform: rotate(360deg);
+		-webkit-transform: rotate(360deg);
+		-moz-transform: rotate(360deg);
+		-o-transform: rotate(360deg);
+		-ms-transform: rotate(360deg);
+	}
+
+	#vcomment .vcards .vcard {
+		padding: 15px 20px 0 20px;
+		border-radius: 10px;
+		margin-bottom: 15px;
+		box-shadow: 0 0 4px 1px rgba(0, 0, 0, .12);
+		transition: all .3s
+	}
+
+	#vcomment .vcards .vcard:hover {
+		box-shadow: 0 0 8px 3px rgba(0, 0, 0, .12)
+	}
+
+	#vcomment .vcards .vcard .vh .vcard {
+		border: none;
+		box-shadow: none;
+	}
+</style>
+    
+  </div>
+
+<!-- comment script in themes\hexo-theme-bamboo\layout\_partial\scripts\index.ejs -->
+
+
+  </div>
+
+  <!-- 目录 -->
+  <!-- 文章详情页右侧目录 -->
+
+  <div class="toc-aside">
+    <div class="toc-main">
+      <div class="toc-aside-title">
+        <i class="fas fa-list-ul" aria-hidden="true"></i><span>catalog</span>
+        
+          <div class="toc-open-close">catalog</div>
+        
+      </div>
+      <div class="toc-content">
+        <div class="toc"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 手机端目录按钮 -->
+  <div id="toc-mobile-btn">
+    <i class="fas fa-list-ul" aria-hidden="true"></i>
+  </div>
+
+
+<script>
+  function closeToc(init) {
+    $(".toc-aside").css({'width': 0, 'padding': 0, 'transition': init ?  'noe' : 'width 0.3s' });
+    $(".toc-content").css({'width': 0});
+    $(".toc-aside-title span, .toc-aside-title i").css({'display': 'none'});
+    $(".main-content").css({'width': '75%', 'margin': '10px auto'});
+  };
+  function openToc() {
+    $(".main-content").css({'width': '65%', 'margin-right': '10px', 'margin-left': 'calc(35% - 350px)'});
+    $(".toc-aside").css({'width': '300px', 'padding': '0 10px', 'transition': 'width 0.3s'});
+    $(".toc-content").css({'width': '300px'});
+    $(".toc-aside-title span, .toc-aside-title i").css({'display': 'inline-block'});
+  }
+  function openBtnClickFn () {
+    let openOrCloseBtn = $('.toc-aside .toc-aside-title .toc-open-close');
+    let open = eval('' || 'true');
+    openOrCloseBtn.click(function() {
+      if (open) {
+        closeToc();
+        open = false;
+      } else {
+        openToc();
+        open = true;
+      }
+    });
+  };
+  openBtnClickFn();
+  initCloseTocWidth(true);
+
+  function initCloseTocWidth(init) {
+    if (window.innerWidth >= 992) {
+      let isClose = false;
+      isClose && closeToc(init)
+    }
+  }
+
+  document.addEventListener('pjax:complete', function () {
+    $(".toc-aside").css({'transition': 'no'});
+  })
+  document.addEventListener('pjax:complete', function () {
+    openBtnClickFn();
+  })
+  
+</script>
+
+  <!-- 图片放大 Wrap images with fancybox support -->
+  <script src="/js/wrapImage.js"></script>
+</div>
+
+<!-- 文章详情页背景图 -->
+<div id="appBgSwiper" style="position: fixed;left: 0;top: 0;width: 100%;height: 100%;z-index: -2;"
+	:style="{'background-color': bgColor ? bgColor : 'transparent'}">
+	<transition-group tag="ul" :name="names">
+		<li v-for='(image,index) in img' :key='index' v-show="index === mark" class="bg-swiper-box">
+			<img :src="image" class="bg-swiper-img no-lazy">
+		</li>
+	</transition-group>
+</div>
+<script>
+	var vm = new Vue({
+		el: '#appBgSwiper',
+		data: {
+			names: '' || 'fade' || 'fade', // translate-fade fade
+			mark: 0,
+			img: [],
+			bgColor: '',
+			time: null
+		},
+		methods: {   //添加方法
+			change(i, m) {
+				if (i > m) {
+					// this.names = 'fade';
+				} else if (i < m) {
+					// this.names = 'fade';
+				} else {
+					return;
+				}
+				this.mark = i;
+			},
+			prev() {
+				// this.names = 'fade';
+				this.mark--;
+				if (this.mark === -1) {
+					this.mark = 3;
+					return
+				}
+			},
+			next() {
+				// this.names = 'fade';
+				this.mark++;
+				if (this.mark === this.img.length) {
+					this.mark = 0;
+					return
+				}
+			},
+			autoPlay() {
+				// this.names = 'fade';
+				this.mark++;
+				if (this.mark === this.img.length) {
+					this.mark = 0;
+					return
+				}
+			},
+			play() {
+				let bgImgDelay = '' || '180000'
+				let delay = parseInt(bgImgDelay) || 180000;
+				this.time = setInterval(this.autoPlay, delay);
+			},
+			enter() {
+				clearInterval(this.time);
+			},
+			leave() {
+				this.play();
+			}
+		},
+		created() {
+			this.play()
+		},
+		beforeDestroy() {
+			clearInterval(this.time);
+		},
+		mounted() {
+			let prop = '' || '';
+			let isImg = prop.includes('.bmp') || prop.includes('.jpg') || prop.includes('.png') || prop.includes('.tif') || prop.includes('.gif') || prop.includes('.pcx') || prop.includes('.tga') || prop.includes('.exif') || prop.includes('.fpx') || prop.includes('.psd') || prop.includes('.cdr') || prop.includes('.pcd') || prop.includes('.dxf') || prop.includes('.ufo') || prop.includes('.eps') || prop.includes('.ai') || prop.includes('.raw') || prop.includes('.WMF') || prop.includes('.webp') || prop.includes('.jpeg') || prop.includes('http://') || prop.includes('https://')
+			if (isImg) {
+				let img = prop.split(',');
+				let configRoot = '/'
+				let arrImg = [];
+				img.forEach(el => {
+					var Expression = /http(s)?:\/\/([\w-]+\.)+[\w-]+(\/[\w- .\/?%&=]*)?/;
+					var objExp = new RegExp(Expression);
+
+					if (objExp.test(el)) {
+						// http or https
+						arrImg.push(el);
+					} else {
+						// 非http or https开头
+						// 本地文件
+						let firstStr = el.charAt(0);
+						if (firstStr == '/') {
+							el = el.substr(1); // 删除第一个字符 '/',因为 configRoot最后一个字符为 /
+						}
+						el = configRoot + el;
+						arrImg.push(el);
+					}
+				})
+				this.img = arrImg;
+			} else {
+				this.bgColor = prop;
+			}
+		}
+	})
+</script>
+
+<style>
+	.bg-swiper-box {
+		position: absolute;
+		display: block;
+		width: 100%;
+		height: 100%;
+	}
+
+	.bg-swiper-img {
+		object-fit: cover;
+		width: 100%;
+		height: 100%;
+	}
+</style>
+
+
+  <script>
+  // https://github.com/theme-next/hexo-theme-next/blob/master/layout/_third-party/math/mathjax.swig
+  if (typeof MathJax === 'undefined') {
+    window.MathJax = {
+      loader: {
+        source: {
+          '[tex]/amsCd': '[tex]/amscd',
+          '[tex]/AMScd': '[tex]/amscd'
+        }
+      },
+      tex: {
+        inlineMath: {'[+]': [['$', '$']]},
+        tags: 'ams'
+      },
+      options: {
+        renderActions: {
+          findScript: [10, doc => {
+            document.querySelectorAll('script[type^="math/tex"]').forEach(node => {
+              const display = !!node.type.match(/; *mode=display/);
+              const math = new doc.options.MathItem(node.textContent, doc.inputJax[0], display);
+              const text = document.createTextNode('');
+              node.parentNode.replaceChild(text, node);
+              math.start = {node: text, delim: '', n: 0};
+              math.end = {node: text, delim: '', n: 0};
+              doc.math.push(math);
+            });
+          }, '', false],
+          insertedScript: [200, () => {
+            document.querySelectorAll('mjx-container').forEach(node => {
+              let target = node.parentNode;
+              if (target.nodeName.toLowerCase() === 'li') {
+                target.parentNode.classList.add('has-jax');
+              }
+            });
+          }, '', false]
+        }
+      }
+    };
+    (function () {
+      var script = document.createElement('script');
+      script.src = 'https://cdn.jsdelivr.net/npm/mathjax@3.0/es5/tex-mml-chtml.js';
+      script.defer = true;
+      document.head.appendChild(script);
+    })();
+  } else {
+    // 文章章节标题不能为 “MathJax” ，否则会报错。
+    MathJax.startup.document.state(0);
+    MathJax.texReset();
+    MathJax.typeset();
+  }
+</script>
+
+
+
+
+  <script>
+  function loadMermaid() {
+    if (document.getElementsByClassName('mermaid').length) {
+      if (window.mermaidJsLoad) mermaid.init()
+      else {
+        loadScript('https://cdn.jsdelivr.net/npm/mermaid/dist/mermaid.min.js').then(() => {
+          window.mermaidJsLoad = true
+          mermaid.initialize({
+            theme: 'default',
+          })
+          if ('true') {
+            mermaid.init();
+          }
+        })
+      }
+    }
+  };
+  document.addEventListener("DOMContentLoaded", function () {
+    loadMermaid();
+  })
+
+  document.addEventListener('pjax:complete', function () {
+    loadMermaid();
+  })
+  
+</script>
+
+
+      </main>
+    </div>
+
+    <!-- 页脚 -->
+    
+  
+  <div class="footer bg-color">
+    <div class="footer-main">
+      
+        
+          <div class="link">
+            
+          </div>
+        
+      
+        
+          <div class="footer-copyright">
+            <p>Copyright © 2019 - 2020 <a target="_blank" rel="noopener" href="https://github.com/yuang01">Deutschball</a> | Powered by <a target="_blank" rel="noopener" href="https://hexo.io/zh-cn/docs/">Deutschball</a> | Theme <a target="_blank" rel="noopener" href="https://github.com/yuang01/theme">Bamboo</a> </p>
+
+          </div>
+        
+      
+        
+          
+        
+      
+        
+          <div class="footer-custom">
+            
+          </div>
+        
+      
+    </div>
+  </div>
+
+
+
+    <!-- 渲染暗黑按钮 -->
+    
+    <!-- 渲染回到顶部按钮 -->
+    
+      <div class="goTop top-btn-color" pointer>
+  <i class="fas fa-arrow-up" aria-hidden="true"></i>
+</div>
+<script src="/js/goTop.js"></script>
+
+    
+    <!-- 渲染左下角音乐播放器 -->
+    
+      <link rel="stylesheet" href="/js/aplayer/APlayer@1.10.1.min.css">
+<style>
+.aplayer .aplayer-lrc p {
+  
+  font-size: 12px;
+  font-weight: 700;
+  line-height: 16px !important;
+}
+
+.aplayer .aplayer-lrc p.aplayer-lrc-current {
+  
+  font-size: 15px;
+  color: #42b983;
+}
+
+
+.aplayer.aplayer-fixed.aplayer-narrow .aplayer-body {
+  left: -66px !important;
+}
+
+.aplayer.aplayer-fixed.aplayer-narrow .aplayer-body:hover {
+  left: 0px !important;
+}
+
+
+</style>
+<meting-js  
+  class=""
+  server="netease"
+  type="song"
+  id="1886422838"
+  fixed='true'
+  autoplay='true'
+  theme='#42b983'
+  loop='one'
+  order='random'
+  preload='auto'
+  volume='0.1'
+  list-folded='true'
+>
+</meting-js>
+
+<!-- <style>
+  #aplayer {
+    position: fixed;
+    left: 0;
+    bottom: 300px;
+  }
+</style> -->
+<script src="https://cdn.jsdelivr.net/npm/aplayer@1.10.1/dist/APlayer.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/meting@2/dist/Meting.min.js"></script>
+    
+
+    <!-- 图片放大 -->
+    
+      <script src="/js/fancybox/jquery.fancybox.min.js"></script>
+    
+
+    <!-- 百度解析 -->
+    <!-- Baidu Analytics -->
+
+    <!-- Baidu Push -->
+
+<script>
+    (function () {
+        var bp = document.createElement('script');
+        var curProtocol = window.location.protocol.split(':')[0];
+        if (curProtocol === 'https') {
+            bp.src = 'https://zz.bdstatic.com/linksubmit/push.js';
+        } else {
+            bp.src = 'http://push.zhanzhang.baidu.com/push.js';
+        }
+        var s = document.getElementsByTagName("script")[0];
+        s.parentNode.insertBefore(bp, s);
+    })();
+</script>
+
+    
+    <!-- 背景彩带 -->
+    
+      <script type="text/javascript" size="100" alpha='0.4' zIndex="-1" src="/js/ribbon.min.js"></script>
+    
+
+    <script src="/js/utils/index.js"></script>
+    <script src="/js/app.js"></script>
+    
+    <!-- 文章目录所需js -->
+<link href="/js/tocbot/tocbot.css" rel="stylesheet">
+<script src="/js/tocbot/tocbot.min.js"></script>
+
+<script>
+  var headerEl = 'h2, h3, h4, h5, h6',  //headers 
+    content = '.post-detail',//文章容器
+    idArr = {};  //标题数组以确定是否增加索引id
+  //add #id
+  var option = {
+    // Where to render the table of contents.
+    tocSelector: '.toc',
+    // Where to grab the headings to build the table of contents.
+    contentSelector: content,
+    // Which headings to grab inside of the contentSelector element.
+    headingSelector: headerEl,
+    scrollSmooth: true,
+    scrollSmoothOffset: -80,
+    headingsOffset: -($(window).height() * 0.4 - 45),
+    positionFixedSelector: '.toc-main',
+    positionFixedClass: 'is-position-fixed',
+    fixedSidebarOffset: 'auto',
+    activeLinkClass: 'is-active-link',
+    // onClick: function (e) {},
+  }
+  if ($('.toc').length > 0) {
+
+    $(content).children(headerEl).each(function () {
+      //去除空格以及多余标点
+      var headerId = $(this).text().replace(/[\s|\~|`|\!|\@|\#|\$|\%|\^|\&|\*|\(|\)|\_|\+|\=|\||\|\[|\]|\{|\}|\;|\:|\"|\'|\,|\<|\.|\>|\/|\?|\：|\，|\。]/g, '');
+
+      headerId = headerId.toLowerCase();
+      if (idArr[headerId]) {
+        //id已经存在
+        $(this).attr('id', headerId + '-' + idArr[headerId]);
+        idArr[headerId]++;
+      }
+      else {
+        //id未存在
+        idArr[headerId] = 1;
+        $(this).attr('id', headerId);
+      }
+    });
+
+    document.addEventListener("DOMContentLoaded", function () {
+      tocbot.init(option);
+      mobileTocClick();
+    });
+
+  }
+
+  window.tocScrollFn = function () {
+    return bamboo.throttle(function () {
+      findHeadPosition();
+    }, 100)()
+  }
+  window.addEventListener('scroll', tocScrollFn);
+
+  const findHeadPosition = function (top) {
+    if ($('.toc-list').length <= 0) {
+      return false;
+    }
+    setTimeout(() => {  // or DOMContentLoaded 
+      autoScrollToc();
+    }, 0);
+  }
+
+  const autoScrollToc = function () {
+    const $activeItem = document.querySelector('.is-active-link');
+    const $cardToc = document.querySelector('.toc-content');
+    const activePosition = $activeItem.getBoundingClientRect().top
+    const sidebarScrollTop = $cardToc.scrollTop
+    if (activePosition > (document.documentElement.clientHeight - 100)) {
+      $cardToc.scrollTop = sidebarScrollTop + 150
+    }
+    if (activePosition < 100) {
+      $cardToc.scrollTop = sidebarScrollTop - 150
+    }
+  }
+
+  document.addEventListener('pjax:send', function () {
+    if ($('.toc').length) {
+      tocbot.destroy();
+    }
+  });
+
+  document.addEventListener('pjax:complete', function () {
+    if ($('.toc').length) {
+      tocbot.init(option);
+      mobileTocClick();
+    }
+  });
+  
+  // 手机端toc按钮点击出现目录
+  const mobileTocClick = function () {
+    const $cardTocLayout = document.getElementsByClassName('toc-aside')[0];
+    const $cardToc = $cardTocLayout.getElementsByClassName('toc-content')[0];
+    let right = '45px';
+    if (window.innerWidth >= 551 && window.innerWidth <= 992) {
+      right = '100px'
+    }
+    const mobileToc = {
+      open: () => {
+        $cardTocLayout.style.cssText = 'animation: toc-open .3s; opacity: 1; right: ' + right
+      },
+
+      close: () => {
+        $cardTocLayout.style.animation = 'toc-close .2s'
+        setTimeout(() => {
+          $cardTocLayout.style.cssText = "opacity:''; animation: ''; right: ''"
+        }, 100)
+      }
+    }
+    document.getElementById('toc-mobile-btn').addEventListener('click', () => {
+      if (window.getComputedStyle($cardTocLayout).getPropertyValue('opacity') === '0') mobileToc.open()
+      else mobileToc.close()
+    })
+
+    $cardToc.addEventListener('click', (e) => {
+      if (window.innerWidth < 992) { // 小于992px的时候
+        mobileToc.close()
+      }
+    })
+  }
+</script>
+
+<style>
+  .is-position-fixed {
+    position: sticky !important;
+    top: 74px;
+  }
+
+  .toc-main ul {
+    counter-reset: show-list;
+  }
+
+  .toc-main ul li::before {
+    content: counter(item)".";
+    display: block;
+    position: absolute;
+    left: 12px;
+    top: 0;
+  }
+</style> 
+
+<!-- 设置导航背景 -->
+<script>
+  let setHeaderClass = () => {
+    const headerMenuTransparent = true;
+    if (!headerMenuTransparent) { return; }
+    const nav = $('#navHeader');
+    const navTop = nav.outerHeight();
+    const winTop = $(window).scrollTop();
+    if(winTop > navTop) {
+      nav.addClass('header-bg-color');
+    }
+    else {
+      nav.removeClass('header-bg-color');
+    }
+  };
+
+  let scrollCollect = () => {
+    return bamboo.throttle(function (e) {
+      setHeaderClass();
+    }, 200)()
+  }
+
+  let initHeaderBg = () => {
+    setHeaderClass();
+  }
+
+  setHeaderClass();
+  window.addEventListener('scroll', scrollCollect);
+
+  document.addEventListener('pjax:send', function () {
+    window.removeEventListener('scroll', scrollCollect)
+  })
+  document.addEventListener('pjax:complete', function () {
+    window.addEventListener('scroll', scrollCollect);
+    setHeaderClass();
+  })
+</script> 
+
+<!-- 渲染issues标签里的内容 -->
+<script>
+  function loadIssuesJS() {
+    if ($(".post-detail").find(".issues-api").length == 0) {
+      return;
+    } 
+    loadScript('/js/issues/index.js');
+  };
+  $(function () {
+    loadIssuesJS();
+  });
+  document.addEventListener('pjax:complete', function () {
+    if (typeof IssuesAPI == "undefined") {
+      loadIssuesJS();
+    }
+  })
+</script>
+
+<!-- 输入框打字特效 -->
+<!-- 输入框打字特效 -->
+
+  <script src="/js/activate-power-mode.js"></script>
+  <script>
+    POWERMODE.colorful = true;  // 打开随机颜色特效
+    POWERMODE.shake = false;    // 关闭输入框抖动
+    document.body.addEventListener('input', POWERMODE);//监听打字事件
+  </script>
+
+
+<!-- markdown代码一键复制功能 -->
+
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/v-plugs-ayu/lib/ayu.css">
+  <script src="https://cdn.jsdelivr.net/npm/v-plugs-ayu/lib/ayu.umd.min.js"></script>
+  <script src="/js/clipboard/clipboard.min.js"></script>
+  <div id="appCopy">
+  </div>
+  <script data-pjax>
+    var vm = new Vue({
+      el: '#appCopy',
+      data: {
+      },
+      computed: {
+      },
+      mounted() {
+        const that = this;
+        var copy = 'copy';
+        /* code */
+        var initCopyCode = function () {
+          var copyHtml = '';
+          copyHtml += '<button class="btn-copy" data-clipboard-snippet="" style="position:absolute;top:0;right:0;z-index:1;">';
+          copyHtml += '<i class="fas fa-copy"></i><span>' + copy + '</span>';
+          copyHtml += '</button>';
+          $(".post-detail pre").not('.gutter pre').wrap("<div class='codeBox' style='position:relative;width:100%;'></div>")
+          $(".post-detail pre").not('.gutter pre').before(copyHtml);
+          new ClipboardJS('.btn-copy', {
+            target: function (trigger) {
+              return trigger.nextElementSibling;
+            }
+          });
+        }
+        initCopyCode();
+        $('.btn-copy').unbind('click').bind('click', function () {
+          doSomething();
+        })
+        $(document).unbind('keypress').bind('keypress', function (e) {
+          if (e.ctrlKey && e.keyCode == 67) {
+            doSomething();
+          }
+        })
+
+        function doSomething() {
+          that.$notify({
+            title: "成功",
+            content: "copy that",
+            type: 'success'
+          })
+        }
+      },
+      methods: {
+      },
+      created() { }
+    })
+  </script>
+  
+
+<!-- 图片懒加载 -->
+<script defer src="https://cdn.jsdelivr.net/npm/vanilla-lazyload@17.1.0/dist/lazyload.min.js"></script>
+<script>
+  // https://www.npmjs.com/package/vanilla-lazyload
+  // Set the options globally
+  // to make LazyLoad self-initialize
+  window.lazyLoadOptions = {
+    elements_selector: ".lazyload",
+    threshold: 0
+  };
+  // Listen to the initialization event
+  // and get the instance of LazyLoad
+  window.addEventListener(
+    "LazyLoad::Initialized",
+    function (event) {
+      window.lazyLoadInstance = event.detail.instance;
+    },
+    false
+  );
+  document.addEventListener('DOMContentLoaded', function () {
+    lazyLoadInstance.update();
+  });
+  document.addEventListener('pjax:complete', function () {
+    lazyLoadInstance.update();
+  });
+</script>
+
+
+<!-- 卡片滚动动画 -->
+   
+
+<!-- 评论所需js -->
+
+  
+    <!-- 弹幕所需的css和js -->
+    
+<!-- 具体js，请前往valine/script.ejs查看 -->
+
+    <script>
+  var requiredFields = '';
+  requiredFields = requiredFields.split(',');
+  comment_el = '.comment';
+  let looperValine = null;
+  load_valine = function () {
+    if ($(comment_el).length) {
+      var valine = new Valine({
+        el: '#vcomment',
+        path: window.location.pathname,
+        notify: false,
+        verify: false,
+        app_id: "",
+        app_key: "",
+        placeholder: "客官，说点什么吧",
+        avatar: "",
+        master: "",   //博主邮箱md5
+        tagMeta: ["博主","小伙伴","访客"],     //标识字段名
+        friends: "",
+        metaPlaceholder: { "nick": "昵称/QQ号", "mail": "邮箱" },
+        requiredFields: requiredFields,
+        enableQQ: true,
+      });
+      function debounce(fn) {
+        var timerID = null
+        return function () {
+          var arg = arguments[0]   //获取事件
+          if (timerID) {
+            clearTimeout(timerID)
+          }
+          timerID = setTimeout(function () {
+            fn(arg)              //事件传入函数
+          }, 200)
+        }
+      }
+      //查询评论 valine.Q('*').limit(7) -- 查询所有，限制7条, 下面的的代码是查询当前页面
+      var themeDanmu = eval('false');
+      var themeLoop = eval('false');
+      var themeLooperTime = '5000' || 5000;
+      var speed = '40' || 20;
+      var isBarrager = true;
+      if (themeDanmu == true) {
+        do_barrager();
+        if ($('.danmuBox').length <= 0) {
+          $('.navbar').append('<div class="danmuBox"><div class="danmuBtn open"><span class="danmuCircle"></span><span class="danmuText">弹幕</span></div></div>');
+        }
+        $('.danmuBtn').on('click', debounce(
+          function () {
+            if ($('.danmuBtn').hasClass('open')) {
+              $('.danmuBtn').removeClass('open')
+              clearInterval(looperValine);
+              $.fn.barrager.removeAll();
+            } else {
+              $('.danmuBtn').addClass("open");
+              do_barrager();
+            }
+          }
+        ))
+      }
+      function do_barrager() {
+        isBarrager && valine.Q(window.location.pathname).find().then(function (comments) {
+          // var num = 0; // 可以记录条数，循环调用的时候只取最新的评论放入弹幕中
+          var run_once = true;
+          var looper_time = themeLooperTime;
+          var total = comments.length;
+          // var looper = null;
+          var index = 0;
+          if (total > 0) {
+            barrager();
+          } else {
+            // 当评论数为0的时候，自动关闭弹幕
+            // $('.danmuBtn').removeClass('open');
+          }
+          function barrager() {
+            if (run_once) {
+              //如果是首次执行,则设置一个定时器,并且把首次执行置为false
+              looperValine = setInterval(barrager, looper_time);
+              run_once = false;
+            }
+            var content = comments[index]._serverData.comment;
+            var email = comments[index]._serverData.mail;
+            var link = comments[index]._serverData.link;
+            var newcontent = content.substring(0, 50).replace(/<[^>]+>/g, "");
+            //发布一个弹幕
+            const item = {
+              img: `https://q1.qlogo.cn/g?b=qq&nk=${email}&s=640`, //图片 
+              info: newcontent, //文字 
+              href: link, //链接 
+              close: true, //显示关闭按钮 
+              speed: speed, //延迟,单位秒,默认6 
+              color: '#fff', //颜色,默认白色 
+              old_ie_color: '#000000', //ie低版兼容色,不能与网页背景相同,默认黑色
+            }
+            $('body').barrager(item);
+            //索引自增
+            index++;
+            //所有弹幕发布完毕，清除计时器。
+            if (index == total) {
+              clearInterval(looperValine);
+              if (themeLoop === true) {
+                setTimeout(function () {
+                  do_barrager();
+                }, 5000);
+              } else {
+                $('.danmuBtn').removeClass('open');
+              }
+              return false;
+            }
+
+          }
+        })
+      }
+    }
+  };
+  $(document).ready(load_valine);
+  document.addEventListener('pjax:send', function (e) {
+    
+  })
+  document.addEventListener('pjax:complete', function () {
+    load_valine();
+  });
+</script>
+
+  
+
+
+<!-- 鼠标点击特效 -->
+<!-- 爱心点击 -->
+
+  
+    <canvas class="fireworks" style="position: fixed;left: 0;top: 0;z-index: 999; pointer-events: none;" ></canvas>
+    <script src="//cdn.bootcss.com/animejs/2.2.0/anime.min.js"></script>
+    <script src="/js/cursor/explosion.min.js"></script>
+  
+
+
+
+
+
+    <!-- pjax -->
+    
+
+<!-- pjax -->
+
+
+  <script src="/js/pjax@0.2.8/index.js"></script>
+  
+    <!-- 样式位于：source/css/_third-party/pjaxanimate.styl -->
+
+<div class="pjax-animate">
+  
+    <div class="loading-circle"><div id="loader-circle"></div></div>
+    <script>
+      window.ShowLoading = function() {
+        $(".loading-circle").css("display", "block");
+      };
+      window.HideLoading = function() {
+        $(".loading-circle").css("display", "none");
+      }
+    </script>
+  
+	<script>
+    document.addEventListener('pjax:complete', function () {
+      window.HideLoading();
+    })
+    document.addEventListener('pjax:send', function () {
+      window.ShowLoading();
+    })
+    document.addEventListener('pjax:error', function () {
+      window.HideLoading();
+    })
+	</script>
+</div>
+
+  
+
+  <script>
+    var pjax = new Pjax({
+      elements: 'a[href]:not([href^="#"]):not([href="javascript:void(0)"]):not([no-pjax])',   // 拦截正常带链接的 a 标签
+      selectors: ["#pjax-container","title"],                                   // 根据实际需要确认重载区域
+      cacheBust: false,   // url 地址追加时间戳，用以避免浏览器缓存
+      timeout: 5000
+    });
+
+    document.addEventListener('pjax:send', function (e) {
+
+      try {
+        var currentUrl = window.location.pathname;
+        var targetUrl = e.triggerElement.href;
+        var banUrl = [""];
+        if (banUrl[0] != "") {
+          banUrl.forEach(item => {
+            if(currentUrl.indexOf(item) != -1 || targetUrl.indexOf(item) != -1) {
+              window.location.href = targetUrl;
+            }
+          });
+        }
+      } catch (error) {}
+
+      $(window).unbind('resize');
+      $(window).unbind('scroll');
+      $(document).unbind('scroll');
+      $(document).unbind('click');
+      $('body').unbind('click');
+
+    })
+    
+    document.addEventListener('pjax:complete', function () {
+      $('script[data-pjax], .pjax-reload script').each(function () {
+        $(this).parent().append($(this).remove());
+      });
+    });
+
+    document.addEventListener('pjax:error', function (e) {
+      window.location.href = e.triggerElement.href;
+    })
+    
+    // 刷新不从顶部开始
+    document.addEventListener("DOMContentLoaded", function () {
+      history.scrollRestoration = 'auto';
+    })
+  </script>
+
+
+
+  </body>
+</html>
