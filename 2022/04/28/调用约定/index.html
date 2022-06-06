@@ -511,6 +511,12 @@
 <p>很多编译器的优化,会不用上述方式(rbp+偏移量)调用上一个函数的局部变量或者函数参数,而是只用rsp+偏移量.然后省出rbp寄存器去干其他事.对于GCC编译器,使用<code>-fomit-frame-pointer</code>编译选项达到上述目的</p>
 <p>按照我的理解,rbp的作用就是调用者的rsp副本,然后rsp为被调用者服务,rbp为调用者服务.</p>
 <p>rbp只是在被调用者嗲用调用者的局部变量时,令寻址更方便,完全可以只用rsp达到目的</p>
+<blockquote>
+<p>后来的实践证明我一开始的理解是错误的</p>
+<p>rbp指向函数栈帧的高地址,即栈底,rsp指向函数栈帧的低地址,即栈顶</p>
+<p>二者都是为当前函数服务的</p>
+<p>函数的开端时会将上一个函数的rbp指针压栈保存,然后指向当前函数栈帧的栈底.函数尾声时会将上一个函数的rbp指针退栈还给rbp</p>
+</blockquote>
 <figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">gcc -O0 -fomit-frame-pointer test.c -c -m64 -o test.o|objdump -d test.o &gt; test.s|code test.s</span><br></pre></td></tr></table></figure>
 <figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line">00000000000000d6 &lt;main&gt;:</span><br><span class="line">  d6:	48 83 ec 28          	sub    $0x28,%rsp</span><br><span class="line">  da:	e8 00 00 00 00       	callq  df &lt;main+0x9&gt;</span><br><span class="line">  df:	e8 ae ff ff ff       	callq  92 &lt;show&gt;</span><br><span class="line">  e4:	b8 00 00 00 00       	mov    $0x0,%eax</span><br><span class="line">  e9:	48 83 c4 28          	add    $0x28,%rsp</span><br><span class="line">  ed:	c3                   	retq   </span><br><span class="line">  ee:	90                   	nop</span><br><span class="line">  ef:	90                   	nop</span><br><span class="line"></span><br></pre></td></tr></table></figure>
 <p>使用<code>-fomit-frame-pointer</code>编译选项之后确实ebp不踪影了</p>
