@@ -1,0 +1,1990 @@
+<!DOCTYPE html>
+<html>
+  <!-- meta/link... -->
+  
+
+
+
+<head>
+  <meta http-equiv="content-type" content="text/html; charset=utf-8">
+  <meta content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=0" name="viewport">
+  <!-- Global site tag (gtag.js) - Google Analytics -->
+
+
+  <title>机器级算术运算的原理 | Deutschball&#39;s blog</title>
+
+  <link rel="icon" type="image/png" href="https://raw.githubusercontent.com/DeutschBall/test/master/emp.png">
+  <link rel="stylesheet" href="https://at.alicdn.com/t/font_1911880_c1nvbyezg17.css">
+  <link href="https://cdn.jsdelivr.net/gh/inkss/fontawesome@5.15.3/css/all.min.css" rel="stylesheet">
+  <link href="/js/swiper/swiper@5.4.1.min.css" rel="stylesheet">
+  
+  
+    <script>
+        var themeModelId = '';
+        if (themeModelId) {
+            localStorage.setItem('modelId', themeModelId);
+        }
+    </script>
+    
+    <script src="https://cdn.jsdelivr.net/gh/yuang01/live2d-widget@latest/autoload.js"></script>
+    <script>
+        var live2dOpen = eval('true') || false;
+        if (!live2dOpen) {
+            localStorage.setItem('waifu-display', 1609323474481);
+        }
+    </script>
+  
+  
+  
+<link rel="stylesheet" href="/css/animate.min.css">
+
+  
+<link rel="stylesheet" href="/css/style.css">
+
+  
+  
+    
+<link rel="stylesheet" href="/js/fancybox/jquery.fancybox.min.css">
+
+  
+  
+    
+<link rel="stylesheet" href="/js/shareJs/share.min.css">
+
+  
+  <style>
+        @media (max-width: 992px) {
+            #waifu {
+                display: none;
+            }
+        }
+    </style>
+    <script src="//cdn.bootcss.com/pace/1.0.2/pace.min.js"></script>
+    <link href="//cdn.bootcss.com/pace/1.0.2/themes/pink/pace-theme-flash.css" rel="stylesheet">
+
+    
+        <script src="/js/valine/av-min@3.0.4.js"></script>
+        <script src="https://cdn.jsdelivr.net/gh/HCLonely/Valine@latest/dist/Valine.min.js"></script>
+    
+
+    <!-- import link -->
+    
+        
+            
+        
+            
+        
+    
+    <!-- import script -->
+    
+        
+            
+        
+            
+        
+    
+
+<!-- hexo injector head_end start -->
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.12.0/dist/katex.min.css">
+<!-- hexo injector head_end end --><meta name="generator" content="Hexo 6.2.0"></head>
+
+  
+  <!-- 依赖于jquery和vue -->
+  
+    
+<script src="https://cdn.jsdelivr.net/npm/jquery@3.5.1/dist/jquery.min.js"></script>
+
+  
+
+  
+    
+<script src="https://cdn.jsdelivr.net/npm/vue@2.6.11/dist/vue.min.js"></script>
+
+  
+  
+  <body>
+    <!-- 预加载动画 -->
+    <!-- 页面预加载动画 -->
+
+<div id='loader'>
+  <link rel="stylesheet" href="/js/loaded/index.css" >
+  <div class="loading-left-bg"></div>
+  <div class="loading-right-bg"></div>
+  <div class="spinner-box">
+    <div class="configure-border-1">
+      <div class="configure-core"></div>
+    </div>
+    <div class="configure-border-2">
+      <div class="configure-core"></div>
+    </div>
+    <div class="loading-word">loading...</div>
+  </div>
+</div>
+
+<script>
+  var endLoading = function () {
+    document.body.style.overflow = 'auto';
+    document.getElementById('loader').classList.add("loading");
+  }
+  window.addEventListener('DOMContentLoaded',endLoading);
+  
+</script>
+
+    
+    <!-- 判断是否为暗黑风格 -->
+    <!-- 判断是否为黑夜模式 -->
+<script>
+  let isDark = JSON.parse(localStorage.getItem('dark')) || JSON.parse('true');
+
+  if (isDark) {
+    $(document.body).addClass('darkModel');
+  }
+</script>
+
+    <!-- 需要在上面加载的js -->
+    <script>
+  function loadScript(src, cb) {
+    return new Promise(resolve => {
+      setTimeout(function () {
+        var HEAD = document.getElementsByTagName("head")[0] || document.documentElement;
+        var script = document.createElement("script");
+        script.setAttribute("type", "text/javascript");
+        if (cb) {
+          if (JSON.stringify(cb)) {
+            for (let p in cb) {
+              if (p == "onload") {
+                script[p] = () => {
+                  cb[p]()
+                  resolve()
+                }
+              } else {
+                script[p] = cb[p]
+                script.onload = resolve
+              }
+            }
+          } else {
+            script.onload = () => {
+              cb()
+              resolve()
+            };
+          }
+        } else {
+          script.onload = resolve
+        }
+        script.setAttribute("src", src);
+        HEAD.appendChild(script);
+      });
+    });
+  }
+
+  //https://github.com/filamentgroup/loadCSS
+  var loadCSS = function (href, before, media, attributes) {
+    return new Promise(resolve => {
+      setTimeout(function () {
+        var link = document.createElement('link');
+        link.rel = "stylesheet";
+        link.href = src;
+        link.onload = resolve;
+        document.getElementsByTagName("head")[0].appendChild(link);
+      });
+    });
+  };
+
+</script> 
+
+<!-- 轮播图所需要的js -->
+<script src="/js/swiper/swiper.min.js"></script>
+<script src="/js/swiper/vue-awesome-swiper.js"></script>
+<script src="/js/swiper/swiper.animate1.0.3.min.js"></script>
+
+<script type="text/javascript">
+  Vue.use(window.VueAwesomeSwiper)
+</script>
+
+
+  <script src="/js/vue-typed-js/index.js"></script>
+
+
+<!-- 首页的公告滚动插件的js需要重新加载 -->
+<script src="/js/vue-seamless-scroll/index.js"></script>
+
+<!-- 打字机效果js -->
+<script src="https://cdn.jsdelivr.net/npm/typed.js@2.0.11"></script>
+
+
+    <div id="safearea">
+      <main class="main" id="pjax-container">
+        <!-- 头部导航 -->
+        
+<header class="header   " 
+  id="navHeader"
+  style="position: fixed;
+  left: 0; top: 0; z-index: 10;width: 100%;"
+>
+  <div class="header-content">
+    <div class="bars">
+      <div id="appDrawer" class="sidebar-image">
+  <div class="drawer-box-icon">
+    <i class="fas fa-bars" aria-hidden="true" @click="showDialogDrawer"></i>
+  </div>
+  
+  <transition name="fade">
+    <div class="drawer-box_mask" v-cloak style="display: none;" v-show="visible" @click.self="cancelDialogDrawer">
+    </div>
+  </transition>
+  <div class="drawer-box" :class="{'active': visible}">
+    <div class="drawer-box-head bg-color">
+      <img class="drawer-box-head_logo lazyload placeholder" src="https://raw.githubusercontent.com/DeutschBall/test/master/emp.png" class="lazyload placeholder" data-srcset="https://raw.githubusercontent.com/DeutschBall/test/master/emp.png" srcset="https://img2.baidu.com/it/u=2037979560,2772131037&fm=26&fmt=auto&gp=0.jpg" alt="logo">
+      <h3 class="drawer-box-head_title">Deutschball&#39;s blog</h3>
+      <h5 class="drawer-box-head_desc"></h5>
+    </div>
+    
+    <div class="drawer-box-content">
+      <ul class="drawer-box-content_menu">
+        
+        
+          <li class="drawer-box-content_item">
+            <a target="_blank" rel="noopener" href="https://github.com/DeutschBall">
+              <i class="fas fa-github" aria-hidden="true"></i>
+              <span>Github</span>
+            </a>
+          </li>
+        
+      </ul>
+    </div>
+  </div>
+</div>
+
+<script>
+  var body = document.body || document.documentElement || window;
+  var vm = new Vue({
+    el: '#appDrawer',
+    data: {
+      visible: false,
+      top: 0,
+      openArr: [],
+    },
+    computed: {
+    },
+    mounted() {
+    },
+    methods: {
+      isOpen(index) {
+        if (this.openArr.includes(index)) {
+          return true;
+        } else {
+          return false;
+        }
+      },
+      openOrCloseMenu(curIndex) {
+        const index = this.openArr.indexOf(curIndex);
+        if (index !== -1) {
+          this.openArr.splice(index, 1);
+        } else {
+          this.openArr.push(curIndex);
+        }
+      },
+      showDialogDrawer() {
+        this.visible = true;
+        // 防止页面滚动，只能让弹框滚动
+        this.top = $(document).scrollTop()
+        body.style.cssText = 'width: 100%; height: 100%;overflow: hidden;';
+      },
+      cancelDialogDrawer() {
+        this.visible = false;
+        body.removeAttribute('style');
+        $(document).scrollTop(this.top)
+      }
+    },
+    created() {}
+  })
+</script>
+
+    </div>
+    <div class="blog-title" id="author-avatar">
+      
+        <div class="avatar">
+          <img src="https://raw.githubusercontent.com/DeutschBall/test/master/emp.png" class="lazyload placeholder" data-srcset="https://raw.githubusercontent.com/DeutschBall/test/master/emp.png" srcset="https://img2.baidu.com/it/u=2037979560,2772131037&fm=26&fmt=auto&gp=0.jpg" alt="logo">
+        </div>
+      
+      <a href="/" class="logo">Deutschball&#39;s blog</a>
+    </div>
+    <nav class="navbar">
+      <ul class="menu">
+        
+      </ul>
+      
+      
+        <div id="appSearch">
+  <div class="search"  @click="showDialog()"><i class="fas fa-search" aria-hidden="true"></i></div>
+  <transition name="fade">
+    <div class="message-box_wrapper" style="display: none;" v-cloak v-show="dialogVisible" @click.self="cancelDialogVisible()">
+      <div class="message-box animated bounceInDown">
+        <h2>
+          <span>
+            <i class="fas fa-search" aria-hidden="true"></i>
+            <span class="title">Search</span>
+          </span>
+          <i class="fas fa-times close" pointer style="float:right;" aria-hidden="true" @click.self="cancelDialogVisible()"></i>
+        </h2>
+        <form class="site-search-form">
+          <input type="text"
+            placeholder="Please enter keywords"
+            id="local-search-input" 
+            @click="getSearchFile()"
+            class="st-search-input"
+            v-model="searchInput"
+          />
+        </form>
+        <div class="result-wrapper">
+          <div id="local-search-result" class="local-search-result-cls"></div>
+        </div>
+      </div>
+    </div>
+  </transition>
+</div>
+<script src="/js/local_search.js"></script>
+<script>
+  var body = document.body || document.documentElement || window;
+  var vm = new Vue({
+    el: '#appSearch',
+    data: {
+      dialogVisible: false,
+      searchInput: '',
+      top: 0,
+    },
+    computed: {
+    },
+    mounted() {
+      window.addEventListener('pjax:complete', () => {
+        this.cancelDialogVisible();
+      })
+    },
+    methods: {
+      showDialog() {
+        this.dialogVisible = true;
+        // 防止页面滚动，只能让弹框滚动
+        this.top = $(document).scrollTop()
+        body.style.cssText = 'overflow: hidden;';
+      },
+      getSearchFile() {
+        if (!this.searchInput) {
+          getSearchFile("/search.xml");
+        }
+      },
+      cancelDialogVisible() {
+        this.dialogVisible = false;
+        body.removeAttribute('style');
+        $(document).scrollTop(this.top)
+      },
+    },
+    created() {}
+  })
+</script>
+<!-- 解决刷新页面闪烁问题，可以在元素上添加display: none, 或者用vue.extend方法，详情：https://blog.csdn.net/qq_31393401/article/details/81017912 -->
+<!-- 下面是搜索基本写法 -->
+<!-- <script type="text/javascript" id="local.search.active">
+  var inputArea = document.querySelector("#local-search-input");
+  inputArea.onclick   = function(){ getSearchFile(); this.onclick = null }
+  inputArea.onkeydown = function(){ if(event.keyCode == 13) return false }
+</script> -->
+
+      
+
+    </nav>
+  </div>
+  
+    <a target="_blank" rel="noopener" href="https://github.com/DeutschBall" class="github-corner color-primary" aria-label="View source on GitHub"><svg width="60" height="60" viewBox="0 0 250 250" style="fill:#fff; position: absolute; top: 0; border: 0; right: 0;" aria-hidden="true"><path d="M0,0 L115,115 L130,115 L142,142 L250,250 L250,0 Z"></path><path d="M128.3,109.0 C113.8,99.7 119.0,89.6 119.0,89.6 C122.0,82.7 120.5,78.6 120.5,78.6 C119.2,72.0 123.4,76.3 123.4,76.3 C127.3,80.9 125.5,87.3 125.5,87.3 C122.9,97.6 130.6,101.9 134.4,103.2" fill="currentColor" style="transform-origin: 130px 106px;" class="octo-arm"></path><path d="M115.0,115.0 C114.9,115.1 118.7,116.5 119.8,115.4 L133.7,101.6 C136.9,99.2 139.9,98.4 142.2,98.6 C133.8,88.0 127.5,74.4 143.8,58.0 C148.5,53.4 154.0,51.2 159.7,51.0 C160.3,49.4 163.2,43.6 171.4,40.1 C171.4,40.1 176.1,42.5 178.8,56.2 C183.1,58.6 187.2,61.8 190.9,65.4 C194.5,69.0 197.7,73.2 200.1,77.6 C213.8,80.2 216.3,84.9 216.3,84.9 C212.7,93.1 206.9,96.0 205.4,96.6 C205.1,102.4 203.0,107.8 198.3,112.5 C181.9,128.9 168.3,122.5 157.7,114.1 C157.9,116.9 156.7,120.9 152.7,124.9 L141.0,136.5 C139.8,137.7 141.6,141.9 141.8,141.8 Z" fill="currentColor" class="octo-body"></path></svg></a><style>.github-corner:hover .octo-arm{animation:octocat-wave 560ms ease-in-out}@keyframes octocat-wave{0%,100%{transform:rotate(0)}20%,60%{transform:rotate(-25deg)}40%,80%{transform:rotate(10deg)}}@media (max-width:500px){.github-corner:hover .octo-arm{animation:none}.github-corner .octo-arm{animation:octocat-wave 560ms ease-in-out}}</style>
+  
+  
+</header>
+        <!-- 内容区域 -->
+        
+ <!-- prismjs 代码高亮 -->
+ 
+
+
+<div class="bg-dark-floor" style="position: fixed;left: 0;top: 0;width: 100%;height: 100%;z-index: -1;"></div>
+
+
+  <!-- 文章详情页顶部图片和标题 -->
+
+
+
+
+<div class="post-detail-header" id="thumbnail_canvas" style="background-repeat: no-repeat; background-size: cover; 
+  background-position: center center;position: relative;background-image:url('/medias/9.jpg')">
+  <div class="post-detail-header-mask"></div>
+  <canvas id="header_canvas"style="position:absolute;bottom:0;pointer-events:none;"></canvas>
+  
+  <div class="post-detail-header_info-box">
+    <div class="title-box">
+      <span class="title">
+        机器级算术运算的原理
+      </span>
+    </div>
+    
+    
+      
+        <span class="post-detail-header_date">
+          <i class="fas fa-calendar"></i> Published in：2022-06-17 |
+        </span>
+      
+
+      
+
+      
+    
+  </div>
+  
+  
+    <script src="/js/bubble/bubble.js"></script>
+  
+</div>
+
+
+
+
+
+<div class="row justify-position" 
+  style="padding-top: 0px;">
+  <div class="main-content">
+    <article class="post post-detail">
+      <div class="post-content">
+        <h1 id="机器级算术运算的原理"><a href="#机器级算术运算的原理" class="headerlink" title="机器级算术运算的原理"></a>机器级算术运算的原理</h1><p>落脚在加法,全加器,半加器,全加器级联,等最基础的知识</p>
+<p>机器在算术的时候有很多行为和人不一样,但是权位的思想是相同的</p>
+<p>人在算术的时候通过列竖式对其的方式,隐含着权位规则.</p>
+<p><strong>机器将权位规则体现在,随着运算会有中间结果的位移</strong></p>
+<p>理解了机器将中间结果移位的原因,也就理解了机器级算术运算的原理</p>
+<p>计组第三章讲的机器机计算方法实际上和程序员距离比较远,ALU中已经封装好了各种计算方法,那为什么还要我们学这一部分呢?</p>
+<p>我的感觉让我们是理解计算机底层实现中的状态机思想,</p>
+<p>在推导适应机器的算法时,越发感觉出,有固定的状态的转移套路</p>
+<p>而这种思想将对我们在开发状态机服务端的时候提供世界观上的支持</p>
+<p>然而课本对于该部分的介绍基本止步于如何计算,并没有下到算法如何设计得到的,可以说是一大遗憾.</p>
+<p>现在将我的设计和课本给出的设计思想其补上</p>
+<h2 id="手算原码乘法"><a href="#手算原码乘法" class="headerlink" title="手算原码乘法"></a>手算原码乘法</h2><p>这是万恶之源,通过一个例题观察人类对权位规则的应用</p>
+<p><img src="C:\Users\86135\AppData\Roaming\Typora\typora-user-images\image-20220616203001064.png" class="lazyload placeholder" data-srcset="C:\Users\86135\AppData\Roaming\Typora\typora-user-images\image-20220616203001064.png" srcset="https://img2.baidu.com/it/u=2037979560,2772131037&fm=26&fmt=auto&gp=0.jpg" alt="image-20220616203001064"></p>
+<p>之前一直不知道怎么描述这个过程,只能是手写比划比划,直到看了CSAPP第二章位向量表示法,终于知道怎么描述这个过程了</p>
+<p>只看小数点后面的部分,把$X,Y$表示成位向量,有</p>
+<script type="math/tex; mode=display">
+X=[X_3X_2X_1X_0]=\sum_{i=0}^3[2^i\times X_i](X_i=0\ or\ 1)</script><script type="math/tex; mode=display">
+Y=[Y_3Y_2Y_1Y_0]=\sum_{i=0}^3[2^i\times Y_i](Y_i=0\ or\ 1)</script><p>那么手算的思想可以用下式表示:</p>
+<script type="math/tex; mode=display">
+\begin{aligned}
+ANS&=X\times Y\\
+&=X\times\sum_{i=0}^3[2^i\times Y_i]\\
+&=\sum_{i=0}^3[ 2^i\times X\times Y_i]\\
+&=[X\times Y_0]+2[X\times Y_1]+4[X\times Y_2]+8[X\times Y_3]\\
+&=A_0+A_1+A_2+A_3\\
+&=E\\
+&=[E_3E_2E_1E_0]
+\end{aligned}</script><p>其中</p>
+<script type="math/tex; mode=display">
+A_i=2^i\times [X\times Y_i],i\in[0,3]</script><script type="math/tex; mode=display">
+E_j=\sum_{i=0}^3A_{ij}+低位进位\\
+j\in[0,7]\</script><p><img src="https://raw.githubusercontent.com/DeutschBall/test/master/image-20220616210922544.png" class="lazyload placeholder" data-srcset="https://raw.githubusercontent.com/DeutschBall/test/master/image-20220616210922544.png" srcset="https://img2.baidu.com/it/u=2037979560,2772131037&fm=26&fmt=auto&gp=0.jpg" alt="image-20220616210922544"></p>
+<p>这里$E_i$的计算方法就是小学里算竖式的时候,老师常说的”落下来”</p>
+<p>从图上我们可以更清晰地看出,被乘数分别和乘数的”个十百千位”相乘,按位对其之后落下来累加得到E</p>
+<h2 id="原码一位乘法"><a href="#原码一位乘法" class="headerlink" title="原码一位乘法"></a>原码一位乘法</h2><p>如果让机器原封不动重复刚才手算的过程</p>
+<h3 id="替机器瞎操心"><a href="#替机器瞎操心" class="headerlink" title="替机器瞎操心"></a>替机器瞎操心</h3><p>他需要维护一个二维数组,记录用X和Y的每一位相乘,分别得到的中间位向量$A_i$</p>
+<p>然后”落下来”求$E$</p>
+<p>就这个二维数组就把机器难为住了</p>
+<p>1.如果两个32位整数相乘,就需要32*32个方格的二维数组,ALU可是没有记忆功能的,寄存器也就稀松几个,记忆能力有限,显然32²个方格没处放.</p>
+<p>2.机器怎么知道当前应该用X对齐Y的”个位”还是”十位”还是”百位”呢?用一个寄存器,记录Y已经被对齐过几位吗?</p>
+<p>不需要,因为本次对齐的位一定是只比上一次对齐位高一位,只需要将被乘数左移一下.</p>
+<p>然后根据本次Y的对齐位是1则$Ai=X\times 权重$,比如图表中$A_3$</p>
+<p>如果本次Y的对齐位为0则$A_i=0$,比如图表中$A_2$</p>
+<p>问题又来了,权重用谁来记住呢?再开一个寄存器,初始记录1,表示权重为$2^0$,随着被乘数$X$的左移,这个寄存器也要左移一下表示权重乘以2</p>
+<p>如果继续研究如何让硬件实现,还能发现更多问题.<del>第一,机器算账,这钱怎么进了你自己的腰包</del></p>
+<h3 id="滚动数组"><a href="#滚动数组" class="headerlink" title="滚动数组"></a>滚动数组</h3><p>现在考虑一下,有必要维护这个二维数组吗?滚动数组行吗?</p>
+<p>中间过程不使用二维数组,就维护一个位向量$A$,计算过程中A只有累加和右移两种行为.</p>
+<p>乘数个位为1,则被乘数直接加到A的<strong>高四位</strong></p>
+<blockquote>
+<p>为啥是高四位呢?似乎有点违反直觉,因为A的高位表示的是高权重,但是现在用被乘数乘的是乘数的个位,权位最低才对啊.别忘了A要右移</p>
+</blockquote>
+<p>然后A右移一位,乘数右移一位</p>
+<blockquote>
+<p>这个过程干了一个啥事呢?</p>
+<p>被乘数一直和乘数的”最低位”对齐,刚才最低位是”个位”,现在经过右移,个位直接扬了,十位成了”最低位”.被乘数时钟看乘数最低位脸色行事,当这个最低位是1的时候才把自己加到A上,加到A的最高四位上</p>
+<p>A右移一位,则所有历史记录都降权2,</p>
+<p>可想而知,当乘数的千位右移到最低位,这时候被乘数将自己加到了A的高四位上,此时计算结束.乘数的千位和被乘数的积 的权就最高,根本不需要降权</p>
+<p>而乘数的个位和被乘数的积此时已经经历了4次降权,权重仅为$\frac{1}{2^4}=\frac{1}{16}$</p>
+<p>这正好满足我们的目的</p>
+</blockquote>
+<p>现在可以用机器实现了</p>
+<p><img src="https://raw.githubusercontent.com/DeutschBall/test/master/image-20220616213145320.png" class="lazyload placeholder" data-srcset="https://raw.githubusercontent.com/DeutschBall/test/master/image-20220616213145320.png" srcset="https://img2.baidu.com/it/u=2037979560,2772131037&fm=26&fmt=auto&gp=0.jpg" alt="image-20220616213145320"></p>
+<h4 id="硬件框图的意义"><a href="#硬件框图的意义" class="headerlink" title="硬件框图的意义"></a>硬件框图的意义</h4><p>这个图怎么看呢?</p>
+<p>D和A合起来作为”中间过程位向量”,D就是高四位,A就是低四位</p>
+<p>一开始的时候D=0,A=Y,这好像和我们刚才的分析不一样,我们分析的滚动数组思想中,Y是独立存在的,不会放在A中.</p>
+<p>而实际上Y需要独立存在吗?考虑每次被乘数要么不加,要么加到高四位上,而Y一开始放在低四位,两者不会相互影响.</p>
+<p>随着这个中间过程位向量不断右移,Y被一位一位移除了A,当Y恰好移出的时候计算恰好结束.</p>
+<p>$A_0$就是乘数的”最低位”,随着乘数Y的不断右移,硬件A的最低位会以此存放Y的个十百千位,相当于将Y遍历了一遍</p>
+<p>“被乘数看乘数最低位颜色决定加不加”这个事怎么实现的呢?</p>
+<p>用一个B寄存器存放被加数X,X和0作为二选一选择器的数据段,$A_0$作为该二选一的地址端,当$A_0=1$则选通X,当$A_0=0$则选通0</p>
+<p>选通的信号就进入了$\Sigma$多位加法器</p>
+<p>左上角这个循环干了啥事呢?</p>
+<p><img src="https://raw.githubusercontent.com/DeutschBall/test/master/image-20220616213859376.png" class="lazyload placeholder" data-srcset="https://raw.githubusercontent.com/DeutschBall/test/master/image-20220616213859376.png" srcset="https://img2.baidu.com/it/u=2037979560,2772131037&fm=26&fmt=auto&gp=0.jpg" alt="image-20220616213859376"></p>
+<p>被加数总是加到中间过程位向量的高四位,这怎么实现?将旧的高四位作为加数和X相加就得到了新的高四位</p>
+<p>这个半调子CF是干啥的呢?</p>
+<p>CF是PSW程序状态字中的一位,用来记录是否有进位,啥时候会有进位呢?</p>
+<p>比如头一次D=1111,右移变成0111,然后下一次又加了1111,显然0111+1111溢出了,但是顶多溢出一位,于是放到CF里,然后D右移的时候,再从CF里拿出来放到D里</p>
+<h3 id="手写模拟"><a href="#手写模拟" class="headerlink" title="手写模拟"></a>手写模拟</h3><p>模拟机器计算$0.1101\times 1.1011$(都是原码)</p>
+<p>符号显然同号得负数,这对机器来说也是小菜一碟,两符号娶个异或即可</p>
+<p>去掉小数点,后面的直接作为整数乘法,怎么乘的呢?</p>
+<p><img src="https://raw.githubusercontent.com/DeutschBall/test/master/image-20220616215950459.png" class="lazyload placeholder" data-srcset="https://raw.githubusercontent.com/DeutschBall/test/master/image-20220616215950459.png" srcset="https://img2.baidu.com/it/u=2037979560,2772131037&fm=26&fmt=auto&gp=0.jpg" alt="image-20220616215950459"></p>
+<p>最左侧这里列也是有实际意义的,里面是CF位的状态.</p>
+<p>这一点课本并没有给出,这导致我一开始认为只有手算模拟才会用到这一列</p>
+<p>乘数有四位,因此共有四次操作,恰好将Y从A中扬了,中间结果积逐渐充斥整个D和A</p>
+<blockquote>
+<p>这个过程要是找个现实中的类比的话,可以举这么一个不恰当的例子:</p>
+<p>一个公司有10个部长,资本家的总是嫌这十个人好吃懒惰不干活,或者说即使比较勤奋,但是不想再给他发太多工资,直接降薪吧人家也不愿意.反正就是想找个理由踢了这是个人换成新人</p>
+<p>但是资本家还不敢一口气全体了,这会造成一段时间没人管事儿.</p>
+<p>于是资本家想了一个温水煮癞蛤蟆的方法,每隔一个月从这10个人里找一个业绩最差的,</p>
+<p>要是他真的好吃懒惰啥也不干,直接踢了,公司正常运转.</p>
+<p>要是他确实负责一些事情,那么找一个能干的新人把他挤了,公司正常运转</p>
+<p>10个月后,10个部长就全是优秀并且高效的00后了</p>
+</blockquote>
+<h4 id="无符号右移"><a href="#无符号右移" class="headerlink" title="无符号右移?"></a>无符号右移?</h4><p>关于”无符号右移”,这个事情发生在</p>
+<p><img src="https://raw.githubusercontent.com/DeutschBall/test/master/image-20220616220805565.png" class="lazyload placeholder" data-srcset="https://raw.githubusercontent.com/DeutschBall/test/master/image-20220616220805565.png" srcset="https://img2.baidu.com/it/u=2037979560,2772131037&fm=26&fmt=auto&gp=0.jpg" alt="image-20220616220805565"></p>
+<div class="table-container">
+<table>
+<thead>
+<tr>
+<th>原数</th>
+<th>带符号右移结果</th>
+<th>无符号右移结果</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>$1’0011’1101$</td>
+<td>$1’1001’1110$</td>
+<td>$0’1001’1110$</td>
+</tr>
+</tbody>
+</table>
+</div>
+<p>显然正确的计算方法是无符号右移,为啥不是带符号的呢?</p>
+<p>首先,带符号意味着负数,而我们整个计算过程中要么加0,要么加x,反正不会加一个负数,理论上就不存在加负数的情况</p>
+<p>再者,这里最左侧的”符号”实际上是CF位,是上一次加被乘数之后的进位,不是”符号”,我们一直在进行无符号运算</p>
+<h2 id="原码两位乘法"><a href="#原码两位乘法" class="headerlink" title="原码两位乘法"></a>原码两位乘法</h2><h3 id="为啥要两位乘"><a href="#为啥要两位乘" class="headerlink" title="为啥要两位乘?"></a>为啥要两位乘?</h3><p>原码两位乘法和原码一位乘法的思想基本相同,但是设计硬件的那伙子人嫌一位乘法太慢,这就好比一个人上楼梯,每次上一个台阶嫌慢,非得上两个</p>
+<p>为啥没有原码三位乘法?<del>一次上三个台阶这不扯蛋吗</del></p>
+<p>因为计算机中的数据都占用偶数位,从来没有说有一个66位计算机,有一个63位计算机,有一个30位计算机.</p>
+<p>实际存在的计算机都是64位,32位,这些位数都是2的幂次,为啥非要是2的幂次?方便使用二进制呗.为啥一定使用二进制?逻辑门高电位和低电位就两种状态呗</p>
+<p>为啥没有原码四位乘法?32和64不也是4的倍数吗?</p>
+<p>还要考虑一个复杂性问题</p>
+<p><img src="https://raw.githubusercontent.com/DeutschBall/test/master/image-20220616230513076.png" class="lazyload placeholder" data-srcset="https://raw.githubusercontent.com/DeutschBall/test/master/image-20220616230513076.png" srcset="https://img2.baidu.com/it/u=2037979560,2772131037&fm=26&fmt=auto&gp=0.jpg" alt="image-20220616230513076"></p>
+<p>如图原码二位乘已经有$2^3=8$种情况了,要是原码四位乘,不考虑低位进位的情况至少这四位需要考虑,就已经有$2^4=16$种情况了,显然让ALU考虑多种情况也是需要记忆功能的</p>
+<p>在记忆能力和速度都可以接收的范围内,只有原码一位乘和原码二位乘是可行的</p>
+<h3 id="规则"><a href="#规则" class="headerlink" title="规则"></a>规则</h3><p>两位乘怎么玩呢?</p>
+<p>原来被乘数看乘数最低位的脸色行事,现在被乘数还要看次低位的脸色.真的太卑微了</p>
+<p>最低位和次低位的权还不一样,次低位更狠,权更重.</p>
+<p>为了更详细的描述这个意思,规定X和Y的位向量表示</p>
+<p>X和Y都忽略小数点和符号位,小数点后面的直接作为一个整数</p>
+<p>$X=X_3X_2X_1X_0$</p>
+<p>$Y=Y_3Y_2Y_1Y_0$</p>
+<p>现在最低位就是$Y_0$,次低位就是$Y_1$,随着Y不断右移,这两个位会遍历整个Y</p>
+<p>当$Y_1Y_0=11=3(Dec)$需要向中间过程位向量上加三个被乘数X,</p>
+<p>当$Y_1Y_0=10=2(Dec)$需要向中间过程位向量上加两个被乘数X</p>
+<p>当$Y_1Y_0=01=1(Dec)$需要向中间过程位向量上加一个被乘数X</p>
+<p>当$Y_1Y_0=00=0(Dec)$啥也不加</p>
+<p>啥也不加,加一个X都好说,加两个X通过将X左移一位×2也容易实现,但是这个半吊子3怎么办呢?</p>
+<p><code>3=4-1</code>,啥意思呢?</p>
+<p>先从中间过程位向量的高四位减去一个被乘数X,</p>
+<p>然后右移两位,这导致刚才减去的X降权4(右移两位相当于除以4),</p>
+<p>此时再向高四位加上一个被乘数X,这个刚加上的X的权就高,是刚才减去的X的四倍,</p>
+<p>这样一减一加,相当于在上一步(刚才减一的那一步)往中间过程位向量上加上了3个X.</p>
+<p>达到了我们的目的</p>
+<p>当$Y_1Y_0=11$,这时候才会加3X,还有加2X,1X,0的时候,怎么区分多种状态呢?用一个flag开关</p>
+<p>也就是下表中的C</p>
+<p><img src="https://raw.githubusercontent.com/DeutschBall/test/master/image-20220616231945745.png" class="lazyload placeholder" data-srcset="https://raw.githubusercontent.com/DeutschBall/test/master/image-20220616231945745.png" srcset="https://img2.baidu.com/it/u=2037979560,2772131037&fm=26&fmt=auto&gp=0.jpg" alt="image-20220616231945745"></p>
+<p>这个表什么意思呢?</p>
+<h4 id="我一开始的理解"><a href="#我一开始的理解" class="headerlink" title="我一开始的理解"></a>我一开始的理解</h4><p><strong>(当然是错误的,但是有借鉴意义)</strong></p>
+<p>刚才我们推导怎么实现加3X的时候,先减X,位移后再加上X,看上去顺理成章,确实解决了上一回合需要加3X这个问题,</p>
+<p>但是同时引入了新问题,即</p>
+<p><strong>位移后的本回合有本回合要做的事情,而你却在本回合处理了上回合要做的事情,那么本回合本来要做的事情啥时候做呢?</strong></p>
+<blockquote>
+<p>啥叫本回合应该做的事?</p>
+<p>每个回合要做的事就是根据<strong>当前</strong>乘数最低两位的脸色决定往中间过程位向量上加几个X</p>
+</blockquote>
+<p>要么本回合开一个额外回合,在给上回合擦腚之后,先不忙着将乘数右移开启下一个回合,而是正式处理本回合的事.处理完了再右移开启下一回合</p>
+<p>但是这样怎么让一个傻子CPU知道这一次有没有额外回合呢?</p>
+<p>可以用标志位C.每个正式回合都根据乘数最低两位是否全1,设置C是否为1,</p>
+<p>当回合开始的时候,让CPU先检查C开关是否打开,</p>
+<p>​    如果开着则先擦腚,然后C给他关上,</p>
+<p>​    如果C关着(不管是本来就管着还是擦完腚关上的,一视同仁),则处理本回合事物</p>
+<p>我确实一开始是这样想的,但是仔细观察法则表之后发现人家的想法和我不一样</p>
+<h4 id="人家的想法"><a href="#人家的想法" class="headerlink" title="人家的想法"></a><strong>人家的想法</strong></h4><p>如果按照我的设想,当C为1的时候,不需要看$Y_1Y_0$的脸色,直接加X,然后C置零</p>
+<p><strong>然而</strong>表中即使C为1也需要看$Y_{i+1}Y_{i}$的脸色</p>
+<p><img src="https://raw.githubusercontent.com/DeutschBall/test/master/image-20220616233254740.png" class="lazyload placeholder" data-srcset="https://raw.githubusercontent.com/DeutschBall/test/master/image-20220616233254740.png" srcset="https://img2.baidu.com/it/u=2037979560,2772131037&fm=26&fmt=auto&gp=0.jpg" alt="image-20220616233254740"></p>
+<p>那么人家的方法什么思想呢?</p>
+<p><img src="https://raw.githubusercontent.com/DeutschBall/test/master/image-20220616233344339.png" class="lazyload placeholder" data-srcset="https://raw.githubusercontent.com/DeutschBall/test/master/image-20220616233344339.png" srcset="https://img2.baidu.com/it/u=2037979560,2772131037&fm=26&fmt=auto&gp=0.jpg" alt="image-20220616233344339"></p>
+<p>这段文字十分滴珍贵,但是是那种懂的人一看就懂,不懂的看了还是不懂(此名言出自计组老师gx)</p>
+<p>啥意思呢?不妨从研究这个表的结构规则入手</p>
+<p>可以发现,</p>
+<p>1.当$Y_{i+1}$固定时,$Y_i$和$C$具有对称结构,具体表现为:</p>
+<p><img src="https://raw.githubusercontent.com/DeutschBall/test/master/image-20220616233605441.png" class="lazyload placeholder" data-srcset="https://raw.githubusercontent.com/DeutschBall/test/master/image-20220616233605441.png" srcset="https://img2.baidu.com/it/u=2037979560,2772131037&fm=26&fmt=auto&gp=0.jpg" alt="image-20220616233605441"></p>
+<p>2.$Y_i$和$C$联手的时候相当于$Y_{i+1}$<br><img src="https://raw.githubusercontent.com/DeutschBall/test/master/image-20220616233706177.png" class="lazyload placeholder" data-srcset="https://raw.githubusercontent.com/DeutschBall/test/master/image-20220616233706177.png" srcset="https://img2.baidu.com/it/u=2037979560,2772131037&fm=26&fmt=auto&gp=0.jpg" alt="image-20220616233706177"></p>
+<p>也就是说,$Y_i$和$C$就有完全相同的地位,$Y_{i+1}$权为2, $Y_i$权为1,$C$的权也是1</p>
+<p>而这种类似的结构我们在什么地方见过呢?全加器</p>
+<blockquote>
+<p><img src="https://raw.githubusercontent.com/DeutschBall/test/master/v2-9b6f89175b854c4c335a704982d3520f_r.jpg" class="lazyload placeholder" data-srcset="https://raw.githubusercontent.com/DeutschBall/test/master/v2-9b6f89175b854c4c335a704982d3520f_r.jpg" srcset="https://img2.baidu.com/it/u=2037979560,2772131037&fm=26&fmt=auto&gp=0.jpg" alt="一位全加器真值表"></p>
+<p>全加器中$X,Y,C_{i-1}$三者具有轮换对称结构</p>
+<p>而$C_{i-1}$表示的是低位向本位的进位开关,类比到原码两位乘法中,他就是低位计算时没擦干净的屁股</p>
+<p>在这个全加器运算的时候,会同时考虑三路输入,将$X_i,Y_i,C_{i-1}$同时加起来,也就是在完成本回合的事物时,同时把上回合的屁股擦了</p>
+<p>但是也可以设计成,$X_i+Y_i$先算好,然后将上回合的屁股$C_{i-1}$加上</p>
+<p>设计固然可以这样设计,但是何必呢?算好的结果还需要保存一下然后才和$C_{i-1}$相加.</p>
+<p>直接三个加起来不用保存中间结果并且更容易实现,岂不美哉</p>
+</blockquote>
+<p>就用全加器的思想考虑在原码两位乘法</p>
+<p>C不也是低位向本位的进位吗?或者说,上一个回合留到本回合才能擦干净的屁股</p>
+<p>在上个回合加4X,不就相当于在本回合加X吗?</p>
+<p>处理上回合的屁股顶多在本回合加一个X,</p>
+<p>要是本回合本来啥也不干,那么处理屁股,加上X就完了</p>
+<p><img src="https://raw.githubusercontent.com/DeutschBall/test/master/image-20220616235501743.png" class="lazyload placeholder" data-srcset="https://raw.githubusercontent.com/DeutschBall/test/master/image-20220616235501743.png" srcset="https://img2.baidu.com/it/u=2037979560,2772131037&fm=26&fmt=auto&gp=0.jpg" alt="image-20220616235501743"></p>
+<p>要是本回合本来就应该加X,那么一块处理了,加上2X就完了</p>
+<p><img src="https://raw.githubusercontent.com/DeutschBall/test/master/image-20220616235511820.png" class="lazyload placeholder" data-srcset="https://raw.githubusercontent.com/DeutschBall/test/master/image-20220616235511820.png" srcset="https://img2.baidu.com/it/u=2037979560,2772131037&fm=26&fmt=auto&gp=0.jpg" alt="image-20220616235511820"></p>
+<p>要是本回合本来应该加2X,加上屁股一个X,一共3X,只需要减一个X然后继续把屁股交给下一个回合</p>
+<p><img src="https://raw.githubusercontent.com/DeutschBall/test/master/image-20220616235623070.png" class="lazyload placeholder" data-srcset="https://raw.githubusercontent.com/DeutschBall/test/master/image-20220616235623070.png" srcset="https://img2.baidu.com/it/u=2037979560,2772131037&fm=26&fmt=auto&gp=0.jpg" alt="image-20220616235623070"></p>
+<p>要是本回合本来应该加3X,加上屁股一共四个X,可以加上左移两次的X,但是留一个屁股给下一回合加上也是相当于本回合加4X,还不用位移,岂不美哉</p>
+<p><img src="https://raw.githubusercontent.com/DeutschBall/test/master/image-20220616235634096.png" class="lazyload placeholder" data-srcset="https://raw.githubusercontent.com/DeutschBall/test/master/image-20220616235634096.png" srcset="https://img2.baidu.com/it/u=2037979560,2772131037&fm=26&fmt=auto&gp=0.jpg" alt="image-20220616235634096"></p>
+<p>如果上个回合没有留屁股(即C=0),则本回合只需要看$Y_1Y_0$脸色行事,不用擦屁股</p>
+<p>如此这个法则表就不用死记硬背了</p>
+<h4 id="手写模拟-1"><a href="#手写模拟-1" class="headerlink" title="手写模拟"></a>手写模拟</h4><p>$X=+0.100111,Y=-0.100111$用原码两位乘法求积</p>
+<p>符号显然为1</p>
+<p><img src="https://raw.githubusercontent.com/DeutschBall/test/master/image-20220616235859593.png" class="lazyload placeholder" data-srcset="https://raw.githubusercontent.com/DeutschBall/test/master/image-20220616235859593.png" srcset="https://img2.baidu.com/it/u=2037979560,2772131037&fm=26&fmt=auto&gp=0.jpg" alt="image-20220616235859593"></p>
+<p>这个”符号位”是啥呢?</p>
+<p>这确实是符号位,因为过程中有$-X$的行为.为啥要三个符号位呢?这个是人为规定的</p>
+<p>因为两位乘每回合需要右移两位,那么符号位至少有两位,至于为什么是三位呢?</p>
+<p>因为<strong>存在带符号右移</strong>的行为,右移两位之后符号位高两位是填充0呢还是填充1呢?</p>
+<p>能不能全都填充0呢?诚如是则三个符号位都是摆设,编课本的人也不用编了.多此一举何必呢?</p>
+<p>这符号位的最高位起一个提示的作用,如果最高位为1则右移的时候最高位也补1,否则补0</p>
+<p>因此最高位完全是个人爱好添加的,因为只要是最高位是1,则符号位的第二位也是1,完全可以根据第二位的提示填充符号位的高两位</p>
+<p>这里就有问题了,为什么会有带符号右移?原码一位乘法的时候明明没有带符号右移啊?</p>
+<p><img src="https://raw.githubusercontent.com/DeutschBall/test/master/image-20220617000021929.png" class="lazyload placeholder" data-srcset="https://raw.githubusercontent.com/DeutschBall/test/master/image-20220617000021929.png" srcset="https://img2.baidu.com/it/u=2037979560,2772131037&fm=26&fmt=auto&gp=0.jpg" alt="image-20220617000021929"></p>
+<p>因为过程中确实有$-X$这种行为,通过加补实现,而补码的符号位就是负数.</p>
+<p>如果无符号右移,则本回合$-X$在右移后进入下回合时,符号位也跟着移到右侧,这个$-X$成了加一个数,失去减法的意义并且导致错误</p>
+<h2 id="补码一位乘法—布斯法"><a href="#补码一位乘法—布斯法" class="headerlink" title="补码一位乘法—布斯法"></a>补码一位乘法—布斯法</h2><h3 id="推导算法原理"><a href="#推导算法原理" class="headerlink" title="推导算法原理"></a>推导算法原理</h3><p>令$X=X_0.X_{-1}X_{-2}…X_{-(n-1)}$,$Y=Y_0.Y_{-1}Y_{-2}…Y_{-(n-1)}$</p>
+<p>将$Y$按照权位展开</p>
+<script type="math/tex; mode=display">
+\begin{aligned}
+Y&=Y_0.Y_{-1}Y_{-2}...Y_{-(n-1)}\\
+&=Y_0\times 2^0+Y_{-1}\times 2^{-1}+Y_{-2}\times 2^{-2}+...+Y_{-(n-1)}\times 2^{-(n-1)}\\
+&=Y_0(2^1-2^0)+Y_{-1}\times(2^0-2^{-1})+Y_{-2}\times (2^{-1}-2^{-2})+...+Y_{-(n-1)}\times (2^{-(n-2)}-2^{-(n-1)})\\
+&=2Y_0+2^0(Y_{-1}-Y_0)+2^{-1}(Y_{-2}-Y_1)+2^{-2}(Y_{-3}-Y_{-2})+...+2^{-(n-2)}(Y_{-(n-1)}-Y_{-(n-2)})+2^{-(n-1)}(0-Y_{-(n-1)})
+\end{aligned}</script><p>其中$Y_0$是符号位,当$Y_0=0$,$2Y_0=0$,可以忽略</p>
+<p>当$Y_1=1$,$2Y_1=10$进位不管,本位还是$0$,也可以忽略</p>
+<p>那么$Y=2^0(Y_{-1}-Y_0)+2^{-1}(Y_{-2}-Y_1)+2^{-2}(Y_{-3}-Y_{-2})+…+2^{-(n-2)}(Y_{-(n-1)}-Y_{-(n-2)})+2^{-(n-1)}(0-Y_{-(n-1)})$</p>
+<p>不妨令$Y$最后再加一位$Y_{-n}=0$反正小数部分最后添0不会影响小数大小</p>
+<p>那么</p>
+<script type="math/tex; mode=display">
+\begin{aligned}
+Y&=2^0(Y_{-1}-Y_0)+2^{-1}(Y_{-2}-Y_1)+2^{-2}(Y_{-3}-Y_{-2})+...+2^{-(n-2)}(Y_{-(n-1)}-Y_{-(n-2)})+2^{-(n-1)}(Y_{-n}-Y_{-(n-1)})\\
+&=\sum_{i=-(n-1)}^{0}2^{i}\times (Y_{i-1}-Y_i)
+\end{aligned}</script><p>好了,现在$Y$经过各种调教,已经连同符号位都可以一起计算了</p>
+<script type="math/tex; mode=display">
+\begin{aligned}
+X\times Y&=X\times \sum_{i=-(n-1)}^{0}2^{i}\times (Y_{i-1}-Y_i)\\
+&=\sum_{i=-(n-1)}^{0}[2^{i}\times (Y_{i-1}-Y_i)\times X]
+\end{aligned}</script><p>这是一种啥形式呢?每次$X$都看$Y_{i-1}Y_{i}$的脸色行事,$2^i$是这俩哥们儿的权重.此时不再考虑$Y_{i-1},Y_{i}$的权重区别了,因为$2^i$是两个家伙的共同的权重,两者权重的二倍关系,已经应用在在刚才的转化过程中</p>
+<div class="table-container">
+<table>
+<thead>
+<tr>
+<th>$Y_{i-1}Y_{i}$</th>
+<th>$Y_{i-1}-Y_{i}$</th>
+<th>行为</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>00</td>
+<td>0</td>
+<td>啥也不干</td>
+</tr>
+<tr>
+<td>01</td>
+<td>-1</td>
+<td>-X</td>
+</tr>
+<tr>
+<td>10</td>
+<td>1</td>
+<td>+X</td>
+</tr>
+<tr>
+<td>11</td>
+<td>0</td>
+<td>啥也不干</td>
+</tr>
+</tbody>
+</table>
+</div>
+<p>在一个回合内应该干的事情:</p>
+<p>从$i=-(n-1)$这个最低权位开始算,每次根据$Y$的最低两位确定行为,然后右移一位,将$Y_i$移出扬了,刚才的$Y_{i-1}$现在是最低位.</p>
+<p>每个回合开始前,将上回合的中间过程位向量右移一位,作用是给先前的计算结果都降权2</p>
+<h3 id="硬件实现"><a href="#硬件实现" class="headerlink" title="硬件实现"></a>硬件实现</h3><p><img src="https://raw.githubusercontent.com/DeutschBall/test/master/image-20220617081422674.png" class="lazyload placeholder" data-srcset="https://raw.githubusercontent.com/DeutschBall/test/master/image-20220617081422674.png" srcset="https://img2.baidu.com/it/u=2037979560,2772131037&fm=26&fmt=auto&gp=0.jpg" alt="image-20220617081422674"></p>
+<p>这个图应该怎样理解呢?</p>
+<p>D和A两个寄存器共同组成中间过程位向量,最右边有一个$A_{-1}$是附加位,这个刚才我们也分析过了,小数部分最后随便添0不影响结果大小</p>
+<p>一开始的时候,乘数$Y$符号位和数值位都放在A中,小数点扬了,$Y$的最低位落到$A_0$,此时$A_{-1}=0,D=0$</p>
+<p>右移的时候$A_{-1}$也要参与,刚才的$A_0$就移入$A_{-1}$,一共右移多少次呢?将A中的乘数刚好扬了为止,比如$Y=1.0011$则右移5次(符号位和数值为没有区别)</p>
+<p>$A_0A_{-1}$接入一个二四译码器,而实际上一共有三种情况,啥也不干,+X,-X,怎么把这三种情况转化成机器能听懂的语言呢?</p>
+<p>当$A_0A_{-1}=00$则选择器选通$D_0=0$</p>
+<p>当$A_0A_-1=01$则选择器选通$D_1={B}$</p>
+<p>当$A_0A_{-1}=10$则选择器选通$D_2=\overline {B}$,此时$A_0\overline A_{-1}$接入与门,与门接到全加器最低位,作用是对$B$的取反再+1得到补码</p>
+<p>当$A_0A_{-1}=11$则选择器选通$D_3=0$</p>
+<p>选通信号都输入全加器</p>
+<p>中间过程位向量$[D:A]$在右移的时候带符号右移,即$CF$跟着移入最高位,并且右移之后$CF$状态不变</p>
+<h3 id="手算模拟"><a href="#手算模拟" class="headerlink" title="手算模拟"></a>手算模拟</h3><p>$X=0.1010,Y=-0.1101$,计算两个数的补码一位布斯乘法</p>
+<p>$[X]_补=00.1010$</p>
+<p>$[Y]_补=11.0011$</p>
+<p><img src="https://raw.githubusercontent.com/DeutschBall/test/master/image-20220617081351470.png" class="lazyload placeholder" data-srcset="https://raw.githubusercontent.com/DeutschBall/test/master/image-20220617081351470.png" srcset="https://img2.baidu.com/it/u=2037979560,2772131037&fm=26&fmt=auto&gp=0.jpg" alt="image-20220617081351470"></p>
+<p>最终没有特判符号位,而是符号位已经在CF中了</p>
+<p>经过刚才的分析,现在$A_{-1}$就具有实际意义了,不再是一个根据人的意愿补上的一位了</p>
+<p>每个回合,被乘数都根据$A_{0}A_{-1}$的脸色行事,比如当$A_0A_{-1}=10$时,应该-X</p>
+<p>而这似乎和我们一开始推导算法的时候相反</p>
+<p><img src="https://raw.githubusercontent.com/DeutschBall/test/master/image-20220617084040120.png" class="lazyload placeholder" data-srcset="https://raw.githubusercontent.com/DeutschBall/test/master/image-20220617084040120.png" srcset="https://img2.baidu.com/it/u=2037979560,2772131037&fm=26&fmt=auto&gp=0.jpg" alt="image-20220617084040120"></p>
+<p>我们推导的是当$Y_{i-1}Y_i=10$时+X</p>
+<p>实际上令i=0得到$Y_{-1}Y_0=10$调个个儿就得到$Y_0Y_{-1}=01$</p>
+<p>因此$A_{0}A_{-1}=10$实际对应的是$Y_{i-1}Y_i=01$的情况,行为是-X</p>
+<p>这里一定要分清关系</p>
+<blockquote>
+<p>在手算模拟的时候,只需要用$A_{-1}-A_0$,根据结果的正负决定加减X,$A_{-1}-A_0=1$则+X</p>
+</blockquote>
+<p>关于手算时符号位为啥要两位?</p>
+<p>实际上机器只需要一位,这一位就有实际意义,即CF的值</p>
+<p>然而由于计算过程中需要带符号右移一位,这样符号位是11时右移一位变成01,我们模拟时一看符号位还有1,于是高位填充1,修正成11</p>
+<p>即最高位是防止人计算的过程中犯糊涂用的</p>
+<p>并且符号位两位起到了双符号位判断溢出的作用,如果计算过程中,出现了两个符号位不同的情况,啃腚是算错了</p>
+<h2 id="原码除法"><a href="#原码除法" class="headerlink" title="原码除法"></a>原码除法</h2><h3 id="手算"><a href="#手算" class="headerlink" title="手算"></a>手算</h3><p>约定规则</p>
+<p><img src="https://raw.githubusercontent.com/DeutschBall/test/master/image-20220617085630330.png" class="lazyload placeholder" data-srcset="https://raw.githubusercontent.com/DeutschBall/test/master/image-20220617085630330.png" srcset="https://img2.baidu.com/it/u=2037979560,2772131037&fm=26&fmt=auto&gp=0.jpg" alt="image-20220617085630330"></p>
+<p>这个规则第一条我就绷不住了,就算是两个定点纯小数,被除数的绝对值也不一定比除数小吧,比如$0.1111\div 0.0111$,整数也是如此</p>
+<p>那为啥要这样规定呢?为了保证两个定点纯小数的除法结果还是一个定点纯小数,</p>
+<p>一旦被除数的绝对值大,则至少结果的整数部分可以商出一个1来,这时候运算结果就是定点既有整数也有小数了</p>
+<p>而我们希望的是不使用整数部分,硬件上根本就不允许整数部分有意义,而是只保留小数部分</p>
+<p>比如$0.1111\div 0.0111=1.00010001..$</p>
+<p>而硬件是这样计算的:$1111\div 0111=00010001$,因为硬件就认为这个结果只可能是小数</p>
+<p>下面通过列竖式的方法计算$X=0.1011$,$Y=0.1101$两数的除法,推导适用于机器的算法</p>
+<p><img src="https://raw.githubusercontent.com/DeutschBall/test/master/image-20220617090654188.png" class="lazyload placeholder" data-srcset="https://raw.githubusercontent.com/DeutschBall/test/master/image-20220617090654188.png" srcset="https://img2.baidu.com/it/u=2037979560,2772131037&fm=26&fmt=auto&gp=0.jpg" alt="image-20220617090654188"></p>
+<p>由于已经保证被除数绝对值小,因此结果的整数个位必定商0</p>
+<p>人类在计算竖式的过程中有一个特点—-人类会<strong>试商</strong>,啥意思呢?</p>
+<p>在商了前两个1之后,下面要计算$1010\div 1101$,</p>
+<p>人类一看除数大,商1就过分了,剪出来一个负数,因此人类此时会商0.</p>
+<blockquote>
+<p>试商我们从小学就学过了,那时候是在十进制下,每次试商都要按照9,8,7,…,2,1,0这种顺序试商(熟练了可以用二分结果试商),直到试到某个值n,此时用n去乘被除数得到的积刚好比中间结果小或者相等整除,并且商$n+1$刚好比中间结果大,那么n就是该位应该上的商</p>
+<p>而现在对于二进制,每一位只有两种状态0或者1,我们只需要试商1,成功则商1,失败则商0</p>
+<p>本质思想是相同的,只不过二进制中商0和商1是相互对立事件,而十进制中商0和商1是互不相容事件,因为十进制下还可以商2,3,等等</p>
+</blockquote>
+<p>然而机器怎么试商呢?机器进行的每步运算都要改变硬件状态,试商会直接把商写进中间过程位向量,他只有一次机会,不允许试.而人类可以在草稿上试商然后将准确的商写道卷子上</p>
+<h3 id="恢复余数法"><a href="#恢复余数法" class="headerlink" title="恢复余数法"></a>恢复余数法</h3><p>虽然机器不能试商,但是机器可以知道的是,自己尚一个1,有没有商的太过分了,</p>
+<p>商1,则用中间结果去减被除数,如果减出来结果是个负数,机器就能根据符号位知道发生了什么.</p>
+<p>他知道刚才商的太狠了,本应该下手轻点的.</p>
+<p>于是他可以反悔,刚才商1导致中间结果负了,那么现在改商0,中间结果再加一个被除数还原到商1之前的情况,刚才商的1不算数.这个过程叫做”<strong>恢复余数</strong>“</p>
+<p>手算模拟$X=-0.10001011除以Y=0.0110$的过程</p>
+<p><img src="https://raw.githubusercontent.com/DeutschBall/test/master/image-20220617093100955.png" class="lazyload placeholder" data-srcset="https://raw.githubusercontent.com/DeutschBall/test/master/image-20220617093100955.png" srcset="https://img2.baidu.com/it/u=2037979560,2772131037&fm=26&fmt=auto&gp=0.jpg" alt="image-20220617093100955"></p>
+<p>最终结果咋看呢?</p>
+<p>看最后一行,</p>
+<p>商的绝对值是$0.1001$,最前面这个0肯定是0,这就是整数位个位的商,由于被除数比除数小,因此这一位必定为0,商的结果根据除数和被除数的符号位异或决定,因此商是$1.1001$</p>
+<p>余数的绝对值是$0.1101\times 2^{-4}$,符号应该和商一致,因此余数是$1.1101\times 2^{-4}$</p>
+<p>这里$2^{-4}$怎么来的呢?余数实际上是中间过程位向量最开始时的低四位经过运算和左移得到的,其本来的权就是$2^{-4}$</p>
+<p>为啥乘法的时候需要中间过程右移,而除法的时候需要中间过程左移呢?</p>
+<p>在做除法的时候我们都是从高位往低位商,而做乘法的时候是从低位向高位乘,两种运算的顺序相反</p>
+<p>做除法时早商应该比晚商权重高,通过左移,越早的商越高,权重越大</p>
+<p>从图上可以发现一个问题,够减的时候,中间结果左移,不够减的时候,恢复余数,不左移</p>
+<p>怎么让机器知道够不够减?前面分析的是根据符号位.</p>
+<p>确实根据符号位可以知道这个事情,但是知道了怎么处理呢?</p>
+<p>哪个元件可以根据CF的状态,决定给ALU送什么数呢?这个过程对硬件来说太抽象,不容易实现</p>
+<p>想法总是千奇百怪,但是真到落地实现的时候,直接摔死</p>
+<blockquote>
+<p>这让我想到大二上学微信小程序的时候,我竟然痴心妄想整一个支持markdown,用缩进表示分支的思维导图(Flowchart).属实是高估自己的编程能力和知识储备了</p>
+<p>然而本学期tx学写游戏的时候,一些听上去天马行空的事情,都被库函数实现了,只能说,人定胜天</p>
+</blockquote>
+<h3 id="加减交替法"><a href="#加减交替法" class="headerlink" title="加减交替法"></a>加减交替法</h3><p>由于恢复余数法不方便实现,考虑一个让硬件舒服的方法</p>
+<p>还是从恢复余数法中吸取教训</p>
+<p>不妨定义一个说法”回合”,感觉这像是一个状态机</p>
+<p>每一回合都要经过,恢复余数(这算是上回合留下的屁股),左移一位,上本次的商,这几个过程</p>
+<p>如果上回合留下了一个屁股,即上回合商1导致中间过程负了,本回合需要首先加上被除数恢复余数,并且上回合的商1作废,改为0,然后左移一位,让上回合的商升权2,然后直接商1,把屁股留给下一个回合</p>
+<p>如果上回合没有留下屁股,即上回合商1,中间过程减去被除数得到正数,则不需要恢复余数,直接左移让上回合的商1升权2,然后直接商1把本回合的屁股留给下一个回合</p>
+<p>好的, 现在考虑,</p>
+<p>本回合需要处理上回合的屁股,首先R(中间过程结果)+Y(被除数),</p>
+<p>然后左移一位,$2(R+Y)$</p>
+<p>然后处理本回合事物,直接商1有$2(R+Y)-Y=2R+Y$</p>
+<p>这不就相当于刚才不擦屁股,直接余数R左移,然后加上Y吗</p>
+<p>本回合不用擦上回合的屁股</p>
+<p>直接R左移一位变成2R</p>
+<p>然后处理本回合事物,直接商1有$2R-Y$</p>
+<p>综上,每个回合要么$2R+Y$,要么$2R-Y$,总共两种状态,</p>
+<p>通过中间过程符号位决定本回合采用哪种状态</p>
+<p>啥时候上商呢?在回合开始还没有位移的时候,根据中间过程的符号上商,</p>
+<p>中间过程符号为0则商1,中间过程符号为1则商0</p>
+<p>这就好实现了,</p>
+<p>2R相当于本回合上来就中间过程左移,</p>
+<p>中间过程符号位作为地址端接到2选1选择器,</p>
+<p>符号为1则$-Y$选通,并且还要向ALU最低位加一个1,实现加补操作</p>
+<p>符号为0则$+Y$选通</p>
+<p>硬件实现如图</p>
+<p><img src="https://raw.githubusercontent.com/DeutschBall/test/master/image-20220617102424109.png" class="lazyload placeholder" data-srcset="https://raw.githubusercontent.com/DeutschBall/test/master/image-20220617102424109.png" srcset="https://img2.baidu.com/it/u=2037979560,2772131037&fm=26&fmt=auto&gp=0.jpg" alt="image-20220617102424109"></p>
+<p>怎么解读这个框图呢?</p>
+<p>以$X=-0.10001011,Y=0.1110$为例,</p>
+<p>$|X|=0.10001011,|Y|=0.1110$</p>
+<p>一开始$|X|$放在D和A中</p>
+<p><img src="https://raw.githubusercontent.com/DeutschBall/test/master/image-20220617103310655.png" class="lazyload placeholder" data-srcset="https://raw.githubusercontent.com/DeutschBall/test/master/image-20220617103310655.png" srcset="https://img2.baidu.com/it/u=2037979560,2772131037&fm=26&fmt=auto&gp=0.jpg" alt="image-20220617103310655"></p>
+<p>第一回合,本回合比较特殊,当前中间过程就是被除数(绝对值),符号为正,但是商0</p>
+<p>然后左移,刚才的符号位0取反后移入$A_0$,$A_0=1$决定本回合-Y,即加Y补</p>
+<p>得到新的中间过程</p>
+<p>如下图描述</p>
+<p><img src="https://raw.githubusercontent.com/DeutschBall/test/master/image-20220617104129464.png" class="lazyload placeholder" data-srcset="https://raw.githubusercontent.com/DeutschBall/test/master/image-20220617104129464.png" srcset="https://img2.baidu.com/it/u=2037979560,2772131037&fm=26&fmt=auto&gp=0.jpg" alt="image-20220617104129464"></p>
+<p>第二回合,当前中间过程为$00’00110110’$,符号为正,商1</p>
+<p>左移一位,符号位0取反之后移入$A_0$,$A_0=1$决定本回合$-|Y|$,即加补</p>
+<p>得到新的中间过程</p>
+<p>如下图描述</p>
+<p><img src="https://raw.githubusercontent.com/DeutschBall/test/master/image-20220617104639433.png" class="lazyload placeholder" data-srcset="https://raw.githubusercontent.com/DeutschBall/test/master/image-20220617104639433.png" srcset="https://img2.baidu.com/it/u=2037979560,2772131037&fm=26&fmt=auto&gp=0.jpg" alt="image-20220617104639433"></p>
+<p>第三回合,当前中间过程为$11’10001101$,符号为负,商1</p>
+<p>左移一位,符号位1取反得0之后移入$A_0$,$A_0=0$决定本回合应该$+|Y|$</p>
+<p>得到新的中间过程</p>
+<p>如下图描述</p>
+<p><img src="https://raw.githubusercontent.com/DeutschBall/test/master/image-20220617104826502.png" class="lazyload placeholder" data-srcset="https://raw.githubusercontent.com/DeutschBall/test/master/image-20220617104826502.png" srcset="https://img2.baidu.com/it/u=2037979560,2772131037&fm=26&fmt=auto&gp=0.jpg" alt="image-20220617104826502"></p>
+<p>以此类推</p>
+<p>最终结果怎么看呢?</p>
+<p><img src="https://raw.githubusercontent.com/DeutschBall/test/master/image-20220617105339564.png" class="lazyload placeholder" data-srcset="https://raw.githubusercontent.com/DeutschBall/test/master/image-20220617105339564.png" srcset="https://img2.baidu.com/it/u=2037979560,2772131037&fm=26&fmt=auto&gp=0.jpg" alt="image-20220617105339564"></p>
+<p>商这一列从上到下就是商,最上面这个0不用管,每次都是0,原因是我们故意控制被除数绝对值比除数小</p>
+<p>或者看最下面这一行最右边01001,就是商这一列不断右移得到的</p>
+<p>余数绝对值$0.1101\times 2^{-4}$,符号和商相同,都要看被除数和除数的符号异或</p>
+<h2 id="补码除法"><a href="#补码除法" class="headerlink" title="补码除法"></a>补码除法</h2><p><img src="https://raw.githubusercontent.com/DeutschBall/test/master/image-20220617110237294.png" class="lazyload placeholder" data-srcset="https://raw.githubusercontent.com/DeutschBall/test/master/image-20220617110237294.png" srcset="https://img2.baidu.com/it/u=2037979560,2772131037&fm=26&fmt=auto&gp=0.jpg" alt="image-20220617110237294"></p>
+<p>这句话我看了好半天才看明白,</p>
+<p>“与乘法运算的情况类似,有时也会<strong>迂回</strong>到补码乘法”</p>
+<p>好家伙算个数还有迂回战术,就gx那三眼一板,一丝不苟的治学态度,我不大相信他能整出这样的词儿来</p>
+<p>看了好几遍发现没有”回”,就一个”迂”,</p>
+<p>是在说用补码做除法的人都<strong>迂</strong>吗?想到这里我都笑出了声,</p>
+<p>用迂字骂人真有感觉,尤其和13合起来,”迂13!”,这山东话绝对有气势</p>
+<blockquote>
+<p>巧了宿舍群就这样命名的</p>
+<p><img src="https://raw.githubusercontent.com/DeutschBall/test/master/image-20220617110800214.png" class="lazyload placeholder" data-srcset="https://raw.githubusercontent.com/DeutschBall/test/master/image-20220617110800214.png" srcset="https://img2.baidu.com/it/u=2037979560,2772131037&fm=26&fmt=auto&gp=0.jpg" alt="image-20220617110800214"></p>
+</blockquote>
+<p>应该是错字,本来想用”用”字的</p>
+<p>绷不住了</p>
+<h3 id="补码除法状态机"><a href="#补码除法状态机" class="headerlink" title="补码除法状态机"></a>补码除法状态机</h3><p><img src="https://raw.githubusercontent.com/DeutschBall/test/master/image-20220617111542233.png" class="lazyload placeholder" data-srcset="https://raw.githubusercontent.com/DeutschBall/test/master/image-20220617111542233.png" srcset="https://img2.baidu.com/it/u=2037979560,2772131037&fm=26&fmt=auto&gp=0.jpg" alt="image-20220617111542233"></p>
+<p><strong>状态</strong>就是被除数或者说余数,或者说中间过程位向量的符号状态,所有的状态转移都是根据该符号位决定的</p>
+
+      </div>
+      <div class="post-tags-categories">
+        
+        <div class="tags">
+          
+            <a href="/tags/CS/" class="">
+              CS
+            </a>
+          
+        </div>
+        
+      </div>
+      
+    </article>
+    <!-- 上一篇文章和下一篇文章 -->
+    
+      <!-- 文章详情页的上一页和下一页 -->
+<div class="post-nav">
+
+
+
+
+
+  
+  <div class="post-nav-next post-nav-item">
+    <div class="post-nav-img" style="background-size: cover; 
+      background-position: center center;">
+      <img class="lazyload lazyload placeholder" src="/medias/12.jpg" class="lazyload placeholder" data-srcset="/medias/12.jpg" srcset="https://img2.baidu.com/it/u=2037979560,2772131037&fm=26&fmt=auto&gp=0.jpg" src="" alt="">
+    </div>
+    <a href="/2022/06/16/shell/" class="post-nav-link">
+      <div class="title">
+        Next: <i class="fas fa-angle-right"></i>
+        <div class="title-text">shell</div>
+      </div>
+      <!-- <div class="content">
+        果壳中的宇宙
+耶路撒冷,唯我独尊
+
+交互式shell环境:win11+vscode+wsl+vmware+ubuntu1
+      </div> -->
+    </a>
+  </div>
+
+</div>
+
+    
+    
+
+    <!-- 打赏 -->
+    
+
+    <!-- 分享 -->
+    
+      <!-- https://github.com/overtrue/share.js -->
+<!-- 文章详情页的分享 -->
+<div class="social-share" data-sites="twitter,facebook,google,qq,qzone,wechat,weibo,douban,linkedin" data-wechat-qrcode-helper="<p>微信扫一扫即可分享！</p>"></div>
+
+<script src="/js/shareJs/social-share.min.js"></script>
+</script>
+
+<style>
+  .social-share {
+    margin: 20px 0;
+  }
+</style>
+
+
+    
+    
+    <!-- 评论 -->
+    <!-- 评论 -->
+
+  <div id="myComment">
+    
+      
+<section id="comments" style="padding: 1em; margin: 15px auto;"
+	class="animated bounceInUp">
+	<div id="vcomment" class="comment"></div>
+</section>
+<style>
+	#comments {
+		background: rgba(255,255,255,0.9);
+	}
+	#veditor {
+		background-image: url('https://raw.githubusercontent.com/DeutschBall/test/master/R.3c3e443dfe9ddbddc93730c482ed0461');
+		background-size: contain;
+		background-repeat: no-repeat;
+		background-position: right;
+		background-color: rgba(255, 255, 255, 0);
+		resize: vertical;
+	}
+	#veditor:focus{
+		background-position-y: 200px;
+		transition: all 0.2s ease-in-out 0s;
+	}
+	#vcomment .vcards .vcard .vh .vhead .vtag.vvisitor {
+		background-color: #42b983;
+	}
+	.v[data-class=v] .vbtn:active, .v[data-class=v] .vbtn:hover {
+		color: #42b983;
+		border-color: #42b983;
+	}
+	#vcomment .vcards .vcard .vhead .vsys i {
+		display: none;
+	}
+	/* 底部valine链接 */
+	#vcomment .vpower {
+		display: none;
+	}
+	
+	/* 底下注释是修改 名称和邮箱和网址输入框的样式 */
+	/* #vcomment .vheader {
+		display: flex;
+		justify-content: space-around;
+	}
+	
+	#vcomment .vheader .vnick {
+		width: 31%;
+		border: 2px solid #dedede;
+		padding-left: 10px;
+		padding-right: 10px;
+		border-radius: 5px
+	}
+
+	#vcomment .vheader .vmail {
+		width: 31%;
+		border: 2px solid #dedede;
+		padding-left: 10px;
+		padding-right: 10px;
+		border-radius: 5px
+	}
+
+	#vcomment .vheader .vlink {
+		width: 31%;
+		border: 2px solid #dedede;
+		padding-left: 10px;
+		padding-right: 10px;
+		border-radius: 5px
+	} */
+
+	img.vimg {
+		transition: all 1s;
+		/* 头像旋转时间为 1s */
+	}
+
+	img.vimg:hover {
+		transform: rotate(360deg);
+		-webkit-transform: rotate(360deg);
+		-moz-transform: rotate(360deg);
+		-o-transform: rotate(360deg);
+		-ms-transform: rotate(360deg);
+	}
+
+	#vcomment .vcards .vcard {
+		padding: 15px 20px 0 20px;
+		border-radius: 10px;
+		margin-bottom: 15px;
+		box-shadow: 0 0 4px 1px rgba(0, 0, 0, .12);
+		transition: all .3s
+	}
+
+	#vcomment .vcards .vcard:hover {
+		box-shadow: 0 0 8px 3px rgba(0, 0, 0, .12)
+	}
+
+	#vcomment .vcards .vcard .vh .vcard {
+		border: none;
+		box-shadow: none;
+	}
+</style>
+    
+  </div>
+
+<!-- comment script in themes\hexo-theme-bamboo\layout\_partial\scripts\index.ejs -->
+
+
+  </div>
+
+  <!-- 目录 -->
+  <!-- 文章详情页右侧目录 -->
+
+  <div class="toc-aside">
+    <div class="toc-main">
+      <div class="toc-aside-title">
+        <i class="fas fa-list-ul" aria-hidden="true"></i><span>catalog</span>
+        
+          <div class="toc-open-close">catalog</div>
+        
+      </div>
+      <div class="toc-content">
+        <div class="toc"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 手机端目录按钮 -->
+  <div id="toc-mobile-btn">
+    <i class="fas fa-list-ul" aria-hidden="true"></i>
+  </div>
+
+
+<script>
+  function closeToc(init) {
+    $(".toc-aside").css({'width': 0, 'padding': 0, 'transition': init ?  'noe' : 'width 0.3s' });
+    $(".toc-content").css({'width': 0});
+    $(".toc-aside-title span, .toc-aside-title i").css({'display': 'none'});
+    $(".main-content").css({'width': '75%', 'margin': '10px auto'});
+  };
+  function openToc() {
+    $(".main-content").css({'width': '65%', 'margin-right': '10px', 'margin-left': 'calc(35% - 350px)'});
+    $(".toc-aside").css({'width': '300px', 'padding': '0 10px', 'transition': 'width 0.3s'});
+    $(".toc-content").css({'width': '300px'});
+    $(".toc-aside-title span, .toc-aside-title i").css({'display': 'inline-block'});
+  }
+  function openBtnClickFn () {
+    let openOrCloseBtn = $('.toc-aside .toc-aside-title .toc-open-close');
+    let open = eval('' || 'true');
+    openOrCloseBtn.click(function() {
+      if (open) {
+        closeToc();
+        open = false;
+      } else {
+        openToc();
+        open = true;
+      }
+    });
+  };
+  openBtnClickFn();
+  initCloseTocWidth(true);
+
+  function initCloseTocWidth(init) {
+    if (window.innerWidth >= 992) {
+      let isClose = false;
+      isClose && closeToc(init)
+    }
+  }
+
+  document.addEventListener('pjax:complete', function () {
+    $(".toc-aside").css({'transition': 'no'});
+  })
+  document.addEventListener('pjax:complete', function () {
+    openBtnClickFn();
+  })
+  
+</script>
+
+  <!-- 图片放大 Wrap images with fancybox support -->
+  <script src="/js/wrapImage.js"></script>
+</div>
+
+<!-- 文章详情页背景图 -->
+<div id="appBgSwiper" style="position: fixed;left: 0;top: 0;width: 100%;height: 100%;z-index: -2;"
+	:style="{'background-color': bgColor ? bgColor : 'transparent'}">
+	<transition-group tag="ul" :name="names">
+		<li v-for='(image,index) in img' :key='index' v-show="index === mark" class="bg-swiper-box">
+			<img :src="image" class="bg-swiper-img no-lazy">
+		</li>
+	</transition-group>
+</div>
+<script>
+	var vm = new Vue({
+		el: '#appBgSwiper',
+		data: {
+			names: '' || 'fade' || 'fade', // translate-fade fade
+			mark: 0,
+			img: [],
+			bgColor: '',
+			time: null
+		},
+		methods: {   //添加方法
+			change(i, m) {
+				if (i > m) {
+					// this.names = 'fade';
+				} else if (i < m) {
+					// this.names = 'fade';
+				} else {
+					return;
+				}
+				this.mark = i;
+			},
+			prev() {
+				// this.names = 'fade';
+				this.mark--;
+				if (this.mark === -1) {
+					this.mark = 3;
+					return
+				}
+			},
+			next() {
+				// this.names = 'fade';
+				this.mark++;
+				if (this.mark === this.img.length) {
+					this.mark = 0;
+					return
+				}
+			},
+			autoPlay() {
+				// this.names = 'fade';
+				this.mark++;
+				if (this.mark === this.img.length) {
+					this.mark = 0;
+					return
+				}
+			},
+			play() {
+				let bgImgDelay = '' || '180000'
+				let delay = parseInt(bgImgDelay) || 180000;
+				this.time = setInterval(this.autoPlay, delay);
+			},
+			enter() {
+				clearInterval(this.time);
+			},
+			leave() {
+				this.play();
+			}
+		},
+		created() {
+			this.play()
+		},
+		beforeDestroy() {
+			clearInterval(this.time);
+		},
+		mounted() {
+			let prop = '' || '';
+			let isImg = prop.includes('.bmp') || prop.includes('.jpg') || prop.includes('.png') || prop.includes('.tif') || prop.includes('.gif') || prop.includes('.pcx') || prop.includes('.tga') || prop.includes('.exif') || prop.includes('.fpx') || prop.includes('.psd') || prop.includes('.cdr') || prop.includes('.pcd') || prop.includes('.dxf') || prop.includes('.ufo') || prop.includes('.eps') || prop.includes('.ai') || prop.includes('.raw') || prop.includes('.WMF') || prop.includes('.webp') || prop.includes('.jpeg') || prop.includes('http://') || prop.includes('https://')
+			if (isImg) {
+				let img = prop.split(',');
+				let configRoot = '/'
+				let arrImg = [];
+				img.forEach(el => {
+					var Expression = /http(s)?:\/\/([\w-]+\.)+[\w-]+(\/[\w- .\/?%&=]*)?/;
+					var objExp = new RegExp(Expression);
+
+					if (objExp.test(el)) {
+						// http or https
+						arrImg.push(el);
+					} else {
+						// 非http or https开头
+						// 本地文件
+						let firstStr = el.charAt(0);
+						if (firstStr == '/') {
+							el = el.substr(1); // 删除第一个字符 '/',因为 configRoot最后一个字符为 /
+						}
+						el = configRoot + el;
+						arrImg.push(el);
+					}
+				})
+				this.img = arrImg;
+			} else {
+				this.bgColor = prop;
+			}
+		}
+	})
+</script>
+
+<style>
+	.bg-swiper-box {
+		position: absolute;
+		display: block;
+		width: 100%;
+		height: 100%;
+	}
+
+	.bg-swiper-img {
+		object-fit: cover;
+		width: 100%;
+		height: 100%;
+	}
+</style>
+
+
+  <script>
+  // https://github.com/theme-next/hexo-theme-next/blob/master/layout/_third-party/math/mathjax.swig
+  if (typeof MathJax === 'undefined') {
+    window.MathJax = {
+      loader: {
+        source: {
+          '[tex]/amsCd': '[tex]/amscd',
+          '[tex]/AMScd': '[tex]/amscd'
+        }
+      },
+      tex: {
+        inlineMath: {'[+]': [['$', '$']]},
+        tags: 'ams'
+      },
+      options: {
+        renderActions: {
+          findScript: [10, doc => {
+            document.querySelectorAll('script[type^="math/tex"]').forEach(node => {
+              const display = !!node.type.match(/; *mode=display/);
+              const math = new doc.options.MathItem(node.textContent, doc.inputJax[0], display);
+              const text = document.createTextNode('');
+              node.parentNode.replaceChild(text, node);
+              math.start = {node: text, delim: '', n: 0};
+              math.end = {node: text, delim: '', n: 0};
+              doc.math.push(math);
+            });
+          }, '', false],
+          insertedScript: [200, () => {
+            document.querySelectorAll('mjx-container').forEach(node => {
+              let target = node.parentNode;
+              if (target.nodeName.toLowerCase() === 'li') {
+                target.parentNode.classList.add('has-jax');
+              }
+            });
+          }, '', false]
+        }
+      }
+    };
+    (function () {
+      var script = document.createElement('script');
+      script.src = 'https://cdn.jsdelivr.net/npm/mathjax@3.0/es5/tex-mml-chtml.js';
+      script.defer = true;
+      document.head.appendChild(script);
+    })();
+  } else {
+    // 文章章节标题不能为 “MathJax” ，否则会报错。
+    MathJax.startup.document.state(0);
+    MathJax.texReset();
+    MathJax.typeset();
+  }
+</script>
+
+
+
+
+  <script>
+  function loadMermaid() {
+    if (document.getElementsByClassName('mermaid').length) {
+      if (window.mermaidJsLoad) mermaid.init()
+      else {
+        loadScript('https://cdn.jsdelivr.net/npm/mermaid/dist/mermaid.min.js').then(() => {
+          window.mermaidJsLoad = true
+          mermaid.initialize({
+            theme: 'default',
+          })
+          if ('true') {
+            mermaid.init();
+          }
+        })
+      }
+    }
+  };
+  document.addEventListener("DOMContentLoaded", function () {
+    loadMermaid();
+  })
+
+  document.addEventListener('pjax:complete', function () {
+    loadMermaid();
+  })
+  
+</script>
+
+
+      </main>
+    </div>
+
+    <!-- 页脚 -->
+    
+  
+  <div class="footer bg-color">
+    <div class="footer-main">
+      
+        
+          <div class="link">
+            
+          </div>
+        
+      
+        
+          <div class="footer-copyright">
+            <p>Copyright © 2019 - 2020 <a target="_blank" rel="noopener" href="https://github.com/yuang01">Deutschball</a> | Powered by <a target="_blank" rel="noopener" href="https://hexo.io/zh-cn/docs/">Deutschball</a> | Theme <a target="_blank" rel="noopener" href="https://github.com/yuang01/theme">Bamboo</a> </p>
+
+          </div>
+        
+      
+        
+          
+        
+      
+        
+          <div class="footer-custom">
+            
+          </div>
+        
+      
+    </div>
+  </div>
+
+
+
+    <!-- 渲染暗黑按钮 -->
+    
+    <!-- 渲染回到顶部按钮 -->
+    
+      <div class="goTop top-btn-color" pointer>
+  <i class="fas fa-arrow-up" aria-hidden="true"></i>
+</div>
+<script src="/js/goTop.js"></script>
+
+    
+    <!-- 渲染左下角音乐播放器 -->
+    
+      <link rel="stylesheet" href="/js/aplayer/APlayer@1.10.1.min.css">
+<style>
+.aplayer .aplayer-lrc p {
+  
+  font-size: 12px;
+  font-weight: 700;
+  line-height: 16px !important;
+}
+
+.aplayer .aplayer-lrc p.aplayer-lrc-current {
+  
+  font-size: 15px;
+  color: #42b983;
+}
+
+
+.aplayer.aplayer-fixed.aplayer-narrow .aplayer-body {
+  left: -66px !important;
+}
+
+.aplayer.aplayer-fixed.aplayer-narrow .aplayer-body:hover {
+  left: 0px !important;
+}
+
+
+</style>
+<meting-js  
+  class=""
+  server="netease"
+  type="song"
+  id="1886422838"
+  fixed='true'
+  autoplay='true'
+  theme='#42b983'
+  loop='one'
+  order='random'
+  preload='auto'
+  volume='0.1'
+  list-folded='true'
+>
+</meting-js>
+
+<!-- <style>
+  #aplayer {
+    position: fixed;
+    left: 0;
+    bottom: 300px;
+  }
+</style> -->
+<script src="https://cdn.jsdelivr.net/npm/aplayer@1.10.1/dist/APlayer.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/meting@2/dist/Meting.min.js"></script>
+    
+
+    <!-- 图片放大 -->
+    
+      <script src="/js/fancybox/jquery.fancybox.min.js"></script>
+    
+
+    <!-- 百度解析 -->
+    <!-- Baidu Analytics -->
+
+    <!-- Baidu Push -->
+
+<script>
+    (function () {
+        var bp = document.createElement('script');
+        var curProtocol = window.location.protocol.split(':')[0];
+        if (curProtocol === 'https') {
+            bp.src = 'https://zz.bdstatic.com/linksubmit/push.js';
+        } else {
+            bp.src = 'http://push.zhanzhang.baidu.com/push.js';
+        }
+        var s = document.getElementsByTagName("script")[0];
+        s.parentNode.insertBefore(bp, s);
+    })();
+</script>
+
+    
+    <!-- 背景彩带 -->
+    
+      <script type="text/javascript" size="100" alpha='0.4' zIndex="-1" src="/js/ribbon.min.js"></script>
+    
+
+    <script src="/js/utils/index.js"></script>
+    <script src="/js/app.js"></script>
+    
+    <!-- 文章目录所需js -->
+<link href="/js/tocbot/tocbot.css" rel="stylesheet">
+<script src="/js/tocbot/tocbot.min.js"></script>
+
+<script>
+  var headerEl = 'h2, h3, h4, h5, h6',  //headers 
+    content = '.post-detail',//文章容器
+    idArr = {};  //标题数组以确定是否增加索引id
+  //add #id
+  var option = {
+    // Where to render the table of contents.
+    tocSelector: '.toc',
+    // Where to grab the headings to build the table of contents.
+    contentSelector: content,
+    // Which headings to grab inside of the contentSelector element.
+    headingSelector: headerEl,
+    scrollSmooth: true,
+    scrollSmoothOffset: -80,
+    headingsOffset: -($(window).height() * 0.4 - 45),
+    positionFixedSelector: '.toc-main',
+    positionFixedClass: 'is-position-fixed',
+    fixedSidebarOffset: 'auto',
+    activeLinkClass: 'is-active-link',
+    // onClick: function (e) {},
+  }
+  if ($('.toc').length > 0) {
+
+    $(content).children(headerEl).each(function () {
+      //去除空格以及多余标点
+      var headerId = $(this).text().replace(/[\s|\~|`|\!|\@|\#|\$|\%|\^|\&|\*|\(|\)|\_|\+|\=|\||\|\[|\]|\{|\}|\;|\:|\"|\'|\,|\<|\.|\>|\/|\?|\：|\，|\。]/g, '');
+
+      headerId = headerId.toLowerCase();
+      if (idArr[headerId]) {
+        //id已经存在
+        $(this).attr('id', headerId + '-' + idArr[headerId]);
+        idArr[headerId]++;
+      }
+      else {
+        //id未存在
+        idArr[headerId] = 1;
+        $(this).attr('id', headerId);
+      }
+    });
+
+    document.addEventListener("DOMContentLoaded", function () {
+      tocbot.init(option);
+      mobileTocClick();
+    });
+
+  }
+
+  window.tocScrollFn = function () {
+    return bamboo.throttle(function () {
+      findHeadPosition();
+    }, 100)()
+  }
+  window.addEventListener('scroll', tocScrollFn);
+
+  const findHeadPosition = function (top) {
+    if ($('.toc-list').length <= 0) {
+      return false;
+    }
+    setTimeout(() => {  // or DOMContentLoaded 
+      autoScrollToc();
+    }, 0);
+  }
+
+  const autoScrollToc = function () {
+    const $activeItem = document.querySelector('.is-active-link');
+    const $cardToc = document.querySelector('.toc-content');
+    const activePosition = $activeItem.getBoundingClientRect().top
+    const sidebarScrollTop = $cardToc.scrollTop
+    if (activePosition > (document.documentElement.clientHeight - 100)) {
+      $cardToc.scrollTop = sidebarScrollTop + 150
+    }
+    if (activePosition < 100) {
+      $cardToc.scrollTop = sidebarScrollTop - 150
+    }
+  }
+
+  document.addEventListener('pjax:send', function () {
+    if ($('.toc').length) {
+      tocbot.destroy();
+    }
+  });
+
+  document.addEventListener('pjax:complete', function () {
+    if ($('.toc').length) {
+      tocbot.init(option);
+      mobileTocClick();
+    }
+  });
+  
+  // 手机端toc按钮点击出现目录
+  const mobileTocClick = function () {
+    const $cardTocLayout = document.getElementsByClassName('toc-aside')[0];
+    const $cardToc = $cardTocLayout.getElementsByClassName('toc-content')[0];
+    let right = '45px';
+    if (window.innerWidth >= 551 && window.innerWidth <= 992) {
+      right = '100px'
+    }
+    const mobileToc = {
+      open: () => {
+        $cardTocLayout.style.cssText = 'animation: toc-open .3s; opacity: 1; right: ' + right
+      },
+
+      close: () => {
+        $cardTocLayout.style.animation = 'toc-close .2s'
+        setTimeout(() => {
+          $cardTocLayout.style.cssText = "opacity:''; animation: ''; right: ''"
+        }, 100)
+      }
+    }
+    document.getElementById('toc-mobile-btn').addEventListener('click', () => {
+      if (window.getComputedStyle($cardTocLayout).getPropertyValue('opacity') === '0') mobileToc.open()
+      else mobileToc.close()
+    })
+
+    $cardToc.addEventListener('click', (e) => {
+      if (window.innerWidth < 992) { // 小于992px的时候
+        mobileToc.close()
+      }
+    })
+  }
+</script>
+
+<style>
+  .is-position-fixed {
+    position: sticky !important;
+    top: 74px;
+  }
+
+  .toc-main ul {
+    counter-reset: show-list;
+  }
+
+  .toc-main ul li::before {
+    content: counter(item)".";
+    display: block;
+    position: absolute;
+    left: 12px;
+    top: 0;
+  }
+</style> 
+
+<!-- 设置导航背景 -->
+<script>
+  let setHeaderClass = () => {
+    const headerMenuTransparent = true;
+    if (!headerMenuTransparent) { return; }
+    const nav = $('#navHeader');
+    const navTop = nav.outerHeight();
+    const winTop = $(window).scrollTop();
+    if(winTop > navTop) {
+      nav.addClass('header-bg-color');
+    }
+    else {
+      nav.removeClass('header-bg-color');
+    }
+  };
+
+  let scrollCollect = () => {
+    return bamboo.throttle(function (e) {
+      setHeaderClass();
+    }, 200)()
+  }
+
+  let initHeaderBg = () => {
+    setHeaderClass();
+  }
+
+  setHeaderClass();
+  window.addEventListener('scroll', scrollCollect);
+
+  document.addEventListener('pjax:send', function () {
+    window.removeEventListener('scroll', scrollCollect)
+  })
+  document.addEventListener('pjax:complete', function () {
+    window.addEventListener('scroll', scrollCollect);
+    setHeaderClass();
+  })
+</script> 
+
+<!-- 渲染issues标签里的内容 -->
+<script>
+  function loadIssuesJS() {
+    if ($(".post-detail").find(".issues-api").length == 0) {
+      return;
+    } 
+    loadScript('/js/issues/index.js');
+  };
+  $(function () {
+    loadIssuesJS();
+  });
+  document.addEventListener('pjax:complete', function () {
+    if (typeof IssuesAPI == "undefined") {
+      loadIssuesJS();
+    }
+  })
+</script>
+
+<!-- 输入框打字特效 -->
+<!-- 输入框打字特效 -->
+
+  <script src="/js/activate-power-mode.js"></script>
+  <script>
+    POWERMODE.colorful = true;  // 打开随机颜色特效
+    POWERMODE.shake = false;    // 关闭输入框抖动
+    document.body.addEventListener('input', POWERMODE);//监听打字事件
+  </script>
+
+
+<!-- markdown代码一键复制功能 -->
+
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/v-plugs-ayu/lib/ayu.css">
+  <script src="https://cdn.jsdelivr.net/npm/v-plugs-ayu/lib/ayu.umd.min.js"></script>
+  <script src="/js/clipboard/clipboard.min.js"></script>
+  <div id="appCopy">
+  </div>
+  <script data-pjax>
+    var vm = new Vue({
+      el: '#appCopy',
+      data: {
+      },
+      computed: {
+      },
+      mounted() {
+        const that = this;
+        var copy = 'copy';
+        /* code */
+        var initCopyCode = function () {
+          var copyHtml = '';
+          copyHtml += '<button class="btn-copy" data-clipboard-snippet="" style="position:absolute;top:0;right:0;z-index:1;">';
+          copyHtml += '<i class="fas fa-copy"></i><span>' + copy + '</span>';
+          copyHtml += '</button>';
+          $(".post-detail pre").not('.gutter pre').wrap("<div class='codeBox' style='position:relative;width:100%;'></div>")
+          $(".post-detail pre").not('.gutter pre').before(copyHtml);
+          new ClipboardJS('.btn-copy', {
+            target: function (trigger) {
+              return trigger.nextElementSibling;
+            }
+          });
+        }
+        initCopyCode();
+        $('.btn-copy').unbind('click').bind('click', function () {
+          doSomething();
+        })
+        $(document).unbind('keypress').bind('keypress', function (e) {
+          if (e.ctrlKey && e.keyCode == 67) {
+            doSomething();
+          }
+        })
+
+        function doSomething() {
+          that.$notify({
+            title: "成功",
+            content: "copy that",
+            type: 'success'
+          })
+        }
+      },
+      methods: {
+      },
+      created() { }
+    })
+  </script>
+  
+
+<!-- 图片懒加载 -->
+<script defer src="https://cdn.jsdelivr.net/npm/vanilla-lazyload@17.1.0/dist/lazyload.min.js"></script>
+<script>
+  // https://www.npmjs.com/package/vanilla-lazyload
+  // Set the options globally
+  // to make LazyLoad self-initialize
+  window.lazyLoadOptions = {
+    elements_selector: ".lazyload",
+    threshold: 0
+  };
+  // Listen to the initialization event
+  // and get the instance of LazyLoad
+  window.addEventListener(
+    "LazyLoad::Initialized",
+    function (event) {
+      window.lazyLoadInstance = event.detail.instance;
+    },
+    false
+  );
+  document.addEventListener('DOMContentLoaded', function () {
+    lazyLoadInstance.update();
+  });
+  document.addEventListener('pjax:complete', function () {
+    lazyLoadInstance.update();
+  });
+</script>
+
+
+<!-- 卡片滚动动画 -->
+   
+
+<!-- 评论所需js -->
+
+  
+    <!-- 弹幕所需的css和js -->
+    
+<!-- 具体js，请前往valine/script.ejs查看 -->
+
+    <script>
+  var requiredFields = '';
+  requiredFields = requiredFields.split(',');
+  comment_el = '.comment';
+  let looperValine = null;
+  load_valine = function () {
+    if ($(comment_el).length) {
+      var valine = new Valine({
+        el: '#vcomment',
+        path: window.location.pathname,
+        notify: false,
+        verify: false,
+        app_id: "",
+        app_key: "",
+        placeholder: "客官，说点什么吧",
+        avatar: "",
+        master: "",   //博主邮箱md5
+        tagMeta: ["博主","小伙伴","访客"],     //标识字段名
+        friends: "",
+        metaPlaceholder: { "nick": "昵称/QQ号", "mail": "邮箱" },
+        requiredFields: requiredFields,
+        enableQQ: true,
+      });
+      function debounce(fn) {
+        var timerID = null
+        return function () {
+          var arg = arguments[0]   //获取事件
+          if (timerID) {
+            clearTimeout(timerID)
+          }
+          timerID = setTimeout(function () {
+            fn(arg)              //事件传入函数
+          }, 200)
+        }
+      }
+      //查询评论 valine.Q('*').limit(7) -- 查询所有，限制7条, 下面的的代码是查询当前页面
+      var themeDanmu = eval('false');
+      var themeLoop = eval('false');
+      var themeLooperTime = '5000' || 5000;
+      var speed = '40' || 20;
+      var isBarrager = true;
+      if (themeDanmu == true) {
+        do_barrager();
+        if ($('.danmuBox').length <= 0) {
+          $('.navbar').append('<div class="danmuBox"><div class="danmuBtn open"><span class="danmuCircle"></span><span class="danmuText">弹幕</span></div></div>');
+        }
+        $('.danmuBtn').on('click', debounce(
+          function () {
+            if ($('.danmuBtn').hasClass('open')) {
+              $('.danmuBtn').removeClass('open')
+              clearInterval(looperValine);
+              $.fn.barrager.removeAll();
+            } else {
+              $('.danmuBtn').addClass("open");
+              do_barrager();
+            }
+          }
+        ))
+      }
+      function do_barrager() {
+        isBarrager && valine.Q(window.location.pathname).find().then(function (comments) {
+          // var num = 0; // 可以记录条数，循环调用的时候只取最新的评论放入弹幕中
+          var run_once = true;
+          var looper_time = themeLooperTime;
+          var total = comments.length;
+          // var looper = null;
+          var index = 0;
+          if (total > 0) {
+            barrager();
+          } else {
+            // 当评论数为0的时候，自动关闭弹幕
+            // $('.danmuBtn').removeClass('open');
+          }
+          function barrager() {
+            if (run_once) {
+              //如果是首次执行,则设置一个定时器,并且把首次执行置为false
+              looperValine = setInterval(barrager, looper_time);
+              run_once = false;
+            }
+            var content = comments[index]._serverData.comment;
+            var email = comments[index]._serverData.mail;
+            var link = comments[index]._serverData.link;
+            var newcontent = content.substring(0, 50).replace(/<[^>]+>/g, "");
+            //发布一个弹幕
+            const item = {
+              img: `https://q1.qlogo.cn/g?b=qq&nk=${email}&s=640`, //图片 
+              info: newcontent, //文字 
+              href: link, //链接 
+              close: true, //显示关闭按钮 
+              speed: speed, //延迟,单位秒,默认6 
+              color: '#fff', //颜色,默认白色 
+              old_ie_color: '#000000', //ie低版兼容色,不能与网页背景相同,默认黑色
+            }
+            $('body').barrager(item);
+            //索引自增
+            index++;
+            //所有弹幕发布完毕，清除计时器。
+            if (index == total) {
+              clearInterval(looperValine);
+              if (themeLoop === true) {
+                setTimeout(function () {
+                  do_barrager();
+                }, 5000);
+              } else {
+                $('.danmuBtn').removeClass('open');
+              }
+              return false;
+            }
+
+          }
+        })
+      }
+    }
+  };
+  $(document).ready(load_valine);
+  document.addEventListener('pjax:send', function (e) {
+    
+  })
+  document.addEventListener('pjax:complete', function () {
+    load_valine();
+  });
+</script>
+
+  
+
+
+<!-- 鼠标点击特效 -->
+<!-- 爱心点击 -->
+
+  
+    <canvas class="fireworks" style="position: fixed;left: 0;top: 0;z-index: 999; pointer-events: none;" ></canvas>
+    <script src="//cdn.bootcss.com/animejs/2.2.0/anime.min.js"></script>
+    <script src="/js/cursor/explosion.min.js"></script>
+  
+
+
+
+
+
+    <!-- pjax -->
+    
+
+<!-- pjax -->
+
+
+  <script src="/js/pjax@0.2.8/index.js"></script>
+  
+    <!-- 样式位于：source/css/_third-party/pjaxanimate.styl -->
+
+<div class="pjax-animate">
+  
+    <div class="loading-circle"><div id="loader-circle"></div></div>
+    <script>
+      window.ShowLoading = function() {
+        $(".loading-circle").css("display", "block");
+      };
+      window.HideLoading = function() {
+        $(".loading-circle").css("display", "none");
+      }
+    </script>
+  
+	<script>
+    document.addEventListener('pjax:complete', function () {
+      window.HideLoading();
+    })
+    document.addEventListener('pjax:send', function () {
+      window.ShowLoading();
+    })
+    document.addEventListener('pjax:error', function () {
+      window.HideLoading();
+    })
+	</script>
+</div>
+
+  
+
+  <script>
+    var pjax = new Pjax({
+      elements: 'a[href]:not([href^="#"]):not([href="javascript:void(0)"]):not([no-pjax])',   // 拦截正常带链接的 a 标签
+      selectors: ["#pjax-container","title"],                                   // 根据实际需要确认重载区域
+      cacheBust: false,   // url 地址追加时间戳，用以避免浏览器缓存
+      timeout: 5000
+    });
+
+    document.addEventListener('pjax:send', function (e) {
+
+      try {
+        var currentUrl = window.location.pathname;
+        var targetUrl = e.triggerElement.href;
+        var banUrl = [""];
+        if (banUrl[0] != "") {
+          banUrl.forEach(item => {
+            if(currentUrl.indexOf(item) != -1 || targetUrl.indexOf(item) != -1) {
+              window.location.href = targetUrl;
+            }
+          });
+        }
+      } catch (error) {}
+
+      $(window).unbind('resize');
+      $(window).unbind('scroll');
+      $(document).unbind('scroll');
+      $(document).unbind('click');
+      $('body').unbind('click');
+
+    })
+    
+    document.addEventListener('pjax:complete', function () {
+      $('script[data-pjax], .pjax-reload script').each(function () {
+        $(this).parent().append($(this).remove());
+      });
+    });
+
+    document.addEventListener('pjax:error', function (e) {
+      window.location.href = e.triggerElement.href;
+    })
+    
+    // 刷新不从顶部开始
+    document.addEventListener("DOMContentLoaded", function () {
+      history.scrollRestoration = 'auto';
+    })
+  </script>
+
+
+
+  </body>
+</html>
