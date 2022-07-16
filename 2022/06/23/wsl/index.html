@@ -451,7 +451,7 @@
   <div class="main-content">
     <article class="post post-detail">
       <div class="post-content">
-        <h1 id="WSL"><a href="#WSL" class="headerlink" title="WSL"></a>WSL</h1><p>Windows Subsystem for Linux,在windows上运行的linux子系统</p>
+        <h1 id="WSL2"><a href="#WSL2" class="headerlink" title="WSL2"></a>WSL2</h1><p>Windows Subsystem for Linux,在windows上运行的linux子系统</p>
 <p>前一段时间一直在用WSL kali+vscode+python3,做pwn的题目还有linux上的逆向题.确实比用vmware开一个虚拟机方便一万倍</p>
 <p>但是对wsl的了解也就仅限于一些简单的命令比如<code>ls</code>等等,对于子系统和主系统的网络关系,以及子系统的其他用法,没有了解过</p>
 <p>现在想了解一下子系统的结构,怎么用子系统完成操作系统的课程实验(编译内核,系统调用,内核模块,设备驱动)</p>
@@ -497,7 +497,9 @@
 <figure class="highlight powershell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="built_in">PS</span> Microsoft.PowerShell.Core\FileSystem::\\wsl.localhost\kali<span class="literal">-linux</span>&gt; <span class="built_in">pwd</span></span><br><span class="line"></span><br><span class="line">Path</span><br><span class="line"><span class="literal">----</span></span><br><span class="line">Microsoft.PowerShell.Core\FileSystem::\\wsl.localhost\kali<span class="literal">-linux</span></span><br></pre></td></tr></table></figure>
 <p>这到底是个啥地方呢?前面怎么好长一坨,FileSystem后面还有俩冒号</p>
 <figure class="highlight powershell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="built_in">PS</span> C:\Users\<span class="number">86135</span>&gt; <span class="built_in">cd</span> \\wsl.localhost\kali<span class="literal">-linux</span></span><br><span class="line"><span class="built_in">PS</span> Microsoft.PowerShell.Core\FileSystem::\\wsl.localhost\kali<span class="literal">-linux</span>&gt;</span><br></pre></td></tr></table></figure>
-<p>切换工作目录的时候前面好长一坨<code>Microsoft.PowerShell.Core\FileSystem::</code>都可以不写</p>
+<p>如果在这个目录下面,想使用cd ..退到爹目录,接着说找不到爹目录</p>
+<p>实际上可以直接用explorer访问wsl的文件系统</p>
+<p><img src="https://raw.githubusercontent.com/DeutschBall/test/master/image-20220716105512580.png" class="lazyload placeholder" data-srcset="https://raw.githubusercontent.com/DeutschBall/test/master/image-20220716105512580.png" srcset="https://img2.baidu.com/it/u=2037979560,2772131037&fm=26&fmt=auto&gp=0.jpg" alt="image-20220716105512580"></p>
 <h3 id="wsl上windows的位置"><a href="#wsl上windows的位置" class="headerlink" title="wsl上windows的位置"></a>wsl上windows的位置</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">┌──(root㉿Executor)-[/mnt/c/Users/86135/Desktop/pwn]</span><br><span class="line">└─<span class="comment"># pwd</span></span><br><span class="line">/mnt/c/Users/86135/Desktop/pwn</span><br></pre></td></tr></table></figure>
 <p>即windows的根目录在wsl上为<code>/mnt/</code></p>
 <p>比如桌面就是<code>/mnt/c/Users/86135/Desktop/</code></p>
@@ -508,7 +510,8 @@
 <p>也可以用wsl打开主系统中已经添加到环境变量的窗口应用程序</p>
 <p>也可以在wsl上调用主系统的cmd,切换到主系统的cmd终端</p>
 <figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line">┌──(root㉿Executor)-[~]</span><br><span class="line">└─<span class="comment"># cmd.exe</span></span><br><span class="line"><span class="string">&#x27;\\wsl.localhost\kali-linux\root&#x27;</span></span><br><span class="line">用作为当前目录的以上路径启动了 CMD.EXE。</span><br><span class="line">UNC 路径不受支持。默认值设为 Windows 目录。</span><br><span class="line">Microsoft Windows [版本 10.0.22000.675]</span><br><span class="line">(c) Microsoft Corporation。保留所有权利。</span><br><span class="line"></span><br><span class="line">C:\Windows&gt;</span><br></pre></td></tr></table></figure>
-<p>至于两个系统的终端怎么怎么联系.这都是茴香豆的n种写法,不会有人闲的让终端之间踢皮球吧</p>
+<p>至于两个系统的终端怎么怎么联系.</p>
+<p>这都是茴香豆的n种写法,不会有人闲的让终端之间踢皮球吧</p>
 <p>并且还有设置开关这些功能,我寻思多多益善吧,不冲突关他干啥呢</p>
 <h2 id="wsl执行linux命令"><a href="#wsl执行linux命令" class="headerlink" title="wsl执行linux命令"></a>wsl执行linux命令</h2><p>正常情况下,linux上的可执行程序.elf或者.out,在windows上是没法执行的.同理win上的.exe也无法在linux上执行</p>
 <p>而wsl就提供了一种在windows上执行linux可执行目标文件的方法</p>
@@ -517,7 +520,7 @@
 <figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br></pre></td><td class="code"><pre><span class="line">PS C:\Users\86135\Desktop\pwn&gt; ls -l</span><br><span class="line">Get-ChildItem : 缺少参数“LiteralPath”的某个参数。请指定一个类型为“System.String[]”的参数，然后再试一次。</span><br><span class="line">所在位置 行:1 字符: 4</span><br><span class="line">+ ls -l</span><br><span class="line">+    ~~</span><br><span class="line">    + CategoryInfo          : InvalidArgument: (:) [Get-ChildItem]，ParameterBindingException</span><br><span class="line">    + FullyQualifiedErrorId : MissingArgument,Microsoft.PowerShell.Commands.GetChildItemCommand</span><br><span class="line"></span><br><span class="line">PS C:\Users\86135\Desktop\pwn&gt; wsl ls -l</span><br><span class="line">total 108</span><br><span class="line">drwxrwxrwx 1 kali kali  4096 Jun  2 19:52 CGfsb</span><br><span class="line">drwxrwxrwx 1 kali kali  4096 May 19 23:14 cgpwn</span><br><span class="line">drwxrwxrwx 1 kali kali  4096 Jun 20 09:55 dice_game</span><br><span class="line">drwxrwxrwx 1 kali kali  4096 Jun 19 23:09 forgot</span><br><span class="line">drwxrwxrwx 1 kali kali  4096 May 11 17:45 get_shell</span><br><span class="line">drwxrwxrwx 1 kali kali  4096 May 20 09:28 guess_num</span><br><span class="line">drwxrwxrwx 1 kali kali  4096 May 11 09:51 hello_pwn</span><br><span class="line">drwxrwxrwx 1 kali kali  4096 May 20 08:45 int_overflow</span><br><span class="line">drwxrwxrwx 1 kali kali  4096 May 11 17:38 level0</span><br><span class="line">drwxrwxrwx 1 kali kali  4096 May 11 21:08 level2</span><br><span class="line">drwxrwxrwx 1 kali kali  4096 Jun  3 16:27 level3</span><br><span class="line">drwxrwxrwx 1 kali kali  4096 Jun 21 10:30 mytest</span><br><span class="line">-rwxrwxrwx 1 kali kali 84286 Jun  3 16:10 pwn.md</span><br><span class="line">drwxrwxrwx 1 kali kali  4096 Jun 19 23:38 reactor</span><br><span class="line">drwxrwxrwx 1 kali kali  4096 Jun 20 00:28 realtime</span><br><span class="line">drwxrwxrwx 1 kali kali  4096 Jun 20 10:06 stack2</span><br><span class="line">drwxrwxrwx 1 kali kali  4096 Jun  3 10:56 string</span><br><span class="line">drwxrwxrwx 1 kali kali  4096 May 29 16:03 testPIE</span><br></pre></td></tr></table></figure>
 <p>在输入<code>wsl ls -l</code>命令之后终端等了好长时间去了,推测是启动子系统去了.</p>
 <p>估计这个过程就是在子系统上运行了<code>ls -l</code>命令之后,将结果反馈给powershell,然后powershell打印到屏幕上</p>
-<h2 id="高级配置"><a href="#高级配置" class="headerlink" title="高级配置"></a>高级配置</h2><p>wsl上两个配置文件<code>wsl.conf,.wslconfig</code></p>
+<h2 id="高级配置"><a href="#高级配置" class="headerlink" title="高级配置"></a>高级配置</h2><p>wsl上两个配置文件<code>wsl.conf</code> <code>.wslconfig</code></p>
 <p>微软给出的这两个文件的描述</p>
 <blockquote>
 <p> <strong>wsl.conf</strong></p>
@@ -536,9 +539,9 @@
 </ul>
 </blockquote>
 <p>这两个文件在默认情况下是不存在的,只有我们需要修改wsl的参数时,才需要在相应位置建立这么一个文件.</p>
-<p>wsl再启动时就会考虑这些文件里的规定了</p>
-<p>wsl.conf放在子系统里</p>
-<p>.wslconfig放在主系统里.</p>
+<p><code>wsl</code>再启动时就会考虑这些文件里的规定了</p>
+<p><code>wsl.conf</code>放在子系统里</p>
+<p><code>.wslconfig</code>放在主系统里.</p>
 <p>在使用wmware的时候,我们可以自由决定虚拟机占用多大内存,最多使用多少个处理器,这就是<code>.wslconfig</code>的作用</p>
 <p>在修改之前,首先在wsl上观察一下处理器数量</p>
 <figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">┌──(root㉿Executor)-[/mnt/c/Users/86135]</span><br><span class="line">└─<span class="comment"># cat /proc/cpuinfo | grep name | cut -f2 -d: | uniq -c</span></span><br><span class="line">     16  11th Gen Intel(R) Core(TM) i7-11800H @ 2.30GHz</span><br></pre></td></tr></table></figure>
@@ -557,6 +560,55 @@
 <figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">deb https://mirrors.aliyun.com/kali kali-rolling main non-free contrib</span><br><span class="line">deb-src https://mirrors.aliyun.com/kali kali-rolling main non-free contrib</span><br></pre></td></tr></table></figure>
 <p>修改之后可以<code>apt update</code>看看成功没</p>
 <figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br></pre></td><td class="code"><pre><span class="line">┌──(root㉿Executor)-[~]</span><br><span class="line">└─<span class="comment"># vim /etc/apt/sources.list</span></span><br><span class="line"></span><br><span class="line">┌──(root㉿Executor)-[~]</span><br><span class="line">└─<span class="comment"># apt update</span></span><br><span class="line">Get:1 https://mirrors.aliyun.com/kali kali-rolling InRelease [30.6 kB]</span><br><span class="line">Get:2 https://mirrors.aliyun.com/kali kali-rolling/main Sources [14.7 MB]</span><br><span class="line">Get:3 https://mirrors.aliyun.com/kali kali-rolling/non-free Sources [128 kB]</span><br><span class="line">Get:4 https://mirrors.aliyun.com/kali kali-rolling/contrib Sources [73.1 kB]</span><br><span class="line">Get:5 https://mirrors.aliyun.com/kali kali-rolling/main amd64 Packages [18.4 MB]</span><br><span class="line">Get:6 https://mirrors.aliyun.com/kali kali-rolling/non-free amd64 Packages [213 kB]</span><br><span class="line">Get:7 https://mirrors.aliyun.com/kali kali-rolling/contrib amd64 Packages [116 kB]</span><br><span class="line">Fetched 33.6 MB <span class="keyword">in</span> 22s (1,505 kB/s)</span><br><span class="line">Reading package lists... Done</span><br><span class="line">Building dependency tree... Done</span><br><span class="line">Reading state information... Done</span><br><span class="line">257 packages can be upgraded. Run <span class="string">&#x27;apt list --upgradable&#x27;</span> to see them.</span><br></pre></td></tr></table></figure>
+<h2 id="wsl迁移"><a href="#wsl迁移" class="headerlink" title="wsl迁移"></a>wsl迁移</h2><p>kali-linux迁移前的C卷大小</p>
+<p><img src="https://raw.githubusercontent.com/DeutschBall/test/master/image-20220716102545759.png" class="lazyload placeholder" data-srcset="https://raw.githubusercontent.com/DeutschBall/test/master/image-20220716102545759.png" srcset="https://img2.baidu.com/it/u=2037979560,2772131037&fm=26&fmt=auto&gp=0.jpg" alt="image-20220716102545759"></p>
+<p>由于我想为kali安装一个xfce桌面,KDE桌面很大,又要剥削压迫C卷,于是就像把wsl搬到D卷</p>
+<p>先用安装了python3的ubuntu20.04LTS做了一个实验,结果迁移后的ubuntu还是有python3的,这意味着以前的修改都会保留</p>
+<p>kali-linux迁移过程:</p>
+<h3 id="1-wsl关机"><a href="#1-wsl关机" class="headerlink" title="1.wsl关机"></a>1.wsl关机</h3><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">wsl --shutdown</span><br></pre></td></tr></table></figure>
+<h3 id="2-选好目的地"><a href="#2-选好目的地" class="headerlink" title="2.选好目的地"></a>2.选好目的地</h3><p>我将D:\wsl\kali作为目的地,加一个wsl父目录是因为,同父目录下还有D:\wsl\ubuntu子系统,将powershell的当前工作目录调整到D:\wsl\kali</p>
+<figure class="highlight powershell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="built_in">PS</span> D:\wsl\kali&gt; <span class="built_in">pwd</span></span><br><span class="line"></span><br><span class="line">Path</span><br><span class="line"><span class="literal">----</span></span><br><span class="line">D:\wsl\kali</span><br></pre></td></tr></table></figure>
+<h3 id="3-选择需要导出的子系统"><a href="#3-选择需要导出的子系统" class="headerlink" title="3.选择需要导出的子系统"></a>3.选择需要导出的子系统</h3><p>使用<code>wsl -l</code>指令列出所有已经注册的子系统名</p>
+<figure class="highlight powershell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="built_in">PS</span> D:\wsl\kali&gt; wsl <span class="literal">-l</span></span><br><span class="line">适用于 Linux 的 Windows 子系统分发版:</span><br><span class="line">kali<span class="literal">-linux</span> (默认)</span><br><span class="line">ubuntu</span><br></pre></td></tr></table></figure>
+<h3 id="4-导出kali-linux-tar"><a href="#4-导出kali-linux-tar" class="headerlink" title="4.导出kali-linux.tar"></a>4.导出<code>kali-linux.tar</code></h3><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">wsl --export &lt;子系统名&gt; &lt;tar包路径&gt;</span><br></pre></td></tr></table></figure>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">PS D:\wsl\kali&gt; wsl --export kali-linux ./kali.tar</span><br></pre></td></tr></table></figure>
+<p>本条命令的意义是,将名为kali-linux的子系统,导出到当前工作目录下的kali.tar中</p>
+<h3 id="5-卸载本来安装在C卷的kali-linux"><a href="#5-卸载本来安装在C卷的kali-linux" class="headerlink" title="5.卸载本来安装在C卷的kali-linux"></a>5.卸载本来安装在C卷的kali-linux</h3><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">wsl --unregister &lt;子系统名&gt;</span><br></pre></td></tr></table></figure>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">PS D:\wsl\kali&gt; wsl --unregister kali-linux</span><br><span class="line">正在注销...</span><br></pre></td></tr></table></figure>
+<h3 id="6-导入迁移到D卷的kali-linux"><a href="#6-导入迁移到D卷的kali-linux" class="headerlink" title="6.导入迁移到D卷的kali-linux"></a>6.导入迁移到D卷的kali-linux</h3><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">wsl --import &lt;子系统名&gt; &lt;子系统安装路径&gt; &lt;tar包路径&gt;</span><br></pre></td></tr></table></figure>
+<figure class="highlight powershell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="built_in">PS</span> D:\wsl\kali&gt; wsl <span class="literal">--import</span> kali<span class="literal">-linux</span> . ./kali.tar</span><br></pre></td></tr></table></figure>
+<p>本条命令的意义是,从当前目录的kali.tar包导入子系统到当前目录,子系统名叫kali-linux</p>
+<h3 id="7-验证导出成功"><a href="#7-验证导出成功" class="headerlink" title="7.验证导出成功"></a>7.验证导出成功</h3><p>终端启动kali成功</p>
+<p><img src="https://raw.githubusercontent.com/DeutschBall/test/master/image-20220716103913136.png" class="lazyload placeholder" data-srcset="https://raw.githubusercontent.com/DeutschBall/test/master/image-20220716103913136.png" srcset="https://img2.baidu.com/it/u=2037979560,2772131037&fm=26&fmt=auto&gp=0.jpg" alt="image-20220716103913136"></p>
+<p>虽然迁移kali只给C省出了3G的磁盘空间…</p>
+<p><img src="https://raw.githubusercontent.com/DeutschBall/test/master/image-20220716103955718.png" class="lazyload placeholder" data-srcset="https://raw.githubusercontent.com/DeutschBall/test/master/image-20220716103955718.png" srcset="https://img2.baidu.com/it/u=2037979560,2772131037&fm=26&fmt=auto&gp=0.jpg" alt="image-20220716103955718"></p>
+<p>但是可以放心安装桌面了</p>
+<h2 id="安装桌面"><a href="#安装桌面" class="headerlink" title="安装桌面"></a>安装桌面</h2><p>在此之前需要保证wsl升级到wsl2,换下载源到阿里云(如果梯子流量管够忽略)</p>
+<h3 id="安装Win-KeX"><a href="#安装Win-KeX" class="headerlink" title="安装Win-KeX"></a>安装Win-KeX</h3><blockquote>
+<p>Win-KeX是windows为kali专门提供的桌面体验,具有以下功能</p>
+<ul>
+<li>窗口模式：在专用窗口中启动Kali Linux桌面</li>
+<li>无缝模式：在Windows和Kali应用程序和菜单之间共享Windows桌面</li>
+<li>声音支持</li>
+<li>无特权和根会话支持</li>
+<li>共享剪贴板，可在Kali Linux和Windows应用之间进行剪切和粘贴支持</li>
+<li>多会话支持：根窗口和非私有窗口以及无缝会话同时进行</li>
+</ul>
+</blockquote>
+<p>安装之前先<code>apt update</code>更新一下</p>
+<p>之后安装Win-KeX</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">apt install -y kali-win-kex</span><br></pre></td></tr></table></figure>
+<p>安装可能很慢…但是速度是百度云盘两倍(比烂是吧)</p>
+<p><img src="https://raw.githubusercontent.com/DeutschBall/test/master/image-20220716104931612.png" class="lazyload placeholder" data-srcset="https://raw.githubusercontent.com/DeutschBall/test/master/image-20220716104931612.png" srcset="https://img2.baidu.com/it/u=2037979560,2772131037&fm=26&fmt=auto&gp=0.jpg" alt="image-20220716104931612"></p>
+<p>安装完成后在kali上使用kex命令,输入一些密码之后,就可以使用xfce桌面了</p>
+<p><img src="https://raw.githubusercontent.com/DeutschBall/test/master/image-20220716114030667.png" class="lazyload placeholder" data-srcset="https://raw.githubusercontent.com/DeutschBall/test/master/image-20220716114030667.png" srcset="https://img2.baidu.com/it/u=2037979560,2772131037&fm=26&fmt=auto&gp=0.jpg" alt="image-20220716114030667"></p>
+<p>在kex中使用F8键可以选择桌面以windows窗口运行还是全屏运行,</p>
+<p>全屏时就和真的kali系统没有区别了,所有键鼠命令都会被kali捕获,不会发往windows</p>
+<p>F8的fullscreen可以设置窗口或者全屏模式</p>
+<h2 id="完整everything"><a href="#完整everything" class="headerlink" title="完整everything"></a>完整everything</h2><p>一开始安装的子系统只是最小安装,只安装了一个系统,各种武器都没有安装</p>
+<p>kali子系统完整安装</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">apt install kali-linux-everything</span><br></pre></td></tr></table></figure>
+<p>大约有20个G,还是在学校wifi环境下安装吧,使用流量划不来</p>
 
       </div>
       <div class="post-tags-categories">
