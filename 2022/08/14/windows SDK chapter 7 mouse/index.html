@@ -1,0 +1,1854 @@
+<!DOCTYPE html>
+<html>
+  <!-- meta/link... -->
+  
+
+
+
+<head>
+  <meta http-equiv="content-type" content="text/html; charset=utf-8">
+  <meta content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=0" name="viewport">
+  <!-- Global site tag (gtag.js) - Google Analytics -->
+
+
+  <title>win32程序设计-chapter7 鼠标 | Deutschball&#39;s blog</title>
+
+  <link rel="icon" type="image/png" href="https://raw.githubusercontent.com/DeutschBall/test/master/emp.png">
+  <link rel="stylesheet" href="https://at.alicdn.com/t/font_1911880_c1nvbyezg17.css">
+  <link href="https://cdn.jsdelivr.net/gh/inkss/fontawesome@5.15.3/css/all.min.css" rel="stylesheet">
+  <link href="/js/swiper/swiper@5.4.1.min.css" rel="stylesheet">
+  
+  
+    <script>
+        var themeModelId = '';
+        if (themeModelId) {
+            localStorage.setItem('modelId', themeModelId);
+        }
+    </script>
+    
+    <script src="https://cdn.jsdelivr.net/gh/yuang01/live2d-widget@latest/autoload.js"></script>
+    <script>
+        var live2dOpen = eval('true') || false;
+        if (!live2dOpen) {
+            localStorage.setItem('waifu-display', 1609323474481);
+        }
+    </script>
+  
+  
+  
+<link rel="stylesheet" href="/css/animate.min.css">
+
+  
+<link rel="stylesheet" href="/css/style.css">
+
+  
+  
+    
+<link rel="stylesheet" href="/js/fancybox/jquery.fancybox.min.css">
+
+  
+  
+    
+<link rel="stylesheet" href="/js/shareJs/share.min.css">
+
+  
+  <style>
+        @media (max-width: 992px) {
+            #waifu {
+                display: none;
+            }
+        }
+    </style>
+    <script src="//cdn.bootcss.com/pace/1.0.2/pace.min.js"></script>
+    <link href="//cdn.bootcss.com/pace/1.0.2/themes/pink/pace-theme-flash.css" rel="stylesheet">
+
+    
+        <script src="/js/valine/av-min@3.0.4.js"></script>
+        <script src="https://cdn.jsdelivr.net/gh/HCLonely/Valine@latest/dist/Valine.min.js"></script>
+    
+
+    <!-- import link -->
+    
+        
+            
+        
+            
+        
+    
+    <!-- import script -->
+    
+        
+            
+        
+            
+        
+    
+
+<!-- hexo injector head_end start -->
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.12.0/dist/katex.min.css">
+<!-- hexo injector head_end end --><meta name="generator" content="Hexo 6.2.0"></head>
+
+  
+  <!-- 依赖于jquery和vue -->
+  
+    
+<script src="https://cdn.jsdelivr.net/npm/jquery@3.5.1/dist/jquery.min.js"></script>
+
+  
+
+  
+    
+<script src="https://cdn.jsdelivr.net/npm/vue@2.6.11/dist/vue.min.js"></script>
+
+  
+  
+  <body>
+    <!-- 预加载动画 -->
+    <!-- 页面预加载动画 -->
+
+<div id='loader'>
+  <link rel="stylesheet" href="/js/loaded/index.css" >
+  <div class="loading-left-bg"></div>
+  <div class="loading-right-bg"></div>
+  <div class="spinner-box">
+    <div class="configure-border-1">
+      <div class="configure-core"></div>
+    </div>
+    <div class="configure-border-2">
+      <div class="configure-core"></div>
+    </div>
+    <div class="loading-word">loading...</div>
+  </div>
+</div>
+
+<script>
+  var endLoading = function () {
+    document.body.style.overflow = 'auto';
+    document.getElementById('loader').classList.add("loading");
+  }
+  window.addEventListener('DOMContentLoaded',endLoading);
+  
+</script>
+
+    
+    <!-- 判断是否为暗黑风格 -->
+    <!-- 判断是否为黑夜模式 -->
+<script>
+  let isDark = JSON.parse(localStorage.getItem('dark')) || JSON.parse('true');
+
+  if (isDark) {
+    $(document.body).addClass('darkModel');
+  }
+</script>
+
+    <!-- 需要在上面加载的js -->
+    <script>
+  function loadScript(src, cb) {
+    return new Promise(resolve => {
+      setTimeout(function () {
+        var HEAD = document.getElementsByTagName("head")[0] || document.documentElement;
+        var script = document.createElement("script");
+        script.setAttribute("type", "text/javascript");
+        if (cb) {
+          if (JSON.stringify(cb)) {
+            for (let p in cb) {
+              if (p == "onload") {
+                script[p] = () => {
+                  cb[p]()
+                  resolve()
+                }
+              } else {
+                script[p] = cb[p]
+                script.onload = resolve
+              }
+            }
+          } else {
+            script.onload = () => {
+              cb()
+              resolve()
+            };
+          }
+        } else {
+          script.onload = resolve
+        }
+        script.setAttribute("src", src);
+        HEAD.appendChild(script);
+      });
+    });
+  }
+
+  //https://github.com/filamentgroup/loadCSS
+  var loadCSS = function (href, before, media, attributes) {
+    return new Promise(resolve => {
+      setTimeout(function () {
+        var link = document.createElement('link');
+        link.rel = "stylesheet";
+        link.href = src;
+        link.onload = resolve;
+        document.getElementsByTagName("head")[0].appendChild(link);
+      });
+    });
+  };
+
+</script> 
+
+<!-- 轮播图所需要的js -->
+<script src="/js/swiper/swiper.min.js"></script>
+<script src="/js/swiper/vue-awesome-swiper.js"></script>
+<script src="/js/swiper/swiper.animate1.0.3.min.js"></script>
+
+<script type="text/javascript">
+  Vue.use(window.VueAwesomeSwiper)
+</script>
+
+
+  <script src="/js/vue-typed-js/index.js"></script>
+
+
+<!-- 首页的公告滚动插件的js需要重新加载 -->
+<script src="/js/vue-seamless-scroll/index.js"></script>
+
+<!-- 打字机效果js -->
+<script src="https://cdn.jsdelivr.net/npm/typed.js@2.0.11"></script>
+
+
+    <div id="safearea">
+      <main class="main" id="pjax-container">
+        <!-- 头部导航 -->
+        
+<header class="header   " 
+  id="navHeader"
+  style="position: fixed;
+  left: 0; top: 0; z-index: 10;width: 100%;"
+>
+  <div class="header-content">
+    <div class="bars">
+      <div id="appDrawer" class="sidebar-image">
+  <div class="drawer-box-icon">
+    <i class="fas fa-bars" aria-hidden="true" @click="showDialogDrawer"></i>
+  </div>
+  
+  <transition name="fade">
+    <div class="drawer-box_mask" v-cloak style="display: none;" v-show="visible" @click.self="cancelDialogDrawer">
+    </div>
+  </transition>
+  <div class="drawer-box" :class="{'active': visible}">
+    <div class="drawer-box-head bg-color">
+      <img class="drawer-box-head_logo lazyload placeholder" src="https://raw.githubusercontent.com/DeutschBall/test/master/emp.png" class="lazyload placeholder" data-srcset="https://raw.githubusercontent.com/DeutschBall/test/master/emp.png" srcset="https://img2.baidu.com/it/u=2037979560,2772131037&fm=26&fmt=auto&gp=0.jpg" alt="logo">
+      <h3 class="drawer-box-head_title">Deutschball&#39;s blog</h3>
+      <h5 class="drawer-box-head_desc"></h5>
+    </div>
+    
+    <div class="drawer-box-content">
+      <ul class="drawer-box-content_menu">
+        
+        
+          <li class="drawer-box-content_item">
+            <a target="_blank" rel="noopener" href="https://github.com/DeutschBall">
+              <i class="fas fa-github" aria-hidden="true"></i>
+              <span>Github</span>
+            </a>
+          </li>
+        
+      </ul>
+    </div>
+  </div>
+</div>
+
+<script>
+  var body = document.body || document.documentElement || window;
+  var vm = new Vue({
+    el: '#appDrawer',
+    data: {
+      visible: false,
+      top: 0,
+      openArr: [],
+    },
+    computed: {
+    },
+    mounted() {
+    },
+    methods: {
+      isOpen(index) {
+        if (this.openArr.includes(index)) {
+          return true;
+        } else {
+          return false;
+        }
+      },
+      openOrCloseMenu(curIndex) {
+        const index = this.openArr.indexOf(curIndex);
+        if (index !== -1) {
+          this.openArr.splice(index, 1);
+        } else {
+          this.openArr.push(curIndex);
+        }
+      },
+      showDialogDrawer() {
+        this.visible = true;
+        // 防止页面滚动，只能让弹框滚动
+        this.top = $(document).scrollTop()
+        body.style.cssText = 'width: 100%; height: 100%;overflow: hidden;';
+      },
+      cancelDialogDrawer() {
+        this.visible = false;
+        body.removeAttribute('style');
+        $(document).scrollTop(this.top)
+      }
+    },
+    created() {}
+  })
+</script>
+
+    </div>
+    <div class="blog-title" id="author-avatar">
+      
+        <div class="avatar">
+          <img src="https://raw.githubusercontent.com/DeutschBall/test/master/emp.png" class="lazyload placeholder" data-srcset="https://raw.githubusercontent.com/DeutschBall/test/master/emp.png" srcset="https://img2.baidu.com/it/u=2037979560,2772131037&fm=26&fmt=auto&gp=0.jpg" alt="logo">
+        </div>
+      
+      <a href="/" class="logo">Deutschball&#39;s blog</a>
+    </div>
+    <nav class="navbar">
+      <ul class="menu">
+        
+      </ul>
+      
+      
+        <div id="appSearch">
+  <div class="search"  @click="showDialog()"><i class="fas fa-search" aria-hidden="true"></i></div>
+  <transition name="fade">
+    <div class="message-box_wrapper" style="display: none;" v-cloak v-show="dialogVisible" @click.self="cancelDialogVisible()">
+      <div class="message-box animated bounceInDown">
+        <h2>
+          <span>
+            <i class="fas fa-search" aria-hidden="true"></i>
+            <span class="title">Search</span>
+          </span>
+          <i class="fas fa-times close" pointer style="float:right;" aria-hidden="true" @click.self="cancelDialogVisible()"></i>
+        </h2>
+        <form class="site-search-form">
+          <input type="text"
+            placeholder="Please enter keywords"
+            id="local-search-input" 
+            @click="getSearchFile()"
+            class="st-search-input"
+            v-model="searchInput"
+          />
+        </form>
+        <div class="result-wrapper">
+          <div id="local-search-result" class="local-search-result-cls"></div>
+        </div>
+      </div>
+    </div>
+  </transition>
+</div>
+<script src="/js/local_search.js"></script>
+<script>
+  var body = document.body || document.documentElement || window;
+  var vm = new Vue({
+    el: '#appSearch',
+    data: {
+      dialogVisible: false,
+      searchInput: '',
+      top: 0,
+    },
+    computed: {
+    },
+    mounted() {
+      window.addEventListener('pjax:complete', () => {
+        this.cancelDialogVisible();
+      })
+    },
+    methods: {
+      showDialog() {
+        this.dialogVisible = true;
+        // 防止页面滚动，只能让弹框滚动
+        this.top = $(document).scrollTop()
+        body.style.cssText = 'overflow: hidden;';
+      },
+      getSearchFile() {
+        if (!this.searchInput) {
+          getSearchFile("/search.xml");
+        }
+      },
+      cancelDialogVisible() {
+        this.dialogVisible = false;
+        body.removeAttribute('style');
+        $(document).scrollTop(this.top)
+      },
+    },
+    created() {}
+  })
+</script>
+<!-- 解决刷新页面闪烁问题，可以在元素上添加display: none, 或者用vue.extend方法，详情：https://blog.csdn.net/qq_31393401/article/details/81017912 -->
+<!-- 下面是搜索基本写法 -->
+<!-- <script type="text/javascript" id="local.search.active">
+  var inputArea = document.querySelector("#local-search-input");
+  inputArea.onclick   = function(){ getSearchFile(); this.onclick = null }
+  inputArea.onkeydown = function(){ if(event.keyCode == 13) return false }
+</script> -->
+
+      
+
+    </nav>
+  </div>
+  
+    <a target="_blank" rel="noopener" href="https://github.com/DeutschBall" class="github-corner color-primary" aria-label="View source on GitHub"><svg width="60" height="60" viewBox="0 0 250 250" style="fill:#fff; position: absolute; top: 0; border: 0; right: 0;" aria-hidden="true"><path d="M0,0 L115,115 L130,115 L142,142 L250,250 L250,0 Z"></path><path d="M128.3,109.0 C113.8,99.7 119.0,89.6 119.0,89.6 C122.0,82.7 120.5,78.6 120.5,78.6 C119.2,72.0 123.4,76.3 123.4,76.3 C127.3,80.9 125.5,87.3 125.5,87.3 C122.9,97.6 130.6,101.9 134.4,103.2" fill="currentColor" style="transform-origin: 130px 106px;" class="octo-arm"></path><path d="M115.0,115.0 C114.9,115.1 118.7,116.5 119.8,115.4 L133.7,101.6 C136.9,99.2 139.9,98.4 142.2,98.6 C133.8,88.0 127.5,74.4 143.8,58.0 C148.5,53.4 154.0,51.2 159.7,51.0 C160.3,49.4 163.2,43.6 171.4,40.1 C171.4,40.1 176.1,42.5 178.8,56.2 C183.1,58.6 187.2,61.8 190.9,65.4 C194.5,69.0 197.7,73.2 200.1,77.6 C213.8,80.2 216.3,84.9 216.3,84.9 C212.7,93.1 206.9,96.0 205.4,96.6 C205.1,102.4 203.0,107.8 198.3,112.5 C181.9,128.9 168.3,122.5 157.7,114.1 C157.9,116.9 156.7,120.9 152.7,124.9 L141.0,136.5 C139.8,137.7 141.6,141.9 141.8,141.8 Z" fill="currentColor" class="octo-body"></path></svg></a><style>.github-corner:hover .octo-arm{animation:octocat-wave 560ms ease-in-out}@keyframes octocat-wave{0%,100%{transform:rotate(0)}20%,60%{transform:rotate(-25deg)}40%,80%{transform:rotate(10deg)}}@media (max-width:500px){.github-corner:hover .octo-arm{animation:none}.github-corner .octo-arm{animation:octocat-wave 560ms ease-in-out}}</style>
+  
+  
+</header>
+        <!-- 内容区域 -->
+        
+ <!-- prismjs 代码高亮 -->
+ 
+
+
+<div class="bg-dark-floor" style="position: fixed;left: 0;top: 0;width: 100%;height: 100%;z-index: -1;"></div>
+
+
+  <!-- 文章详情页顶部图片和标题 -->
+
+
+
+
+<div class="post-detail-header" id="thumbnail_canvas" style="background-repeat: no-repeat; background-size: cover; 
+  background-position: center center;position: relative;background-image:url('/medias/15.jpg')">
+  <div class="post-detail-header-mask"></div>
+  <canvas id="header_canvas"style="position:absolute;bottom:0;pointer-events:none;"></canvas>
+  
+  <div class="post-detail-header_info-box">
+    <div class="title-box">
+      <span class="title">
+        win32程序设计-chapter7 鼠标
+      </span>
+    </div>
+    
+    
+      
+        <span class="post-detail-header_date">
+          <i class="fas fa-calendar"></i> Published in：2022-08-14 |
+        </span>
+      
+
+      
+
+      
+    
+  </div>
+  
+  
+    <script src="/js/bubble/bubble.js"></script>
+  
+</div>
+
+
+
+
+
+<div class="row justify-position" 
+  style="padding-top: 0px;">
+  <div class="main-content">
+    <article class="post post-detail">
+      <div class="post-content">
+        <h1 id="windows-SDK-chapter-7-mouse"><a href="#windows-SDK-chapter-7-mouse" class="headerlink" title="windows SDK chapter 7 mouse"></a>windows SDK chapter 7 mouse</h1><h2 id="鼠标的基本信息"><a href="#鼠标的基本信息" class="headerlink" title="鼠标的基本信息"></a>鼠标的基本信息</h2><h3 id="是否在线"><a href="#是否在线" class="headerlink" title="是否在线"></a>是否在线</h3><figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">fMouse=GetSystemMetrics(SM_MOUSEPRESENT);</span><br></pre></td></tr></table></figure>
+<p>如果鼠标都不在线(和鼠标共用接口的输入设备也有可能被作为鼠标),则该函数返回0.</p>
+<p>如果至少有一个鼠标在线则函数返回非零值</p>
+<h3 id="单键双键"><a href="#单键双键" class="headerlink" title="单键双键"></a>单键双键</h3><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">cButtons = GetSystemMetrics(SM_CMOUSEBUTTONS);</span><br></pre></td></tr></table></figure>
+<p>但是在我的笔记本电脑上,这个值是8,而我的鼠标就四个键</p>
+<p>可能是触摸板加上了两指三指四指动作,等等各种使用方法?</p>
+<h3 id="鼠标样式"><a href="#鼠标样式" class="headerlink" title="鼠标样式"></a>鼠标样式</h3><p>鼠标样式最常见的就是斜向箭头,当程序忙的时候可能变成沙漏或者左箭头右沙漏</p>
+<p>当绘图的时候鼠标可能会变成十字</p>
+<p>实际上这个图标就是一个小的位图结构,点击鼠标时有效的位置只有一个像素点,叫做”焦点”</p>
+<p>斜向箭头的焦点在顶点上.十字的焦点在十字路口</p>
+<p>设置鼠标样式</p>
+<p>在实例化窗口对象的时候就指定过一次鼠标样式了</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">wndclass.hCursor  = LoadCursor(<span class="literal">NULL</span>, IDC_ARROW);</span><br></pre></td></tr></table></figure>
+<p>IDC_ARROW就是最常见的斜向箭头样式</p>
+<div class="table-container">
+<table>
+<thead>
+<tr>
+<th style="text-align:left">Value</th>
+<th style="text-align:left">Meaning</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:left"><strong>IDC_APPSTARTING</strong>MAKEINTRESOURCE(32650)</td>
+<td style="text-align:left">Standard arrow and small hourglass</td>
+</tr>
+<tr>
+<td style="text-align:left"><strong>IDC_ARROW</strong>MAKEINTRESOURCE(32512)</td>
+<td style="text-align:left">Standard arrow</td>
+</tr>
+<tr>
+<td style="text-align:left"><strong>IDC_CROSS</strong>MAKEINTRESOURCE(32515)</td>
+<td style="text-align:left">Crosshair</td>
+</tr>
+<tr>
+<td style="text-align:left"><strong>IDC_HAND</strong>MAKEINTRESOURCE(32649)</td>
+<td style="text-align:left">Hand</td>
+</tr>
+<tr>
+<td style="text-align:left"><strong>IDC_HELP</strong>MAKEINTRESOURCE(32651)</td>
+<td style="text-align:left">Arrow and question mark</td>
+</tr>
+<tr>
+<td style="text-align:left"><strong>IDC_IBEAM</strong>MAKEINTRESOURCE(32513)</td>
+<td style="text-align:left">I-beam</td>
+</tr>
+<tr>
+<td style="text-align:left"><strong>IDC_ICON</strong>MAKEINTRESOURCE(32641)</td>
+<td style="text-align:left">Obsolete for applications marked version 4.0 or later.</td>
+</tr>
+<tr>
+<td style="text-align:left"><strong>IDC_NO</strong>MAKEINTRESOURCE(32648)</td>
+<td style="text-align:left">Slashed circle</td>
+</tr>
+<tr>
+<td style="text-align:left"><strong>IDC_SIZE</strong>MAKEINTRESOURCE(32640)</td>
+<td style="text-align:left">Obsolete for applications marked version 4.0 or later. Use <strong>IDC_SIZEALL</strong>.</td>
+</tr>
+<tr>
+<td style="text-align:left"><strong>IDC_SIZEALL</strong>MAKEINTRESOURCE(32646)</td>
+<td style="text-align:left">Four-pointed arrow pointing north, south, east, and west</td>
+</tr>
+<tr>
+<td style="text-align:left"><strong>IDC_SIZENESW</strong>MAKEINTRESOURCE(32643)</td>
+<td style="text-align:left">Double-pointed arrow pointing northeast and southwest</td>
+</tr>
+<tr>
+<td style="text-align:left"><strong>IDC_SIZENS</strong>MAKEINTRESOURCE(32645)</td>
+<td style="text-align:left">Double-pointed arrow pointing north and south</td>
+</tr>
+<tr>
+<td style="text-align:left"><strong>IDC_SIZENWSE</strong>MAKEINTRESOURCE(32642)</td>
+<td style="text-align:left">Double-pointed arrow pointing northwest and southeast</td>
+</tr>
+<tr>
+<td style="text-align:left"><strong>IDC_SIZEWE</strong>MAKEINTRESOURCE(32644)</td>
+<td style="text-align:left">Double-pointed arrow pointing west and east</td>
+</tr>
+<tr>
+<td style="text-align:left"><strong>IDC_UPARROW</strong>MAKEINTRESOURCE(32516)</td>
+<td style="text-align:left">Vertical arrow</td>
+</tr>
+<tr>
+<td style="text-align:left"><strong>IDC_WAIT</strong>MAKEINTRESOURCE(32514)</td>
+<td style="text-align:left">Hourglass</td>
+</tr>
+</tbody>
+</table>
+</div>
+<p>然而在我的win11笔记本上,除了斜向箭头和转圈,其他鼠标样式都加载不出来,或者都加载成转圈或者斜向箭头</p>
+<h2 id="客户区鼠标消息"><a href="#客户区鼠标消息" class="headerlink" title="客户区鼠标消息"></a>客户区鼠标消息</h2><p>windows只把键盘消息发往具有输入焦点的窗口,但是鼠标不同</p>
+<p>只要鼠标经过某个窗口,windows就会对齐发送一个WM_MOUSEMOVE的消息</p>
+<p><img src="https://raw.githubusercontent.com/DeutschBall/DeutschBall/main/image-20220813092214535.png" class="lazyload placeholder" data-srcset="https://raw.githubusercontent.com/DeutschBall/DeutschBall/main/image-20220813092214535.png" srcset="https://img2.baidu.com/it/u=2037979560,2772131037&fm=26&fmt=auto&gp=0.jpg" alt="image-20220813092214535"></p>
+<p>其中双击信息许哟啊在创建窗口实例的时候指明风格使用</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">wndclass.style=CS_DBLCLKS | ...</span><br></pre></td></tr></table></figure>
+<p>带有CS_DBLCLKS风格的窗口才可以接收WM_LBUTTONDBLCLK这种双击消息</p>
+<p>对于鼠标消息(hwnd,message,wParam,lParam)</p>
+<h3 id="lParam"><a href="#lParam" class="headerlink" title="lParam"></a>lParam</h3><p>包含鼠标的位置信息,低字表示x坐标,高字表示y坐标</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">x=LOWORD(lParam);</span><br><span class="line">y=HIWORD(lParam);</span><br></pre></td></tr></table></figure>
+<h3 id="wParam"><a href="#wParam" class="headerlink" title="wParam"></a>wParam</h3><h3 id="包含了鼠标哪个键-还有此时Ctrl和Shift的状态"><a href="#包含了鼠标哪个键-还有此时Ctrl和Shift的状态" class="headerlink" title="包含了鼠标哪个键,还有此时Ctrl和Shift的状态."></a>包含了鼠标哪个键,还有此时Ctrl和Shift的状态.</h3><p>令wParam和宏定义按位与即可测试相应状态</p>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#<span class="keyword">ifndef</span> NOKEYSTATES</span></span><br><span class="line"><span class="meta">#<span class="keyword">define</span> MK_LBUTTON 0x0001</span></span><br><span class="line"><span class="meta">#<span class="keyword">define</span> MK_RBUTTON 0x0002</span></span><br><span class="line"><span class="meta">#<span class="keyword">define</span> MK_SHIFT 0x0004</span></span><br><span class="line"><span class="meta">#<span class="keyword">define</span> MK_CONTROL 0x0008</span></span><br><span class="line"><span class="meta">#<span class="keyword">define</span> MK_MBUTTON 0x0010</span></span><br><span class="line"><span class="meta">#<span class="keyword">define</span> MK_XBUTTON1 0x0020</span></span><br><span class="line"><span class="meta">#<span class="keyword">define</span> MK_XBUTTON2 0x0040</span></span><br><span class="line"><span class="meta">#<span class="keyword">endif</span></span></span><br></pre></td></tr></table></figure>
+<h2 id="MOUSEMOVE的速度"><a href="#MOUSEMOVE的速度" class="headerlink" title="MOUSEMOVE的速度"></a>MOUSEMOVE的速度</h2><p>windows不会给鼠标经过的每个像素点都产生一个WM_MOUSEMOVE消息,这取决于应用程序处理WM_MOUSEMOVE的速度,当应用程序的消息队列中还有WM_MOUSEMOVE的消息时就不能接收第二个WM_MOUSEMOVE消息</p>
+<p>书上在此给出了一个例子.</p>
+<p>凡是WM_MOUSEMOVE捕获的点都会被计入点集,点集中任意两个点连一条线</p>
+<p>分析一下其过程函数WndProc</p>
+<h3 id="变量定义"><a href="#变量定义" class="headerlink" title="变量定义"></a>变量定义</h3><figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="type">static</span> POINT pt[MAXPOINTS];<span class="comment">//存储已经捕获的点集</span></span><br><span class="line"><span class="type">static</span> <span class="type">int</span> iCount;<span class="comment">//记录已经捕获的点数量</span></span><br><span class="line">HDC hdc;<span class="comment">//设备环境句柄</span></span><br><span class="line"><span class="type">int</span> i, j;<span class="comment">//循环变量</span></span><br><span class="line">PAINTSTRUCT ps;<span class="comment">//绘图结构</span></span><br></pre></td></tr></table></figure>
+<h3 id="鼠标信息处理"><a href="#鼠标信息处理" class="headerlink" title="鼠标信息处理"></a>鼠标信息处理</h3><figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">case</span> WM_LBUTTONDOWN:</span><br><span class="line">	iCount = <span class="number">0</span>;<span class="comment">//左键按下时清零重新记录</span></span><br><span class="line">	InvalidateRect(hwnd, <span class="literal">NULL</span>, TRUE);<span class="comment">//清零后重绘</span></span><br><span class="line">	<span class="keyword">return</span> <span class="number">0</span>;</span><br><span class="line"></span><br><span class="line"><span class="keyword">case</span> WM_MOUSEMOVE:</span><br><span class="line">	<span class="keyword">if</span> (wParam &amp; MK_LBUTTON &amp;&amp; iCount &lt; MAXPOINTS)<span class="comment">//如果是左键按下的移动状态并且目前点集未满则捕获新点</span></span><br><span class="line">	&#123;</span><br><span class="line">		pt[iCount].x = LOWORD(lParam);<span class="comment">//捕获新点</span></span><br><span class="line">		pt[iCount++].y = HIWORD(lParam);</span><br><span class="line"></span><br><span class="line">		hdc = GetDC(hwnd);</span><br><span class="line">		SetPixel(hdc, LOWORD(lParam), HIWORD(lParam), <span class="number">0</span>);<span class="comment">//将该新点的位置打印成一个黑点</span></span><br><span class="line">		ReleaseDC(hwnd, hdc);</span><br><span class="line">	&#125;</span><br><span class="line">	<span class="keyword">return</span> <span class="number">0</span>;</span><br><span class="line"></span><br><span class="line"><span class="keyword">case</span> WM_LBUTTONUP:</span><br><span class="line">	InvalidateRect(hwnd, <span class="literal">NULL</span>, FALSE);<span class="comment">//左键松开,立刻通知处理WM_PAINT函数,重绘点集</span></span><br><span class="line">	<span class="keyword">return</span> <span class="number">0</span>;</span><br></pre></td></tr></table></figure>
+<h3 id="绘图消息"><a href="#绘图消息" class="headerlink" title="绘图消息"></a>绘图消息</h3><figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">case</span> WM_PAINT:</span><br><span class="line">	hdc = BeginPaint(hwnd, &amp;ps);</span><br><span class="line"></span><br><span class="line">	SetCursor(LoadCursor(<span class="literal">NULL</span>, IDC_WAIT));<span class="comment">//由于绘图可能时间较长,因此此时将光标样式换成等待</span></span><br><span class="line">	ShowCursor(TRUE);<span class="comment">//显示光标</span></span><br><span class="line"></span><br><span class="line">	<span class="keyword">for</span> (i = <span class="number">0</span>; i &lt; iCount - <span class="number">1</span>; i++)<span class="comment">//每两个点之间握手一次</span></span><br><span class="line">		<span class="keyword">for</span> (j = i + <span class="number">1</span>; j &lt; iCount; j++)</span><br><span class="line">		&#123;</span><br><span class="line">			MoveToEx(hdc, pt[i].x, pt[i].y, <span class="literal">NULL</span>);<span class="comment">//从pt[i]到pt[j]连线</span></span><br><span class="line">			LineTo(hdc, pt[j].x, pt[j].y);</span><br><span class="line">		&#125;</span><br><span class="line">	ShowCursor(FALSE);</span><br><span class="line">	SetCursor(LoadCursor(<span class="literal">NULL</span>, IDC_ARROW));<span class="comment">//绘图完毕,光标从忙状态换成指针状态</span></span><br><span class="line">	EndPaint(hwnd, &amp;ps);</span><br><span class="line">	<span class="keyword">return</span> <span class="number">0</span>;</span><br></pre></td></tr></table></figure>
+<h3 id="窗口销毁消息"><a href="#窗口销毁消息" class="headerlink" title="窗口销毁消息"></a>窗口销毁消息</h3><figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">case</span> WM_DESTROY:</span><br><span class="line">	PostQuitMessage(<span class="number">0</span>);</span><br><span class="line">	<span class="keyword">return</span> <span class="number">0</span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<h3 id="效果"><a href="#效果" class="headerlink" title="效果"></a>效果</h3><p><img src="https://raw.githubusercontent.com/DeutschBall/DeutschBall/main/image-20220813102524348.png" class="lazyload placeholder" data-srcset="https://raw.githubusercontent.com/DeutschBall/DeutschBall/main/image-20220813102524348.png" srcset="https://img2.baidu.com/it/u=2037979560,2772131037&fm=26&fmt=auto&gp=0.jpg" alt="左鼠标移速快,右鼠标移速慢"></p>
+<h2 id="双击"><a href="#双击" class="headerlink" title="双击"></a>双击</h2><p>只有创建窗口实例时,风格上允许双击的窗口才可以接受双击信息</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">wndclass.style = CS_HREDRAW | CS_VREDRAW | CS_DBLCLKS;</span><br></pre></td></tr></table></figure>
+<blockquote>
+<p>对于没有双击风格的窗口,双击动作造成的消息:</p>
+<p>WM_LBUTTONDOWN 左键第一次按下</p>
+<p> WM_LBUTTONUP 左键第一次起来</p>
+<p> WM_LBUTTONDOWN 左键第二次按下</p>
+<p> WM_LBUTTONUP  左键起来</p>
+<p>对于有双击风格的窗口,双击造成的信息:</p>
+<p> WM_LBUTTONDOWN </p>
+<p> WM_LBUTTONUP </p>
+<p> WM_LBUTTONDBLCLK 第二次按下被替换为WM_LBUTTONDBLCLK</p>
+<p> WM_LBUTTONUP </p>
+</blockquote>
+<h2 id="非客户区鼠标消息"><a href="#非客户区鼠标消息" class="headerlink" title="非客户区鼠标消息"></a>非客户区鼠标消息</h2><p><img src="https://raw.githubusercontent.com/DeutschBall/DeutschBall/main/image-20220813105023942.png" class="lazyload placeholder" data-srcset="https://raw.githubusercontent.com/DeutschBall/DeutschBall/main/image-20220813105023942.png" srcset="https://img2.baidu.com/it/u=2037979560,2772131037&fm=26&fmt=auto&gp=0.jpg" alt="image-20220813105023942"></p>
+<p>非客户区的消息在WM_前缀之后又加了一个NC前缀(not client)</p>
+<h3 id="参数意义"><a href="#参数意义" class="headerlink" title="参数意义"></a>参数意义</h3><h4 id="lParam-1"><a href="#lParam-1" class="headerlink" title="lParam"></a>lParam</h4><p>低字为x坐标,高字为y坐标,此处的坐标是相对于整个屏幕的坐标</p>
+<p>而客户区的鼠标信息中lParam携带的坐标是相对于客户区左上角的坐标</p>
+<p><img src="https://raw.githubusercontent.com/DeutschBall/DeutschBall/main/image-20220813105412718.png" class="lazyload placeholder" data-srcset="https://raw.githubusercontent.com/DeutschBall/DeutschBall/main/image-20220813105412718.png" srcset="https://img2.baidu.com/it/u=2037979560,2772131037&fm=26&fmt=auto&gp=0.jpg" alt="image-20220813105412718"></p>
+<p>屏幕坐标和客户区坐标的互换:</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">BOOL <span class="title function_">ScreenToClient</span><span class="params">(</span></span><br><span class="line"><span class="params">  [in] HWND    hWnd,</span></span><br><span class="line"><span class="params">       LPPOINT lpPoint</span></span><br><span class="line"><span class="params">)</span>;</span><br><span class="line">BOOL <span class="title function_">ClientToScreen</span><span class="params">(</span></span><br><span class="line"><span class="params">  [in]      HWND    hWnd,</span></span><br><span class="line"><span class="params">  [in, out] LPPOINT lpPoint</span></span><br><span class="line"><span class="params">)</span>;</span><br></pre></td></tr></table></figure>
+<blockquote>
+<p>白刀子进,红刀子出</p>
+</blockquote>
+<p>使用pt带着原坐标进去,带着转换坐标出来</p>
+<h4 id="wParam-1"><a href="#wParam-1" class="headerlink" title="wParam"></a>wParam</h4><p>非客户区鼠标移动或者单击的位置(不是坐标),一个标识符</p>
+<h2 id="击中测试"><a href="#击中测试" class="headerlink" title="击中测试"></a>击中测试</h2><h3 id="WM-NCHITTEST"><a href="#WM-NCHITTEST" class="headerlink" title="WM_NCHITTEST"></a>WM_NCHITTEST</h3><p>关于鼠标的最后一个消息类型</p>
+<p>这个消息优先级高于所有客户区和非客户区的鼠标消息</p>
+<h4 id="lParam-2"><a href="#lParam-2" class="headerlink" title="lParam"></a>lParam</h4><p>鼠标位置的屏幕坐标</p>
+<h4 id="wParam-2"><a href="#wParam-2" class="headerlink" title="wParam"></a>wParam</h4><p>没有用到</p>
+<p>这条消息应该被直接传递给DefWindowProc,操作系统负责将屏幕坐标翻译为客户区坐标之后,产生一个客户区鼠标消息发送给应用程序</p>
+<p>那么如果捕获该消息并且不让他传递给DefWindowProc,就阻断了所有鼠标消息.所有本窗口的鼠标动作将失效</p>
+<h3 id="什么是击中测试"><a href="#什么是击中测试" class="headerlink" title="什么是击中测试"></a>什么是击中测试</h3><p>在文件浏览器中双击某个文件时,文件浏览器会进入该目录或者打开该文件.</p>
+<p>可是文件浏览器是怎么知道应该打开哪个文件的呢?</p>
+<p>他需要获取鼠标位置然后判断这个位置落在哪里</p>
+<p><img src="https://raw.githubusercontent.com/DeutschBall/DeutschBall/main/image-20220814083834575.png" class="lazyload placeholder" data-srcset="https://raw.githubusercontent.com/DeutschBall/DeutschBall/main/image-20220814083834575.png" srcset="https://img2.baidu.com/it/u=2037979560,2772131037&fm=26&fmt=auto&gp=0.jpg" alt="image-20220814083834575"></p>
+<p>考虑实现一个简单的文件浏览器,以列表形式列出当前目录下的所有文件和子文件夹</p>
+<p>每个文件占一行,放不下就用滚动条</p>
+<p>客户区的点击动作就需要将纵坐标换算为行数,再根据卷动情况判断是指向的哪一行</p>
+<p>根据确定的行号作为下标查文件名表,查到之后打开该文件,如果是文件夹则打开该文件夹</p>
+<h3 id="击中测试例程"><a href="#击中测试例程" class="headerlink" title="击中测试例程"></a>击中测试例程</h3><p>书上在此给出了一个击中测试的例程,分析其过程函数WndProc</p>
+<h4 id="变量定义-1"><a href="#变量定义-1" class="headerlink" title="变量定义"></a>变量定义</h4><figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#<span class="keyword">define</span> DIVISIONS 5<span class="comment">//整个客户区分成5*5=25个矩形区域</span></span></span><br><span class="line">...</span><br><span class="line">	<span class="type">static</span> BOOL fState[DIVISIONS][DIVISIONS];<span class="comment">//状态数组,fState[x][y]记录第x行低y列的格子状态</span></span><br><span class="line">    <span class="type">static</span> <span class="type">int</span> cxBlock, cyBlock;<span class="comment">//一个格子的宽度和高度</span></span><br><span class="line">    HDC hdc;</span><br><span class="line">    <span class="type">int</span> x, y;<span class="comment">//临时变量,作为下标遍历每个格子</span></span><br><span class="line">    PAINTSTRUCT ps;</span><br></pre></td></tr></table></figure>
+<h4 id="尺寸变化消息"><a href="#尺寸变化消息" class="headerlink" title="尺寸变化消息"></a>尺寸变化消息</h4><figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">case</span> WM_SIZE:</span><br><span class="line">    cxBlock = LOWORD(lParam) / DIVISIONS;<span class="comment">//lParam携带的是当前客户区大小,cxBlocks计算的是平均每个矩形的宽度</span></span><br><span class="line">    cyBlock = HIWORD(lParam) / DIVISIONS;<span class="comment">//平均每个矩形的高度</span></span><br><span class="line">    <span class="keyword">return</span> <span class="number">0</span>;</span><br></pre></td></tr></table></figure>
+<p>尽量用整个客户区打印所有方格</p>
+<h4 id="左键单击消息"><a href="#左键单击消息" class="headerlink" title="左键单击消息"></a>左键单击消息</h4><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br></pre></td><td class="code"><pre><span class="line">case WM_LBUTTONDOWN:</span><br><span class="line">    x = LOWORD(lParam) / cxBlock;//鼠标的横坐标落在哪一列</span><br><span class="line">    y = HIWORD(lParam) / cyBlock;//鼠标的纵坐标落在哪一行</span><br><span class="line">    if (x &lt; DIVISIONS &amp;&amp; y &lt; DIVISIONS) &#123;//x,y都在合法范围之内</span><br><span class="line">        fState[x][y] ^= 1;//修改fState[x][y]的状态,1变0,0变1</span><br><span class="line">        rect.left = x * cxBlock;</span><br><span class="line">        rect.top = y * cyBlock;</span><br><span class="line">        rect.right = (x + 1) * cxBlock;</span><br><span class="line">        rect.bottom = (y + 1) * cyBlock;</span><br><span class="line">        //InvalidateRect(hwnd, &amp;rect, TRUE);//rect对应区域失效</span><br><span class="line">        InvalidateRect(hwnd, NULL, TRUE);//全区域失效重绘</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    else &#123;</span><br><span class="line">        MessageBeep(0);</span><br><span class="line">    &#125;</span><br><span class="line">    return 0;</span><br></pre></td></tr></table></figure>
+<h4 id="绘图消息-1"><a href="#绘图消息-1" class="headerlink" title="绘图消息"></a>绘图消息</h4><figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">case</span> WM_PAINT:</span><br><span class="line">    hdc = BeginPaint(hwnd, &amp;ps);</span><br><span class="line">    <span class="comment">//HBRUSH hBrushBlack=(HBRUSH)</span></span><br><span class="line">    <span class="keyword">for</span> (x = <span class="number">0</span>; x &lt; DIVISIONS; ++x) &#123;<span class="comment">//遍历每个矩形区域</span></span><br><span class="line">        <span class="keyword">for</span> (y = <span class="number">0</span>; y &lt; DIVISIONS; ++y) &#123;</span><br><span class="line">            <span class="keyword">if</span> (fState[x][y]) &#123;<span class="comment">//1则表示这个格子是按下的状态,刷成灰色</span></span><br><span class="line">                SelectObject(hdc, (HBRUSH)GetStockObject(LTGRAY_BRUSH));</span><br><span class="line">            &#125;</span><br><span class="line">            <span class="keyword">else</span> &#123;<span class="comment">//0则表示这个格子没有按下,刷成白色</span></span><br><span class="line">                SelectObject(hdc, (HBRUSH)GetStockObject(WHITE_BRUSH));</span><br><span class="line">            &#125;</span><br><span class="line">            Rectangle(hdc, x * cxBlock, y * cyBlock, (x + <span class="number">1</span>) * cxBlock, (y + <span class="number">1</span>) * cyBlock);<span class="comment">//每个区域绘制矩形</span></span><br><span class="line"></span><br><span class="line">        &#125;</span><br><span class="line"></span><br><span class="line">    &#125;</span><br><span class="line">    EndPaint(hwnd, &amp;ps);</span><br><span class="line">    <span class="keyword">return</span> <span class="number">0</span>;</span><br></pre></td></tr></table></figure>
+<h2 id="键盘模仿鼠标"><a href="#键盘模仿鼠标" class="headerlink" title="键盘模仿鼠标"></a>键盘模仿鼠标</h2><p>使用方向键移动鼠标光标.使用Enter确认按下</p>
+<p>这样即使计算机没有连接鼠标也能使用键盘模拟鼠标动作</p>
+<p>比如windows桌面上如果有一个图标是高亮的,那么右方向键会使同行右侧的图标高亮,可以用隐藏光标,然后捕获位置进行击中测试,决定高亮哪个图标.</p>
+<h3 id="显示计数"><a href="#显示计数" class="headerlink" title="显示计数"></a>显示计数</h3><p>书上扯了大半天,实际上就说了一个有用的东西</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="type">int</span> <span class="title function_">ShowCursor</span><span class="params">(</span></span><br><span class="line"><span class="params">  [in] BOOL bShow</span></span><br><span class="line"><span class="params">)</span>;</span><br></pre></td></tr></table></figure>
+<p>当bShow为False则不显示鼠标光标</p>
+<p>当bShow为True则显示鼠标光标</p>
+<h3 id="指针位置"><a href="#指针位置" class="headerlink" title="指针位置"></a>指针位置</h3><p>不管有没有接鼠标,鼠标指针都是存在的,一般开机时位于屏幕正中间.即使不使用鼠标移动指针位置,也可以使用键盘做到</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">BOOL <span class="title function_">GetCursorPos</span><span class="params">(</span></span><br><span class="line"><span class="params">  [out] LPPOINT lpPoint<span class="comment">//lpPoint承接返回值,指针位置的坐标结构体</span></span></span><br><span class="line"><span class="params">)</span>;</span><br><span class="line">BOOL <span class="title function_">SetCursorPos</span><span class="params">(</span></span><br><span class="line"><span class="params">  [in] <span class="type">int</span> X,<span class="comment">//设置指针位置(X,Y)</span></span></span><br><span class="line"><span class="params">  [in] <span class="type">int</span> Y</span></span><br><span class="line"><span class="params">)</span>;</span><br></pre></td></tr></table></figure>
+<p>两个函数中涉及到的坐标都是屏幕坐标,如果需要客户区坐标,可以使用坐标转换函数</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">BOOL <span class="title function_">ScreenToClient</span><span class="params">(</span></span><br><span class="line"><span class="params">  [in] HWND    hWnd,</span></span><br><span class="line"><span class="params">       LPPOINT lpPoint</span></span><br><span class="line"><span class="params">)</span>;</span><br><span class="line">BOOL <span class="title function_">ClientToScreen</span><span class="params">(</span></span><br><span class="line"><span class="params">  [in]      HWND    hWnd,</span></span><br><span class="line"><span class="params">  [in, out] LPPOINT lpPoint</span></span><br><span class="line"><span class="params">)</span>;</span><br></pre></td></tr></table></figure>
+<p>使用GetCursorPos并且用ScreenToClient转换得到的指针位置和鼠标消息中的指针位置不同</p>
+<p>前者是啥时候调用函数啥时候取得指针位置,后者指针位置是产生该条消息时指针的位置</p>
+<h3 id="击中测试-1"><a href="#击中测试-1" class="headerlink" title="击中测试"></a>击中测试</h3><h4 id="变量定义-2"><a href="#变量定义-2" class="headerlink" title="变量定义"></a>变量定义</h4><figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#<span class="keyword">define</span> DIVISIONS 5<span class="comment">//客户区划分为5*5=25个区域</span></span></span><br><span class="line">...</span><br><span class="line">	<span class="type">static</span> <span class="type">int</span> fState[DIVISIONS][DIVISIONS];<span class="comment">//记录每个格子的状态</span></span><br><span class="line">    <span class="type">static</span> <span class="type">int</span> cxBlock, cyBlock;<span class="comment">//每个格子的宽度和高度</span></span><br><span class="line">    HDC hdc;</span><br><span class="line">    <span class="type">int</span> x, y;<span class="comment">//临时变量,用来遍历fState</span></span><br><span class="line">    PAINTSTRUCT ps;<span class="comment">//BeginPaint和EndPaint需要使用</span></span><br><span class="line">    POINT point;记录鼠标位置</span><br><span class="line"></span><br></pre></td></tr></table></figure>
+<h4 id="窗口焦点信息"><a href="#窗口焦点信息" class="headerlink" title="窗口焦点信息"></a>窗口焦点信息</h4><figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">case</span> WM_SETFOCUS:<span class="comment">//获得焦点</span></span><br><span class="line">    ShowCursor(TRUE);</span><br><span class="line">    <span class="keyword">return</span> <span class="number">0</span>;</span><br><span class="line"><span class="keyword">case</span> WM_KILLFOCUS:<span class="comment">//失去焦点</span></span><br><span class="line">    ShowCursor(FALSE);</span><br><span class="line">    <span class="keyword">return</span> <span class="number">0</span>;</span><br></pre></td></tr></table></figure>
+<p>当窗口获得焦点的时候显示光标,失去焦点的时候隐藏光标</p>
+<h4 id="尺寸调整信息"><a href="#尺寸调整信息" class="headerlink" title="尺寸调整信息"></a>尺寸调整信息</h4><figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">case</span> WM_SIZE:<span class="comment">//客户区重新计算块大小</span></span><br><span class="line">    cxBlock = LOWORD(lParam) / DIVISIONS;</span><br><span class="line">    cyBlock = HIWORD(lParam) / DIVISIONS;</span><br><span class="line">    <span class="keyword">return</span> <span class="number">0</span>;</span><br></pre></td></tr></table></figure>
+<p>当客户区尺寸发生变化的时候调整区块的大小</p>
+<p>使得5*5个区块尽量占满整个客户区</p>
+<h4 id="虚拟键信息"><a href="#虚拟键信息" class="headerlink" title="虚拟键信息"></a>虚拟键信息</h4><figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">case</span> WM_KEYDOWN:<span class="comment">//虚拟键按下</span></span><br><span class="line">    GetCursorPos(&amp;point);<span class="comment">//获取当前鼠标位置</span></span><br><span class="line">    ScreenToClient(hWnd, &amp;point);<span class="comment">//转换屏幕坐标为客户区坐标</span></span><br><span class="line">    x = max(<span class="number">0</span>, min(DIVISIONS - <span class="number">1</span>, point.x / cxBlock));<span class="comment">//计算当前光标所在行</span></span><br><span class="line">    y = max(<span class="number">0</span>, min(DIVISIONS - <span class="number">1</span>, point.y / cyBlock));<span class="comment">//计算当前光标所在列</span></span><br><span class="line">    <span class="keyword">switch</span> (wParam) &#123;</span><br><span class="line">    <span class="keyword">case</span> VK_UP:<span class="comment">//方向键上键</span></span><br><span class="line">        --y;<span class="comment">//y的单位是列,上键按下之后纵坐标应该上移一个格子的高度</span></span><br><span class="line">        <span class="keyword">break</span>;</span><br><span class="line">    <span class="keyword">case</span> VK_DOWN:</span><br><span class="line">        ++y;</span><br><span class="line">        <span class="keyword">break</span>;</span><br><span class="line">    <span class="keyword">case</span> VK_LEFT:</span><br><span class="line">        --x;</span><br><span class="line">        <span class="keyword">break</span>;</span><br><span class="line">    <span class="keyword">case</span> VK_HOME:<span class="comment">//Home键,光标回到左上角</span></span><br><span class="line">        x = y = <span class="number">0</span>;</span><br><span class="line">        <span class="keyword">break</span>;</span><br><span class="line">    <span class="keyword">case</span> VK_RIGHT:</span><br><span class="line">        ++x;</span><br><span class="line">        <span class="keyword">break</span>;</span><br><span class="line">    <span class="keyword">case</span> VK_END:</span><br><span class="line">        x = y = DIVISIONS - <span class="number">1</span>;<span class="comment">//End键,光标跳到右下格</span></span><br><span class="line">        <span class="keyword">break</span>;</span><br><span class="line">    <span class="keyword">case</span> VK_RETURN:<span class="comment">//回车和空格的作用相同,都相当于在当前格的左上角按下鼠标左键</span></span><br><span class="line">    <span class="keyword">case</span> VK_SPACE:</span><br><span class="line">        SendMessage(hWnd, WM_LBUTTONDOWN, MK_LBUTTON, MAKELONG(x * cxBlock, y * cyBlock));<span class="comment">//通知</span></span><br><span class="line">        <span class="keyword">break</span>;</span><br><span class="line">    &#125;</span><br><span class="line">    x = (x + DIVISIONS) % DIVISIONS;<span class="comment">//计算当前指向方格</span></span><br><span class="line">    y = (y + DIVISIONS) % DIVISIONS;</span><br><span class="line">    point.x = x * cxBlock + cxBlock / <span class="number">2</span>;<span class="comment">//光标放在这个格的正中间位置</span></span><br><span class="line">    point.y = y * cyBlock + cyBlock / <span class="number">2</span>;</span><br><span class="line">    ClientToScreen(hWnd, &amp;point);<span class="comment">//转换坐标</span></span><br><span class="line">    SetCursorPos(point.x, point.y);<span class="comment">//设置新光标位置</span></span><br><span class="line">    <span class="keyword">return</span> <span class="number">0</span>;</span><br></pre></td></tr></table></figure>
+<h2 id="使用子窗口"><a href="#使用子窗口" class="headerlink" title="使用子窗口"></a>使用子窗口</h2><p>每个子窗口都有自己的句柄,客户区,窗口过程函数.</p>
+<p>多个子窗口将整个客户区划分成几个小的矩形区域</p>
+<p>对于子窗口的鼠标消息,lParam参数包含相对于该子窗口左上角的坐标</p>
+<p>本来我们的程序中使用了一个<code>fState[DIVISIONS][DIVISIONS]</code>二维数组保存每个区块的状态,整个程序就一个窗口过程,它遍历打印每个窗口的状态.</p>
+<p>现在使用子窗口,使得每个区块成为一个子窗口,每个子窗口自己处理发生在自己身上的鼠标键盘动作</p>
+<h3 id="注册父窗口类"><a href="#注册父窗口类" class="headerlink" title="注册父窗口类"></a>注册父窗口类</h3><figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br></pre></td><td class="code"><pre><span class="line"><span class="type">static</span> TCHAR szAppName[] = TEXT(<span class="string">&quot;Checker4&quot;</span>);<span class="comment">//将要作为父窗口类名</span></span><br><span class="line">HWND hwnd;</span><br><span class="line">MSG msg;</span><br><span class="line">WNDCLASS wndclass;</span><br><span class="line"></span><br><span class="line">wndclass.style = CS_HREDRAW | CS_VREDRAW;<span class="comment">//填写父窗口类信息</span></span><br><span class="line">wndclass.lpfnWndProc = WndProc;</span><br><span class="line">wndclass.cbClsExtra = <span class="number">0</span>;</span><br><span class="line">wndclass.cbWndExtra = <span class="number">0</span>;</span><br><span class="line">wndclass.hInstance = hInstance;</span><br><span class="line">wndclass.hIcon = LoadIcon(<span class="literal">NULL</span>,</span><br><span class="line">	IDI_APPLICATION);</span><br><span class="line">wndclass.hCursor = LoadCursor(<span class="literal">NULL</span>,</span><br><span class="line">	IDC_ARROW);</span><br><span class="line">wndclass.hbrBackground = (HBRUSH)GetStockObject(WHITE_BRUSH);</span><br><span class="line">wndclass.lpszMenuName = <span class="literal">NULL</span>;</span><br><span class="line">wndclass.lpszClassName = szAppName;</span><br><span class="line"></span><br><span class="line"><span class="keyword">if</span> (!RegisterClass(&amp;wndclass))<span class="comment">//注册父窗口类</span></span><br><span class="line">&#123;</span><br><span class="line">	MessageBox(<span class="literal">NULL</span>, TEXT(<span class="string">&quot;Program requires Windows NT!&quot;</span>),</span><br><span class="line">		szAppName,</span><br><span class="line">		MB_ICONERROR);</span><br><span class="line">	<span class="keyword">return</span> <span class="number">0</span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<h3 id="注册子窗口类"><a href="#注册子窗口类" class="headerlink" title="注册子窗口类"></a>注册子窗口类</h3><figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">wndclass.lpfnWndProc = ChildWndProc;<span class="comment">//修改一下wndclass的部分信息,填写子窗口类信息</span></span><br><span class="line">wndclass.cbWndExtra = <span class="keyword">sizeof</span>(<span class="type">long</span>);</span><br><span class="line">wndclass.hIcon = <span class="literal">NULL</span>;</span><br><span class="line">wndclass.lpszClassName = szChildClass;<span class="comment">//此处绑定了szChildClass字符串作为子窗口类的索引值</span></span><br><span class="line"></span><br><span class="line">RegisterClass(&amp;wndclass);<span class="comment">//注册子窗口类</span></span><br></pre></td></tr></table></figure>
+<p>此处注册子窗口类,但是并不在winmain函数中创建实例,而是当父窗口起来之后,在其WM_CREATE消息处理中创建25个szChildClass指向的子窗口实例</p>
+<h3 id="创建父窗口实例-显示父窗口消息循环"><a href="#创建父窗口实例-显示父窗口消息循环" class="headerlink" title="创建父窗口实例,显示父窗口消息循环"></a>创建父窗口实例,显示父窗口消息循环</h3><figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line">hwnd = CreateWindow(szAppName, TEXT(<span class="string">&quot;Checker4 Mouse Hit-Test Demo&quot;</span>),</span><br><span class="line">	WS_OVERLAPPEDWINDOW,</span><br><span class="line">	CW_USEDEFAULT, CW_USEDEFAULT,</span><br><span class="line">	CW_USEDEFAULT, CW_USEDEFAULT,</span><br><span class="line">	<span class="literal">NULL</span>, <span class="literal">NULL</span>, hInstance, <span class="literal">NULL</span>);</span><br><span class="line">ShowWindow(hwnd, iCmdShow);</span><br><span class="line">UpdateWindow(hwnd);</span><br><span class="line"></span><br><span class="line"><span class="keyword">while</span> (GetMessage(&amp;msg, <span class="literal">NULL</span>, <span class="number">0</span>, <span class="number">0</span>))</span><br><span class="line">&#123;</span><br><span class="line">	TranslateMessage(&amp;msg);</span><br><span class="line">	DispatchMessage(&amp;msg);</span><br><span class="line">&#125;</span><br><span class="line"><span class="keyword">return</span> msg.wParam;</span><br></pre></td></tr></table></figure>
+<h3 id="父窗口过程WndProc"><a href="#父窗口过程WndProc" class="headerlink" title="父窗口过程WndProc"></a>父窗口过程WndProc</h3><h4 id="变量定义-3"><a href="#变量定义-3" class="headerlink" title="变量定义"></a>变量定义</h4><figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="type">static</span> HWND hwndChild[DIVISIONS][DIVISIONS];<span class="comment">//子窗口句柄数组,hwndChild[x][y]为第x行第y列子窗口的句柄</span></span><br><span class="line"><span class="type">int</span> cxBlock, cyBlock, x, y;<span class="comment">//cxBlock每个子窗口的尺寸,x遍历子窗口数组使用的下标</span></span><br></pre></td></tr></table></figure>
+<blockquote>
+<p>区分HWND句柄和HINSTANCE句柄</p>
+<p>整个win32程序只有一个引用程序句柄HINSTANCE,</p>
+<p>着一个程序可以有很多个窗口,每个窗口都有一个独一无二的窗口句柄HWND</p>
+</blockquote>
+<h4 id="窗口创建消息"><a href="#窗口创建消息" class="headerlink" title="窗口创建消息"></a>窗口创建消息</h4><figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">case</span> WM_CREATE:<span class="comment">//主窗口创建消息,此时为创建子窗口的最佳时机</span></span><br><span class="line">	<span class="keyword">for</span> (x = <span class="number">0</span>; x &lt; DIVISIONS; x++)<span class="comment">//遍历创建每一个子窗口</span></span><br><span class="line">		<span class="keyword">for</span> (y = <span class="number">0</span>; y &lt; DIVISIONS; y++)</span><br><span class="line">			hwndChild[x][y] = </span><br><span class="line">			CreateWindow(</span><br><span class="line">				szChildClass, <span class="comment">//子窗口名</span></span><br><span class="line">				<span class="literal">NULL</span>,<span class="comment">//子窗口标题为空</span></span><br><span class="line">				WS_CHILDWINDOW | WS_VISIBLE,<span class="comment">//子窗口风格</span></span><br><span class="line">				<span class="number">0</span>, <span class="number">0</span>, <span class="number">0</span>, <span class="number">0</span>,<span class="comment">//子窗口坐标(相对于父窗口客户区左上角),初始位置</span></span><br><span class="line">				hwnd, <span class="comment">//父窗口句柄</span></span><br><span class="line">				(HMENU)(y &lt;&lt; <span class="number">8</span> | x),<span class="comment">//子窗口的菜单句柄,作用是给父窗口提供索引,在GetDlgItem 获取子窗口句柄时有重要作用</span></span><br><span class="line">				(HINSTANCE) GetWindowLong(hwnd, GWL_HINSTANCE),<span class="comment">//从windows那里获取一个应用此程序实例句柄</span></span><br><span class="line">				<span class="literal">NULL</span><span class="comment">//通过WM_CREATE的lParam参数传递给子窗口的值的指针</span></span><br><span class="line">			);</span><br><span class="line"><span class="keyword">return</span> <span class="number">0</span>;</span><br></pre></td></tr></table></figure>
+<h5 id="CreateWindow"><a href="#CreateWindow" class="headerlink" title="CreateWindow"></a>CreateWindow</h5><p>创建父窗口实例时也使用了该函数,返回值是一个窗口实例的句柄</p>
+<blockquote>
+<p>创建并显示窗口三个过程:</p>
+<p>RegisterClass注册窗口类,该窗口类的类名作为句柄</p>
+<p>CreateWindow创建窗口实例,可以使用刚才的窗口类名填充窗口的基本信息</p>
+<p>ShowWindow显示窗口类</p>
+</blockquote>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line">HWND <span class="title function_">CreateWindowA</span><span class="params">(</span></span><br><span class="line"><span class="params">  [in, optional]  lpClassName,<span class="comment">//子窗口使用的类名</span></span></span><br><span class="line"><span class="params">  [in, optional]  lpWindowName,<span class="comment">//子窗口名</span></span></span><br><span class="line"><span class="params">  [in]            dwStyle,<span class="comment">//子窗口风格</span></span></span><br><span class="line"><span class="params">  [in]            x,<span class="comment">//子窗口位置(相对于父窗口的客户区)</span></span></span><br><span class="line"><span class="params">  [in]            y,</span></span><br><span class="line"><span class="params">  [in]            nWidth,<span class="comment">//子窗口的尺寸</span></span></span><br><span class="line"><span class="params">  [in]            nHeight,</span></span><br><span class="line"><span class="params">  [in, optional]  hWndParent,<span class="comment">//父窗口的句柄</span></span></span><br><span class="line"><span class="params">  [in, optional]  hMenu,<span class="comment">//子窗口标识符</span></span></span><br><span class="line"><span class="params">  [in, optional]  hInstance,<span class="comment">//程序实例的句柄</span></span></span><br><span class="line"><span class="params">  [in, optional]  lpParam<span class="comment">//父窗口要传递给子窗口WM_CREATE消息,lParam参数的信息</span></span></span><br><span class="line"><span class="params">)</span>;</span><br></pre></td></tr></table></figure>
+<h4 id="调整尺寸消息"><a href="#调整尺寸消息" class="headerlink" title="调整尺寸消息"></a>调整尺寸消息</h4><figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">case</span> WM_SIZE:</span><br><span class="line">	cxBlock = LOWORD(lParam) / DIVISIONS;<span class="comment">//重新计算区块大小</span></span><br><span class="line">	cyBlock = HIWORD(lParam) / DIVISIONS;</span><br><span class="line"></span><br><span class="line">	<span class="keyword">for</span> (x = <span class="number">0</span>; x &lt; DIVISIONS; x++)</span><br><span class="line">		<span class="keyword">for</span> (y = <span class="number">0</span>; y &lt; DIVISIONS; y++)</span><br><span class="line">			MoveWindow(hwndChild[x][y],<span class="comment">//调整子窗口的位置和大小</span></span><br><span class="line">				x * cxBlock, y * cyBlock,</span><br><span class="line">				cxBlock, cyBlock, TRUE);<span class="comment">//大小是cxBlock宽,cyBlock高</span></span><br><span class="line">	<span class="keyword">return</span> <span class="number">0</span>;</span><br><span class="line"></span><br></pre></td></tr></table></figure>
+<h5 id="MoveWindow"><a href="#MoveWindow" class="headerlink" title="MoveWindow"></a>MoveWindow</h5><p>对于子窗口来说,该函数中指定的坐标都是相对于父窗口客户区左上角的</p>
+<p>对于非子窗口来说,该函数中的坐标是屏幕坐标</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">BOOL <span class="title function_">MoveWindow</span><span class="params">(</span></span><br><span class="line"><span class="params">  [in] HWND hWnd,<span class="comment">//需要移动位置的窗口句柄,一般用于父窗口过程移动子窗口</span></span></span><br><span class="line"><span class="params">  [in] <span class="type">int</span>  X,</span></span><br><span class="line"><span class="params">  [in] <span class="type">int</span>  Y,</span></span><br><span class="line"><span class="params">  [in] <span class="type">int</span>  nWidth,<span class="comment">//移动顺便设置尺寸</span></span></span><br><span class="line"><span class="params">  [in] <span class="type">int</span>  nHeight,</span></span><br><span class="line"><span class="params">  [in] BOOL bRepaint<span class="comment">//是否重绘,TRUE则hWnd指向的窗口收到WM_PAINT消息</span></span></span><br><span class="line"><span class="params">)</span>;</span><br></pre></td></tr></table></figure>
+<h4 id="左键按下消息"><a href="#左键按下消息" class="headerlink" title="左键按下消息"></a>左键按下消息</h4><figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">case</span> WM_LBUTTONDOWN:</span><br><span class="line">	MessageBeep(<span class="number">0</span>);</span><br><span class="line">	<span class="keyword">return</span> <span class="number">0</span>;</span><br></pre></td></tr></table></figure>
+<p>理论上25个子窗口尽量铺满父窗口的客户区,但是父窗口客户区的最右边和最下边可能有留白,因此当鼠标点击到这些地方的时候父窗口就会接到WM_LBUTTONDOWN消息</p>
+<p>父窗口对这种消息的处理是发出一条蜂鸣声实际上是一个wav波形文件,还有一些系统定义好了的蜂鸣声,作用不大不展开了</p>
+<h4 id="获得焦点消息"><a href="#获得焦点消息" class="headerlink" title="获得焦点消息"></a>获得焦点消息</h4><figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">case</span> WM_SETFOCUS:<span class="comment">//父窗口获取焦点之后通知它上次获得焦点的子窗口继续获得焦点</span></span><br><span class="line">	SetFocus(GetDlgItem(hwnd, idFocus));<span class="comment">//通知哪一个子窗口获得焦点,全局变量idFocus在WM_KEYDOWN被设置</span></span><br><span class="line">	<span class="keyword">return</span> <span class="number">0</span>;</span><br></pre></td></tr></table></figure>
+<p>父窗口获得焦点之后,应该把最后一次获得焦点的子窗口作为焦点窗口</p>
+<p>但是处理本消息时并没有体现获得idFocus,原因是该全局变量idFocus在WM_KEYDOWN中更新,显然没有按下键盘,通过鼠标点选也可以获得焦点,获得焦点的时候就需要指定让子窗口获得焦点</p>
+<p>而现在父窗口掌握着25个子窗口句柄,应该怎么把焦点交给其中之一的子窗口呢?</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">HWND <span class="title function_">GetDlgItem</span><span class="params">(</span></span><br><span class="line"><span class="params">  [in, optional] HWND hDlg,<span class="comment">//父窗口句柄</span></span></span><br><span class="line"><span class="params">  [in]           <span class="type">int</span>  nIDDlgItem<span class="comment">//子窗口的索引值</span></span></span><br><span class="line"><span class="params">)</span>;</span><br></pre></td></tr></table></figure>
+<p>这个函数的作用是,返回父窗口的一个子窗口的句柄</p>
+<p>这里nIDDlgItem这个值是父窗口注册子窗口是在CreateWindow函数的hMenu上指定的,其中第x行第y列的子窗口是这样索引的</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">(HMENU)(y &lt;&lt; <span class="number">8</span> | x)</span><br></pre></td></tr></table></figure>
+<p>既然要获取子窗口的句柄,父窗口不是实例化子窗口时就维护了一个子窗口句柄数组吗?</p>
+<p>为啥还要额外维护一个值托管这个句柄呢?</p>
+<p>只有一个子窗口句柄数组不能知道最近获得焦点的子窗口是谁,因此idFocus就起到了一个寄存器的作用</p>
+<h4 id="虚拟键消息"><a href="#虚拟键消息" class="headerlink" title="虚拟键消息"></a>虚拟键消息</h4><figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">case</span> WM_KEYDOWN:</span><br><span class="line">	x = idFocus &amp; <span class="number">0xFF</span>;<span class="comment">//x保存原来的焦点位置(子窗口下标)</span></span><br><span class="line">	y = idFocus &gt;&gt; <span class="number">8</span>;<span class="comment">//y保存原来的焦点位置</span></span><br><span class="line">	<span class="keyword">switch</span> (wParam)</span><br><span class="line">	&#123;</span><br><span class="line">	<span class="keyword">case</span> VK_UP: </span><br><span class="line">		y--;<span class="comment">//焦点上移</span></span><br><span class="line">		<span class="keyword">break</span>;</span><br><span class="line">	<span class="keyword">case</span> VK_DOWN: </span><br><span class="line">		y++;</span><br><span class="line">		<span class="keyword">break</span>;</span><br><span class="line">	<span class="keyword">case</span> VK_LEFT: </span><br><span class="line">		x--;</span><br><span class="line">		<span class="keyword">break</span>;</span><br><span class="line">	<span class="keyword">case</span> VK_RIGHT: </span><br><span class="line">		x++; </span><br><span class="line">		<span class="keyword">break</span>;</span><br><span class="line">	<span class="keyword">case</span> VK_HOME: </span><br><span class="line">		x = y = <span class="number">0</span>; </span><br><span class="line">		<span class="keyword">break</span>;</span><br><span class="line">	<span class="keyword">case</span> VK_END: </span><br><span class="line">		x = y = DIVISIONS - <span class="number">1</span>; </span><br><span class="line">		<span class="keyword">break</span>;</span><br><span class="line">       x = (x + DIVISIONS) % DIVISIONS;</span><br><span class="line">	y = (y + DIVISIONS) % DIVISIONS;</span><br><span class="line">	idFocus = y &lt;&lt; <span class="number">8</span> | x;<span class="comment">//调整新焦点</span></span><br><span class="line">	SetFocus(GetDlgItem(hwnd, idFocus));<span class="comment">//设置新焦点</span></span><br><span class="line">	<span class="keyword">return</span> <span class="number">0</span>;</span><br></pre></td></tr></table></figure>
+<p>这里计算x,y坐标的方式根HMENU参数的定义方式相反,互为逆运算</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">		x = idFocus &amp; <span class="number">0xFF</span>;<span class="comment">//x保存原来的焦点位置</span></span><br><span class="line">		y = idFocus &gt;&gt; <span class="number">8</span>;<span class="comment">//y保存原来的焦点位置</span></span><br><span class="line">...</span><br><span class="line">    </span><br><span class="line">    	idFocus = y &lt;&lt; <span class="number">8</span> | x;<span class="comment">//调整新焦点</span></span><br></pre></td></tr></table></figure>
+<p><code>WM_KEYDOWN</code>消息执行完毕后立刻设置当前子窗口为焦点窗口</p>
+<h4 id="窗口销毁消息-1"><a href="#窗口销毁消息-1" class="headerlink" title="窗口销毁消息"></a>窗口销毁消息</h4><figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">case</span> WM_DESTROY:</span><br><span class="line">	PostQuitMessage(<span class="number">0</span>);</span><br><span class="line">	<span class="keyword">return</span> <span class="number">0</span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<h3 id="子窗口过程ChildWndProc"><a href="#子窗口过程ChildWndProc" class="headerlink" title="子窗口过程ChildWndProc"></a>子窗口过程ChildWndProc</h3><h4 id="子窗口创建消息"><a href="#子窗口创建消息" class="headerlink" title="子窗口创建消息"></a>子窗口创建消息</h4><figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">case</span> WM_CREATE:</span><br><span class="line">	SetWindowLong(hwnd, <span class="number">0</span>, <span class="number">0</span>); <span class="comment">// on/off flag ,刚创建时本窗口的开关状态置0</span></span><br><span class="line">	<span class="keyword">return</span> <span class="number">0</span>;</span><br></pre></td></tr></table></figure>
+<p>修改窗口的一个属性</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">LONG <span class="title function_">SetWindowLongA</span><span class="params">(</span></span><br><span class="line"><span class="params">  [in] HWND hWnd,<span class="comment">//窗口句柄</span></span></span><br><span class="line"><span class="params">  [in] <span class="type">int</span>  nIndex,<span class="comment">//指定要修改的窗口属性</span></span></span><br><span class="line"><span class="params">  [in] LONG dwNewLong<span class="comment">//该窗口属性的新值</span></span></span><br><span class="line"><span class="params">)</span>;</span><br></pre></td></tr></table></figure>
+<p>例子中修改的是下标为0的属性,对应的宏定义是DWL_MSGRESULT(0)</p>
+<p>设置对话框过程的返回值,设置成了0.</p>
+<p>实际上子窗口也不需要把这个值返回给父窗口看,它自己就可以决定把自己绘制成什么颜色</p>
+<p>因此只是借用了一个线程的窗口属性来放置自己应该是按下还是起来的状态</p>
+<h4 id="子窗口键鼠消息"><a href="#子窗口键鼠消息" class="headerlink" title="子窗口键鼠消息"></a>子窗口键鼠消息</h4><p>由于父窗口中会主动将焦点下放到子窗口,因此焦点子窗口可获取键鼠的输入.</p>
+<p>父窗口只能等子窗口吃完了然后吃剩下的</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">case</span> WM_KEYDOWN:</span><br><span class="line">	<span class="comment">// Send most key presses to the parent window </span></span><br><span class="line"></span><br><span class="line">	<span class="keyword">if</span> (wParam != VK_RETURN &amp;&amp; wParam != VK_SPACE)<span class="comment">//子窗口只负责拦截并处理空格回车消息,其他键盘消息丢给父窗口</span></span><br><span class="line">	&#123;</span><br><span class="line">		SendMessage(GetParent(hwnd), message, wParam, lParam);<span class="comment">//其他键盘消息传递给父窗口</span></span><br><span class="line">		<span class="keyword">return</span> <span class="number">0</span>;</span><br><span class="line">	&#125;</span><br><span class="line">	<span class="comment">// For Return and Space, fall through to toggle the square</span></span><br><span class="line">	<span class="comment">//如果是空格和回车则相当于鼠标左键按下,一起处理</span></span><br><span class="line"><span class="keyword">case</span> WM_LBUTTONDOWN:<span class="comment">//左键单击按下</span></span><br><span class="line">	SetWindowLong(hwnd, <span class="number">0</span>, <span class="number">1</span> ^ GetWindowLong(hwnd, <span class="number">0</span>));<span class="comment">//子窗口开关状态置反</span></span><br><span class="line">	SetFocus(hwnd);<span class="comment">//本子窗口获取焦点</span></span><br><span class="line">	InvalidateRect(hwnd, <span class="literal">NULL</span>, FALSE);<span class="comment">//立刻重绘</span></span><br><span class="line">	<span class="keyword">return</span> <span class="number">0</span>;</span><br><span class="line">	<span class="comment">// For focus messages, invalidate the window for repaint </span></span><br><span class="line"></span><br></pre></td></tr></table></figure>
+<p>这里子窗口就处理里两个虚拟键消息,空格和回车,其他的消息通过</p>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="built_in">SendMessage</span>(<span class="built_in">GetParent</span>(hwnd), message, wParam, lParam);</span><br></pre></td></tr></table></figure>
+<p>转发给父窗口</p>
+<p>空格,回车,左键单击一视同仁,首先本子窗口的属性置反</p>
+<p>然后设置本窗口为焦点窗口</p>
+<p>然后使窗口无效,导致重绘</p>
+<h4 id="子窗口获取-失去焦点消息"><a href="#子窗口获取-失去焦点消息" class="headerlink" title="子窗口获取/失去焦点消息"></a>子窗口获取/失去焦点消息</h4><figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">case</span> WM_SETFOCUS:</span><br><span class="line">	idFocus = GetWindowLong(hwnd, GWL_ID);</span><br><span class="line">	<span class="comment">// Fall through </span></span><br><span class="line"><span class="keyword">case</span> WM_KILLFOCUS:</span><br><span class="line">	InvalidateRect(hwnd, <span class="literal">NULL</span>, TRUE);<span class="comment">//失效重绘,因为子窗口获得焦点的时候会有绘制方框提示,因此失去焦点时应当不再提示</span></span><br><span class="line">	<span class="keyword">return</span> <span class="number">0</span>;</span><br><span class="line"></span><br></pre></td></tr></table></figure>
+<h5 id="GetWindowLong-获取窗口属性"><a href="#GetWindowLong-获取窗口属性" class="headerlink" title="GetWindowLong 获取窗口属性"></a>GetWindowLong 获取窗口属性</h5><p>由于窗口属性都是LONG类型的值,因此该函数取名”GetWindowLong”</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">LONG <span class="title function_">GetWindowLongA</span><span class="params">(</span></span><br><span class="line"><span class="params">  [in] HWND hWnd,<span class="comment">//指定要获取信息的窗口句柄</span></span></span><br><span class="line"><span class="params">  [in] <span class="type">int</span>  nIndex<span class="comment">//指定要获取该窗口的哪个属性</span></span></span><br><span class="line"><span class="params">)</span>;</span><br></pre></td></tr></table></figure>
+<blockquote>
+<div class="table-container">
+<table>
+<thead>
+<tr>
+<th style="text-align:left">Value</th>
+<th style="text-align:left">Meaning</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:left"><strong>GWL_EXSTYLE</strong>-20</td>
+<td style="text-align:left">获取窗口实例的拓展风格,即CreateWindow函数指定的dwExStyle</td>
+</tr>
+<tr>
+<td style="text-align:left"><strong>GWL_HINSTANCE</strong>-6</td>
+<td style="text-align:left">获取应用程序句柄</td>
+</tr>
+<tr>
+<td style="text-align:left"><strong>GWL_HWNDPARENT</strong>-8</td>
+<td style="text-align:left">获取父窗口句柄</td>
+</tr>
+<tr>
+<td style="text-align:left"><strong>GWL_ID</strong>-12</td>
+<td style="text-align:left">获取本窗口的索引值,即CreateWindow函数指定的HMENU值</td>
+</tr>
+<tr>
+<td style="text-align:left"><strong>GWL_STYLE</strong>-16</td>
+<td style="text-align:left">获取窗口实例的风格,这个风格就是CreateWindow指定的dwStyle</td>
+</tr>
+<tr>
+<td style="text-align:left"><strong>GWL_USERDATA</strong>-21</td>
+<td style="text-align:left">Retrieves the user data associated with the window. This data is intended for use by the application that created the window. Its value is initially zero.</td>
+</tr>
+<tr>
+<td style="text-align:left"><strong>GWL_WNDPROC</strong>-4</td>
+<td style="text-align:left">Retrieves the address of the window procedure, or a handle representing the address of the window procedure. You must use the <a target="_blank" rel="noopener" href="https://docs.microsoft.com/en-us/windows/desktop/api/winuser/nf-winuser-callwindowproca">CallWindowProc</a> function to call the window procedure.</td>
+</tr>
+</tbody>
+</table>
+</div>
+<p>The following values are also available when the <em>hWnd</em> parameter identifies a dialog box.</p>
+<div class="table-container">
+<table>
+<thead>
+<tr>
+<th style="text-align:left">Value</th>
+<th style="text-align:left">Meaning</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:left"><strong>DWL_DLGPROC</strong>DWLP_MSGRESULT + sizeof(LRESULT)</td>
+<td style="text-align:left">Retrieves the address of the dialog box procedure, or a handle representing the address of the dialog box procedure. You must use the <a target="_blank" rel="noopener" href="https://docs.microsoft.com/en-us/windows/desktop/api/winuser/nf-winuser-callwindowproca">CallWindowProc</a> function to call the dialog box procedure.</td>
+</tr>
+<tr>
+<td style="text-align:left"><strong>DWL_MSGRESULT</strong>0</td>
+<td style="text-align:left">Retrieves the return value of a message processed in the dialog box procedure.</td>
+</tr>
+<tr>
+<td style="text-align:left"><strong>DWL_USER</strong>DWLP_DLGPROC + sizeof(DLGPROC)</td>
+<td style="text-align:left">Retrieves extra information private to the application, such as handles or pointers.</td>
+</tr>
+</tbody>
+</table>
+</div>
+</blockquote>
+<p>例子中获取的是子窗口的HMENU索引值</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">idFocus = GetWindowLong(hwnd, GWL_ID);</span><br></pre></td></tr></table></figure>
+<p>这句的意思就是子窗口将idFocus当前焦点窗口寄存器设置为子窗口自己</p>
+<p>当子窗口失去焦点的时候需要通知失效重绘,其原因是WM_PAINT中获得焦点的子窗口会多绘制一些提示信息,那么当它失去焦点的时候就得擦除提示信息了</p>
+<p><img src="https://raw.githubusercontent.com/DeutschBall/DeutschBall/main/image-20220814172257251.png" class="lazyload placeholder" data-srcset="https://raw.githubusercontent.com/DeutschBall/DeutschBall/main/image-20220814172257251.png" srcset="https://img2.baidu.com/it/u=2037979560,2772131037&fm=26&fmt=auto&gp=0.jpg" alt="image-20220814172257251"></p>
+<h4 id="子窗口绘图消息"><a href="#子窗口绘图消息" class="headerlink" title="子窗口绘图消息"></a>子窗口绘图消息</h4><figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">case</span> WM_PAINT:</span><br><span class="line">	hdc = BeginPaint(hwnd, &amp;ps);</span><br><span class="line"></span><br><span class="line">	GetClientRect(hwnd, &amp;rect);</span><br><span class="line">	Rectangle(hdc, <span class="number">0</span>, <span class="number">0</span>, rect.right, rect.bottom);<span class="comment">//绘制边框</span></span><br><span class="line">	<span class="comment">// Draw the &quot;x&quot; mark</span></span><br><span class="line">	<span class="keyword">if</span> (GetWindowLong(hwnd, <span class="number">0</span>))<span class="comment">//通过0号属性观察本窗口应该是按下还是起来的状态,</span></span><br><span class="line">	&#123;<span class="comment">//如果应该按下则本子窗口画出对角线</span></span><br><span class="line">		MoveToEx(hdc, <span class="number">0</span>, <span class="number">0</span>, <span class="literal">NULL</span>);</span><br><span class="line">		LineTo(hdc, rect.right, rect.bottom);</span><br><span class="line">		MoveToEx(hdc, <span class="number">0</span>, rect.bottom, <span class="literal">NULL</span>);</span><br><span class="line">		LineTo(hdc, rect.right, <span class="number">0</span>);</span><br><span class="line">	&#125;</span><br><span class="line">	<span class="comment">// Draw the &quot;focus&quot; rectangle </span></span><br><span class="line"></span><br><span class="line">	<span class="keyword">if</span> (hwnd == GetFocus())<span class="comment">//如果当前子窗口正在获得焦点,那么额外画出提示信息</span></span><br><span class="line">	&#123;</span><br><span class="line">		rect.left += rect.right / <span class="number">10</span>;<span class="comment">//设置内方框信息</span></span><br><span class="line">		rect.right -= rect.left;</span><br><span class="line">		rect.top += rect.bottom / <span class="number">10</span>;</span><br><span class="line">		rect.bottom -= rect.top;</span><br><span class="line">		SelectObject(hdc, GetStockObject(NULL_BRUSH));<span class="comment">//不使用画刷</span></span><br><span class="line">		SelectObject(hdc, CreatePen(PS_DASH, <span class="number">0</span>, <span class="number">0</span>));<span class="comment">//画笔改成虚线模式</span></span><br><span class="line">		Rectangle(hdc, rect.left, rect.top, rect.right,rect.bottom);</span><br><span class="line">		DeleteObject(SelectObject(hdc, GetStockObject(BLACK_PEN)));<span class="comment">//删除刚才创建的逻辑画笔实例</span></span><br><span class="line">	&#125;</span><br><span class="line">	EndPaint(hwnd, &amp;ps);</span><br><span class="line">	<span class="keyword">return</span> <span class="number">0</span>;</span><br></pre></td></tr></table></figure>
+<h2 id="捕获鼠标"><a href="#捕获鼠标" class="headerlink" title="捕获鼠标"></a>捕获鼠标</h2><p>书上举了一个例子,一个绘图程序,假如要绘制一个矩形,鼠标左键按下之后确定矩形一个点,不松开拖着鼠标移动则实时绘制矩形边框,当鼠标左键松开时确定整个矩形,此时填充矩形表明完成绘制</p>
+<p>然而如果左键是在客户区按下,引发开始绘制矩形了,然后移出客户区松开左键,此时会发生什么?</p>
+<p><img src="https://raw.githubusercontent.com/DeutschBall/DeutschBall/main/image-20220814173608831.png" class="lazyload placeholder" data-srcset="https://raw.githubusercontent.com/DeutschBall/DeutschBall/main/image-20220814173608831.png" srcset="https://img2.baidu.com/it/u=2037979560,2772131037&fm=26&fmt=auto&gp=0.jpg" alt="image-20220814173608831"></p>
+<p>程序迟迟不能确定另一个点的位置,停留在最后一次记录鼠标移动位置的地方,一直等着.</p>
+<p>就算鼠标在外面松开,程序也无法绘图,因为鼠标在外面松开的消息被windows发往其他窗口了</p>
+<p>当鼠标再次移入客户区,不管是按下还是松开,都会被程序重新捕获,此时进入一种bug状态,左键没有按下也能拖着另一个顶点走,但是一旦左键点一下就绘制失效了</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br><span class="line">75</span><br><span class="line">76</span><br><span class="line">77</span><br><span class="line">78</span><br><span class="line">79</span><br><span class="line">80</span><br><span class="line">81</span><br><span class="line">82</span><br><span class="line">83</span><br><span class="line">84</span><br><span class="line">85</span><br><span class="line">86</span><br><span class="line">87</span><br><span class="line">88</span><br><span class="line">89</span><br><span class="line">90</span><br><span class="line">91</span><br><span class="line">92</span><br><span class="line">93</span><br><span class="line">94</span><br></pre></td><td class="code"><pre><span class="line"><span class="type">void</span> <span class="title function_">DrawBoxOutline</span><span class="params">(HWND hwnd, POINT ptBeg, POINT ptEnd)</span><span class="comment">//正常情况下客户区内松开左键时调用,填充矩形</span></span><br><span class="line">&#123;</span><br><span class="line">	HDC hdc;</span><br><span class="line">	hdc = GetDC(hwnd);</span><br><span class="line">	SetROP2(hdc, R2_NOT);<span class="comment">//该函数的作用是,只要是绘图,当前背景色取反,原来是白板,取反得黑,交替使用绘图函数会呈现一白一黑</span></span><br><span class="line">	SelectObject(hdc, GetStockObject(NULL_BRUSH));</span><br><span class="line">	Rectangle(hdc, ptBeg.x, ptBeg.y, ptEnd.x, ptEnd.y);</span><br><span class="line">	ReleaseDC(hwnd, hdc);</span><br><span class="line">&#125;</span><br><span class="line">LRESULT CALLBACK <span class="title function_">WndProc</span><span class="params">(HWND hwnd, UINT message, WPARAM wParam, LPARAM</span></span><br><span class="line"><span class="params">	lParam)</span></span><br><span class="line">&#123;</span><br><span class="line">	<span class="type">static</span> BOOL fBlocking, fValidBox;</span><br><span class="line">	<span class="type">static</span> POINT ptBeg, ptEnd, ptBoxBeg, ptBoxEnd;</span><br><span class="line">	HDC hdc;</span><br><span class="line">	PAINTSTRUCT ps;</span><br><span class="line">	<span class="keyword">switch</span> (message)</span><br><span class="line">	&#123;</span><br><span class="line">	<span class="keyword">case</span> WM_LBUTTONDOWN:</span><br><span class="line">		ptBeg.x = ptEnd.x = LOWORD(lParam);<span class="comment">//ptBeg获取当前鼠标位置</span></span><br><span class="line">		ptBeg.y = ptEnd.y = HIWORD(lParam);</span><br><span class="line"></span><br><span class="line">		DrawBoxOutline(hwnd, ptBeg, ptEnd);<span class="comment">//描矩形边.使用ptBeg,ptEnd指定主对角线的矩形</span></span><br><span class="line"></span><br><span class="line">		SetCursor(LoadCursor(<span class="literal">NULL</span>, IDC_CROSS));<span class="comment">//左键按下后进入绘制状态,鼠标变成十字提示绘图</span></span><br><span class="line"></span><br><span class="line">		fBlocking = TRUE;<span class="comment">//一个flag,表征鼠标是否一直按下,这个状态会被Esc键修改,表示终止绘图</span></span><br><span class="line">		<span class="keyword">return</span> <span class="number">0</span>;</span><br><span class="line">	<span class="keyword">case</span> WM_MOUSEMOVE:</span><br><span class="line">		<span class="keyword">if</span> (fBlocking)</span><br><span class="line">		&#123;</span><br><span class="line">			SetCursor(LoadCursor(<span class="literal">NULL</span>, IDC_CROSS));</span><br><span class="line"></span><br><span class="line">			DrawBoxOutline(hwnd, ptBeg, ptEnd);</span><br><span class="line"></span><br><span class="line">			ptEnd.x = LOWORD(lParam);</span><br><span class="line">			ptEnd.y = HIWORD(lParam);</span><br><span class="line"></span><br><span class="line">			DrawBoxOutline(hwnd, ptBeg, ptEnd);<span class="comment">//这里矩形边框画了两次,是因为后来这一次会更新前面那一次,由于SetROP2已经设置了黑白交替绘画,</span></span><br><span class="line">			<span class="comment">//当前一次是黑笔是,后一次是白笔就擦除了前面的绘制</span></span><br><span class="line">			<span class="comment">//如此做到只能看到一个实时边框,否则只绘制一次会导致很多重影</span></span><br><span class="line">		&#125;</span><br><span class="line">		<span class="keyword">return</span> <span class="number">0</span>;</span><br><span class="line"></span><br><span class="line">	<span class="keyword">case</span> WM_LBUTTONUP:</span><br><span class="line">		<span class="keyword">if</span> (fBlocking)<span class="comment">//如果fBlocking==1说明左键按下没有起来过并且没有被Esc中断过</span></span><br><span class="line">		&#123;</span><br><span class="line">			DrawBoxOutline(hwnd, ptBeg, ptEnd);<span class="comment">//这里只调用了一次,是因为这一次要固定边框位置了,直接描黑</span></span><br><span class="line"></span><br><span class="line">			ptBoxBeg = ptBeg;</span><br><span class="line">			ptBoxEnd.x = LOWORD(lParam);<span class="comment">//准备好需要填充的矩形范围</span></span><br><span class="line">			ptBoxEnd.y = HIWORD(lParam);</span><br><span class="line"></span><br><span class="line">			SetCursor(LoadCursor(<span class="literal">NULL</span>, IDC_ARROW));<span class="comment">//放下屠刀之后,鼠标变成了斜向箭头样式</span></span><br><span class="line">			fBlocking = FALSE;<span class="comment">//关闭中断标志,为下一次绘图做准备</span></span><br><span class="line">			fValidBox = TRUE;<span class="comment">//设置填充区域有效,可以填充,为WM_PAINT做准备</span></span><br><span class="line"></span><br><span class="line">			InvalidateRect(hwnd, <span class="literal">NULL</span>, TRUE);</span><br><span class="line">		&#125;</span><br><span class="line">		<span class="keyword">return</span> <span class="number">0</span>;</span><br><span class="line"></span><br><span class="line">	<span class="keyword">case</span> WM_CHAR:</span><br><span class="line">		<span class="keyword">if</span> (fBlocking &amp; wParam == <span class="string">&#x27;\x1B&#x27;</span>) <span class="comment">// i.e., Escape //按下Esc终止绘制矩形,即使左键正在按下</span></span><br><span class="line">		&#123;</span><br><span class="line">			DrawBoxOutline(hwnd, ptBeg, ptEnd);</span><br><span class="line"></span><br><span class="line">			SetCursor(LoadCursor(<span class="literal">NULL</span>, IDC_ARROW));</span><br><span class="line"></span><br><span class="line">			fBlocking = FALSE;<span class="comment">//Esc中止逻辑修改了一个fBlocking,就可以让程序知道左键按下起来之间有没有被中断过</span></span><br><span class="line">		&#125;</span><br><span class="line">		<span class="keyword">return</span> <span class="number">0</span>;</span><br><span class="line">	<span class="keyword">case</span> WM_PAINT:</span><br><span class="line">		hdc = BeginPaint(hwnd, &amp;ps);</span><br><span class="line">		<span class="keyword">if</span> (fValidBox)<span class="comment">//这个值只能通过鼠标左键起来修改,表明确实有过画图</span></span><br><span class="line">		&#123;</span><br><span class="line">			SelectObject(hdc, GetStockObject(BLACK_BRUSH));</span><br><span class="line">			Rectangle(hdc, ptBoxBeg.x, ptBoxBeg.y,ptBoxEnd.x, ptBoxEnd.y);<span class="comment">//填充</span></span><br><span class="line">		&#125;</span><br><span class="line"></span><br><span class="line">		<span class="keyword">if</span> (fBlocking)<span class="comment">//fBlocking=1表明正在绘图,应当打印边框</span></span><br><span class="line">		&#123;</span><br><span class="line">			SetROP2(hdc, R2_NOT);</span><br><span class="line">			SelectObject(hdc, GetStockObject(NULL_BRUSH));</span><br><span class="line">			Rectangle(hdc, ptBeg.x, ptBeg.y, ptEnd.x,ptEnd.y);</span><br><span class="line">		&#125;</span><br><span class="line"></span><br><span class="line">		EndPaint(hwnd, &amp;ps);</span><br><span class="line">		<span class="keyword">return</span> <span class="number">0</span>;</span><br><span class="line">	<span class="keyword">case</span> WM_DESTROY:</span><br><span class="line">		PostQuitMessage(<span class="number">0</span>);</span><br><span class="line">		<span class="keyword">return</span> <span class="number">0</span>;</span><br><span class="line">	&#125;</span><br><span class="line">	<span class="keyword">return</span> DefWindowProc(hwnd, message, wParam, lParam);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>怎么捕获已经移出客户区的鼠标呢?</p>
+<h3 id="Set-ReleaseCapture"><a href="#Set-ReleaseCapture" class="headerlink" title="Set/ReleaseCapture"></a>Set/ReleaseCapture</h3><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">SetCapture(hwnd);//此函数执行之后所有的鼠标动作将被hwnd指向的窗口捕获</span><br><span class="line">ReleaseCapture();//直到本函数执行之后鼠标动作才会恢复正常</span><br></pre></td></tr></table></figure>
+
+      </div>
+      <div class="post-tags-categories">
+        
+        <div class="tags">
+          
+            <a href="/tags/windows%E7%A8%8B%E5%BA%8F%E8%AE%BE%E8%AE%A1/" class="">
+              windows程序设计
+            </a>
+          
+        </div>
+        
+      </div>
+      
+    </article>
+    <!-- 上一篇文章和下一篇文章 -->
+    
+      <!-- 文章详情页的上一页和下一页 -->
+<div class="post-nav">
+
+
+
+
+
+  
+  <div class="post-nav-next post-nav-item">
+    <div class="post-nav-img" style="background-size: cover; 
+      background-position: center center;">
+      <img class="lazyload lazyload placeholder" src="/medias/14.jpg" class="lazyload placeholder" data-srcset="/medias/14.jpg" srcset="https://img2.baidu.com/it/u=2037979560,2772131037&fm=26&fmt=auto&gp=0.jpg" src="" alt="">
+    </div>
+    <a href="/2022/08/12/windows%20SDK%20chapter%206%20keyboard/" class="post-nav-link">
+      <div class="title">
+        Next: <i class="fas fa-angle-right"></i>
+        <div class="title-text">win32程序设计-chapter6 键盘</div>
+      </div>
+      <!-- <div class="content">
+        windows SDK chapter 6 keyboard键盘基础who is using the keyboard?
+      </div> -->
+    </a>
+  </div>
+
+</div>
+
+    
+    
+
+    <!-- 打赏 -->
+    
+
+    <!-- 分享 -->
+    
+      <!-- https://github.com/overtrue/share.js -->
+<!-- 文章详情页的分享 -->
+<div class="social-share" data-sites="twitter,facebook,google,qq,qzone,wechat,weibo,douban,linkedin" data-wechat-qrcode-helper="<p>微信扫一扫即可分享！</p>"></div>
+
+<script src="/js/shareJs/social-share.min.js"></script>
+</script>
+
+<style>
+  .social-share {
+    margin: 20px 0;
+  }
+</style>
+
+
+    
+    
+    <!-- 评论 -->
+    <!-- 评论 -->
+
+  <div id="myComment">
+    
+      
+<section id="comments" style="padding: 1em; margin: 15px auto;"
+	class="animated bounceInUp">
+	<div id="vcomment" class="comment"></div>
+</section>
+<style>
+	#comments {
+		background: rgba(255,255,255,0.9);
+	}
+	#veditor {
+		background-image: url('https://raw.githubusercontent.com/DeutschBall/test/master/R.3c3e443dfe9ddbddc93730c482ed0461');
+		background-size: contain;
+		background-repeat: no-repeat;
+		background-position: right;
+		background-color: rgba(255, 255, 255, 0);
+		resize: vertical;
+	}
+	#veditor:focus{
+		background-position-y: 200px;
+		transition: all 0.2s ease-in-out 0s;
+	}
+	#vcomment .vcards .vcard .vh .vhead .vtag.vvisitor {
+		background-color: #42b983;
+	}
+	.v[data-class=v] .vbtn:active, .v[data-class=v] .vbtn:hover {
+		color: #42b983;
+		border-color: #42b983;
+	}
+	#vcomment .vcards .vcard .vhead .vsys i {
+		display: none;
+	}
+	/* 底部valine链接 */
+	#vcomment .vpower {
+		display: none;
+	}
+	
+	/* 底下注释是修改 名称和邮箱和网址输入框的样式 */
+	/* #vcomment .vheader {
+		display: flex;
+		justify-content: space-around;
+	}
+	
+	#vcomment .vheader .vnick {
+		width: 31%;
+		border: 2px solid #dedede;
+		padding-left: 10px;
+		padding-right: 10px;
+		border-radius: 5px
+	}
+
+	#vcomment .vheader .vmail {
+		width: 31%;
+		border: 2px solid #dedede;
+		padding-left: 10px;
+		padding-right: 10px;
+		border-radius: 5px
+	}
+
+	#vcomment .vheader .vlink {
+		width: 31%;
+		border: 2px solid #dedede;
+		padding-left: 10px;
+		padding-right: 10px;
+		border-radius: 5px
+	} */
+
+	img.vimg {
+		transition: all 1s;
+		/* 头像旋转时间为 1s */
+	}
+
+	img.vimg:hover {
+		transform: rotate(360deg);
+		-webkit-transform: rotate(360deg);
+		-moz-transform: rotate(360deg);
+		-o-transform: rotate(360deg);
+		-ms-transform: rotate(360deg);
+	}
+
+	#vcomment .vcards .vcard {
+		padding: 15px 20px 0 20px;
+		border-radius: 10px;
+		margin-bottom: 15px;
+		box-shadow: 0 0 4px 1px rgba(0, 0, 0, .12);
+		transition: all .3s
+	}
+
+	#vcomment .vcards .vcard:hover {
+		box-shadow: 0 0 8px 3px rgba(0, 0, 0, .12)
+	}
+
+	#vcomment .vcards .vcard .vh .vcard {
+		border: none;
+		box-shadow: none;
+	}
+</style>
+    
+  </div>
+
+<!-- comment script in themes\hexo-theme-bamboo\layout\_partial\scripts\index.ejs -->
+
+
+  </div>
+
+  <!-- 目录 -->
+  <!-- 文章详情页右侧目录 -->
+
+  <div class="toc-aside">
+    <div class="toc-main">
+      <div class="toc-aside-title">
+        <i class="fas fa-list-ul" aria-hidden="true"></i><span>catalog</span>
+        
+          <div class="toc-open-close">catalog</div>
+        
+      </div>
+      <div class="toc-content">
+        <div class="toc"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 手机端目录按钮 -->
+  <div id="toc-mobile-btn">
+    <i class="fas fa-list-ul" aria-hidden="true"></i>
+  </div>
+
+
+<script>
+  function closeToc(init) {
+    $(".toc-aside").css({'width': 0, 'padding': 0, 'transition': init ?  'noe' : 'width 0.3s' });
+    $(".toc-content").css({'width': 0});
+    $(".toc-aside-title span, .toc-aside-title i").css({'display': 'none'});
+    $(".main-content").css({'width': '75%', 'margin': '10px auto'});
+  };
+  function openToc() {
+    $(".main-content").css({'width': '65%', 'margin-right': '10px', 'margin-left': 'calc(35% - 350px)'});
+    $(".toc-aside").css({'width': '300px', 'padding': '0 10px', 'transition': 'width 0.3s'});
+    $(".toc-content").css({'width': '300px'});
+    $(".toc-aside-title span, .toc-aside-title i").css({'display': 'inline-block'});
+  }
+  function openBtnClickFn () {
+    let openOrCloseBtn = $('.toc-aside .toc-aside-title .toc-open-close');
+    let open = eval('' || 'true');
+    openOrCloseBtn.click(function() {
+      if (open) {
+        closeToc();
+        open = false;
+      } else {
+        openToc();
+        open = true;
+      }
+    });
+  };
+  openBtnClickFn();
+  initCloseTocWidth(true);
+
+  function initCloseTocWidth(init) {
+    if (window.innerWidth >= 992) {
+      let isClose = false;
+      isClose && closeToc(init)
+    }
+  }
+
+  document.addEventListener('pjax:complete', function () {
+    $(".toc-aside").css({'transition': 'no'});
+  })
+  document.addEventListener('pjax:complete', function () {
+    openBtnClickFn();
+  })
+  
+</script>
+
+  <!-- 图片放大 Wrap images with fancybox support -->
+  <script src="/js/wrapImage.js"></script>
+</div>
+
+<!-- 文章详情页背景图 -->
+<div id="appBgSwiper" style="position: fixed;left: 0;top: 0;width: 100%;height: 100%;z-index: -2;"
+	:style="{'background-color': bgColor ? bgColor : 'transparent'}">
+	<transition-group tag="ul" :name="names">
+		<li v-for='(image,index) in img' :key='index' v-show="index === mark" class="bg-swiper-box">
+			<img :src="image" class="bg-swiper-img no-lazy">
+		</li>
+	</transition-group>
+</div>
+<script>
+	var vm = new Vue({
+		el: '#appBgSwiper',
+		data: {
+			names: '' || 'fade' || 'fade', // translate-fade fade
+			mark: 0,
+			img: [],
+			bgColor: '',
+			time: null
+		},
+		methods: {   //添加方法
+			change(i, m) {
+				if (i > m) {
+					// this.names = 'fade';
+				} else if (i < m) {
+					// this.names = 'fade';
+				} else {
+					return;
+				}
+				this.mark = i;
+			},
+			prev() {
+				// this.names = 'fade';
+				this.mark--;
+				if (this.mark === -1) {
+					this.mark = 3;
+					return
+				}
+			},
+			next() {
+				// this.names = 'fade';
+				this.mark++;
+				if (this.mark === this.img.length) {
+					this.mark = 0;
+					return
+				}
+			},
+			autoPlay() {
+				// this.names = 'fade';
+				this.mark++;
+				if (this.mark === this.img.length) {
+					this.mark = 0;
+					return
+				}
+			},
+			play() {
+				let bgImgDelay = '' || '180000'
+				let delay = parseInt(bgImgDelay) || 180000;
+				this.time = setInterval(this.autoPlay, delay);
+			},
+			enter() {
+				clearInterval(this.time);
+			},
+			leave() {
+				this.play();
+			}
+		},
+		created() {
+			this.play()
+		},
+		beforeDestroy() {
+			clearInterval(this.time);
+		},
+		mounted() {
+			let prop = '' || '';
+			let isImg = prop.includes('.bmp') || prop.includes('.jpg') || prop.includes('.png') || prop.includes('.tif') || prop.includes('.gif') || prop.includes('.pcx') || prop.includes('.tga') || prop.includes('.exif') || prop.includes('.fpx') || prop.includes('.psd') || prop.includes('.cdr') || prop.includes('.pcd') || prop.includes('.dxf') || prop.includes('.ufo') || prop.includes('.eps') || prop.includes('.ai') || prop.includes('.raw') || prop.includes('.WMF') || prop.includes('.webp') || prop.includes('.jpeg') || prop.includes('http://') || prop.includes('https://')
+			if (isImg) {
+				let img = prop.split(',');
+				let configRoot = '/'
+				let arrImg = [];
+				img.forEach(el => {
+					var Expression = /http(s)?:\/\/([\w-]+\.)+[\w-]+(\/[\w- .\/?%&=]*)?/;
+					var objExp = new RegExp(Expression);
+
+					if (objExp.test(el)) {
+						// http or https
+						arrImg.push(el);
+					} else {
+						// 非http or https开头
+						// 本地文件
+						let firstStr = el.charAt(0);
+						if (firstStr == '/') {
+							el = el.substr(1); // 删除第一个字符 '/',因为 configRoot最后一个字符为 /
+						}
+						el = configRoot + el;
+						arrImg.push(el);
+					}
+				})
+				this.img = arrImg;
+			} else {
+				this.bgColor = prop;
+			}
+		}
+	})
+</script>
+
+<style>
+	.bg-swiper-box {
+		position: absolute;
+		display: block;
+		width: 100%;
+		height: 100%;
+	}
+
+	.bg-swiper-img {
+		object-fit: cover;
+		width: 100%;
+		height: 100%;
+	}
+</style>
+
+
+  <script>
+  // https://github.com/theme-next/hexo-theme-next/blob/master/layout/_third-party/math/mathjax.swig
+  if (typeof MathJax === 'undefined') {
+    window.MathJax = {
+      loader: {
+        source: {
+          '[tex]/amsCd': '[tex]/amscd',
+          '[tex]/AMScd': '[tex]/amscd'
+        }
+      },
+      tex: {
+        inlineMath: {'[+]': [['$', '$']]},
+        tags: 'ams'
+      },
+      options: {
+        renderActions: {
+          findScript: [10, doc => {
+            document.querySelectorAll('script[type^="math/tex"]').forEach(node => {
+              const display = !!node.type.match(/; *mode=display/);
+              const math = new doc.options.MathItem(node.textContent, doc.inputJax[0], display);
+              const text = document.createTextNode('');
+              node.parentNode.replaceChild(text, node);
+              math.start = {node: text, delim: '', n: 0};
+              math.end = {node: text, delim: '', n: 0};
+              doc.math.push(math);
+            });
+          }, '', false],
+          insertedScript: [200, () => {
+            document.querySelectorAll('mjx-container').forEach(node => {
+              let target = node.parentNode;
+              if (target.nodeName.toLowerCase() === 'li') {
+                target.parentNode.classList.add('has-jax');
+              }
+            });
+          }, '', false]
+        }
+      }
+    };
+    (function () {
+      var script = document.createElement('script');
+      script.src = 'https://cdn.jsdelivr.net/npm/mathjax@3.0/es5/tex-mml-chtml.js';
+      script.defer = true;
+      document.head.appendChild(script);
+    })();
+  } else {
+    // 文章章节标题不能为 “MathJax” ，否则会报错。
+    MathJax.startup.document.state(0);
+    MathJax.texReset();
+    MathJax.typeset();
+  }
+</script>
+
+
+
+
+  <script>
+  function loadMermaid() {
+    if (document.getElementsByClassName('mermaid').length) {
+      if (window.mermaidJsLoad) mermaid.init()
+      else {
+        loadScript('https://cdn.jsdelivr.net/npm/mermaid/dist/mermaid.min.js').then(() => {
+          window.mermaidJsLoad = true
+          mermaid.initialize({
+            theme: 'default',
+          })
+          if ('true') {
+            mermaid.init();
+          }
+        })
+      }
+    }
+  };
+  document.addEventListener("DOMContentLoaded", function () {
+    loadMermaid();
+  })
+
+  document.addEventListener('pjax:complete', function () {
+    loadMermaid();
+  })
+  
+</script>
+
+
+      </main>
+    </div>
+
+    <!-- 页脚 -->
+    
+  
+  <div class="footer bg-color">
+    <div class="footer-main">
+      
+        
+          <div class="link">
+            
+          </div>
+        
+      
+        
+          <div class="footer-copyright">
+            <p>Copyright © 2019 - 2020 <a target="_blank" rel="noopener" href="https://github.com/yuang01">Deutschball</a> | Powered by <a target="_blank" rel="noopener" href="https://hexo.io/zh-cn/docs/">Deutschball</a> | Theme <a target="_blank" rel="noopener" href="https://github.com/yuang01/theme">Bamboo</a> </p>
+
+          </div>
+        
+      
+        
+          
+        
+      
+        
+          <div class="footer-custom">
+            
+          </div>
+        
+      
+    </div>
+  </div>
+
+<script src='https://unpkg.com/mermaid@/dist/mermaid.min.js'></script>
+<script>
+  if (window.mermaid) {
+    mermaid.initialize({theme: 'forest'});
+  }
+</script>
+
+
+
+
+    <!-- 渲染暗黑按钮 -->
+    
+    <!-- 渲染回到顶部按钮 -->
+    
+      <div class="goTop top-btn-color" pointer>
+  <i class="fas fa-arrow-up" aria-hidden="true"></i>
+</div>
+<script src="/js/goTop.js"></script>
+
+    
+    <!-- 渲染左下角音乐播放器 -->
+    
+
+    <!-- 图片放大 -->
+    
+      <script src="/js/fancybox/jquery.fancybox.min.js"></script>
+    
+
+    <!-- 百度解析 -->
+    <!-- Baidu Analytics -->
+
+    <!-- Baidu Push -->
+
+<script>
+    (function () {
+        var bp = document.createElement('script');
+        var curProtocol = window.location.protocol.split(':')[0];
+        if (curProtocol === 'https') {
+            bp.src = 'https://zz.bdstatic.com/linksubmit/push.js';
+        } else {
+            bp.src = 'http://push.zhanzhang.baidu.com/push.js';
+        }
+        var s = document.getElementsByTagName("script")[0];
+        s.parentNode.insertBefore(bp, s);
+    })();
+</script>
+
+    
+    <!-- 背景彩带 -->
+    
+      <script type="text/javascript" size="100" alpha='0.4' zIndex="-1" src="/js/ribbon.min.js"></script>
+    
+
+    <script src="/js/utils/index.js"></script>
+    <script src="/js/app.js"></script>
+    
+    <!-- 文章目录所需js -->
+<link href="/js/tocbot/tocbot.css" rel="stylesheet">
+<script src="/js/tocbot/tocbot.min.js"></script>
+
+<script>
+  var headerEl = 'h2, h3, h4, h5, h6',  //headers 
+    content = '.post-detail',//文章容器
+    idArr = {};  //标题数组以确定是否增加索引id
+  //add #id
+  var option = {
+    // Where to render the table of contents.
+    tocSelector: '.toc',
+    // Where to grab the headings to build the table of contents.
+    contentSelector: content,
+    // Which headings to grab inside of the contentSelector element.
+    headingSelector: headerEl,
+    scrollSmooth: true,
+    scrollSmoothOffset: -80,
+    headingsOffset: -($(window).height() * 0.4 - 45),
+    positionFixedSelector: '.toc-main',
+    positionFixedClass: 'is-position-fixed',
+    fixedSidebarOffset: 'auto',
+    activeLinkClass: 'is-active-link',
+    // onClick: function (e) {},
+  }
+  if ($('.toc').length > 0) {
+
+    $(content).children(headerEl).each(function () {
+      //去除空格以及多余标点
+      var headerId = $(this).text().replace(/[\s|\~|`|\!|\@|\#|\$|\%|\^|\&|\*|\(|\)|\_|\+|\=|\||\|\[|\]|\{|\}|\;|\:|\"|\'|\,|\<|\.|\>|\/|\?|\：|\，|\。]/g, '');
+
+      headerId = headerId.toLowerCase();
+      if (idArr[headerId]) {
+        //id已经存在
+        $(this).attr('id', headerId + '-' + idArr[headerId]);
+        idArr[headerId]++;
+      }
+      else {
+        //id未存在
+        idArr[headerId] = 1;
+        $(this).attr('id', headerId);
+      }
+    });
+
+    document.addEventListener("DOMContentLoaded", function () {
+      tocbot.init(option);
+      mobileTocClick();
+    });
+
+  }
+
+  window.tocScrollFn = function () {
+    return bamboo.throttle(function () {
+      findHeadPosition();
+    }, 100)()
+  }
+  window.addEventListener('scroll', tocScrollFn);
+
+  const findHeadPosition = function (top) {
+    if ($('.toc-list').length <= 0) {
+      return false;
+    }
+    setTimeout(() => {  // or DOMContentLoaded 
+      autoScrollToc();
+    }, 0);
+  }
+
+  const autoScrollToc = function () {
+    const $activeItem = document.querySelector('.is-active-link');
+    const $cardToc = document.querySelector('.toc-content');
+    const activePosition = $activeItem.getBoundingClientRect().top
+    const sidebarScrollTop = $cardToc.scrollTop
+    if (activePosition > (document.documentElement.clientHeight - 100)) {
+      $cardToc.scrollTop = sidebarScrollTop + 150
+    }
+    if (activePosition < 100) {
+      $cardToc.scrollTop = sidebarScrollTop - 150
+    }
+  }
+
+  document.addEventListener('pjax:send', function () {
+    if ($('.toc').length) {
+      tocbot.destroy();
+    }
+  });
+
+  document.addEventListener('pjax:complete', function () {
+    if ($('.toc').length) {
+      tocbot.init(option);
+      mobileTocClick();
+    }
+  });
+  
+  // 手机端toc按钮点击出现目录
+  const mobileTocClick = function () {
+    const $cardTocLayout = document.getElementsByClassName('toc-aside')[0];
+    const $cardToc = $cardTocLayout.getElementsByClassName('toc-content')[0];
+    let right = '45px';
+    if (window.innerWidth >= 551 && window.innerWidth <= 992) {
+      right = '100px'
+    }
+    const mobileToc = {
+      open: () => {
+        $cardTocLayout.style.cssText = 'animation: toc-open .3s; opacity: 1; right: ' + right
+      },
+
+      close: () => {
+        $cardTocLayout.style.animation = 'toc-close .2s'
+        setTimeout(() => {
+          $cardTocLayout.style.cssText = "opacity:''; animation: ''; right: ''"
+        }, 100)
+      }
+    }
+    document.getElementById('toc-mobile-btn').addEventListener('click', () => {
+      if (window.getComputedStyle($cardTocLayout).getPropertyValue('opacity') === '0') mobileToc.open()
+      else mobileToc.close()
+    })
+
+    $cardToc.addEventListener('click', (e) => {
+      if (window.innerWidth < 992) { // 小于992px的时候
+        mobileToc.close()
+      }
+    })
+  }
+</script>
+
+<style>
+  .is-position-fixed {
+    position: sticky !important;
+    top: 74px;
+  }
+
+  .toc-main ul {
+    counter-reset: show-list;
+  }
+
+  .toc-main ul li::before {
+    content: counter(item)".";
+    display: block;
+    position: absolute;
+    left: 12px;
+    top: 0;
+  }
+</style> 
+
+<!-- 设置导航背景 -->
+<script>
+  let setHeaderClass = () => {
+    const headerMenuTransparent = true;
+    if (!headerMenuTransparent) { return; }
+    const nav = $('#navHeader');
+    const navTop = nav.outerHeight();
+    const winTop = $(window).scrollTop();
+    if(winTop > navTop) {
+      nav.addClass('header-bg-color');
+    }
+    else {
+      nav.removeClass('header-bg-color');
+    }
+  };
+
+  let scrollCollect = () => {
+    return bamboo.throttle(function (e) {
+      setHeaderClass();
+    }, 200)()
+  }
+
+  let initHeaderBg = () => {
+    setHeaderClass();
+  }
+
+  setHeaderClass();
+  window.addEventListener('scroll', scrollCollect);
+
+  document.addEventListener('pjax:send', function () {
+    window.removeEventListener('scroll', scrollCollect)
+  })
+  document.addEventListener('pjax:complete', function () {
+    window.addEventListener('scroll', scrollCollect);
+    setHeaderClass();
+  })
+</script> 
+
+<!-- 渲染issues标签里的内容 -->
+<script>
+  function loadIssuesJS() {
+    if ($(".post-detail").find(".issues-api").length == 0) {
+      return;
+    } 
+    loadScript('/js/issues/index.js');
+  };
+  $(function () {
+    loadIssuesJS();
+  });
+  document.addEventListener('pjax:complete', function () {
+    if (typeof IssuesAPI == "undefined") {
+      loadIssuesJS();
+    }
+  })
+</script>
+
+<!-- 输入框打字特效 -->
+<!-- 输入框打字特效 -->
+
+  <script src="/js/activate-power-mode.js"></script>
+  <script>
+    POWERMODE.colorful = true;  // 打开随机颜色特效
+    POWERMODE.shake = false;    // 关闭输入框抖动
+    document.body.addEventListener('input', POWERMODE);//监听打字事件
+  </script>
+
+
+<!-- markdown代码一键复制功能 -->
+
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/v-plugs-ayu/lib/ayu.css">
+  <script src="https://cdn.jsdelivr.net/npm/v-plugs-ayu/lib/ayu.umd.min.js"></script>
+  <script src="/js/clipboard/clipboard.min.js"></script>
+  <div id="appCopy">
+  </div>
+  <script data-pjax>
+    var vm = new Vue({
+      el: '#appCopy',
+      data: {
+      },
+      computed: {
+      },
+      mounted() {
+        const that = this;
+        var copy = 'copy';
+        /* code */
+        var initCopyCode = function () {
+          var copyHtml = '';
+          copyHtml += '<button class="btn-copy" data-clipboard-snippet="" style="position:absolute;top:0;right:0;z-index:1;">';
+          copyHtml += '<i class="fas fa-copy"></i><span>' + copy + '</span>';
+          copyHtml += '</button>';
+          $(".post-detail pre").not('.gutter pre').wrap("<div class='codeBox' style='position:relative;width:100%;'></div>")
+          $(".post-detail pre").not('.gutter pre').before(copyHtml);
+          new ClipboardJS('.btn-copy', {
+            target: function (trigger) {
+              return trigger.nextElementSibling;
+            }
+          });
+        }
+        initCopyCode();
+        $('.btn-copy').unbind('click').bind('click', function () {
+          doSomething();
+        })
+        $(document).unbind('keypress').bind('keypress', function (e) {
+          if (e.ctrlKey && e.keyCode == 67) {
+            doSomething();
+          }
+        })
+
+        function doSomething() {
+          that.$notify({
+            title: "成功",
+            content: "copy that",
+            type: 'success'
+          })
+        }
+      },
+      methods: {
+      },
+      created() { }
+    })
+  </script>
+  
+
+<!-- 图片懒加载 -->
+<script defer src="https://cdn.jsdelivr.net/npm/vanilla-lazyload@17.1.0/dist/lazyload.min.js"></script>
+<script>
+  // https://www.npmjs.com/package/vanilla-lazyload
+  // Set the options globally
+  // to make LazyLoad self-initialize
+  window.lazyLoadOptions = {
+    elements_selector: ".lazyload",
+    threshold: 0
+  };
+  // Listen to the initialization event
+  // and get the instance of LazyLoad
+  window.addEventListener(
+    "LazyLoad::Initialized",
+    function (event) {
+      window.lazyLoadInstance = event.detail.instance;
+    },
+    false
+  );
+  document.addEventListener('DOMContentLoaded', function () {
+    lazyLoadInstance.update();
+  });
+  document.addEventListener('pjax:complete', function () {
+    lazyLoadInstance.update();
+  });
+</script>
+
+
+<!-- 卡片滚动动画 -->
+   
+
+<!-- 评论所需js -->
+
+  
+    <!-- 弹幕所需的css和js -->
+    
+<!-- 具体js，请前往valine/script.ejs查看 -->
+
+    <script>
+  var requiredFields = '';
+  requiredFields = requiredFields.split(',');
+  comment_el = '.comment';
+  let looperValine = null;
+  load_valine = function () {
+    if ($(comment_el).length) {
+      var valine = new Valine({
+        el: '#vcomment',
+        path: window.location.pathname,
+        notify: false,
+        verify: false,
+        app_id: "",
+        app_key: "",
+        placeholder: "客官，说点什么吧",
+        avatar: "",
+        master: "",   //博主邮箱md5
+        tagMeta: ["博主","小伙伴","访客"],     //标识字段名
+        friends: "",
+        metaPlaceholder: { "nick": "昵称/QQ号", "mail": "邮箱" },
+        requiredFields: requiredFields,
+        enableQQ: true,
+      });
+      function debounce(fn) {
+        var timerID = null
+        return function () {
+          var arg = arguments[0]   //获取事件
+          if (timerID) {
+            clearTimeout(timerID)
+          }
+          timerID = setTimeout(function () {
+            fn(arg)              //事件传入函数
+          }, 200)
+        }
+      }
+      //查询评论 valine.Q('*').limit(7) -- 查询所有，限制7条, 下面的的代码是查询当前页面
+      var themeDanmu = eval('false');
+      var themeLoop = eval('false');
+      var themeLooperTime = '5000' || 5000;
+      var speed = '40' || 20;
+      var isBarrager = true;
+      if (themeDanmu == true) {
+        do_barrager();
+        if ($('.danmuBox').length <= 0) {
+          $('.navbar').append('<div class="danmuBox"><div class="danmuBtn open"><span class="danmuCircle"></span><span class="danmuText">弹幕</span></div></div>');
+        }
+        $('.danmuBtn').on('click', debounce(
+          function () {
+            if ($('.danmuBtn').hasClass('open')) {
+              $('.danmuBtn').removeClass('open')
+              clearInterval(looperValine);
+              $.fn.barrager.removeAll();
+            } else {
+              $('.danmuBtn').addClass("open");
+              do_barrager();
+            }
+          }
+        ))
+      }
+      function do_barrager() {
+        isBarrager && valine.Q(window.location.pathname).find().then(function (comments) {
+          // var num = 0; // 可以记录条数，循环调用的时候只取最新的评论放入弹幕中
+          var run_once = true;
+          var looper_time = themeLooperTime;
+          var total = comments.length;
+          // var looper = null;
+          var index = 0;
+          if (total > 0) {
+            barrager();
+          } else {
+            // 当评论数为0的时候，自动关闭弹幕
+            // $('.danmuBtn').removeClass('open');
+          }
+          function barrager() {
+            if (run_once) {
+              //如果是首次执行,则设置一个定时器,并且把首次执行置为false
+              looperValine = setInterval(barrager, looper_time);
+              run_once = false;
+            }
+            var content = comments[index]._serverData.comment;
+            var email = comments[index]._serverData.mail;
+            var link = comments[index]._serverData.link;
+            var newcontent = content.substring(0, 50).replace(/<[^>]+>/g, "");
+            //发布一个弹幕
+            const item = {
+              img: `https://q1.qlogo.cn/g?b=qq&nk=${email}&s=640`, //图片 
+              info: newcontent, //文字 
+              href: link, //链接 
+              close: true, //显示关闭按钮 
+              speed: speed, //延迟,单位秒,默认6 
+              color: '#fff', //颜色,默认白色 
+              old_ie_color: '#000000', //ie低版兼容色,不能与网页背景相同,默认黑色
+            }
+            $('body').barrager(item);
+            //索引自增
+            index++;
+            //所有弹幕发布完毕，清除计时器。
+            if (index == total) {
+              clearInterval(looperValine);
+              if (themeLoop === true) {
+                setTimeout(function () {
+                  do_barrager();
+                }, 5000);
+              } else {
+                $('.danmuBtn').removeClass('open');
+              }
+              return false;
+            }
+
+          }
+        })
+      }
+    }
+  };
+  $(document).ready(load_valine);
+  document.addEventListener('pjax:send', function (e) {
+    
+  })
+  document.addEventListener('pjax:complete', function () {
+    load_valine();
+  });
+</script>
+
+  
+
+
+<!-- 鼠标点击特效 -->
+<!-- 爱心点击 -->
+
+  
+    <canvas class="fireworks" style="position: fixed;left: 0;top: 0;z-index: 999; pointer-events: none;" ></canvas>
+    <script src="//cdn.bootcss.com/animejs/2.2.0/anime.min.js"></script>
+    <script src="/js/cursor/explosion.min.js"></script>
+  
+
+
+
+
+
+    <!-- pjax -->
+    
+
+<!-- pjax -->
+
+
+  <script src="/js/pjax@0.2.8/index.js"></script>
+  
+    <!-- 样式位于：source/css/_third-party/pjaxanimate.styl -->
+
+<div class="pjax-animate">
+  
+    <div class="loading-circle"><div id="loader-circle"></div></div>
+    <script>
+      window.ShowLoading = function() {
+        $(".loading-circle").css("display", "block");
+      };
+      window.HideLoading = function() {
+        $(".loading-circle").css("display", "none");
+      }
+    </script>
+  
+	<script>
+    document.addEventListener('pjax:complete', function () {
+      window.HideLoading();
+    })
+    document.addEventListener('pjax:send', function () {
+      window.ShowLoading();
+    })
+    document.addEventListener('pjax:error', function () {
+      window.HideLoading();
+    })
+	</script>
+</div>
+
+  
+
+  <script>
+    var pjax = new Pjax({
+      elements: 'a[href]:not([href^="#"]):not([href="javascript:void(0)"]):not([no-pjax])',   // 拦截正常带链接的 a 标签
+      selectors: ["#pjax-container","title"],                                   // 根据实际需要确认重载区域
+      cacheBust: false,   // url 地址追加时间戳，用以避免浏览器缓存
+      timeout: 5000
+    });
+
+    document.addEventListener('pjax:send', function (e) {
+
+      try {
+        var currentUrl = window.location.pathname;
+        var targetUrl = e.triggerElement.href;
+        var banUrl = [""];
+        if (banUrl[0] != "") {
+          banUrl.forEach(item => {
+            if(currentUrl.indexOf(item) != -1 || targetUrl.indexOf(item) != -1) {
+              window.location.href = targetUrl;
+            }
+          });
+        }
+      } catch (error) {}
+
+      $(window).unbind('resize');
+      $(window).unbind('scroll');
+      $(document).unbind('scroll');
+      $(document).unbind('click');
+      $('body').unbind('click');
+
+    })
+    
+    document.addEventListener('pjax:complete', function () {
+      $('script[data-pjax], .pjax-reload script').each(function () {
+        $(this).parent().append($(this).remove());
+      });
+    });
+
+    document.addEventListener('pjax:error', function (e) {
+      window.location.href = e.triggerElement.href;
+    })
+    
+    // 刷新不从顶部开始
+    document.addEventListener("DOMContentLoaded", function () {
+      history.scrollRestoration = 'auto';
+    })
+  </script>
+
+
+
+  </body>
+</html>
