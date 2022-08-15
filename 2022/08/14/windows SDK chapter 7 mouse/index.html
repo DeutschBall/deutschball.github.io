@@ -11,7 +11,7 @@
   <!-- Global site tag (gtag.js) - Google Analytics -->
 
 
-  <title>win32程序设计-chapter7 鼠标 | Deutschball&#39;s blog</title>
+  <title>Deutschball&#39;s blog</title>
 
   <link rel="icon" type="image/png" href="https://raw.githubusercontent.com/DeutschBall/test/master/emp.png">
   <link rel="stylesheet" href="https://at.alicdn.com/t/font_1911880_c1nvbyezg17.css">
@@ -413,14 +413,14 @@
 
 
 <div class="post-detail-header" id="thumbnail_canvas" style="background-repeat: no-repeat; background-size: cover; 
-  background-position: center center;position: relative;background-image:url('/medias/15.jpg')">
+  background-position: center center;position: relative;background-image:url('/medias/1.jpg')">
   <div class="post-detail-header-mask"></div>
   <canvas id="header_canvas"style="position:absolute;bottom:0;pointer-events:none;"></canvas>
   
   <div class="post-detail-header_info-box">
     <div class="title-box">
       <span class="title">
-        win32程序设计-chapter7 鼠标
+        
       </span>
     </div>
     
@@ -767,26 +767,189 @@
 <p>当子窗口失去焦点的时候需要通知失效重绘,其原因是WM_PAINT中获得焦点的子窗口会多绘制一些提示信息,那么当它失去焦点的时候就得擦除提示信息了</p>
 <p><img src="https://raw.githubusercontent.com/DeutschBall/DeutschBall/main/image-20220814172257251.png" class="lazyload placeholder" data-srcset="https://raw.githubusercontent.com/DeutschBall/DeutschBall/main/image-20220814172257251.png" srcset="https://img2.baidu.com/it/u=2037979560,2772131037&fm=26&fmt=auto&gp=0.jpg" alt="image-20220814172257251"></p>
 <h4 id="子窗口绘图消息"><a href="#子窗口绘图消息" class="headerlink" title="子窗口绘图消息"></a>子窗口绘图消息</h4><figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">case</span> WM_PAINT:</span><br><span class="line">	hdc = BeginPaint(hwnd, &amp;ps);</span><br><span class="line"></span><br><span class="line">	GetClientRect(hwnd, &amp;rect);</span><br><span class="line">	Rectangle(hdc, <span class="number">0</span>, <span class="number">0</span>, rect.right, rect.bottom);<span class="comment">//绘制边框</span></span><br><span class="line">	<span class="comment">// Draw the &quot;x&quot; mark</span></span><br><span class="line">	<span class="keyword">if</span> (GetWindowLong(hwnd, <span class="number">0</span>))<span class="comment">//通过0号属性观察本窗口应该是按下还是起来的状态,</span></span><br><span class="line">	&#123;<span class="comment">//如果应该按下则本子窗口画出对角线</span></span><br><span class="line">		MoveToEx(hdc, <span class="number">0</span>, <span class="number">0</span>, <span class="literal">NULL</span>);</span><br><span class="line">		LineTo(hdc, rect.right, rect.bottom);</span><br><span class="line">		MoveToEx(hdc, <span class="number">0</span>, rect.bottom, <span class="literal">NULL</span>);</span><br><span class="line">		LineTo(hdc, rect.right, <span class="number">0</span>);</span><br><span class="line">	&#125;</span><br><span class="line">	<span class="comment">// Draw the &quot;focus&quot; rectangle </span></span><br><span class="line"></span><br><span class="line">	<span class="keyword">if</span> (hwnd == GetFocus())<span class="comment">//如果当前子窗口正在获得焦点,那么额外画出提示信息</span></span><br><span class="line">	&#123;</span><br><span class="line">		rect.left += rect.right / <span class="number">10</span>;<span class="comment">//设置内方框信息</span></span><br><span class="line">		rect.right -= rect.left;</span><br><span class="line">		rect.top += rect.bottom / <span class="number">10</span>;</span><br><span class="line">		rect.bottom -= rect.top;</span><br><span class="line">		SelectObject(hdc, GetStockObject(NULL_BRUSH));<span class="comment">//不使用画刷</span></span><br><span class="line">		SelectObject(hdc, CreatePen(PS_DASH, <span class="number">0</span>, <span class="number">0</span>));<span class="comment">//画笔改成虚线模式</span></span><br><span class="line">		Rectangle(hdc, rect.left, rect.top, rect.right,rect.bottom);</span><br><span class="line">		DeleteObject(SelectObject(hdc, GetStockObject(BLACK_PEN)));<span class="comment">//删除刚才创建的逻辑画笔实例</span></span><br><span class="line">	&#125;</span><br><span class="line">	EndPaint(hwnd, &amp;ps);</span><br><span class="line">	<span class="keyword">return</span> <span class="number">0</span>;</span><br></pre></td></tr></table></figure>
-<h2 id="捕获鼠标"><a href="#捕获鼠标" class="headerlink" title="捕获鼠标"></a>捕获鼠标</h2><p>书上举了一个例子,一个绘图程序,假如要绘制一个矩形,鼠标左键按下之后确定矩形一个点,不松开拖着鼠标移动则实时绘制矩形边框,当鼠标左键松开时确定整个矩形,此时填充矩形表明完成绘制</p>
-<p>然而如果左键是在客户区按下,引发开始绘制矩形了,然后移出客户区松开左键,此时会发生什么?</p>
-<p><img src="https://raw.githubusercontent.com/DeutschBall/DeutschBall/main/image-20220814173608831.png" class="lazyload placeholder" data-srcset="https://raw.githubusercontent.com/DeutschBall/DeutschBall/main/image-20220814173608831.png" srcset="https://img2.baidu.com/it/u=2037979560,2772131037&fm=26&fmt=auto&gp=0.jpg" alt="image-20220814173608831"></p>
-<p>程序迟迟不能确定另一个点的位置,停留在最后一次记录鼠标移动位置的地方,一直等着.</p>
-<p>就算鼠标在外面松开,程序也无法绘图,因为鼠标在外面松开的消息被windows发往其他窗口了</p>
-<p>当鼠标再次移入客户区,不管是按下还是松开,都会被程序重新捕获,此时进入一种bug状态,左键没有按下也能拖着另一个顶点走,但是一旦左键点一下就绘制失效了</p>
-<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br><span class="line">75</span><br><span class="line">76</span><br><span class="line">77</span><br><span class="line">78</span><br><span class="line">79</span><br><span class="line">80</span><br><span class="line">81</span><br><span class="line">82</span><br><span class="line">83</span><br><span class="line">84</span><br><span class="line">85</span><br><span class="line">86</span><br><span class="line">87</span><br><span class="line">88</span><br><span class="line">89</span><br><span class="line">90</span><br><span class="line">91</span><br><span class="line">92</span><br><span class="line">93</span><br><span class="line">94</span><br></pre></td><td class="code"><pre><span class="line"><span class="type">void</span> <span class="title function_">DrawBoxOutline</span><span class="params">(HWND hwnd, POINT ptBeg, POINT ptEnd)</span><span class="comment">//正常情况下客户区内松开左键时调用,填充矩形</span></span><br><span class="line">&#123;</span><br><span class="line">	HDC hdc;</span><br><span class="line">	hdc = GetDC(hwnd);</span><br><span class="line">	SetROP2(hdc, R2_NOT);<span class="comment">//该函数的作用是,只要是绘图,当前背景色取反,原来是白板,取反得黑,交替使用绘图函数会呈现一白一黑</span></span><br><span class="line">	SelectObject(hdc, GetStockObject(NULL_BRUSH));</span><br><span class="line">	Rectangle(hdc, ptBeg.x, ptBeg.y, ptEnd.x, ptEnd.y);</span><br><span class="line">	ReleaseDC(hwnd, hdc);</span><br><span class="line">&#125;</span><br><span class="line">LRESULT CALLBACK <span class="title function_">WndProc</span><span class="params">(HWND hwnd, UINT message, WPARAM wParam, LPARAM</span></span><br><span class="line"><span class="params">	lParam)</span></span><br><span class="line">&#123;</span><br><span class="line">	<span class="type">static</span> BOOL fBlocking, fValidBox;</span><br><span class="line">	<span class="type">static</span> POINT ptBeg, ptEnd, ptBoxBeg, ptBoxEnd;</span><br><span class="line">	HDC hdc;</span><br><span class="line">	PAINTSTRUCT ps;</span><br><span class="line">	<span class="keyword">switch</span> (message)</span><br><span class="line">	&#123;</span><br><span class="line">	<span class="keyword">case</span> WM_LBUTTONDOWN:</span><br><span class="line">		ptBeg.x = ptEnd.x = LOWORD(lParam);<span class="comment">//ptBeg获取当前鼠标位置</span></span><br><span class="line">		ptBeg.y = ptEnd.y = HIWORD(lParam);</span><br><span class="line"></span><br><span class="line">		DrawBoxOutline(hwnd, ptBeg, ptEnd);<span class="comment">//描矩形边.使用ptBeg,ptEnd指定主对角线的矩形</span></span><br><span class="line"></span><br><span class="line">		SetCursor(LoadCursor(<span class="literal">NULL</span>, IDC_CROSS));<span class="comment">//左键按下后进入绘制状态,鼠标变成十字提示绘图</span></span><br><span class="line"></span><br><span class="line">		fBlocking = TRUE;<span class="comment">//一个flag,表征鼠标是否一直按下,这个状态会被Esc键修改,表示终止绘图</span></span><br><span class="line">		<span class="keyword">return</span> <span class="number">0</span>;</span><br><span class="line">	<span class="keyword">case</span> WM_MOUSEMOVE:</span><br><span class="line">		<span class="keyword">if</span> (fBlocking)</span><br><span class="line">		&#123;</span><br><span class="line">			SetCursor(LoadCursor(<span class="literal">NULL</span>, IDC_CROSS));</span><br><span class="line"></span><br><span class="line">			DrawBoxOutline(hwnd, ptBeg, ptEnd);</span><br><span class="line"></span><br><span class="line">			ptEnd.x = LOWORD(lParam);</span><br><span class="line">			ptEnd.y = HIWORD(lParam);</span><br><span class="line"></span><br><span class="line">			DrawBoxOutline(hwnd, ptBeg, ptEnd);<span class="comment">//这里矩形边框画了两次,是因为后来这一次会更新前面那一次,由于SetROP2已经设置了黑白交替绘画,</span></span><br><span class="line">			<span class="comment">//当前一次是黑笔是,后一次是白笔就擦除了前面的绘制</span></span><br><span class="line">			<span class="comment">//如此做到只能看到一个实时边框,否则只绘制一次会导致很多重影</span></span><br><span class="line">		&#125;</span><br><span class="line">		<span class="keyword">return</span> <span class="number">0</span>;</span><br><span class="line"></span><br><span class="line">	<span class="keyword">case</span> WM_LBUTTONUP:</span><br><span class="line">		<span class="keyword">if</span> (fBlocking)<span class="comment">//如果fBlocking==1说明左键按下没有起来过并且没有被Esc中断过</span></span><br><span class="line">		&#123;</span><br><span class="line">			DrawBoxOutline(hwnd, ptBeg, ptEnd);<span class="comment">//这里只调用了一次,是因为这一次要固定边框位置了,直接描黑</span></span><br><span class="line"></span><br><span class="line">			ptBoxBeg = ptBeg;</span><br><span class="line">			ptBoxEnd.x = LOWORD(lParam);<span class="comment">//准备好需要填充的矩形范围</span></span><br><span class="line">			ptBoxEnd.y = HIWORD(lParam);</span><br><span class="line"></span><br><span class="line">			SetCursor(LoadCursor(<span class="literal">NULL</span>, IDC_ARROW));<span class="comment">//放下屠刀之后,鼠标变成了斜向箭头样式</span></span><br><span class="line">			fBlocking = FALSE;<span class="comment">//关闭中断标志,为下一次绘图做准备</span></span><br><span class="line">			fValidBox = TRUE;<span class="comment">//设置填充区域有效,可以填充,为WM_PAINT做准备</span></span><br><span class="line"></span><br><span class="line">			InvalidateRect(hwnd, <span class="literal">NULL</span>, TRUE);</span><br><span class="line">		&#125;</span><br><span class="line">		<span class="keyword">return</span> <span class="number">0</span>;</span><br><span class="line"></span><br><span class="line">	<span class="keyword">case</span> WM_CHAR:</span><br><span class="line">		<span class="keyword">if</span> (fBlocking &amp; wParam == <span class="string">&#x27;\x1B&#x27;</span>) <span class="comment">// i.e., Escape //按下Esc终止绘制矩形,即使左键正在按下</span></span><br><span class="line">		&#123;</span><br><span class="line">			DrawBoxOutline(hwnd, ptBeg, ptEnd);</span><br><span class="line"></span><br><span class="line">			SetCursor(LoadCursor(<span class="literal">NULL</span>, IDC_ARROW));</span><br><span class="line"></span><br><span class="line">			fBlocking = FALSE;<span class="comment">//Esc中止逻辑修改了一个fBlocking,就可以让程序知道左键按下起来之间有没有被中断过</span></span><br><span class="line">		&#125;</span><br><span class="line">		<span class="keyword">return</span> <span class="number">0</span>;</span><br><span class="line">	<span class="keyword">case</span> WM_PAINT:</span><br><span class="line">		hdc = BeginPaint(hwnd, &amp;ps);</span><br><span class="line">		<span class="keyword">if</span> (fValidBox)<span class="comment">//这个值只能通过鼠标左键起来修改,表明确实有过画图</span></span><br><span class="line">		&#123;</span><br><span class="line">			SelectObject(hdc, GetStockObject(BLACK_BRUSH));</span><br><span class="line">			Rectangle(hdc, ptBoxBeg.x, ptBoxBeg.y,ptBoxEnd.x, ptBoxEnd.y);<span class="comment">//填充</span></span><br><span class="line">		&#125;</span><br><span class="line"></span><br><span class="line">		<span class="keyword">if</span> (fBlocking)<span class="comment">//fBlocking=1表明正在绘图,应当打印边框</span></span><br><span class="line">		&#123;</span><br><span class="line">			SetROP2(hdc, R2_NOT);</span><br><span class="line">			SelectObject(hdc, GetStockObject(NULL_BRUSH));</span><br><span class="line">			Rectangle(hdc, ptBeg.x, ptBeg.y, ptEnd.x,ptEnd.y);</span><br><span class="line">		&#125;</span><br><span class="line"></span><br><span class="line">		EndPaint(hwnd, &amp;ps);</span><br><span class="line">		<span class="keyword">return</span> <span class="number">0</span>;</span><br><span class="line">	<span class="keyword">case</span> WM_DESTROY:</span><br><span class="line">		PostQuitMessage(<span class="number">0</span>);</span><br><span class="line">		<span class="keyword">return</span> <span class="number">0</span>;</span><br><span class="line">	&#125;</span><br><span class="line">	<span class="keyword">return</span> DefWindowProc(hwnd, message, wParam, lParam);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-<p>怎么捕获已经移出客户区的鼠标呢?</p>
-<h3 id="Set-ReleaseCapture"><a href="#Set-ReleaseCapture" class="headerlink" title="Set/ReleaseCapture"></a>Set/ReleaseCapture</h3><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">SetCapture(hwnd);//此函数执行之后所有的鼠标动作将被hwnd指向的窗口捕获</span><br><span class="line">ReleaseCapture();//直到本函数执行之后鼠标动作才会恢复正常</span><br></pre></td></tr></table></figure>
+<h2 id="捕获鼠标"><a href="#捕获鼠标" class="headerlink" title="捕获鼠标"></a>捕获鼠标</h2><p>书上举了一个例子,一个绘图程序,假如要绘制一个矩形,鼠标左键按下之后确定矩形一个点,不松开拖着鼠标移动则实时绘制矩形边框,(好像这个边框叫做橡皮线)</p>
+<p>当鼠标左键松开时确定整个矩形,此时填充矩形表明完成绘制</p>
+<h3 id="例程"><a href="#例程" class="headerlink" title="例程"></a>例程</h3><h4 id="绘制边框橡皮线函数"><a href="#绘制边框橡皮线函数" class="headerlink" title="绘制边框橡皮线函数"></a>绘制边框橡皮线函数</h4><figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line"><span class="type">void</span> <span class="title function_">DrawBoxOutline</span><span class="params">(HWND hwnd, POINT ptBeg, POINT ptEnd)</span><span class="comment">//正常情况下客户区内松开左键时调用,填充矩形</span></span><br><span class="line">&#123;</span><br><span class="line">	HDC hdc;</span><br><span class="line">	hdc = GetDC(hwnd);</span><br><span class="line">	SetROP2(hdc, R2_NOT);<span class="comment">//该函数的作用是,只要是绘图,当前背景色取反,原来是白板,取反得黑,交替使用绘图函数会呈现一白一黑</span></span><br><span class="line">	SelectObject(hdc, GetStockObject(NULL_BRUSH));<span class="comment">//设置画笔无色,用ROP2反色下一次画出黑色</span></span><br><span class="line">	Rectangle(hdc, ptBeg.x, ptBeg.y, ptEnd.x, ptEnd.y);</span><br><span class="line">	ReleaseDC(hwnd, hdc);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>ptBeg和ptEnd都是相对于hwnd的客户区而言的,意思是在hwnd中绘制一个左上角ptBeg到右下角的ptEnd矩形边框</p>
+<h4 id="SetROP2"><a href="#SetROP2" class="headerlink" title="SetROP2"></a>SetROP2</h4><figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="type">int</span> <span class="title function_">SetROP2</span><span class="params">(</span></span><br><span class="line"><span class="params">  [in] HDC hdc,</span></span><br><span class="line"><span class="params">  [in] <span class="type">int</span> rop2<span class="comment">//样式</span></span></span><br><span class="line"><span class="params">)</span>;</span><br></pre></td></tr></table></figure>
+<blockquote>
+<p>The <strong>SetROP2</strong> function sets the current foreground mix mode. GDI uses the foreground mix mode to combine pens and interiors of filled objects with the colors already on the screen. The foreground mix mode defines how colors from the brush or pen and the colors in the existing image are to be combined.</p>
+</blockquote>
+<p>SetROP2函数设置当前前景的混合模式.</p>
+<p>GDI使用前景混合模式,作用是将画笔画刷的行为和先前已有的颜色结合起来.也就是说本次绘画会影响之前的绘画,rop2参数指定怎么个影响方法,是将像素点的颜色异或还是按位与还是直接擦除先前颜色等等</p>
+<blockquote>
+<p>前景和背景是相反的,背景在正文图层的下面,前景在正文图层的上面</p>
+</blockquote>
+<p>rop2的可选值:</p>
+<div class="table-container">
+<table>
+<thead>
+<tr>
+<th style="text-align:left">Mix mode</th>
+<th style="text-align:left">Meaning</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:left"><strong>R2_BLACK</strong></td>
+<td style="text-align:left">直接画黑,不考虑很多,不使用画笔颜色,相当于设置了一个寂寞</td>
+</tr>
+<tr>
+<td style="text-align:left"><strong>R2_COPYPEN</strong></td>
+<td style="text-align:left">继续使用画笔颜色,相当于设置了一个寂寞</td>
+</tr>
+<tr>
+<td style="text-align:left"><strong>R2_MASKNOTPEN</strong></td>
+<td style="text-align:left">原屏幕颜色和画笔反色的结合</td>
+</tr>
+<tr>
+<td style="text-align:left"><strong>R2_MASKPEN</strong></td>
+<td style="text-align:left">Pixel is a combination of the colors common to both the pen and the screen.</td>
+</tr>
+<tr>
+<td style="text-align:left"><strong>R2_MASKPENNOT</strong></td>
+<td style="text-align:left">Pixel is a combination of the colors common to both the pen and the inverse of the screen.</td>
+</tr>
+<tr>
+<td style="text-align:left"><strong>R2_MERGENOTPEN</strong></td>
+<td style="text-align:left">Pixel is a combination of the screen color and the inverse of the pen color.</td>
+</tr>
+<tr>
+<td style="text-align:left"><strong>R2_MERGEPEN</strong></td>
+<td style="text-align:left">Pixel is a combination of the pen color and the screen color.</td>
+</tr>
+<tr>
+<td style="text-align:left"><strong>R2_MERGEPENNOT</strong></td>
+<td style="text-align:left">Pixel is a combination of the pen color and the inverse of the screen color.</td>
+</tr>
+<tr>
+<td style="text-align:left"><strong>R2_NOP</strong></td>
+<td style="text-align:left">啥也不改变,更是个寂寞</td>
+</tr>
+<tr>
+<td style="text-align:left"><strong>R2_NOT</strong></td>
+<td style="text-align:left">和原屏幕颜色相反</td>
+</tr>
+<tr>
+<td style="text-align:left"><strong>R2_NOTCOPYPEN</strong></td>
+<td style="text-align:left">笔的反色</td>
+</tr>
+<tr>
+<td style="text-align:left"><strong>R2_NOTMASKPEN</strong></td>
+<td style="text-align:left">Pixel is the inverse of the R2_MASKPEN color.</td>
+</tr>
+<tr>
+<td style="text-align:left"><strong>R2_NOTMERGEPEN</strong></td>
+<td style="text-align:left">Pixel is the inverse of the R2_MERGEPEN color.</td>
+</tr>
+<tr>
+<td style="text-align:left"><strong>R2_NOTXORPEN</strong></td>
+<td style="text-align:left">Pixel is the inverse of the R2_XORPEN color.</td>
+</tr>
+<tr>
+<td style="text-align:left"><strong>R2_WHITE</strong></td>
+<td style="text-align:left">Pixel is always 1.</td>
+</tr>
+<tr>
+<td style="text-align:left"><strong>R2_XORPEN</strong></td>
+<td style="text-align:left">Pixel is a combination of the colors in the pen and in the screen, but not in both.</td>
+</tr>
+</tbody>
+</table>
+</div>
+<h4 id="左键按下消息-1"><a href="#左键按下消息-1" class="headerlink" title="左键按下消息"></a>左键按下消息</h4><figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">case</span> WM_LBUTTONDOWN:</span><br><span class="line">	ptBeg.x = ptEnd.x = LOWORD(lParam);<span class="comment">//ptBeg获取当前鼠标位置</span></span><br><span class="line">	ptBeg.y = ptEnd.y = HIWORD(lParam);</span><br><span class="line"></span><br><span class="line">	DrawBoxOutline(hwnd, ptBeg, ptEnd);<span class="comment">//描矩形边.使用ptBeg,ptEnd指定主对角线的矩形</span></span><br><span class="line"></span><br><span class="line">	SetCursor(LoadCursor(<span class="literal">NULL</span>, IDC_CROSS));<span class="comment">//左键按下后进入绘制状态,鼠标变成十字提示绘图</span></span><br><span class="line"></span><br><span class="line">	fBlocking = TRUE;<span class="comment">//一个flag,表征鼠标是否一直按下,这个状态会被Esc键修改,表示终止绘图</span></span><br><span class="line">	SetCapture(hwnd);</span><br><span class="line"></span><br><span class="line">	<span class="keyword">return</span> <span class="number">0</span>;</span><br></pre></td></tr></table></figure>
+<p>左键按下时就已经开始绘图了,首先绘制一个点,即左键按下时的鼠标位置,</p>
+<p>fBlocking变量用来记录绘图过程中有没有被Esc打断过.</p>
+<p>SetCapture(hwnd)意思是从调用该函数开始,所有鼠标动作,包括不在本客户区的鼠标动作,全都被本程序捕获.这种状态需要到ReleaseCapture解出</p>
+<h5 id="Set-ReleaseCapture"><a href="#Set-ReleaseCapture" class="headerlink" title="Set/ReleaseCapture"></a>Set/ReleaseCapture</h5><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">SetCapture(hwnd);//此函数执行之后所有的鼠标动作将被hwnd指向的窗口捕获</span><br><span class="line">ReleaseCapture();//直到本函数执行之后鼠标动作才会恢复正常</span><br></pre></td></tr></table></figure>
+<h4 id="鼠标移动消息"><a href="#鼠标移动消息" class="headerlink" title="鼠标移动消息"></a>鼠标移动消息</h4><figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">case</span> WM_MOUSEMOVE:</span><br><span class="line">	<span class="keyword">if</span> (fBlocking)</span><br><span class="line">	&#123;</span><br><span class="line">		SetCursor(LoadCursor(<span class="literal">NULL</span>, IDC_CROSS));</span><br><span class="line"></span><br><span class="line">		DrawBoxOutline(hwnd, ptBeg, ptEnd);</span><br><span class="line"></span><br><span class="line">		ptEnd.x = LOWORD(lParam);</span><br><span class="line">		ptEnd.y = HIWORD(lParam);</span><br><span class="line"></span><br><span class="line">		DrawBoxOutline(hwnd, ptBeg, ptEnd);<span class="comment">//这里矩形边框画了两次,是因为后来这一次会更新前面那一次,由于SetROP2已经设置了黑白交替绘画,</span></span><br><span class="line">		<span class="comment">//当前一次是黑笔是,后一次是白笔就擦除了前面的绘制</span></span><br><span class="line">		<span class="comment">//如此做到只能看到一个实时边框,否则只绘制一次会导致很多重影</span></span><br><span class="line">	&#125;</span><br><span class="line">	<span class="keyword">return</span> <span class="number">0</span>;</span><br></pre></td></tr></table></figure>
+<p>由于左键起来之后会进行结算,因此绘图时的鼠标移动是压着左键移动的</p>
+<p>首先判断了fBlocking的状态,如果被Esc打断则直接退出,不做处理</p>
+<p>这里调用了两次<code>DrawBoxOutline</code>,其作用是:</p>
+<p>由于<code>SetROP2(hdc, R2_NOT)</code>这个设置,会导致相邻两次绘图使用的颜色相反</p>
+<p>如果本次使用黑色,那么下一次就使用白色</p>
+<p>这样交替绘制的意义是:刚用黑色绘制出边框,接着逻辑上擦除它,但是在屏幕上不显示擦除,这就是压着黑笔停下时仍然能看到过期的客户区上有边框线.当画笔再次移动时,先前的边框已经被逻辑擦除,此时再画新线保证只有新线,不会有重影.这就实现了橡皮线的效果</p>
+<p>这里两次调用<code>DrawBoxOutline</code>,头一次的ptEnd没有被修改,也就是上一次绘图使用的ptEnd,那么重绘这个矩形,相当于擦除了上一次的绘制</p>
+<h4 id="左键起来消息"><a href="#左键起来消息" class="headerlink" title="左键起来消息"></a>左键起来消息</h4><figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">case</span> WM_LBUTTONUP:</span><br><span class="line">	<span class="keyword">if</span> (fBlocking)<span class="comment">//如果fBlocking==1说明左键按下没有起来过并且没有被Esc中断过</span></span><br><span class="line">	&#123;</span><br><span class="line">		DrawBoxOutline(hwnd, ptBeg, ptEnd);<span class="comment">//这里只调用了一次,是因为这一次要固定边框位置了,直接描黑</span></span><br><span class="line"></span><br><span class="line">		ptBoxBeg = ptBeg;</span><br><span class="line">		ptBoxEnd.x = LOWORD(lParam);<span class="comment">//准备好需要填充的矩形范围</span></span><br><span class="line">		ptBoxEnd.y = HIWORD(lParam);</span><br><span class="line">		</span><br><span class="line">		ReleaseCapture();</span><br><span class="line">		SetCursor(LoadCursor(<span class="literal">NULL</span>, IDC_ARROW));<span class="comment">//放下屠刀之后,鼠标变成了斜向箭头样式</span></span><br><span class="line">		fBlocking = FALSE;<span class="comment">//关闭中断标志,为下一次绘图做准备</span></span><br><span class="line">		fValidBox = TRUE;<span class="comment">//设置填充区域有效,可以填充,为WM_PAINT做准备</span></span><br><span class="line"></span><br><span class="line">		InvalidateRect(hwnd, <span class="literal">NULL</span>, TRUE);</span><br><span class="line">	&#125;</span><br><span class="line">	<span class="keyword">return</span> <span class="number">0</span>;</span><br></pre></td></tr></table></figure>
+<p>首先判断fBlocking状态,如果中途被Esc打断过则不做处理</p>
+<p>调用一次<code>DrawBoxOutline</code>擦除最后一次<code>WM_MOUSEMOVE</code>留下的边框.但是最后一次WM_MOUSEMOVE和WM_LBUTTONUP的到达时间非常接近,拉不开差距,因此这个函数调用与否意义不大,除非电脑很卡</p>
+<p>释放对鼠标的捕获状态,程序对于客户区以外的鼠标动作不再处理</p>
+<p>鼠标样式还原为斜向箭头</p>
+<p>重置中断标志,设置绘图标志有效,提醒WM_PAINT应该绘制填充矩形了</p>
+<h4 id="Esc中断消息"><a href="#Esc中断消息" class="headerlink" title="Esc中断消息"></a>Esc中断消息</h4><figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">case</span> WM_CHAR:</span><br><span class="line">	<span class="keyword">if</span> (fBlocking &amp; wParam == <span class="string">&#x27;\x1B&#x27;</span>) <span class="comment">// i.e., Escape //按下Esc终止绘制矩形,即使左键正在按下</span></span><br><span class="line">	&#123;</span><br><span class="line">		DrawBoxOutline(hwnd, ptBeg, ptEnd);</span><br><span class="line"></span><br><span class="line">		SetCursor(LoadCursor(<span class="literal">NULL</span>, IDC_ARROW));</span><br><span class="line"></span><br><span class="line">		fBlocking = FALSE;<span class="comment">//Esc中止逻辑修改了一个fBlocking,就可以让程序知道左键按下起来之间有没有被中断过</span></span><br><span class="line">	&#125;</span><br><span class="line">	<span class="keyword">return</span> <span class="number">0</span>;</span><br></pre></td></tr></table></figure>
+<p>对于该消息,例子采用的是处理字符消息,而不是处理虚拟键消息</p>
+<p>如果出现Esc消息并且fBlocking表明正在绘图,那么设置fBlocking绘图无效</p>
+<p>此后由于WM_MOUSEMOVE需要判断fBlocking正在绘图才继续绘制边框,因此Esc出现之后矩形边框橡皮线立刻消失</p>
+<p>然而这种绘制失效的状态需要等到<strong>左键起来</strong>才能完全恢复</p>
+<p>WM_LBUTTONUP也会先判断fBlocking是否还有效.无效则啥也不处理</p>
+<p>此时所有标志都恢复原状(fValidBox压根没有被改变过,fBlocking被Esc重置为假)</p>
+<h4 id="绘图消息-2"><a href="#绘图消息-2" class="headerlink" title="绘图消息"></a>绘图消息</h4><figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">case</span> WM_PAINT:</span><br><span class="line">	hdc = BeginPaint(hwnd, &amp;ps);</span><br><span class="line">	<span class="keyword">if</span> (fValidBox)<span class="comment">//这个值只能通过鼠标左键起来修改,表明确实有过画图</span></span><br><span class="line">	&#123;</span><br><span class="line">		SelectObject(hdc, GetStockObject(BLACK_BRUSH));</span><br><span class="line">		Rectangle(hdc, ptBoxBeg.x, ptBoxBeg.y,ptBoxEnd.x, ptBoxEnd.y);<span class="comment">//填充</span></span><br><span class="line">	&#125;</span><br><span class="line"></span><br><span class="line">	<span class="keyword">if</span> (fBlocking)<span class="comment">//fBlocking=1表明正在绘图,应当打印边框</span></span><br><span class="line">	&#123;</span><br><span class="line">		SetROP2(hdc, R2_NOT);</span><br><span class="line">		SelectObject(hdc, GetStockObject(NULL_BRUSH));</span><br><span class="line">		Rectangle(hdc, ptBeg.x, ptBeg.y, ptEnd.x,ptEnd.y);</span><br><span class="line">	&#125;</span><br><span class="line"></span><br><span class="line">	EndPaint(hwnd, &amp;ps);</span><br><span class="line">	<span class="keyword">return</span> <span class="number">0</span>;</span><br></pre></td></tr></table></figure>
+<p>fValidBox是LBUTTONUP准备好的绘制标志,如果绘画中途没有Esc中断则LBUTTONUP消息处理中,会把fValidBox置有效,提醒WM_PAINT应该画图了</p>
+<p>修改画刷为黑色画刷然后填充最后确定的矩形</p>
+<p>如果fBlocking为有效说明仍然没有确定矩形的另一个点,此时WM_PAINT也打印矩形边框橡皮线,然而是多次一句,因为WM_MOUSEMOVE已经把这件事干了.</p>
+<h4 id="窗口销毁消息-2"><a href="#窗口销毁消息-2" class="headerlink" title="窗口销毁消息"></a>窗口销毁消息</h4><figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">case</span> WM_DESTROY:</span><br><span class="line">	PostQuitMessage(<span class="number">0</span>);</span><br><span class="line">	<span class="keyword">return</span> <span class="number">0</span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<h2 id="鼠标滚动"><a href="#鼠标滚动" class="headerlink" title="鼠标滚动"></a>鼠标滚动</h2><h3 id="鼠标滚动消息WM-MOUSEWHEEL"><a href="#鼠标滚动消息WM-MOUSEWHEEL" class="headerlink" title="鼠标滚动消息WM_MOUSEWHEEL"></a>鼠标滚动消息WM_MOUSEWHEEL</h3><p>当鼠标滚轮滚动时,该消息将被发往<strong>焦点窗口</strong>,</p>
+<p>参数意义:</p>
+<h4 id="wParam-3"><a href="#wParam-3" class="headerlink" title="wParam"></a>wParam</h4><p>高字表明滚动增量</p>
+<p>低字表明同时按下的虚拟键</p>
+<div class="table-container">
+<table>
+<thead>
+<tr>
+<th style="text-align:left">Value</th>
+<th style="text-align:left">Meaning</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:left"><strong>MK_CONTROL</strong>0x0008</td>
+<td style="text-align:left">The CTRL key is down.</td>
+</tr>
+<tr>
+<td style="text-align:left"><strong>MK_LBUTTON</strong>0x0001</td>
+<td style="text-align:left">The left mouse button is down.</td>
+</tr>
+<tr>
+<td style="text-align:left"><strong>MK_MBUTTON</strong>0x0010</td>
+<td style="text-align:left">The middle mouse button is down.</td>
+</tr>
+<tr>
+<td style="text-align:left"><strong>MK_RBUTTON</strong>0x0002</td>
+<td style="text-align:left">The right mouse button is down.</td>
+</tr>
+<tr>
+<td style="text-align:left"><strong>MK_SHIFT</strong>0x0004</td>
+<td style="text-align:left">The SHIFT key is down.</td>
+</tr>
+<tr>
+<td style="text-align:left"><strong>MK_XBUTTON1</strong>0x0020</td>
+<td style="text-align:left">The first X button is down.</td>
+</tr>
+<tr>
+<td style="text-align:left"><strong>MK_XBUTTON2</strong>0x0040</td>
+<td style="text-align:left">The second X button is down.</td>
+</tr>
+</tbody>
+</table>
+</div>
+<h4 id="lParam-3"><a href="#lParam-3" class="headerlink" title="lParam"></a>lParam</h4><p>低字表明此时鼠标位置横坐标,屏幕坐标</p>
+<p>高字表明纵坐标</p>
+<h3 id="滚动增量"><a href="#滚动增量" class="headerlink" title="滚动增量"></a>滚动增量</h3><p>衡量滚得狠不狠的参数,如果一下子转了好几圈显然增量很大,如果只发生了很少的转动,那么这点增量几乎不能导致程序卷动</p>
+<p>在控制面板中我们可以设置滚动灵敏度,相同的滚动增量,假设都转一圈,可能灵敏度高的可以滚动一整页,灵敏度低的滚了三行,这是怎么实现的呢?</p>
+<p>用滚动增量除以一个灵敏度系数,不妨给这个量起名<strong>灵敏后增量</strong>(我乱起的)</p>
+<p>比如滚动增量为120,除以3得到40就是灵敏后增量.</p>
+<p>在程序中我们可以设置一个<strong>单位行增量</strong>,意思是多少滚动增量可以导致程序卷动一个行,比如说设置为40</p>
+<p>那么当灵敏度系数为3,那么初始时的120滚动增量就可以得到40 的灵敏后增量,刚好可以卷动一行</p>
+<p>如果灵敏度系数为1,则灵敏后增量就是120.可以卷动三行</p>
+<p>这就体现出不同灵敏度的区别了</p>
+<h3 id="加装滚动动作的Sysmets程序"><a href="#加装滚动动作的Sysmets程序" class="headerlink" title="加装滚动动作的Sysmets程序"></a>加装滚动动作的Sysmets程序</h3><h4 id="滚动相关变量"><a href="#滚动相关变量" class="headerlink" title="滚动相关变量"></a>滚动相关变量</h4><figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="type">static</span> <span class="type">int</span> iDeltaPerLine, iAccumDelta;</span><br><span class="line">ULONG ulScrollLines;</span><br></pre></td></tr></table></figure>
+<p>iDeltaPerLine即单位行增量</p>
+<p>iAccumDelta表示先前的滚动效果的累加,可以理解为初始滚动量</p>
+<p>ulScrollLines存放灵敏度系数</p>
+<h4 id="滚动消息"><a href="#滚动消息" class="headerlink" title="滚动消息"></a>滚动消息</h4><figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">case</span> WM_MOUSEWHEEL:</span><br><span class="line">	<span class="keyword">if</span> (iDeltaPerLine == <span class="number">0</span>)<span class="keyword">break</span>;</span><br><span class="line">	iAccumDelta += (<span class="type">short</span>)HIWORD(wParam);<span class="comment">//累计滚动量</span></span><br><span class="line">	<span class="keyword">while</span> (iAccumDelta &gt;= iDeltaPerLine) &#123;<span class="comment">//能滚就滚</span></span><br><span class="line">		SendMessage(hwnd, WM_VSCROLL, SB_LINEUP, <span class="number">0</span>);<span class="comment">//滚一行</span></span><br><span class="line">		iAccumDelta -= iDeltaPerLine;</span><br><span class="line">	&#125;</span><br><span class="line">	<span class="keyword">while</span> (iAccumDelta &lt;= -iDeltaPerLine) &#123;<span class="comment">//倒着能滚就滚</span></span><br><span class="line">		SendMessage(hwnd, WM_VSCROLL, SB_LINEDOWN, <span class="number">0</span>);</span><br><span class="line">		iAccumDelta += iDeltaPerLine;</span><br><span class="line">	&#125;</span><br><span class="line">	<span class="keyword">return</span> <span class="number">0</span>;</span><br></pre></td></tr></table></figure>
 
       </div>
       <div class="post-tags-categories">
-        
-        <div class="tags">
-          
-            <a href="/tags/windows%E7%A8%8B%E5%BA%8F%E8%AE%BE%E8%AE%A1/" class="">
-              windows程序设计
-            </a>
-          
-        </div>
         
       </div>
       
@@ -1143,59 +1306,6 @@
 		height: 100%;
 	}
 </style>
-
-
-  <script>
-  // https://github.com/theme-next/hexo-theme-next/blob/master/layout/_third-party/math/mathjax.swig
-  if (typeof MathJax === 'undefined') {
-    window.MathJax = {
-      loader: {
-        source: {
-          '[tex]/amsCd': '[tex]/amscd',
-          '[tex]/AMScd': '[tex]/amscd'
-        }
-      },
-      tex: {
-        inlineMath: {'[+]': [['$', '$']]},
-        tags: 'ams'
-      },
-      options: {
-        renderActions: {
-          findScript: [10, doc => {
-            document.querySelectorAll('script[type^="math/tex"]').forEach(node => {
-              const display = !!node.type.match(/; *mode=display/);
-              const math = new doc.options.MathItem(node.textContent, doc.inputJax[0], display);
-              const text = document.createTextNode('');
-              node.parentNode.replaceChild(text, node);
-              math.start = {node: text, delim: '', n: 0};
-              math.end = {node: text, delim: '', n: 0};
-              doc.math.push(math);
-            });
-          }, '', false],
-          insertedScript: [200, () => {
-            document.querySelectorAll('mjx-container').forEach(node => {
-              let target = node.parentNode;
-              if (target.nodeName.toLowerCase() === 'li') {
-                target.parentNode.classList.add('has-jax');
-              }
-            });
-          }, '', false]
-        }
-      }
-    };
-    (function () {
-      var script = document.createElement('script');
-      script.src = 'https://cdn.jsdelivr.net/npm/mathjax@3.0/es5/tex-mml-chtml.js';
-      script.defer = true;
-      document.head.appendChild(script);
-    })();
-  } else {
-    // 文章章节标题不能为 “MathJax” ，否则会报错。
-    MathJax.startup.document.state(0);
-    MathJax.texReset();
-    MathJax.typeset();
-  }
-</script>
 
 
 
