@@ -1,0 +1,1886 @@
+<!DOCTYPE html>
+<html>
+  <!-- meta/link... -->
+  
+
+
+
+<head>
+  <meta http-equiv="content-type" content="text/html; charset=utf-8">
+  <meta content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=0" name="viewport">
+  <!-- Global site tag (gtag.js) - Google Analytics -->
+
+
+  <title>win32程序设计-chapter21 动态链接库与消息钩取 | Deutschball&#39;s blog</title>
+
+  <link rel="icon" type="image/png" href="https://raw.githubusercontent.com/DeutschBall/test/master/emp.png">
+  <link rel="stylesheet" href="https://at.alicdn.com/t/font_1911880_c1nvbyezg17.css">
+  <link href="https://cdn.jsdelivr.net/gh/inkss/fontawesome@5.15.3/css/all.min.css" rel="stylesheet">
+  <link href="/js/swiper/swiper@5.4.1.min.css" rel="stylesheet">
+  
+  
+    <script>
+        var themeModelId = '';
+        if (themeModelId) {
+            localStorage.setItem('modelId', themeModelId);
+        }
+    </script>
+    
+    <script src="https://cdn.jsdelivr.net/gh/yuang01/live2d-widget@latest/autoload.js"></script>
+    <script>
+        var live2dOpen = eval('true') || false;
+        if (!live2dOpen) {
+            localStorage.setItem('waifu-display', 1609323474481);
+        }
+    </script>
+  
+  
+  
+<link rel="stylesheet" href="/css/animate.min.css">
+
+  
+<link rel="stylesheet" href="/css/style.css">
+
+  
+  
+    
+<link rel="stylesheet" href="/js/fancybox/jquery.fancybox.min.css">
+
+  
+  
+    
+<link rel="stylesheet" href="/js/shareJs/share.min.css">
+
+  
+  <style>
+        @media (max-width: 992px) {
+            #waifu {
+                display: none;
+            }
+        }
+    </style>
+    <script src="//cdn.bootcss.com/pace/1.0.2/pace.min.js"></script>
+    <link href="//cdn.bootcss.com/pace/1.0.2/themes/pink/pace-theme-flash.css" rel="stylesheet">
+
+    
+        <script src="/js/valine/av-min@3.0.4.js"></script>
+        <script src="https://cdn.jsdelivr.net/gh/HCLonely/Valine@latest/dist/Valine.min.js"></script>
+    
+
+    <!-- import link -->
+    
+        
+            
+        
+            
+        
+    
+    <!-- import script -->
+    
+        
+            
+        
+            
+        
+    
+
+<!-- hexo injector head_end start -->
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.12.0/dist/katex.min.css">
+<!-- hexo injector head_end end --><meta name="generator" content="Hexo 6.2.0"></head>
+
+  
+  <!-- 依赖于jquery和vue -->
+  
+    
+<script src="https://cdn.jsdelivr.net/npm/jquery@3.5.1/dist/jquery.min.js"></script>
+
+  
+
+  
+    
+<script src="https://cdn.jsdelivr.net/npm/vue@2.6.11/dist/vue.min.js"></script>
+
+  
+  
+  <body>
+    <!-- 预加载动画 -->
+    <!-- 页面预加载动画 -->
+
+<div id='loader'>
+  <link rel="stylesheet" href="/js/loaded/index.css" >
+  <div class="loading-left-bg"></div>
+  <div class="loading-right-bg"></div>
+  <div class="spinner-box">
+    <div class="configure-border-1">
+      <div class="configure-core"></div>
+    </div>
+    <div class="configure-border-2">
+      <div class="configure-core"></div>
+    </div>
+    <div class="loading-word">loading...</div>
+  </div>
+</div>
+
+<script>
+  var endLoading = function () {
+    document.body.style.overflow = 'auto';
+    document.getElementById('loader').classList.add("loading");
+  }
+  window.addEventListener('DOMContentLoaded',endLoading);
+  
+</script>
+
+    
+    <!-- 判断是否为暗黑风格 -->
+    <!-- 判断是否为黑夜模式 -->
+<script>
+  let isDark = JSON.parse(localStorage.getItem('dark')) || JSON.parse('true');
+
+  if (isDark) {
+    $(document.body).addClass('darkModel');
+  }
+</script>
+
+    <!-- 需要在上面加载的js -->
+    <script>
+  function loadScript(src, cb) {
+    return new Promise(resolve => {
+      setTimeout(function () {
+        var HEAD = document.getElementsByTagName("head")[0] || document.documentElement;
+        var script = document.createElement("script");
+        script.setAttribute("type", "text/javascript");
+        if (cb) {
+          if (JSON.stringify(cb)) {
+            for (let p in cb) {
+              if (p == "onload") {
+                script[p] = () => {
+                  cb[p]()
+                  resolve()
+                }
+              } else {
+                script[p] = cb[p]
+                script.onload = resolve
+              }
+            }
+          } else {
+            script.onload = () => {
+              cb()
+              resolve()
+            };
+          }
+        } else {
+          script.onload = resolve
+        }
+        script.setAttribute("src", src);
+        HEAD.appendChild(script);
+      });
+    });
+  }
+
+  //https://github.com/filamentgroup/loadCSS
+  var loadCSS = function (href, before, media, attributes) {
+    return new Promise(resolve => {
+      setTimeout(function () {
+        var link = document.createElement('link');
+        link.rel = "stylesheet";
+        link.href = src;
+        link.onload = resolve;
+        document.getElementsByTagName("head")[0].appendChild(link);
+      });
+    });
+  };
+
+</script> 
+
+<!-- 轮播图所需要的js -->
+<script src="/js/swiper/swiper.min.js"></script>
+<script src="/js/swiper/vue-awesome-swiper.js"></script>
+<script src="/js/swiper/swiper.animate1.0.3.min.js"></script>
+
+<script type="text/javascript">
+  Vue.use(window.VueAwesomeSwiper)
+</script>
+
+
+  <script src="/js/vue-typed-js/index.js"></script>
+
+
+<!-- 首页的公告滚动插件的js需要重新加载 -->
+<script src="/js/vue-seamless-scroll/index.js"></script>
+
+<!-- 打字机效果js -->
+<script src="https://cdn.jsdelivr.net/npm/typed.js@2.0.11"></script>
+
+
+    <div id="safearea">
+      <main class="main" id="pjax-container">
+        <!-- 头部导航 -->
+        
+<header class="header   " 
+  id="navHeader"
+  style="position: fixed;
+  left: 0; top: 0; z-index: 10;width: 100%;"
+>
+  <div class="header-content">
+    <div class="bars">
+      <div id="appDrawer" class="sidebar-image">
+  <div class="drawer-box-icon">
+    <i class="fas fa-bars" aria-hidden="true" @click="showDialogDrawer"></i>
+  </div>
+  
+  <transition name="fade">
+    <div class="drawer-box_mask" v-cloak style="display: none;" v-show="visible" @click.self="cancelDialogDrawer">
+    </div>
+  </transition>
+  <div class="drawer-box" :class="{'active': visible}">
+    <div class="drawer-box-head bg-color">
+      <img class="drawer-box-head_logo lazyload placeholder" src="https://raw.githubusercontent.com/DeutschBall/test/master/emp.png" class="lazyload placeholder" data-srcset="https://raw.githubusercontent.com/DeutschBall/test/master/emp.png" srcset="https://img2.baidu.com/it/u=2037979560,2772131037&fm=26&fmt=auto&gp=0.jpg" alt="logo">
+      <h3 class="drawer-box-head_title">Deutschball&#39;s blog</h3>
+      <h5 class="drawer-box-head_desc"></h5>
+    </div>
+    
+    <div class="drawer-box-content">
+      <ul class="drawer-box-content_menu">
+        
+        
+          <li class="drawer-box-content_item">
+            <a target="_blank" rel="noopener" href="https://github.com/DeutschBall">
+              <i class="fas fa-github" aria-hidden="true"></i>
+              <span>Github</span>
+            </a>
+          </li>
+        
+      </ul>
+    </div>
+  </div>
+</div>
+
+<script>
+  var body = document.body || document.documentElement || window;
+  var vm = new Vue({
+    el: '#appDrawer',
+    data: {
+      visible: false,
+      top: 0,
+      openArr: [],
+    },
+    computed: {
+    },
+    mounted() {
+    },
+    methods: {
+      isOpen(index) {
+        if (this.openArr.includes(index)) {
+          return true;
+        } else {
+          return false;
+        }
+      },
+      openOrCloseMenu(curIndex) {
+        const index = this.openArr.indexOf(curIndex);
+        if (index !== -1) {
+          this.openArr.splice(index, 1);
+        } else {
+          this.openArr.push(curIndex);
+        }
+      },
+      showDialogDrawer() {
+        this.visible = true;
+        // 防止页面滚动，只能让弹框滚动
+        this.top = $(document).scrollTop()
+        body.style.cssText = 'width: 100%; height: 100%;overflow: hidden;';
+      },
+      cancelDialogDrawer() {
+        this.visible = false;
+        body.removeAttribute('style');
+        $(document).scrollTop(this.top)
+      }
+    },
+    created() {}
+  })
+</script>
+
+    </div>
+    <div class="blog-title" id="author-avatar">
+      
+        <div class="avatar">
+          <img src="https://raw.githubusercontent.com/DeutschBall/test/master/emp.png" class="lazyload placeholder" data-srcset="https://raw.githubusercontent.com/DeutschBall/test/master/emp.png" srcset="https://img2.baidu.com/it/u=2037979560,2772131037&fm=26&fmt=auto&gp=0.jpg" alt="logo">
+        </div>
+      
+      <a href="/" class="logo">Deutschball&#39;s blog</a>
+    </div>
+    <nav class="navbar">
+      <ul class="menu">
+        
+      </ul>
+      
+      
+        <div id="appSearch">
+  <div class="search"  @click="showDialog()"><i class="fas fa-search" aria-hidden="true"></i></div>
+  <transition name="fade">
+    <div class="message-box_wrapper" style="display: none;" v-cloak v-show="dialogVisible" @click.self="cancelDialogVisible()">
+      <div class="message-box animated bounceInDown">
+        <h2>
+          <span>
+            <i class="fas fa-search" aria-hidden="true"></i>
+            <span class="title">Search</span>
+          </span>
+          <i class="fas fa-times close" pointer style="float:right;" aria-hidden="true" @click.self="cancelDialogVisible()"></i>
+        </h2>
+        <form class="site-search-form">
+          <input type="text"
+            placeholder="Please enter keywords"
+            id="local-search-input" 
+            @click="getSearchFile()"
+            class="st-search-input"
+            v-model="searchInput"
+          />
+        </form>
+        <div class="result-wrapper">
+          <div id="local-search-result" class="local-search-result-cls"></div>
+        </div>
+      </div>
+    </div>
+  </transition>
+</div>
+<script src="/js/local_search.js"></script>
+<script>
+  var body = document.body || document.documentElement || window;
+  var vm = new Vue({
+    el: '#appSearch',
+    data: {
+      dialogVisible: false,
+      searchInput: '',
+      top: 0,
+    },
+    computed: {
+    },
+    mounted() {
+      window.addEventListener('pjax:complete', () => {
+        this.cancelDialogVisible();
+      })
+    },
+    methods: {
+      showDialog() {
+        this.dialogVisible = true;
+        // 防止页面滚动，只能让弹框滚动
+        this.top = $(document).scrollTop()
+        body.style.cssText = 'overflow: hidden;';
+      },
+      getSearchFile() {
+        if (!this.searchInput) {
+          getSearchFile("/search.xml");
+        }
+      },
+      cancelDialogVisible() {
+        this.dialogVisible = false;
+        body.removeAttribute('style');
+        $(document).scrollTop(this.top)
+      },
+    },
+    created() {}
+  })
+</script>
+<!-- 解决刷新页面闪烁问题，可以在元素上添加display: none, 或者用vue.extend方法，详情：https://blog.csdn.net/qq_31393401/article/details/81017912 -->
+<!-- 下面是搜索基本写法 -->
+<!-- <script type="text/javascript" id="local.search.active">
+  var inputArea = document.querySelector("#local-search-input");
+  inputArea.onclick   = function(){ getSearchFile(); this.onclick = null }
+  inputArea.onkeydown = function(){ if(event.keyCode == 13) return false }
+</script> -->
+
+      
+
+    </nav>
+  </div>
+  
+    <a target="_blank" rel="noopener" href="https://github.com/DeutschBall" class="github-corner color-primary" aria-label="View source on GitHub"><svg width="60" height="60" viewBox="0 0 250 250" style="fill:#fff; position: absolute; top: 0; border: 0; right: 0;" aria-hidden="true"><path d="M0,0 L115,115 L130,115 L142,142 L250,250 L250,0 Z"></path><path d="M128.3,109.0 C113.8,99.7 119.0,89.6 119.0,89.6 C122.0,82.7 120.5,78.6 120.5,78.6 C119.2,72.0 123.4,76.3 123.4,76.3 C127.3,80.9 125.5,87.3 125.5,87.3 C122.9,97.6 130.6,101.9 134.4,103.2" fill="currentColor" style="transform-origin: 130px 106px;" class="octo-arm"></path><path d="M115.0,115.0 C114.9,115.1 118.7,116.5 119.8,115.4 L133.7,101.6 C136.9,99.2 139.9,98.4 142.2,98.6 C133.8,88.0 127.5,74.4 143.8,58.0 C148.5,53.4 154.0,51.2 159.7,51.0 C160.3,49.4 163.2,43.6 171.4,40.1 C171.4,40.1 176.1,42.5 178.8,56.2 C183.1,58.6 187.2,61.8 190.9,65.4 C194.5,69.0 197.7,73.2 200.1,77.6 C213.8,80.2 216.3,84.9 216.3,84.9 C212.7,93.1 206.9,96.0 205.4,96.6 C205.1,102.4 203.0,107.8 198.3,112.5 C181.9,128.9 168.3,122.5 157.7,114.1 C157.9,116.9 156.7,120.9 152.7,124.9 L141.0,136.5 C139.8,137.7 141.6,141.9 141.8,141.8 Z" fill="currentColor" class="octo-body"></path></svg></a><style>.github-corner:hover .octo-arm{animation:octocat-wave 560ms ease-in-out}@keyframes octocat-wave{0%,100%{transform:rotate(0)}20%,60%{transform:rotate(-25deg)}40%,80%{transform:rotate(10deg)}}@media (max-width:500px){.github-corner:hover .octo-arm{animation:none}.github-corner .octo-arm{animation:octocat-wave 560ms ease-in-out}}</style>
+  
+  
+</header>
+        <!-- 内容区域 -->
+        
+ <!-- prismjs 代码高亮 -->
+ 
+
+
+<div class="bg-dark-floor" style="position: fixed;left: 0;top: 0;width: 100%;height: 100%;z-index: -1;"></div>
+
+
+  <!-- 文章详情页顶部图片和标题 -->
+
+
+
+
+<div class="post-detail-header" id="thumbnail_canvas" style="background-repeat: no-repeat; background-size: cover; 
+  background-position: center center;position: relative;background-image:url('/medias/9.jpg')">
+  <div class="post-detail-header-mask"></div>
+  <canvas id="header_canvas"style="position:absolute;bottom:0;pointer-events:none;"></canvas>
+  
+  <div class="post-detail-header_info-box">
+    <div class="title-box">
+      <span class="title">
+        win32程序设计-chapter21 动态链接库与消息钩取
+      </span>
+    </div>
+    
+    
+      
+        <span class="post-detail-header_date">
+          <i class="fas fa-calendar"></i> Published in：2022-08-20 |
+        </span>
+      
+
+      
+
+      
+    
+  </div>
+  
+  
+    <script src="/js/bubble/bubble.js"></script>
+  
+</div>
+
+
+
+
+
+<div class="row justify-position" 
+  style="padding-top: 0px;">
+  <div class="main-content">
+    <article class="post post-detail">
+      <div class="post-content">
+        <h1 id="windows-SDK-chapter-21-动态链接库"><a href="#windows-SDK-chapter-21-动态链接库" class="headerlink" title="windows SDK chapter 21 动态链接库"></a>windows SDK chapter 21 动态链接库</h1><h2 id="库的类型"><a href="#库的类型" class="headerlink" title="库的类型"></a>库的类型</h2><div class="table-container">
+<table>
+<thead>
+<tr>
+<th>库类型</th>
+<th>拓展名</th>
+<th>作用</th>
+<th>举例</th>
+<th>使用时期</th>
+<th>是否链接进入可执行目标文件</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>对象库(静态库)</td>
+<td>.lib</td>
+<td>.obj目标模块集合</td>
+<td>LIBC.lib</td>
+<td>开发时</td>
+<td>是</td>
+</tr>
+<tr>
+<td>导入库</td>
+<td>.lib</td>
+<td>链接器使用它解析函数调用</td>
+<td>kernel32.lib</td>
+<td>开发时</td>
+<td>是</td>
+</tr>
+<tr>
+<td>动态链接库</td>
+<td>.dll</td>
+<td>运行时提供支持</td>
+<td>kernel32.dll</td>
+<td>运行时</td>
+<td>否</td>
+</tr>
+</tbody>
+</table>
+</div>
+<h2 id="库的位置"><a href="#库的位置" class="headerlink" title="库的位置"></a>库的位置</h2><p>类似于头文件的搜索顺序,当一个exe程序需要dll支持的时候,windows搜索dll也是有顺序的,编译链接时不需要指定动态库位置</p>
+<p>1.exe文件同在的目录</p>
+<p>2.shell的当前目录(pwd)</p>
+<p>3.windows系统目录,即C://Windows/system32文件夹</p>
+<p>4.windows目录,即C://Windows文件夹</p>
+<p>5.DOS环境下PATH环境变量</p>
+<p>如果在某一步找到则不再继续寻找</p>
+<h2 id="Visual-C-和Visual-Studio"><a href="#Visual-C-和Visual-Studio" class="headerlink" title="Visual C++和Visual Studio"></a>Visual C++和Visual Studio</h2><p>由于这本书年代比较久远,当时的集成开发环境还是VC++,而现在win11上装一个兼容的VC++都不容易了</p>
+<p>VC++中的”workspace”对应到VS上就是解决方案”solution”</p>
+<p>一个工作区/解决方案 下面可以建立多个项目,一个项目对应一个应用程序或者一个DLL</p>
+<h2 id="Linux上的链接与库"><a href="#Linux上的链接与库" class="headerlink" title="Linux上的链接与库"></a>Linux上的链接与库</h2><p>此部分在CSAPP-chapter -7链接已经学过,在此只回顾一下GNU GCC命令</p>
+<h3 id="预编译"><a href="#预编译" class="headerlink" title="预编译"></a>预编译</h3><p>预编译,将源文件.c或者.cpp的宏定义展开成.i文件</p>
+<figure class="highlight sh"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">cpp main.c &gt; main.i</span><br></pre></td></tr></table></figure>
+<blockquote>
+<p>需要输出重定向到main.i,否则cpp命令默认输出到屏幕</p>
+</blockquote>
+<h3 id="汇编"><a href="#汇编" class="headerlink" title="汇编"></a>汇编</h3><p>汇编,将源文件汇编成汇编语言文件.s</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">gcc main.c -S</span><br></pre></td></tr></table></figure>
+<h3 id="编译"><a href="#编译" class="headerlink" title="编译"></a>编译</h3><p>编译,将源文件编译成可重定位目标文件.o</p>
+<figure class="highlight sh"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">gcc main.c -c -o main.o</span><br></pre></td></tr></table></figure>
+<h3 id="链接"><a href="#链接" class="headerlink" title="链接"></a>链接</h3><p>将多个可重定位目标模块链接成可执行目标模块.out</p>
+<figure class="highlight sh"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">gcc main.o func.o -o main.out</span><br></pre></td></tr></table></figure>
+<h3 id="创建静态库"><a href="#创建静态库" class="headerlink" title="创建静态库"></a>创建静态库</h3><p>将一个或多个可重定位目标模块.o,创建成静态库.a(归档文件)</p>
+<figure class="highlight sh"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">ar rcs libmain.a main.o</span><br></pre></td></tr></table></figure>
+<h3 id="创建动态库"><a href="#创建动态库" class="headerlink" title="创建动态库"></a>创建动态库</h3><figure class="highlight sh"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">gcc -shared -fPIC main.c -o main.so</span><br></pre></td></tr></table></figure>
+<h2 id="Visual-Studio-创建使用库"><a href="#Visual-Studio-创建使用库" class="headerlink" title="Visual Studio 创建使用库"></a>Visual Studio 创建使用库</h2><p>Microsoft Visual Studio 2022</p>
+<h3 id="静态库的使用"><a href="#静态库的使用" class="headerlink" title="静态库的使用"></a>静态库的使用</h3><h4 id="创建静态库-1"><a href="#创建静态库-1" class="headerlink" title="创建静态库"></a>创建静态库</h4><h5 id="1-新建空白解决方案"><a href="#1-新建空白解决方案" class="headerlink" title="1.新建空白解决方案"></a>1.新建空白解决方案</h5><p>(在VC++上”解决方案”叫做workspace工作区)</p>
+<p><img src="https://raw.githubusercontent.com/DeutschBall/test/master/image-20220721155939293.png" class="lazyload placeholder" data-srcset="https://raw.githubusercontent.com/DeutschBall/test/master/image-20220721155939293.png" srcset="https://img2.baidu.com/it/u=2037979560,2772131037&fm=26&fmt=auto&gp=0.jpg" alt="image-20220721155939293"></p>
+<h5 id="2-配置新”项目”"><a href="#2-配置新”项目”" class="headerlink" title="2.配置新”项目”"></a>2.配置新”项目”</h5><p>解决方案名称就叫做”MATHTOOLS”吧,</p>
+<p>一个解决方案可以包含多个项目,但是新建解决方案时也是通过”新建项目”选项卡实现的</p>
+<p><img src="https://raw.githubusercontent.com/DeutschBall/test/master/image-20220721160058473.png" class="lazyload placeholder" data-srcset="https://raw.githubusercontent.com/DeutschBall/test/master/image-20220721160058473.png" srcset="https://img2.baidu.com/it/u=2037979560,2772131037&fm=26&fmt=auto&gp=0.jpg" alt="image-20220721160058473"></p>
+<h5 id="3-新建静态库工程"><a href="#3-新建静态库工程" class="headerlink" title="3.新建静态库工程"></a>3.新建静态库工程</h5><p>在”解决方案资源管理器”中(视图-&gt;解决方案资源管理器或者Ctrl+Alt+L唤醒),</p>
+<p>在”解决方案’MATHTOOLS’(0个项目)”上右键-&gt;新建项目</p>
+<p><img src="https://raw.githubusercontent.com/DeutschBall/test/master/image-20220721160318596.png" class="lazyload placeholder" data-srcset="https://raw.githubusercontent.com/DeutschBall/test/master/image-20220721160318596.png" srcset="https://img2.baidu.com/it/u=2037979560,2772131037&fm=26&fmt=auto&gp=0.jpg" alt="image-20220721160318596"></p>
+<h5 id="4-在添加新项目搜索框中搜索”静态库”"><a href="#4-在添加新项目搜索框中搜索”静态库”" class="headerlink" title="4.在添加新项目搜索框中搜索”静态库”"></a>4.在添加新项目搜索框中搜索”静态库”</h5><p><img src="https://raw.githubusercontent.com/DeutschBall/test/master/image-20220721160358962.png" class="lazyload placeholder" data-srcset="https://raw.githubusercontent.com/DeutschBall/test/master/image-20220721160358962.png" srcset="https://img2.baidu.com/it/u=2037979560,2772131037&fm=26&fmt=auto&gp=0.jpg" alt="image-20220721160358962"></p>
+<h5 id="5-配置静态库项目"><a href="#5-配置静态库项目" class="headerlink" title="5.配置静态库项目"></a>5.配置静态库项目</h5><p>起个名,然后创建</p>
+<p><img src="https://raw.githubusercontent.com/DeutschBall/test/master/image-20220721160433974.png" class="lazyload placeholder" data-srcset="https://raw.githubusercontent.com/DeutschBall/test/master/image-20220721160433974.png" srcset="https://img2.baidu.com/it/u=2037979560,2772131037&fm=26&fmt=auto&gp=0.jpg" alt="image-20220721160433974"></p>
+<h5 id="6-建立静态库项目之后的解决方案资源管理器"><a href="#6-建立静态库项目之后的解决方案资源管理器" class="headerlink" title="6.建立静态库项目之后的解决方案资源管理器"></a>6.建立静态库项目之后的解决方案资源管理器</h5><p><img src="https://raw.githubusercontent.com/DeutschBall/test/master/image-20220721160547138.png" class="lazyload placeholder" data-srcset="https://raw.githubusercontent.com/DeutschBall/test/master/image-20220721160547138.png" srcset="https://img2.baidu.com/it/u=2037979560,2772131037&fm=26&fmt=auto&gp=0.jpg" alt="image-20220721160547138"></p>
+<p>有一些vs自动帮我们生成的文件,比如<code>pch.h,framework.h,pch.cpp,MATHLIB.cpp</code></p>
+<p>然而这些都是可有可无的</p>
+<h5 id="7-不使用预编译头"><a href="#7-不使用预编译头" class="headerlink" title="7.不使用预编译头"></a>7.不使用预编译头</h5><p>在解决方案资源管理器-&gt;MATHLIB项目 上右键,属性</p>
+<p><img src="https://raw.githubusercontent.com/DeutschBall/test/master/image-20220721160748513.png" class="lazyload placeholder" data-srcset="https://raw.githubusercontent.com/DeutschBall/test/master/image-20220721160748513.png" srcset="https://img2.baidu.com/it/u=2037979560,2772131037&fm=26&fmt=auto&gp=0.jpg" alt="image-20220721160748513"></p>
+<p>在弹出的属性页中将陪着和平台都改成所有的</p>
+<p><img src="https://raw.githubusercontent.com/DeutschBall/test/master/image-20220721160818483.png" class="lazyload placeholder" data-srcset="https://raw.githubusercontent.com/DeutschBall/test/master/image-20220721160818483.png" srcset="https://img2.baidu.com/it/u=2037979560,2772131037&fm=26&fmt=auto&gp=0.jpg" alt="image-20220721160818483"></p>
+<p>然后配置属性-&gt;C/C++-&gt;预编译头-&gt;不使用预编译头</p>
+<p><img src="https://raw.githubusercontent.com/DeutschBall/test/master/image-20220721160906154.png" class="lazyload placeholder" data-srcset="https://raw.githubusercontent.com/DeutschBall/test/master/image-20220721160906154.png" srcset="https://img2.baidu.com/it/u=2037979560,2772131037&fm=26&fmt=auto&gp=0.jpg" alt="image-20220721160906154"></p>
+<h5 id="8-新建MathLib-h和MathLib-cpp"><a href="#8-新建MathLib-h和MathLib-cpp" class="headerlink" title="8.新建MathLib.h和MathLib.cpp"></a>8.新建MathLib.h和MathLib.cpp</h5><p>删掉头文件和源文件中vs帮我们建立好的文件,然后在头文件和源文件夹下面分别新建MathLib.h和MathLib.cpp</p>
+<p><code>MathLib.h</code></p>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#<span class="keyword">pragma</span> once</span></span><br><span class="line"><span class="keyword">struct</span> <span class="title class_">Point</span> &#123;</span><br><span class="line">	<span class="type">double</span> x;</span><br><span class="line">	<span class="type">double</span> y;</span><br><span class="line">	<span class="built_in">Point</span>(<span class="type">const</span> <span class="type">double</span> &amp;x,<span class="type">const</span> <span class="type">double</span> &amp;y);</span><br><span class="line">	<span class="built_in">Point</span>();</span><br><span class="line">	<span class="function"><span class="type">void</span> <span class="title">setCoordinate</span><span class="params">(<span class="type">const</span> <span class="type">double</span>&amp; x, <span class="type">const</span> <span class="type">double</span>&amp; y)</span></span>;</span><br><span class="line">	<span class="function"><span class="type">double</span>&amp; <span class="title">X</span><span class="params">()</span></span>;</span><br><span class="line">	<span class="function"><span class="type">double</span>&amp; <span class="title">Y</span><span class="params">()</span></span>;</span><br><span class="line">	<span class="function"><span class="type">const</span> <span class="type">double</span> <span class="title">getEuclidianDistance</span><span class="params">(<span class="type">const</span> Point&amp; p)</span><span class="type">const</span></span>;</span><br><span class="line">	<span class="function"><span class="type">const</span> <span class="type">double</span> <span class="title">getManHatonDistance</span><span class="params">(<span class="type">const</span> Point&amp; p)</span><span class="type">const</span></span>;</span><br><span class="line">	<span class="function"><span class="type">double</span> <span class="title">getSlope</span><span class="params">(<span class="type">const</span> Point&amp; p)</span><span class="type">const</span></span>;</span><br><span class="line">	<span class="keyword">friend</span> std::ostream&amp; <span class="keyword">operator</span>&lt;&lt;(std::ostream&amp; os, <span class="type">const</span> Point&amp; p);</span><br><span class="line"></span><br><span class="line">&#125;;</span><br><span class="line"><span class="keyword">struct</span> <span class="title class_">Line</span> &#123;</span><br><span class="line">	Point a;</span><br><span class="line">	Point b;</span><br><span class="line">	<span class="built_in">Line</span>();</span><br><span class="line">	<span class="built_in">Line</span>(<span class="type">const</span> Point&amp; a, <span class="type">const</span> Point&amp; b);</span><br><span class="line">	<span class="function"><span class="type">double</span> <span class="title">length</span><span class="params">()</span><span class="type">const</span></span>;</span><br><span class="line">	<span class="function">Point &amp;<span class="title">A</span><span class="params">()</span></span>;</span><br><span class="line">	<span class="function">Point &amp;<span class="title">B</span><span class="params">()</span></span>;</span><br><span class="line">	<span class="function"><span class="type">double</span> <span class="title">getSlope</span><span class="params">()</span><span class="type">const</span></span>;</span><br><span class="line">	<span class="keyword">friend</span> std::ostream&amp; <span class="keyword">operator</span>&lt;&lt;(std::ostream&amp; os, <span class="type">const</span> Line&amp; l);</span><br><span class="line">	<span class="function"><span class="type">bool</span> <span class="title">isParallel</span><span class="params">(<span class="type">const</span> Line &amp;l)</span><span class="type">const</span></span>;</span><br><span class="line">&#125;;</span><br><span class="line"></span><br></pre></td></tr></table></figure>
+<p><code>MathLib.cpp</code></p>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;iostream&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;cmath&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;algorithm&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&quot;MathLib.h&quot;</span></span></span><br><span class="line"></span><br><span class="line">Point::<span class="built_in">Point</span>(<span class="type">const</span> <span class="type">double</span>&amp; x, <span class="type">const</span> <span class="type">double</span>&amp; y) &#123;</span><br><span class="line">	<span class="keyword">this</span>-&gt;x = x;</span><br><span class="line">	<span class="keyword">this</span>-&gt;y = y;</span><br><span class="line">	&#125;</span><br><span class="line">Point::<span class="built_in">Point</span>() &#123;</span><br><span class="line">	<span class="keyword">this</span>-&gt;x = <span class="number">0</span>;</span><br><span class="line">	<span class="keyword">this</span>-&gt;y = <span class="number">0</span>;</span><br><span class="line">	&#125;</span><br><span class="line"><span class="function"><span class="type">void</span> <span class="title">Point::setCoordinate</span><span class="params">(<span class="type">const</span> <span class="type">double</span>&amp; x, <span class="type">const</span> <span class="type">double</span>&amp; y)</span> </span>&#123;</span><br><span class="line">	<span class="keyword">this</span>-&gt;x = x;</span><br><span class="line">	<span class="keyword">this</span>-&gt;y = y;</span><br><span class="line">	&#125;</span><br><span class="line"><span class="function"><span class="type">double</span>&amp; <span class="title">Point::X</span><span class="params">()</span> </span>&#123;</span><br><span class="line">	<span class="keyword">return</span> <span class="keyword">this</span>-&gt;x;</span><br><span class="line">	&#125;</span><br><span class="line"><span class="function"><span class="type">double</span>&amp; <span class="title">Point::Y</span><span class="params">()</span> </span>&#123;</span><br><span class="line">	<span class="keyword">return</span> <span class="keyword">this</span>-&gt;y;</span><br><span class="line">	&#125;</span><br><span class="line"><span class="function"><span class="type">const</span> <span class="type">double</span> <span class="title">Point::getEuclidianDistance</span><span class="params">(<span class="type">const</span> Point&amp; p)</span><span class="type">const</span> </span>&#123;</span><br><span class="line">	<span class="keyword">return</span> <span class="built_in">sqrt</span>(<span class="number">1.0</span>*(x - p.x) * (x - p.x) + (y - p.y) * (y - p.y));</span><br><span class="line">	&#125;</span><br><span class="line"><span class="function"><span class="type">const</span> <span class="type">double</span> <span class="title">Point::getManHatonDistance</span><span class="params">(<span class="type">const</span> Point&amp; p)</span> <span class="type">const</span></span>&#123;</span><br><span class="line">	<span class="keyword">return</span> <span class="built_in">abs</span>(x - p.x) + <span class="built_in">abs</span>(y - p.y);</span><br><span class="line">	&#125;</span><br><span class="line"><span class="function"><span class="type">double</span> <span class="title">Point::getSlope</span><span class="params">(<span class="type">const</span> Point&amp; p)</span> <span class="type">const</span></span>&#123;</span><br><span class="line">	<span class="keyword">return</span> <span class="number">1.0</span>*(y - p.y) / (x - p.x);</span><br><span class="line">	&#125;</span><br><span class="line">std::ostream&amp; <span class="keyword">operator</span>&lt;&lt;(std::ostream&amp; os, <span class="type">const</span> Point&amp; p) &#123;</span><br><span class="line">	os &lt;&lt; <span class="string">&quot;(&quot;</span> &lt;&lt; p.x &lt;&lt; <span class="string">&quot;,&quot;</span> &lt;&lt; p.y &lt;&lt; <span class="string">&quot;)&quot;</span>;</span><br><span class="line">	<span class="keyword">return</span> os;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">	Line::<span class="built_in">Line</span>() &#123;</span><br><span class="line">		</span><br><span class="line">	&#125;</span><br><span class="line">	Line::<span class="built_in">Line</span>(<span class="type">const</span> Point&amp; a, <span class="type">const</span> Point&amp; b) &#123;</span><br><span class="line">		<span class="keyword">this</span>-&gt;a = a;</span><br><span class="line">		<span class="keyword">this</span>-&gt;b = b;</span><br><span class="line">	&#125;</span><br><span class="line">	<span class="function"><span class="type">double</span> <span class="title">Line::length</span><span class="params">()</span><span class="type">const</span> </span>&#123;</span><br><span class="line">		<span class="keyword">return</span> a.<span class="built_in">getEuclidianDistance</span>(b);</span><br><span class="line">	&#125;</span><br><span class="line">	<span class="function">Point&amp; <span class="title">Line::A</span><span class="params">()</span> </span>&#123;</span><br><span class="line">		<span class="keyword">return</span> a;</span><br><span class="line">	&#125;</span><br><span class="line">	<span class="function">Point&amp; <span class="title">Line::B</span><span class="params">()</span> </span>&#123;</span><br><span class="line">		<span class="keyword">return</span> b;</span><br><span class="line">	&#125;</span><br><span class="line">	<span class="function"><span class="type">double</span> <span class="title">Line::getSlope</span><span class="params">()</span><span class="type">const</span> </span>&#123;</span><br><span class="line">		<span class="keyword">return</span> a.<span class="built_in">getSlope</span>(b);</span><br><span class="line">	&#125;</span><br><span class="line">	std::ostream&amp; <span class="keyword">operator</span>&lt;&lt;(std::ostream&amp; os, <span class="type">const</span> Line&amp; l )&#123;</span><br><span class="line">		os &lt;&lt; <span class="string">&quot;[&quot;</span> &lt;&lt; l.a &lt;&lt; <span class="string">&quot;;&quot;</span> &lt;&lt; l.b &lt;&lt; <span class="string">&quot;]&quot;</span>;</span><br><span class="line">		<span class="keyword">return</span> os;</span><br><span class="line">	&#125;</span><br><span class="line">	<span class="function"><span class="type">bool</span> <span class="title">Line::isParallel</span><span class="params">(<span class="type">const</span> Line&amp; l)</span><span class="type">const</span> </span>&#123;</span><br><span class="line">		<span class="keyword">return</span> <span class="built_in">abs</span>(<span class="built_in">getSlope</span>() - l.<span class="built_in">getSlope</span>()) &lt; <span class="number">0.001</span>;</span><br><span class="line">	&#125;</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"></span><br></pre></td></tr></table></figure>
+<h5 id="9-重新生成解决方案"><a href="#9-重新生成解决方案" class="headerlink" title="9.重新生成解决方案"></a>9.重新生成解决方案</h5><p><img src="https://raw.githubusercontent.com/DeutschBall/test/master/image-20220721164200557.png" class="lazyload placeholder" data-srcset="https://raw.githubusercontent.com/DeutschBall/test/master/image-20220721164200557.png" srcset="https://img2.baidu.com/it/u=2037979560,2772131037&fm=26&fmt=auto&gp=0.jpg" alt="image-20220721164200557"></p>
+<p>如果生成成功</p>
+<p><img src="https://raw.githubusercontent.com/DeutschBall/test/master/image-20220721164221010.png" class="lazyload placeholder" data-srcset="https://raw.githubusercontent.com/DeutschBall/test/master/image-20220721164221010.png" srcset="https://img2.baidu.com/it/u=2037979560,2772131037&fm=26&fmt=auto&gp=0.jpg" alt="image-20220721164221010"></p>
+<h4 id="链接静态库"><a href="#链接静态库" class="headerlink" title="链接静态库"></a>链接静态库</h4><h5 id="1-往解决方案中添加新项目"><a href="#1-往解决方案中添加新项目" class="headerlink" title="1.往解决方案中添加新项目"></a>1.往解决方案中添加新项目</h5><p><img src="https://raw.githubusercontent.com/DeutschBall/test/master/image-20220721164306283.png" class="lazyload placeholder" data-srcset="https://raw.githubusercontent.com/DeutschBall/test/master/image-20220721164306283.png" srcset="https://img2.baidu.com/it/u=2037979560,2772131037&fm=26&fmt=auto&gp=0.jpg" alt="image-20220721164306283"></p>
+<p><img src="https://raw.githubusercontent.com/DeutschBall/test/master/image-20220721164320309.png" class="lazyload placeholder" data-srcset="https://raw.githubusercontent.com/DeutschBall/test/master/image-20220721164320309.png" srcset="https://img2.baidu.com/it/u=2037979560,2772131037&fm=26&fmt=auto&gp=0.jpg" alt="image-20220721164320309"></p>
+<p><img src="https://raw.githubusercontent.com/DeutschBall/test/master/image-20220721164341661.png" class="lazyload placeholder" data-srcset="https://raw.githubusercontent.com/DeutschBall/test/master/image-20220721164341661.png" srcset="https://img2.baidu.com/it/u=2037979560,2772131037&fm=26&fmt=auto&gp=0.jpg" alt="image-20220721164341661"></p>
+<p>新项目名叫MATHTEST</p>
+<h5 id="2-添加引用"><a href="#2-添加引用" class="headerlink" title="2.添加引用"></a>2.添加引用</h5><p>此步的作用是</p>
+<ol>
+<li>在链接A时，自动带上 b.lib，debug/release能够自动区分</li>
+<li>当B项目有变化时，若编译A项目前先编译B项目</li>
+</ol>
+<p><img src="https://raw.githubusercontent.com/DeutschBall/test/master/image-20220721170149106.png" class="lazyload placeholder" data-srcset="https://raw.githubusercontent.com/DeutschBall/test/master/image-20220721170149106.png" srcset="https://img2.baidu.com/it/u=2037979560,2772131037&fm=26&fmt=auto&gp=0.jpg" alt="image-20220721170149106"></p>
+<p><img src="https://raw.githubusercontent.com/DeutschBall/test/master/image-20220721170201234.png" class="lazyload placeholder" data-srcset="https://raw.githubusercontent.com/DeutschBall/test/master/image-20220721170201234.png" srcset="https://img2.baidu.com/it/u=2037979560,2772131037&fm=26&fmt=auto&gp=0.jpg" alt="image-20220721170201234"></p>
+<h5 id="3-修改包含目录"><a href="#3-修改包含目录" class="headerlink" title="3.修改包含目录"></a>3.修改包含目录</h5><p>此步的作用是给<code>#include &quot;MathLib.h&quot;</code>找到包含路径,即MathLib.h在哪里</p>
+<p><img src="https://raw.githubusercontent.com/DeutschBall/test/master/image-20220721170408179.png" class="lazyload placeholder" data-srcset="https://raw.githubusercontent.com/DeutschBall/test/master/image-20220721170408179.png" srcset="https://img2.baidu.com/it/u=2037979560,2772131037&fm=26&fmt=auto&gp=0.jpg" alt="image-20220721170408179"></p>
+<p><img src="https://raw.githubusercontent.com/DeutschBall/test/master/image-20220721170458649.png" class="lazyload placeholder" data-srcset="https://raw.githubusercontent.com/DeutschBall/test/master/image-20220721170458649.png" srcset="https://img2.baidu.com/it/u=2037979560,2772131037&fm=26&fmt=auto&gp=0.jpg" alt="image-20220721170458649"></p>
+<p>到此MATHTEST中的源文件就能找到需要包含的MathLib.h头文件在哪里,链接器也能知道MathLib.lib在哪里了</p>
+<h5 id="4-测试静态库"><a href="#4-测试静态库" class="headerlink" title="4.测试静态库"></a>4.测试静态库</h5><p>在MATHTEST项目中新建一个源文件(或者利用自动创建的MATHTEST.cpp)</p>
+<p>随便写点测试静态库的东西</p>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;iostream&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&quot;MathLib.h&quot;</span></span></span><br><span class="line"><span class="keyword">using</span> <span class="keyword">namespace</span> std;</span><br><span class="line"><span class="function"><span class="type">int</span> <span class="title">main</span><span class="params">()</span></span></span><br><span class="line"><span class="function"></span>&#123;</span><br><span class="line">    <span class="function">Point <span class="title">A1</span><span class="params">(<span class="number">2</span>, <span class="number">4</span>)</span></span>;</span><br><span class="line">    <span class="function">Point <span class="title">B1</span><span class="params">(<span class="number">4</span>, <span class="number">8</span>)</span></span>;</span><br><span class="line">    <span class="function">Point <span class="title">A2</span><span class="params">(<span class="number">5</span>, <span class="number">10</span>)</span></span>;</span><br><span class="line">    <span class="function">Point <span class="title">B2</span><span class="params">(<span class="number">15</span>, <span class="number">29</span>)</span></span>;</span><br><span class="line">    <span class="function">Line <span class="title">L1</span><span class="params">(A1, B1)</span></span>;</span><br><span class="line">    <span class="function">Line <span class="title">L2</span><span class="params">(A2, B2)</span></span>;</span><br><span class="line">    cout &lt;&lt; L1.<span class="built_in">isParallel</span>(L2)&lt;&lt;endl;</span><br><span class="line">    cout &lt;&lt; A1.<span class="built_in">getEuclidianDistance</span>(B1) &lt;&lt; <span class="string">&quot;  &quot;</span> &lt;&lt; L1.<span class="built_in">length</span>() &lt;&lt; endl;</span><br><span class="line">    cout &lt;&lt; A1 &lt;&lt; endl;</span><br><span class="line">    cout &lt;&lt; L1 &lt;&lt; endl;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>然后将MATHTEST项目设置为启动项目(如果让MATHLIB库项目作为启动项目根本起不来)</p>
+<p><img src="https://raw.githubusercontent.com/DeutschBall/test/master/image-20220721171411117.png" class="lazyload placeholder" data-srcset="https://raw.githubusercontent.com/DeutschBall/test/master/image-20220721171411117.png" srcset="https://img2.baidu.com/it/u=2037979560,2772131037&fm=26&fmt=auto&gp=0.jpg" alt="image-20220721171411117"></p>
+<p>然后Ctrl+F5开始运行(不调试)</p>
+<p><img src="https://raw.githubusercontent.com/DeutschBall/test/master/image-20220721171456970.png" class="lazyload placeholder" data-srcset="https://raw.githubusercontent.com/DeutschBall/test/master/image-20220721171456970.png" srcset="https://img2.baidu.com/it/u=2037979560,2772131037&fm=26&fmt=auto&gp=0.jpg" alt="image-20220721171456970"></p>
+<h4 id="解决方案的结构"><a href="#解决方案的结构" class="headerlink" title="解决方案的结构"></a>解决方案的结构</h4><p>可以在解决方案根目录下面,终端上用<code>tree /f</code>命令打印整个结构</p>
+<p><img src="https://raw.githubusercontent.com/DeutschBall/test/master/%E8%A7%A3%E5%86%B3%E6%96%B9%E6%A1%88%E6%A0%B9%E7%9B%AE%E5%BD%95.png" class="lazyload placeholder" data-srcset="https://raw.githubusercontent.com/DeutschBall/test/master/%E8%A7%A3%E5%86%B3%E6%96%B9%E6%A1%88%E6%A0%B9%E7%9B%AE%E5%BD%95.png" srcset="https://img2.baidu.com/it/u=2037979560,2772131037&fm=26&fmt=auto&gp=0.jpg" alt="解决方案根目录"></p>
+<h3 id="动态库的使用"><a href="#动态库的使用" class="headerlink" title="动态库的使用"></a>动态库的使用</h3><h4 id="创建动态库-1"><a href="#创建动态库-1" class="headerlink" title="创建动态库"></a>创建动态库</h4><h5 id="1-建立空白解决方案"><a href="#1-建立空白解决方案" class="headerlink" title="1.建立空白解决方案"></a>1.建立空白解决方案</h5><p><img src="https://raw.githubusercontent.com/DeutschBall/test/master/image-20220721182820966.png" class="lazyload placeholder" data-srcset="https://raw.githubusercontent.com/DeutschBall/test/master/image-20220721182820966.png" srcset="https://img2.baidu.com/it/u=2037979560,2772131037&fm=26&fmt=auto&gp=0.jpg" alt="image-20220721182820966"></p>
+<p><img src="https://raw.githubusercontent.com/DeutschBall/test/master/image-20220721182929764.png" class="lazyload placeholder" data-srcset="https://raw.githubusercontent.com/DeutschBall/test/master/image-20220721182929764.png" srcset="https://img2.baidu.com/it/u=2037979560,2772131037&fm=26&fmt=auto&gp=0.jpg" alt="image-20220721182929764"></p>
+<h5 id="2-建立动态库项目"><a href="#2-建立动态库项目" class="headerlink" title="2.建立动态库项目"></a>2.建立动态库项目</h5><p><img src="https://raw.githubusercontent.com/DeutschBall/test/master/image-20220721182953735.png" class="lazyload placeholder" data-srcset="https://raw.githubusercontent.com/DeutschBall/test/master/image-20220721182953735.png" srcset="https://img2.baidu.com/it/u=2037979560,2772131037&fm=26&fmt=auto&gp=0.jpg" alt="image-20220721182953735"></p>
+<p>具有导出项的动态库</p>
+<p><img src="https://raw.githubusercontent.com/DeutschBall/test/master/image-20220721183016050.png" class="lazyload placeholder" data-srcset="https://raw.githubusercontent.com/DeutschBall/test/master/image-20220721183016050.png" srcset="https://img2.baidu.com/it/u=2037979560,2772131037&fm=26&fmt=auto&gp=0.jpg" alt="image-20220721183016050"></p>
+<p>项目名称MATHDLL</p>
+<p><img src="https://raw.githubusercontent.com/DeutschBall/test/master/image-20220721183052585.png" class="lazyload placeholder" data-srcset="https://raw.githubusercontent.com/DeutschBall/test/master/image-20220721183052585.png" srcset="https://img2.baidu.com/it/u=2037979560,2772131037&fm=26&fmt=auto&gp=0.jpg" alt="image-20220721183052585"></p>
+<p>属性页设置不使用预编译头</p>
+<p><img src="https://raw.githubusercontent.com/DeutschBall/test/master/image-20220721183151901.png" class="lazyload placeholder" data-srcset="https://raw.githubusercontent.com/DeutschBall/test/master/image-20220721183151901.png" srcset="https://img2.baidu.com/it/u=2037979560,2772131037&fm=26&fmt=auto&gp=0.jpg" alt="image-20220721183151901"></p>
+<p>删除掉多余的pch等自动生成的文件之后,解决方案资源管理器是这样的</p>
+<p><img src="https://raw.githubusercontent.com/DeutschBall/test/master/image-20220721183358281.png" class="lazyload placeholder" data-srcset="https://raw.githubusercontent.com/DeutschBall/test/master/image-20220721183358281.png" srcset="https://img2.baidu.com/it/u=2037979560,2772131037&fm=26&fmt=auto&gp=0.jpg" alt="image-20220721183358281"></p>
+<h5 id="3-充实头文件MATHDLL-h和原文件MATHDLL-cpp"><a href="#3-充实头文件MATHDLL-h和原文件MATHDLL-cpp" class="headerlink" title="3.充实头文件MATHDLL.h和原文件MATHDLL.cpp"></a>3.充实头文件MATHDLL.h和原文件MATHDLL.cpp</h5><p>自动生成的MATHDLL.h中有一个实用的宏定义<code>MATHDLL_API</code></p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// 下列 ifdef 块是创建使从 DLL 导出更简单的</span></span><br><span class="line"><span class="comment">// 宏的标准方法。此 DLL 中的所有文件都是用命令行上定义的 MATHDLL_EXPORTS</span></span><br><span class="line"><span class="comment">// 符号编译的。在使用此 DLL 的</span></span><br><span class="line"><span class="comment">// 任何项目上不应定义此符号。这样，源文件中包含此文件的任何其他项目都会将</span></span><br><span class="line"><span class="comment">// MATHDLL_API 函数视为是从 DLL 导入的，而此 DLL 则将用此宏定义的</span></span><br><span class="line"><span class="comment">// 符号视为是被导出的。</span></span><br><span class="line"><span class="meta">#<span class="keyword">ifdef</span> MATHDLL_EXPORTS</span></span><br><span class="line"><span class="meta">#<span class="keyword">define</span> MATHDLL_API __declspec(dllexport)</span></span><br><span class="line"><span class="meta">#<span class="keyword">else</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">define</span> MATHDLL_API __declspec(dllimport)</span></span><br><span class="line"><span class="meta">#<span class="keyword">endif</span></span></span><br><span class="line"></span><br><span class="line"><span class="comment">// 此类是从 dll 导出的</span></span><br><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">MATHDLL_API</span> <span class="title">CMATHDLL</span> &#123;</span></span><br><span class="line">public:</span><br><span class="line">	CMATHDLL(<span class="type">void</span>);</span><br><span class="line">	<span class="comment">// <span class="doctag">TODO:</span> 在此处添加方法。</span></span><br><span class="line">&#125;;</span><br><span class="line"></span><br><span class="line"><span class="keyword">extern</span> MATHDLL_API <span class="type">int</span> nMATHDLL;</span><br><span class="line"></span><br><span class="line">MATHDLL_API <span class="type">int</span> <span class="title function_">fnMATHDLL</span><span class="params">(<span class="type">void</span>)</span>;</span><br><span class="line"></span><br></pre></td></tr></table></figure>
+<p><code>MATHDLL_API</code>这个宏定义,对于DLL库的头文件来说被翻译为<code>__declspec(dllexport)</code>,</p>
+<p>而对于包含该头文件的其他项目的源文件来说被翻译为<code>__declspec(dllimport)</code></p>
+<p>关于<code>__declspec(dllexport)</code>干了啥事,现在不想知道,只需要知道导出函数时必须</p>
+<p><code>MATHDLL.h</code></p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// 下列 ifdef 块是创建使从 DLL 导出更简单的</span></span><br><span class="line"><span class="comment">// 宏的标准方法。此 DLL 中的所有文件都是用命令行上定义的 MATHDLL_EXPORTS</span></span><br><span class="line"><span class="comment">// 符号编译的。在使用此 DLL 的</span></span><br><span class="line"><span class="comment">// 任何项目上不应定义此符号。这样，源文件中包含此文件的任何其他项目都会将</span></span><br><span class="line"><span class="comment">// MATHDLL_API 函数视为是从 DLL 导入的，而此 DLL 则将用此宏定义的</span></span><br><span class="line"><span class="comment">// 符号视为是被导出的。</span></span><br><span class="line"><span class="meta">#<span class="keyword">ifdef</span> MATHDLL_EXPORTS</span></span><br><span class="line"><span class="meta">#<span class="keyword">define</span> MATHDLL_API __declspec(dllexport)</span></span><br><span class="line"><span class="meta">#<span class="keyword">else</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">define</span> MATHDLL_API __declspec(dllimport)</span></span><br><span class="line"><span class="meta">#<span class="keyword">endif</span></span></span><br><span class="line"></span><br><span class="line"><span class="class"><span class="keyword">struct</span> <span class="title">MATHDLL_API</span> <span class="title">Point</span> &#123;</span><span class="comment">//使用MATHDLL_API修饰意思是导出类</span></span><br><span class="line">	<span class="type">double</span> x;</span><br><span class="line">	<span class="type">double</span> y;</span><br><span class="line">	Point(<span class="type">const</span> <span class="type">double</span>&amp; x, <span class="type">const</span> <span class="type">double</span>&amp; y);</span><br><span class="line">	Point();</span><br><span class="line">	<span class="type">void</span> <span class="title function_">setCoordinate</span><span class="params">(<span class="type">const</span> <span class="type">double</span>&amp; x, <span class="type">const</span> <span class="type">double</span>&amp; y)</span>;</span><br><span class="line">	<span class="type">double</span>&amp; <span class="title function_">X</span><span class="params">()</span>;</span><br><span class="line">	<span class="type">double</span>&amp; <span class="title function_">Y</span><span class="params">()</span>;</span><br><span class="line">	<span class="type">const</span> <span class="type">double</span> <span class="title function_">getEuclidianDistance</span><span class="params">(<span class="type">const</span> Point&amp; p)</span><span class="type">const</span>;</span><br><span class="line">	<span class="type">const</span> <span class="type">double</span> <span class="title function_">getManHatonDistance</span><span class="params">(<span class="type">const</span> Point&amp; p)</span><span class="type">const</span>;</span><br><span class="line">	<span class="type">double</span> <span class="title function_">getSlope</span><span class="params">(<span class="type">const</span> Point&amp; p)</span><span class="type">const</span>;</span><br><span class="line">	friend <span class="built_in">std</span>::ostream&amp; operator&lt;&lt;(<span class="built_in">std</span>::ostream&amp; os, <span class="type">const</span> Point&amp; p);</span><br><span class="line"></span><br><span class="line">&#125;;</span><br><span class="line"><span class="class"><span class="keyword">struct</span> <span class="title">MATHDLL_API</span> <span class="title">Line</span> &#123;</span></span><br><span class="line">	Point a;</span><br><span class="line">	Point b;</span><br><span class="line">	Line();</span><br><span class="line">	Line(<span class="type">const</span> Point&amp; a, <span class="type">const</span> Point&amp; b);</span><br><span class="line">	<span class="type">double</span> <span class="title function_">length</span><span class="params">()</span><span class="type">const</span>;</span><br><span class="line">	Point&amp; <span class="title function_">A</span><span class="params">()</span>;</span><br><span class="line">	Point&amp; <span class="title function_">B</span><span class="params">()</span>;</span><br><span class="line">	<span class="type">double</span> <span class="title function_">getSlope</span><span class="params">()</span><span class="type">const</span>;</span><br><span class="line">	friend <span class="built_in">std</span>::ostream&amp; operator&lt;&lt;(<span class="built_in">std</span>::ostream&amp; os, <span class="type">const</span> Line&amp; l);</span><br><span class="line">	<span class="type">bool</span> <span class="title function_">isParallel</span><span class="params">(<span class="type">const</span> Line&amp; l)</span><span class="type">const</span>;</span><br><span class="line">&#125;;</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="comment">//extern MATHDLL_API int nMATHDLL;</span></span><br><span class="line"></span><br><span class="line"><span class="comment">//MATHDLL_API int fnMATHDLL(void);</span></span><br><span class="line"></span><br></pre></td></tr></table></figure>
+<p><code>MATHDLL.cpp</code></p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;iostream&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;cmath&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;algorithm&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&quot;MATHDLL.h&quot;</span></span></span><br><span class="line"></span><br><span class="line">Point::Point(<span class="type">const</span> <span class="type">double</span>&amp; x, <span class="type">const</span> <span class="type">double</span>&amp; y) &#123;</span><br><span class="line">	this-&gt;x = x;</span><br><span class="line">	this-&gt;y = y;</span><br><span class="line">&#125;</span><br><span class="line">Point::Point() &#123;</span><br><span class="line">	this-&gt;x = <span class="number">0</span>;</span><br><span class="line">	this-&gt;y = <span class="number">0</span>;</span><br><span class="line">&#125;</span><br><span class="line"><span class="type">void</span> <span class="title function_">Point::setCoordinate</span><span class="params">(<span class="type">const</span> <span class="type">double</span>&amp; x, <span class="type">const</span> <span class="type">double</span>&amp; y)</span> &#123;</span><br><span class="line">	this-&gt;x = x;</span><br><span class="line">	this-&gt;y = y;</span><br><span class="line">&#125;</span><br><span class="line"><span class="type">double</span>&amp; <span class="title function_">Point::X</span><span class="params">()</span> &#123;</span><br><span class="line">	<span class="keyword">return</span> this-&gt;x;</span><br><span class="line">&#125;</span><br><span class="line"><span class="type">double</span>&amp; <span class="title function_">Point::Y</span><span class="params">()</span> &#123;</span><br><span class="line">	<span class="keyword">return</span> this-&gt;y;</span><br><span class="line">&#125;</span><br><span class="line"><span class="type">const</span> <span class="type">double</span> <span class="title function_">Point::getEuclidianDistance</span><span class="params">(<span class="type">const</span> Point&amp; p)</span><span class="type">const</span> &#123;</span><br><span class="line">	<span class="keyword">return</span> <span class="built_in">sqrt</span>(<span class="number">1.0</span> * (x - p.x) * (x - p.x) + (y - p.y) * (y - p.y));</span><br><span class="line">&#125;</span><br><span class="line"><span class="type">const</span> <span class="type">double</span> <span class="title function_">Point::getManHatonDistance</span><span class="params">(<span class="type">const</span> Point&amp; p)</span> <span class="type">const</span> &#123;</span><br><span class="line">	<span class="keyword">return</span> <span class="built_in">abs</span>(x - p.x) + <span class="built_in">abs</span>(y - p.y);</span><br><span class="line">&#125;</span><br><span class="line"><span class="type">double</span> <span class="title function_">Point::getSlope</span><span class="params">(<span class="type">const</span> Point&amp; p)</span> <span class="type">const</span> &#123;</span><br><span class="line">	<span class="keyword">return</span> <span class="number">1.0</span> * (y - p.y) / (x - p.x);</span><br><span class="line">&#125;</span><br><span class="line"><span class="built_in">std</span>::ostream&amp; operator&lt;&lt;(<span class="built_in">std</span>::ostream&amp; os, <span class="type">const</span> Point&amp; p) &#123;</span><br><span class="line">	os &lt;&lt; <span class="string">&quot;(&quot;</span> &lt;&lt; p.x &lt;&lt; <span class="string">&quot;,&quot;</span> &lt;&lt; p.y &lt;&lt; <span class="string">&quot;)&quot;</span>;</span><br><span class="line">	<span class="keyword">return</span> os;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">Line::Line() &#123;</span><br><span class="line"></span><br><span class="line">&#125;</span><br><span class="line">Line::Line(<span class="type">const</span> Point&amp; a, <span class="type">const</span> Point&amp; b) &#123;</span><br><span class="line">	this-&gt;a = a;</span><br><span class="line">	this-&gt;b = b;</span><br><span class="line">&#125;</span><br><span class="line"><span class="type">double</span> <span class="title function_">Line::length</span><span class="params">()</span><span class="type">const</span> &#123;</span><br><span class="line">	<span class="keyword">return</span> a.getEuclidianDistance(b);</span><br><span class="line">&#125;</span><br><span class="line">Point&amp; <span class="title function_">Line::A</span><span class="params">()</span> &#123;</span><br><span class="line">	<span class="keyword">return</span> a;</span><br><span class="line">&#125;</span><br><span class="line">Point&amp; <span class="title function_">Line::B</span><span class="params">()</span> &#123;</span><br><span class="line">	<span class="keyword">return</span> b;</span><br><span class="line">&#125;</span><br><span class="line"><span class="type">double</span> <span class="title function_">Line::getSlope</span><span class="params">()</span><span class="type">const</span> &#123;</span><br><span class="line">	<span class="keyword">return</span> a.getSlope(b);</span><br><span class="line">&#125;</span><br><span class="line"><span class="built_in">std</span>::ostream&amp; operator&lt;&lt;(<span class="built_in">std</span>::ostream&amp; os, <span class="type">const</span> Line&amp; l) &#123;</span><br><span class="line">	os &lt;&lt; <span class="string">&quot;[&quot;</span> &lt;&lt; l.a &lt;&lt; <span class="string">&quot;;&quot;</span> &lt;&lt; l.b &lt;&lt; <span class="string">&quot;]&quot;</span>;</span><br><span class="line">	<span class="keyword">return</span> os;</span><br><span class="line">&#125;</span><br><span class="line"><span class="type">bool</span> <span class="title function_">Line::isParallel</span><span class="params">(<span class="type">const</span> Line&amp; l)</span><span class="type">const</span> &#123;</span><br><span class="line">	<span class="keyword">return</span> <span class="built_in">abs</span>(getSlope() - l.getSlope()) &lt; <span class="number">0.001</span>;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"></span><br></pre></td></tr></table></figure>
+<p><code>dllMain.cpp</code>保持原样不用管</p>
+<p>此时重新生成解决方案没有错误,则动态库创建完毕了</p>
+<p>此时在<code>MATHTOOLS/debug/</code>下面生成四个文件</p>
+<figure class="highlight sh"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line">PS C:\Users\86135\Desktop\testDLL\MATHTOOLS\Debug&gt; <span class="built_in">ls</span></span><br><span class="line"></span><br><span class="line"></span><br><span class="line">    目录: C:\Users\86135\Desktop\testDLL\MATHTOOLS\Debug</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">Mode                 LastWriteTime         Length Name</span><br><span class="line">----                 -------------         ------ ----</span><br><span class="line">-a----         2022/7/21     19:01          52736 MATHDLL.dll</span><br><span class="line">-a----         2022/7/21     19:01           3532 MATHDLL.exp</span><br><span class="line">-a----         2022/7/21     19:01           6308 MATHDLL.lib</span><br><span class="line">-a----         2022/7/21     19:01        1200128 MATHDLL.pdb</span><br></pre></td></tr></table></figure>
+<p>有动态库dll这不足为奇,我们要的就是它</p>
+<p>有pdb数据库也不足为奇,调试时用的符号就存在这个数据库里</p>
+<p>那exp和lib是来干啥的?留作后话</p>
+<p>到此动态库创建完毕,下面新建测试项目</p>
+<h4 id="链接动态库"><a href="#链接动态库" class="headerlink" title="链接动态库"></a>链接动态库</h4><p>链接一个动态库好麻烦,需要三个东西</p>
+<p>1.包含头文件路径</p>
+<p>2.lib导入库的路径</p>
+<p>3.dll本尊的路径</p>
+<p>其中头文件在编译的时候给一个符号,lib是一个药引子,它干了啥事留作后话</p>
+<h5 id="1-新建控制台测试项目"><a href="#1-新建控制台测试项目" class="headerlink" title="1.新建控制台测试项目"></a>1.新建控制台测试项目</h5><p><img src="https://raw.githubusercontent.com/DeutschBall/test/master/image-20220721190552713.png" class="lazyload placeholder" data-srcset="https://raw.githubusercontent.com/DeutschBall/test/master/image-20220721190552713.png" srcset="https://img2.baidu.com/it/u=2037979560,2772131037&fm=26&fmt=auto&gp=0.jpg" alt="image-20220721190552713"></p>
+<p><img src="https://raw.githubusercontent.com/DeutschBall/test/master/image-20220721190612424.png" class="lazyload placeholder" data-srcset="https://raw.githubusercontent.com/DeutschBall/test/master/image-20220721190612424.png" srcset="https://img2.baidu.com/it/u=2037979560,2772131037&fm=26&fmt=auto&gp=0.jpg" alt="image-20220721190612424"></p>
+<p><img src="https://raw.githubusercontent.com/DeutschBall/test/master/image-20220721190626516.png" class="lazyload placeholder" data-srcset="https://raw.githubusercontent.com/DeutschBall/test/master/image-20220721190626516.png" srcset="https://img2.baidu.com/it/u=2037979560,2772131037&fm=26&fmt=auto&gp=0.jpg" alt="image-20220721190626516"></p>
+<h5 id="2-添加引用-1"><a href="#2-添加引用-1" class="headerlink" title="2.添加引用"></a>2.添加引用</h5><p>在MATHTEST的引用上添加引用,作用同静态库时的用法,即将lib文件链接进入exe文件</p>
+<p><img src="https://raw.githubusercontent.com/DeutschBall/test/master/image-20220721190715859.png" class="lazyload placeholder" data-srcset="https://raw.githubusercontent.com/DeutschBall/test/master/image-20220721190715859.png" srcset="https://img2.baidu.com/it/u=2037979560,2772131037&fm=26&fmt=auto&gp=0.jpg" alt="image-20220721190715859"></p>
+<p><img src="https://raw.githubusercontent.com/DeutschBall/test/master/image-20220721190737071.png" class="lazyload placeholder" data-srcset="https://raw.githubusercontent.com/DeutschBall/test/master/image-20220721190737071.png" srcset="https://img2.baidu.com/it/u=2037979560,2772131037&fm=26&fmt=auto&gp=0.jpg" alt="image-20220721190737071"></p>
+<p>此步的作用是添加dll库文件本身的路径</p>
+<h5 id="3-添加头文件包含路径"><a href="#3-添加头文件包含路径" class="headerlink" title="3.添加头文件包含路径"></a>3.添加头文件包含路径</h5><p>头文件的作用是提供符号引用,只是提供引用的作用,没有其他作用了,不用想太多</p>
+<blockquote>
+<p> 有时甚至不包含头文件只链接对应源文件也不会链接报错,警告罢了</p>
+</blockquote>
+<p><img src="https://raw.githubusercontent.com/DeutschBall/test/master/image-20220721190917081.png" class="lazyload placeholder" data-srcset="https://raw.githubusercontent.com/DeutschBall/test/master/image-20220721190917081.png" srcset="https://img2.baidu.com/it/u=2037979560,2772131037&fm=26&fmt=auto&gp=0.jpg" alt="image-20220721190917081"></p>
+<p><img src="https://raw.githubusercontent.com/DeutschBall/test/master/image-20220721190857128.png" class="lazyload placeholder" data-srcset="https://raw.githubusercontent.com/DeutschBall/test/master/image-20220721190857128.png" srcset="https://img2.baidu.com/it/u=2037979560,2772131037&fm=26&fmt=auto&gp=0.jpg" alt="image-20220721190857128"></p>
+<h5 id="4-添加导入库-lib文件-路径"><a href="#4-添加导入库-lib文件-路径" class="headerlink" title="4.添加导入库(lib文件)路径"></a>4.添加导入库(lib文件)路径</h5><p>此处需要在链接器-&gt;输入-&gt;附加依赖项  还有  链接器-&gt;常规-&gt;附加库目录两个地方进行添加</p>
+<p><img src="https://raw.githubusercontent.com/DeutschBall/test/master/image-20220721191127957.png" class="lazyload placeholder" data-srcset="https://raw.githubusercontent.com/DeutschBall/test/master/image-20220721191127957.png" srcset="https://img2.baidu.com/it/u=2037979560,2772131037&fm=26&fmt=auto&gp=0.jpg" alt="image-20220721191127957"></p>
+<p><img src="https://raw.githubusercontent.com/DeutschBall/test/master/image-20220721192104087.png" class="lazyload placeholder" data-srcset="https://raw.githubusercontent.com/DeutschBall/test/master/image-20220721192104087.png" srcset="https://img2.baidu.com/it/u=2037979560,2772131037&fm=26&fmt=auto&gp=0.jpg" alt="image-20220721192104087"></p>
+<p>到此程序就可以运行了</p>
+<h3 id="obj-gt-lib-gt-dll"><a href="#obj-gt-lib-gt-dll" class="headerlink" title=".obj-&gt;.lib-&gt;.dll"></a><code>.obj-&gt;.lib-&gt;.dll</code></h3><p>两种库的制作过程中,都有.lib文件,但是静态库中.lib是最终产品,动态库中.lib是一个药引子导入库</p>
+<h2 id="MSVC创建使用库"><a href="#MSVC创建使用库" class="headerlink" title="MSVC创建使用库"></a>MSVC创建使用库</h2><p>用Vscode打开一个文件夹作为工作目录,然后在本文件夹下面写EDRLIB.C和EDRLIB.H,EDRTEST.C</p>
+<h3 id="制作动态库"><a href="#制作动态库" class="headerlink" title="制作动态库"></a>制作动态库</h3><p>首先在本目录下面编写<code>EDRLIB.H,EDRLIB.C</code>两个源代码文件</p>
+<p><code>EDRLIB.H</code></p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#<span class="keyword">ifdef</span> __cplusplus <span class="comment">//防止C++的命名重整,使得本库文件可以被C和C++程序使用</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">define</span> EXPORT extern <span class="string">&quot;C&quot;</span> __declspec(dllexport)</span></span><br><span class="line"><span class="meta">#<span class="keyword">else</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">define</span> EXPORT __declspec(dllexport)</span></span><br><span class="line"><span class="meta">#<span class="keyword">endif</span></span></span><br><span class="line"></span><br><span class="line">EXPORT BOOL CALLBACK <span class="title function_">EdrCenterTextA</span><span class="params">(HDC,PRECT,PCSTR)</span>;</span><br><span class="line">EXPORT BOOL CALLBACK <span class="title function_">EdrCenterTextW</span><span class="params">(HDC,PRECT,PCWSTR)</span>;</span><br><span class="line"></span><br><span class="line"><span class="meta">#<span class="keyword">ifdef</span> UNICODE</span></span><br><span class="line"><span class="meta">#<span class="keyword">define</span> EdrCenterText EdrCenterTextW</span></span><br><span class="line"><span class="meta">#<span class="keyword">else</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">define</span> EdrCenterText EdrCenterTextA</span></span><br><span class="line"><span class="meta">#<span class="keyword">endif</span></span></span><br></pre></td></tr></table></figure>
+<p><code>EDRLIB.C</code></p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;windows.h&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&quot;EDRLIB.H&quot;</span></span></span><br><span class="line"></span><br><span class="line">LRESULT CALLBACK <span class="title function_">WndProc</span><span class="params">(HWND, UINT, WPARAM, LPARAM)</span>;</span><br><span class="line"><span class="type">int</span> WINAPI <span class="title function_">WinMain</span><span class="params">(HINSTANCE hInstance, HINSTANCE hPrevInstance, PSTR szCmdLine, <span class="type">int</span> iCmdShow)</span></span><br><span class="line">&#123;</span><br><span class="line">    <span class="type">static</span> TCHAR szAppName[] = TEXT(<span class="string">&quot;StrProg&quot;</span>);</span><br><span class="line">    HWND hwnd;</span><br><span class="line">    MSG msg;</span><br><span class="line"></span><br><span class="line">    WNDCLASS wndclass;</span><br><span class="line">    wndclass.style = CS_HREDRAW | CS_VREDRAW;</span><br><span class="line">    wndclass.lpfnWndProc = WndProc;</span><br><span class="line">    wndclass.cbClsExtra = <span class="number">0</span>;</span><br><span class="line">    wndclass.cbWndExtra = <span class="number">0</span>;</span><br><span class="line">    wndclass.hInstance = hInstance;</span><br><span class="line">    wndclass.hIcon = LoadIcon(<span class="literal">NULL</span>, IDI_APPLICATION);</span><br><span class="line">    wndclass.hCursor = LoadCursor(<span class="literal">NULL</span>, IDC_ARROW);</span><br><span class="line">    wndclass.hbrBackground = (HBRUSH)GetStockObject(WHITE_BRUSH);</span><br><span class="line">    wndclass.lpszMenuName = <span class="literal">NULL</span>;</span><br><span class="line">    wndclass.lpszClassName = szAppName;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">if</span> (!RegisterClass(&amp;wndclass))</span><br><span class="line">    &#123;</span><br><span class="line">        MessageBox(<span class="literal">NULL</span>, TEXT(<span class="string">&quot;requires Windows NT&quot;</span>), szAppName, MB_ICONERROR);</span><br><span class="line">        <span class="keyword">return</span> <span class="number">0</span>;</span><br><span class="line">    &#125;</span><br><span class="line">    hwnd = CreateWindow(</span><br><span class="line">        szAppName,</span><br><span class="line">        TEXT(<span class="string">&quot;DLL Demonstrate Program&quot;</span>),</span><br><span class="line">        WS_OVERLAPPEDWINDOW,</span><br><span class="line">        CW_USEDEFAULT,</span><br><span class="line">        CW_USEDEFAULT,</span><br><span class="line">        CW_USEDEFAULT,</span><br><span class="line">        CW_USEDEFAULT,</span><br><span class="line">        <span class="literal">NULL</span>,</span><br><span class="line">        <span class="literal">NULL</span>,</span><br><span class="line">        hInstance,</span><br><span class="line">        <span class="literal">NULL</span>);</span><br><span class="line"></span><br><span class="line">    ShowWindow(hwnd, iCmdShow);</span><br><span class="line">    UpdateWindow(hwnd);</span><br><span class="line">    <span class="keyword">while</span> (GetMessage(&amp;msg, <span class="literal">NULL</span>, <span class="number">0</span>, <span class="number">0</span>))</span><br><span class="line">    &#123;</span><br><span class="line">        TranslateMessage(&amp;msg);</span><br><span class="line">        DispatchMessage(&amp;msg);</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">return</span> msg.wParam;</span><br><span class="line">&#125;</span><br><span class="line">LRESULT CALLBACK <span class="title function_">WndProc</span><span class="params">(HWND hwnd, UINT message, WPARAM wParam, LPARAM lParam)</span></span><br><span class="line">&#123;</span><br><span class="line">    HDC hdc;</span><br><span class="line">    PAINTSTRUCT ps;</span><br><span class="line">    RECT rect;</span><br><span class="line">    <span class="keyword">switch</span> (message)</span><br><span class="line">    &#123;</span><br><span class="line">    <span class="keyword">case</span> WM_PAINT:</span><br><span class="line">        hdc = BeginPaint(hwnd, &amp;ps);</span><br><span class="line">        GetClientRect(hwnd, &amp;rect);</span><br><span class="line">        EdrCenterText(hdc, &amp;rect, TEXT(<span class="string">&quot;in DLLLLLLLer&quot;</span>));</span><br><span class="line">        EndPaint(hwnd, &amp;ps);</span><br><span class="line">        <span class="keyword">return</span> <span class="number">0</span>;</span><br><span class="line">    <span class="keyword">case</span> WM_DESTROY:</span><br><span class="line">        PostQuitMessage(<span class="number">0</span>);</span><br><span class="line">        <span class="keyword">return</span> <span class="number">0</span>;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">return</span> DefWindowProc(hwnd, message, wParam, lParam);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>使用MSVC编译链接制作动态库</p>
+<figure class="highlight powershell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">cl /c EDRLIB.C</span><br><span class="line">link /dll EDRLIB.obj user32.lib kernel32.lib gdi32.lib</span><br></pre></td></tr></table></figure>
+<p>到此本目录下面就生成了dll动态库文件和lib导入库文件</p>
+<h3 id="链接导入库"><a href="#链接导入库" class="headerlink" title="链接导入库"></a>链接导入库</h3><p>编写测试程序<code>EDRTEST.C</code></p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;windows.h&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&quot;EDRLIB.H&quot;</span></span></span><br><span class="line"></span><br><span class="line">LRESULT CALLBACK <span class="title function_">WndProc</span><span class="params">(HWND, UINT, WPARAM, LPARAM)</span>;</span><br><span class="line"><span class="type">int</span> WINAPI <span class="title function_">WinMain</span><span class="params">(HINSTANCE hInstance, HINSTANCE hPrevInstance, PSTR szCmdLine, <span class="type">int</span> iCmdShow)</span></span><br><span class="line">&#123;</span><br><span class="line">    <span class="type">static</span> TCHAR szAppName[] = TEXT(<span class="string">&quot;StrProg&quot;</span>);</span><br><span class="line">    HWND hwnd;</span><br><span class="line">    MSG msg;</span><br><span class="line"></span><br><span class="line">    WNDCLASS wndclass;</span><br><span class="line">    wndclass.style = CS_HREDRAW | CS_VREDRAW;</span><br><span class="line">    wndclass.lpfnWndProc = WndProc;</span><br><span class="line">    wndclass.cbClsExtra = <span class="number">0</span>;</span><br><span class="line">    wndclass.cbWndExtra = <span class="number">0</span>;</span><br><span class="line">    wndclass.hInstance = hInstance;</span><br><span class="line">    wndclass.hIcon = LoadIcon(<span class="literal">NULL</span>, IDI_APPLICATION);</span><br><span class="line">    wndclass.hCursor = LoadCursor(<span class="literal">NULL</span>, IDC_ARROW);</span><br><span class="line">    wndclass.hbrBackground = (HBRUSH)GetStockObject(WHITE_BRUSH);</span><br><span class="line">    wndclass.lpszMenuName = <span class="literal">NULL</span>;</span><br><span class="line">    wndclass.lpszClassName = szAppName;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">if</span> (!RegisterClass(&amp;wndclass))</span><br><span class="line">    &#123;</span><br><span class="line">        MessageBox(<span class="literal">NULL</span>, TEXT(<span class="string">&quot;requires Windows NT&quot;</span>), szAppName, MB_ICONERROR);</span><br><span class="line">        <span class="keyword">return</span> <span class="number">0</span>;</span><br><span class="line">    &#125;</span><br><span class="line">    hwnd = CreateWindow(</span><br><span class="line">        szAppName,</span><br><span class="line">        TEXT(<span class="string">&quot;DLL Demonstrate Program&quot;</span>),</span><br><span class="line">        WS_OVERLAPPEDWINDOW,</span><br><span class="line">        CW_USEDEFAULT,</span><br><span class="line">        CW_USEDEFAULT,</span><br><span class="line">        CW_USEDEFAULT,</span><br><span class="line">        CW_USEDEFAULT,</span><br><span class="line">        <span class="literal">NULL</span>,</span><br><span class="line">        <span class="literal">NULL</span>,</span><br><span class="line">        hInstance,</span><br><span class="line">        <span class="literal">NULL</span>);</span><br><span class="line"></span><br><span class="line">    ShowWindow(hwnd, iCmdShow);</span><br><span class="line">    UpdateWindow(hwnd);</span><br><span class="line">    <span class="keyword">while</span> (GetMessage(&amp;msg, <span class="literal">NULL</span>, <span class="number">0</span>, <span class="number">0</span>))</span><br><span class="line">    &#123;</span><br><span class="line">        TranslateMessage(&amp;msg);</span><br><span class="line">        DispatchMessage(&amp;msg);</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">return</span> msg.wParam;</span><br><span class="line">&#125;</span><br><span class="line">LRESULT CALLBACK <span class="title function_">WndProc</span><span class="params">(HWND hwnd, UINT message, WPARAM wParam, LPARAM lParam)</span></span><br><span class="line">&#123;</span><br><span class="line">    HDC hdc;</span><br><span class="line">    PAINTSTRUCT ps;</span><br><span class="line">    RECT rect;</span><br><span class="line">    <span class="keyword">switch</span> (message)</span><br><span class="line">    &#123;</span><br><span class="line">    <span class="keyword">case</span> WM_PAINT:</span><br><span class="line">        hdc = BeginPaint(hwnd, &amp;ps);</span><br><span class="line">        GetClientRect(hwnd, &amp;rect);</span><br><span class="line">        EdrCenterText(hdc, &amp;rect, TEXT(<span class="string">&quot;in DLLLLLLLer&quot;</span>));</span><br><span class="line">        EndPaint(hwnd, &amp;ps);</span><br><span class="line">        <span class="keyword">return</span> <span class="number">0</span>;</span><br><span class="line">    <span class="keyword">case</span> WM_DESTROY:</span><br><span class="line">        PostQuitMessage(<span class="number">0</span>);</span><br><span class="line">        <span class="keyword">return</span> <span class="number">0</span>;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">return</span> DefWindowProc(hwnd, message, wParam, lParam);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>MSVC编译链接导入库</p>
+<figure class="highlight powershell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">cl /c EDRTEST.c</span><br><span class="line">link EDRTEST.obj EDRLIB.lib kernel32.lib user32.lib gdi32.lib</span><br></pre></td></tr></table></figure>
+<h3 id="运行时使用动态库"><a href="#运行时使用动态库" class="headerlink" title="运行时使用动态库"></a>运行时使用动态库</h3><p>由于EDRTEST.exe和EDRLIB.dll在同一目录下,因此装载器可以找到EDRLIB.dll,直接运行即可</p>
+<p><img src="https://raw.githubusercontent.com/DeutschBall/DeutschBall/main/image-20220819155710984.png" class="lazyload placeholder" data-srcset="https://raw.githubusercontent.com/DeutschBall/DeutschBall/main/image-20220819155710984.png" srcset="https://img2.baidu.com/it/u=2037979560,2772131037&fm=26&fmt=auto&gp=0.jpg" alt="image-20220819155710984"></p>
+<h2 id="TDM-GCC创建使用库"><a href="#TDM-GCC创建使用库" class="headerlink" title="TDM-GCC创建使用库"></a>TDM-GCC创建使用库</h2><p>我电脑上这个TDM-GCC来自于Dev-Cpp,把TDM-GCC的bin目录添加到环境变量path即可在终端上使用</p>
+<p>文件都不变</p>
+<h3 id="制作动态库-1"><a href="#制作动态库-1" class="headerlink" title="制作动态库"></a>制作动态库</h3><figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">gcc -shared EDRLIB.C -o EDRLIB.dll -luser32 -lgdi32 -lkernel32 </span><br></pre></td></tr></table></figure>
+<p>然而这一步完成之后只生成了dll动态库文件,没有生成lib导入库文件</p>
+<h3 id="链接动态库-1"><a href="#链接动态库-1" class="headerlink" title="链接动态库"></a>链接动态库</h3><figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">gcc EDRTEST.C -o EDRTEST.exe -lkernel32 -lgdi32 -luser32 -L./ -lEDRLIB ;执行在当前目录下寻找库文件,库文件名EDRLIB</span><br></pre></td></tr></table></figure>
+<h3 id="运行时使用动态库-1"><a href="#运行时使用动态库-1" class="headerlink" title="运行时使用动态库"></a>运行时使用动态库</h3><p>dll和exe同目录,可以直接运行</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">./EDRTEST.exe</span><br></pre></td></tr></table></figure>
+<p><img src="https://raw.githubusercontent.com/DeutschBall/DeutschBall/main/image-20220819161937488.png" class="lazyload placeholder" data-srcset="https://raw.githubusercontent.com/DeutschBall/DeutschBall/main/image-20220819161937488.png" srcset="https://img2.baidu.com/it/u=2037979560,2772131037&fm=26&fmt=auto&gp=0.jpg" alt="image-20220819161937488"></p>
+<p>效果和MSVC相同</p>
+<p>如果把MSVC形成的exe和TDM-GCC形成的dll放在同一目录则运行报错,反过来也这样,总之就是谁的exe就得有谁的dll支持</p>
+<h2 id="DllMain"><a href="#DllMain" class="headerlink" title="DllMain"></a>DllMain</h2><p>Dll文件也可以有入口点,DllMain函数,该函数会在Dll被装载或者卸载等等各时期被调用</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="type">int</span> WINAPI <span class="title function_">DllMain</span><span class="params">(HINSTANCE hInstance,DWORD fdwReason,PVOID pvReserved)</span>;</span><br></pre></td></tr></table></figure>
+<h3 id="参数意义"><a href="#参数意义" class="headerlink" title="参数意义"></a>参数意义</h3><p>hInstance是本DLL模块的句柄,实际上是本模块加载进入进程地址空间中的基地址</p>
+<p>fdwReason本DllMain函数被调用的原因</p>
+<div class="table-container">
+<table>
+<thead>
+<tr>
+<th style="text-align:left">值</th>
+<th style="text-align:left">含义</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:left"><strong>DLL_PROCESS_ATTACH</strong>(1)</td>
+<td style="text-align:left">由于进程启动或调用 <a target="_blank" rel="noopener" href="https://docs.microsoft.com/zh-cn/windows/win32/api/libloaderapi/nf-libloaderapi-loadlibrarya"><strong>LoadLibrary</strong></a>，DLL 正在加载到当前进程的虚拟地址空间中。 DLL 可以使用此机会初始化任何实例数据，或使用 <a target="_blank" rel="noopener" href="https://docs.microsoft.com/zh-cn/windows/desktop/api/processthreadsapi/nf-processthreadsapi-tlsalloc"><strong>TlsAlloc</strong></a> 函数分配线程本地存储 (TLS) 索引。 <em>lpvReserved</em> 参数指示是静态还是动态加载 DLL。</td>
+</tr>
+<tr>
+<td style="text-align:left"><strong>DLL_PROCESS_DETACH</strong>(0)</td>
+<td style="text-align:left">DLL 正在从调用进程的虚拟地址空间中卸载，因为它加载失败，或者引用计数已达到零， (进程每次调用 <a target="_blank" rel="noopener" href="https://docs.microsoft.com/zh-cn/windows/win32/api/libloaderapi/nf-libloaderapi-freelibrary"><strong>LoadLibrary</strong></a>) 时，都会终止或调用 <a target="_blank" rel="noopener" href="https://docs.microsoft.com/zh-cn/windows/win32/api/libloaderapi/nf-libloaderapi-loadlibrarya"><strong>FreeLibrary</strong></a> 。 <em>lpvReserved</em> 参数指示是否由于 <a target="_blank" rel="noopener" href="https://docs.microsoft.com/zh-cn/windows/win32/api/libloaderapi/nf-libloaderapi-freelibrary"><strong>FreeLibrary</strong></a> 调用、加载失败或进程终止而卸载 DLL。 DLL 可以使用此机会调用 <a target="_blank" rel="noopener" href="https://docs.microsoft.com/zh-cn/windows/desktop/api/processthreadsapi/nf-processthreadsapi-tlsfree"><strong>TlsFree</strong></a> 函数，以释放使用 <a target="_blank" rel="noopener" href="https://docs.microsoft.com/zh-cn/windows/desktop/api/processthreadsapi/nf-processthreadsapi-tlsalloc"><strong>TlsAlloc</strong></a> 分配的任何 TLS 索引，并释放任何线程本地数据。 请注意，接收 <strong>DLL_PROCESS_DETACH</strong> 通知的线程不一定是接收 <strong>DLL_PROCESS_ATTACH通知的</strong> 线程。</td>
+</tr>
+<tr>
+<td style="text-align:left"><strong>DLL_THREAD_ATTACH</strong>(2)</td>
+<td style="text-align:left">当前进程正在创建新线程。 发生这种情况时，系统会调用当前附加到进程的所有 DLL 的入口点函数。 调用是在新线程的上下文中进行的。 DLL 可以使用此机会初始化线程的 TLS 槽。 使用 <strong>DLL_PROCESS_ATTACH</strong> 调用 DLL 入口点函数的线程不会使用 <strong>DLL_THREAD_ATTACH</strong> 调用 DLL 入口点函数。 请注意，DLL 的入口点函数仅由进程加载 DLL 后创建的线程调用此值。 使用 <a target="_blank" rel="noopener" href="https://docs.microsoft.com/zh-cn/windows/win32/api/libloaderapi/nf-libloaderapi-loadlibrarya"><strong>LoadLibrary</strong></a> 加载 DLL 时，现有线程不会调用新加载 DLL 的入口点函数。</td>
+</tr>
+<tr>
+<td style="text-align:left"><strong>DLL_THREAD_DETACH</strong>(3)</td>
+<td style="text-align:left">线程已干净退出。 如果 DLL 已存储指向 TLS 槽中已分配内存的指针，则应使用此机会释放内存。 系统使用此值调用当前加载的所有 DLL 的入口点函数。 调用是在退出线程的上下文中进行的。</td>
+</tr>
+</tbody>
+</table>
+</div>
+<p>pvReserved尚未使用</p>
+<h3 id="分拣消息"><a href="#分拣消息" class="headerlink" title="分拣消息"></a>分拣消息</h3><p>DllMain的调用,和窗口过程函数WndProc的调用方式很像,</p>
+<p>WndProc调用时,message参数记录消息类型.</p>
+<p>DllMain调用时,fdwReason记录调用原因</p>
+<p>因此DllMain中可以根据调用原因的不同,设计不同的处理过程</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br></pre></td><td class="code"><pre><span class="line">BOOL WINAPI <span class="title function_">DllMain</span><span class="params">(</span></span><br><span class="line"><span class="params">    HINSTANCE hinstDLL,  <span class="comment">// handle to DLL module</span></span></span><br><span class="line"><span class="params">    DWORD fdwReason,     <span class="comment">// reason for calling function</span></span></span><br><span class="line"><span class="params">    LPVOID lpReserved )</span>  <span class="comment">// reserved</span></span><br><span class="line">&#123;</span><br><span class="line">    <span class="comment">// Perform actions based on the reason for calling.</span></span><br><span class="line">    <span class="keyword">switch</span>( fdwReason ) </span><br><span class="line">    &#123; </span><br><span class="line">        <span class="keyword">case</span> DLL_PROCESS_ATTACH:</span><br><span class="line">         <span class="comment">// Initialize once for each new process.</span></span><br><span class="line">         <span class="comment">// Return FALSE to fail DLL load.</span></span><br><span class="line">            <span class="keyword">break</span>;</span><br><span class="line"></span><br><span class="line">        <span class="keyword">case</span> DLL_THREAD_ATTACH:</span><br><span class="line">         <span class="comment">// Do thread-specific initialization.</span></span><br><span class="line">            <span class="keyword">break</span>;</span><br><span class="line"></span><br><span class="line">        <span class="keyword">case</span> DLL_THREAD_DETACH:</span><br><span class="line">         <span class="comment">// Do thread-specific cleanup.</span></span><br><span class="line">            <span class="keyword">break</span>;</span><br><span class="line"></span><br><span class="line">        <span class="keyword">case</span> DLL_PROCESS_DETACH:</span><br><span class="line">         <span class="comment">// Perform any necessary cleanup.</span></span><br><span class="line">            <span class="keyword">break</span>;</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">return</span> TRUE;  <span class="comment">// Successful DLL_PROCESS_ATTACH.</span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<h2 id="Windows消息钩取-Dll注入"><a href="#Windows消息钩取-Dll注入" class="headerlink" title="Windows消息钩取(Dll注入)"></a>Windows消息钩取(Dll注入)</h2><p>学习windows程序设计有一段时间了,我就知道了一个事,即消息会从操作系统的消息队列分发到应用程序的消息队列.比如键盘按下之后操作系统首先捕捉该消息,然后看看焦点窗口是谁,再把这个消息发给焦点窗口.</p>
+<p>而消息钩取就发生在这个消息分发的过程中,钩子程序可以监视从操作系统消息队列发往应用程序消息队列的所有消息</p>
+<h3 id="windows消息流"><a href="#windows消息流" class="headerlink" title="windows消息流"></a>windows消息流</h3><p>当发生键盘按下的时间时,WM_KEYDOWN消息首先被添加到操作系统消息队列</p>
+<p>操作系统判断是哪个应用程序发生的事件,然后从自己的消息队列中取出这个消息添加到对应应用程序的消息队列</p>
+<p>应用程序的消息循环不停地从自己的消息队列中取出消息并调用相应的事件处理程序(即窗口过程)</p>
+<blockquote>
+<p>这里窗口过程是回调形式的,因为同一个应用程序可以有多个窗口,自然可以有多个窗口过程,消息循环中的<code>DispatchMessage(&amp;msg);</code>可以决定将消息发往哪个窗口过程</p>
+</blockquote>
+<p>消息钩取发生在消息从OS消息队列到应用消息队列的路上</p>
+<p><img src="https://raw.githubusercontent.com/DeutschBall/DeutschBall/main/image-20220819173944182.png" class="lazyload placeholder" data-srcset="https://raw.githubusercontent.com/DeutschBall/DeutschBall/main/image-20220819173944182.png" srcset="https://img2.baidu.com/it/u=2037979560,2772131037&fm=26&fmt=auto&gp=0.jpg" alt="image-20220819173944182"></p>
+<h3 id="SetWindowsHookEx数注册钩子"><a href="#SetWindowsHookEx数注册钩子" class="headerlink" title="SetWindowsHookEx数注册钩子"></a>SetWindowsHookEx数注册钩子</h3><figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">HHOOK <span class="title function_">SetWindowsHookEx</span><span class="params">(</span></span><br><span class="line"><span class="params">   <span class="type">int</span> idHook,   <span class="comment">//hook type</span></span></span><br><span class="line"><span class="params">   HOOKPROC lpfn,  <span class="comment">//hook procedure</span></span></span><br><span class="line"><span class="params">   HINSTANCE hMod,  <span class="comment">//hook procedure所属的DLL句柄</span></span></span><br><span class="line"><span class="params">   DWORD dwThreadId <span class="comment">//将要挂钩的目标线程ID</span></span></span><br><span class="line"><span class="params">)</span>;</span><br></pre></td></tr></table></figure>
+<h4 id="参数意义-1"><a href="#参数意义-1" class="headerlink" title="参数意义"></a>参数意义</h4><h5 id="idHook"><a href="#idHook" class="headerlink" title="idHook"></a>idHook</h5><p>钩子类型,决定钩子的类型和范围</p>
+<p><img src="https://github.com/DeutschBall/DeutschBall/blob/main/20191231092715762.png?raw=true" class="lazyload placeholder" data-srcset="https://github.com/DeutschBall/DeutschBall/blob/main/20191231092715762.png?raw=true" srcset="https://img2.baidu.com/it/u=2037979560,2772131037&fm=26&fmt=auto&gp=0.jpg" alt="img"></p>
+<h5 id="lpfn"><a href="#lpfn" class="headerlink" title="lpfn"></a>lpfn</h5><p>钩子过程函数,需要存在于某个DLL内部</p>
+<p>该函数是一个回调函数,有固定的参数,返回值要求</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">LRESULT CALLBACK HookProc<span class="comment">//程序员对于钩子过程的名字还是有支配权的</span></span><br><span class="line">(</span><br><span class="line">  <span class="type">int</span> nCode,<span class="comment">//钩子代码,一种代码对应一种情况,钩子过程可以根据情况就事论事</span></span><br><span class="line">  WPARAM wParam,<span class="comment">//两个附属参数都是nCode的更详细信息,nCode确定了wParam才有意义</span></span><br><span class="line">  LPARAM lParam,</span><br><span class="line">);<span class="comment">//返回值一般直接写返回CallNextHookEx的返回值就行了,根WndProc返回DefWndProc差不多</span></span><br></pre></td></tr></table></figure>
+<p>这里(nCode,wParam,lParam)的消息组合起始和WndProc中的(message,wParam,lParam)很像</p>
+<p>nCode/message指定消息类型,wParam和lParam是具体的解释</p>
+<h5 id="hMod"><a href="#hMod" class="headerlink" title="hMod"></a>hMod</h5><p>钩子函数所在实例的句柄,即lpfn所在的DLL句柄</p>
+<p>如果是本地钩子,并且钩子就写在本程序中,那么hMod可以是本程序实例句柄,此时lpfn注册的函数也在本程序中,编译之后一运行,程序和钩子都在同一个进程地址空间,钩子可以猥琐欲为</p>
+<p>然而远程钩子,即这个进程钩取那个进程消息这种,就一定需要把钩子放在dll中,然后指望操作系统把这个dll,注入到远程进程的地址空间中了</p>
+<h5 id="dwThreadId"><a href="#dwThreadId" class="headerlink" title="dwThreadId"></a>dwThreadId</h5><p>挂钩的线程ID</p>
+<p>若该值为0则全局钩子,影响所有进程</p>
+<h4 id="返回值"><a href="#返回值" class="headerlink" title="返回值"></a>返回值</h4><p>HHOOK类型,即钩子句柄,钩子实际上也是一种内核数据结构,通过HHOOK句柄可以索引到该钩子</p>
+<p>SetWindowsHookEx如果调用成功则返回其注册的钩子,方便后来使用完毕后删除钩子</p>
+<h3 id="UnhookWindowsHookEx删除钩子"><a href="#UnhookWindowsHookEx删除钩子" class="headerlink" title="UnhookWindowsHookEx删除钩子"></a>UnhookWindowsHookEx删除钩子</h3><figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">BOOL <span class="title function_">UnhookWindowsHookEx</span><span class="params">(</span></span><br><span class="line"><span class="params">  [in] HHOOK hhk</span></span><br><span class="line"><span class="params">)</span>;</span><br></pre></td></tr></table></figure>
+<p>只需要一个钩子句柄HHOOK,这个值是SetWindowsHookEx的返回值,即可注销这次SetWindowsHookEx注册的钩子</p>
+<h3 id="钩链"><a href="#钩链" class="headerlink" title="钩链"></a>钩链</h3><p>每调用一次SetWindowsHookEx就会注册一层钩子,调用多了就形成一条钩链,</p>
+<p>最新注册的钩子<strong>最先</strong>截获消息</p>
+<p>当前钩子回调函数处理完成之后调用CallNextHookEx将消息传递给钩链上下一个钩子回调函数进行处理</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">LRESULT CALLBACK <span class="title function_">HookProc</span><span class="params">(<span class="type">int</span> nCode,WPARAM wParam,LPARAM lParam)</span>&#123;<span class="comment">//钩子过程,回调函数</span></span><br><span class="line">	...</span><br><span class="line">    <span class="keyword">return</span> CallNextHookEx(g_hHook,nCode,wParam,lParam);<span class="comment">//轮到下一个钩子了,如果这里不再调用下一个钩子则一般情况下钩链到此为止(但是就有那特殊情况)</span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<h3 id="钩取notepad-exe键盘消息"><a href="#钩取notepad-exe键盘消息" class="headerlink" title="钩取notepad.exe键盘消息"></a>钩取notepad.exe键盘消息</h3><p>本钩子只对windows32位的notepad.exe起作用,对如今电脑自带的记事本不起作用</p>
+<p>可以把windows XP虚拟机的notepad.exe拽出来做实验</p>
+<h4 id="钩子模块KeyHook-dll"><a href="#钩子模块KeyHook-dll" class="headerlink" title="钩子模块KeyHook.dll"></a>钩子模块KeyHook.dll</h4><figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;stdio.h&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;windows.h&gt;</span></span></span><br><span class="line"></span><br><span class="line"><span class="meta">#<span class="keyword">define</span> DEF_PROCESS_NAME <span class="string">&quot;notepad.exe&quot;</span></span></span><br><span class="line"></span><br><span class="line">HINSTANCE g_hInstance = <span class="literal">NULL</span>;</span><br><span class="line">HHOOK g_hHook = <span class="literal">NULL</span>;<span class="comment">//钩子句柄,由本模块自己维护</span></span><br><span class="line">HWND g_hWnd = <span class="literal">NULL</span>;</span><br><span class="line"></span><br><span class="line">BOOL WINAPI <span class="title function_">DllMain</span><span class="params">(HINSTANCE hInstDLL, DWORD dwReason, LPVOID lpvReserved)</span></span><br><span class="line">&#123;</span><br><span class="line">    <span class="keyword">switch</span> (dwReason)</span><br><span class="line">    &#123;</span><br><span class="line">    <span class="keyword">case</span> DLL_PROCESS_ATTACH:<span class="comment">//如果是因为进程附加则g_hInstance获取hInstDLL值</span></span><br><span class="line">        g_hInstance = hInstDLL;</span><br><span class="line">        <span class="keyword">break</span>;</span><br><span class="line">    <span class="keyword">case</span> DLL_PROCESS_DETACH:</span><br><span class="line">        <span class="keyword">break</span>;</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">return</span> TRUE;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">LRESULT CALLBACK <span class="title function_">KeyBoardProc</span><span class="params">(<span class="type">int</span> nCode,WPARAM wParam,LPARAM lParam)</span>&#123;<span class="comment">//钩子过程,回调函数</span></span><br><span class="line">    <span class="type">char</span> szPath[MAX_PATH]=&#123;<span class="number">0</span>,&#125;;</span><br><span class="line">    <span class="type">char</span> *p=<span class="literal">NULL</span>;</span><br><span class="line">    <span class="keyword">if</span>(nCode=<span class="number">0</span>)&#123;</span><br><span class="line">        <span class="keyword">if</span>(!(lParam&amp;<span class="number">0x80000000</span>))&#123;</span><br><span class="line">            GetModuleFileNameA(<span class="literal">NULL</span>,szPath,MAX_PATH);</span><br><span class="line">            p=<span class="built_in">strrchr</span>(szPath,<span class="string">&#x27;\\&#x27;</span>);</span><br><span class="line">            <span class="keyword">if</span>(!_stricmp(p+<span class="number">1</span>,DEF_PROCESS_NAME))<span class="keyword">return</span> <span class="number">1</span>;</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">return</span> CallNextHookEx(g_hHook,nCode,wParam,lParam);<span class="comment">//轮到狗链上的下一个钩子了</span></span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="meta">#<span class="keyword">ifdef</span> __cplusplus <span class="comment">//防止C++的命名重整,使得本库文件可以被C和C++程序使用</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">define</span> EXPORT extern <span class="string">&quot;C&quot;</span> __declspec(dllexport)</span></span><br><span class="line"><span class="meta">#<span class="keyword">else</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">define</span> EXPORT __declspec(dllexport)</span></span><br><span class="line"><span class="meta">#<span class="keyword">endif</span></span></span><br><span class="line"></span><br><span class="line">EXPORT <span class="type">void</span> <span class="title function_">HookStart</span><span class="params">()</span>&#123;<span class="comment">//导出函数,启动钩子</span></span><br><span class="line">    g_hHook=SetWindowsHookEx(WH_KEYBOARD,KeyBoardProc,g_hInstance,<span class="number">0</span>);</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">EXPORT <span class="type">void</span> <span class="title function_">HookStop</span><span class="params">()</span>&#123;<span class="comment">//导出函数,停止钩子</span></span><br><span class="line">    <span class="keyword">if</span>(g_hHook)&#123;</span><br><span class="line">        UnhookWindowsHookEx(g_hHook);</span><br><span class="line">        g_hHook=<span class="literal">NULL</span>;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">g++ KeyHook.cpp -shared -o KeyHook.dll</span><br></pre></td></tr></table></figure>
+<p>本模块导出了两个函数,注册和注销钩子</p>
+<p>HookStart设置钩子类型为键盘型,并且注册了钩子过程回调函数KeyBoardProc,设置本模块为钩子所在模块,钩最后一个参数为0表明本钩子模块将被注入所有进程的地址空间</p>
+<p>关键在于钩子过程回调函数KeyBoardProc,这个回调函数的返回值,参数个数,类型,意义,都是有固定要求的,除了函数名可以随便写</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line">LRESULT CALLBACK <span class="title function_">KeyBoardProc</span><span class="params">(<span class="type">int</span> nCode,WPARAM wParam,LPARAM lParam)</span>&#123;<span class="comment">//钩子过程,回调函数</span></span><br><span class="line">    <span class="type">char</span> szPath[MAX_PATH]=&#123;<span class="number">0</span>,&#125;;</span><br><span class="line">    <span class="type">char</span> *p=<span class="literal">NULL</span>;</span><br><span class="line">    <span class="keyword">if</span>(nCode=<span class="number">0</span>)&#123;<span class="comment">//当nCode=时对应键盘消息</span></span><br><span class="line">        <span class="keyword">if</span>(!(lParam&amp;<span class="number">0x80000000</span>))&#123;</span><br><span class="line">            GetModuleFileNameA(<span class="literal">NULL</span>,szPath,MAX_PATH);</span><br><span class="line">            p=<span class="built_in">strrchr</span>(szPath,<span class="string">&#x27;\\&#x27;</span>);<span class="comment">//返回szpath中最后一次出现&#x27;\&#x27;的位置</span></span><br><span class="line">            <span class="keyword">if</span>(!_stricmp(p+<span class="number">1</span>,DEF_PROCESS_NAME))<span class="keyword">return</span> <span class="number">1</span>;</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">return</span> CallNextHookEx(g_hHook,nCode,wParam,lParam);<span class="comment">//轮到下一个钩链了</span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<blockquote>
+<p>当GetMessage或者PeekMessage被调用时或者键盘消息发生时(WM_KEYUP,WM_KEYDOWN),操作系统会调用KeyBoardProc函数</p>
+<blockquote>
+<p>这个函数叫啥无所谓,KeyBoardProc,HookProc等等,只要是SetWindowsEx把他注册上就行</p>
+</blockquote>
+<p>对于键盘类型的钩子,其nCode有两种</p>
+<p>HC_ACTION(0)和HC_NOREMOVE(3)</p>
+<p>当nCode=HC_ACTION,此时wParam和lParam携带击键信息,和击键消息时的作用差不多</p>
+<p>当nCode=HC_NOREMOVE,此时wParam和lParam携带击键信息,并且该消息尚未被从应用程序消息队列中移除</p>
+<p>wParam是虚拟键编码</p>
+<p>lParam</p>
+<div class="table-container">
+<table>
+<thead>
+<tr>
+<th style="text-align:left">Bits</th>
+<th style="text-align:left">Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:left">0-15</td>
+<td style="text-align:left">重复击键次数</td>
+</tr>
+<tr>
+<td style="text-align:left">16-23</td>
+<td style="text-align:left">OEM扫描码,基本用不到了</td>
+</tr>
+<tr>
+<td style="text-align:left">24</td>
+<td style="text-align:left">是否为拓展键</td>
+</tr>
+<tr>
+<td style="text-align:left">25-28</td>
+<td style="text-align:left">保留</td>
+</tr>
+<tr>
+<td style="text-align:left">29</td>
+<td style="text-align:left">如果Alt按下则为1</td>
+</tr>
+<tr>
+<td style="text-align:left">30</td>
+<td style="text-align:left">本键的先前状态,如果先前按下则为1</td>
+</tr>
+<tr>
+<td style="text-align:left">31</td>
+<td style="text-align:left">本键状态,如果正在按下则为0</td>
+</tr>
+</tbody>
+</table>
+</div>
+</blockquote>
+<h5 id="if-nCode-0"><a href="#if-nCode-0" class="headerlink" title="if(nCode=0)"></a>if(nCode=0)</h5><p>例子中首先判断nCode=0,这就确定了lParam和wParam代表的意义</p>
+<h5 id="if-lParam-amp-0x80000000"><a href="#if-lParam-amp-0x80000000" class="headerlink" title="if(!(lParam&amp;0x80000000))"></a>if(!(lParam&amp;0x80000000))</h5><p>然后判断lParam的第31位是否是0,如果是0即对应键正在按下,则通过判断</p>
+<h5 id="GetModuleFileNameA-NULL-szPath-MAX-PATH"><a href="#GetModuleFileNameA-NULL-szPath-MAX-PATH" class="headerlink" title="GetModuleFileNameA(NULL,szPath,MAX_PATH);"></a>GetModuleFileNameA(NULL,szPath,MAX_PATH);</h5><p>本函数用于获取本进程已经加载的模块的完整路径名</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">DWORD <span class="title function_">GetModuleFileNameA</span><span class="params">(</span></span><br><span class="line"><span class="params">  [in, optional] HMODULE hModule,</span></span><br><span class="line"><span class="params">  [out]          LPSTR   lpFilename,</span></span><br><span class="line"><span class="params">  [in]           DWORD   nSize</span></span><br><span class="line"><span class="params">)</span>;</span><br></pre></td></tr></table></figure>
+<p>hModule指定一个本进程已经加载的模块,如果是NULL则返回当前exe应用程序的完整路径</p>
+<p>lpFilename用于承载本函数返回的路径的缓冲区</p>
+<p>nSize指定lpFilename的大小,防止缓冲区溢出</p>
+<p>本例子中这样写<code>GetModuleFileNameA(NULL,szPath,MAX_PATH);</code></p>
+<p>意思就是获取当前exe程序完整路径,放到szPath字符串数组中,该路径最长不能超过MAX_PATH长度</p>
+<h5 id="p-strrchr-szPath-39-39"><a href="#p-strrchr-szPath-39-39" class="headerlink" title="p=strrchr(szPath,&#39;\\&#39;)"></a><code>p=strrchr(szPath,&#39;\\&#39;)</code></h5><p>strrchr用于返回szPath字符串中最后一次出现<code>\</code>字符的指针位置</p>
+<blockquote>
+<p>这里写了两个斜杠,第一个斜杠是转义的意思</p>
+</blockquote>
+<h5 id="if-stricmp-p-1-DEF-PROCESS-NAME"><a href="#if-stricmp-p-1-DEF-PROCESS-NAME" class="headerlink" title="if(!_stricmp(p+1,DEF_PROCESS_NAME))"></a>if(!_stricmp(p+1,DEF_PROCESS_NAME))</h5><p>stricmp相对于strcmp来说不区分字母大小写</p>
+<p>这里DEF_PROCESS_NAME宏定义为”notepad.exe”</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#<span class="keyword">define</span> DEF_PROCESS_NAME <span class="string">&quot;notepad.exe&quot;</span></span></span><br></pre></td></tr></table></figure>
+<p>即这里判断了刚才返回的本exe文件的名称是否是”notepad.exe”</p>
+<p>如果是则返回1,那么该键盘消息就在钩链上中止了,无法到达notepad应用程序的消息队列了,自然表现为无法获取键盘输入</p>
+<blockquote>
+<p>这里钩子函数明明在KeyHook.dll中,那么怎么获取”本exe文件的名称”呢?</p>
+<p>这是因为后来本dll文件会被操作系统强行注入exe进程的地址空间</p>
+</blockquote>
+<p>前面进行了三次判断,要求</p>
+<p>nCode==1表示键盘消息</p>
+<p>lParam最高位为0表示键按下</p>
+<p>当前应用程序名叫”notepad.exe”</p>
+<p>如果有一次不满足则</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">return</span> CallNextHookEx(g_hHook,nCode,wParam,lParam);</span><br></pre></td></tr></table></figure>
+<p>如果都满足则不再继续钩子,直接返回1</p>
+<h4 id="HookMain-exe"><a href="#HookMain-exe" class="headerlink" title="HookMain.exe"></a>HookMain.exe</h4><p>钩子以dll模块的形式打包,HookMain.exe相当于一个注射器,只要HookMain.exe以运行,钩子模块就会被注入所有进程的地址空间.</p>
+<p>钩子自己判断了当前注入的进程,是不是notepad进程,如果是则中断键盘消息的传送,否则继续传递键盘消息</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;stdio.h&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;conio.h&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;windows.h&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;iostream&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">define</span> DEF_DLL_NAME <span class="string">&quot;KeyHook.dll&quot;</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">define</span> DEF_HOOKSTART <span class="string">&quot;HookStart&quot;</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">define</span> DEF_HOOKSTOP <span class="string">&quot;HookStop&quot;</span></span></span><br><span class="line">using namespace <span class="built_in">std</span>;</span><br><span class="line"><span class="keyword">typedef</span> <span class="title function_">void</span> <span class="params">(*PFN_HOOKSTART)</span><span class="params">()</span>;</span><br><span class="line"><span class="keyword">typedef</span> <span class="title function_">void</span> <span class="params">(*PFN_HOOKSTOP)</span><span class="params">()</span>;</span><br><span class="line">PFN_HOOKSTART HookStart = <span class="literal">NULL</span>;</span><br><span class="line">PFN_HOOKSTOP HookStop = <span class="literal">NULL</span>;</span><br><span class="line">HMODULE hDll = <span class="literal">NULL</span>;</span><br><span class="line"><span class="type">int</span> <span class="title function_">main</span><span class="params">()</span></span><br><span class="line">&#123;</span><br><span class="line">    hDll = LoadLibraryA(DEF_DLL_NAME);</span><br><span class="line">    <span class="keyword">if</span> (!hDll)</span><br><span class="line">    &#123;</span><br><span class="line">        <span class="built_in">cout</span> &lt;&lt; <span class="string">&quot;load dll failed&quot;</span> &lt;&lt; <span class="built_in">endl</span>;</span><br><span class="line">    &#125;</span><br><span class="line">    HookStart = (PFN_HOOKSTART)GetProcAddress(hDll, DEF_HOOKSTART);</span><br><span class="line">    HookStop = (PFN_HOOKSTOP)GetProcAddress(hDll, DEF_HOOKSTOP);</span><br><span class="line">    <span class="keyword">if</span> (!HookStart || !HookStop)</span><br><span class="line">    &#123;</span><br><span class="line">        <span class="built_in">cout</span> &lt;&lt; <span class="string">&quot;load function failed&quot;</span> &lt;&lt; <span class="built_in">endl</span>;</span><br><span class="line">    &#125;</span><br><span class="line">    HookStart();<span class="comment">//注册钩子</span></span><br><span class="line">    getchar();<span class="comment">//如果不输入则钩子一直起作用</span></span><br><span class="line">    HookStop();<span class="comment">//注销钩子</span></span><br><span class="line">    FreeLibrary(hDll);<span class="comment">//卸载模块</span></span><br><span class="line"></span><br><span class="line">    <span class="keyword">return</span> <span class="number">0</span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+      </div>
+      <div class="post-tags-categories">
+        
+        <div class="tags">
+          
+            <a href="/tags/windows%E7%A8%8B%E5%BA%8F%E8%AE%BE%E8%AE%A1/" class="">
+              windows程序设计
+            </a>
+          
+        </div>
+        
+      </div>
+      
+    </article>
+    <!-- 上一篇文章和下一篇文章 -->
+    
+      <!-- 文章详情页的上一页和下一页 -->
+<div class="post-nav">
+
+
+
+
+
+  
+  <div class="post-nav-next post-nav-item">
+    <div class="post-nav-img" style="background-size: cover; 
+      background-position: center center;">
+      <img class="lazyload lazyload placeholder" src="/medias/14.jpg" class="lazyload placeholder" data-srcset="/medias/14.jpg" srcset="https://img2.baidu.com/it/u=2037979560,2772131037&fm=26&fmt=auto&gp=0.jpg" src="" alt="">
+    </div>
+    <a href="/2022/08/19/lib%E6%96%87%E4%BB%B6%E6%A0%BC%E5%BC%8F%E8%A7%A3%E6%9E%90/" class="post-nav-link">
+      <div class="title">
+        Next: <i class="fas fa-angle-right"></i>
+        <div class="title-text">程序员的自我修养 chapter 9 LIB</div>
+      </div>
+      <!-- <div class="content">
+        windows LIB文件格式静态库以Math.c为例,将其分别编译静态库文件libMath.lib
+Math.c
+12
+      </div> -->
+    </a>
+  </div>
+
+</div>
+
+    
+    
+
+    <!-- 打赏 -->
+    
+
+    <!-- 分享 -->
+    
+      <!-- https://github.com/overtrue/share.js -->
+<!-- 文章详情页的分享 -->
+<div class="social-share" data-sites="twitter,facebook,google,qq,qzone,wechat,weibo,douban,linkedin" data-wechat-qrcode-helper="<p>微信扫一扫即可分享！</p>"></div>
+
+<script src="/js/shareJs/social-share.min.js"></script>
+</script>
+
+<style>
+  .social-share {
+    margin: 20px 0;
+  }
+</style>
+
+
+    
+    
+    <!-- 评论 -->
+    <!-- 评论 -->
+
+  <div id="myComment">
+    
+      
+<section id="comments" style="padding: 1em; margin: 15px auto;"
+	class="animated bounceInUp">
+	<div id="vcomment" class="comment"></div>
+</section>
+<style>
+	#comments {
+		background: rgba(255,255,255,0.9);
+	}
+	#veditor {
+		background-image: url('https://raw.githubusercontent.com/DeutschBall/test/master/R.3c3e443dfe9ddbddc93730c482ed0461');
+		background-size: contain;
+		background-repeat: no-repeat;
+		background-position: right;
+		background-color: rgba(255, 255, 255, 0);
+		resize: vertical;
+	}
+	#veditor:focus{
+		background-position-y: 200px;
+		transition: all 0.2s ease-in-out 0s;
+	}
+	#vcomment .vcards .vcard .vh .vhead .vtag.vvisitor {
+		background-color: #42b983;
+	}
+	.v[data-class=v] .vbtn:active, .v[data-class=v] .vbtn:hover {
+		color: #42b983;
+		border-color: #42b983;
+	}
+	#vcomment .vcards .vcard .vhead .vsys i {
+		display: none;
+	}
+	/* 底部valine链接 */
+	#vcomment .vpower {
+		display: none;
+	}
+	
+	/* 底下注释是修改 名称和邮箱和网址输入框的样式 */
+	/* #vcomment .vheader {
+		display: flex;
+		justify-content: space-around;
+	}
+	
+	#vcomment .vheader .vnick {
+		width: 31%;
+		border: 2px solid #dedede;
+		padding-left: 10px;
+		padding-right: 10px;
+		border-radius: 5px
+	}
+
+	#vcomment .vheader .vmail {
+		width: 31%;
+		border: 2px solid #dedede;
+		padding-left: 10px;
+		padding-right: 10px;
+		border-radius: 5px
+	}
+
+	#vcomment .vheader .vlink {
+		width: 31%;
+		border: 2px solid #dedede;
+		padding-left: 10px;
+		padding-right: 10px;
+		border-radius: 5px
+	} */
+
+	img.vimg {
+		transition: all 1s;
+		/* 头像旋转时间为 1s */
+	}
+
+	img.vimg:hover {
+		transform: rotate(360deg);
+		-webkit-transform: rotate(360deg);
+		-moz-transform: rotate(360deg);
+		-o-transform: rotate(360deg);
+		-ms-transform: rotate(360deg);
+	}
+
+	#vcomment .vcards .vcard {
+		padding: 15px 20px 0 20px;
+		border-radius: 10px;
+		margin-bottom: 15px;
+		box-shadow: 0 0 4px 1px rgba(0, 0, 0, .12);
+		transition: all .3s
+	}
+
+	#vcomment .vcards .vcard:hover {
+		box-shadow: 0 0 8px 3px rgba(0, 0, 0, .12)
+	}
+
+	#vcomment .vcards .vcard .vh .vcard {
+		border: none;
+		box-shadow: none;
+	}
+</style>
+    
+  </div>
+
+<!-- comment script in themes\hexo-theme-bamboo\layout\_partial\scripts\index.ejs -->
+
+
+  </div>
+
+  <!-- 目录 -->
+  <!-- 文章详情页右侧目录 -->
+
+  <div class="toc-aside">
+    <div class="toc-main">
+      <div class="toc-aside-title">
+        <i class="fas fa-list-ul" aria-hidden="true"></i><span>catalog</span>
+        
+          <div class="toc-open-close">catalog</div>
+        
+      </div>
+      <div class="toc-content">
+        <div class="toc"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 手机端目录按钮 -->
+  <div id="toc-mobile-btn">
+    <i class="fas fa-list-ul" aria-hidden="true"></i>
+  </div>
+
+
+<script>
+  function closeToc(init) {
+    $(".toc-aside").css({'width': 0, 'padding': 0, 'transition': init ?  'noe' : 'width 0.3s' });
+    $(".toc-content").css({'width': 0});
+    $(".toc-aside-title span, .toc-aside-title i").css({'display': 'none'});
+    $(".main-content").css({'width': '75%', 'margin': '10px auto'});
+  };
+  function openToc() {
+    $(".main-content").css({'width': '65%', 'margin-right': '10px', 'margin-left': 'calc(35% - 350px)'});
+    $(".toc-aside").css({'width': '300px', 'padding': '0 10px', 'transition': 'width 0.3s'});
+    $(".toc-content").css({'width': '300px'});
+    $(".toc-aside-title span, .toc-aside-title i").css({'display': 'inline-block'});
+  }
+  function openBtnClickFn () {
+    let openOrCloseBtn = $('.toc-aside .toc-aside-title .toc-open-close');
+    let open = eval('' || 'true');
+    openOrCloseBtn.click(function() {
+      if (open) {
+        closeToc();
+        open = false;
+      } else {
+        openToc();
+        open = true;
+      }
+    });
+  };
+  openBtnClickFn();
+  initCloseTocWidth(true);
+
+  function initCloseTocWidth(init) {
+    if (window.innerWidth >= 992) {
+      let isClose = false;
+      isClose && closeToc(init)
+    }
+  }
+
+  document.addEventListener('pjax:complete', function () {
+    $(".toc-aside").css({'transition': 'no'});
+  })
+  document.addEventListener('pjax:complete', function () {
+    openBtnClickFn();
+  })
+  
+</script>
+
+  <!-- 图片放大 Wrap images with fancybox support -->
+  <script src="/js/wrapImage.js"></script>
+</div>
+
+<!-- 文章详情页背景图 -->
+<div id="appBgSwiper" style="position: fixed;left: 0;top: 0;width: 100%;height: 100%;z-index: -2;"
+	:style="{'background-color': bgColor ? bgColor : 'transparent'}">
+	<transition-group tag="ul" :name="names">
+		<li v-for='(image,index) in img' :key='index' v-show="index === mark" class="bg-swiper-box">
+			<img :src="image" class="bg-swiper-img no-lazy">
+		</li>
+	</transition-group>
+</div>
+<script>
+	var vm = new Vue({
+		el: '#appBgSwiper',
+		data: {
+			names: '' || 'fade' || 'fade', // translate-fade fade
+			mark: 0,
+			img: [],
+			bgColor: '',
+			time: null
+		},
+		methods: {   //添加方法
+			change(i, m) {
+				if (i > m) {
+					// this.names = 'fade';
+				} else if (i < m) {
+					// this.names = 'fade';
+				} else {
+					return;
+				}
+				this.mark = i;
+			},
+			prev() {
+				// this.names = 'fade';
+				this.mark--;
+				if (this.mark === -1) {
+					this.mark = 3;
+					return
+				}
+			},
+			next() {
+				// this.names = 'fade';
+				this.mark++;
+				if (this.mark === this.img.length) {
+					this.mark = 0;
+					return
+				}
+			},
+			autoPlay() {
+				// this.names = 'fade';
+				this.mark++;
+				if (this.mark === this.img.length) {
+					this.mark = 0;
+					return
+				}
+			},
+			play() {
+				let bgImgDelay = '' || '180000'
+				let delay = parseInt(bgImgDelay) || 180000;
+				this.time = setInterval(this.autoPlay, delay);
+			},
+			enter() {
+				clearInterval(this.time);
+			},
+			leave() {
+				this.play();
+			}
+		},
+		created() {
+			this.play()
+		},
+		beforeDestroy() {
+			clearInterval(this.time);
+		},
+		mounted() {
+			let prop = '' || '';
+			let isImg = prop.includes('.bmp') || prop.includes('.jpg') || prop.includes('.png') || prop.includes('.tif') || prop.includes('.gif') || prop.includes('.pcx') || prop.includes('.tga') || prop.includes('.exif') || prop.includes('.fpx') || prop.includes('.psd') || prop.includes('.cdr') || prop.includes('.pcd') || prop.includes('.dxf') || prop.includes('.ufo') || prop.includes('.eps') || prop.includes('.ai') || prop.includes('.raw') || prop.includes('.WMF') || prop.includes('.webp') || prop.includes('.jpeg') || prop.includes('http://') || prop.includes('https://')
+			if (isImg) {
+				let img = prop.split(',');
+				let configRoot = '/'
+				let arrImg = [];
+				img.forEach(el => {
+					var Expression = /http(s)?:\/\/([\w-]+\.)+[\w-]+(\/[\w- .\/?%&=]*)?/;
+					var objExp = new RegExp(Expression);
+
+					if (objExp.test(el)) {
+						// http or https
+						arrImg.push(el);
+					} else {
+						// 非http or https开头
+						// 本地文件
+						let firstStr = el.charAt(0);
+						if (firstStr == '/') {
+							el = el.substr(1); // 删除第一个字符 '/',因为 configRoot最后一个字符为 /
+						}
+						el = configRoot + el;
+						arrImg.push(el);
+					}
+				})
+				this.img = arrImg;
+			} else {
+				this.bgColor = prop;
+			}
+		}
+	})
+</script>
+
+<style>
+	.bg-swiper-box {
+		position: absolute;
+		display: block;
+		width: 100%;
+		height: 100%;
+	}
+
+	.bg-swiper-img {
+		object-fit: cover;
+		width: 100%;
+		height: 100%;
+	}
+</style>
+
+
+  <script>
+  // https://github.com/theme-next/hexo-theme-next/blob/master/layout/_third-party/math/mathjax.swig
+  if (typeof MathJax === 'undefined') {
+    window.MathJax = {
+      loader: {
+        source: {
+          '[tex]/amsCd': '[tex]/amscd',
+          '[tex]/AMScd': '[tex]/amscd'
+        }
+      },
+      tex: {
+        inlineMath: {'[+]': [['$', '$']]},
+        tags: 'ams'
+      },
+      options: {
+        renderActions: {
+          findScript: [10, doc => {
+            document.querySelectorAll('script[type^="math/tex"]').forEach(node => {
+              const display = !!node.type.match(/; *mode=display/);
+              const math = new doc.options.MathItem(node.textContent, doc.inputJax[0], display);
+              const text = document.createTextNode('');
+              node.parentNode.replaceChild(text, node);
+              math.start = {node: text, delim: '', n: 0};
+              math.end = {node: text, delim: '', n: 0};
+              doc.math.push(math);
+            });
+          }, '', false],
+          insertedScript: [200, () => {
+            document.querySelectorAll('mjx-container').forEach(node => {
+              let target = node.parentNode;
+              if (target.nodeName.toLowerCase() === 'li') {
+                target.parentNode.classList.add('has-jax');
+              }
+            });
+          }, '', false]
+        }
+      }
+    };
+    (function () {
+      var script = document.createElement('script');
+      script.src = 'https://cdn.jsdelivr.net/npm/mathjax@3.0/es5/tex-mml-chtml.js';
+      script.defer = true;
+      document.head.appendChild(script);
+    })();
+  } else {
+    // 文章章节标题不能为 “MathJax” ，否则会报错。
+    MathJax.startup.document.state(0);
+    MathJax.texReset();
+    MathJax.typeset();
+  }
+</script>
+
+
+
+
+  <script>
+  function loadMermaid() {
+    if (document.getElementsByClassName('mermaid').length) {
+      if (window.mermaidJsLoad) mermaid.init()
+      else {
+        loadScript('https://cdn.jsdelivr.net/npm/mermaid/dist/mermaid.min.js').then(() => {
+          window.mermaidJsLoad = true
+          mermaid.initialize({
+            theme: 'default',
+          })
+          if ('true') {
+            mermaid.init();
+          }
+        })
+      }
+    }
+  };
+  document.addEventListener("DOMContentLoaded", function () {
+    loadMermaid();
+  })
+
+  document.addEventListener('pjax:complete', function () {
+    loadMermaid();
+  })
+  
+</script>
+
+
+      </main>
+    </div>
+
+    <!-- 页脚 -->
+    
+  
+  <div class="footer bg-color">
+    <div class="footer-main">
+      
+        
+          <div class="link">
+            
+          </div>
+        
+      
+        
+          <div class="footer-copyright">
+            <p>Copyright © 2019 - 2020 <a target="_blank" rel="noopener" href="https://github.com/yuang01">Deutschball</a> | Powered by <a target="_blank" rel="noopener" href="https://hexo.io/zh-cn/docs/">Deutschball</a> | Theme <a target="_blank" rel="noopener" href="https://github.com/yuang01/theme">Bamboo</a> </p>
+
+          </div>
+        
+      
+        
+          
+        
+      
+        
+          <div class="footer-custom">
+            
+          </div>
+        
+      
+    </div>
+  </div>
+
+<script src='https://unpkg.com/mermaid@/dist/mermaid.min.js'></script>
+<script>
+  if (window.mermaid) {
+    mermaid.initialize({theme: 'forest'});
+  }
+</script>
+
+
+
+
+    <!-- 渲染暗黑按钮 -->
+    
+    <!-- 渲染回到顶部按钮 -->
+    
+      <div class="goTop top-btn-color" pointer>
+  <i class="fas fa-arrow-up" aria-hidden="true"></i>
+</div>
+<script src="/js/goTop.js"></script>
+
+    
+    <!-- 渲染左下角音乐播放器 -->
+    
+
+    <!-- 图片放大 -->
+    
+      <script src="/js/fancybox/jquery.fancybox.min.js"></script>
+    
+
+    <!-- 百度解析 -->
+    <!-- Baidu Analytics -->
+
+    <!-- Baidu Push -->
+
+<script>
+    (function () {
+        var bp = document.createElement('script');
+        var curProtocol = window.location.protocol.split(':')[0];
+        if (curProtocol === 'https') {
+            bp.src = 'https://zz.bdstatic.com/linksubmit/push.js';
+        } else {
+            bp.src = 'http://push.zhanzhang.baidu.com/push.js';
+        }
+        var s = document.getElementsByTagName("script")[0];
+        s.parentNode.insertBefore(bp, s);
+    })();
+</script>
+
+    
+    <!-- 背景彩带 -->
+    
+      <script type="text/javascript" size="100" alpha='0.4' zIndex="-1" src="/js/ribbon.min.js"></script>
+    
+
+    <script src="/js/utils/index.js"></script>
+    <script src="/js/app.js"></script>
+    
+    <!-- 文章目录所需js -->
+<link href="/js/tocbot/tocbot.css" rel="stylesheet">
+<script src="/js/tocbot/tocbot.min.js"></script>
+
+<script>
+  var headerEl = 'h2, h3, h4, h5, h6',  //headers 
+    content = '.post-detail',//文章容器
+    idArr = {};  //标题数组以确定是否增加索引id
+  //add #id
+  var option = {
+    // Where to render the table of contents.
+    tocSelector: '.toc',
+    // Where to grab the headings to build the table of contents.
+    contentSelector: content,
+    // Which headings to grab inside of the contentSelector element.
+    headingSelector: headerEl,
+    scrollSmooth: true,
+    scrollSmoothOffset: -80,
+    headingsOffset: -($(window).height() * 0.4 - 45),
+    positionFixedSelector: '.toc-main',
+    positionFixedClass: 'is-position-fixed',
+    fixedSidebarOffset: 'auto',
+    activeLinkClass: 'is-active-link',
+    // onClick: function (e) {},
+  }
+  if ($('.toc').length > 0) {
+
+    $(content).children(headerEl).each(function () {
+      //去除空格以及多余标点
+      var headerId = $(this).text().replace(/[\s|\~|`|\!|\@|\#|\$|\%|\^|\&|\*|\(|\)|\_|\+|\=|\||\|\[|\]|\{|\}|\;|\:|\"|\'|\,|\<|\.|\>|\/|\?|\：|\，|\。]/g, '');
+
+      headerId = headerId.toLowerCase();
+      if (idArr[headerId]) {
+        //id已经存在
+        $(this).attr('id', headerId + '-' + idArr[headerId]);
+        idArr[headerId]++;
+      }
+      else {
+        //id未存在
+        idArr[headerId] = 1;
+        $(this).attr('id', headerId);
+      }
+    });
+
+    document.addEventListener("DOMContentLoaded", function () {
+      tocbot.init(option);
+      mobileTocClick();
+    });
+
+  }
+
+  window.tocScrollFn = function () {
+    return bamboo.throttle(function () {
+      findHeadPosition();
+    }, 100)()
+  }
+  window.addEventListener('scroll', tocScrollFn);
+
+  const findHeadPosition = function (top) {
+    if ($('.toc-list').length <= 0) {
+      return false;
+    }
+    setTimeout(() => {  // or DOMContentLoaded 
+      autoScrollToc();
+    }, 0);
+  }
+
+  const autoScrollToc = function () {
+    const $activeItem = document.querySelector('.is-active-link');
+    const $cardToc = document.querySelector('.toc-content');
+    const activePosition = $activeItem.getBoundingClientRect().top
+    const sidebarScrollTop = $cardToc.scrollTop
+    if (activePosition > (document.documentElement.clientHeight - 100)) {
+      $cardToc.scrollTop = sidebarScrollTop + 150
+    }
+    if (activePosition < 100) {
+      $cardToc.scrollTop = sidebarScrollTop - 150
+    }
+  }
+
+  document.addEventListener('pjax:send', function () {
+    if ($('.toc').length) {
+      tocbot.destroy();
+    }
+  });
+
+  document.addEventListener('pjax:complete', function () {
+    if ($('.toc').length) {
+      tocbot.init(option);
+      mobileTocClick();
+    }
+  });
+  
+  // 手机端toc按钮点击出现目录
+  const mobileTocClick = function () {
+    const $cardTocLayout = document.getElementsByClassName('toc-aside')[0];
+    const $cardToc = $cardTocLayout.getElementsByClassName('toc-content')[0];
+    let right = '45px';
+    if (window.innerWidth >= 551 && window.innerWidth <= 992) {
+      right = '100px'
+    }
+    const mobileToc = {
+      open: () => {
+        $cardTocLayout.style.cssText = 'animation: toc-open .3s; opacity: 1; right: ' + right
+      },
+
+      close: () => {
+        $cardTocLayout.style.animation = 'toc-close .2s'
+        setTimeout(() => {
+          $cardTocLayout.style.cssText = "opacity:''; animation: ''; right: ''"
+        }, 100)
+      }
+    }
+    document.getElementById('toc-mobile-btn').addEventListener('click', () => {
+      if (window.getComputedStyle($cardTocLayout).getPropertyValue('opacity') === '0') mobileToc.open()
+      else mobileToc.close()
+    })
+
+    $cardToc.addEventListener('click', (e) => {
+      if (window.innerWidth < 992) { // 小于992px的时候
+        mobileToc.close()
+      }
+    })
+  }
+</script>
+
+<style>
+  .is-position-fixed {
+    position: sticky !important;
+    top: 74px;
+  }
+
+  .toc-main ul {
+    counter-reset: show-list;
+  }
+
+  .toc-main ul li::before {
+    content: counter(item)".";
+    display: block;
+    position: absolute;
+    left: 12px;
+    top: 0;
+  }
+</style> 
+
+<!-- 设置导航背景 -->
+<script>
+  let setHeaderClass = () => {
+    const headerMenuTransparent = true;
+    if (!headerMenuTransparent) { return; }
+    const nav = $('#navHeader');
+    const navTop = nav.outerHeight();
+    const winTop = $(window).scrollTop();
+    if(winTop > navTop) {
+      nav.addClass('header-bg-color');
+    }
+    else {
+      nav.removeClass('header-bg-color');
+    }
+  };
+
+  let scrollCollect = () => {
+    return bamboo.throttle(function (e) {
+      setHeaderClass();
+    }, 200)()
+  }
+
+  let initHeaderBg = () => {
+    setHeaderClass();
+  }
+
+  setHeaderClass();
+  window.addEventListener('scroll', scrollCollect);
+
+  document.addEventListener('pjax:send', function () {
+    window.removeEventListener('scroll', scrollCollect)
+  })
+  document.addEventListener('pjax:complete', function () {
+    window.addEventListener('scroll', scrollCollect);
+    setHeaderClass();
+  })
+</script> 
+
+<!-- 渲染issues标签里的内容 -->
+<script>
+  function loadIssuesJS() {
+    if ($(".post-detail").find(".issues-api").length == 0) {
+      return;
+    } 
+    loadScript('/js/issues/index.js');
+  };
+  $(function () {
+    loadIssuesJS();
+  });
+  document.addEventListener('pjax:complete', function () {
+    if (typeof IssuesAPI == "undefined") {
+      loadIssuesJS();
+    }
+  })
+</script>
+
+<!-- 输入框打字特效 -->
+<!-- 输入框打字特效 -->
+
+  <script src="/js/activate-power-mode.js"></script>
+  <script>
+    POWERMODE.colorful = true;  // 打开随机颜色特效
+    POWERMODE.shake = false;    // 关闭输入框抖动
+    document.body.addEventListener('input', POWERMODE);//监听打字事件
+  </script>
+
+
+<!-- markdown代码一键复制功能 -->
+
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/v-plugs-ayu/lib/ayu.css">
+  <script src="https://cdn.jsdelivr.net/npm/v-plugs-ayu/lib/ayu.umd.min.js"></script>
+  <script src="/js/clipboard/clipboard.min.js"></script>
+  <div id="appCopy">
+  </div>
+  <script data-pjax>
+    var vm = new Vue({
+      el: '#appCopy',
+      data: {
+      },
+      computed: {
+      },
+      mounted() {
+        const that = this;
+        var copy = 'copy';
+        /* code */
+        var initCopyCode = function () {
+          var copyHtml = '';
+          copyHtml += '<button class="btn-copy" data-clipboard-snippet="" style="position:absolute;top:0;right:0;z-index:1;">';
+          copyHtml += '<i class="fas fa-copy"></i><span>' + copy + '</span>';
+          copyHtml += '</button>';
+          $(".post-detail pre").not('.gutter pre').wrap("<div class='codeBox' style='position:relative;width:100%;'></div>")
+          $(".post-detail pre").not('.gutter pre').before(copyHtml);
+          new ClipboardJS('.btn-copy', {
+            target: function (trigger) {
+              return trigger.nextElementSibling;
+            }
+          });
+        }
+        initCopyCode();
+        $('.btn-copy').unbind('click').bind('click', function () {
+          doSomething();
+        })
+        $(document).unbind('keypress').bind('keypress', function (e) {
+          if (e.ctrlKey && e.keyCode == 67) {
+            doSomething();
+          }
+        })
+
+        function doSomething() {
+          that.$notify({
+            title: "成功",
+            content: "copy that",
+            type: 'success'
+          })
+        }
+      },
+      methods: {
+      },
+      created() { }
+    })
+  </script>
+  
+
+<!-- 图片懒加载 -->
+<script defer src="https://cdn.jsdelivr.net/npm/vanilla-lazyload@17.1.0/dist/lazyload.min.js"></script>
+<script>
+  // https://www.npmjs.com/package/vanilla-lazyload
+  // Set the options globally
+  // to make LazyLoad self-initialize
+  window.lazyLoadOptions = {
+    elements_selector: ".lazyload",
+    threshold: 0
+  };
+  // Listen to the initialization event
+  // and get the instance of LazyLoad
+  window.addEventListener(
+    "LazyLoad::Initialized",
+    function (event) {
+      window.lazyLoadInstance = event.detail.instance;
+    },
+    false
+  );
+  document.addEventListener('DOMContentLoaded', function () {
+    lazyLoadInstance.update();
+  });
+  document.addEventListener('pjax:complete', function () {
+    lazyLoadInstance.update();
+  });
+</script>
+
+
+<!-- 卡片滚动动画 -->
+   
+
+<!-- 评论所需js -->
+
+  
+    <!-- 弹幕所需的css和js -->
+    
+<!-- 具体js，请前往valine/script.ejs查看 -->
+
+    <script>
+  var requiredFields = '';
+  requiredFields = requiredFields.split(',');
+  comment_el = '.comment';
+  let looperValine = null;
+  load_valine = function () {
+    if ($(comment_el).length) {
+      var valine = new Valine({
+        el: '#vcomment',
+        path: window.location.pathname,
+        notify: false,
+        verify: false,
+        app_id: "",
+        app_key: "",
+        placeholder: "客官，说点什么吧",
+        avatar: "",
+        master: "",   //博主邮箱md5
+        tagMeta: ["博主","小伙伴","访客"],     //标识字段名
+        friends: "",
+        metaPlaceholder: { "nick": "昵称/QQ号", "mail": "邮箱" },
+        requiredFields: requiredFields,
+        enableQQ: true,
+      });
+      function debounce(fn) {
+        var timerID = null
+        return function () {
+          var arg = arguments[0]   //获取事件
+          if (timerID) {
+            clearTimeout(timerID)
+          }
+          timerID = setTimeout(function () {
+            fn(arg)              //事件传入函数
+          }, 200)
+        }
+      }
+      //查询评论 valine.Q('*').limit(7) -- 查询所有，限制7条, 下面的的代码是查询当前页面
+      var themeDanmu = eval('false');
+      var themeLoop = eval('false');
+      var themeLooperTime = '5000' || 5000;
+      var speed = '40' || 20;
+      var isBarrager = true;
+      if (themeDanmu == true) {
+        do_barrager();
+        if ($('.danmuBox').length <= 0) {
+          $('.navbar').append('<div class="danmuBox"><div class="danmuBtn open"><span class="danmuCircle"></span><span class="danmuText">弹幕</span></div></div>');
+        }
+        $('.danmuBtn').on('click', debounce(
+          function () {
+            if ($('.danmuBtn').hasClass('open')) {
+              $('.danmuBtn').removeClass('open')
+              clearInterval(looperValine);
+              $.fn.barrager.removeAll();
+            } else {
+              $('.danmuBtn').addClass("open");
+              do_barrager();
+            }
+          }
+        ))
+      }
+      function do_barrager() {
+        isBarrager && valine.Q(window.location.pathname).find().then(function (comments) {
+          // var num = 0; // 可以记录条数，循环调用的时候只取最新的评论放入弹幕中
+          var run_once = true;
+          var looper_time = themeLooperTime;
+          var total = comments.length;
+          // var looper = null;
+          var index = 0;
+          if (total > 0) {
+            barrager();
+          } else {
+            // 当评论数为0的时候，自动关闭弹幕
+            // $('.danmuBtn').removeClass('open');
+          }
+          function barrager() {
+            if (run_once) {
+              //如果是首次执行,则设置一个定时器,并且把首次执行置为false
+              looperValine = setInterval(barrager, looper_time);
+              run_once = false;
+            }
+            var content = comments[index]._serverData.comment;
+            var email = comments[index]._serverData.mail;
+            var link = comments[index]._serverData.link;
+            var newcontent = content.substring(0, 50).replace(/<[^>]+>/g, "");
+            //发布一个弹幕
+            const item = {
+              img: `https://q1.qlogo.cn/g?b=qq&nk=${email}&s=640`, //图片 
+              info: newcontent, //文字 
+              href: link, //链接 
+              close: true, //显示关闭按钮 
+              speed: speed, //延迟,单位秒,默认6 
+              color: '#fff', //颜色,默认白色 
+              old_ie_color: '#000000', //ie低版兼容色,不能与网页背景相同,默认黑色
+            }
+            $('body').barrager(item);
+            //索引自增
+            index++;
+            //所有弹幕发布完毕，清除计时器。
+            if (index == total) {
+              clearInterval(looperValine);
+              if (themeLoop === true) {
+                setTimeout(function () {
+                  do_barrager();
+                }, 5000);
+              } else {
+                $('.danmuBtn').removeClass('open');
+              }
+              return false;
+            }
+
+          }
+        })
+      }
+    }
+  };
+  $(document).ready(load_valine);
+  document.addEventListener('pjax:send', function (e) {
+    
+  })
+  document.addEventListener('pjax:complete', function () {
+    load_valine();
+  });
+</script>
+
+  
+
+
+<!-- 鼠标点击特效 -->
+<!-- 爱心点击 -->
+
+  
+    <canvas class="fireworks" style="position: fixed;left: 0;top: 0;z-index: 999; pointer-events: none;" ></canvas>
+    <script src="//cdn.bootcss.com/animejs/2.2.0/anime.min.js"></script>
+    <script src="/js/cursor/explosion.min.js"></script>
+  
+
+
+
+
+
+    <!-- pjax -->
+    
+
+<!-- pjax -->
+
+
+  <script src="/js/pjax@0.2.8/index.js"></script>
+  
+    <!-- 样式位于：source/css/_third-party/pjaxanimate.styl -->
+
+<div class="pjax-animate">
+  
+    <div class="loading-circle"><div id="loader-circle"></div></div>
+    <script>
+      window.ShowLoading = function() {
+        $(".loading-circle").css("display", "block");
+      };
+      window.HideLoading = function() {
+        $(".loading-circle").css("display", "none");
+      }
+    </script>
+  
+	<script>
+    document.addEventListener('pjax:complete', function () {
+      window.HideLoading();
+    })
+    document.addEventListener('pjax:send', function () {
+      window.ShowLoading();
+    })
+    document.addEventListener('pjax:error', function () {
+      window.HideLoading();
+    })
+	</script>
+</div>
+
+  
+
+  <script>
+    var pjax = new Pjax({
+      elements: 'a[href]:not([href^="#"]):not([href="javascript:void(0)"]):not([no-pjax])',   // 拦截正常带链接的 a 标签
+      selectors: ["#pjax-container","title"],                                   // 根据实际需要确认重载区域
+      cacheBust: false,   // url 地址追加时间戳，用以避免浏览器缓存
+      timeout: 5000
+    });
+
+    document.addEventListener('pjax:send', function (e) {
+
+      try {
+        var currentUrl = window.location.pathname;
+        var targetUrl = e.triggerElement.href;
+        var banUrl = [""];
+        if (banUrl[0] != "") {
+          banUrl.forEach(item => {
+            if(currentUrl.indexOf(item) != -1 || targetUrl.indexOf(item) != -1) {
+              window.location.href = targetUrl;
+            }
+          });
+        }
+      } catch (error) {}
+
+      $(window).unbind('resize');
+      $(window).unbind('scroll');
+      $(document).unbind('scroll');
+      $(document).unbind('click');
+      $('body').unbind('click');
+
+    })
+    
+    document.addEventListener('pjax:complete', function () {
+      $('script[data-pjax], .pjax-reload script').each(function () {
+        $(this).parent().append($(this).remove());
+      });
+    });
+
+    document.addEventListener('pjax:error', function (e) {
+      window.location.href = e.triggerElement.href;
+    })
+    
+    // 刷新不从顶部开始
+    document.addEventListener("DOMContentLoaded", function () {
+      history.scrollRestoration = 'auto';
+    })
+  </script>
+
+
+
+  </body>
+</html>
