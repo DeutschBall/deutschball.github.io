@@ -1,0 +1,1673 @@
+<!DOCTYPE html>
+<html>
+  <!-- meta/link... -->
+  
+
+
+
+<head>
+  <meta http-equiv="content-type" content="text/html; charset=utf-8">
+  <meta content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=0" name="viewport">
+  <!-- Global site tag (gtag.js) - Google Analytics -->
+
+
+  <title>win32程序设计-chapter11 对话框 | Deutschball&#39;s blog</title>
+
+  <link rel="icon" type="image/png" href="https://raw.githubusercontent.com/DeutschBall/test/master/emp.png">
+  <link rel="stylesheet" href="https://at.alicdn.com/t/font_1911880_c1nvbyezg17.css">
+  <link href="https://cdn.jsdelivr.net/gh/inkss/fontawesome@5.15.3/css/all.min.css" rel="stylesheet">
+  <link href="/js/swiper/swiper@5.4.1.min.css" rel="stylesheet">
+  
+  
+    <script>
+        var themeModelId = '';
+        if (themeModelId) {
+            localStorage.setItem('modelId', themeModelId);
+        }
+    </script>
+    
+    <script src="https://cdn.jsdelivr.net/gh/yuang01/live2d-widget@latest/autoload.js"></script>
+    <script>
+        var live2dOpen = eval('true') || false;
+        if (!live2dOpen) {
+            localStorage.setItem('waifu-display', 1609323474481);
+        }
+    </script>
+  
+  
+  
+<link rel="stylesheet" href="/css/animate.min.css">
+
+  
+<link rel="stylesheet" href="/css/style.css">
+
+  
+  
+    
+<link rel="stylesheet" href="/js/fancybox/jquery.fancybox.min.css">
+
+  
+  
+    
+<link rel="stylesheet" href="/js/shareJs/share.min.css">
+
+  
+  <style>
+        @media (max-width: 992px) {
+            #waifu {
+                display: none;
+            }
+        }
+    </style>
+    <script src="//cdn.bootcss.com/pace/1.0.2/pace.min.js"></script>
+    <link href="//cdn.bootcss.com/pace/1.0.2/themes/pink/pace-theme-flash.css" rel="stylesheet">
+
+    
+        <script src="/js/valine/av-min@3.0.4.js"></script>
+        <script src="https://cdn.jsdelivr.net/gh/HCLonely/Valine@latest/dist/Valine.min.js"></script>
+    
+
+    <!-- import link -->
+    
+        
+            
+        
+            
+        
+    
+    <!-- import script -->
+    
+        
+            
+        
+            
+        
+    
+
+<!-- hexo injector head_end start -->
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.12.0/dist/katex.min.css">
+<!-- hexo injector head_end end --><meta name="generator" content="Hexo 6.2.0"></head>
+
+  
+  <!-- 依赖于jquery和vue -->
+  
+    
+<script src="https://cdn.jsdelivr.net/npm/jquery@3.5.1/dist/jquery.min.js"></script>
+
+  
+
+  
+    
+<script src="https://cdn.jsdelivr.net/npm/vue@2.6.11/dist/vue.min.js"></script>
+
+  
+  
+  <body>
+    <!-- 预加载动画 -->
+    <!-- 页面预加载动画 -->
+
+<div id='loader'>
+  <link rel="stylesheet" href="/js/loaded/index.css" >
+  <div class="loading-left-bg"></div>
+  <div class="loading-right-bg"></div>
+  <div class="spinner-box">
+    <div class="configure-border-1">
+      <div class="configure-core"></div>
+    </div>
+    <div class="configure-border-2">
+      <div class="configure-core"></div>
+    </div>
+    <div class="loading-word">loading...</div>
+  </div>
+</div>
+
+<script>
+  var endLoading = function () {
+    document.body.style.overflow = 'auto';
+    document.getElementById('loader').classList.add("loading");
+  }
+  window.addEventListener('DOMContentLoaded',endLoading);
+  
+</script>
+
+    
+    <!-- 判断是否为暗黑风格 -->
+    <!-- 判断是否为黑夜模式 -->
+<script>
+  let isDark = JSON.parse(localStorage.getItem('dark')) || JSON.parse('true');
+
+  if (isDark) {
+    $(document.body).addClass('darkModel');
+  }
+</script>
+
+    <!-- 需要在上面加载的js -->
+    <script>
+  function loadScript(src, cb) {
+    return new Promise(resolve => {
+      setTimeout(function () {
+        var HEAD = document.getElementsByTagName("head")[0] || document.documentElement;
+        var script = document.createElement("script");
+        script.setAttribute("type", "text/javascript");
+        if (cb) {
+          if (JSON.stringify(cb)) {
+            for (let p in cb) {
+              if (p == "onload") {
+                script[p] = () => {
+                  cb[p]()
+                  resolve()
+                }
+              } else {
+                script[p] = cb[p]
+                script.onload = resolve
+              }
+            }
+          } else {
+            script.onload = () => {
+              cb()
+              resolve()
+            };
+          }
+        } else {
+          script.onload = resolve
+        }
+        script.setAttribute("src", src);
+        HEAD.appendChild(script);
+      });
+    });
+  }
+
+  //https://github.com/filamentgroup/loadCSS
+  var loadCSS = function (href, before, media, attributes) {
+    return new Promise(resolve => {
+      setTimeout(function () {
+        var link = document.createElement('link');
+        link.rel = "stylesheet";
+        link.href = src;
+        link.onload = resolve;
+        document.getElementsByTagName("head")[0].appendChild(link);
+      });
+    });
+  };
+
+</script> 
+
+<!-- 轮播图所需要的js -->
+<script src="/js/swiper/swiper.min.js"></script>
+<script src="/js/swiper/vue-awesome-swiper.js"></script>
+<script src="/js/swiper/swiper.animate1.0.3.min.js"></script>
+
+<script type="text/javascript">
+  Vue.use(window.VueAwesomeSwiper)
+</script>
+
+
+  <script src="/js/vue-typed-js/index.js"></script>
+
+
+<!-- 首页的公告滚动插件的js需要重新加载 -->
+<script src="/js/vue-seamless-scroll/index.js"></script>
+
+<!-- 打字机效果js -->
+<script src="https://cdn.jsdelivr.net/npm/typed.js@2.0.11"></script>
+
+
+    <div id="safearea">
+      <main class="main" id="pjax-container">
+        <!-- 头部导航 -->
+        
+<header class="header   " 
+  id="navHeader"
+  style="position: fixed;
+  left: 0; top: 0; z-index: 10;width: 100%;"
+>
+  <div class="header-content">
+    <div class="bars">
+      <div id="appDrawer" class="sidebar-image">
+  <div class="drawer-box-icon">
+    <i class="fas fa-bars" aria-hidden="true" @click="showDialogDrawer"></i>
+  </div>
+  
+  <transition name="fade">
+    <div class="drawer-box_mask" v-cloak style="display: none;" v-show="visible" @click.self="cancelDialogDrawer">
+    </div>
+  </transition>
+  <div class="drawer-box" :class="{'active': visible}">
+    <div class="drawer-box-head bg-color">
+      <img class="drawer-box-head_logo lazyload placeholder" src="https://raw.githubusercontent.com/DeutschBall/test/master/emp.png" class="lazyload placeholder" data-srcset="https://raw.githubusercontent.com/DeutschBall/test/master/emp.png" srcset="https://img2.baidu.com/it/u=2037979560,2772131037&fm=26&fmt=auto&gp=0.jpg" alt="logo">
+      <h3 class="drawer-box-head_title">Deutschball&#39;s blog</h3>
+      <h5 class="drawer-box-head_desc"></h5>
+    </div>
+    
+    <div class="drawer-box-content">
+      <ul class="drawer-box-content_menu">
+        
+        
+          <li class="drawer-box-content_item">
+            <a target="_blank" rel="noopener" href="https://github.com/DeutschBall">
+              <i class="fas fa-github" aria-hidden="true"></i>
+              <span>Github</span>
+            </a>
+          </li>
+        
+      </ul>
+    </div>
+  </div>
+</div>
+
+<script>
+  var body = document.body || document.documentElement || window;
+  var vm = new Vue({
+    el: '#appDrawer',
+    data: {
+      visible: false,
+      top: 0,
+      openArr: [],
+    },
+    computed: {
+    },
+    mounted() {
+    },
+    methods: {
+      isOpen(index) {
+        if (this.openArr.includes(index)) {
+          return true;
+        } else {
+          return false;
+        }
+      },
+      openOrCloseMenu(curIndex) {
+        const index = this.openArr.indexOf(curIndex);
+        if (index !== -1) {
+          this.openArr.splice(index, 1);
+        } else {
+          this.openArr.push(curIndex);
+        }
+      },
+      showDialogDrawer() {
+        this.visible = true;
+        // 防止页面滚动，只能让弹框滚动
+        this.top = $(document).scrollTop()
+        body.style.cssText = 'width: 100%; height: 100%;overflow: hidden;';
+      },
+      cancelDialogDrawer() {
+        this.visible = false;
+        body.removeAttribute('style');
+        $(document).scrollTop(this.top)
+      }
+    },
+    created() {}
+  })
+</script>
+
+    </div>
+    <div class="blog-title" id="author-avatar">
+      
+        <div class="avatar">
+          <img src="https://raw.githubusercontent.com/DeutschBall/test/master/emp.png" class="lazyload placeholder" data-srcset="https://raw.githubusercontent.com/DeutschBall/test/master/emp.png" srcset="https://img2.baidu.com/it/u=2037979560,2772131037&fm=26&fmt=auto&gp=0.jpg" alt="logo">
+        </div>
+      
+      <a href="/" class="logo">Deutschball&#39;s blog</a>
+    </div>
+    <nav class="navbar">
+      <ul class="menu">
+        
+      </ul>
+      
+      
+        <div id="appSearch">
+  <div class="search"  @click="showDialog()"><i class="fas fa-search" aria-hidden="true"></i></div>
+  <transition name="fade">
+    <div class="message-box_wrapper" style="display: none;" v-cloak v-show="dialogVisible" @click.self="cancelDialogVisible()">
+      <div class="message-box animated bounceInDown">
+        <h2>
+          <span>
+            <i class="fas fa-search" aria-hidden="true"></i>
+            <span class="title">Search</span>
+          </span>
+          <i class="fas fa-times close" pointer style="float:right;" aria-hidden="true" @click.self="cancelDialogVisible()"></i>
+        </h2>
+        <form class="site-search-form">
+          <input type="text"
+            placeholder="Please enter keywords"
+            id="local-search-input" 
+            @click="getSearchFile()"
+            class="st-search-input"
+            v-model="searchInput"
+          />
+        </form>
+        <div class="result-wrapper">
+          <div id="local-search-result" class="local-search-result-cls"></div>
+        </div>
+      </div>
+    </div>
+  </transition>
+</div>
+<script src="/js/local_search.js"></script>
+<script>
+  var body = document.body || document.documentElement || window;
+  var vm = new Vue({
+    el: '#appSearch',
+    data: {
+      dialogVisible: false,
+      searchInput: '',
+      top: 0,
+    },
+    computed: {
+    },
+    mounted() {
+      window.addEventListener('pjax:complete', () => {
+        this.cancelDialogVisible();
+      })
+    },
+    methods: {
+      showDialog() {
+        this.dialogVisible = true;
+        // 防止页面滚动，只能让弹框滚动
+        this.top = $(document).scrollTop()
+        body.style.cssText = 'overflow: hidden;';
+      },
+      getSearchFile() {
+        if (!this.searchInput) {
+          getSearchFile("/search.xml");
+        }
+      },
+      cancelDialogVisible() {
+        this.dialogVisible = false;
+        body.removeAttribute('style');
+        $(document).scrollTop(this.top)
+      },
+    },
+    created() {}
+  })
+</script>
+<!-- 解决刷新页面闪烁问题，可以在元素上添加display: none, 或者用vue.extend方法，详情：https://blog.csdn.net/qq_31393401/article/details/81017912 -->
+<!-- 下面是搜索基本写法 -->
+<!-- <script type="text/javascript" id="local.search.active">
+  var inputArea = document.querySelector("#local-search-input");
+  inputArea.onclick   = function(){ getSearchFile(); this.onclick = null }
+  inputArea.onkeydown = function(){ if(event.keyCode == 13) return false }
+</script> -->
+
+      
+
+    </nav>
+  </div>
+  
+    <a target="_blank" rel="noopener" href="https://github.com/DeutschBall" class="github-corner color-primary" aria-label="View source on GitHub"><svg width="60" height="60" viewBox="0 0 250 250" style="fill:#fff; position: absolute; top: 0; border: 0; right: 0;" aria-hidden="true"><path d="M0,0 L115,115 L130,115 L142,142 L250,250 L250,0 Z"></path><path d="M128.3,109.0 C113.8,99.7 119.0,89.6 119.0,89.6 C122.0,82.7 120.5,78.6 120.5,78.6 C119.2,72.0 123.4,76.3 123.4,76.3 C127.3,80.9 125.5,87.3 125.5,87.3 C122.9,97.6 130.6,101.9 134.4,103.2" fill="currentColor" style="transform-origin: 130px 106px;" class="octo-arm"></path><path d="M115.0,115.0 C114.9,115.1 118.7,116.5 119.8,115.4 L133.7,101.6 C136.9,99.2 139.9,98.4 142.2,98.6 C133.8,88.0 127.5,74.4 143.8,58.0 C148.5,53.4 154.0,51.2 159.7,51.0 C160.3,49.4 163.2,43.6 171.4,40.1 C171.4,40.1 176.1,42.5 178.8,56.2 C183.1,58.6 187.2,61.8 190.9,65.4 C194.5,69.0 197.7,73.2 200.1,77.6 C213.8,80.2 216.3,84.9 216.3,84.9 C212.7,93.1 206.9,96.0 205.4,96.6 C205.1,102.4 203.0,107.8 198.3,112.5 C181.9,128.9 168.3,122.5 157.7,114.1 C157.9,116.9 156.7,120.9 152.7,124.9 L141.0,136.5 C139.8,137.7 141.6,141.9 141.8,141.8 Z" fill="currentColor" class="octo-body"></path></svg></a><style>.github-corner:hover .octo-arm{animation:octocat-wave 560ms ease-in-out}@keyframes octocat-wave{0%,100%{transform:rotate(0)}20%,60%{transform:rotate(-25deg)}40%,80%{transform:rotate(10deg)}}@media (max-width:500px){.github-corner:hover .octo-arm{animation:none}.github-corner .octo-arm{animation:octocat-wave 560ms ease-in-out}}</style>
+  
+  
+</header>
+        <!-- 内容区域 -->
+        
+ <!-- prismjs 代码高亮 -->
+ 
+
+
+<div class="bg-dark-floor" style="position: fixed;left: 0;top: 0;width: 100%;height: 100%;z-index: -1;"></div>
+
+
+  <!-- 文章详情页顶部图片和标题 -->
+
+
+
+
+<div class="post-detail-header" id="thumbnail_canvas" style="background-repeat: no-repeat; background-size: cover; 
+  background-position: center center;position: relative;background-image:url('/medias/12.jpg')">
+  <div class="post-detail-header-mask"></div>
+  <canvas id="header_canvas"style="position:absolute;bottom:0;pointer-events:none;"></canvas>
+  
+  <div class="post-detail-header_info-box">
+    <div class="title-box">
+      <span class="title">
+        win32程序设计-chapter11 对话框
+      </span>
+    </div>
+    
+    
+      
+        <span class="post-detail-header_date">
+          <i class="fas fa-calendar"></i> Published in：2022-08-24 |
+        </span>
+      
+
+      
+
+      
+    
+  </div>
+  
+  
+    <script src="/js/bubble/bubble.js"></script>
+  
+</div>
+
+
+
+
+
+<div class="row justify-position" 
+  style="padding-top: 0px;">
+  <div class="main-content">
+    <article class="post post-detail">
+      <div class="post-content">
+        <h1 id="windows-SDK-chapter-11-对话框"><a href="#windows-SDK-chapter-11-对话框" class="headerlink" title="windows SDK chapter 11 对话框"></a>windows SDK chapter 11 对话框</h1><h2 id="模态对话框"><a href="#模态对话框" class="headerlink" title="模态对话框"></a>模态对话框</h2><p>模态对话框指对话框存在时不能操作父窗口,必须关闭模态对话框才能和父窗口进行交互</p>
+<p>如果是普通的模态对话框,此时还可以切换到其他应用程序.</p>
+<p>如果是系统的模态对话框,则整个操作系统都会被这一个模态对话框锁住,必须关了系统模态对话框才可以干别的</p>
+<p>因为父窗口过程直接将控制转移给了对话框函数,啥时候对话框函数返回即对话框关闭,控制才能还给父窗口</p>
+<h3 id="About1"><a href="#About1" class="headerlink" title="About1"></a>About1</h3><p>主窗口过程WndProc在处理菜单消息时有一个创建对话框的情况,即点选ID_APP_ABOUT对应的菜单</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">case</span> WM_COMMAND :</span><br><span class="line">     <span class="keyword">switch</span> (LOWORD (wParam))</span><br><span class="line">     &#123;</span><br><span class="line">     <span class="keyword">case</span> IDM_APP_ABOUT :</span><br><span class="line">          DialogBox (hInstance, TEXT (<span class="string">&quot;AboutBox&quot;</span>), hwnd, AboutDlgProc) ;<span class="comment">//创建对话框,使用AboutBox资源</span></span><br><span class="line">          <span class="keyword">break</span> ;</span><br><span class="line">     &#125;</span><br><span class="line">     <span class="keyword">return</span> <span class="number">0</span> ;</span><br></pre></td></tr></table></figure>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="type">void</span> <span class="title function_">DialogBoxA</span><span class="params">(</span></span><br><span class="line"><span class="params">  [in, optional]  hInstance,<span class="comment">//exe句柄</span></span></span><br><span class="line"><span class="params">  [in]            lpTemplate,<span class="comment">//对话框模板,可以加载资源</span></span></span><br><span class="line"><span class="params">  [in, optional]  hWndParent,<span class="comment">//父窗口句柄</span></span></span><br><span class="line"><span class="params">  [in, optional]  lpDialogFunc<span class="comment">//对话框过程函数</span></span></span><br><span class="line"><span class="params">)</span>;</span><br></pre></td></tr></table></figure>
+<p>该函数会一直等到lpDialogFunc回调函数中调用EndDialog才会结束执行,将控制还给WndProc,</p>
+<p>这意味在对话框起来之后,主窗口啥也干不了,除非把对话框扬了.</p>
+<p>创建对话框的过程:</p>
+<blockquote>
+<p>DialogBox宏用<a target="_blank" rel="noopener" href="https://baike.baidu.com/item/CreateWindowEx/6376090">CreateWindowEx</a>函数创建对话框。DialogBox函数然后把一个<a target="_blank" rel="noopener" href="https://baike.baidu.com/item/WM_INITDIALOG/1904851">WM_INITDIALOG</a>消息（和一个WM_SETFONT消息，如果模板指定DS_SETFONT类型）传递到对话框过程。不管模板是否指定WS_VISIBLE类型，函数显示对话框，并且使拥有该对话框的窗口（也称属主窗口）失效，且为对话框启动它本身的<a target="_blank" rel="noopener" href="https://baike.baidu.com/item/消息循环">消息循环</a>来检索和传递消息。</p>
+<p>当对话框应用程序调用<a target="_blank" rel="noopener" href="https://baike.baidu.com/item/EndDialog/6370746">EndDialog</a>函数时，DialogBox函数清除对话框户止消息循环，使属主窗口生效（如果以前有效），且返回函数EndDialog调用中的nReSUlt参数。</p>
+</blockquote>
+<p>对话框过程</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br></pre></td><td class="code"><pre><span class="line">BOOL CALLBACK <span class="title function_">AboutDlgProc</span> <span class="params">(HWND hDlg, UINT message, </span></span><br><span class="line"><span class="params">                            WPARAM wParam, LPARAM lParam)</span><span class="comment">//hDlg持有自己的对话框句柄</span></span><br><span class="line">&#123;</span><br><span class="line">     <span class="keyword">switch</span> (message)</span><br><span class="line">     &#123;</span><br><span class="line">     <span class="keyword">case</span> WM_INITDIALOG :</span><br><span class="line">          <span class="keyword">return</span> TRUE ;</span><br><span class="line">          </span><br><span class="line">     <span class="keyword">case</span> WM_COMMAND :</span><br><span class="line">          <span class="keyword">switch</span> (LOWORD (wParam))</span><br><span class="line">          &#123;</span><br><span class="line">          <span class="keyword">case</span> IDOK :</span><br><span class="line">          <span class="keyword">case</span> IDCANCEL :<span class="comment">//然而该对话框没有取消按钮,只有一个OK按钮,可以使用Esc键触发IDCANCLE</span></span><br><span class="line">               EndDialog (hDlg, <span class="number">0</span>) ;<span class="comment">//结束对话框</span></span><br><span class="line">               <span class="keyword">return</span> TRUE ;</span><br><span class="line">          &#125;</span><br><span class="line">          <span class="keyword">break</span> ;</span><br><span class="line">     &#125;</span><br><span class="line">     <span class="keyword">return</span> FALSE ;</span><br><span class="line">&#125;</span><br><span class="line"></span><br></pre></td></tr></table></figure>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">BOOL <span class="title function_">EndDialog</span><span class="params">(</span></span><br><span class="line"><span class="params">  [in] HWND    hDlg,<span class="comment">//需要结束的对话框句柄</span></span></span><br><span class="line"><span class="params">  [in] INT_PTR nResult<span class="comment">//返回值,主窗口可以根据该值与对话框进行交互</span></span></span><br><span class="line"><span class="params">)</span>;</span><br></pre></td></tr></table></figure>
+<p>使用DialogBox创建的对话框必须使用EndDialog制死</p>
+<p>EndDialog函数是在对话框窗口过程中调用的,并且只能用于结束对话框过程</p>
+<p>EndDialog中指定的返回值就是DialogBox函数的返回值</p>
+<h4 id="设计对话框"><a href="#设计对话框" class="headerlink" title="设计对话框"></a>设计对话框</h4><p>visual studio添加对话框资源,可以交互式设计对话框</p>
+<p>rc文件中</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line">ABOUTBOX DIALOGEX <span class="number">32</span>, <span class="number">32</span>, <span class="number">180</span>, <span class="number">102</span>		<span class="comment">//名字(用于索引该对话框) 对话框类型 左上角横坐标,左上角纵坐标,宽度,高度</span></span><br><span class="line">STYLE DS_SETFONT | WS_POPUP | WS_THICKFRAME		<span class="comment">//风格	对话框有字,弹出,薄框架</span></span><br><span class="line">FONT <span class="number">8</span>, <span class="string">&quot;MS Sans Serif&quot;</span>, <span class="number">0</span>, <span class="number">0</span>, <span class="number">0x0</span>	<span class="comment">//字号8	字体	,balabala</span></span><br><span class="line">BEGIN	<span class="comment">//对话框主题开始</span></span><br><span class="line">    DEFPUSHBUTTON   <span class="string">&quot;OK&quot;</span>,IDOK,<span class="number">66</span>,<span class="number">81</span>,<span class="number">50</span>,<span class="number">14</span>	<span class="comment">//一个默认按钮,ID是IDOK,上有字样&quot;OK&quot; 左上角(66,81) 宽50,高14</span></span><br><span class="line">    ICON            <span class="string">&quot;ABOUT1&quot;</span>,IDC_STATIC,<span class="number">7</span>,<span class="number">7</span>,<span class="number">20</span>,<span class="number">20</span>	<span class="comment">//图标,名称&quot;ABOUT1&quot; ID是IDC_STATIC,左上角(7,7),宽高20(对于ICON来说该宽高无意义)</span></span><br><span class="line">    CTEXT           <span class="string">&quot;dialog&quot;</span>,IDC_STATIC,<span class="number">40</span>,<span class="number">12</span>,<span class="number">100</span>,<span class="number">8</span>	<span class="comment">//文字</span></span><br><span class="line">    CTEXT           <span class="string">&quot;dustball&quot;</span>,IDC_STATIC,<span class="number">7</span>,<span class="number">40</span>,<span class="number">166</span>,<span class="number">8</span></span><br><span class="line">    CTEXT           <span class="string">&quot;(c) dustball, 2022&quot;</span>,IDC_STATIC,<span class="number">7</span>,<span class="number">52</span>,<span class="number">166</span>,<span class="number">8</span></span><br><span class="line">END		<span class="comment">//对话框主题结束</span></span><br></pre></td></tr></table></figure>
+<p>这里所有数值的单位都不是像素,而是对话框所用字体的宽的四分之一高的八分之一,具体怎么算的不重要,交互式设计不需要闷头算他娘的</p>
+<p>BEGIN和END之间是对话框子窗口控件</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">控件类型 &quot;文本&quot;,id,左坐标,上坐标,宽度,高度,控件风格</span><br></pre></td></tr></table></figure>
+<p>控件风格比如WS_CHILD,SS_CENTER,WS_VISIBLE</p>
+<h4 id="对话框过程"><a href="#对话框过程" class="headerlink" title="对话框过程"></a>对话框过程</h4><figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">BOOL CALLBACK <span class="title function_">AboutDlgProc</span> <span class="params">(HWND hDlg, UINT message,WPARAM wParam, LPARAM lParam)</span>;</span><br></pre></td></tr></table></figure>
+<p>一个返回真假的回调函数,有四个参数,对话框句柄,消息,w参和l参</p>
+<p>对比窗口过程和对话框过程</p>
+<div class="table-container">
+<table>
+<thead>
+<tr>
+<th></th>
+<th>对话框过程</th>
+<th>窗口过程</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>返回值</td>
+<td>BOOL</td>
+<td>LRESULT</td>
+</tr>
+<tr>
+<td>DefWindowProc</td>
+<td>不会调用,只会返回TRUE</td>
+<td>处理不了的消息调用DefWindowProc</td>
+</tr>
+<tr>
+<td>处理消息</td>
+<td>不需要处理WM_PAINT,WM_DESTORY<br />不会收到WM_CREATE,<br />有专门消息WM_INITDIALOG<br />只需要处理WM_COMMAND</td>
+</tr>
+</tbody>
+</table>
+</div>
+<p>当对话框中按下按钮时,这个按钮回向它的父窗口,也就是这个对话框,发送WM_COMMAND消息,wParam是控件ID</p>
+<h3 id="About2"><a href="#About2" class="headerlink" title="About2"></a>About2</h3><h4 id="资源脚本"><a href="#资源脚本" class="headerlink" title="资源脚本"></a>资源脚本</h4><figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br></pre></td><td class="code"><pre><span class="line">ABOUTBOX DIALOG DISCARDABLE  <span class="number">32</span>, <span class="number">32</span>, <span class="number">200</span>, <span class="number">234</span>	<span class="comment">//名叫ABOUTBOX</span></span><br><span class="line">STYLE DS_MODALFRAME | WS_POPUP | WS_CAPTION</span><br><span class="line">FONT <span class="number">8</span>, <span class="string">&quot;MS Sans Serif&quot;</span></span><br><span class="line">BEGIN</span><br><span class="line">    ICON            <span class="string">&quot;ABOUT2&quot;</span>,IDC_STATIC,<span class="number">7</span>,<span class="number">7</span>,<span class="number">20</span>,<span class="number">20</span></span><br><span class="line">    CTEXT           <span class="string">&quot;About2&quot;</span>,IDC_STATIC,<span class="number">57</span>,<span class="number">12</span>,<span class="number">86</span>,<span class="number">8</span></span><br><span class="line">    CTEXT           <span class="string">&quot;About Box Demo Program&quot;</span>,IDC_STATIC,<span class="number">7</span>,<span class="number">40</span>,<span class="number">186</span>,<span class="number">8</span></span><br><span class="line">    LTEXT           <span class="string">&quot;&quot;</span>,IDC_PAINT,<span class="number">114</span>,<span class="number">67</span>,<span class="number">72</span>,<span class="number">72</span>			<span class="comment">//预览块</span></span><br><span class="line">    GROUPBOX        <span class="string">&quot;&amp;Color&quot;</span>,IDC_STATIC,<span class="number">7</span>,<span class="number">60</span>,<span class="number">84</span>,<span class="number">143</span></span><br><span class="line">    RADIOBUTTON     <span class="string">&quot;&amp;Black&quot;</span>,IDC_BLACK,<span class="number">16</span>,<span class="number">76</span>,<span class="number">64</span>,<span class="number">8</span>,WS_GROUP | WS_TABSTOP<span class="comment">//单选组开始,tab键停留位置,使用tab键可以更换当前对话框内的焦点.同一组内按钮可以使用上下左右键调整选择</span></span><br><span class="line">    RADIOBUTTON     <span class="string">&quot;B&amp;lue&quot;</span>,IDC_BLUE,<span class="number">16</span>,<span class="number">92</span>,<span class="number">64</span>,<span class="number">8</span></span><br><span class="line">    RADIOBUTTON     <span class="string">&quot;&amp;Green&quot;</span>,IDC_GREEN,<span class="number">16</span>,<span class="number">108</span>,<span class="number">64</span>,<span class="number">8</span></span><br><span class="line">    RADIOBUTTON     <span class="string">&quot;Cya&amp;n&quot;</span>,IDC_CYAN,<span class="number">16</span>,<span class="number">124</span>,<span class="number">64</span>,<span class="number">8</span></span><br><span class="line">    RADIOBUTTON     <span class="string">&quot;&amp;Red&quot;</span>,IDC_RED,<span class="number">16</span>,<span class="number">140</span>,<span class="number">64</span>,<span class="number">8</span></span><br><span class="line">    RADIOBUTTON     <span class="string">&quot;&amp;Magenta&quot;</span>,IDC_MAGENTA,<span class="number">16</span>,<span class="number">156</span>,<span class="number">64</span>,<span class="number">8</span></span><br><span class="line">    RADIOBUTTON     <span class="string">&quot;&amp;Yellow&quot;</span>,IDC_YELLOW,<span class="number">16</span>,<span class="number">172</span>,<span class="number">64</span>,<span class="number">8</span></span><br><span class="line">    RADIOBUTTON     <span class="string">&quot;&amp;White&quot;</span>,IDC_WHITE,<span class="number">16</span>,<span class="number">188</span>,<span class="number">64</span>,<span class="number">8</span></span><br><span class="line">    GROUPBOX        <span class="string">&quot;&amp;Figure&quot;</span>,IDC_STATIC,<span class="number">109</span>,<span class="number">156</span>,<span class="number">84</span>,<span class="number">46</span>,WS_GROUP</span><br><span class="line">    RADIOBUTTON     <span class="string">&quot;Rec&amp;tangle&quot;</span>,IDC_RECT,<span class="number">116</span>,<span class="number">172</span>,<span class="number">65</span>,<span class="number">8</span>,WS_GROUP | WS_TABSTOP</span><br><span class="line">    RADIOBUTTON     <span class="string">&quot;&amp;Ellipse&quot;</span>,IDC_ELLIPSE,<span class="number">116</span>,<span class="number">188</span>,<span class="number">64</span>,<span class="number">8</span></span><br><span class="line">    DEFPUSHBUTTON   <span class="string">&quot;OK&quot;</span>,IDOK,<span class="number">35</span>,<span class="number">212</span>,<span class="number">50</span>,<span class="number">14</span>,WS_GROUP</span><br><span class="line">    PUSHBUTTON      <span class="string">&quot;Cancel&quot;</span>,IDCANCEL,<span class="number">113</span>,<span class="number">212</span>,<span class="number">50</span>,<span class="number">14</span>,WS_GROUP</span><br><span class="line">END</span><br></pre></td></tr></table></figure>
+<h4 id="全局变量"><a href="#全局变量" class="headerlink" title="全局变量"></a>全局变量</h4><figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="type">int</span> iCurrentColor = IDC_BLACK;  <span class="comment">//当前颜色</span></span><br><span class="line"><span class="type">int</span>    iCurrentFigure = IDC_RECT ;<span class="comment">//当前形状</span></span><br></pre></td></tr></table></figure>
+<p>这两个变量决定着预览框和主窗口如何绘制.</p>
+<p>通过对话框修改</p>
+<h4 id="父窗口过程"><a href="#父窗口过程" class="headerlink" title="父窗口过程"></a>父窗口过程</h4><figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br></pre></td><td class="code"><pre><span class="line">LRESULT CALLBACK <span class="title function_">WndProc</span> <span class="params">(HWND hwnd, UINT message, WPARAM wParam, LPARAM lParam)</span></span><br><span class="line">&#123;</span><br><span class="line">     <span class="type">static</span> HINSTANCE hInstance ;</span><br><span class="line">     PAINTSTRUCT      ps ;</span><br><span class="line">     </span><br><span class="line">     <span class="keyword">switch</span> (message)</span><br><span class="line">     &#123;</span><br><span class="line">     <span class="keyword">case</span> WM_CREATE:</span><br><span class="line">          hInstance = ((LPCREATESTRUCT) lParam)-&gt;hInstance ;</span><br><span class="line">          <span class="keyword">return</span> <span class="number">0</span> ;</span><br><span class="line">          </span><br><span class="line">     <span class="keyword">case</span> WM_COMMAND:</span><br><span class="line">          <span class="keyword">switch</span> (LOWORD (wParam))</span><br><span class="line">          &#123;</span><br><span class="line">          <span class="keyword">case</span> IDM_APP_ABOUT:</span><br><span class="line">               <span class="keyword">if</span> (DialogBox (hInstance, TEXT (<span class="string">&quot;AboutBox&quot;</span>), hwnd, AboutDlgProc))</span><br><span class="line">                    InvalidateRect (hwnd, <span class="literal">NULL</span>, TRUE) ;</span><br><span class="line">               <span class="keyword">return</span> <span class="number">0</span> ;</span><br><span class="line">          &#125;</span><br><span class="line">          <span class="keyword">break</span> ;</span><br><span class="line">          </span><br><span class="line">     <span class="keyword">case</span> WM_PAINT:</span><br><span class="line">          BeginPaint (hwnd, &amp;ps) ;</span><br><span class="line">          EndPaint (hwnd, &amp;ps) ;</span><br><span class="line">               </span><br><span class="line">          PaintWindow (hwnd, iCurrentColor, iCurrentFigure) ;</span><br><span class="line">          <span class="keyword">return</span> <span class="number">0</span> ;</span><br><span class="line">               </span><br><span class="line">     <span class="keyword">case</span> WM_DESTROY:</span><br><span class="line">          PostQuitMessage (<span class="number">0</span>) ;</span><br><span class="line">          <span class="keyword">return</span> <span class="number">0</span> ;</span><br><span class="line">     &#125;</span><br><span class="line">     <span class="keyword">return</span> DefWindowProc (hwnd, message, wParam, lParam) ;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<h4 id="PaintWindow"><a href="#PaintWindow" class="headerlink" title="PaintWindow"></a>PaintWindow</h4><p>使用iColor颜色和iFigure形状绘制hwnd指向的窗口</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br></pre></td><td class="code"><pre><span class="line"><span class="type">void</span> <span class="title function_">PaintWindow</span> <span class="params">(HWND hwnd, <span class="type">int</span> iColor, <span class="type">int</span> iFigure)</span><span class="comment">//根据指定颜色和形状绘制窗口</span></span><br><span class="line">&#123;</span><br><span class="line">     <span class="type">static</span> COLORREF crColor[<span class="number">8</span>] = &#123; RGB (  <span class="number">0</span>,   <span class="number">0</span>, <span class="number">0</span>), RGB (  <span class="number">0</span>,   <span class="number">0</span>, <span class="number">255</span>),</span><br><span class="line">                                    RGB (  <span class="number">0</span>, <span class="number">255</span>, <span class="number">0</span>), RGB (  <span class="number">0</span>, <span class="number">255</span>, <span class="number">255</span>),</span><br><span class="line">                                    RGB (<span class="number">255</span>,   <span class="number">0</span>, <span class="number">0</span>), RGB (<span class="number">255</span>,   <span class="number">0</span>, <span class="number">255</span>),</span><br><span class="line">                                    RGB (<span class="number">255</span>, <span class="number">255</span>, <span class="number">0</span>), RGB (<span class="number">255</span>, <span class="number">255</span>, <span class="number">255</span>) &#125; ;<span class="comment">//颜色列表</span></span><br><span class="line"></span><br><span class="line">     HBRUSH          hBrush ;</span><br><span class="line">     HDC             hdc ;</span><br><span class="line">     RECT            rect ;</span><br><span class="line">     </span><br><span class="line">     hdc = GetDC (hwnd) ;</span><br><span class="line">     GetClientRect (hwnd, &amp;rect) ;</span><br><span class="line">     hBrush = CreateSolidBrush (crColor[iColor - IDC_BLACK]) ;<span class="comment">//iColor是当前正在使用的颜色</span></span><br><span class="line">     hBrush = (HBRUSH) SelectObject (hdc, hBrush) ;</span><br><span class="line">     </span><br><span class="line">     <span class="keyword">if</span> (iFigure == IDC_RECT)<span class="comment">//绘制矩形</span></span><br><span class="line">          Rectangle (hdc, rect.left, rect.top, rect.right, rect.bottom) ;</span><br><span class="line">     <span class="keyword">else</span><span class="comment">//绘制扁瓜蛋</span></span><br><span class="line">          Ellipse   (hdc, rect.left, rect.top, rect.right, rect.bottom) ;</span><br><span class="line">     </span><br><span class="line">     DeleteObject (SelectObject (hdc, hBrush)) ;</span><br><span class="line">     ReleaseDC (hwnd, hdc) ;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<h4 id="对话框过程-1"><a href="#对话框过程-1" class="headerlink" title="对话框过程"></a>对话框过程</h4><figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br></pre></td><td class="code"><pre><span class="line"></span><br><span class="line">BOOL CALLBACK <span class="title function_">AboutDlgProc</span> <span class="params">(HWND hDlg, UINT message, </span></span><br><span class="line"><span class="params">                            WPARAM wParam, LPARAM lParam)</span></span><br><span class="line">&#123;</span><br><span class="line">     <span class="type">static</span> HWND hCtrlBlock ;<span class="comment">//预览块句柄</span></span><br><span class="line">     <span class="type">static</span> <span class="type">int</span>  iColor, iFigure ;</span><br><span class="line">     </span><br><span class="line">     <span class="keyword">switch</span> (message)</span><br><span class="line">     &#123;</span><br><span class="line">     <span class="keyword">case</span> WM_INITDIALOG:</span><br><span class="line">          iColor  = iCurrentColor ;<span class="comment">//获取当前颜色</span></span><br><span class="line">          iFigure = iCurrentFigure ;</span><br><span class="line">          </span><br><span class="line">          CheckRadioButton (hDlg, IDC_BLACK, IDC_WHITE,   iColor) ;<span class="comment">//第一个颜色和最后一个颜色,其间的宏定义都算,这一些选项中有且只有一个处于被选中状态</span></span><br><span class="line">          CheckRadioButton (hDlg, IDC_RECT,  IDC_ELLIPSE, iFigure) ;</span><br><span class="line">          </span><br><span class="line">          hCtrlBlock = GetDlgItem (hDlg, IDC_PAINT) ;<span class="comment">//获取预览块句柄</span></span><br><span class="line">          </span><br><span class="line">          SetFocus (GetDlgItem (hDlg, iColor)) ;<span class="comment">//iColor就是选中颜色按钮的句柄,将焦点让给该按钮</span></span><br><span class="line">          <span class="keyword">return</span> FALSE ;</span><br><span class="line">          </span><br><span class="line">     <span class="keyword">case</span> WM_COMMAND:</span><br><span class="line">          <span class="keyword">switch</span> (LOWORD (wParam))</span><br><span class="line">          &#123;</span><br><span class="line">          <span class="keyword">case</span> IDOK:<span class="comment">//点选了确认键,需要修改设置了</span></span><br><span class="line">               iCurrentColor  = iColor ;</span><br><span class="line">               iCurrentFigure = iFigure ;<span class="comment">//修改当前设置</span></span><br><span class="line">               EndDialog (hDlg, TRUE) ;</span><br><span class="line">               <span class="keyword">return</span> TRUE ;</span><br><span class="line">               </span><br><span class="line">          <span class="keyword">case</span> IDCANCEL:</span><br><span class="line">               EndDialog (hDlg, FALSE) ;</span><br><span class="line">               <span class="keyword">return</span> TRUE ;</span><br><span class="line">               </span><br><span class="line">          <span class="keyword">case</span> IDC_BLACK:</span><br><span class="line">          <span class="keyword">case</span> IDC_RED:</span><br><span class="line">          <span class="keyword">case</span> IDC_GREEN:</span><br><span class="line">          <span class="keyword">case</span> IDC_YELLOW:</span><br><span class="line">          <span class="keyword">case</span> IDC_BLUE:</span><br><span class="line">          <span class="keyword">case</span> IDC_MAGENTA:</span><br><span class="line">          <span class="keyword">case</span> IDC_CYAN:</span><br><span class="line">          <span class="keyword">case</span> IDC_WHITE:</span><br><span class="line">               iColor = LOWORD (wParam) ;<span class="comment">//LOWORD(wParam)携带控件ID</span></span><br><span class="line">               CheckRadioButton (hDlg, IDC_BLACK, IDC_WHITE, LOWORD (wParam)) ;<span class="comment">//根据鼠标点选改变单选按钮状态</span></span><br><span class="line">               PaintTheBlock (hCtrlBlock, iColor, iFigure) ;<span class="comment">//Block是预览块,实时根据选择改变,提供预览功能</span></span><br><span class="line">               <span class="keyword">return</span> TRUE ;</span><br><span class="line">               </span><br><span class="line">          <span class="keyword">case</span> IDC_RECT:</span><br><span class="line">          <span class="keyword">case</span> IDC_ELLIPSE:</span><br><span class="line">               iFigure = LOWORD (wParam) ;<span class="comment">//更新图形状态</span></span><br><span class="line">               CheckRadioButton (hDlg, IDC_RECT, IDC_ELLIPSE, LOWORD (wParam)) ;</span><br><span class="line">               PaintTheBlock (hCtrlBlock, iColor, iFigure) ;<span class="comment">//立刻重绘预览块</span></span><br><span class="line">               <span class="keyword">return</span> TRUE ;</span><br><span class="line">          &#125;</span><br><span class="line">          <span class="keyword">break</span> ;</span><br><span class="line">          </span><br><span class="line">     <span class="keyword">case</span> WM_PAINT:</span><br><span class="line">          PaintTheBlock (hCtrlBlock, iColor, iFigure) ;<span class="comment">//重绘时只需要关注预览块</span></span><br><span class="line">          <span class="keyword">break</span> ;</span><br><span class="line">     &#125;</span><br><span class="line">     <span class="keyword">return</span> FALSE ;</span><br><span class="line">&#125;</span><br><span class="line"></span><br></pre></td></tr></table></figure>
+<h4 id="PaintTheBlock"><a href="#PaintTheBlock" class="headerlink" title="PaintTheBlock"></a>PaintTheBlock</h4><figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="type">void</span> <span class="title function_">PaintTheBlock</span> <span class="params">(HWND hCtrl, <span class="type">int</span> iColor, <span class="type">int</span> iFigure)</span></span><br><span class="line">&#123;</span><br><span class="line">     InvalidateRect (hCtrl, <span class="literal">NULL</span>, TRUE) ;<span class="comment">//hCtrl句柄控制的客户去全都失效</span></span><br><span class="line">     UpdateWindow (hCtrl) ;<span class="comment">//重绘hCtrl</span></span><br><span class="line">     PaintWindow (hCtrl, iColor, iFigure) ;<span class="comment">//根据hCtrl和iColor指定的风格重绘</span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<h4 id="回顾父子通信方式"><a href="#回顾父子通信方式" class="headerlink" title="回顾父子通信方式"></a>回顾父子通信方式</h4><p>父窗口就只负责主窗口客户区的颜色和图形绘制,对话框负责调这个颜色和图形</p>
+<p>父窗口和对话框如何进行通信的?或者说对话框是如何通知父窗口用新样式绘图的呢?</p>
+<p>关键在于两个对父过程和对话框过程都可见的全局变量,对话框使用这两个变量间接通知父窗口</p>
+<p>并且在对话框关闭之后,父窗口会立刻重绘,这就使得颜色样式更新显得没有延迟</p>
+<p>父窗口中,关闭对话框之后的立刻更新:</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">case</span> IDM_APP_ABOUT:</span><br><span class="line">     <span class="keyword">if</span> (DialogBox (hInstance, TEXT (<span class="string">&quot;AboutBox&quot;</span>), hwnd, AboutDlgProc))<span class="comment">//如果DialogBox返回值1说明确实有修改,需要重绘,否则不需要重绘</span></span><br><span class="line">          InvalidateRect (hwnd, <span class="literal">NULL</span>, TRUE) ;</span><br></pre></td></tr></table></figure>
+<h4 id="避免使用全局变量"><a href="#避免使用全局变量" class="headerlink" title="避免使用全局变量"></a>避免使用全局变量</h4><p>正当我感觉使用全局变量间接实现父子通信,这个设计合情合理,甚至有点巧妙时,人家又说,这是low B方法.</p>
+<p>书上给的方法是,定义一个结构体</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">typedef</span> <span class="class"><span class="keyword">struct</span> &#123;</span></span><br><span class="line">    <span class="type">int</span> iColor, iFigure;</span><br><span class="line">&#125;ABOUTBOX_DATA;</span><br></pre></td></tr></table></figure>
+<p>这个结构体就记录了对话框能够使用的变量</p>
+<p>在WndProc中用这样一个结构体指针传递给DialogBoxParam,即带参数的对话框函数</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">INT_PTR <span class="title function_">DialogBoxParamA</span><span class="params">(</span></span><br><span class="line"><span class="params">  [in, optional] HINSTANCE hInstance,<span class="comment">//应用程序实例句柄</span></span></span><br><span class="line"><span class="params">  [in]           LPCSTR    lpTemplateName,<span class="comment">//对话框id</span></span></span><br><span class="line"><span class="params">  [in, optional] HWND      hWndParent,<span class="comment">//父窗口</span></span></span><br><span class="line"><span class="params">  [in, optional] DLGPROC   lpDialogFunc,<span class="comment">//对话框过程</span></span></span><br><span class="line"><span class="params">  [in]           LPARAM    dwInitParam<span class="comment">//参数</span></span></span><br><span class="line"><span class="params">)</span>;</span><br></pre></td></tr></table></figure>
+<p>dwInitParam这个参数将会作为对话框WM_INITDIALOG消息的lParam参数传递给对话框过程,也就是把WndProc函数栈变量的地址交给了对话框过程AboutDlgProc,使得对话框过程函数可以操作WndProc的函数栈</p>
+<p>AboutDlgProc中有两个关于ABOUTBOX_DATA结构体的变量,一个是指针类型,保管WndProc用WM_INITDIALOG消息的lParam参数指定的指针,用于向WndProc打报告</p>
+<p>另一个是AboutDlgProc函数栈下的局部变量,这个是对话框过程自娱自乐用的,打报告的时候只需要拷贝该局部变量的情况</p>
+<p>修改后的About2</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br><span class="line">75</span><br><span class="line">76</span><br><span class="line">77</span><br><span class="line">78</span><br><span class="line">79</span><br><span class="line">80</span><br><span class="line">81</span><br><span class="line">82</span><br><span class="line">83</span><br><span class="line">84</span><br><span class="line">85</span><br><span class="line">86</span><br><span class="line">87</span><br><span class="line">88</span><br><span class="line">89</span><br><span class="line">90</span><br><span class="line">91</span><br><span class="line">92</span><br><span class="line">93</span><br><span class="line">94</span><br><span class="line">95</span><br><span class="line">96</span><br><span class="line">97</span><br><span class="line">98</span><br><span class="line">99</span><br><span class="line">100</span><br><span class="line">101</span><br><span class="line">102</span><br><span class="line">103</span><br><span class="line">104</span><br><span class="line">105</span><br><span class="line">106</span><br><span class="line">107</span><br><span class="line">108</span><br><span class="line">109</span><br><span class="line">110</span><br><span class="line">111</span><br><span class="line">112</span><br><span class="line">113</span><br><span class="line">114</span><br><span class="line">115</span><br><span class="line">116</span><br><span class="line">117</span><br><span class="line">118</span><br><span class="line">119</span><br><span class="line">120</span><br><span class="line">121</span><br><span class="line">122</span><br><span class="line">123</span><br><span class="line">124</span><br><span class="line">125</span><br><span class="line">126</span><br><span class="line">127</span><br><span class="line">128</span><br><span class="line">129</span><br><span class="line">130</span><br><span class="line">131</span><br><span class="line">132</span><br><span class="line">133</span><br><span class="line">134</span><br><span class="line">135</span><br><span class="line">136</span><br><span class="line">137</span><br><span class="line">138</span><br><span class="line">139</span><br><span class="line">140</span><br><span class="line">141</span><br><span class="line">142</span><br><span class="line">143</span><br><span class="line">144</span><br><span class="line">145</span><br><span class="line">146</span><br><span class="line">147</span><br><span class="line">148</span><br><span class="line">149</span><br><span class="line">150</span><br><span class="line">151</span><br><span class="line">152</span><br><span class="line">153</span><br><span class="line">154</span><br><span class="line">155</span><br><span class="line">156</span><br><span class="line">157</span><br><span class="line">158</span><br><span class="line">159</span><br><span class="line">160</span><br><span class="line">161</span><br><span class="line">162</span><br><span class="line">163</span><br><span class="line">164</span><br><span class="line">165</span><br><span class="line">166</span><br><span class="line">167</span><br><span class="line">168</span><br><span class="line">169</span><br><span class="line">170</span><br><span class="line">171</span><br><span class="line">172</span><br><span class="line">173</span><br><span class="line">174</span><br><span class="line">175</span><br><span class="line">176</span><br><span class="line">177</span><br><span class="line">178</span><br><span class="line">179</span><br><span class="line">180</span><br><span class="line">181</span><br><span class="line">182</span><br><span class="line">183</span><br><span class="line">184</span><br><span class="line">185</span><br><span class="line">186</span><br><span class="line">187</span><br><span class="line">188</span><br><span class="line">189</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">/*------------------------------------------</span></span><br><span class="line"><span class="comment">   ABOUT2.C -- About Box Demo Program No. 2</span></span><br><span class="line"><span class="comment">               (c) Charles Petzold, 1998</span></span><br><span class="line"><span class="comment">  ------------------------------------------*/</span></span><br><span class="line"> </span><br><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;windows.h&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&quot;resource.h&quot;</span></span></span><br><span class="line"></span><br><span class="line"><span class="keyword">typedef</span> <span class="class"><span class="keyword">struct</span> &#123;</span><span class="comment">//结构体定义</span></span><br><span class="line">    <span class="type">int</span> iColor, iFigure;</span><br><span class="line">&#125;ABOUTBOX_DATA;</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">LRESULT CALLBACK <span class="title function_">WndProc</span>      <span class="params">(HWND, UINT, WPARAM, LPARAM)</span> ;</span><br><span class="line">BOOL    CALLBACK <span class="title function_">AboutDlgProc</span> <span class="params">(HWND, UINT, WPARAM, LPARAM)</span> ;</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="type">int</span> WINAPI <span class="title function_">WinMain</span> <span class="params">(HINSTANCE hInstance, HINSTANCE hPrevInstance,</span></span><br><span class="line"><span class="params">                    PSTR szCmdLine, <span class="type">int</span> iCmdShow)</span></span><br><span class="line">&#123;</span><br><span class="line">     <span class="type">static</span> TCHAR szAppName[] = TEXT (<span class="string">&quot;About2&quot;</span>) ;</span><br><span class="line">     MSG          msg ;</span><br><span class="line">     HWND         hwnd ;</span><br><span class="line">     WNDCLASS     wndclass ;</span><br><span class="line">     </span><br><span class="line">     wndclass.style         = CS_HREDRAW | CS_VREDRAW ;</span><br><span class="line">     wndclass.lpfnWndProc   = WndProc ;</span><br><span class="line">     wndclass.cbClsExtra    = <span class="number">0</span> ;</span><br><span class="line">     wndclass.cbWndExtra    = <span class="number">0</span> ;</span><br><span class="line">     wndclass.hInstance     = hInstance ;</span><br><span class="line">     wndclass.hIcon         = LoadIcon (hInstance, szAppName) ;</span><br><span class="line">     wndclass.hCursor       = LoadCursor (<span class="literal">NULL</span>, IDC_ARROW) ;</span><br><span class="line">     wndclass.hbrBackground = (HBRUSH) GetStockObject (WHITE_BRUSH) ;</span><br><span class="line">     wndclass.lpszMenuName  = szAppName ;</span><br><span class="line">     wndclass.lpszClassName = szAppName ;</span><br><span class="line">     </span><br><span class="line">     <span class="keyword">if</span> (!RegisterClass (&amp;wndclass))</span><br><span class="line">     &#123;</span><br><span class="line">          MessageBox (<span class="literal">NULL</span>, TEXT (<span class="string">&quot;This program requires Windows NT!&quot;</span>),</span><br><span class="line">                      szAppName, MB_ICONERROR) ;</span><br><span class="line">          <span class="keyword">return</span> <span class="number">0</span> ;</span><br><span class="line">     &#125;</span><br><span class="line">     </span><br><span class="line">     hwnd = CreateWindow (szAppName, TEXT (<span class="string">&quot;About Box Demo Program&quot;</span>),</span><br><span class="line">                          WS_OVERLAPPEDWINDOW,</span><br><span class="line">                          CW_USEDEFAULT, CW_USEDEFAULT,</span><br><span class="line">                          CW_USEDEFAULT, CW_USEDEFAULT,</span><br><span class="line">                          <span class="literal">NULL</span>, <span class="literal">NULL</span>, hInstance, <span class="literal">NULL</span>) ;</span><br><span class="line">     </span><br><span class="line">     ShowWindow (hwnd, iCmdShow) ;</span><br><span class="line">     UpdateWindow (hwnd) ; </span><br><span class="line">     </span><br><span class="line">     <span class="keyword">while</span> (GetMessage (&amp;msg, <span class="literal">NULL</span>, <span class="number">0</span>, <span class="number">0</span>))</span><br><span class="line">     &#123;</span><br><span class="line">          TranslateMessage (&amp;msg) ;</span><br><span class="line">          DispatchMessage (&amp;msg) ;</span><br><span class="line">     &#125;</span><br><span class="line">     <span class="keyword">return</span> msg.wParam ;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="type">void</span> <span class="title function_">PaintWindow</span> <span class="params">(HWND hwnd, <span class="type">int</span> iColor, <span class="type">int</span> iFigure)</span></span><br><span class="line">&#123;</span><br><span class="line">     <span class="type">static</span> COLORREF crColor[<span class="number">8</span>] = &#123; RGB (  <span class="number">0</span>,   <span class="number">0</span>, <span class="number">0</span>), RGB (  <span class="number">0</span>,   <span class="number">0</span>, <span class="number">255</span>),</span><br><span class="line">                                    RGB (  <span class="number">0</span>, <span class="number">255</span>, <span class="number">0</span>), RGB (  <span class="number">0</span>, <span class="number">255</span>, <span class="number">255</span>),</span><br><span class="line">                                    RGB (<span class="number">255</span>,   <span class="number">0</span>, <span class="number">0</span>), RGB (<span class="number">255</span>,   <span class="number">0</span>, <span class="number">255</span>),</span><br><span class="line">                                    RGB (<span class="number">255</span>, <span class="number">255</span>, <span class="number">0</span>), RGB (<span class="number">255</span>, <span class="number">255</span>, <span class="number">255</span>) &#125; ;</span><br><span class="line"></span><br><span class="line">     HBRUSH          hBrush ;</span><br><span class="line">     HDC             hdc ;</span><br><span class="line">     RECT            rect ;</span><br><span class="line">     </span><br><span class="line">     hdc = GetDC (hwnd) ;</span><br><span class="line">     GetClientRect (hwnd, &amp;rect) ;</span><br><span class="line">     hBrush = CreateSolidBrush (crColor[iColor - IDC_BLACK]) ;</span><br><span class="line">     hBrush = (HBRUSH) SelectObject (hdc, hBrush) ;</span><br><span class="line">     </span><br><span class="line">     <span class="keyword">if</span> (iFigure == IDC_RECT)</span><br><span class="line">          Rectangle (hdc, rect.left, rect.top, rect.right, rect.bottom) ;</span><br><span class="line">     <span class="keyword">else</span></span><br><span class="line">          Ellipse   (hdc, rect.left, rect.top, rect.right, rect.bottom) ;</span><br><span class="line">     </span><br><span class="line">     DeleteObject (SelectObject (hdc, hBrush)) ;</span><br><span class="line">     ReleaseDC (hwnd, hdc) ;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="type">void</span> <span class="title function_">PaintTheBlock</span> <span class="params">(HWND hCtrl, <span class="type">int</span> iColor, <span class="type">int</span> iFigure)</span></span><br><span class="line">&#123;</span><br><span class="line">     InvalidateRect (hCtrl, <span class="literal">NULL</span>, TRUE) ;</span><br><span class="line">     UpdateWindow (hCtrl) ;</span><br><span class="line">     PaintWindow (hCtrl, iColor, iFigure) ;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">LRESULT CALLBACK <span class="title function_">WndProc</span> <span class="params">(HWND hwnd, UINT message, WPARAM wParam, LPARAM lParam)</span></span><br><span class="line">&#123;</span><br><span class="line">     <span class="type">static</span> HINSTANCE hInstance ;<span class="comment">//应用程序实例句柄</span></span><br><span class="line">     <span class="type">static</span> PAINTSTRUCT      ps ;</span><br><span class="line">     <span class="type">static</span> ABOUTBOX_DATA ad;<span class="comment">//父窗口绘图依据</span></span><br><span class="line"></span><br><span class="line">     <span class="keyword">switch</span> (message)</span><br><span class="line">     &#123;</span><br><span class="line">     <span class="keyword">case</span> WM_CREATE:</span><br><span class="line">          hInstance = ((LPCREATESTRUCT) lParam)-&gt;hInstance ;</span><br><span class="line">          <span class="keyword">return</span> <span class="number">0</span> ;</span><br><span class="line">          </span><br><span class="line">     <span class="keyword">case</span> WM_COMMAND:</span><br><span class="line">          <span class="keyword">switch</span> (LOWORD (wParam))</span><br><span class="line">          &#123;</span><br><span class="line">          <span class="keyword">case</span> IDM_APP_ABOUT:</span><br><span class="line">               <span class="keyword">if</span> (DialogBoxParam (hInstance, TEXT (<span class="string">&quot;AboutBox&quot;</span>), hwnd, AboutDlgProc,&amp;ad))<span class="comment">//ad地址交给子窗口,使其可以跨函数栈帧修改ad值</span></span><br><span class="line">                    InvalidateRect (hwnd, <span class="literal">NULL</span>, TRUE) ;</span><br><span class="line">               <span class="keyword">return</span> <span class="number">0</span> ;</span><br><span class="line">          &#125;</span><br><span class="line">          <span class="keyword">break</span> ;</span><br><span class="line">          </span><br><span class="line">     <span class="keyword">case</span> WM_PAINT:</span><br><span class="line">          BeginPaint (hwnd, &amp;ps) ;</span><br><span class="line">          EndPaint (hwnd, &amp;ps) ;</span><br><span class="line">               </span><br><span class="line">          PaintWindow (hwnd, ad.iColor, ad.iFigure) ;<span class="comment">//根据当前颜色当前形状绘图</span></span><br><span class="line">          <span class="keyword">return</span> <span class="number">0</span> ;</span><br><span class="line">               </span><br><span class="line">     <span class="keyword">case</span> WM_DESTROY:</span><br><span class="line">          PostQuitMessage (<span class="number">0</span>) ;</span><br><span class="line">          <span class="keyword">return</span> <span class="number">0</span> ;</span><br><span class="line">     &#125;</span><br><span class="line">     <span class="keyword">return</span> DefWindowProc (hwnd, message, wParam, lParam) ;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">BOOL CALLBACK <span class="title function_">AboutDlgProc</span> <span class="params">(HWND hDlg, UINT message, </span></span><br><span class="line"><span class="params">                            WPARAM wParam, LPARAM lParam)</span></span><br><span class="line">&#123;</span><br><span class="line">     <span class="type">static</span> HWND hCtrlBlock ;</span><br><span class="line">     <span class="type">static</span> ABOUTBOX_DATA ad,*pad;</span><br><span class="line">     <span class="keyword">switch</span> (message)</span><br><span class="line">     &#123;</span><br><span class="line">     <span class="keyword">case</span> WM_INITDIALOG:</span><br><span class="line">         pad = (ABOUTBOX_DATA*)lParam;<span class="comment">//pad用于承接父窗口传递的指针</span></span><br><span class="line">         ad = *pad;<span class="comment">//ad是本函数绘图依据,不到万不得已不使用*pad指针</span></span><br><span class="line"></span><br><span class="line">          </span><br><span class="line">          CheckRadioButton (hDlg, IDC_BLACK, IDC_WHITE,   ad.iColor) ;<span class="comment">//第一个颜色和最后一个颜色,其间的宏定义都算,这一些选项中有且只有一个处于被选中状态</span></span><br><span class="line">          CheckRadioButton (hDlg, IDC_RECT,  IDC_ELLIPSE, ad.iFigure) ;</span><br><span class="line">          </span><br><span class="line">          hCtrlBlock = GetDlgItem (hDlg, IDC_PAINT) ;<span class="comment">//预览块矿建</span></span><br><span class="line">          </span><br><span class="line">          SetFocus (GetDlgItem (hDlg, ad.iColor)) ;</span><br><span class="line">          <span class="keyword">return</span> FALSE ;</span><br><span class="line">          </span><br><span class="line">     <span class="keyword">case</span> WM_COMMAND:</span><br><span class="line">          <span class="keyword">switch</span> (LOWORD (wParam))</span><br><span class="line">          &#123;</span><br><span class="line">          <span class="keyword">case</span> IDOK:<span class="comment">//点选了确认键,需要修改设置了</span></span><br><span class="line">              *pad = ad;</span><br><span class="line">               EndDialog (hDlg, TRUE) ;</span><br><span class="line">               <span class="keyword">return</span> TRUE ;</span><br><span class="line">               </span><br><span class="line">          <span class="keyword">case</span> IDCANCEL:</span><br><span class="line">               EndDialog (hDlg, FALSE) ;</span><br><span class="line">               <span class="keyword">return</span> TRUE ;</span><br><span class="line">               </span><br><span class="line">          <span class="keyword">case</span> IDC_BLACK:</span><br><span class="line">          <span class="keyword">case</span> IDC_RED:</span><br><span class="line">          <span class="keyword">case</span> IDC_GREEN:</span><br><span class="line">          <span class="keyword">case</span> IDC_YELLOW:</span><br><span class="line">          <span class="keyword">case</span> IDC_BLUE:</span><br><span class="line">          <span class="keyword">case</span> IDC_MAGENTA:</span><br><span class="line">          <span class="keyword">case</span> IDC_CYAN:</span><br><span class="line">          <span class="keyword">case</span> IDC_WHITE:</span><br><span class="line">               ad.iColor = LOWORD (wParam) ;<span class="comment">//LOWORD(wParam)携带控件ID</span></span><br><span class="line">               CheckRadioButton (hDlg, IDC_BLACK, IDC_WHITE, LOWORD (wParam)) ;</span><br><span class="line">               PaintTheBlock (hCtrlBlock, ad.iColor,ad.iFigure ) ;<span class="comment">//Block是预览块,实时根据选择改变,提供预览功能</span></span><br><span class="line">               <span class="keyword">return</span> TRUE ;</span><br><span class="line">               </span><br><span class="line">          <span class="keyword">case</span> IDC_RECT:</span><br><span class="line">          <span class="keyword">case</span> IDC_ELLIPSE:</span><br><span class="line">               ad.iFigure = LOWORD (wParam) ;</span><br><span class="line">               CheckRadioButton (hDlg, IDC_RECT, IDC_ELLIPSE, LOWORD (wParam)) ;</span><br><span class="line">               PaintTheBlock (hCtrlBlock, ad.iColor, ad.iFigure) ;</span><br><span class="line">               <span class="keyword">return</span> TRUE ;</span><br><span class="line">          &#125;</span><br><span class="line">          <span class="keyword">break</span> ;</span><br><span class="line">          </span><br><span class="line">     <span class="keyword">case</span> WM_PAINT:</span><br><span class="line">          PaintTheBlock (hCtrlBlock, ad.iColor, ad.iFigure) ;</span><br><span class="line">          <span class="keyword">break</span> ;</span><br><span class="line">     &#125;</span><br><span class="line">     <span class="keyword">return</span> FALSE ;</span><br><span class="line">&#125;</span><br><span class="line"></span><br></pre></td></tr></table></figure>
+<h4 id="回顾单选互斥的实现"><a href="#回顾单选互斥的实现" class="headerlink" title="回顾单选互斥的实现"></a>回顾单选互斥的实现</h4><p>之前实现单选互斥,需要维护一组按钮的状态,当新按钮按下之前,先得把原来按下的按钮扣起来,在按下新按钮.</p>
+<p>而现在只需要</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">CheckRadioButton(hDlg,idFirst,idLast,idCheck);</span><br></pre></td></tr></table></figure>
+<p>意思是,在hDlg对话框中,编号属于<code>[idFirst,idLast]</code>这个范围的单选按钮都是互斥的,idCheck决定按下哪一个.</p>
+<p>这就要求从idFirst到idLast是连号的,idCheck属于这个范围</p>
+<h3 id="About3"><a href="#About3" class="headerlink" title="About3"></a>About3</h3><p>自定义对话框控件</p>
+<h4 id="资源脚本-1"><a href="#资源脚本-1" class="headerlink" title="资源脚本"></a>资源脚本</h4><figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line">ABOUTBOX DIALOG DISCARDABLE  <span class="number">32</span>, <span class="number">32</span>, <span class="number">180</span>, <span class="number">100</span></span><br><span class="line">STYLE DS_MODALFRAME | WS_POPUP</span><br><span class="line">FONT <span class="number">8</span>, <span class="string">&quot;MS Sans Serif&quot;</span></span><br><span class="line">BEGIN</span><br><span class="line">    CONTROL         <span class="string">&quot;OK&quot;</span>,IDOK,<span class="string">&quot;EllipPush&quot;</span>,WS_GROUP | WS_TABSTOP,<span class="number">73</span>,<span class="number">79</span>,<span class="number">32</span>,<span class="number">14</span><span class="comment">//自定义控件,ID=IDOK,类名=&quot;EllipPush&quot;</span></span><br><span class="line">    ICON            <span class="string">&quot;ABOUT3&quot;</span>,IDC_STATIC,<span class="number">7</span>,<span class="number">7</span>,<span class="number">20</span>,<span class="number">20</span></span><br><span class="line">    CTEXT           <span class="string">&quot;About3&quot;</span>,IDC_STATIC,<span class="number">40</span>,<span class="number">12</span>,<span class="number">100</span>,<span class="number">8</span></span><br><span class="line">    CTEXT           <span class="string">&quot;About Box Demo Program&quot;</span>,IDC_STATIC,<span class="number">7</span>,<span class="number">40</span>,<span class="number">166</span>,<span class="number">8</span></span><br><span class="line">    CTEXT           <span class="string">&quot;(c) Charles Petzold, 1998&quot;</span>,IDC_STATIC,<span class="number">7</span>,<span class="number">52</span>,<span class="number">166</span>,<span class="number">8</span></span><br><span class="line">END</span><br></pre></td></tr></table></figure>
+<p>这里的类名就是注册窗口类时的类名,决定从该类创建的实例的属性</p>
+<h4 id="自定义控件过程函数"><a href="#自定义控件过程函数" class="headerlink" title="自定义控件过程函数"></a>自定义控件过程函数</h4><p>创建自定义控件类的时候需要注册其过程函数,其中WM_PAINT决定了该自定义控件类的外观</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br></pre></td><td class="code"><pre><span class="line">LRESULT CALLBACK <span class="title function_">EllipPushWndProc</span> <span class="params">(HWND hwnd, UINT message, <span class="comment">//自定义按钮类行为</span></span></span><br><span class="line"><span class="params">                                   WPARAM wParam, LPARAM lParam)</span></span><br><span class="line">&#123;</span><br><span class="line">     TCHAR       szText[<span class="number">40</span>] ;</span><br><span class="line">     HBRUSH      hBrush ;</span><br><span class="line">     HDC         hdc ;</span><br><span class="line">     PAINTSTRUCT ps ;</span><br><span class="line">     RECT        rect ;</span><br><span class="line">     </span><br><span class="line">     <span class="keyword">switch</span> (message)</span><br><span class="line">     &#123;</span><br><span class="line">     <span class="keyword">case</span> WM_PAINT :<span class="comment">//绘图行为</span></span><br><span class="line">          GetClientRect (hwnd, &amp;rect) ;</span><br><span class="line">          GetWindowText (hwnd, szText, lstrlen(szText)) ;<span class="comment">//获取本子窗口的描述文字,写到szText数组里,即&quot;OK&quot;字样</span></span><br><span class="line">          </span><br><span class="line">          hdc = BeginPaint (hwnd, &amp;ps) ;</span><br><span class="line">          </span><br><span class="line">          hBrush = CreateSolidBrush (GetSysColor (COLOR_WINDOW)) ;</span><br><span class="line">          hBrush = (HBRUSH) SelectObject (hdc, hBrush) ;</span><br><span class="line">          SetBkColor (hdc, GetSysColor (COLOR_WINDOW)) ;</span><br><span class="line">          SetTextColor (hdc, GetSysColor (COLOR_WINDOWTEXT)) ;</span><br><span class="line">          </span><br><span class="line">          Ellipse (hdc, rect.left, rect.top, rect.right, rect.bottom) ;<span class="comment">//绘制椭圆</span></span><br><span class="line">          DrawText (hdc, szText, <span class="number">-1</span>, &amp;rect,<span class="comment">//椭圆中心写字</span></span><br><span class="line">                    DT_SINGLELINE | DT_CENTER | DT_VCENTER) ;</span><br><span class="line">          </span><br><span class="line">          DeleteObject (SelectObject (hdc, hBrush)) ;</span><br><span class="line">          </span><br><span class="line">          EndPaint (hwnd, &amp;ps) ;</span><br><span class="line">          <span class="keyword">return</span> <span class="number">0</span> ;</span><br><span class="line">          </span><br><span class="line">     <span class="keyword">case</span> WM_KEYUP :</span><br><span class="line">          <span class="keyword">if</span> (wParam != VK_SPACE)<span class="comment">//按下空格键相当于按下鼠标左键,其他键忽略,交给DefWindowProc处理</span></span><br><span class="line">               <span class="keyword">break</span> ;</span><br><span class="line">                                             <span class="comment">// fall through</span></span><br><span class="line">     <span class="keyword">case</span> WM_LBUTTONUP :</span><br><span class="line">          SendMessage (GetParent (hwnd), WM_COMMAND,<span class="comment">//向父窗口即对话框发送WM_COMMAND消息,消息内容是本按钮的id</span></span><br><span class="line">               GetWindowLong (hwnd, GWL_ID), (LPARAM) hwnd) ;</span><br><span class="line">          <span class="keyword">return</span> <span class="number">0</span> ;</span><br><span class="line">     &#125;</span><br><span class="line">     <span class="keyword">return</span> DefWindowProc (hwnd, message, wParam, lParam) ;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<h2 id="非模态对话框"><a href="#非模态对话框" class="headerlink" title="非模态对话框"></a>非模态对话框</h2><p>非模态对话框就是可以不理会对话框内容继续和父窗口交互</p>
+<p>一般Ctrl+F召唤的查找框就是非模态的</p>
+<p>使用CreateDialogA函数创建非模态对话框</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="type">void</span> <span class="title function_">CreateDialogA</span><span class="params">(</span></span><br><span class="line"><span class="params">  [in, optional]  hInstance,</span></span><br><span class="line"><span class="params">  [in]            lpName,<span class="comment">//对话框类名,或者类句柄</span></span></span><br><span class="line"><span class="params">  [in, optional]  hWndParent,<span class="comment">//父窗口句柄</span></span></span><br><span class="line"><span class="params">  [in, optional]  lpDialogFunc<span class="comment">//对话框回调函数</span></span></span><br><span class="line"><span class="params">)</span>;</span><br></pre></td></tr></table></figure>
+<h3 id="COLORS"><a href="#COLORS" class="headerlink" title="COLORS"></a>COLORS</h3><figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br><span class="line">75</span><br><span class="line">76</span><br><span class="line">77</span><br><span class="line">78</span><br><span class="line">79</span><br><span class="line">80</span><br><span class="line">81</span><br><span class="line">82</span><br><span class="line">83</span><br><span class="line">84</span><br><span class="line">85</span><br><span class="line">86</span><br><span class="line">87</span><br><span class="line">88</span><br><span class="line">89</span><br><span class="line">90</span><br><span class="line">91</span><br><span class="line">92</span><br><span class="line">93</span><br><span class="line">94</span><br><span class="line">95</span><br><span class="line">96</span><br><span class="line">97</span><br><span class="line">98</span><br><span class="line">99</span><br><span class="line">100</span><br><span class="line">101</span><br><span class="line">102</span><br><span class="line">103</span><br><span class="line">104</span><br><span class="line">105</span><br><span class="line">106</span><br><span class="line">107</span><br><span class="line">108</span><br><span class="line">109</span><br><span class="line">110</span><br><span class="line">111</span><br><span class="line">112</span><br><span class="line">113</span><br><span class="line">114</span><br><span class="line">115</span><br><span class="line">116</span><br><span class="line">117</span><br><span class="line">118</span><br><span class="line">119</span><br><span class="line">120</span><br><span class="line">121</span><br><span class="line">122</span><br><span class="line">123</span><br><span class="line">124</span><br><span class="line">125</span><br><span class="line">126</span><br><span class="line">127</span><br><span class="line">128</span><br><span class="line">129</span><br><span class="line">130</span><br><span class="line">131</span><br><span class="line">132</span><br><span class="line">133</span><br></pre></td><td class="code"><pre><span class="line"></span><br><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;windows.h&gt;</span></span></span><br><span class="line"></span><br><span class="line">LRESULT CALLBACK <span class="title function_">WndProc</span><span class="params">(HWND, UINT, WPARAM, LPARAM)</span>;</span><br><span class="line">BOOL    CALLBACK <span class="title function_">ColorScrDlg</span><span class="params">(HWND, UINT, WPARAM, LPARAM)</span>;</span><br><span class="line"></span><br><span class="line">HWND hDlgModeless;	<span class="comment">//非模态对话框的全局句柄,对任意函数可见,</span></span><br><span class="line"></span><br><span class="line"><span class="type">int</span> WINAPI <span class="title function_">WinMain</span><span class="params">(HINSTANCE hInstance, HINSTANCE hPrevInstance,</span></span><br><span class="line"><span class="params">	PSTR szCmdLine, <span class="type">int</span> iCmdShow)</span></span><br><span class="line">&#123;</span><br><span class="line">	<span class="type">static</span> TCHAR szAppName[] = TEXT(<span class="string">&quot;Colors2&quot;</span>);</span><br><span class="line">	HWND         hwnd;</span><br><span class="line">	MSG          msg;</span><br><span class="line">	WNDCLASS     wndclass;</span><br><span class="line"></span><br><span class="line">	wndclass.style = CS_HREDRAW | CS_VREDRAW;</span><br><span class="line">	wndclass.lpfnWndProc = WndProc;</span><br><span class="line">	wndclass.cbClsExtra = <span class="number">0</span>;</span><br><span class="line">	wndclass.cbWndExtra = <span class="number">0</span>;</span><br><span class="line">	wndclass.hInstance = hInstance;</span><br><span class="line">	wndclass.hIcon = LoadIcon(<span class="literal">NULL</span>, IDI_APPLICATION);</span><br><span class="line">	wndclass.hCursor = LoadCursor(<span class="literal">NULL</span>, IDC_ARROW);</span><br><span class="line">	wndclass.hbrBackground = CreateSolidBrush(<span class="number">0L</span>);</span><br><span class="line">	wndclass.lpszMenuName = <span class="literal">NULL</span>;</span><br><span class="line">	wndclass.lpszClassName = szAppName;</span><br><span class="line"></span><br><span class="line">	<span class="keyword">if</span> (!RegisterClass(&amp;wndclass))</span><br><span class="line">	&#123;</span><br><span class="line">		MessageBox(<span class="literal">NULL</span>, TEXT(<span class="string">&quot;This program requires Windows NT!&quot;</span>),</span><br><span class="line">			szAppName, MB_ICONERROR);</span><br><span class="line">		<span class="keyword">return</span> <span class="number">0</span>;</span><br><span class="line">	&#125;</span><br><span class="line"></span><br><span class="line">	hwnd = CreateWindow(</span><br><span class="line">		szAppName, TEXT(<span class="string">&quot;Color Scroll&quot;</span>),</span><br><span class="line">		WS_OVERLAPPEDWINDOW | WS_CLIPCHILDREN,<span class="comment">//不擦除子窗口的情况下,重绘父窗口</span></span><br><span class="line">		CW_USEDEFAULT, CW_USEDEFAULT,</span><br><span class="line">		CW_USEDEFAULT, CW_USEDEFAULT,</span><br><span class="line">		<span class="literal">NULL</span>, <span class="literal">NULL</span>, hInstance, <span class="literal">NULL</span></span><br><span class="line">	);</span><br><span class="line"></span><br><span class="line">	ShowWindow(hwnd, iCmdShow);</span><br><span class="line">	UpdateWindow(hwnd);</span><br><span class="line"></span><br><span class="line">	hDlgModeless = CreateDialog(hInstance, TEXT(<span class="string">&quot;ColorScrDlg&quot;</span>), hwnd, ColorScrDlg);<span class="comment">//在winMain中创建非模态对话框,使用字符串索引资源,注册非模态对话框过程ColorScrDlg</span></span><br><span class="line"></span><br><span class="line"></span><br><span class="line">	<span class="keyword">while</span> (GetMessage(&amp;msg, <span class="literal">NULL</span>, <span class="number">0</span>, <span class="number">0</span>))</span><br><span class="line">	&#123;</span><br><span class="line">		<span class="keyword">if</span> (hDlgModeless == <span class="number">0</span> || !IsDialogMessage(hDlgModeless, &amp;msg))</span><br><span class="line">		&#123;</span><br><span class="line">			TranslateMessage(&amp;msg);</span><br><span class="line">			DispatchMessage(&amp;msg);</span><br><span class="line">		&#125;</span><br><span class="line">	&#125;</span><br><span class="line">	<span class="keyword">return</span> msg.wParam;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">LRESULT CALLBACK <span class="title function_">WndProc</span><span class="params">(HWND hwnd, UINT message, WPARAM wParam, LPARAM lParam)</span></span><br><span class="line">&#123;</span><br><span class="line">	<span class="keyword">switch</span> (message)</span><br><span class="line">	&#123;</span><br><span class="line">	<span class="keyword">case</span> WM_DESTROY:</span><br><span class="line">		DeleteObject((HGDIOBJ)SetClassLong(hwnd, GCL_HBRBACKGROUND,(LONG)GetStockObject(WHITE_BRUSH)));<span class="comment">//删除注册窗口类时创建的逻辑画刷,避免内存泄漏</span></span><br><span class="line">		PostQuitMessage(<span class="number">0</span>);</span><br><span class="line">		<span class="keyword">return</span> <span class="number">0</span>;</span><br><span class="line">	&#125;</span><br><span class="line">	<span class="keyword">return</span> DefWindowProc(hwnd, message, wParam, lParam);</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">BOOL CALLBACK <span class="title function_">ColorScrDlg</span><span class="params">(HWND hDlg, UINT message,</span></span><br><span class="line"><span class="params">	WPARAM wParam, LPARAM lParam)</span><span class="comment">//对话框过程回调</span></span><br><span class="line">&#123;</span><br><span class="line">	<span class="type">static</span> <span class="type">int</span> iColor[<span class="number">3</span>];</span><br><span class="line">	HWND       hwndParent, hCtrl;</span><br><span class="line">	<span class="type">int</span>        iCtrlID, iIndex;</span><br><span class="line"></span><br><span class="line">	<span class="keyword">switch</span> (message)</span><br><span class="line">	&#123;</span><br><span class="line">	<span class="keyword">case</span> WM_INITDIALOG:<span class="comment">//初始化对话框</span></span><br><span class="line">		<span class="keyword">for</span> (iCtrlID = <span class="number">10</span>; iCtrlID &lt; <span class="number">13</span>; iCtrlID++)<span class="comment">//三个滚动条的ID分别是10,11,12</span></span><br><span class="line">		&#123;</span><br><span class="line">			hCtrl = GetDlgItem(hDlg, iCtrlID);<span class="comment">//获取hDlg句柄对应的对话框上,ID是iCtrlID的控件的句柄,即滚动条控件的句柄</span></span><br><span class="line">			SetScrollRange(hCtrl, SB_CTL, <span class="number">0</span>, <span class="number">255</span>, FALSE);<span class="comment">//设置滚动条范围0到255,恰好是RGB值的范围</span></span><br><span class="line">			SetScrollPos(hCtrl, SB_CTL, <span class="number">0</span>, FALSE);<span class="comment">//设置滑块初始位置在0上</span></span><br><span class="line">		&#125;</span><br><span class="line">		<span class="keyword">return</span> TRUE;</span><br><span class="line"></span><br><span class="line">	<span class="keyword">case</span> WM_VSCROLL:</span><br><span class="line">		hCtrl = (HWND)lParam;<span class="comment">//是三个滚动条中的哪一个产生的消息</span></span><br><span class="line">		iCtrlID = GetWindowLong(hCtrl, GWL_ID);<span class="comment">//获取id</span></span><br><span class="line">		iIndex = iCtrlID - <span class="number">10</span>;<span class="comment">//转换成0,1,2下标//该下标用于索引iColor数组,iColor[0]表示红色色度条//同时iColor[0]值也表示了该条上的滑块位置</span></span><br><span class="line">		hwndParent = GetParent(hDlg);<span class="comment">//获取父窗口也就是主窗口句柄</span></span><br><span class="line"></span><br><span class="line">		<span class="keyword">switch</span> (LOWORD(wParam))</span><br><span class="line">		&#123;</span><br><span class="line">		<span class="keyword">case</span> SB_PAGEDOWN:</span><br><span class="line">			iColor[iIndex] += <span class="number">15</span>;        <span class="comment">// fall through//一页是滚动15+1个单位,但是最大不能超过255个单位</span></span><br><span class="line">		<span class="keyword">case</span> SB_LINEDOWN:</span><br><span class="line">			iColor[iIndex] = min(<span class="number">255</span>, iColor[iIndex] + <span class="number">1</span>);</span><br><span class="line">			<span class="keyword">break</span>;</span><br><span class="line">		<span class="keyword">case</span> SB_PAGEUP:</span><br><span class="line">			iColor[iIndex] -= <span class="number">15</span>;        <span class="comment">// fall through</span></span><br><span class="line">		<span class="keyword">case</span> SB_LINEUP:</span><br><span class="line">			iColor[iIndex] = max(<span class="number">0</span>, iColor[iIndex] - <span class="number">1</span>);</span><br><span class="line">			<span class="keyword">break</span>;</span><br><span class="line">		<span class="keyword">case</span> SB_TOP:</span><br><span class="line">			iColor[iIndex] = <span class="number">0</span>;</span><br><span class="line">			<span class="keyword">break</span>;</span><br><span class="line">		<span class="keyword">case</span> SB_BOTTOM:</span><br><span class="line">			iColor[iIndex] = <span class="number">255</span>;</span><br><span class="line">			<span class="keyword">break</span>;</span><br><span class="line">		<span class="keyword">case</span> SB_THUMBPOSITION:</span><br><span class="line">		<span class="keyword">case</span> SB_THUMBTRACK:<span class="comment">//拖动滑块</span></span><br><span class="line">			iColor[iIndex] = HIWORD(wParam);</span><br><span class="line">			<span class="keyword">break</span>;</span><br><span class="line">		<span class="keyword">default</span>:</span><br><span class="line">			<span class="keyword">return</span> FALSE;</span><br><span class="line">		&#125;</span><br><span class="line">		SetScrollPos(hCtrl, SB_CTL, iColor[iIndex], TRUE);<span class="comment">//设置滑块位置</span></span><br><span class="line">		SetDlgItemInt(hDlg, iCtrlID + <span class="number">3</span>, iColor[iIndex], FALSE);<span class="comment">//设置对话框控件文本,也就是表明当前色度的数值</span></span><br><span class="line">							<span class="comment">//+3是将滚动条号转化为其上的解释性文字的id</span></span><br><span class="line"></span><br><span class="line">		DeleteObject((HGDIOBJ)SetClassLong(hwndParent, GCL_HBRBACKGROUND,<span class="comment">//删除旧背景颜色</span></span><br><span class="line">			(LONG)CreateSolidBrush(RGB(iColor[<span class="number">0</span>], iColor[<span class="number">1</span>], iColor[<span class="number">2</span>]))));<span class="comment">//更新新背景颜色</span></span><br><span class="line"></span><br><span class="line">		InvalidateRect(hwndParent, <span class="literal">NULL</span>, TRUE);<span class="comment">//父窗口全部失效,立刻通知重绘</span></span><br><span class="line">		<span class="keyword">return</span> TRUE;</span><br><span class="line">	&#125;</span><br><span class="line">	<span class="keyword">return</span> FALSE;</span><br><span class="line">&#125;</span><br><span class="line"></span><br></pre></td></tr></table></figure>
+<h4 id="对话框资源"><a href="#对话框资源" class="headerlink" title="对话框资源"></a>对话框资源</h4><figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br></pre></td><td class="code"><pre><span class="line"></span><br><span class="line">COLORSCRDLG DIALOG DISCARDABLE  <span class="number">16</span>, <span class="number">16</span>, <span class="number">120</span>, <span class="number">141</span>	<span class="comment">//对话框名叫&quot;COLORSCRDLG&quot;</span></span><br><span class="line">STYLE DS_MODALFRAME | WS_POPUP | WS_VISIBLE | WS_CAPTION	<span class="comment">//非模态,弹出,可见,有标题</span></span><br><span class="line">CAPTION <span class="string">&quot;Color Scroll Scrollbars&quot;</span>		<span class="comment">//对话框标题</span></span><br><span class="line">FONT <span class="number">8</span>, <span class="string">&quot;MS Sans Serif&quot;</span>	<span class="comment">//字号字体</span></span><br><span class="line">BEGIN</span><br><span class="line">    CTEXT           <span class="string">&quot;&amp;Red&quot;</span>,IDC_STATIC,<span class="number">8</span>,<span class="number">8</span>,<span class="number">24</span>,<span class="number">8</span>,NOT WS_GROUP	<span class="comment">//滚动条两头的解释性文字,没有逻辑作用</span></span><br><span class="line">    SCROLLBAR       <span class="number">10</span>,<span class="number">8</span>,<span class="number">20</span>,<span class="number">24</span>,<span class="number">100</span>,SBS_VERT | WS_TABSTOP	<span class="comment">//滚动条,	数值方向滚动,制表停留</span></span><br><span class="line">    CTEXT           <span class="string">&quot;0&quot;</span>,<span class="number">13</span>,<span class="number">8</span>,<span class="number">124</span>,<span class="number">24</span>,<span class="number">8</span>,NOT WS_GROUP</span><br><span class="line">    CTEXT           <span class="string">&quot;&amp;Green&quot;</span>,IDC_STATIC,<span class="number">48</span>,<span class="number">8</span>,<span class="number">24</span>,<span class="number">8</span>,NOT WS_GROUP</span><br><span class="line">    SCROLLBAR       <span class="number">11</span>,<span class="number">48</span>,<span class="number">20</span>,<span class="number">24</span>,<span class="number">100</span>,SBS_VERT | WS_TABSTOP</span><br><span class="line">    CTEXT           <span class="string">&quot;0&quot;</span>,<span class="number">14</span>,<span class="number">48</span>,<span class="number">124</span>,<span class="number">24</span>,<span class="number">8</span>,NOT WS_GROUP</span><br><span class="line">    CTEXT           <span class="string">&quot;&amp;Blue&quot;</span>,IDC_STATIC,<span class="number">89</span>,<span class="number">8</span>,<span class="number">24</span>,<span class="number">8</span>,NOT WS_GROUP</span><br><span class="line">    SCROLLBAR       <span class="number">12</span>,<span class="number">89</span>,<span class="number">20</span>,<span class="number">24</span>,<span class="number">100</span>,SBS_VERT | WS_TABSTOP</span><br><span class="line">    CTEXT           <span class="string">&quot;0&quot;</span>,<span class="number">15</span>,<span class="number">89</span>,<span class="number">124</span>,<span class="number">24</span>,<span class="number">8</span>,NOT WS_GROUP</span><br><span class="line">END</span><br><span class="line"></span><br></pre></td></tr></table></figure>
+<h4 id="CreateDialog和DialogBox"><a href="#CreateDialog和DialogBox" class="headerlink" title="CreateDialog和DialogBox"></a>CreateDialog和DialogBox</h4><p>CreateDialog创建非模态对话框的参数和DialogBox创建模态对话框的参数一模一样</p>
+<p>两个函数的区别是是否持有控制</p>
+<p>DialogBox调用之后控制会从父窗口过程函数转移给对话框过程函数,返回值是一个数</p>
+<p>但是CreateDialog会立刻返回对话框的句柄,不会持有控制.</p>
+<p>之所以CreateDialog需要返回句柄,是因为非模态对话框的父窗口是可以动的,它可能需要使用对话框句柄</p>
+<h4 id="新消息循环"><a href="#新消息循环" class="headerlink" title="新消息循环"></a>新消息循环</h4><p>非模态对话框的消息要进入WinMain中的消息循环,相当于一个子窗口,需要WinMain消息循环分拣派发消息</p>
+<blockquote>
+<p>但是模态对话框的消息不需要,因为当模态对话框或者的时候,本程序的消息指定都是发往模态对话框的</p>
+</blockquote>
+<p>考虑非模态对话框的WinMain消息循环就应该:</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">while</span> (GetMessage (&amp;msg, <span class="literal">NULL</span>, <span class="number">0</span>, <span class="number">0</span>))</span><br><span class="line">&#123;</span><br><span class="line">     <span class="keyword">if</span> (hDlgModeless == <span class="number">0</span> || !IsDialogMessage (hDlgModeless, &amp;msg))<span class="comment">//如果没有非模态对话框句柄或者该消息不是非模态对话框的才往下走</span></span><br><span class="line">     &#123;</span><br><span class="line">          TranslateMessage (&amp;msg) ;</span><br><span class="line">          DispatchMessage  (&amp;msg) ;</span><br><span class="line">     &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>IsDialogMessage不止会判断该消息是不是非模态对话框的,并且会把是非模态对话框的消息发送</p>
+<p>hDlgModeless是一个对WinMain和对话框过程都可见的全局变量,为啥要对WndProc也可见呢?</p>
+<p>得想办法该关闭非模态对话框的时候就得关上吧,这个关闭怎么才能让WinMain知道?</p>
+<p>修改hDlgModeless值为NULL,</p>
+<p>谁来修改?WndProc吗?WndProc只负责父窗口的逻辑,关于非模态对话框它不管</p>
+<p>因此需要非模态对话框自己决定关闭hDlgModeless</p>
+<h3 id="COLORS3-但是摆大烂"><a href="#COLORS3-但是摆大烂" class="headerlink" title="COLORS3,但是摆大烂"></a>COLORS3,但是摆大烂</h3><p>windows甚至把专门调色的对话框都准备好了</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;windows.h&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;commdlg.h&gt;</span></span></span><br><span class="line"></span><br><span class="line"><span class="type">int</span> WINAPI <span class="title function_">WinMain</span> <span class="params">(HINSTANCE hInstance, HINSTANCE hPrevInstance,</span></span><br><span class="line"><span class="params">                    PSTR szCmdLine, <span class="type">int</span> iCmdShow)</span></span><br><span class="line">&#123;</span><br><span class="line">     <span class="type">static</span> CHOOSECOLOR cc ;</span><br><span class="line">     <span class="type">static</span> COLORREF    crCustColors[<span class="number">16</span>] ;</span><br><span class="line">     cc.lStructSize    = <span class="keyword">sizeof</span> (CHOOSECOLOR) ;</span><br><span class="line">     cc.hwndOwner      = <span class="literal">NULL</span> ;</span><br><span class="line">     cc.hInstance      = <span class="literal">NULL</span> ;</span><br><span class="line">     cc.rgbResult      = RGB (<span class="number">0x80</span>, <span class="number">0x80</span>, <span class="number">0x80</span>) ;</span><br><span class="line">     cc.lpCustColors   = crCustColors ;</span><br><span class="line">     cc.Flags          = CC_RGBINIT | CC_FULLOPEN ;</span><br><span class="line">     cc.lCustData      = <span class="number">0</span> ;</span><br><span class="line">     cc.lpfnHook       = <span class="literal">NULL</span> ;</span><br><span class="line">     cc.lpTemplateName = <span class="literal">NULL</span> ;</span><br><span class="line"></span><br><span class="line">     <span class="keyword">return</span> ChooseColor(&amp;cc) ;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>就这么几行实现了一个调色的功能</p>
+<p><img src="https://raw.githubusercontent.com/DeutschBall/DeutschBall/main/image-20220824160618978.png" class="lazyload placeholder" data-srcset="https://raw.githubusercontent.com/DeutschBall/DeutschBall/main/image-20220824160618978.png" srcset="https://img2.baidu.com/it/u=2037979560,2772131037&fm=26&fmt=auto&gp=0.jpg" alt="image-20220824160618978"></p>
+<p>在老版本的windows绘图上,就是用的这个调色板,比如windows7上的</p>
+<p><img src="https://raw.githubusercontent.com/DeutschBall/DeutschBall/main/image-20220824160851851.png" class="lazyload placeholder" data-srcset="https://raw.githubusercontent.com/DeutschBall/DeutschBall/main/image-20220824160851851.png" srcset="https://img2.baidu.com/it/u=2037979560,2772131037&fm=26&fmt=auto&gp=0.jpg" alt="这不win7调色板吗,几天没见,这么拉了"></p>
+<p>实际上是调用<code>ChooseColor(&amp;cc)</code>函数完成的,只需要给这个函数传递一个CHOOSECOLOR指针,就可以使用面板交互方式调制颜色了</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">typedef</span> <span class="class"><span class="keyword">struct</span> <span class="title">tagCHOOSECOLORW</span> &#123;</span></span><br><span class="line">  DWORD        lStructSize;<span class="comment">//本结构体大小,冗余量</span></span><br><span class="line">  HWND         hwndOwner;<span class="comment">//调用ChooseColor函数产生的对话框的父窗口</span></span><br><span class="line">  HWND         hInstance;<span class="comment">//应用程序实例</span></span><br><span class="line">  COLORREF     rgbResult;<span class="comment">//RGB值,初始化一开始显式的颜色值</span></span><br><span class="line">  COLORREF     *lpCustColors;<span class="comment">//16色值,灰度,用于LowB电脑</span></span><br><span class="line">  DWORD        Flags;<span class="comment">//样式</span></span><br><span class="line">  LPARAM       lCustData;<span class="comment">//钩子过程参数</span></span><br><span class="line">  LPCCHOOKPROC lpfnHook;<span class="comment">//钩子回调函数,需要Flags上置起CC_ENABLEHOOK标志</span></span><br><span class="line">  LPCWSTR      lpTemplateName;<span class="comment">//类名称或者ID</span></span><br><span class="line">  LPEDITMENU   lpEditInfo;</span><br><span class="line">&#125; CHOOSECOLORW, *LPCHOOSECOLORW;</span><br></pre></td></tr></table></figure>
+<h3 id="HEXCALC"><a href="#HEXCALC" class="headerlink" title="HEXCALC"></a>HEXCALC</h3><p>不到150行源代码实现一个16进制计算器</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br><span class="line">75</span><br><span class="line">76</span><br><span class="line">77</span><br><span class="line">78</span><br><span class="line">79</span><br><span class="line">80</span><br><span class="line">81</span><br><span class="line">82</span><br><span class="line">83</span><br><span class="line">84</span><br><span class="line">85</span><br><span class="line">86</span><br><span class="line">87</span><br><span class="line">88</span><br><span class="line">89</span><br><span class="line">90</span><br><span class="line">91</span><br><span class="line">92</span><br><span class="line">93</span><br><span class="line">94</span><br><span class="line">95</span><br><span class="line">96</span><br><span class="line">97</span><br><span class="line">98</span><br><span class="line">99</span><br><span class="line">100</span><br><span class="line">101</span><br><span class="line">102</span><br><span class="line">103</span><br><span class="line">104</span><br><span class="line">105</span><br><span class="line">106</span><br><span class="line">107</span><br><span class="line">108</span><br><span class="line">109</span><br><span class="line">110</span><br><span class="line">111</span><br><span class="line">112</span><br><span class="line">113</span><br><span class="line">114</span><br><span class="line">115</span><br><span class="line">116</span><br><span class="line">117</span><br><span class="line">118</span><br><span class="line">119</span><br><span class="line">120</span><br><span class="line">121</span><br><span class="line">122</span><br><span class="line">123</span><br><span class="line">124</span><br><span class="line">125</span><br><span class="line">126</span><br><span class="line">127</span><br><span class="line">128</span><br><span class="line">129</span><br><span class="line">130</span><br><span class="line">131</span><br><span class="line">132</span><br><span class="line">133</span><br><span class="line">134</span><br><span class="line">135</span><br><span class="line">136</span><br><span class="line">137</span><br><span class="line">138</span><br><span class="line">139</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;windows.h&gt;</span></span></span><br><span class="line"></span><br><span class="line">LRESULT CALLBACK <span class="title function_">WndProc</span> <span class="params">(HWND, UINT, WPARAM, LPARAM)</span> ;</span><br><span class="line"></span><br><span class="line"><span class="type">int</span> WINAPI <span class="title function_">WinMain</span> <span class="params">(HINSTANCE hInstance, HINSTANCE hPrevInstance,</span></span><br><span class="line"><span class="params">                    PSTR szCmdLine, <span class="type">int</span> iCmdShow)</span></span><br><span class="line">&#123;</span><br><span class="line">     <span class="type">static</span> TCHAR szAppName[] = TEXT (<span class="string">&quot;HexCalc&quot;</span>) ;</span><br><span class="line">     HWND         hwnd ;</span><br><span class="line">     MSG          msg ;</span><br><span class="line">     WNDCLASS     wndclass ;</span><br><span class="line">     </span><br><span class="line">     wndclass.style         = CS_HREDRAW | CS_VREDRAW;</span><br><span class="line">     wndclass.lpfnWndProc   = WndProc ;</span><br><span class="line">     wndclass.cbClsExtra    = <span class="number">0</span> ;</span><br><span class="line">     wndclass.cbWndExtra    = DLGWINDOWEXTRA ;    <span class="comment">// Note!//30bytes</span></span><br><span class="line">     wndclass.hInstance     = hInstance ;</span><br><span class="line">     wndclass.hIcon         = LoadIcon (hInstance, szAppName) ;</span><br><span class="line">     wndclass.hCursor       = LoadCursor (<span class="literal">NULL</span>, IDC_ARROW) ;</span><br><span class="line">     wndclass.hbrBackground = (HBRUSH) (COLOR_BTNFACE + <span class="number">1</span>) ;</span><br><span class="line">     wndclass.lpszMenuName  = <span class="literal">NULL</span> ;</span><br><span class="line">     wndclass.lpszClassName = szAppName ;</span><br><span class="line">     </span><br><span class="line">     <span class="keyword">if</span> (!RegisterClass (&amp;wndclass))</span><br><span class="line">     &#123;</span><br><span class="line">          MessageBox (<span class="literal">NULL</span>, TEXT (<span class="string">&quot;This program requires Windows NT!&quot;</span>),</span><br><span class="line">                      szAppName, MB_ICONERROR) ;</span><br><span class="line">          <span class="keyword">return</span> <span class="number">0</span> ;</span><br><span class="line">     &#125;</span><br><span class="line">     </span><br><span class="line">     hwnd = CreateDialog (hInstance, szAppName, <span class="number">0</span>, <span class="literal">NULL</span>) ;<span class="comment">//创建非模态对话框</span></span><br><span class="line">     </span><br><span class="line">     ShowWindow (hwnd, iCmdShow) ;<span class="comment">//把对话框作为窗口</span></span><br><span class="line">     </span><br><span class="line">     <span class="keyword">while</span> (GetMessage (&amp;msg, <span class="literal">NULL</span>, <span class="number">0</span>, <span class="number">0</span>))</span><br><span class="line">     &#123;</span><br><span class="line">          TranslateMessage (&amp;msg) ;</span><br><span class="line">          DispatchMessage (&amp;msg) ;</span><br><span class="line">     &#125;</span><br><span class="line">     <span class="keyword">return</span> msg.wParam ;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="type">void</span> <span class="title function_">ShowNumber</span> <span class="params">(HWND hwnd, UINT iNumber)</span></span><br><span class="line">&#123;</span><br><span class="line">     TCHAR szBuffer[<span class="number">20</span>] ;</span><br><span class="line"></span><br><span class="line">     wsprintf (szBuffer, TEXT (<span class="string">&quot;%X&quot;</span>), iNumber) ;</span><br><span class="line">     SetDlgItemText (hwnd, VK_ESCAPE, szBuffer) ;<span class="comment">//设置VK_ESCAPE控件的描述字</span></span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">DWORD <span class="title function_">CalcIt</span> <span class="params">(UINT iFirstNum, <span class="type">int</span> iOperation, UINT iNum)</span></span><br><span class="line">&#123;</span><br><span class="line">     <span class="keyword">switch</span> (iOperation)</span><br><span class="line">     &#123;</span><br><span class="line">     <span class="keyword">case</span> <span class="string">&#x27;=&#x27;</span>: <span class="keyword">return</span> iNum ;</span><br><span class="line">     <span class="keyword">case</span> <span class="string">&#x27;+&#x27;</span>: <span class="keyword">return</span> iFirstNum +  iNum ;</span><br><span class="line">     <span class="keyword">case</span> <span class="string">&#x27;-&#x27;</span>: <span class="keyword">return</span> iFirstNum -  iNum ;</span><br><span class="line">     <span class="keyword">case</span> <span class="string">&#x27;*&#x27;</span>: <span class="keyword">return</span> iFirstNum *  iNum ;</span><br><span class="line">     <span class="keyword">case</span> <span class="string">&#x27;&amp;&#x27;</span>: <span class="keyword">return</span> iFirstNum &amp;  iNum ;</span><br><span class="line">     <span class="keyword">case</span> <span class="string">&#x27;|&#x27;</span>: <span class="keyword">return</span> iFirstNum |  iNum ;</span><br><span class="line">     <span class="keyword">case</span> <span class="string">&#x27;^&#x27;</span>: <span class="keyword">return</span> iFirstNum ^  iNum ;</span><br><span class="line">     <span class="keyword">case</span> <span class="string">&#x27;&lt;&#x27;</span>: <span class="keyword">return</span> iFirstNum &lt;&lt; iNum ;</span><br><span class="line">     <span class="keyword">case</span> <span class="string">&#x27;&gt;&#x27;</span>: <span class="keyword">return</span> iFirstNum &gt;&gt; iNum ;</span><br><span class="line">     <span class="keyword">case</span> <span class="string">&#x27;/&#x27;</span>: <span class="keyword">return</span> iNum ? iFirstNum / iNum: MAXDWORD ;</span><br><span class="line">     <span class="keyword">case</span> <span class="string">&#x27;%&#x27;</span>: <span class="keyword">return</span> iNum ? iFirstNum % iNum: MAXDWORD ;</span><br><span class="line">     <span class="keyword">default</span> : <span class="keyword">return</span> <span class="number">0</span> ;</span><br><span class="line">     &#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">LRESULT CALLBACK <span class="title function_">WndProc</span> <span class="params">(HWND hwnd, UINT message, WPARAM wParam, LPARAM lParam)</span></span><br><span class="line">&#123;</span><br><span class="line">     <span class="type">static</span> BOOL  bNewNumber = TRUE ;</span><br><span class="line">     <span class="type">static</span> <span class="type">int</span>   iOperation = <span class="string">&#x27;=&#x27;</span> ;</span><br><span class="line">     <span class="type">static</span> UINT  iNumber, iFirstNum ;</span><br><span class="line">     HWND         hButton ;</span><br><span class="line">     </span><br><span class="line">     <span class="keyword">switch</span> (message)</span><br><span class="line">     &#123;</span><br><span class="line">     <span class="keyword">case</span> WM_KEYDOWN:                   <span class="comment">// left arrow --&gt; backspace</span></span><br><span class="line">          <span class="keyword">if</span> (wParam != VK_LEFT)</span><br><span class="line">               <span class="keyword">break</span> ;</span><br><span class="line">          wParam = VK_BACK ;</span><br><span class="line">                                        <span class="comment">// fall through</span></span><br><span class="line">     <span class="keyword">case</span> WM_CHAR:</span><br><span class="line">          <span class="keyword">if</span> ((wParam = (WPARAM) CharUpper ((TCHAR *) wParam)) == VK_RETURN)</span><br><span class="line">               wParam = <span class="string">&#x27;=&#x27;</span> ;</span><br><span class="line">          </span><br><span class="line">          <span class="keyword">if</span> (hButton = GetDlgItem (hwnd, wParam))<span class="comment">//字符消息的wParam就是字符的ASCII码,而对话框脚本中我们也把按钮的ID设置成了对应字符的ASCII码</span></span><br><span class="line">          &#123;</span><br><span class="line">               SendMessage (hButton, BM_SETSTATE, <span class="number">1</span>, <span class="number">0</span>) ;<span class="comment">//按下状态</span></span><br><span class="line">               Sleep (<span class="number">100</span>) ;<span class="comment">//按下状态持续0.1秒,让人能看见</span></span><br><span class="line">               SendMessage (hButton, BM_SETSTATE, <span class="number">0</span>, <span class="number">0</span>) ;<span class="comment">//起来</span></span><br><span class="line">          &#125;</span><br><span class="line">          <span class="keyword">else</span></span><br><span class="line">          &#123;</span><br><span class="line">               MessageBeep (<span class="number">0</span>) ;<span class="comment">//没点到按钮就叫唤</span></span><br><span class="line">               <span class="keyword">break</span> ;</span><br><span class="line">          &#125;</span><br><span class="line">                                        <span class="comment">// fall through</span></span><br><span class="line">     <span class="keyword">case</span> WM_COMMAND:</span><br><span class="line">          SetFocus (hwnd) ;</span><br><span class="line">          </span><br><span class="line">          <span class="keyword">if</span> (LOWORD (wParam) == VK_BACK)         <span class="comment">// backspace</span></span><br><span class="line">               ShowNumber (hwnd, iNumber /= <span class="number">16</span>) ;<span class="comment">//16进制数右移一位</span></span><br><span class="line">          </span><br><span class="line">          <span class="keyword">else</span> <span class="keyword">if</span> (LOWORD (wParam) == VK_ESCAPE)  <span class="comment">// escape</span></span><br><span class="line">               ShowNumber (hwnd, iNumber = <span class="number">0</span>) ;</span><br><span class="line">          </span><br><span class="line">          <span class="keyword">else</span> <span class="keyword">if</span> (<span class="built_in">isxdigit</span> (LOWORD (wParam)))    <span class="comment">// hex digit//判断是否是16进制数,0-9,A-F</span></span><br><span class="line">          &#123;</span><br><span class="line">               <span class="keyword">if</span> (bNewNumber)<span class="comment">//如果是新的计算局面</span></span><br><span class="line">               &#123;</span><br><span class="line">                    iFirstNum = iNumber ;<span class="comment">//第一个操作数置为iNumber</span></span><br><span class="line">                    iNumber = <span class="number">0</span> ;<span class="comment">//第二个操作数尚未到来,虚位以待</span></span><br><span class="line">               &#125;</span><br><span class="line">               bNewNumber = FALSE ;<span class="comment">//置局面混乱</span></span><br><span class="line">               </span><br><span class="line">               <span class="keyword">if</span> (iNumber &lt;= MAXDWORD &gt;&gt; <span class="number">4</span>)</span><br><span class="line">                    ShowNumber (hwnd, iNumber = <span class="number">16</span> * iNumber + wParam -</span><br><span class="line">                    (<span class="built_in">isdigit</span> (wParam) ? <span class="string">&#x27;0&#x27;</span>: <span class="string">&#x27;A&#x27;</span> - <span class="number">10</span>)) ;</span><br><span class="line">               <span class="keyword">else</span></span><br><span class="line">                    MessageBeep (<span class="number">0</span>) ;</span><br><span class="line">          &#125;</span><br><span class="line">          <span class="keyword">else</span>                                    <span class="comment">// operation</span></span><br><span class="line">          &#123;</span><br><span class="line">               <span class="keyword">if</span> (!bNewNumber)<span class="comment">//如果不是16进制数,即不是操作数,那就是操作符了</span></span><br><span class="line">                    ShowNumber (hwnd, iNumber =CalcIt (iFirstNum, iOperation, iNumber)) ;</span><br><span class="line">               bNewNumber = TRUE ;</span><br><span class="line">               iOperation = LOWORD (wParam) ;</span><br><span class="line">          &#125;</span><br><span class="line">          <span class="keyword">return</span> <span class="number">0</span> ;</span><br><span class="line">          </span><br><span class="line">     <span class="keyword">case</span> WM_DESTROY:</span><br><span class="line">          PostQuitMessage (<span class="number">0</span>) ;</span><br><span class="line">          <span class="keyword">return</span> <span class="number">0</span> ;</span><br><span class="line">     &#125;</span><br><span class="line">     <span class="keyword">return</span> DefWindowProc (hwnd, message, wParam, lParam) ;</span><br><span class="line">&#125;</span><br><span class="line"></span><br></pre></td></tr></table></figure>
+<h4 id="窗口额外"><a href="#窗口额外" class="headerlink" title="窗口额外"></a>窗口额外</h4><p>cbClsExtra ：windows程序为每一个窗口设计类管理一个WNDCLASS结构。在应用程序注册一个窗口类的时候，可以让windows分配一定字节空间的内存，这部分内存成为类的附件内存，有属于这个窗口类的所有窗口共享，类附件内存信息用于存储窗口类的附加信息。windows系统将这部分内存初始化为0，因此我们经常设置此参数为0.</p>
+<p>cbWndExtra :windows程序为每一个窗口管理一个内部数据结构，在注册窗口类的时候，系统可以为每一个窗口分配一定的字节数的附加内存空间，称为窗口附件内存。应用程序可使用这部分内存存储窗口特有的数据，windows系统把这部分内存初始化为0.</p>
+<h4 id="HEXCALC-DLG"><a href="#HEXCALC-DLG" class="headerlink" title="HEXCALC.DLG"></a>HEXCALC.DLG</h4><p>这个文件不在rc文件中,而是独立成文件,然后被包含进入RC文件</p>
+<p>为啥不能直接放到RC里呢?因为visual studio没有添加对话框资源的选项</p>
+<p><img src="https://raw.githubusercontent.com/DeutschBall/DeutschBall/main/image-20220824165419486.png" class="lazyload placeholder" data-srcset="https://raw.githubusercontent.com/DeutschBall/DeutschBall/main/image-20220824165419486.png" srcset="https://img2.baidu.com/it/u=2037979560,2772131037&fm=26&fmt=auto&gp=0.jpg" alt="image-20220824165419486"></p>
+<p>这个对话框脚本是手打的,然后在资源脚本RC中导入:</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="number">3</span> TEXTINCLUDE DISCARDABLE </span><br><span class="line">BEGIN</span><br><span class="line">    <span class="string">&quot;#include &quot;</span><span class="string">&quot;hexcalc.dlg&quot;</span><span class="string">&quot;\r\n&quot;</span></span><br><span class="line">    <span class="string">&quot;\0&quot;</span></span><br><span class="line">END</span><br></pre></td></tr></table></figure>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">/*---------------------------</span></span><br><span class="line"><span class="comment">   HEXCALC.DLG dialog script</span></span><br><span class="line"><span class="comment">  ---------------------------*/</span></span><br><span class="line"></span><br><span class="line">HexCalc DIALOG <span class="number">-1</span>, <span class="number">-1</span>, <span class="number">102</span>, <span class="number">122</span></span><br><span class="line">STYLE WS_OVERLAPPED | WS_CAPTION | WS_SYSMENU | WS_MINIMIZEBOX<span class="comment">//层叠,标题,系统菜单,最小方框</span></span><br><span class="line">CLASS <span class="string">&quot;HexCalc&quot;</span><span class="comment">//类名HexCalc</span></span><br><span class="line">CAPTION <span class="string">&quot;Hex Calculator&quot;</span></span><br><span class="line">&#123;</span><br><span class="line">     PUSHBUTTON <span class="string">&quot;D&quot;</span>,       <span class="number">68</span>,  <span class="number">8</span>,  <span class="number">24</span>, <span class="number">14</span>, <span class="number">14</span><span class="comment">//按钮 &quot;D&quot;,字符68位置(8,24)宽高14</span></span><br><span class="line">     PUSHBUTTON <span class="string">&quot;A&quot;</span>,       <span class="number">65</span>,  <span class="number">8</span>,  <span class="number">40</span>, <span class="number">14</span>, <span class="number">14</span></span><br><span class="line">     PUSHBUTTON <span class="string">&quot;7&quot;</span>,       <span class="number">55</span>,  <span class="number">8</span>,  <span class="number">56</span>, <span class="number">14</span>, <span class="number">14</span></span><br><span class="line">     PUSHBUTTON <span class="string">&quot;4&quot;</span>,       <span class="number">52</span>,  <span class="number">8</span>,  <span class="number">72</span>, <span class="number">14</span>, <span class="number">14</span></span><br><span class="line">     PUSHBUTTON <span class="string">&quot;1&quot;</span>,       <span class="number">49</span>,  <span class="number">8</span>,  <span class="number">88</span>, <span class="number">14</span>, <span class="number">14</span></span><br><span class="line">     PUSHBUTTON <span class="string">&quot;0&quot;</span>,       <span class="number">48</span>,  <span class="number">8</span>, <span class="number">104</span>, <span class="number">14</span>, <span class="number">14</span></span><br><span class="line">     PUSHBUTTON <span class="string">&quot;0&quot;</span>,       <span class="number">27</span>, <span class="number">26</span>,   <span class="number">4</span>, <span class="number">50</span>, <span class="number">14</span></span><br><span class="line">     PUSHBUTTON <span class="string">&quot;E&quot;</span>,       <span class="number">69</span>, <span class="number">26</span>,  <span class="number">24</span>, <span class="number">14</span>, <span class="number">14</span></span><br><span class="line">     PUSHBUTTON <span class="string">&quot;B&quot;</span>,       <span class="number">66</span>, <span class="number">26</span>,  <span class="number">40</span>, <span class="number">14</span>, <span class="number">14</span></span><br><span class="line">     PUSHBUTTON <span class="string">&quot;8&quot;</span>,       <span class="number">56</span>, <span class="number">26</span>,  <span class="number">56</span>, <span class="number">14</span>, <span class="number">14</span></span><br><span class="line">     PUSHBUTTON <span class="string">&quot;5&quot;</span>,       <span class="number">53</span>, <span class="number">26</span>,  <span class="number">72</span>, <span class="number">14</span>, <span class="number">14</span></span><br><span class="line">     PUSHBUTTON <span class="string">&quot;2&quot;</span>,       <span class="number">50</span>, <span class="number">26</span>,  <span class="number">88</span>, <span class="number">14</span>, <span class="number">14</span></span><br><span class="line">     PUSHBUTTON <span class="string">&quot;Back&quot;</span>,     <span class="number">8</span>, <span class="number">26</span>, <span class="number">104</span>, <span class="number">32</span>, <span class="number">14</span></span><br><span class="line">     PUSHBUTTON <span class="string">&quot;C&quot;</span>,       <span class="number">67</span>, <span class="number">44</span>,  <span class="number">40</span>, <span class="number">14</span>, <span class="number">14</span></span><br><span class="line">     PUSHBUTTON <span class="string">&quot;F&quot;</span>,       <span class="number">70</span>, <span class="number">44</span>,  <span class="number">24</span>, <span class="number">14</span>, <span class="number">14</span></span><br><span class="line">     PUSHBUTTON <span class="string">&quot;9&quot;</span>,       <span class="number">57</span>, <span class="number">44</span>,  <span class="number">56</span>, <span class="number">14</span>, <span class="number">14</span></span><br><span class="line">     PUSHBUTTON <span class="string">&quot;6&quot;</span>,       <span class="number">54</span>, <span class="number">44</span>,  <span class="number">72</span>, <span class="number">14</span>, <span class="number">14</span></span><br><span class="line">     PUSHBUTTON <span class="string">&quot;3&quot;</span>,       <span class="number">51</span>, <span class="number">44</span>,  <span class="number">88</span>, <span class="number">14</span>, <span class="number">14</span></span><br><span class="line">     PUSHBUTTON <span class="string">&quot;+&quot;</span>,       <span class="number">43</span>, <span class="number">62</span>,  <span class="number">24</span>, <span class="number">14</span>, <span class="number">14</span></span><br><span class="line">     PUSHBUTTON <span class="string">&quot;-&quot;</span>,       <span class="number">45</span>, <span class="number">62</span>,  <span class="number">40</span>, <span class="number">14</span>, <span class="number">14</span></span><br><span class="line">     PUSHBUTTON <span class="string">&quot;*&quot;</span>,       <span class="number">42</span>, <span class="number">62</span>,  <span class="number">56</span>, <span class="number">14</span>, <span class="number">14</span></span><br><span class="line">     PUSHBUTTON <span class="string">&quot;/&quot;</span>,       <span class="number">47</span>, <span class="number">62</span>,  <span class="number">72</span>, <span class="number">14</span>, <span class="number">14</span></span><br><span class="line">     PUSHBUTTON <span class="string">&quot;%&quot;</span>,       <span class="number">37</span>, <span class="number">62</span>,  <span class="number">88</span>, <span class="number">14</span>, <span class="number">14</span></span><br><span class="line">     PUSHBUTTON <span class="string">&quot;Equals&quot;</span>,  <span class="number">61</span>, <span class="number">62</span>, <span class="number">104</span>, <span class="number">32</span>, <span class="number">14</span></span><br><span class="line">     PUSHBUTTON <span class="string">&quot;&amp;&amp;&quot;</span>,      <span class="number">38</span>, <span class="number">80</span>,  <span class="number">24</span>, <span class="number">14</span>, <span class="number">14</span></span><br><span class="line">     PUSHBUTTON <span class="string">&quot;|&quot;</span>,      <span class="number">124</span>, <span class="number">80</span>,  <span class="number">40</span>, <span class="number">14</span>, <span class="number">14</span></span><br><span class="line">     PUSHBUTTON <span class="string">&quot;^&quot;</span>,       <span class="number">94</span>, <span class="number">80</span>,  <span class="number">56</span>, <span class="number">14</span>, <span class="number">14</span></span><br><span class="line">     PUSHBUTTON <span class="string">&quot;&lt;&quot;</span>,       <span class="number">60</span>, <span class="number">80</span>,  <span class="number">72</span>, <span class="number">14</span>, <span class="number">14</span></span><br><span class="line">     PUSHBUTTON <span class="string">&quot;&gt;&quot;</span>,       <span class="number">62</span>, <span class="number">80</span>,  <span class="number">88</span>, <span class="number">14</span>, <span class="number">14</span></span><br><span class="line">&#125;</span><br><span class="line"></span><br></pre></td></tr></table></figure>
+<p>全是按钮的对话框,但是没有定义动作,我们需要给每个按钮按下之后的效果编程</p>
+<p>这个怎么实现的呢?</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">case</span> WM_CHAR:</span><br><span class="line">     <span class="keyword">if</span> ((wParam = (WPARAM) CharUpper ((TCHAR *) wParam)) == VK_RETURN)</span><br><span class="line">          wParam = <span class="string">&#x27;=&#x27;</span> ;</span><br><span class="line">     </span><br><span class="line">     <span class="keyword">if</span> (hButton = GetDlgItem (hwnd, wParam))<span class="comment">//字符消息的wParam就是字符的ASCII码,而对话框脚本中我们也把按钮的ID设置成了对应字符的ASCII码</span></span><br><span class="line">     &#123;</span><br><span class="line">          SendMessage (hButton, BM_SETSTATE, <span class="number">1</span>, <span class="number">0</span>) ;<span class="comment">//按下状态</span></span><br><span class="line">          Sleep (<span class="number">100</span>) ;<span class="comment">//按下状态持续0.1秒,让人能看见,知道自己按下去了</span></span><br><span class="line">          SendMessage (hButton, BM_SETSTATE, <span class="number">0</span>, <span class="number">0</span>) ;<span class="comment">//起来</span></span><br><span class="line">     &#125;</span><br><span class="line">     <span class="keyword">else</span></span><br><span class="line">     &#123;</span><br><span class="line">          MessageBeep (<span class="number">0</span>) ;<span class="comment">//没点到按钮就叫唤</span></span><br><span class="line">          <span class="keyword">break</span> ;</span><br><span class="line">     &#125;</span><br></pre></td></tr></table></figure>
+<p>对话框脚本中故意设置按钮id和ASCII字符编码相同,因此非常方便</p>
+<h2 id="对话框模板"><a href="#对话框模板" class="headerlink" title="对话框模板"></a>对话框模板</h2><p>在COLORS3中,我们已经看到摆烂的力量,像调色板这种对话框模板再来一万个也不多</p>
+<p>比如查找替换对话框</p>
+<p>这些预定义好的对话框模板,都是以一个函数传递一个结构体指针创建的,这些结构体在commdlg.h中</p>
+<p>用啥查啥的文档吧</p>
+
+      </div>
+      <div class="post-tags-categories">
+        
+        <div class="tags">
+          
+            <a href="/tags/windows%E7%A8%8B%E5%BA%8F%E8%AE%BE%E8%AE%A1/" class="">
+              windows程序设计
+            </a>
+          
+        </div>
+        
+      </div>
+      
+    </article>
+    <!-- 上一篇文章和下一篇文章 -->
+    
+      <!-- 文章详情页的上一页和下一页 -->
+<div class="post-nav">
+
+
+
+
+
+  
+  <div class="post-nav-next post-nav-item">
+    <div class="post-nav-img" style="background-size: cover; 
+      background-position: center center;">
+      <img class="lazyload lazyload placeholder" src="/medias/13.jpg" class="lazyload placeholder" data-srcset="/medias/13.jpg" srcset="https://img2.baidu.com/it/u=2037979560,2772131037&fm=26&fmt=auto&gp=0.jpg" src="" alt="">
+    </div>
+    <a href="/2022/08/23/windows%20SDK%20chapter%2010%20%E8%8F%9C%E5%8D%95%E4%B8%8E%E8%B5%84%E6%BA%90/" class="post-nav-link">
+      <div class="title">
+        Next: <i class="fas fa-angle-right"></i>
+        <div class="title-text">win32程序设计-chapter10 菜单</div>
+      </div>
+      <!-- <div class="content">
+        windows SDK chapter 10 菜单与资源资源图标光标等资源不是重点,重点在菜单
+图标,光标,菜单,对话框
+      </div> -->
+    </a>
+  </div>
+
+</div>
+
+    
+    
+
+    <!-- 打赏 -->
+    
+
+    <!-- 分享 -->
+    
+      <!-- https://github.com/overtrue/share.js -->
+<!-- 文章详情页的分享 -->
+<div class="social-share" data-sites="twitter,facebook,google,qq,qzone,wechat,weibo,douban,linkedin" data-wechat-qrcode-helper="<p>微信扫一扫即可分享！</p>"></div>
+
+<script src="/js/shareJs/social-share.min.js"></script>
+</script>
+
+<style>
+  .social-share {
+    margin: 20px 0;
+  }
+</style>
+
+
+    
+    
+    <!-- 评论 -->
+    <!-- 评论 -->
+
+  <div id="myComment">
+    
+      
+<section id="comments" style="padding: 1em; margin: 15px auto;"
+	class="animated bounceInUp">
+	<div id="vcomment" class="comment"></div>
+</section>
+<style>
+	#comments {
+		background: rgba(255,255,255,0.9);
+	}
+	#veditor {
+		background-image: url('https://raw.githubusercontent.com/DeutschBall/test/master/R.3c3e443dfe9ddbddc93730c482ed0461');
+		background-size: contain;
+		background-repeat: no-repeat;
+		background-position: right;
+		background-color: rgba(255, 255, 255, 0);
+		resize: vertical;
+	}
+	#veditor:focus{
+		background-position-y: 200px;
+		transition: all 0.2s ease-in-out 0s;
+	}
+	#vcomment .vcards .vcard .vh .vhead .vtag.vvisitor {
+		background-color: #42b983;
+	}
+	.v[data-class=v] .vbtn:active, .v[data-class=v] .vbtn:hover {
+		color: #42b983;
+		border-color: #42b983;
+	}
+	#vcomment .vcards .vcard .vhead .vsys i {
+		display: none;
+	}
+	/* 底部valine链接 */
+	#vcomment .vpower {
+		display: none;
+	}
+	
+	/* 底下注释是修改 名称和邮箱和网址输入框的样式 */
+	/* #vcomment .vheader {
+		display: flex;
+		justify-content: space-around;
+	}
+	
+	#vcomment .vheader .vnick {
+		width: 31%;
+		border: 2px solid #dedede;
+		padding-left: 10px;
+		padding-right: 10px;
+		border-radius: 5px
+	}
+
+	#vcomment .vheader .vmail {
+		width: 31%;
+		border: 2px solid #dedede;
+		padding-left: 10px;
+		padding-right: 10px;
+		border-radius: 5px
+	}
+
+	#vcomment .vheader .vlink {
+		width: 31%;
+		border: 2px solid #dedede;
+		padding-left: 10px;
+		padding-right: 10px;
+		border-radius: 5px
+	} */
+
+	img.vimg {
+		transition: all 1s;
+		/* 头像旋转时间为 1s */
+	}
+
+	img.vimg:hover {
+		transform: rotate(360deg);
+		-webkit-transform: rotate(360deg);
+		-moz-transform: rotate(360deg);
+		-o-transform: rotate(360deg);
+		-ms-transform: rotate(360deg);
+	}
+
+	#vcomment .vcards .vcard {
+		padding: 15px 20px 0 20px;
+		border-radius: 10px;
+		margin-bottom: 15px;
+		box-shadow: 0 0 4px 1px rgba(0, 0, 0, .12);
+		transition: all .3s
+	}
+
+	#vcomment .vcards .vcard:hover {
+		box-shadow: 0 0 8px 3px rgba(0, 0, 0, .12)
+	}
+
+	#vcomment .vcards .vcard .vh .vcard {
+		border: none;
+		box-shadow: none;
+	}
+</style>
+    
+  </div>
+
+<!-- comment script in themes\hexo-theme-bamboo\layout\_partial\scripts\index.ejs -->
+
+
+  </div>
+
+  <!-- 目录 -->
+  <!-- 文章详情页右侧目录 -->
+
+  <div class="toc-aside">
+    <div class="toc-main">
+      <div class="toc-aside-title">
+        <i class="fas fa-list-ul" aria-hidden="true"></i><span>catalog</span>
+        
+          <div class="toc-open-close">catalog</div>
+        
+      </div>
+      <div class="toc-content">
+        <div class="toc"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 手机端目录按钮 -->
+  <div id="toc-mobile-btn">
+    <i class="fas fa-list-ul" aria-hidden="true"></i>
+  </div>
+
+
+<script>
+  function closeToc(init) {
+    $(".toc-aside").css({'width': 0, 'padding': 0, 'transition': init ?  'noe' : 'width 0.3s' });
+    $(".toc-content").css({'width': 0});
+    $(".toc-aside-title span, .toc-aside-title i").css({'display': 'none'});
+    $(".main-content").css({'width': '75%', 'margin': '10px auto'});
+  };
+  function openToc() {
+    $(".main-content").css({'width': '65%', 'margin-right': '10px', 'margin-left': 'calc(35% - 350px)'});
+    $(".toc-aside").css({'width': '300px', 'padding': '0 10px', 'transition': 'width 0.3s'});
+    $(".toc-content").css({'width': '300px'});
+    $(".toc-aside-title span, .toc-aside-title i").css({'display': 'inline-block'});
+  }
+  function openBtnClickFn () {
+    let openOrCloseBtn = $('.toc-aside .toc-aside-title .toc-open-close');
+    let open = eval('' || 'true');
+    openOrCloseBtn.click(function() {
+      if (open) {
+        closeToc();
+        open = false;
+      } else {
+        openToc();
+        open = true;
+      }
+    });
+  };
+  openBtnClickFn();
+  initCloseTocWidth(true);
+
+  function initCloseTocWidth(init) {
+    if (window.innerWidth >= 992) {
+      let isClose = false;
+      isClose && closeToc(init)
+    }
+  }
+
+  document.addEventListener('pjax:complete', function () {
+    $(".toc-aside").css({'transition': 'no'});
+  })
+  document.addEventListener('pjax:complete', function () {
+    openBtnClickFn();
+  })
+  
+</script>
+
+  <!-- 图片放大 Wrap images with fancybox support -->
+  <script src="/js/wrapImage.js"></script>
+</div>
+
+<!-- 文章详情页背景图 -->
+<div id="appBgSwiper" style="position: fixed;left: 0;top: 0;width: 100%;height: 100%;z-index: -2;"
+	:style="{'background-color': bgColor ? bgColor : 'transparent'}">
+	<transition-group tag="ul" :name="names">
+		<li v-for='(image,index) in img' :key='index' v-show="index === mark" class="bg-swiper-box">
+			<img :src="image" class="bg-swiper-img no-lazy">
+		</li>
+	</transition-group>
+</div>
+<script>
+	var vm = new Vue({
+		el: '#appBgSwiper',
+		data: {
+			names: '' || 'fade' || 'fade', // translate-fade fade
+			mark: 0,
+			img: [],
+			bgColor: '',
+			time: null
+		},
+		methods: {   //添加方法
+			change(i, m) {
+				if (i > m) {
+					// this.names = 'fade';
+				} else if (i < m) {
+					// this.names = 'fade';
+				} else {
+					return;
+				}
+				this.mark = i;
+			},
+			prev() {
+				// this.names = 'fade';
+				this.mark--;
+				if (this.mark === -1) {
+					this.mark = 3;
+					return
+				}
+			},
+			next() {
+				// this.names = 'fade';
+				this.mark++;
+				if (this.mark === this.img.length) {
+					this.mark = 0;
+					return
+				}
+			},
+			autoPlay() {
+				// this.names = 'fade';
+				this.mark++;
+				if (this.mark === this.img.length) {
+					this.mark = 0;
+					return
+				}
+			},
+			play() {
+				let bgImgDelay = '' || '180000'
+				let delay = parseInt(bgImgDelay) || 180000;
+				this.time = setInterval(this.autoPlay, delay);
+			},
+			enter() {
+				clearInterval(this.time);
+			},
+			leave() {
+				this.play();
+			}
+		},
+		created() {
+			this.play()
+		},
+		beforeDestroy() {
+			clearInterval(this.time);
+		},
+		mounted() {
+			let prop = '' || '';
+			let isImg = prop.includes('.bmp') || prop.includes('.jpg') || prop.includes('.png') || prop.includes('.tif') || prop.includes('.gif') || prop.includes('.pcx') || prop.includes('.tga') || prop.includes('.exif') || prop.includes('.fpx') || prop.includes('.psd') || prop.includes('.cdr') || prop.includes('.pcd') || prop.includes('.dxf') || prop.includes('.ufo') || prop.includes('.eps') || prop.includes('.ai') || prop.includes('.raw') || prop.includes('.WMF') || prop.includes('.webp') || prop.includes('.jpeg') || prop.includes('http://') || prop.includes('https://')
+			if (isImg) {
+				let img = prop.split(',');
+				let configRoot = '/'
+				let arrImg = [];
+				img.forEach(el => {
+					var Expression = /http(s)?:\/\/([\w-]+\.)+[\w-]+(\/[\w- .\/?%&=]*)?/;
+					var objExp = new RegExp(Expression);
+
+					if (objExp.test(el)) {
+						// http or https
+						arrImg.push(el);
+					} else {
+						// 非http or https开头
+						// 本地文件
+						let firstStr = el.charAt(0);
+						if (firstStr == '/') {
+							el = el.substr(1); // 删除第一个字符 '/',因为 configRoot最后一个字符为 /
+						}
+						el = configRoot + el;
+						arrImg.push(el);
+					}
+				})
+				this.img = arrImg;
+			} else {
+				this.bgColor = prop;
+			}
+		}
+	})
+</script>
+
+<style>
+	.bg-swiper-box {
+		position: absolute;
+		display: block;
+		width: 100%;
+		height: 100%;
+	}
+
+	.bg-swiper-img {
+		object-fit: cover;
+		width: 100%;
+		height: 100%;
+	}
+</style>
+
+
+  <script>
+  // https://github.com/theme-next/hexo-theme-next/blob/master/layout/_third-party/math/mathjax.swig
+  if (typeof MathJax === 'undefined') {
+    window.MathJax = {
+      loader: {
+        source: {
+          '[tex]/amsCd': '[tex]/amscd',
+          '[tex]/AMScd': '[tex]/amscd'
+        }
+      },
+      tex: {
+        inlineMath: {'[+]': [['$', '$']]},
+        tags: 'ams'
+      },
+      options: {
+        renderActions: {
+          findScript: [10, doc => {
+            document.querySelectorAll('script[type^="math/tex"]').forEach(node => {
+              const display = !!node.type.match(/; *mode=display/);
+              const math = new doc.options.MathItem(node.textContent, doc.inputJax[0], display);
+              const text = document.createTextNode('');
+              node.parentNode.replaceChild(text, node);
+              math.start = {node: text, delim: '', n: 0};
+              math.end = {node: text, delim: '', n: 0};
+              doc.math.push(math);
+            });
+          }, '', false],
+          insertedScript: [200, () => {
+            document.querySelectorAll('mjx-container').forEach(node => {
+              let target = node.parentNode;
+              if (target.nodeName.toLowerCase() === 'li') {
+                target.parentNode.classList.add('has-jax');
+              }
+            });
+          }, '', false]
+        }
+      }
+    };
+    (function () {
+      var script = document.createElement('script');
+      script.src = 'https://cdn.jsdelivr.net/npm/mathjax@3.0/es5/tex-mml-chtml.js';
+      script.defer = true;
+      document.head.appendChild(script);
+    })();
+  } else {
+    // 文章章节标题不能为 “MathJax” ，否则会报错。
+    MathJax.startup.document.state(0);
+    MathJax.texReset();
+    MathJax.typeset();
+  }
+</script>
+
+
+
+
+  <script>
+  function loadMermaid() {
+    if (document.getElementsByClassName('mermaid').length) {
+      if (window.mermaidJsLoad) mermaid.init()
+      else {
+        loadScript('https://cdn.jsdelivr.net/npm/mermaid/dist/mermaid.min.js').then(() => {
+          window.mermaidJsLoad = true
+          mermaid.initialize({
+            theme: 'default',
+          })
+          if ('true') {
+            mermaid.init();
+          }
+        })
+      }
+    }
+  };
+  document.addEventListener("DOMContentLoaded", function () {
+    loadMermaid();
+  })
+
+  document.addEventListener('pjax:complete', function () {
+    loadMermaid();
+  })
+  
+</script>
+
+
+      </main>
+    </div>
+
+    <!-- 页脚 -->
+    
+  
+  <div class="footer bg-color">
+    <div class="footer-main">
+      
+        
+          <div class="link">
+            
+          </div>
+        
+      
+        
+          <div class="footer-copyright">
+            <p>Copyright © 2019 - 2020 <a target="_blank" rel="noopener" href="https://github.com/yuang01">Deutschball</a> | Powered by <a target="_blank" rel="noopener" href="https://hexo.io/zh-cn/docs/">Deutschball</a> | Theme <a target="_blank" rel="noopener" href="https://github.com/yuang01/theme">Bamboo</a> </p>
+
+          </div>
+        
+      
+        
+          
+        
+      
+        
+          <div class="footer-custom">
+            
+          </div>
+        
+      
+    </div>
+  </div>
+
+<script src='https://unpkg.com/mermaid@/dist/mermaid.min.js'></script>
+<script>
+  if (window.mermaid) {
+    mermaid.initialize({theme: 'forest'});
+  }
+</script>
+
+
+
+
+    <!-- 渲染暗黑按钮 -->
+    
+    <!-- 渲染回到顶部按钮 -->
+    
+      <div class="goTop top-btn-color" pointer>
+  <i class="fas fa-arrow-up" aria-hidden="true"></i>
+</div>
+<script src="/js/goTop.js"></script>
+
+    
+    <!-- 渲染左下角音乐播放器 -->
+    
+
+    <!-- 图片放大 -->
+    
+      <script src="/js/fancybox/jquery.fancybox.min.js"></script>
+    
+
+    <!-- 百度解析 -->
+    <!-- Baidu Analytics -->
+
+    <!-- Baidu Push -->
+
+<script>
+    (function () {
+        var bp = document.createElement('script');
+        var curProtocol = window.location.protocol.split(':')[0];
+        if (curProtocol === 'https') {
+            bp.src = 'https://zz.bdstatic.com/linksubmit/push.js';
+        } else {
+            bp.src = 'http://push.zhanzhang.baidu.com/push.js';
+        }
+        var s = document.getElementsByTagName("script")[0];
+        s.parentNode.insertBefore(bp, s);
+    })();
+</script>
+
+    
+    <!-- 背景彩带 -->
+    
+      <script type="text/javascript" size="100" alpha='0.4' zIndex="-1" src="/js/ribbon.min.js"></script>
+    
+
+    <script src="/js/utils/index.js"></script>
+    <script src="/js/app.js"></script>
+    
+    <!-- 文章目录所需js -->
+<link href="/js/tocbot/tocbot.css" rel="stylesheet">
+<script src="/js/tocbot/tocbot.min.js"></script>
+
+<script>
+  var headerEl = 'h2, h3, h4, h5, h6',  //headers 
+    content = '.post-detail',//文章容器
+    idArr = {};  //标题数组以确定是否增加索引id
+  //add #id
+  var option = {
+    // Where to render the table of contents.
+    tocSelector: '.toc',
+    // Where to grab the headings to build the table of contents.
+    contentSelector: content,
+    // Which headings to grab inside of the contentSelector element.
+    headingSelector: headerEl,
+    scrollSmooth: true,
+    scrollSmoothOffset: -80,
+    headingsOffset: -($(window).height() * 0.4 - 45),
+    positionFixedSelector: '.toc-main',
+    positionFixedClass: 'is-position-fixed',
+    fixedSidebarOffset: 'auto',
+    activeLinkClass: 'is-active-link',
+    // onClick: function (e) {},
+  }
+  if ($('.toc').length > 0) {
+
+    $(content).children(headerEl).each(function () {
+      //去除空格以及多余标点
+      var headerId = $(this).text().replace(/[\s|\~|`|\!|\@|\#|\$|\%|\^|\&|\*|\(|\)|\_|\+|\=|\||\|\[|\]|\{|\}|\;|\:|\"|\'|\,|\<|\.|\>|\/|\?|\：|\，|\。]/g, '');
+
+      headerId = headerId.toLowerCase();
+      if (idArr[headerId]) {
+        //id已经存在
+        $(this).attr('id', headerId + '-' + idArr[headerId]);
+        idArr[headerId]++;
+      }
+      else {
+        //id未存在
+        idArr[headerId] = 1;
+        $(this).attr('id', headerId);
+      }
+    });
+
+    document.addEventListener("DOMContentLoaded", function () {
+      tocbot.init(option);
+      mobileTocClick();
+    });
+
+  }
+
+  window.tocScrollFn = function () {
+    return bamboo.throttle(function () {
+      findHeadPosition();
+    }, 100)()
+  }
+  window.addEventListener('scroll', tocScrollFn);
+
+  const findHeadPosition = function (top) {
+    if ($('.toc-list').length <= 0) {
+      return false;
+    }
+    setTimeout(() => {  // or DOMContentLoaded 
+      autoScrollToc();
+    }, 0);
+  }
+
+  const autoScrollToc = function () {
+    const $activeItem = document.querySelector('.is-active-link');
+    const $cardToc = document.querySelector('.toc-content');
+    const activePosition = $activeItem.getBoundingClientRect().top
+    const sidebarScrollTop = $cardToc.scrollTop
+    if (activePosition > (document.documentElement.clientHeight - 100)) {
+      $cardToc.scrollTop = sidebarScrollTop + 150
+    }
+    if (activePosition < 100) {
+      $cardToc.scrollTop = sidebarScrollTop - 150
+    }
+  }
+
+  document.addEventListener('pjax:send', function () {
+    if ($('.toc').length) {
+      tocbot.destroy();
+    }
+  });
+
+  document.addEventListener('pjax:complete', function () {
+    if ($('.toc').length) {
+      tocbot.init(option);
+      mobileTocClick();
+    }
+  });
+  
+  // 手机端toc按钮点击出现目录
+  const mobileTocClick = function () {
+    const $cardTocLayout = document.getElementsByClassName('toc-aside')[0];
+    const $cardToc = $cardTocLayout.getElementsByClassName('toc-content')[0];
+    let right = '45px';
+    if (window.innerWidth >= 551 && window.innerWidth <= 992) {
+      right = '100px'
+    }
+    const mobileToc = {
+      open: () => {
+        $cardTocLayout.style.cssText = 'animation: toc-open .3s; opacity: 1; right: ' + right
+      },
+
+      close: () => {
+        $cardTocLayout.style.animation = 'toc-close .2s'
+        setTimeout(() => {
+          $cardTocLayout.style.cssText = "opacity:''; animation: ''; right: ''"
+        }, 100)
+      }
+    }
+    document.getElementById('toc-mobile-btn').addEventListener('click', () => {
+      if (window.getComputedStyle($cardTocLayout).getPropertyValue('opacity') === '0') mobileToc.open()
+      else mobileToc.close()
+    })
+
+    $cardToc.addEventListener('click', (e) => {
+      if (window.innerWidth < 992) { // 小于992px的时候
+        mobileToc.close()
+      }
+    })
+  }
+</script>
+
+<style>
+  .is-position-fixed {
+    position: sticky !important;
+    top: 74px;
+  }
+
+  .toc-main ul {
+    counter-reset: show-list;
+  }
+
+  .toc-main ul li::before {
+    content: counter(item)".";
+    display: block;
+    position: absolute;
+    left: 12px;
+    top: 0;
+  }
+</style> 
+
+<!-- 设置导航背景 -->
+<script>
+  let setHeaderClass = () => {
+    const headerMenuTransparent = true;
+    if (!headerMenuTransparent) { return; }
+    const nav = $('#navHeader');
+    const navTop = nav.outerHeight();
+    const winTop = $(window).scrollTop();
+    if(winTop > navTop) {
+      nav.addClass('header-bg-color');
+    }
+    else {
+      nav.removeClass('header-bg-color');
+    }
+  };
+
+  let scrollCollect = () => {
+    return bamboo.throttle(function (e) {
+      setHeaderClass();
+    }, 200)()
+  }
+
+  let initHeaderBg = () => {
+    setHeaderClass();
+  }
+
+  setHeaderClass();
+  window.addEventListener('scroll', scrollCollect);
+
+  document.addEventListener('pjax:send', function () {
+    window.removeEventListener('scroll', scrollCollect)
+  })
+  document.addEventListener('pjax:complete', function () {
+    window.addEventListener('scroll', scrollCollect);
+    setHeaderClass();
+  })
+</script> 
+
+<!-- 渲染issues标签里的内容 -->
+<script>
+  function loadIssuesJS() {
+    if ($(".post-detail").find(".issues-api").length == 0) {
+      return;
+    } 
+    loadScript('/js/issues/index.js');
+  };
+  $(function () {
+    loadIssuesJS();
+  });
+  document.addEventListener('pjax:complete', function () {
+    if (typeof IssuesAPI == "undefined") {
+      loadIssuesJS();
+    }
+  })
+</script>
+
+<!-- 输入框打字特效 -->
+<!-- 输入框打字特效 -->
+
+  <script src="/js/activate-power-mode.js"></script>
+  <script>
+    POWERMODE.colorful = true;  // 打开随机颜色特效
+    POWERMODE.shake = false;    // 关闭输入框抖动
+    document.body.addEventListener('input', POWERMODE);//监听打字事件
+  </script>
+
+
+<!-- markdown代码一键复制功能 -->
+
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/v-plugs-ayu/lib/ayu.css">
+  <script src="https://cdn.jsdelivr.net/npm/v-plugs-ayu/lib/ayu.umd.min.js"></script>
+  <script src="/js/clipboard/clipboard.min.js"></script>
+  <div id="appCopy">
+  </div>
+  <script data-pjax>
+    var vm = new Vue({
+      el: '#appCopy',
+      data: {
+      },
+      computed: {
+      },
+      mounted() {
+        const that = this;
+        var copy = 'copy';
+        /* code */
+        var initCopyCode = function () {
+          var copyHtml = '';
+          copyHtml += '<button class="btn-copy" data-clipboard-snippet="" style="position:absolute;top:0;right:0;z-index:1;">';
+          copyHtml += '<i class="fas fa-copy"></i><span>' + copy + '</span>';
+          copyHtml += '</button>';
+          $(".post-detail pre").not('.gutter pre').wrap("<div class='codeBox' style='position:relative;width:100%;'></div>")
+          $(".post-detail pre").not('.gutter pre').before(copyHtml);
+          new ClipboardJS('.btn-copy', {
+            target: function (trigger) {
+              return trigger.nextElementSibling;
+            }
+          });
+        }
+        initCopyCode();
+        $('.btn-copy').unbind('click').bind('click', function () {
+          doSomething();
+        })
+        $(document).unbind('keypress').bind('keypress', function (e) {
+          if (e.ctrlKey && e.keyCode == 67) {
+            doSomething();
+          }
+        })
+
+        function doSomething() {
+          that.$notify({
+            title: "成功",
+            content: "copy that",
+            type: 'success'
+          })
+        }
+      },
+      methods: {
+      },
+      created() { }
+    })
+  </script>
+  
+
+<!-- 图片懒加载 -->
+<script defer src="https://cdn.jsdelivr.net/npm/vanilla-lazyload@17.1.0/dist/lazyload.min.js"></script>
+<script>
+  // https://www.npmjs.com/package/vanilla-lazyload
+  // Set the options globally
+  // to make LazyLoad self-initialize
+  window.lazyLoadOptions = {
+    elements_selector: ".lazyload",
+    threshold: 0
+  };
+  // Listen to the initialization event
+  // and get the instance of LazyLoad
+  window.addEventListener(
+    "LazyLoad::Initialized",
+    function (event) {
+      window.lazyLoadInstance = event.detail.instance;
+    },
+    false
+  );
+  document.addEventListener('DOMContentLoaded', function () {
+    lazyLoadInstance.update();
+  });
+  document.addEventListener('pjax:complete', function () {
+    lazyLoadInstance.update();
+  });
+</script>
+
+
+<!-- 卡片滚动动画 -->
+   
+
+<!-- 评论所需js -->
+
+  
+    <!-- 弹幕所需的css和js -->
+    
+<!-- 具体js，请前往valine/script.ejs查看 -->
+
+    <script>
+  var requiredFields = '';
+  requiredFields = requiredFields.split(',');
+  comment_el = '.comment';
+  let looperValine = null;
+  load_valine = function () {
+    if ($(comment_el).length) {
+      var valine = new Valine({
+        el: '#vcomment',
+        path: window.location.pathname,
+        notify: false,
+        verify: false,
+        app_id: "",
+        app_key: "",
+        placeholder: "客官，说点什么吧",
+        avatar: "",
+        master: "",   //博主邮箱md5
+        tagMeta: ["博主","小伙伴","访客"],     //标识字段名
+        friends: "",
+        metaPlaceholder: { "nick": "昵称/QQ号", "mail": "邮箱" },
+        requiredFields: requiredFields,
+        enableQQ: true,
+      });
+      function debounce(fn) {
+        var timerID = null
+        return function () {
+          var arg = arguments[0]   //获取事件
+          if (timerID) {
+            clearTimeout(timerID)
+          }
+          timerID = setTimeout(function () {
+            fn(arg)              //事件传入函数
+          }, 200)
+        }
+      }
+      //查询评论 valine.Q('*').limit(7) -- 查询所有，限制7条, 下面的的代码是查询当前页面
+      var themeDanmu = eval('false');
+      var themeLoop = eval('false');
+      var themeLooperTime = '5000' || 5000;
+      var speed = '40' || 20;
+      var isBarrager = true;
+      if (themeDanmu == true) {
+        do_barrager();
+        if ($('.danmuBox').length <= 0) {
+          $('.navbar').append('<div class="danmuBox"><div class="danmuBtn open"><span class="danmuCircle"></span><span class="danmuText">弹幕</span></div></div>');
+        }
+        $('.danmuBtn').on('click', debounce(
+          function () {
+            if ($('.danmuBtn').hasClass('open')) {
+              $('.danmuBtn').removeClass('open')
+              clearInterval(looperValine);
+              $.fn.barrager.removeAll();
+            } else {
+              $('.danmuBtn').addClass("open");
+              do_barrager();
+            }
+          }
+        ))
+      }
+      function do_barrager() {
+        isBarrager && valine.Q(window.location.pathname).find().then(function (comments) {
+          // var num = 0; // 可以记录条数，循环调用的时候只取最新的评论放入弹幕中
+          var run_once = true;
+          var looper_time = themeLooperTime;
+          var total = comments.length;
+          // var looper = null;
+          var index = 0;
+          if (total > 0) {
+            barrager();
+          } else {
+            // 当评论数为0的时候，自动关闭弹幕
+            // $('.danmuBtn').removeClass('open');
+          }
+          function barrager() {
+            if (run_once) {
+              //如果是首次执行,则设置一个定时器,并且把首次执行置为false
+              looperValine = setInterval(barrager, looper_time);
+              run_once = false;
+            }
+            var content = comments[index]._serverData.comment;
+            var email = comments[index]._serverData.mail;
+            var link = comments[index]._serverData.link;
+            var newcontent = content.substring(0, 50).replace(/<[^>]+>/g, "");
+            //发布一个弹幕
+            const item = {
+              img: `https://q1.qlogo.cn/g?b=qq&nk=${email}&s=640`, //图片 
+              info: newcontent, //文字 
+              href: link, //链接 
+              close: true, //显示关闭按钮 
+              speed: speed, //延迟,单位秒,默认6 
+              color: '#fff', //颜色,默认白色 
+              old_ie_color: '#000000', //ie低版兼容色,不能与网页背景相同,默认黑色
+            }
+            $('body').barrager(item);
+            //索引自增
+            index++;
+            //所有弹幕发布完毕，清除计时器。
+            if (index == total) {
+              clearInterval(looperValine);
+              if (themeLoop === true) {
+                setTimeout(function () {
+                  do_barrager();
+                }, 5000);
+              } else {
+                $('.danmuBtn').removeClass('open');
+              }
+              return false;
+            }
+
+          }
+        })
+      }
+    }
+  };
+  $(document).ready(load_valine);
+  document.addEventListener('pjax:send', function (e) {
+    
+  })
+  document.addEventListener('pjax:complete', function () {
+    load_valine();
+  });
+</script>
+
+  
+
+
+<!-- 鼠标点击特效 -->
+<!-- 爱心点击 -->
+
+  
+    <canvas class="fireworks" style="position: fixed;left: 0;top: 0;z-index: 999; pointer-events: none;" ></canvas>
+    <script src="//cdn.bootcss.com/animejs/2.2.0/anime.min.js"></script>
+    <script src="/js/cursor/explosion.min.js"></script>
+  
+
+
+
+
+
+    <!-- pjax -->
+    
+
+<!-- pjax -->
+
+
+  <script src="/js/pjax@0.2.8/index.js"></script>
+  
+    <!-- 样式位于：source/css/_third-party/pjaxanimate.styl -->
+
+<div class="pjax-animate">
+  
+    <div class="loading-circle"><div id="loader-circle"></div></div>
+    <script>
+      window.ShowLoading = function() {
+        $(".loading-circle").css("display", "block");
+      };
+      window.HideLoading = function() {
+        $(".loading-circle").css("display", "none");
+      }
+    </script>
+  
+	<script>
+    document.addEventListener('pjax:complete', function () {
+      window.HideLoading();
+    })
+    document.addEventListener('pjax:send', function () {
+      window.ShowLoading();
+    })
+    document.addEventListener('pjax:error', function () {
+      window.HideLoading();
+    })
+	</script>
+</div>
+
+  
+
+  <script>
+    var pjax = new Pjax({
+      elements: 'a[href]:not([href^="#"]):not([href="javascript:void(0)"]):not([no-pjax])',   // 拦截正常带链接的 a 标签
+      selectors: ["#pjax-container","title"],                                   // 根据实际需要确认重载区域
+      cacheBust: false,   // url 地址追加时间戳，用以避免浏览器缓存
+      timeout: 5000
+    });
+
+    document.addEventListener('pjax:send', function (e) {
+
+      try {
+        var currentUrl = window.location.pathname;
+        var targetUrl = e.triggerElement.href;
+        var banUrl = [""];
+        if (banUrl[0] != "") {
+          banUrl.forEach(item => {
+            if(currentUrl.indexOf(item) != -1 || targetUrl.indexOf(item) != -1) {
+              window.location.href = targetUrl;
+            }
+          });
+        }
+      } catch (error) {}
+
+      $(window).unbind('resize');
+      $(window).unbind('scroll');
+      $(document).unbind('scroll');
+      $(document).unbind('click');
+      $('body').unbind('click');
+
+    })
+    
+    document.addEventListener('pjax:complete', function () {
+      $('script[data-pjax], .pjax-reload script').each(function () {
+        $(this).parent().append($(this).remove());
+      });
+    });
+
+    document.addEventListener('pjax:error', function (e) {
+      window.location.href = e.triggerElement.href;
+    })
+    
+    // 刷新不从顶部开始
+    document.addEventListener("DOMContentLoaded", function () {
+      history.scrollRestoration = 'auto';
+    })
+  </script>
+
+
+
+  </body>
+</html>
