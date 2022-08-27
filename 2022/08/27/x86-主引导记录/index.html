@@ -1,0 +1,1726 @@
+<!DOCTYPE html>
+<html>
+  <!-- meta/link... -->
+  
+
+
+
+<head>
+  <meta http-equiv="content-type" content="text/html; charset=utf-8">
+  <meta content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=0" name="viewport">
+  <!-- Global site tag (gtag.js) - Google Analytics -->
+
+
+  <title>x86汇编语言 chapter 5 主引导记录 | Deutschball&#39;s blog</title>
+
+  <link rel="icon" type="image/png" href="https://raw.githubusercontent.com/DeutschBall/test/master/emp.png">
+  <link rel="stylesheet" href="https://at.alicdn.com/t/font_1911880_c1nvbyezg17.css">
+  <link href="https://cdn.jsdelivr.net/gh/inkss/fontawesome@5.15.3/css/all.min.css" rel="stylesheet">
+  <link href="/js/swiper/swiper@5.4.1.min.css" rel="stylesheet">
+  
+  
+    <script>
+        var themeModelId = '';
+        if (themeModelId) {
+            localStorage.setItem('modelId', themeModelId);
+        }
+    </script>
+    
+    <script src="https://cdn.jsdelivr.net/gh/yuang01/live2d-widget@latest/autoload.js"></script>
+    <script>
+        var live2dOpen = eval('true') || false;
+        if (!live2dOpen) {
+            localStorage.setItem('waifu-display', 1609323474481);
+        }
+    </script>
+  
+  
+  
+<link rel="stylesheet" href="/css/animate.min.css">
+
+  
+<link rel="stylesheet" href="/css/style.css">
+
+  
+  
+    
+<link rel="stylesheet" href="/js/fancybox/jquery.fancybox.min.css">
+
+  
+  
+    
+<link rel="stylesheet" href="/js/shareJs/share.min.css">
+
+  
+  <style>
+        @media (max-width: 992px) {
+            #waifu {
+                display: none;
+            }
+        }
+    </style>
+    <script src="//cdn.bootcss.com/pace/1.0.2/pace.min.js"></script>
+    <link href="//cdn.bootcss.com/pace/1.0.2/themes/pink/pace-theme-flash.css" rel="stylesheet">
+
+    
+        <script src="/js/valine/av-min@3.0.4.js"></script>
+        <script src="https://cdn.jsdelivr.net/gh/HCLonely/Valine@latest/dist/Valine.min.js"></script>
+    
+
+    <!-- import link -->
+    
+        
+            
+        
+            
+        
+    
+    <!-- import script -->
+    
+        
+            
+        
+            
+        
+    
+
+<!-- hexo injector head_end start -->
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.12.0/dist/katex.min.css">
+<!-- hexo injector head_end end --><meta name="generator" content="Hexo 6.2.0"></head>
+
+  
+  <!-- 依赖于jquery和vue -->
+  
+    
+<script src="https://cdn.jsdelivr.net/npm/jquery@3.5.1/dist/jquery.min.js"></script>
+
+  
+
+  
+    
+<script src="https://cdn.jsdelivr.net/npm/vue@2.6.11/dist/vue.min.js"></script>
+
+  
+  
+  <body>
+    <!-- 预加载动画 -->
+    <!-- 页面预加载动画 -->
+
+<div id='loader'>
+  <link rel="stylesheet" href="/js/loaded/index.css" >
+  <div class="loading-left-bg"></div>
+  <div class="loading-right-bg"></div>
+  <div class="spinner-box">
+    <div class="configure-border-1">
+      <div class="configure-core"></div>
+    </div>
+    <div class="configure-border-2">
+      <div class="configure-core"></div>
+    </div>
+    <div class="loading-word">loading...</div>
+  </div>
+</div>
+
+<script>
+  var endLoading = function () {
+    document.body.style.overflow = 'auto';
+    document.getElementById('loader').classList.add("loading");
+  }
+  window.addEventListener('DOMContentLoaded',endLoading);
+  
+</script>
+
+    
+    <!-- 判断是否为暗黑风格 -->
+    <!-- 判断是否为黑夜模式 -->
+<script>
+  let isDark = JSON.parse(localStorage.getItem('dark')) || JSON.parse('true');
+
+  if (isDark) {
+    $(document.body).addClass('darkModel');
+  }
+</script>
+
+    <!-- 需要在上面加载的js -->
+    <script>
+  function loadScript(src, cb) {
+    return new Promise(resolve => {
+      setTimeout(function () {
+        var HEAD = document.getElementsByTagName("head")[0] || document.documentElement;
+        var script = document.createElement("script");
+        script.setAttribute("type", "text/javascript");
+        if (cb) {
+          if (JSON.stringify(cb)) {
+            for (let p in cb) {
+              if (p == "onload") {
+                script[p] = () => {
+                  cb[p]()
+                  resolve()
+                }
+              } else {
+                script[p] = cb[p]
+                script.onload = resolve
+              }
+            }
+          } else {
+            script.onload = () => {
+              cb()
+              resolve()
+            };
+          }
+        } else {
+          script.onload = resolve
+        }
+        script.setAttribute("src", src);
+        HEAD.appendChild(script);
+      });
+    });
+  }
+
+  //https://github.com/filamentgroup/loadCSS
+  var loadCSS = function (href, before, media, attributes) {
+    return new Promise(resolve => {
+      setTimeout(function () {
+        var link = document.createElement('link');
+        link.rel = "stylesheet";
+        link.href = src;
+        link.onload = resolve;
+        document.getElementsByTagName("head")[0].appendChild(link);
+      });
+    });
+  };
+
+</script> 
+
+<!-- 轮播图所需要的js -->
+<script src="/js/swiper/swiper.min.js"></script>
+<script src="/js/swiper/vue-awesome-swiper.js"></script>
+<script src="/js/swiper/swiper.animate1.0.3.min.js"></script>
+
+<script type="text/javascript">
+  Vue.use(window.VueAwesomeSwiper)
+</script>
+
+
+  <script src="/js/vue-typed-js/index.js"></script>
+
+
+<!-- 首页的公告滚动插件的js需要重新加载 -->
+<script src="/js/vue-seamless-scroll/index.js"></script>
+
+<!-- 打字机效果js -->
+<script src="https://cdn.jsdelivr.net/npm/typed.js@2.0.11"></script>
+
+
+    <div id="safearea">
+      <main class="main" id="pjax-container">
+        <!-- 头部导航 -->
+        
+<header class="header   " 
+  id="navHeader"
+  style="position: fixed;
+  left: 0; top: 0; z-index: 10;width: 100%;"
+>
+  <div class="header-content">
+    <div class="bars">
+      <div id="appDrawer" class="sidebar-image">
+  <div class="drawer-box-icon">
+    <i class="fas fa-bars" aria-hidden="true" @click="showDialogDrawer"></i>
+  </div>
+  
+  <transition name="fade">
+    <div class="drawer-box_mask" v-cloak style="display: none;" v-show="visible" @click.self="cancelDialogDrawer">
+    </div>
+  </transition>
+  <div class="drawer-box" :class="{'active': visible}">
+    <div class="drawer-box-head bg-color">
+      <img class="drawer-box-head_logo lazyload placeholder" src="https://raw.githubusercontent.com/DeutschBall/test/master/emp.png" class="lazyload placeholder" data-srcset="https://raw.githubusercontent.com/DeutschBall/test/master/emp.png" srcset="https://img2.baidu.com/it/u=2037979560,2772131037&fm=26&fmt=auto&gp=0.jpg" alt="logo">
+      <h3 class="drawer-box-head_title">Deutschball&#39;s blog</h3>
+      <h5 class="drawer-box-head_desc"></h5>
+    </div>
+    
+    <div class="drawer-box-content">
+      <ul class="drawer-box-content_menu">
+        
+        
+          <li class="drawer-box-content_item">
+            <a target="_blank" rel="noopener" href="https://github.com/DeutschBall">
+              <i class="fas fa-github" aria-hidden="true"></i>
+              <span>Github</span>
+            </a>
+          </li>
+        
+      </ul>
+    </div>
+  </div>
+</div>
+
+<script>
+  var body = document.body || document.documentElement || window;
+  var vm = new Vue({
+    el: '#appDrawer',
+    data: {
+      visible: false,
+      top: 0,
+      openArr: [],
+    },
+    computed: {
+    },
+    mounted() {
+    },
+    methods: {
+      isOpen(index) {
+        if (this.openArr.includes(index)) {
+          return true;
+        } else {
+          return false;
+        }
+      },
+      openOrCloseMenu(curIndex) {
+        const index = this.openArr.indexOf(curIndex);
+        if (index !== -1) {
+          this.openArr.splice(index, 1);
+        } else {
+          this.openArr.push(curIndex);
+        }
+      },
+      showDialogDrawer() {
+        this.visible = true;
+        // 防止页面滚动，只能让弹框滚动
+        this.top = $(document).scrollTop()
+        body.style.cssText = 'width: 100%; height: 100%;overflow: hidden;';
+      },
+      cancelDialogDrawer() {
+        this.visible = false;
+        body.removeAttribute('style');
+        $(document).scrollTop(this.top)
+      }
+    },
+    created() {}
+  })
+</script>
+
+    </div>
+    <div class="blog-title" id="author-avatar">
+      
+        <div class="avatar">
+          <img src="https://raw.githubusercontent.com/DeutschBall/test/master/emp.png" class="lazyload placeholder" data-srcset="https://raw.githubusercontent.com/DeutschBall/test/master/emp.png" srcset="https://img2.baidu.com/it/u=2037979560,2772131037&fm=26&fmt=auto&gp=0.jpg" alt="logo">
+        </div>
+      
+      <a href="/" class="logo">Deutschball&#39;s blog</a>
+    </div>
+    <nav class="navbar">
+      <ul class="menu">
+        
+      </ul>
+      
+      
+        <div id="appSearch">
+  <div class="search"  @click="showDialog()"><i class="fas fa-search" aria-hidden="true"></i></div>
+  <transition name="fade">
+    <div class="message-box_wrapper" style="display: none;" v-cloak v-show="dialogVisible" @click.self="cancelDialogVisible()">
+      <div class="message-box animated bounceInDown">
+        <h2>
+          <span>
+            <i class="fas fa-search" aria-hidden="true"></i>
+            <span class="title">Search</span>
+          </span>
+          <i class="fas fa-times close" pointer style="float:right;" aria-hidden="true" @click.self="cancelDialogVisible()"></i>
+        </h2>
+        <form class="site-search-form">
+          <input type="text"
+            placeholder="Please enter keywords"
+            id="local-search-input" 
+            @click="getSearchFile()"
+            class="st-search-input"
+            v-model="searchInput"
+          />
+        </form>
+        <div class="result-wrapper">
+          <div id="local-search-result" class="local-search-result-cls"></div>
+        </div>
+      </div>
+    </div>
+  </transition>
+</div>
+<script src="/js/local_search.js"></script>
+<script>
+  var body = document.body || document.documentElement || window;
+  var vm = new Vue({
+    el: '#appSearch',
+    data: {
+      dialogVisible: false,
+      searchInput: '',
+      top: 0,
+    },
+    computed: {
+    },
+    mounted() {
+      window.addEventListener('pjax:complete', () => {
+        this.cancelDialogVisible();
+      })
+    },
+    methods: {
+      showDialog() {
+        this.dialogVisible = true;
+        // 防止页面滚动，只能让弹框滚动
+        this.top = $(document).scrollTop()
+        body.style.cssText = 'overflow: hidden;';
+      },
+      getSearchFile() {
+        if (!this.searchInput) {
+          getSearchFile("/search.xml");
+        }
+      },
+      cancelDialogVisible() {
+        this.dialogVisible = false;
+        body.removeAttribute('style');
+        $(document).scrollTop(this.top)
+      },
+    },
+    created() {}
+  })
+</script>
+<!-- 解决刷新页面闪烁问题，可以在元素上添加display: none, 或者用vue.extend方法，详情：https://blog.csdn.net/qq_31393401/article/details/81017912 -->
+<!-- 下面是搜索基本写法 -->
+<!-- <script type="text/javascript" id="local.search.active">
+  var inputArea = document.querySelector("#local-search-input");
+  inputArea.onclick   = function(){ getSearchFile(); this.onclick = null }
+  inputArea.onkeydown = function(){ if(event.keyCode == 13) return false }
+</script> -->
+
+      
+
+    </nav>
+  </div>
+  
+    <a target="_blank" rel="noopener" href="https://github.com/DeutschBall" class="github-corner color-primary" aria-label="View source on GitHub"><svg width="60" height="60" viewBox="0 0 250 250" style="fill:#fff; position: absolute; top: 0; border: 0; right: 0;" aria-hidden="true"><path d="M0,0 L115,115 L130,115 L142,142 L250,250 L250,0 Z"></path><path d="M128.3,109.0 C113.8,99.7 119.0,89.6 119.0,89.6 C122.0,82.7 120.5,78.6 120.5,78.6 C119.2,72.0 123.4,76.3 123.4,76.3 C127.3,80.9 125.5,87.3 125.5,87.3 C122.9,97.6 130.6,101.9 134.4,103.2" fill="currentColor" style="transform-origin: 130px 106px;" class="octo-arm"></path><path d="M115.0,115.0 C114.9,115.1 118.7,116.5 119.8,115.4 L133.7,101.6 C136.9,99.2 139.9,98.4 142.2,98.6 C133.8,88.0 127.5,74.4 143.8,58.0 C148.5,53.4 154.0,51.2 159.7,51.0 C160.3,49.4 163.2,43.6 171.4,40.1 C171.4,40.1 176.1,42.5 178.8,56.2 C183.1,58.6 187.2,61.8 190.9,65.4 C194.5,69.0 197.7,73.2 200.1,77.6 C213.8,80.2 216.3,84.9 216.3,84.9 C212.7,93.1 206.9,96.0 205.4,96.6 C205.1,102.4 203.0,107.8 198.3,112.5 C181.9,128.9 168.3,122.5 157.7,114.1 C157.9,116.9 156.7,120.9 152.7,124.9 L141.0,136.5 C139.8,137.7 141.6,141.9 141.8,141.8 Z" fill="currentColor" class="octo-body"></path></svg></a><style>.github-corner:hover .octo-arm{animation:octocat-wave 560ms ease-in-out}@keyframes octocat-wave{0%,100%{transform:rotate(0)}20%,60%{transform:rotate(-25deg)}40%,80%{transform:rotate(10deg)}}@media (max-width:500px){.github-corner:hover .octo-arm{animation:none}.github-corner .octo-arm{animation:octocat-wave 560ms ease-in-out}}</style>
+  
+  
+</header>
+        <!-- 内容区域 -->
+        
+ <!-- prismjs 代码高亮 -->
+ 
+
+
+<div class="bg-dark-floor" style="position: fixed;left: 0;top: 0;width: 100%;height: 100%;z-index: -1;"></div>
+
+
+  <!-- 文章详情页顶部图片和标题 -->
+
+
+
+
+<div class="post-detail-header" id="thumbnail_canvas" style="background-repeat: no-repeat; background-size: cover; 
+  background-position: center center;position: relative;background-image:url('/medias/5.jpg')">
+  <div class="post-detail-header-mask"></div>
+  <canvas id="header_canvas"style="position:absolute;bottom:0;pointer-events:none;"></canvas>
+  
+  <div class="post-detail-header_info-box">
+    <div class="title-box">
+      <span class="title">
+        x86汇编语言 chapter 5 主引导记录
+      </span>
+    </div>
+    
+    
+      
+        <span class="post-detail-header_date">
+          <i class="fas fa-calendar"></i> Published in：2022-08-27 |
+        </span>
+      
+
+      
+
+      
+    
+  </div>
+  
+  
+    <script src="/js/bubble/bubble.js"></script>
+  
+</div>
+
+
+
+
+
+<div class="row justify-position" 
+  style="padding-top: 0px;">
+  <div class="main-content">
+    <article class="post post-detail">
+      <div class="post-content">
+        <h1 id="主引导记录"><a href="#主引导记录" class="headerlink" title="主引导记录"></a>主引导记录</h1><p>书上借助主引导扇区的例子,讲解了实模式下分段机制,显存的使用等等基本原理</p>
+<p>为啥要借助主引导扇区呢?</p>
+<p>因为虚拟机开机之后BIOS自动将磁盘的前512字节作为主引导记录装载进入内存的0x7c00位置并从0x7c00处开始执行.</p>
+<p>我们的代码直接写到主引导记录中就可以顺理成章地执行了</p>
+<h2 id="自举过程"><a href="#自举过程" class="headerlink" title="自举过程"></a>自举过程</h2><p>计算机上电之后,如果设置硬盘位首选的启动设备,则ROM-BIOS将视图读取硬盘的逻辑0号扇区,即物理上的0面0道1扇区.这里就是主引导扇区的位置</p>
+<p>ROM-BIOS会把这个扇区的512字节搬到内存的0x7c00处,后面就是对内存中的拷贝进行的一系列操作</p>
+<p>ROM-BIOS检查这512字节的最后两个字节是否是0x55,0xAA,这是主引导扇区魔数</p>
+<p>如果主引导扇区有效则跳转打0x7c00继续执行</p>
+<p>主引导扇区的内容一般是检测操作系统在硬盘上的位置,把grub代码加载道内存,跳转grub举起操作系统来</p>
+<h2 id="显示"><a href="#显示" class="headerlink" title="显示"></a>显示</h2><h3 id="显卡与显示器"><a href="#显卡与显示器" class="headerlink" title="显卡与显示器"></a>显卡与显示器</h3><p>显卡负责给显示器提供内容</p>
+<p>显示器负责显式</p>
+<p>显示器接到显卡上,显卡接到主板上</p>
+<p>显卡控制显示器的最小单位是像素,每个像素点需要24比特存储颜色(RGB各8比特).显卡使用字节的显式存储器(显存,video RAM,VRAM)存放像素点的颜色.要显式啥就把啥信息放到显存里.</p>
+<p>显示器是一个二维平面,儿显存就是一个内存条子的存储器,它是线性的,这就涉及到一维数组到二维数组的映射关系了</p>
+<p>显存相当于一个缓冲区,CPU把想要输出到屏幕的东西放到显存里.显卡周期性地从显存拿出来按顺序显式到屏幕上.</p>
+<h3 id="显卡工作模式"><a href="#显卡工作模式" class="headerlink" title="显卡工作模式"></a>显卡工作模式</h3><p>显卡的工作模式分为文本模式和图形模式</p>
+<p>图形模式下操作的确实是像素点</p>
+<p>文本模式下只需要在显存中写入指定的字符的ASCII码,显卡内部经过字符发生器,就可以翻译成一些像素点的组合输出到屏幕上,也就是代替人干了计算每个像素点位置的事,人只需要指定第几行第几列写哪个字符就可以了</p>
+<p>一般个人电脑显卡加电自检之后都会把自己初始化为80×25的文本模式</p>
+<p>每行可以显示80个字符,一共可以显示25行.满屏是2000个字符</p>
+<h3 id="端口映射内存"><a href="#端口映射内存" class="headerlink" title="端口映射内存"></a>端口映射内存</h3><p>如果正儿八经地论起来,除了内存条子,其他的设备都是IO外设,CPU和内存条子打交道的速度得是外设的成千上万倍,如果想要实现细致流畅的游戏画面体验,经过IO访问显存是办不到的.于是把显存也和内存统一编址,这就绕开了IO直接让CPU像访问内存一样访问显存.</p>
+<p>对于8086来说,其CPU宽20位,可以寻址1M的内存空间0x0到0x9FFFF,</p>
+<p>那从0xA0000到0xFFFFF就不是内存条子的事了,比如</p>
+<p>0xB8000到0xBFFFF这32KB的地址空间映射给显存</p>
+<p>0xF0000到0xFFFFF这64K的地址空间映射给ROM-BIOS</p>
+<p><img src="https://raw.githubusercontent.com/DeutschBall/DeutschBall/main/image-20220825153008702.png" class="lazyload placeholder" data-srcset="https://raw.githubusercontent.com/DeutschBall/DeutschBall/main/image-20220825153008702.png" srcset="https://img2.baidu.com/it/u=2037979560,2772131037&fm=26&fmt=auto&gp=0.jpg" alt="image-20220825153008702"></p>
+<h3 id="段寄存器"><a href="#段寄存器" class="headerlink" title="段寄存器"></a>段寄存器</h3><p>显存入乡随俗,怎么访问内存就得怎么访问显存</p>
+<p>访问内存使用段地址:偏移量,</p>
+<p>物理地址=段地址×16+偏移量</p>
+<p>那么如果要访问显存,就得根据显存的起始地址设置段地址,由于显存起始地址是0xB8000,因此段地址就是0xB800,寻址的时候CPU会自动把0xB800乘16的</p>
+<p>怎样让段寄存器等于0xB800呢?</p>
+<p><code>mov es,0xB800</code>这样写吗?不可以,Intel的处理器规定不允许将立即数传递给段寄存器,必须使用通用寄存器或者内存单元中转一下,也就是说</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">mov ax,<span class="number">0xb800</span>                 ;指向文本模式的显示缓冲区</span><br><span class="line">mov es,ax</span><br></pre></td></tr></table></figure>
+<h3 id="字符模式下一个表示字符"><a href="#字符模式下一个表示字符" class="headerlink" title="字符模式下一个表示字符"></a>字符模式下一个表示字符</h3><p>字符模式下每个字符需要占据连续的两个字节,低字节是该字符的ASCII代码,高字节是该字符的颜色特征</p>
+<p><img src="https://raw.githubusercontent.com/DeutschBall/DeutschBall/main/image-20220825162813158.png" class="lazyload placeholder" data-srcset="https://raw.githubusercontent.com/DeutschBall/DeutschBall/main/image-20220825162813158.png" srcset="https://img2.baidu.com/it/u=2037979560,2772131037&fm=26&fmt=auto&gp=0.jpg" alt="image-20220825162813158"></p>
+<p>比如这里0xB8000开始的连续两个字节,</p>
+<p>低字节0x48是’H’的ASCII码,</p>
+<p>高字节0x07=00000111B表示黑背景色不闪烁,白前景色</p>
+<h3 id="显示字符"><a href="#显示字符" class="headerlink" title="显示字符"></a>显示字符</h3><p>例子中想要显示一串字符串”Label offset:”</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br></pre></td><td class="code"><pre><span class="line">      mov ax,<span class="number">0xb800</span>                 <span class="comment">//es段设置为显存地址起始位置</span></span><br><span class="line">      mov es,ax	</span><br><span class="line">mov byte [es:<span class="number">0x00</span>],<span class="string">&#x27;L&#x27;</span></span><br><span class="line">      mov byte [es:<span class="number">0x01</span>],<span class="number">0x07</span></span><br><span class="line">      mov byte [es:<span class="number">0x02</span>],<span class="string">&#x27;a&#x27;</span></span><br><span class="line">      mov byte [es:<span class="number">0x03</span>],<span class="number">0x07</span></span><br><span class="line">      mov byte [es:<span class="number">0x04</span>],<span class="string">&#x27;b&#x27;</span></span><br><span class="line">      mov byte [es:<span class="number">0x05</span>],<span class="number">0x07</span></span><br><span class="line">      mov byte [es:<span class="number">0x06</span>],<span class="string">&#x27;e&#x27;</span></span><br><span class="line">      mov byte [es:<span class="number">0x07</span>],<span class="number">0x07</span></span><br><span class="line">      mov byte [es:<span class="number">0x08</span>],<span class="string">&#x27;l&#x27;</span></span><br><span class="line">      mov byte [es:<span class="number">0x09</span>],<span class="number">0x07</span></span><br><span class="line">      mov byte [es:<span class="number">0x0a</span>],<span class="string">&#x27; &#x27;</span></span><br><span class="line">      mov byte [es:<span class="number">0x0b</span>],<span class="number">0x07</span></span><br><span class="line">      mov byte [es:<span class="number">0x0c</span>],<span class="string">&quot;o&quot;</span></span><br><span class="line">      mov byte [es:<span class="number">0x0d</span>],<span class="number">0x07</span></span><br><span class="line">      mov byte [es:<span class="number">0x0e</span>],<span class="string">&#x27;f&#x27;</span></span><br><span class="line">      mov byte [es:<span class="number">0x0f</span>],<span class="number">0x07</span></span><br><span class="line">      mov byte [es:<span class="number">0x10</span>],<span class="string">&#x27;f&#x27;</span></span><br><span class="line">      mov byte [es:<span class="number">0x11</span>],<span class="number">0x07</span></span><br><span class="line">      mov byte [es:<span class="number">0x12</span>],<span class="string">&#x27;s&#x27;</span></span><br><span class="line">      mov byte [es:<span class="number">0x13</span>],<span class="number">0x07</span></span><br><span class="line">      mov byte [es:<span class="number">0x14</span>],<span class="string">&#x27;e&#x27;</span></span><br><span class="line">      mov byte [es:<span class="number">0x15</span>],<span class="number">0x07</span></span><br><span class="line">      mov byte [es:<span class="number">0x16</span>],<span class="string">&#x27;t&#x27;</span></span><br><span class="line">      mov byte [es:<span class="number">0x17</span>],<span class="number">0x07</span></span><br><span class="line">      mov byte [es:<span class="number">0x18</span>],<span class="string">&#x27;:&#x27;</span></span><br><span class="line">      mov byte [es:<span class="number">0x19</span>],<span class="number">0x07</span></span><br></pre></td></tr></table></figure>
+<p>每两个相邻字节的低字节放字符ASCII代码,高字节调制颜色,都是不闪烁的黑背景,白前景</p>
+<p>寻址的时候使用的是<code>[es:0x00]</code>,转换成物理地址就是</p>
+<p><code>es*16+0x00</code>,为啥要写es呢?因为段寄存器默认是ds,这里需要段超越前缀指定使用es段</p>
+<p>而es=0x8b00,乘以16之后恰好就是显存映射地址的起始位置</p>
+<p>用byte关键字来修饰操作数的范围</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">mov byte [es:<span class="number">0x00</span>],<span class="string">&#x27;L&#x27;</span></span><br></pre></td></tr></table></figure>
+<p>意思是’L’顶多占用一个字节,不能再多了,这条指令只会把0x4C放到es:00上</p>
+<blockquote>
+<p>如果这样写</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">mov word [es:0x00],&#x27;L&#x27;</span><br></pre></td></tr></table></figure>
+<p>则把0x4C放到es:0x00,把0x00放到es:0x01</p>
+</blockquote>
+<p>如果是把寄存器的值放到内存上则不用byte或者word修饰操作数的范围,因为寄存器已经自带宽度了</p>
+<h2 id="指令地址"><a href="#指令地址" class="headerlink" title="指令地址"></a>指令地址</h2><h3 id="汇编地址"><a href="#汇编地址" class="headerlink" title="汇编地址"></a>汇编地址</h3><p>前面字句过程中也已经提到过,BIOS会把MBR这个512个字节放到内存条的0x7c00上.也就是说代码是从0x7c00开始的</p>
+<blockquote>
+<p>刚才显存扯了一大堆,但是都是相当于往数据段放东西,这个数据段位于0xB8000</p>
+</blockquote>
+<p>汇编地址:</p>
+<p>编译器会把0x7c00开始的MBR代码作为一个独立的段处理</p>
+<p>这样每条指令相对于段地址都有一个汇编地址(段内),在lst文件中可以看到这个汇编地址</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"> 行号 段内偏移 指令								汇编                                    </span><br><span class="line"> <span class="number">6</span> <span class="number">00000000</span> B800B8                           mov ax,<span class="number">0xb800</span>                 ;指向文本模式的显示缓冲区</span><br><span class="line"> <span class="number">7</span> <span class="number">00000003</span> <span class="number">8</span>EC0                             mov es,ax</span><br><span class="line"> <span class="number">8</span>                                  </span><br><span class="line"> <span class="number">9</span>                                           ;以下显示字符串<span class="string">&quot;Label offset:&quot;</span></span><br><span class="line"><span class="number">10</span> <span class="number">00000005</span> <span class="number">26</span>C60600004C                     mov byte [es:<span class="number">0x00</span>],<span class="string">&#x27;L&#x27;</span></span><br><span class="line"><span class="number">11</span> <span class="number">0000000B</span> <span class="number">26</span>C606010007                     mov byte [es:<span class="number">0x01</span>],<span class="number">0x07</span></span><br><span class="line"><span class="number">12</span> <span class="number">00000011</span> <span class="number">26</span>C606020061                     mov byte [es:<span class="number">0x02</span>],<span class="string">&#x27;a&#x27;</span></span><br></pre></td></tr></table></figure>
+<p>第一条有意义的指令是在第6行,段内偏移量为0,指令内容是0xB800B8,翻译成汇编语言就是<code>mov ax,0xb800</code>,由于这条指令长3字节,因此可以计算得到下一条指令的段内偏移量就是3</p>
+<p>第七行指令的段内偏移量就是3</p>
+<h3 id="标号"><a href="#标号" class="headerlink" title="标号"></a>标号</h3><p>如果要在汇编语言中写出跳转功能,就得从一个地址转到另一个地址.</p>
+<p>怎么指定目标地址呢?让人手工计算目标地址然后写到jmp后面吗?显然人工计算指令地址不显示,比如一段千八行的汇编语言,有好多指令都是跳转或者调用指令,现在第一行的指令发现错了要改,假设原来两个字节的指令改成了一个字节,那么后面的所有指令地址就都减1,这就需要所有的跳转和调用指令重定位.让人手工一行一行改太慢了</p>
+<p>于是就发明了标号这种东西,类似于一个变量符号,作用是记录一个地址,编译器会自动计算该标号的地址,在生成二进制码的时候自动把标号翻译成地址,根宏定义展开一样</p>
+<p>比如主引导记录中有这么一句:</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">infi: jmp near infi                 ;无限循环</span><br></pre></td></tr></table></figure>
+<p>infi标号的这条指令要跳转到infi标号处的指令,也就是自己跳转到自己的开始,这就形成了无线循环</p>
+<p>标号还可以直接写到汇编指令里:</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">dividnd dw 0x3f0</span><br><span class="line">divisor db 0x3f</span><br><span class="line">mov ax,[dividnd]</span><br><span class="line">div byte [divisor]</span><br></pre></td></tr></table></figure>
+<p>这里dividnd标号是0x3f0的地址,divisor是0x3f的地址</p>
+<p>在编译时就像宏定义展开一样,mov ax,[dividnd]这里的标号就会自动转化成地址</p>
+<h2 id="声明并初始化数据"><a href="#声明并初始化数据" class="headerlink" title="声明并初始化数据"></a>声明并初始化数据</h2><figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">number db <span class="number">0</span>,<span class="number">0</span>,<span class="number">0</span>,<span class="number">0</span>,<span class="number">0</span></span><br></pre></td></tr></table></figure>
+<p>这里number是标号,db是定义字节的伪指令,后面定义了五个字节,都初始化为0,相邻两个字节之间用逗号隔开.6</p>
+<blockquote>
+<p>这里定义的五个字节就在当前代码段中</p>
+<p>但是标注的做法应该是代码数据分离,数据专门放在数据段中,使用段超越方法寻址</p>
+<p>byte [ds:00]就表示数据段的最开始的字节</p>
+</blockquote>
+<p>意思是从number开始的五个字节都是0</p>
+<p>dw声明字,dd声明双字,dq声明四字</p>
+<p>db,dw,dd,dq都是伪指令,当编译完成时就找不到影子了</p>
+<blockquote>
+<p>编译完成后的样子,就是5个0</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="number">100</span> <span class="number">0000012</span>E <span class="number">0000000000</span>                number db <span class="number">0</span>,<span class="number">0</span>,<span class="number">0</span>,<span class="number">0</span>,<span class="number">0</span></span><br></pre></td></tr></table></figure>
+</blockquote>
+<p>用db声明的变量就必须在字节大小范围内,最小是0x00,最大是0xFF,如果比这还大就会截断高位</p>
+<p>比如db 0xFF00,编译之后保留低字节0x00</p>
+<h2 id="段超越前缀"><a href="#段超越前缀" class="headerlink" title="段超越前缀"></a>段超越前缀</h2><p>如果这样写mov al,[0x00]</p>
+<p>意思是把内存中0x00位置的数据搬到al寄存器中,问题是,这个0x00是相对于哪个段的偏移量呢?</p>
+<p>DS?CS?</p>
+<p>默认的数据段是DS,因此如果不指明段超越前缀,就是访问的数据段</p>
+<p>但是如果要访问ES段寄存器指向的段,应该怎么写呢?</p>
+<p>mov al,[es:0x00]</p>
+<p>这里es:就是段超越前缀</p>
+<h2 id="除法指令"><a href="#除法指令" class="headerlink" title="除法指令"></a>除法指令</h2><p>除法指令div只有一个操作数作为除数</p>
+<p>被除数默认是AX寄存器</p>
+<p>8086允许两种类型的整数除法,</p>
+<p>其一是16位被除数除以8位除数由于8086的寄存器宽度为8,因此一个AX就可以放开被除数.除完了商放到AL,余数放到AH</p>
+<p>其二是32位被除数除以16位除数</p>
+<p>此时除数刚好占用一个寄存器,但是被除数就需要放到两个寄存器中了,即DX放高16位,AX放低16位,除完了商放在AX,余数放在DX</p>
+<p>处理器怎么区分两种除法应该用哪种呢?看除数的格式,如果除数是一个字寄存器,比如div cx,就得是32位除被数除以16位除数.如果是div cl,就是16位被除数除以8位除数</p>
+<p>在主引导扇区代码的第37到47行是这样写的</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line">mov ax,number ;这里number是一个地址标号</span><br><span class="line">mov bx,10	;被除数置为10</span><br><span class="line"></span><br><span class="line">mov cx,cs		</span><br><span class="line">mov ds,cx		;ds寄存器指向当前cx寄存器的段地址</span><br><span class="line"></span><br><span class="line">mov dx,0	;被除数高位置0</span><br><span class="line">div bx	;DX:AX/BX</span><br><span class="line">       </span><br><span class="line">mov [0x7c00+number+0x00],dl		;dl放的是余数的低字节,也就是number这个地址的个位数字,放到0x7c00+number+0x00这个位置上</span><br></pre></td></tr></table></figure>
+<p>主引导记录中一直重复该过程,意思是十进制分解被除数number标号地址的各位,放到0x7c00+number开始的五个字节上</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br></pre></td><td class="code"><pre><span class="line">mov ax,number                 ;?????number???????</span><br><span class="line">mov bx,<span class="number">10</span></span><br><span class="line"></span><br><span class="line"></span><br><span class="line">mov cx,cs</span><br><span class="line">mov ds,cx</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">mov dx,<span class="number">0</span></span><br><span class="line">div bx</span><br><span class="line">mov [<span class="number">0x7c00</span>+number+<span class="number">0x00</span>],dl   </span><br><span class="line"></span><br><span class="line"></span><br><span class="line">xor dx,dx</span><br><span class="line">div bx</span><br><span class="line">mov [<span class="number">0x7c00</span>+number+<span class="number">0x01</span>],dl  </span><br><span class="line"></span><br><span class="line"></span><br><span class="line">xor dx,dx</span><br><span class="line">div bx</span><br><span class="line">mov [<span class="number">0x7c00</span>+number+<span class="number">0x02</span>],dl   </span><br><span class="line"></span><br><span class="line"></span><br><span class="line">xor dx,dx</span><br><span class="line">div bx</span><br><span class="line">mov [<span class="number">0x7c00</span>+number+<span class="number">0x03</span>],dl   </span><br><span class="line"></span><br><span class="line">;????位??????? </span><br><span class="line">xor dx,dx</span><br><span class="line">div bx</span><br><span class="line">mov [<span class="number">0x7c00</span>+number+<span class="number">0x04</span>],dl  </span><br><span class="line"></span><br></pre></td></tr></table></figure>
+<p><code>mov [0x7c00+number+0x00],dl</code>这就很诡异了,0x7c00是怎么来的?</p>
+<h3 id="偏移量换算"><a href="#偏移量换算" class="headerlink" title="偏移量换算"></a>偏移量换算</h3><figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">mov [<span class="number">0x7c00</span>+number+<span class="number">0x00</span>],dl</span><br></pre></td></tr></table></figure>
+<p>这里多了一个0x7c00,而不是直接mov [number+0x00],dl</p>
+<p>这是因为,主引导扇区会被bios装载到内存的0x7c00处</p>
+<p>此时CS=0x0000,IP=0x7c00</p>
+<p>number是相对于mbr.asm这个文件的偏移量12E.</p>
+<p>如果写mov [number+0x00],dl.实际上就是mov [0x12E],dl</p>
+<p>放到了内存条上的0x12E位置,直接出了主引导区了</p>
+<p><img src="https://raw.githubusercontent.com/DeutschBall/DeutschBall/main/image-20220827151725554.png" class="lazyload placeholder" data-srcset="https://raw.githubusercontent.com/DeutschBall/DeutschBall/main/image-20220827151725554.png" srcset="https://img2.baidu.com/it/u=2037979560,2772131037&fm=26&fmt=auto&gp=0.jpg" alt="image-20220827151725554"></p>
+<p>mbr.asm程序自始至终没有修改过cs的值,那么这个值就是BIOS设置的,一直是0x0000不变</p>
+<h2 id="显示分解出来的各个数位"><a href="#显示分解出来的各个数位" class="headerlink" title="显示分解出来的各个数位"></a>显示分解出来的各个数位</h2><p>分解的各个数位按照个十百千万的顺序放到0x7c00+number+0x00到0x7c00+number+0x04的五个字节中</p>
+<p>对于万位上的数字,mbr程序是这样写的:</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">mov al,[<span class="number">0x7c00</span>+number+<span class="number">0x04</span>]</span><br><span class="line">add al,<span class="number">0x30</span></span><br><span class="line">mov [es:<span class="number">0x1a</span>],al</span><br><span class="line">mov byte [es:<span class="number">0x1b</span>],<span class="number">0x04</span></span><br></pre></td></tr></table></figure>
+<p>把万位数字拿出来放到al里,加上0x30转化成这个数字的ASCII码,然后放到es:0x1a位置,由于es早已设置为0xb800,即显存的起始位置,因此es:0x1a就是第一行的第1a个字符</p>
+<p>在es:0x1b位置设置的是该字符的显示样式,设置为0x04意思是无背景不闪烁,红色前景</p>
+<p><img src="https://raw.githubusercontent.com/DeutschBall/DeutschBall/main/image-20220825162813158.png" class="lazyload placeholder" data-srcset="https://raw.githubusercontent.com/DeutschBall/DeutschBall/main/image-20220825162813158.png" srcset="https://img2.baidu.com/it/u=2037979560,2772131037&fm=26&fmt=auto&gp=0.jpg" alt=""></p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br></pre></td><td class="code"><pre><span class="line">mov al,[0x7c00+number+0x04]</span><br><span class="line">add al,0x30</span><br><span class="line">mov [es:0x1a],al</span><br><span class="line">mov byte [es:0x1b],0x04</span><br><span class="line"></span><br><span class="line">mov al,[0x7c00+number+0x03]</span><br><span class="line">add al,0x30</span><br><span class="line">mov [es:0x1c],al</span><br><span class="line">mov byte [es:0x1d],0x04</span><br><span class="line"></span><br><span class="line">mov al,[0x7c00+number+0x02]</span><br><span class="line">add al,0x30</span><br><span class="line">mov [es:0x1e],al</span><br><span class="line">mov byte [es:0x1f],0x04</span><br><span class="line"></span><br><span class="line">mov al,[0x7c00+number+0x01]</span><br><span class="line">add al,0x30</span><br><span class="line">mov [es:0x20],al</span><br><span class="line">mov byte [es:0x21],0x04</span><br><span class="line"></span><br><span class="line">mov al,[0x7c00+number+0x00]</span><br><span class="line">add al,0x30</span><br><span class="line">mov [es:0x22],al</span><br><span class="line">mov byte [es:0x23],0x04</span><br><span class="line"></span><br><span class="line">mov byte [es:0x24],&#x27;D&#x27;</span><br><span class="line">mov byte [es:0x25],0x07</span><br></pre></td></tr></table></figure>
+<p>最后另外放了一个黑底不闪烁白字’D’,意思是十进制的缩写(Decimal)</p>
+<p>因此打印效果为</p>
+<p><img src="https://raw.githubusercontent.com/DeutschBall/DeutschBall/main/image-20220827154928612.png" class="lazyload placeholder" data-srcset="https://raw.githubusercontent.com/DeutschBall/DeutschBall/main/image-20220827154928612.png" srcset="https://img2.baidu.com/it/u=2037979560,2772131037&fm=26&fmt=auto&gp=0.jpg" alt="image-20220827154928612"></p>
+<h2 id="无限循环"><a href="#无限循环" class="headerlink" title="无限循环"></a>无限循环</h2><p>在主引导记录中打印了number的数位分解之后,立刻进入无线循环</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">infi: jmp near infi  </span><br></pre></td></tr></table></figure>
+<p>为啥要这样写呢?</p>
+<p>因为如果不写无线循环,那么虚拟机就直接寄了,主引导记录并没有抛砖引玉地加载操作系统,这512个字节跑完之后,后面就全是0了,不存在指令了</p>
+<h3 id="段内跳转near"><a href="#段内跳转near" class="headerlink" title="段内跳转near"></a>段内跳转near</h3><p>jmp near意思是跳转到当前段内的一个地址,也就是不改变CS段寄存器地址,只改变ip的地址,因此操作数只是infi这个标号,不需要cs:infi指定跳转到哪个段的infi</p>
+<h2 id="填充与魔数"><a href="#填充与魔数" class="headerlink" title="填充与魔数"></a>填充与魔数</h2><p>前面的代码和数据都写完了也远远达不到512个字节,主引导记录需要最后两个字符是0xAA55才有效.因此中间的字节需要说一些废话填充</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">times <span class="number">203</span> db <span class="number">0</span></span><br><span class="line">          db <span class="number">0x55</span>,<span class="number">0xaa</span></span><br></pre></td></tr></table></figure>
+<p>连着定义了203个字节都置0,最后两个字节是0xAA55魔数</p>
+<p>到此主引导记录才有效</p>
+<h2 id="Bochs调试"><a href="#Bochs调试" class="headerlink" title="Bochs调试"></a>Bochs调试</h2><p>之前我们一直使用的都是virtualBox虚拟机,只能运行不能调试,唯一能够调试运行的虚拟机就是Bochs</p>
+<h3 id="bochs配置"><a href="#bochs配置" class="headerlink" title="bochs配置"></a>bochs配置</h3><p>将主引导记录写入虚拟磁盘vhd文件之后启动bochs,需要在开始菜单上进行一些设置</p>
+<p><img src="https://raw.githubusercontent.com/DeutschBall/DeutschBall/main/image-20220827161343625.png" class="lazyload placeholder" data-srcset="https://raw.githubusercontent.com/DeutschBall/DeutschBall/main/image-20220827161343625.png" srcset="https://img2.baidu.com/it/u=2037979560,2772131037&fm=26&fmt=auto&gp=0.jpg" alt="image-20220827161343625"></p>
+<h4 id="Disk-amp-Boot"><a href="#Disk-amp-Boot" class="headerlink" title="Disk&amp;Boot"></a>Disk&amp;Boot</h4><p><img src="https://raw.githubusercontent.com/DeutschBall/DeutschBall/main/image-20220827161537279.png" class="lazyload placeholder" data-srcset="https://raw.githubusercontent.com/DeutschBall/DeutschBall/main/image-20220827161537279.png" srcset="https://img2.baidu.com/it/u=2037979560,2772131037&fm=26&fmt=auto&gp=0.jpg" alt="image-20220827161537279"></p>
+<p>都2202年了,不会还有人用软盘吧</p>
+<p>ATA,硬盘接口标准,PATA是以前的IDE接口,SATA是当前使用的接口标准</p>
+<p>每个计算机有多个ATA通道,允许加多块磁盘</p>
+<p>ATA channel 0 是必须的,将nobody.vhd挂到ATA channel0上即可</p>
+<h4 id="ATA-channel-0"><a href="#ATA-channel-0" class="headerlink" title="ATA channel 0"></a>ATA channel 0</h4><p><img src="https://raw.githubusercontent.com/DeutschBall/DeutschBall/main/image-20220827162047232.png" class="lazyload placeholder" data-srcset="https://raw.githubusercontent.com/DeutschBall/DeutschBall/main/image-20220827162047232.png" srcset="https://img2.baidu.com/it/u=2037979560,2772131037&fm=26&fmt=auto&gp=0.jpg" alt="image-20220827162047232"></p>
+<p><img src="https://raw.githubusercontent.com/DeutschBall/DeutschBall/main/image-20220827162545217.png" class="lazyload placeholder" data-srcset="https://raw.githubusercontent.com/DeutschBall/DeutschBall/main/image-20220827162545217.png" srcset="https://img2.baidu.com/it/u=2037979560,2772131037&fm=26&fmt=auto&gp=0.jpg" alt="image-20220827162545217"></p>
+<p>这里Cylinders,Heads等参数不是乱写的,需要填虚拟磁盘的实际情况,可以手工分析最后512个字节的几何参数,也可以使用教材配套软件fixvhdwr.exe</p>
+<p><img src="https://raw.githubusercontent.com/DeutschBall/DeutschBall/main/image-20220827162429565.png" class="lazyload placeholder" data-srcset="https://raw.githubusercontent.com/DeutschBall/DeutschBall/main/image-20220827162429565.png" srcset="https://img2.baidu.com/it/u=2037979560,2772131037&fm=26&fmt=auto&gp=0.jpg" alt="image-20220827162429565"></p>
+<h4 id="Boot-Options"><a href="#Boot-Options" class="headerlink" title="Boot Options"></a>Boot Options</h4><p><img src="https://raw.githubusercontent.com/DeutschBall/DeutschBall/main/image-20220827162851643.png" class="lazyload placeholder" data-srcset="https://raw.githubusercontent.com/DeutschBall/DeutschBall/main/image-20220827162851643.png" srcset="https://img2.baidu.com/it/u=2037979560,2772131037&fm=26&fmt=auto&gp=0.jpg" alt="image-20220827162851643"></p>
+<h4 id="保存"><a href="#保存" class="headerlink" title="保存"></a>保存</h4><p><img src="https://raw.githubusercontent.com/DeutschBall/DeutschBall/main/image-20220827162908917.png" class="lazyload placeholder" data-srcset="https://raw.githubusercontent.com/DeutschBall/DeutschBall/main/image-20220827162908917.png" srcset="https://img2.baidu.com/it/u=2037979560,2772131037&fm=26&fmt=auto&gp=0.jpg" alt="image-20220827162908917"></p>
+<p>前面两个设置完毕之后Save保存设置,下一次开Bochs的时候就不用重新设置了</p>
+<p>保存一个bochsrc.bxrc文件,找一个牢稳的地方保存,比如bochs的根目录,或者虚拟机根目录,反正就是下一次启动bochs需要手动load该文件,能找到就行</p>
+<h3 id="bochs运行主引导记录"><a href="#bochs运行主引导记录" class="headerlink" title="bochs运行主引导记录"></a>bochs运行主引导记录</h3><p>设置好之后就可以从bochs启动了</p>
+<p>可以看到第一行打印出了”Label offset:00302D”</p>
+<p><img src="https://raw.githubusercontent.com/DeutschBall/DeutschBall/main/image-20220827163212152.png" class="lazyload placeholder" data-srcset="https://raw.githubusercontent.com/DeutschBall/DeutschBall/main/image-20220827163212152.png" srcset="https://img2.baidu.com/it/u=2037979560,2772131037&fm=26&fmt=auto&gp=0.jpg" alt="image-20220827163212152"></p>
+<h3 id="bochs调试"><a href="#bochs调试" class="headerlink" title="bochs调试"></a>bochs调试</h3><p>使用bochsdbg启动虚拟机,此时除了模拟虚拟机屏幕窗口之外,还有一个终端窗口用于调试</p>
+<p><img src="https://raw.githubusercontent.com/DeutschBall/DeutschBall/main/image-20220827163659611.png" class="lazyload placeholder" data-srcset="https://raw.githubusercontent.com/DeutschBall/DeutschBall/main/image-20220827163659611.png" srcset="https://img2.baidu.com/it/u=2037979560,2772131037&fm=26&fmt=auto&gp=0.jpg" alt="image-20220827163659611"></p>
+<p>bochs在执行第一条指令前停下来等待调试命令</p>
+<p>此时第一条指令位于f000:fff0,指令内容是</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">jmp far 0xf000:e05b</span><br></pre></td></tr></table></figure>
+<p>这个cs:ip指向的地址翻译成物理地址就是0xfe05b</p>
+<p>而BIOS映射到内存的地址是[0xF0000,0xFFFFF],显然第一条指令跳转到了BIOS中</p>
+<p>此后在这个调试终端中就可以输入命令进行调试了</p>
+<h4 id="断点"><a href="#断点" class="headerlink" title="断点"></a>断点</h4><p>如果想在主引导记录开始下断点,由于主引导记录将被bios装载进入内存的0x7c00位置,</p>
+<p>因此可以在调试终端中这样写</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">b 0x7c00</span><br></pre></td></tr></table></figure>
+<p>这样就在0x7c00出下拉一个断点,处理器将在执行0x7c00的指令之前停下</p>
+<h4 id="执行到断点"><a href="#执行到断点" class="headerlink" title="执行到断点"></a>执行到断点</h4><p>在0x7c00下断点后,命令c,一直执行直到遇到断点</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">(<span class="number">0</span>) [<span class="number">0x000000007c00</span>] <span class="number">0000</span>:<span class="number">7</span>c00 (unk. ctxt): mov ax, <span class="number">0xb800</span>            ; b800b8</span><br></pre></td></tr></table></figure>
+<p>确实是主引导记录的第一条指令,将要通过ax中转设置es为显存基地址</p>
+<p>分号后面的十六进制数是该条指令的机器码</p>
+<h4 id="查看寄存器"><a href="#查看寄存器" class="headerlink" title="查看寄存器"></a>查看寄存器</h4><p>使用r命令查看所有通用寄存器内容</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br></pre></td><td class="code"><pre><span class="line">&lt;bochs:<span class="number">5</span>&gt; r</span><br><span class="line">rax: <span class="number">00000000</span>_0000aa55</span><br><span class="line">rbx: <span class="number">00000000</span>_00000000</span><br><span class="line">rcx: <span class="number">00000000</span>_00090000</span><br><span class="line">rdx: <span class="number">00000000</span>_00000080</span><br><span class="line">rsp: <span class="number">00000000</span>_0000ffd6</span><br><span class="line">rbp: <span class="number">00000000</span>_00000000</span><br><span class="line">rsi: <span class="number">00000000</span>_000e0000</span><br><span class="line">rdi: <span class="number">00000000</span>_0000ffac</span><br><span class="line">r8 : <span class="number">00000000</span>_00000000</span><br><span class="line">r9 : <span class="number">00000000</span>_00000000</span><br><span class="line">r10: <span class="number">00000000</span>_00000000</span><br><span class="line">r11: <span class="number">00000000</span>_00000000</span><br><span class="line">r12: <span class="number">00000000</span>_00000000</span><br><span class="line">r13: <span class="number">00000000</span>_00000000</span><br><span class="line">r14: <span class="number">00000000</span>_00000000</span><br><span class="line">r15: <span class="number">00000000</span>_00000000</span><br><span class="line">rip: <span class="number">00000000</span>_00007c00</span><br><span class="line">eflags <span class="number">0x00000082</span>: id vip vif ac vm rf nt IOPL=<span class="number">0</span> of df <span class="keyword">if</span> tf SF zf af pf cf</span><br></pre></td></tr></table></figure>
+<p>此时rax存放的是0xAA55,估计是BIOS检查主引导记录有效性时留下的</p>
+<p>rip程序计数器此时指向0x7c00</p>
+<h4 id="单步执行"><a href="#单步执行" class="headerlink" title="单步执行"></a>单步执行</h4><p>单步执行之后,程序停在0x7c03位置,此处的指令是mov es,ax.</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">&lt;bochs:<span class="number">6</span>&gt; s</span><br><span class="line">Next at t=<span class="number">17178999</span></span><br><span class="line">(<span class="number">0</span>) [<span class="number">0x000000007c03</span>] <span class="number">0000</span>:<span class="number">7</span>c03 (unk. ctxt): mov es, ax                ; <span class="number">8</span>ec0</span><br></pre></td></tr></table></figure>
+<p>那么此时第一条指令已经执行完毕了,ax的值应该是0xb800,r打印一下</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">&lt;bochs:<span class="number">7</span>&gt; r</span><br><span class="line">rax: <span class="number">00000000</span>_0000b800</span><br></pre></td></tr></table></figure>
+<p>确实如此</p>
+<h4 id="查看段寄存器"><a href="#查看段寄存器" class="headerlink" title="查看段寄存器"></a>查看段寄存器</h4><p>单步执行第二条指令mov es,ax.</p>
+<p>之后es应该被赋值为0xb800</p>
+<p>使用sreg打印所有段寄存器</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br></pre></td><td class="code"><pre><span class="line">&lt;bochs:<span class="number">17</span>&gt; sreg</span><br><span class="line">es:<span class="number">0xb800</span>, dh=<span class="number">0x0000930b</span>, dl=<span class="number">0x8000ffff</span>, valid=<span class="number">1</span></span><br><span class="line">        Data segment, base=<span class="number">0x000b8000</span>, limit=<span class="number">0x0000ffff</span>, Read/Write, Accessed</span><br><span class="line">cs:<span class="number">0x0000</span>, dh=<span class="number">0x00009300</span>, dl=<span class="number">0x0000ffff</span>, valid=<span class="number">1</span></span><br><span class="line">        Data segment, base=<span class="number">0x00000000</span>, limit=<span class="number">0x0000ffff</span>, Read/Write, Accessed</span><br><span class="line">ss:<span class="number">0x0000</span>, dh=<span class="number">0x00009300</span>, dl=<span class="number">0x0000ffff</span>, valid=<span class="number">7</span></span><br><span class="line">        Data segment, base=<span class="number">0x00000000</span>, limit=<span class="number">0x0000ffff</span>, Read/Write, Accessed</span><br><span class="line">ds:<span class="number">0x0000</span>, dh=<span class="number">0x00009300</span>, dl=<span class="number">0x0000ffff</span>, valid=<span class="number">1</span></span><br><span class="line">        Data segment, base=<span class="number">0x00000000</span>, limit=<span class="number">0x0000ffff</span>, Read/Write, Accessed</span><br><span class="line">fs:<span class="number">0x0000</span>, dh=<span class="number">0x00009300</span>, dl=<span class="number">0x0000ffff</span>, valid=<span class="number">1</span></span><br><span class="line">        Data segment, base=<span class="number">0x00000000</span>, limit=<span class="number">0x0000ffff</span>, Read/Write, Accessed</span><br><span class="line">gs:<span class="number">0x0000</span>, dh=<span class="number">0x00009300</span>, dl=<span class="number">0x0000ffff</span>, valid=<span class="number">1</span></span><br><span class="line">        Data segment, base=<span class="number">0x00000000</span>, limit=<span class="number">0x0000ffff</span>, Read/Write, Accessed</span><br><span class="line">ldtr:<span class="number">0x0000</span>, dh=<span class="number">0x00008200</span>, dl=<span class="number">0x0000ffff</span>, valid=<span class="number">1</span></span><br><span class="line">tr:<span class="number">0x0000</span>, dh=<span class="number">0x00008b00</span>, dl=<span class="number">0x0000ffff</span>, valid=<span class="number">1</span></span><br><span class="line">gdtr:base=<span class="number">0x00000000000f9ad7</span>, limit=<span class="number">0x30</span></span><br><span class="line">idtr:base=<span class="number">0x0000000000000000</span>, limit=<span class="number">0x3ff</span></span><br></pre></td></tr></table></figure>
+<p>sreg不但打印了段寄存器内容,还打印了段寄存器隐藏的高速缓存器的内容,这是ollydbg做不到的</p>
+<p>高速缓存器还有ldtr,gdtr等寄存器都是在保护模式才会用到,现在不管</p>
+<h4 id="查看内存"><a href="#查看内存" class="headerlink" title="查看内存"></a>查看内存</h4><p>再连续执行两步,写入显存映射区域</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">(<span class="number">0</span>) [<span class="number">0x000000007c05</span>] <span class="number">0000</span>:<span class="number">7</span>c05 (unk. ctxt): mov byte ptr es:<span class="number">0x0000</span>, <span class="number">0x4c</span> ; <span class="number">26</span>c60600004c</span><br><span class="line">&lt;bochs:<span class="number">18</span>&gt; s</span><br><span class="line">Next at t=<span class="number">17179001</span></span><br><span class="line">(<span class="number">0</span>) [<span class="number">0x000000007c0b</span>] <span class="number">0000</span>:<span class="number">7</span>c0b (unk. ctxt): mov byte ptr es:<span class="number">0x0001</span>, <span class="number">0x07</span> ; <span class="number">26</span>c606010007</span><br><span class="line">&lt;bochs:<span class="number">19</span>&gt; s</span><br><span class="line">Next at t=<span class="number">17179002</span></span><br><span class="line">(<span class="number">0</span>) [<span class="number">0x000000007c11</span>] <span class="number">0000</span>:<span class="number">7</span>c11 (unk. ctxt): mov byte ptr es:<span class="number">0x0002</span>, <span class="number">0x61</span> ; <span class="number">26</span>c606020061</span><br></pre></td></tr></table></figure>
+<p>使用xp(examine memory at physical address),显示指定物理内存处内容</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">xp (/数量) &lt;物理地址&gt;</span><br></pre></td></tr></table></figure>
+<p>xp默认情况下一次显示一个双字,xp /n就是显示n个双字</p>
+<p>使用xp命令观察0xb8000开始的第一个双字</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">&lt;bochs:24&gt; xp 0xb8000</span><br><span class="line">[bochs]:</span><br><span class="line">0x00000000000b8000 &lt;bogus+       0&gt;:    0x0b6f074c</span><br></pre></td></tr></table></figure>
+<p>低两个字节是0x074c,正好对应</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">mov byte ptr es:0x0000, 0x4c</span><br><span class="line">mov byte ptr es:0x0001, 0x07</span><br></pre></td></tr></table></figure>
+<h4 id="退出调试"><a href="#退出调试" class="headerlink" title="退出调试"></a>退出调试</h4><p>命令q退出</p>
+
+      </div>
+      <div class="post-tags-categories">
+        
+        <div class="tags">
+          
+            <a href="/tags/x86%E6%B1%87%E7%BC%96%E8%AF%AD%E8%A8%80%E4%BB%8E%E5%AE%9E%E6%A8%A1%E5%BC%8F%E5%88%B0%E4%BF%9D%E6%8A%A4%E6%A8%A1%E5%BC%8F/" class="">
+              x86汇编语言从实模式到保护模式
+            </a>
+          
+        </div>
+        
+      </div>
+      
+    </article>
+    <!-- 上一篇文章和下一篇文章 -->
+    
+      <!-- 文章详情页的上一页和下一页 -->
+<div class="post-nav">
+
+
+
+
+
+  
+  <div class="post-nav-next post-nav-item">
+    <div class="post-nav-img" style="background-size: cover; 
+      background-position: center center;">
+      <img class="lazyload lazyload placeholder" src="/medias/3.jpg" class="lazyload placeholder" data-srcset="/medias/3.jpg" srcset="https://img2.baidu.com/it/u=2037979560,2772131037&fm=26&fmt=auto&gp=0.jpg" src="" alt="">
+    </div>
+    <a href="/2022/08/25/%E8%99%9A%E6%8B%9F%E7%A1%AC%E7%9B%98vhd/" class="post-nav-link">
+      <div class="title">
+        Next: <i class="fas fa-angle-right"></i>
+        <div class="title-text">x86汇编语言 chapter 4 虚拟磁盘</div>
+      </div>
+      <!-- <div class="content">
+        虚拟硬盘vhdvirtual hard disk
+用virtualbox新建的没有操作系统的虚拟电脑,选择VHD格式虚拟
+      </div> -->
+    </a>
+  </div>
+
+</div>
+
+    
+    
+
+    <!-- 打赏 -->
+    
+
+    <!-- 分享 -->
+    
+      <!-- https://github.com/overtrue/share.js -->
+<!-- 文章详情页的分享 -->
+<div class="social-share" data-sites="twitter,facebook,google,qq,qzone,wechat,weibo,douban,linkedin" data-wechat-qrcode-helper="<p>微信扫一扫即可分享！</p>"></div>
+
+<script src="/js/shareJs/social-share.min.js"></script>
+</script>
+
+<style>
+  .social-share {
+    margin: 20px 0;
+  }
+</style>
+
+
+    
+    
+    <!-- 评论 -->
+    <!-- 评论 -->
+
+  <div id="myComment">
+    
+      
+<section id="comments" style="padding: 1em; margin: 15px auto;"
+	class="animated bounceInUp">
+	<div id="vcomment" class="comment"></div>
+</section>
+<style>
+	#comments {
+		background: rgba(255,255,255,0.9);
+	}
+	#veditor {
+		background-image: url('https://raw.githubusercontent.com/DeutschBall/test/master/R.3c3e443dfe9ddbddc93730c482ed0461');
+		background-size: contain;
+		background-repeat: no-repeat;
+		background-position: right;
+		background-color: rgba(255, 255, 255, 0);
+		resize: vertical;
+	}
+	#veditor:focus{
+		background-position-y: 200px;
+		transition: all 0.2s ease-in-out 0s;
+	}
+	#vcomment .vcards .vcard .vh .vhead .vtag.vvisitor {
+		background-color: #42b983;
+	}
+	.v[data-class=v] .vbtn:active, .v[data-class=v] .vbtn:hover {
+		color: #42b983;
+		border-color: #42b983;
+	}
+	#vcomment .vcards .vcard .vhead .vsys i {
+		display: none;
+	}
+	/* 底部valine链接 */
+	#vcomment .vpower {
+		display: none;
+	}
+	
+	/* 底下注释是修改 名称和邮箱和网址输入框的样式 */
+	/* #vcomment .vheader {
+		display: flex;
+		justify-content: space-around;
+	}
+	
+	#vcomment .vheader .vnick {
+		width: 31%;
+		border: 2px solid #dedede;
+		padding-left: 10px;
+		padding-right: 10px;
+		border-radius: 5px
+	}
+
+	#vcomment .vheader .vmail {
+		width: 31%;
+		border: 2px solid #dedede;
+		padding-left: 10px;
+		padding-right: 10px;
+		border-radius: 5px
+	}
+
+	#vcomment .vheader .vlink {
+		width: 31%;
+		border: 2px solid #dedede;
+		padding-left: 10px;
+		padding-right: 10px;
+		border-radius: 5px
+	} */
+
+	img.vimg {
+		transition: all 1s;
+		/* 头像旋转时间为 1s */
+	}
+
+	img.vimg:hover {
+		transform: rotate(360deg);
+		-webkit-transform: rotate(360deg);
+		-moz-transform: rotate(360deg);
+		-o-transform: rotate(360deg);
+		-ms-transform: rotate(360deg);
+	}
+
+	#vcomment .vcards .vcard {
+		padding: 15px 20px 0 20px;
+		border-radius: 10px;
+		margin-bottom: 15px;
+		box-shadow: 0 0 4px 1px rgba(0, 0, 0, .12);
+		transition: all .3s
+	}
+
+	#vcomment .vcards .vcard:hover {
+		box-shadow: 0 0 8px 3px rgba(0, 0, 0, .12)
+	}
+
+	#vcomment .vcards .vcard .vh .vcard {
+		border: none;
+		box-shadow: none;
+	}
+</style>
+    
+  </div>
+
+<!-- comment script in themes\hexo-theme-bamboo\layout\_partial\scripts\index.ejs -->
+
+
+  </div>
+
+  <!-- 目录 -->
+  <!-- 文章详情页右侧目录 -->
+
+  <div class="toc-aside">
+    <div class="toc-main">
+      <div class="toc-aside-title">
+        <i class="fas fa-list-ul" aria-hidden="true"></i><span>catalog</span>
+        
+          <div class="toc-open-close">catalog</div>
+        
+      </div>
+      <div class="toc-content">
+        <div class="toc"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 手机端目录按钮 -->
+  <div id="toc-mobile-btn">
+    <i class="fas fa-list-ul" aria-hidden="true"></i>
+  </div>
+
+
+<script>
+  function closeToc(init) {
+    $(".toc-aside").css({'width': 0, 'padding': 0, 'transition': init ?  'noe' : 'width 0.3s' });
+    $(".toc-content").css({'width': 0});
+    $(".toc-aside-title span, .toc-aside-title i").css({'display': 'none'});
+    $(".main-content").css({'width': '75%', 'margin': '10px auto'});
+  };
+  function openToc() {
+    $(".main-content").css({'width': '65%', 'margin-right': '10px', 'margin-left': 'calc(35% - 350px)'});
+    $(".toc-aside").css({'width': '300px', 'padding': '0 10px', 'transition': 'width 0.3s'});
+    $(".toc-content").css({'width': '300px'});
+    $(".toc-aside-title span, .toc-aside-title i").css({'display': 'inline-block'});
+  }
+  function openBtnClickFn () {
+    let openOrCloseBtn = $('.toc-aside .toc-aside-title .toc-open-close');
+    let open = eval('' || 'true');
+    openOrCloseBtn.click(function() {
+      if (open) {
+        closeToc();
+        open = false;
+      } else {
+        openToc();
+        open = true;
+      }
+    });
+  };
+  openBtnClickFn();
+  initCloseTocWidth(true);
+
+  function initCloseTocWidth(init) {
+    if (window.innerWidth >= 992) {
+      let isClose = false;
+      isClose && closeToc(init)
+    }
+  }
+
+  document.addEventListener('pjax:complete', function () {
+    $(".toc-aside").css({'transition': 'no'});
+  })
+  document.addEventListener('pjax:complete', function () {
+    openBtnClickFn();
+  })
+  
+</script>
+
+  <!-- 图片放大 Wrap images with fancybox support -->
+  <script src="/js/wrapImage.js"></script>
+</div>
+
+<!-- 文章详情页背景图 -->
+<div id="appBgSwiper" style="position: fixed;left: 0;top: 0;width: 100%;height: 100%;z-index: -2;"
+	:style="{'background-color': bgColor ? bgColor : 'transparent'}">
+	<transition-group tag="ul" :name="names">
+		<li v-for='(image,index) in img' :key='index' v-show="index === mark" class="bg-swiper-box">
+			<img :src="image" class="bg-swiper-img no-lazy">
+		</li>
+	</transition-group>
+</div>
+<script>
+	var vm = new Vue({
+		el: '#appBgSwiper',
+		data: {
+			names: '' || 'fade' || 'fade', // translate-fade fade
+			mark: 0,
+			img: [],
+			bgColor: '',
+			time: null
+		},
+		methods: {   //添加方法
+			change(i, m) {
+				if (i > m) {
+					// this.names = 'fade';
+				} else if (i < m) {
+					// this.names = 'fade';
+				} else {
+					return;
+				}
+				this.mark = i;
+			},
+			prev() {
+				// this.names = 'fade';
+				this.mark--;
+				if (this.mark === -1) {
+					this.mark = 3;
+					return
+				}
+			},
+			next() {
+				// this.names = 'fade';
+				this.mark++;
+				if (this.mark === this.img.length) {
+					this.mark = 0;
+					return
+				}
+			},
+			autoPlay() {
+				// this.names = 'fade';
+				this.mark++;
+				if (this.mark === this.img.length) {
+					this.mark = 0;
+					return
+				}
+			},
+			play() {
+				let bgImgDelay = '' || '180000'
+				let delay = parseInt(bgImgDelay) || 180000;
+				this.time = setInterval(this.autoPlay, delay);
+			},
+			enter() {
+				clearInterval(this.time);
+			},
+			leave() {
+				this.play();
+			}
+		},
+		created() {
+			this.play()
+		},
+		beforeDestroy() {
+			clearInterval(this.time);
+		},
+		mounted() {
+			let prop = '' || '';
+			let isImg = prop.includes('.bmp') || prop.includes('.jpg') || prop.includes('.png') || prop.includes('.tif') || prop.includes('.gif') || prop.includes('.pcx') || prop.includes('.tga') || prop.includes('.exif') || prop.includes('.fpx') || prop.includes('.psd') || prop.includes('.cdr') || prop.includes('.pcd') || prop.includes('.dxf') || prop.includes('.ufo') || prop.includes('.eps') || prop.includes('.ai') || prop.includes('.raw') || prop.includes('.WMF') || prop.includes('.webp') || prop.includes('.jpeg') || prop.includes('http://') || prop.includes('https://')
+			if (isImg) {
+				let img = prop.split(',');
+				let configRoot = '/'
+				let arrImg = [];
+				img.forEach(el => {
+					var Expression = /http(s)?:\/\/([\w-]+\.)+[\w-]+(\/[\w- .\/?%&=]*)?/;
+					var objExp = new RegExp(Expression);
+
+					if (objExp.test(el)) {
+						// http or https
+						arrImg.push(el);
+					} else {
+						// 非http or https开头
+						// 本地文件
+						let firstStr = el.charAt(0);
+						if (firstStr == '/') {
+							el = el.substr(1); // 删除第一个字符 '/',因为 configRoot最后一个字符为 /
+						}
+						el = configRoot + el;
+						arrImg.push(el);
+					}
+				})
+				this.img = arrImg;
+			} else {
+				this.bgColor = prop;
+			}
+		}
+	})
+</script>
+
+<style>
+	.bg-swiper-box {
+		position: absolute;
+		display: block;
+		width: 100%;
+		height: 100%;
+	}
+
+	.bg-swiper-img {
+		object-fit: cover;
+		width: 100%;
+		height: 100%;
+	}
+</style>
+
+
+  <script>
+  // https://github.com/theme-next/hexo-theme-next/blob/master/layout/_third-party/math/mathjax.swig
+  if (typeof MathJax === 'undefined') {
+    window.MathJax = {
+      loader: {
+        source: {
+          '[tex]/amsCd': '[tex]/amscd',
+          '[tex]/AMScd': '[tex]/amscd'
+        }
+      },
+      tex: {
+        inlineMath: {'[+]': [['$', '$']]},
+        tags: 'ams'
+      },
+      options: {
+        renderActions: {
+          findScript: [10, doc => {
+            document.querySelectorAll('script[type^="math/tex"]').forEach(node => {
+              const display = !!node.type.match(/; *mode=display/);
+              const math = new doc.options.MathItem(node.textContent, doc.inputJax[0], display);
+              const text = document.createTextNode('');
+              node.parentNode.replaceChild(text, node);
+              math.start = {node: text, delim: '', n: 0};
+              math.end = {node: text, delim: '', n: 0};
+              doc.math.push(math);
+            });
+          }, '', false],
+          insertedScript: [200, () => {
+            document.querySelectorAll('mjx-container').forEach(node => {
+              let target = node.parentNode;
+              if (target.nodeName.toLowerCase() === 'li') {
+                target.parentNode.classList.add('has-jax');
+              }
+            });
+          }, '', false]
+        }
+      }
+    };
+    (function () {
+      var script = document.createElement('script');
+      script.src = 'https://cdn.jsdelivr.net/npm/mathjax@3.0/es5/tex-mml-chtml.js';
+      script.defer = true;
+      document.head.appendChild(script);
+    })();
+  } else {
+    // 文章章节标题不能为 “MathJax” ，否则会报错。
+    MathJax.startup.document.state(0);
+    MathJax.texReset();
+    MathJax.typeset();
+  }
+</script>
+
+
+
+
+  <script>
+  function loadMermaid() {
+    if (document.getElementsByClassName('mermaid').length) {
+      if (window.mermaidJsLoad) mermaid.init()
+      else {
+        loadScript('https://cdn.jsdelivr.net/npm/mermaid/dist/mermaid.min.js').then(() => {
+          window.mermaidJsLoad = true
+          mermaid.initialize({
+            theme: 'default',
+          })
+          if ('true') {
+            mermaid.init();
+          }
+        })
+      }
+    }
+  };
+  document.addEventListener("DOMContentLoaded", function () {
+    loadMermaid();
+  })
+
+  document.addEventListener('pjax:complete', function () {
+    loadMermaid();
+  })
+  
+</script>
+
+
+      </main>
+    </div>
+
+    <!-- 页脚 -->
+    
+  
+  <div class="footer bg-color">
+    <div class="footer-main">
+      
+        
+          <div class="link">
+            
+          </div>
+        
+      
+        
+          <div class="footer-copyright">
+            <p>Copyright © 2019 - 2020 <a target="_blank" rel="noopener" href="https://github.com/yuang01">Deutschball</a> | Powered by <a target="_blank" rel="noopener" href="https://hexo.io/zh-cn/docs/">Deutschball</a> | Theme <a target="_blank" rel="noopener" href="https://github.com/yuang01/theme">Bamboo</a> </p>
+
+          </div>
+        
+      
+        
+          
+        
+      
+        
+          <div class="footer-custom">
+            
+          </div>
+        
+      
+    </div>
+  </div>
+
+<script src='https://unpkg.com/mermaid@/dist/mermaid.min.js'></script>
+<script>
+  if (window.mermaid) {
+    mermaid.initialize({theme: 'forest'});
+  }
+</script>
+
+
+
+
+    <!-- 渲染暗黑按钮 -->
+    
+    <!-- 渲染回到顶部按钮 -->
+    
+      <div class="goTop top-btn-color" pointer>
+  <i class="fas fa-arrow-up" aria-hidden="true"></i>
+</div>
+<script src="/js/goTop.js"></script>
+
+    
+    <!-- 渲染左下角音乐播放器 -->
+    
+
+    <!-- 图片放大 -->
+    
+      <script src="/js/fancybox/jquery.fancybox.min.js"></script>
+    
+
+    <!-- 百度解析 -->
+    <!-- Baidu Analytics -->
+
+    <!-- Baidu Push -->
+
+<script>
+    (function () {
+        var bp = document.createElement('script');
+        var curProtocol = window.location.protocol.split(':')[0];
+        if (curProtocol === 'https') {
+            bp.src = 'https://zz.bdstatic.com/linksubmit/push.js';
+        } else {
+            bp.src = 'http://push.zhanzhang.baidu.com/push.js';
+        }
+        var s = document.getElementsByTagName("script")[0];
+        s.parentNode.insertBefore(bp, s);
+    })();
+</script>
+
+    
+    <!-- 背景彩带 -->
+    
+      <script type="text/javascript" size="100" alpha='0.4' zIndex="-1" src="/js/ribbon.min.js"></script>
+    
+
+    <script src="/js/utils/index.js"></script>
+    <script src="/js/app.js"></script>
+    
+    <!-- 文章目录所需js -->
+<link href="/js/tocbot/tocbot.css" rel="stylesheet">
+<script src="/js/tocbot/tocbot.min.js"></script>
+
+<script>
+  var headerEl = 'h2, h3, h4, h5, h6',  //headers 
+    content = '.post-detail',//文章容器
+    idArr = {};  //标题数组以确定是否增加索引id
+  //add #id
+  var option = {
+    // Where to render the table of contents.
+    tocSelector: '.toc',
+    // Where to grab the headings to build the table of contents.
+    contentSelector: content,
+    // Which headings to grab inside of the contentSelector element.
+    headingSelector: headerEl,
+    scrollSmooth: true,
+    scrollSmoothOffset: -80,
+    headingsOffset: -($(window).height() * 0.4 - 45),
+    positionFixedSelector: '.toc-main',
+    positionFixedClass: 'is-position-fixed',
+    fixedSidebarOffset: 'auto',
+    activeLinkClass: 'is-active-link',
+    // onClick: function (e) {},
+  }
+  if ($('.toc').length > 0) {
+
+    $(content).children(headerEl).each(function () {
+      //去除空格以及多余标点
+      var headerId = $(this).text().replace(/[\s|\~|`|\!|\@|\#|\$|\%|\^|\&|\*|\(|\)|\_|\+|\=|\||\|\[|\]|\{|\}|\;|\:|\"|\'|\,|\<|\.|\>|\/|\?|\：|\，|\。]/g, '');
+
+      headerId = headerId.toLowerCase();
+      if (idArr[headerId]) {
+        //id已经存在
+        $(this).attr('id', headerId + '-' + idArr[headerId]);
+        idArr[headerId]++;
+      }
+      else {
+        //id未存在
+        idArr[headerId] = 1;
+        $(this).attr('id', headerId);
+      }
+    });
+
+    document.addEventListener("DOMContentLoaded", function () {
+      tocbot.init(option);
+      mobileTocClick();
+    });
+
+  }
+
+  window.tocScrollFn = function () {
+    return bamboo.throttle(function () {
+      findHeadPosition();
+    }, 100)()
+  }
+  window.addEventListener('scroll', tocScrollFn);
+
+  const findHeadPosition = function (top) {
+    if ($('.toc-list').length <= 0) {
+      return false;
+    }
+    setTimeout(() => {  // or DOMContentLoaded 
+      autoScrollToc();
+    }, 0);
+  }
+
+  const autoScrollToc = function () {
+    const $activeItem = document.querySelector('.is-active-link');
+    const $cardToc = document.querySelector('.toc-content');
+    const activePosition = $activeItem.getBoundingClientRect().top
+    const sidebarScrollTop = $cardToc.scrollTop
+    if (activePosition > (document.documentElement.clientHeight - 100)) {
+      $cardToc.scrollTop = sidebarScrollTop + 150
+    }
+    if (activePosition < 100) {
+      $cardToc.scrollTop = sidebarScrollTop - 150
+    }
+  }
+
+  document.addEventListener('pjax:send', function () {
+    if ($('.toc').length) {
+      tocbot.destroy();
+    }
+  });
+
+  document.addEventListener('pjax:complete', function () {
+    if ($('.toc').length) {
+      tocbot.init(option);
+      mobileTocClick();
+    }
+  });
+  
+  // 手机端toc按钮点击出现目录
+  const mobileTocClick = function () {
+    const $cardTocLayout = document.getElementsByClassName('toc-aside')[0];
+    const $cardToc = $cardTocLayout.getElementsByClassName('toc-content')[0];
+    let right = '45px';
+    if (window.innerWidth >= 551 && window.innerWidth <= 992) {
+      right = '100px'
+    }
+    const mobileToc = {
+      open: () => {
+        $cardTocLayout.style.cssText = 'animation: toc-open .3s; opacity: 1; right: ' + right
+      },
+
+      close: () => {
+        $cardTocLayout.style.animation = 'toc-close .2s'
+        setTimeout(() => {
+          $cardTocLayout.style.cssText = "opacity:''; animation: ''; right: ''"
+        }, 100)
+      }
+    }
+    document.getElementById('toc-mobile-btn').addEventListener('click', () => {
+      if (window.getComputedStyle($cardTocLayout).getPropertyValue('opacity') === '0') mobileToc.open()
+      else mobileToc.close()
+    })
+
+    $cardToc.addEventListener('click', (e) => {
+      if (window.innerWidth < 992) { // 小于992px的时候
+        mobileToc.close()
+      }
+    })
+  }
+</script>
+
+<style>
+  .is-position-fixed {
+    position: sticky !important;
+    top: 74px;
+  }
+
+  .toc-main ul {
+    counter-reset: show-list;
+  }
+
+  .toc-main ul li::before {
+    content: counter(item)".";
+    display: block;
+    position: absolute;
+    left: 12px;
+    top: 0;
+  }
+</style> 
+
+<!-- 设置导航背景 -->
+<script>
+  let setHeaderClass = () => {
+    const headerMenuTransparent = true;
+    if (!headerMenuTransparent) { return; }
+    const nav = $('#navHeader');
+    const navTop = nav.outerHeight();
+    const winTop = $(window).scrollTop();
+    if(winTop > navTop) {
+      nav.addClass('header-bg-color');
+    }
+    else {
+      nav.removeClass('header-bg-color');
+    }
+  };
+
+  let scrollCollect = () => {
+    return bamboo.throttle(function (e) {
+      setHeaderClass();
+    }, 200)()
+  }
+
+  let initHeaderBg = () => {
+    setHeaderClass();
+  }
+
+  setHeaderClass();
+  window.addEventListener('scroll', scrollCollect);
+
+  document.addEventListener('pjax:send', function () {
+    window.removeEventListener('scroll', scrollCollect)
+  })
+  document.addEventListener('pjax:complete', function () {
+    window.addEventListener('scroll', scrollCollect);
+    setHeaderClass();
+  })
+</script> 
+
+<!-- 渲染issues标签里的内容 -->
+<script>
+  function loadIssuesJS() {
+    if ($(".post-detail").find(".issues-api").length == 0) {
+      return;
+    } 
+    loadScript('/js/issues/index.js');
+  };
+  $(function () {
+    loadIssuesJS();
+  });
+  document.addEventListener('pjax:complete', function () {
+    if (typeof IssuesAPI == "undefined") {
+      loadIssuesJS();
+    }
+  })
+</script>
+
+<!-- 输入框打字特效 -->
+<!-- 输入框打字特效 -->
+
+  <script src="/js/activate-power-mode.js"></script>
+  <script>
+    POWERMODE.colorful = true;  // 打开随机颜色特效
+    POWERMODE.shake = false;    // 关闭输入框抖动
+    document.body.addEventListener('input', POWERMODE);//监听打字事件
+  </script>
+
+
+<!-- markdown代码一键复制功能 -->
+
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/v-plugs-ayu/lib/ayu.css">
+  <script src="https://cdn.jsdelivr.net/npm/v-plugs-ayu/lib/ayu.umd.min.js"></script>
+  <script src="/js/clipboard/clipboard.min.js"></script>
+  <div id="appCopy">
+  </div>
+  <script data-pjax>
+    var vm = new Vue({
+      el: '#appCopy',
+      data: {
+      },
+      computed: {
+      },
+      mounted() {
+        const that = this;
+        var copy = 'copy';
+        /* code */
+        var initCopyCode = function () {
+          var copyHtml = '';
+          copyHtml += '<button class="btn-copy" data-clipboard-snippet="" style="position:absolute;top:0;right:0;z-index:1;">';
+          copyHtml += '<i class="fas fa-copy"></i><span>' + copy + '</span>';
+          copyHtml += '</button>';
+          $(".post-detail pre").not('.gutter pre').wrap("<div class='codeBox' style='position:relative;width:100%;'></div>")
+          $(".post-detail pre").not('.gutter pre').before(copyHtml);
+          new ClipboardJS('.btn-copy', {
+            target: function (trigger) {
+              return trigger.nextElementSibling;
+            }
+          });
+        }
+        initCopyCode();
+        $('.btn-copy').unbind('click').bind('click', function () {
+          doSomething();
+        })
+        $(document).unbind('keypress').bind('keypress', function (e) {
+          if (e.ctrlKey && e.keyCode == 67) {
+            doSomething();
+          }
+        })
+
+        function doSomething() {
+          that.$notify({
+            title: "成功",
+            content: "copy that",
+            type: 'success'
+          })
+        }
+      },
+      methods: {
+      },
+      created() { }
+    })
+  </script>
+  
+
+<!-- 图片懒加载 -->
+<script defer src="https://cdn.jsdelivr.net/npm/vanilla-lazyload@17.1.0/dist/lazyload.min.js"></script>
+<script>
+  // https://www.npmjs.com/package/vanilla-lazyload
+  // Set the options globally
+  // to make LazyLoad self-initialize
+  window.lazyLoadOptions = {
+    elements_selector: ".lazyload",
+    threshold: 0
+  };
+  // Listen to the initialization event
+  // and get the instance of LazyLoad
+  window.addEventListener(
+    "LazyLoad::Initialized",
+    function (event) {
+      window.lazyLoadInstance = event.detail.instance;
+    },
+    false
+  );
+  document.addEventListener('DOMContentLoaded', function () {
+    lazyLoadInstance.update();
+  });
+  document.addEventListener('pjax:complete', function () {
+    lazyLoadInstance.update();
+  });
+</script>
+
+
+<!-- 卡片滚动动画 -->
+   
+
+<!-- 评论所需js -->
+
+  
+    <!-- 弹幕所需的css和js -->
+    
+<!-- 具体js，请前往valine/script.ejs查看 -->
+
+    <script>
+  var requiredFields = '';
+  requiredFields = requiredFields.split(',');
+  comment_el = '.comment';
+  let looperValine = null;
+  load_valine = function () {
+    if ($(comment_el).length) {
+      var valine = new Valine({
+        el: '#vcomment',
+        path: window.location.pathname,
+        notify: false,
+        verify: false,
+        app_id: "",
+        app_key: "",
+        placeholder: "客官，说点什么吧",
+        avatar: "",
+        master: "",   //博主邮箱md5
+        tagMeta: ["博主","小伙伴","访客"],     //标识字段名
+        friends: "",
+        metaPlaceholder: { "nick": "昵称/QQ号", "mail": "邮箱" },
+        requiredFields: requiredFields,
+        enableQQ: true,
+      });
+      function debounce(fn) {
+        var timerID = null
+        return function () {
+          var arg = arguments[0]   //获取事件
+          if (timerID) {
+            clearTimeout(timerID)
+          }
+          timerID = setTimeout(function () {
+            fn(arg)              //事件传入函数
+          }, 200)
+        }
+      }
+      //查询评论 valine.Q('*').limit(7) -- 查询所有，限制7条, 下面的的代码是查询当前页面
+      var themeDanmu = eval('false');
+      var themeLoop = eval('false');
+      var themeLooperTime = '5000' || 5000;
+      var speed = '40' || 20;
+      var isBarrager = true;
+      if (themeDanmu == true) {
+        do_barrager();
+        if ($('.danmuBox').length <= 0) {
+          $('.navbar').append('<div class="danmuBox"><div class="danmuBtn open"><span class="danmuCircle"></span><span class="danmuText">弹幕</span></div></div>');
+        }
+        $('.danmuBtn').on('click', debounce(
+          function () {
+            if ($('.danmuBtn').hasClass('open')) {
+              $('.danmuBtn').removeClass('open')
+              clearInterval(looperValine);
+              $.fn.barrager.removeAll();
+            } else {
+              $('.danmuBtn').addClass("open");
+              do_barrager();
+            }
+          }
+        ))
+      }
+      function do_barrager() {
+        isBarrager && valine.Q(window.location.pathname).find().then(function (comments) {
+          // var num = 0; // 可以记录条数，循环调用的时候只取最新的评论放入弹幕中
+          var run_once = true;
+          var looper_time = themeLooperTime;
+          var total = comments.length;
+          // var looper = null;
+          var index = 0;
+          if (total > 0) {
+            barrager();
+          } else {
+            // 当评论数为0的时候，自动关闭弹幕
+            // $('.danmuBtn').removeClass('open');
+          }
+          function barrager() {
+            if (run_once) {
+              //如果是首次执行,则设置一个定时器,并且把首次执行置为false
+              looperValine = setInterval(barrager, looper_time);
+              run_once = false;
+            }
+            var content = comments[index]._serverData.comment;
+            var email = comments[index]._serverData.mail;
+            var link = comments[index]._serverData.link;
+            var newcontent = content.substring(0, 50).replace(/<[^>]+>/g, "");
+            //发布一个弹幕
+            const item = {
+              img: `https://q1.qlogo.cn/g?b=qq&nk=${email}&s=640`, //图片 
+              info: newcontent, //文字 
+              href: link, //链接 
+              close: true, //显示关闭按钮 
+              speed: speed, //延迟,单位秒,默认6 
+              color: '#fff', //颜色,默认白色 
+              old_ie_color: '#000000', //ie低版兼容色,不能与网页背景相同,默认黑色
+            }
+            $('body').barrager(item);
+            //索引自增
+            index++;
+            //所有弹幕发布完毕，清除计时器。
+            if (index == total) {
+              clearInterval(looperValine);
+              if (themeLoop === true) {
+                setTimeout(function () {
+                  do_barrager();
+                }, 5000);
+              } else {
+                $('.danmuBtn').removeClass('open');
+              }
+              return false;
+            }
+
+          }
+        })
+      }
+    }
+  };
+  $(document).ready(load_valine);
+  document.addEventListener('pjax:send', function (e) {
+    
+  })
+  document.addEventListener('pjax:complete', function () {
+    load_valine();
+  });
+</script>
+
+  
+
+
+<!-- 鼠标点击特效 -->
+<!-- 爱心点击 -->
+
+  
+    <canvas class="fireworks" style="position: fixed;left: 0;top: 0;z-index: 999; pointer-events: none;" ></canvas>
+    <script src="//cdn.bootcss.com/animejs/2.2.0/anime.min.js"></script>
+    <script src="/js/cursor/explosion.min.js"></script>
+  
+
+
+
+
+
+    <!-- pjax -->
+    
+
+<!-- pjax -->
+
+
+  <script src="/js/pjax@0.2.8/index.js"></script>
+  
+    <!-- 样式位于：source/css/_third-party/pjaxanimate.styl -->
+
+<div class="pjax-animate">
+  
+    <div class="loading-circle"><div id="loader-circle"></div></div>
+    <script>
+      window.ShowLoading = function() {
+        $(".loading-circle").css("display", "block");
+      };
+      window.HideLoading = function() {
+        $(".loading-circle").css("display", "none");
+      }
+    </script>
+  
+	<script>
+    document.addEventListener('pjax:complete', function () {
+      window.HideLoading();
+    })
+    document.addEventListener('pjax:send', function () {
+      window.ShowLoading();
+    })
+    document.addEventListener('pjax:error', function () {
+      window.HideLoading();
+    })
+	</script>
+</div>
+
+  
+
+  <script>
+    var pjax = new Pjax({
+      elements: 'a[href]:not([href^="#"]):not([href="javascript:void(0)"]):not([no-pjax])',   // 拦截正常带链接的 a 标签
+      selectors: ["#pjax-container","title"],                                   // 根据实际需要确认重载区域
+      cacheBust: false,   // url 地址追加时间戳，用以避免浏览器缓存
+      timeout: 5000
+    });
+
+    document.addEventListener('pjax:send', function (e) {
+
+      try {
+        var currentUrl = window.location.pathname;
+        var targetUrl = e.triggerElement.href;
+        var banUrl = [""];
+        if (banUrl[0] != "") {
+          banUrl.forEach(item => {
+            if(currentUrl.indexOf(item) != -1 || targetUrl.indexOf(item) != -1) {
+              window.location.href = targetUrl;
+            }
+          });
+        }
+      } catch (error) {}
+
+      $(window).unbind('resize');
+      $(window).unbind('scroll');
+      $(document).unbind('scroll');
+      $(document).unbind('click');
+      $('body').unbind('click');
+
+    })
+    
+    document.addEventListener('pjax:complete', function () {
+      $('script[data-pjax], .pjax-reload script').each(function () {
+        $(this).parent().append($(this).remove());
+      });
+    });
+
+    document.addEventListener('pjax:error', function (e) {
+      window.location.href = e.triggerElement.href;
+    })
+    
+    // 刷新不从顶部开始
+    document.addEventListener("DOMContentLoaded", function () {
+      history.scrollRestoration = 'auto';
+    })
+  </script>
+
+
+
+  </body>
+</html>
