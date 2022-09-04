@@ -609,6 +609,38 @@
 <p>kali子系统完整安装</p>
 <figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">apt install kali-linux-everything</span><br></pre></td></tr></table></figure>
 <p>大约有20个G,还是在学校wifi环境下安装吧,使用流量划不来</p>
+<h2 id="ida-wsl远程调试"><a href="#ida-wsl远程调试" class="headerlink" title="ida+wsl远程调试"></a>ida+wsl远程调试</h2><p>终于会动态调试了</p>
+<p>但是windows上的IDA似乎只能用local windows debugger,其他的各种各样的设置看了就烦</p>
+<p>今天终于不厌其烦试了试IDA+remote linux debugger在ida上调试elf文件</p>
+<p>终于调通了</p>
+<p>需要ida,wsl</p>
+<h3 id="remote-linux-debugger"><a href="#remote-linux-debugger" class="headerlink" title="remote linux debugger"></a>remote linux debugger</h3><p>win11+wsl kali+ida</p>
+<p><code>IDA-&lt;version&gt;/dbgsrv/</code>这个目录下面有调试需要使用的文件</p>
+<p><img src="https://raw.githubusercontent.com/DeutschBall/DeutschBall/main/image-20220901163211166.png" class="lazyload placeholder" data-srcset="https://raw.githubusercontent.com/DeutschBall/DeutschBall/main/image-20220901163211166.png" srcset="https://img2.baidu.com/it/u=2037979560,2772131037&fm=26&fmt=auto&gp=0.jpg" alt="image-20220901163211166"></p>
+<p>如果要使用linux远程调试elf文件,需要linux_server和linux_server64两个文件,把他俩复制到kali的文件系统中去</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">┌──(root㉿Executor)-[/home/kali]</span><br><span class="line">└─# ls -l | grep linux</span><br><span class="line">-rwxrwxrwx 1 root root 783792 Jan  1  2021 linux_server</span><br><span class="line">-rwxrwxrwx 1 root root 735376 Jan  1  2021 linux_server64</span><br></pre></td></tr></table></figure>
+<p>cd 到该目录下,修改其权限</p>
+<p>可以使用—help看linux_server的用法</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">chmod 777 linux_server</span><br></pre></td></tr></table></figure>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line">┌──(root㉿Executor)-[/home/kali]</span><br><span class="line">└─# ./linux_server --help</span><br><span class="line">IDA Linux 32-bit remote debug server(ST) v7.5.26. Hex-Rays (c) 2004-2020</span><br><span class="line">Usage: linux_server [options]</span><br><span class="line">  -p ...  (--port-number ...) Port number</span><br><span class="line">  -i ...  (--ip-address ...) IP address to bind to (default to any)</span><br><span class="line">  -s      (--use-tls) Use TLS</span><br><span class="line">  -c ...  (--certchain-file ...) TLS certificate chain file</span><br><span class="line">  -k ...  (--privkey-file ...) TLS private key file</span><br><span class="line">  -v      (--verbose) Verbose mode</span><br><span class="line">  -P ...  (--password ...) Password</span><br><span class="line">  -k      (--on-broken-connection-keep-session) Keep debugger session alive when connection breaks</span><br><span class="line">  -K      (--on-stop-kill-process) Kill debuggee when closing session</span><br><span class="line"></span><br></pre></td></tr></table></figure>
+<p>执行linux_server</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">┌──(root㉿Executor)-[/home/kali]</span><br><span class="line">└─# ./linux_server</span><br><span class="line">IDA Linux 32-bit remote debug server(ST) v7.5.26. Hex-Rays (c) 2004-2020</span><br><span class="line">Listening on 0.0.0.0:23946...</span><br></pre></td></tr></table></figure>
+<p>此时kali已经在监听其23946端口了</p>
+<p>现在用ida打开一个32位elf程序,F9或者点击Debugger下拉菜单,选择调试器Remote Linux debugger</p>
+<p><img src="https://raw.githubusercontent.com/DeutschBall/DeutschBall/main/image-20220901163954709.png" class="lazyload placeholder" data-srcset="https://raw.githubusercontent.com/DeutschBall/DeutschBall/main/image-20220901163954709.png" srcset="https://img2.baidu.com/it/u=2037979560,2772131037&fm=26&fmt=auto&gp=0.jpg" alt="image-20220901163954709"></p>
+<p>然后调试运行(ida默认也是访问远程主机的23946端口,如果不是则这里肯定联不通,ida会让重新设置端口的)</p>
+<p>必然会报错找不到输入文件,</p>
+<p><img src="https://raw.githubusercontent.com/DeutschBall/DeutschBall/main/image-20220901164111650.png" class="lazyload placeholder" data-srcset="https://raw.githubusercontent.com/DeutschBall/DeutschBall/main/image-20220901164111650.png" srcset="https://img2.baidu.com/it/u=2037979560,2772131037&fm=26&fmt=auto&gp=0.jpg" alt="image-20220901164111650"></p>
+<p>一看报错信息,原来输入文件是从远程linux上找的,当然找不到</p>
+<p>OK之后ida提供了替代方案</p>
+<p><img src="https://raw.githubusercontent.com/DeutschBall/DeutschBall/main/image-20220901164214375.png" class="lazyload placeholder" data-srcset="https://raw.githubusercontent.com/DeutschBall/DeutschBall/main/image-20220901164214375.png" srcset="https://img2.baidu.com/it/u=2037979560,2772131037&fm=26&fmt=auto&gp=0.jpg" alt="image-20220901164214375"></p>
+<p>点这个Use found就可以使用本机的<code>C:\Users\86135\Desktop\malloc\main</code>作为输入文件了</p>
+<p>但是调试界面刚出来又没了,原来是忘记下断点了</p>
+<p>在main函数(或者其他地方)下断点,然后重新调试运行,可以调试了</p>
+<p><img src="https://raw.githubusercontent.com/DeutschBall/DeutschBall/main/image-20220901164532437.png" class="lazyload placeholder" data-srcset="https://raw.githubusercontent.com/DeutschBall/DeutschBall/main/image-20220901164532437.png" srcset="https://img2.baidu.com/it/u=2037979560,2772131037&fm=26&fmt=auto&gp=0.jpg" alt="image-20220901164532437"></p>
+<p>甚至可以使用F5反汇编,显然是linux上的光棍儿gdb做不到的</p>
+<h3 id="remote-gbd-debugger"><a href="#remote-gbd-debugger" class="headerlink" title="remote gbd debugger"></a>remote gbd debugger</h3><p>既然linux上也有gdb,那么是不是也可以用远程gdb调试呢?确实能调通,安一个gdbserver剩下的随便拾到拾到就行了</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">apt install gdbserver</span><br></pre></td></tr></table></figure>
 
       </div>
       <div class="post-tags-categories">
