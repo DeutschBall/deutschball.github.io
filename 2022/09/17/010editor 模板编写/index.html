@@ -11,7 +11,7 @@
   <!-- Global site tag (gtag.js) - Google Analytics -->
 
 
-  <title>archives | Deutschball&#39;s blog</title>
+  <title>010editor 模板语法 | Deutschball&#39;s blog</title>
 
   <link rel="icon" type="image/png" href="https://raw.githubusercontent.com/DeutschBall/test/master/emp.png">
   <link rel="stylesheet" href="https://at.alicdn.com/t/font_1911880_c1nvbyezg17.css">
@@ -399,280 +399,543 @@
   
 </header>
         <!-- 内容区域 -->
-        <div class="bg-dark-floor" style="position: fixed;left: 0;top: 0;width: 100%;height: 100%;z-index: -2;"></div>
-<div class="bg-light-floor-archive" style="position: fixed;left: 0;top: 0;width: 100%;height: 100%;z-index: -3;"></div>
-<div class="archive-header" style="background-image:url('https://raw.githubusercontent.com/DeutschBall/test/master/vader.jpg')">
-  <div class="archive-header-title">
-    archive
-  </div>
-  <div class="archive-header-desc">
+        
+ <!-- prismjs 代码高亮 -->
+ 
+
+
+<div class="bg-dark-floor" style="position: fixed;left: 0;top: 0;width: 100%;height: 100%;z-index: -1;"></div>
+
+
+  <!-- 文章详情页顶部图片和标题 -->
+
+
+
+
+<div class="post-detail-header" id="thumbnail_canvas" style="background-repeat: no-repeat; background-size: cover; 
+  background-position: center center;position: relative;background-image:url('/medias/2.jpg')">
+  <div class="post-detail-header-mask"></div>
+  <canvas id="header_canvas"style="position:absolute;bottom:0;pointer-events:none;"></canvas>
   
-  <span class="title" id="archive-header-desc"></span>
+  <div class="post-detail-header_info-box">
+    <div class="title-box">
+      <span class="title">
+        010editor 模板语法
+      </span>
+    </div>
+    
+    
+      
+        <span class="post-detail-header_date">
+          <i class="fas fa-calendar"></i> Published in：2022-09-17 |
+        </span>
+      
+
+      
+
+      
+    
+  </div>
+  
+  
+    <script src="/js/bubble/bubble.js"></script>
+  
+</div>
+
+
+
+
+
+<div class="row justify-position" 
+  style="padding-top: 0px;">
+  <div class="main-content">
+    <article class="post post-detail">
+      <div class="post-content">
+        <h1 id="010editor-模板编写"><a href="#010editor-模板编写" class="headerlink" title="010editor 模板编写"></a>010editor 模板编写</h1><p>以linux上的归档文件AR,或者说windows上的静态库LIB为例看看模板是咋写的</p>
+<p>总的来说,写010editor模板就是定义结构体.</p>
+<h2 id="AR结构"><a href="#AR结构" class="headerlink" title="AR结构"></a>AR结构</h2><p>需要结合AR文件的结构,理解AR模板</p>
+<p><a target="_blank" rel="noopener" href="https://dustball.top/2022/08/19/lib文件格式解析/">程序员的自我修养 chapter 9 LIB | Deutschball’s blog (dustball.top)</a></p>
+<p>AR文件由一个签名魔数<code>!&lt;arch&gt;\n</code>还有多个obj模块组成,</p>
+<p>每个obj模块之前都会有一个头,作用是描述该obj模块的信息</p>
+<p>这个头的定义大概是这样的,字节数是对的,但是变量名叫啥无所谓</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">typedef</span> <span class="class"><span class="keyword">struct</span> &#123;</span></span><br><span class="line">    <span class="type">char</span>    fileName[<span class="number">16</span>];<span class="comment">//文件名</span></span><br><span class="line">    <span class="type">char</span>    modification_timestamp[<span class="number">12</span>];<span class="comment">//最后修改时间戳</span></span><br><span class="line">    <span class="type">char</span>    ownerID[<span class="number">6</span>];<span class="comment">//拥有者ID</span></span><br><span class="line">    <span class="type">char</span>    groupID[<span class="number">6</span>];<span class="comment">//组ID</span></span><br><span class="line">    <span class="type">char</span>    fileMode[<span class="number">8</span>];<span class="comment">//文件模式</span></span><br><span class="line">    <span class="type">char</span>    fileSize[<span class="number">10</span>];<span class="comment">//文件大小</span></span><br><span class="line">    <span class="type">char</span>    endMarker[<span class="number">2</span>];<span class="comment">//本头结束符</span></span><br><span class="line">&#125; OBJ_HEADER;</span><br></pre></td></tr></table></figure>
+<p>后面紧跟着就是obj模块正文了</p>
+<p>如果obj模块的大小是一个奇数,则后面再填充一个字节</p>
+<p>这就是一个obj模块在AR文件中的状态</p>
+<h2 id="AR模板"><a href="#AR模板" class="headerlink" title="AR模板"></a>AR模板</h2><h3 id="结构定义"><a href="#结构定义" class="headerlink" title="结构定义"></a>结构定义</h3><p>AR 模板的主体就是这么一个ar_flie结构体,成员他都有,又附加了一些额外的函数等等</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">typedef</span> <span class="class"><span class="keyword">struct</span> &#123;</span></span><br><span class="line">    <span class="comment">// Define header</span></span><br><span class="line">    SetBackColor( cLtYellow );<span class="comment">//从这里开始的数据被高亮为亮黄色</span></span><br><span class="line">    <span class="type">char</span>    fileName[<span class="number">16</span>];<span class="comment">//文件名,没有local修饰,会显示</span></span><br><span class="line">    <span class="type">char</span>    modification_timestamp[<span class="number">12</span>];</span><br><span class="line">    <span class="type">char</span>    ownerID[<span class="number">6</span>];</span><br><span class="line">    <span class="type">char</span>    groupID[<span class="number">6</span>];</span><br><span class="line">    <span class="type">char</span>    fileMode[<span class="number">8</span>];</span><br><span class="line">    <span class="type">char</span>    fileSize[<span class="number">10</span>];</span><br><span class="line">    <span class="type">char</span>    endMarker[<span class="number">2</span>];</span><br><span class="line">    SetBackColor( cNone );<span class="comment">//取消高亮</span></span><br><span class="line"></span><br><span class="line">    <span class="comment">// Define file data</span></span><br><span class="line">    <span class="keyword">if</span>( endMarker == <span class="string">&quot;\x60\x0a&quot;</span> )<span class="comment">//如果endMarker==&#x27;\0x60\0x0a&#x27;说明都对齐了,没有差错</span></span><br><span class="line">    &#123;</span><br><span class="line">        local int64 size;<span class="comment">//local变量不会显示,只是计算使用</span></span><br><span class="line">        SScanf( fileSize, <span class="string">&quot;%Ld&quot;</span>, size );<span class="comment">//010editor API,将fileSize转化成长整型,放到格式化参数size上</span></span><br><span class="line">        <span class="keyword">if</span>( size &gt; <span class="number">0</span> )<span class="comment">//如果size&gt;0说明本头是有对应obj模块的,obj模块的大小已经在filesize中给出了</span></span><br><span class="line">            uchar data[size];<span class="comment">//此处定义的uchar data[size]没有用local修饰,是会显示的,size会显示出变量值</span></span><br><span class="line"></span><br><span class="line">        <span class="comment">// Add padding byte</span></span><br><span class="line">        <span class="keyword">if</span>( size &amp; <span class="number">1</span> )<span class="comment">//如果size文件大小是个奇数则最后填充一个字节</span></span><br><span class="line">            uchar padding &lt;bgcolor=cLtGray&gt;;<span class="comment">//该填充字节使用亮灰色高亮</span></span><br><span class="line">    &#125;</span><br><span class="line">&#125; ar_file &lt;read=ReadArFile&gt;;<span class="comment">//读回调函数声明为ReadArFile</span></span><br><span class="line"><span class="comment">// Display filename beside ar_file struct</span></span><br><span class="line"><span class="built_in">string</span> <span class="title function_">ReadArFile</span><span class="params">( <span class="keyword">struct</span> ar_file &amp;f )</span><span class="comment">//读回调函数</span></span><br><span class="line">&#123;</span><br><span class="line">    <span class="keyword">return</span> f.fileName + <span class="string">&quot; size=&quot;</span> + f.fileSize;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>读回调函数的返回值是一个string字符串,将会显示在Value栏</p>
+<p><img src="https://raw.githubusercontent.com/DeutschBall/DeutschBall/main/image-20220917231952934.png" class="lazyload placeholder" data-srcset="https://raw.githubusercontent.com/DeutschBall/DeutschBall/main/image-20220917231952934.png" srcset="https://img2.baidu.com/it/u=2037979560,2772131037&fm=26&fmt=auto&gp=0.jpg" alt="image-20220917231952934"></p>
+<h3 id="控制流"><a href="#控制流" class="headerlink" title="控制流"></a>控制流</h3><p>上述<code>typedef struct ar_file</code>和ReadArFile都只是定义,这一点和C语言相同,并没有实例化ar_file结构体的对象,也没有调用ReadArFile函数,下面才开始控制流</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// Read the file signature</span></span><br><span class="line"><span class="type">char</span> signature[<span class="number">8</span>] &lt;bgcolor=cLtPurple&gt;;<span class="comment">//首先定义8个字节用来承载文件魔数,亮紫色高亮</span></span><br><span class="line"><span class="keyword">if</span>( signature != <span class="string">&quot;!&lt;arch&gt;\n&quot;</span> )<span class="comment">//判断魔数是否是AR的魔数,如果不是则返回-1表明模板错误</span></span><br><span class="line">&#123;</span><br><span class="line">    Warning( <span class="string">&quot;File is not a valid archive. Template stopped.&quot;</span> );<span class="comment">//API函数,发出警告</span></span><br><span class="line">    <span class="keyword">return</span> <span class="number">-1</span>;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="comment">// Read file records</span></span><br><span class="line"><span class="keyword">while</span>( !FEof() )<span class="comment">//FEof为010editor API,用于检查当前文件指针是否到达文件末尾</span></span><br><span class="line">&#123;</span><br><span class="line">    ar_file file;<span class="comment">//如果文件指针没有到达末尾,说明还有obj模块的信息没有分析,每次读入填充一个ar_file,直到全都读取完毕</span></span><br><span class="line">&#125;</span><br><span class="line"></span><br></pre></td></tr></table></figure>
+<p>每个obj模块的正文长度都是不一样的,但是读取的时候都是创建ar_file,怎么体现对于不同模块的区别对待呢?</p>
+<p>已经包含在ar_file结构体的定义中了</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">if</span>( size &gt; <span class="number">0</span> )<span class="comment">//如果size&gt;0说明本头是有对应obj模块的,obj模块的大小已经在filesize中给出了</span></span><br><span class="line">           uchar data[size];<span class="comment">//此处定义的uchar data[size]没有用local修饰,是会显示的,size会显示出变量值</span></span><br></pre></td></tr></table></figure>
+<p>不得不说,优雅,真的太优雅了,010editor将复杂的工作留给自己</p>
+<h2 id="模板的组成"><a href="#模板的组成" class="headerlink" title="模板的组成"></a>模板的组成</h2><h3 id="变量"><a href="#变量" class="headerlink" title="变量"></a>变量</h3><p>只要是在控制流中创建的变量,都分成两种,带<code>local</code>的和不带<code>local</code>的</p>
+<p>带<code>local</code>的是临时变量,不会显示在界面上,只用于承载临时变量,比如作为循环变量或者中间结果</p>
+<p>在AR模板中<code>local int size</code>就作为中间结果承载<code>filesize</code>字符串的转换值</p>
+<p>不带<code>local</code>的就是界面变量,会显示在界面上.比如<code>ar_file file;</code>比如<code>char signature[8];</code></p>
+<h3 id="属性"><a href="#属性" class="headerlink" title="属性"></a>属性</h3><p>尖括号内可以附加属性</p>
+<p>比如<code>uchar padding &lt;bgcolor=cLtGray&gt;;</code>这就把一个字节的填充设置为亮灰色</p>
+<p>比如<code>char signature[8] &lt;bgcolor=cLtPurple&gt;;</code>就把魔数签名设置为亮紫色了</p>
+<p>又如<code>ar_file &lt;read=ReadArFile&gt;;</code>就给每个<code>ar_file</code>头都设置了读回调函数<code>ReadArFile</code></p>
+<p>该函数的作用是在头的value域上写<code>f.fileName + &quot; size=&quot; + f.fileSize</code></p>
+<p>常用的属性有</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">&lt;format=hex|decimal|octal|binary&gt;,<span class="comment">//设置数字显示格式</span></span><br><span class="line">fgcolor=&lt;color&gt;, <span class="comment">//前景色</span></span><br><span class="line">bgcolor=&lt;color&gt;, <span class="comment">//背景色</span></span><br><span class="line">comment= <span class="string">&quot;&lt;string&gt;&quot;</span>, <span class="comment">//注释</span></span><br><span class="line">open=<span class="literal">true</span>|<span class="literal">false</span>|suppress, <span class="comment">//默认情况下是折叠还是展开</span></span><br><span class="line">hidden=<span class="literal">true</span>|<span class="literal">false</span>, <span class="comment">//</span></span><br><span class="line">read=&lt;function_name&gt;, <span class="comment">//读回调函数</span></span><br><span class="line">write=&lt;function_name&gt; <span class="comment">//写回调函数</span></span><br></pre></td></tr></table></figure>
+<h3 id="API"><a href="#API" class="headerlink" title="API"></a>API</h3><p>参考<a target="_blank" rel="noopener" href="https://www.jianshu.com/p/ba60ebd8f916">010Editor脚本语法入门 - 简书 (jianshu.com)</a></p>
+<p>想用啥功能就去查010editor的啥函数</p>
+
+      </div>
+      <div class="post-tags-categories">
+        
+        <div class="tags">
+          
+            <a href="/tags/010editor/" class="">
+              010editor
+            </a>
+          
+        </div>
+        
+      </div>
+      
+    </article>
+    <!-- 上一篇文章和下一篇文章 -->
+    
+      <!-- 文章详情页的上一页和下一页 -->
+<div class="post-nav">
+
+
+
+
+
+  
+  <div class="post-nav-next post-nav-item">
+    <div class="post-nav-img" style="background-size: cover; 
+      background-position: center center;">
+      <img class="lazyload lazyload placeholder" src="/medias/14.jpg" class="lazyload placeholder" data-srcset="/medias/14.jpg" srcset="https://img2.baidu.com/it/u=2037979560,2772131037&fm=26&fmt=auto&gp=0.jpg" src="" alt="">
+    </div>
+    <a href="/2022/09/17/shellcode/" class="post-nav-link">
+      <div class="title">
+        Next: <i class="fas fa-angle-right"></i>
+        <div class="title-text">shellcode</div>
+      </div>
+      <!-- <div class="content">
+        shellcodejmp esp在第二章的实验中,跳转执行堆栈中的shellcode时,使用的是绝对地址,只要是换个系统
+      </div> -->
+    </a>
+  </div>
+
+</div>
+
+    
+    
+
+    <!-- 打赏 -->
+    
+
+    <!-- 分享 -->
+    
+      <!-- https://github.com/overtrue/share.js -->
+<!-- 文章详情页的分享 -->
+<div class="social-share" data-sites="twitter,facebook,google,qq,qzone,wechat,weibo,douban,linkedin" data-wechat-qrcode-helper="<p>微信扫一扫即可分享！</p>"></div>
+
+<script src="/js/shareJs/social-share.min.js"></script>
+</script>
+
+<style>
+  .social-share {
+    margin: 20px 0;
+  }
+</style>
+
+
+    
+    
+    <!-- 评论 -->
+    <!-- 评论 -->
+
+  <div id="myComment">
+    
+      
+<section id="comments" style="padding: 1em; margin: 15px auto;"
+	class="animated bounceInUp">
+	<div id="vcomment" class="comment"></div>
+</section>
+<style>
+	#comments {
+		background: rgba(255,255,255,0.9);
+	}
+	#veditor {
+		background-image: url('https://raw.githubusercontent.com/DeutschBall/test/master/R.3c3e443dfe9ddbddc93730c482ed0461');
+		background-size: contain;
+		background-repeat: no-repeat;
+		background-position: right;
+		background-color: rgba(255, 255, 255, 0);
+		resize: vertical;
+	}
+	#veditor:focus{
+		background-position-y: 200px;
+		transition: all 0.2s ease-in-out 0s;
+	}
+	#vcomment .vcards .vcard .vh .vhead .vtag.vvisitor {
+		background-color: #42b983;
+	}
+	.v[data-class=v] .vbtn:active, .v[data-class=v] .vbtn:hover {
+		color: #42b983;
+		border-color: #42b983;
+	}
+	#vcomment .vcards .vcard .vhead .vsys i {
+		display: none;
+	}
+	/* 底部valine链接 */
+	#vcomment .vpower {
+		display: none;
+	}
+	
+	/* 底下注释是修改 名称和邮箱和网址输入框的样式 */
+	/* #vcomment .vheader {
+		display: flex;
+		justify-content: space-around;
+	}
+	
+	#vcomment .vheader .vnick {
+		width: 31%;
+		border: 2px solid #dedede;
+		padding-left: 10px;
+		padding-right: 10px;
+		border-radius: 5px
+	}
+
+	#vcomment .vheader .vmail {
+		width: 31%;
+		border: 2px solid #dedede;
+		padding-left: 10px;
+		padding-right: 10px;
+		border-radius: 5px
+	}
+
+	#vcomment .vheader .vlink {
+		width: 31%;
+		border: 2px solid #dedede;
+		padding-left: 10px;
+		padding-right: 10px;
+		border-radius: 5px
+	} */
+
+	img.vimg {
+		transition: all 1s;
+		/* 头像旋转时间为 1s */
+	}
+
+	img.vimg:hover {
+		transform: rotate(360deg);
+		-webkit-transform: rotate(360deg);
+		-moz-transform: rotate(360deg);
+		-o-transform: rotate(360deg);
+		-ms-transform: rotate(360deg);
+	}
+
+	#vcomment .vcards .vcard {
+		padding: 15px 20px 0 20px;
+		border-radius: 10px;
+		margin-bottom: 15px;
+		box-shadow: 0 0 4px 1px rgba(0, 0, 0, .12);
+		transition: all .3s
+	}
+
+	#vcomment .vcards .vcard:hover {
+		box-shadow: 0 0 8px 3px rgba(0, 0, 0, .12)
+	}
+
+	#vcomment .vcards .vcard .vh .vcard {
+		border: none;
+		box-shadow: none;
+	}
+</style>
+    
+  </div>
+
+<!-- comment script in themes\hexo-theme-bamboo\layout\_partial\scripts\index.ejs -->
+
+
+  </div>
+
+  <!-- 目录 -->
+  <!-- 文章详情页右侧目录 -->
+
+  <div class="toc-aside">
+    <div class="toc-main">
+      <div class="toc-aside-title">
+        <i class="fas fa-list-ul" aria-hidden="true"></i><span>catalog</span>
+        
+          <div class="toc-open-close">catalog</div>
+        
+      </div>
+      <div class="toc-content">
+        <div class="toc"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 手机端目录按钮 -->
+  <div id="toc-mobile-btn">
+    <i class="fas fa-list-ul" aria-hidden="true"></i>
+  </div>
+
+
+<script>
+  function closeToc(init) {
+    $(".toc-aside").css({'width': 0, 'padding': 0, 'transition': init ?  'noe' : 'width 0.3s' });
+    $(".toc-content").css({'width': 0});
+    $(".toc-aside-title span, .toc-aside-title i").css({'display': 'none'});
+    $(".main-content").css({'width': '75%', 'margin': '10px auto'});
+  };
+  function openToc() {
+    $(".main-content").css({'width': '65%', 'margin-right': '10px', 'margin-left': 'calc(35% - 350px)'});
+    $(".toc-aside").css({'width': '300px', 'padding': '0 10px', 'transition': 'width 0.3s'});
+    $(".toc-content").css({'width': '300px'});
+    $(".toc-aside-title span, .toc-aside-title i").css({'display': 'inline-block'});
+  }
+  function openBtnClickFn () {
+    let openOrCloseBtn = $('.toc-aside .toc-aside-title .toc-open-close');
+    let open = eval('' || 'true');
+    openOrCloseBtn.click(function() {
+      if (open) {
+        closeToc();
+        open = false;
+      } else {
+        openToc();
+        open = true;
+      }
+    });
+  };
+  openBtnClickFn();
+  initCloseTocWidth(true);
+
+  function initCloseTocWidth(init) {
+    if (window.innerWidth >= 992) {
+      let isClose = false;
+      isClose && closeToc(init)
+    }
+  }
+
+  document.addEventListener('pjax:complete', function () {
+    $(".toc-aside").css({'transition': 'no'});
+  })
+  document.addEventListener('pjax:complete', function () {
+    openBtnClickFn();
+  })
+  
+</script>
+
+  <!-- 图片放大 Wrap images with fancybox support -->
+  <script src="/js/wrapImage.js"></script>
+</div>
+
+<!-- 文章详情页背景图 -->
+<div id="appBgSwiper" style="position: fixed;left: 0;top: 0;width: 100%;height: 100%;z-index: -2;"
+	:style="{'background-color': bgColor ? bgColor : 'transparent'}">
+	<transition-group tag="ul" :name="names">
+		<li v-for='(image,index) in img' :key='index' v-show="index === mark" class="bg-swiper-box">
+			<img :src="image" class="bg-swiper-img no-lazy">
+		</li>
+	</transition-group>
+</div>
+<script>
+	var vm = new Vue({
+		el: '#appBgSwiper',
+		data: {
+			names: '' || 'fade' || 'fade', // translate-fade fade
+			mark: 0,
+			img: [],
+			bgColor: '',
+			time: null
+		},
+		methods: {   //添加方法
+			change(i, m) {
+				if (i > m) {
+					// this.names = 'fade';
+				} else if (i < m) {
+					// this.names = 'fade';
+				} else {
+					return;
+				}
+				this.mark = i;
+			},
+			prev() {
+				// this.names = 'fade';
+				this.mark--;
+				if (this.mark === -1) {
+					this.mark = 3;
+					return
+				}
+			},
+			next() {
+				// this.names = 'fade';
+				this.mark++;
+				if (this.mark === this.img.length) {
+					this.mark = 0;
+					return
+				}
+			},
+			autoPlay() {
+				// this.names = 'fade';
+				this.mark++;
+				if (this.mark === this.img.length) {
+					this.mark = 0;
+					return
+				}
+			},
+			play() {
+				let bgImgDelay = '' || '180000'
+				let delay = parseInt(bgImgDelay) || 180000;
+				this.time = setInterval(this.autoPlay, delay);
+			},
+			enter() {
+				clearInterval(this.time);
+			},
+			leave() {
+				this.play();
+			}
+		},
+		created() {
+			this.play()
+		},
+		beforeDestroy() {
+			clearInterval(this.time);
+		},
+		mounted() {
+			let prop = '' || '';
+			let isImg = prop.includes('.bmp') || prop.includes('.jpg') || prop.includes('.png') || prop.includes('.tif') || prop.includes('.gif') || prop.includes('.pcx') || prop.includes('.tga') || prop.includes('.exif') || prop.includes('.fpx') || prop.includes('.psd') || prop.includes('.cdr') || prop.includes('.pcd') || prop.includes('.dxf') || prop.includes('.ufo') || prop.includes('.eps') || prop.includes('.ai') || prop.includes('.raw') || prop.includes('.WMF') || prop.includes('.webp') || prop.includes('.jpeg') || prop.includes('http://') || prop.includes('https://')
+			if (isImg) {
+				let img = prop.split(',');
+				let configRoot = '/'
+				let arrImg = [];
+				img.forEach(el => {
+					var Expression = /http(s)?:\/\/([\w-]+\.)+[\w-]+(\/[\w- .\/?%&=]*)?/;
+					var objExp = new RegExp(Expression);
+
+					if (objExp.test(el)) {
+						// http or https
+						arrImg.push(el);
+					} else {
+						// 非http or https开头
+						// 本地文件
+						let firstStr = el.charAt(0);
+						if (firstStr == '/') {
+							el = el.substr(1); // 删除第一个字符 '/',因为 configRoot最后一个字符为 /
+						}
+						el = configRoot + el;
+						arrImg.push(el);
+					}
+				})
+				this.img = arrImg;
+			} else {
+				this.bgColor = prop;
+			}
+		}
+	})
+</script>
+
+<style>
+	.bg-swiper-box {
+		position: absolute;
+		display: block;
+		width: 100%;
+		height: 100%;
+	}
+
+	.bg-swiper-img {
+		object-fit: cover;
+		width: 100%;
+		height: 100%;
+	}
+</style>
+
+
   <script>
-  function typedFn() {
-    const el = '#archive-header-desc';
-    const type = 'archive';
-    let desc = 'explore in the galaxy...'
-    var typed = new Typed(el, {
-      strings: [desc],
-      startDelay: 100,
-      typeSpeed: 100,
-      loop: true,
-      backSpeed: 50,
-      showCursor: true
-    });
+  // https://github.com/theme-next/hexo-theme-next/blob/master/layout/_third-party/math/mathjax.swig
+  if (typeof MathJax === 'undefined') {
+    window.MathJax = {
+      loader: {
+        source: {
+          '[tex]/amsCd': '[tex]/amscd',
+          '[tex]/AMScd': '[tex]/amscd'
+        }
+      },
+      tex: {
+        inlineMath: {'[+]': [['$', '$']]},
+        tags: 'ams'
+      },
+      options: {
+        renderActions: {
+          findScript: [10, doc => {
+            document.querySelectorAll('script[type^="math/tex"]').forEach(node => {
+              const display = !!node.type.match(/; *mode=display/);
+              const math = new doc.options.MathItem(node.textContent, doc.inputJax[0], display);
+              const text = document.createTextNode('');
+              node.parentNode.replaceChild(text, node);
+              math.start = {node: text, delim: '', n: 0};
+              math.end = {node: text, delim: '', n: 0};
+              doc.math.push(math);
+            });
+          }, '', false],
+          insertedScript: [200, () => {
+            document.querySelectorAll('mjx-container').forEach(node => {
+              let target = node.parentNode;
+              if (target.nodeName.toLowerCase() === 'li') {
+                target.parentNode.classList.add('has-jax');
+              }
+            });
+          }, '', false]
+        }
+      }
+    };
+    (function () {
+      var script = document.createElement('script');
+      script.src = 'https://cdn.jsdelivr.net/npm/mathjax@3.0/es5/tex-mml-chtml.js';
+      script.defer = true;
+      document.head.appendChild(script);
+    })();
+  } else {
+    // 文章章节标题不能为 “MathJax” ，否则会报错。
+    MathJax.startup.document.state(0);
+    MathJax.texReset();
+    MathJax.typeset();
   }
-  typedFn();
 </script>
-  
-  </div>
-  <div class="mask-box"></div>
-</div>
 
-<div class="archive-video">
-  <video class="full-video" autoplay loop muted>
-      <source style="width: 100%;height: 100vh;" src="/">
-  </video>
-  <div class="video-header-title">
-    archive
-  </div>
-  <div class="video-header-desc">
+
+
+
+  <script>
+  function loadMermaid() {
+    if (document.getElementsByClassName('mermaid').length) {
+      if (window.mermaidJsLoad) mermaid.init()
+      else {
+        loadScript('https://cdn.jsdelivr.net/npm/mermaid/dist/mermaid.min.js').then(() => {
+          window.mermaidJsLoad = true
+          mermaid.initialize({
+            theme: 'default',
+          })
+          if ('true') {
+            mermaid.init();
+          }
+        })
+      }
+    }
+  };
+  document.addEventListener("DOMContentLoaded", function () {
+    loadMermaid();
+  })
+
+  document.addEventListener('pjax:complete', function () {
+    loadMermaid();
+  })
   
-      <span class="title" id="archive-video-header-desc"></span>
-      <script>
-  function typedFn() {
-    const el = '#archive-video-header-desc';
-    const type = 'archive';
-    let desc = 'explore in the galaxy...'
-    var typed = new Typed(el, {
-      strings: [desc],
-      startDelay: 100,
-      typeSpeed: 100,
-      loop: true,
-      backSpeed: 50,
-      showCursor: true
-    });
-  }
-  typedFn();
 </script>
-      
-  </div>
-  <div class="mask-box"></div>
-</div>
 
-<!-- hash算法 -->
-
-
-<div class="archive-main">
-  <section class="archive">
-    <div class="archive-content">
-      <ul class="post-archive">
-        
-        
-          
-            
-            <div class="year" data-aos="zoom-in-up">
-                <div class="bullet"></div>
-                <a href="/archives/2022">2022</a>
-            </div>
-          
-          <li class="post-item" data-aos="fade-left">
-            
-            <div class="post-img-box">
-              <a href="/2022/08/18/DLL%E4%B8%8E%E5%8A%A8%E6%80%81%E9%93%BE%E6%8E%A5/" class="post-img " style="background-size: cover; 
-                background-position: center center;">
-                <img class="lazyload lazyload placeholder" src="/medias/9.jpg" class="lazyload placeholder" data-srcset="/medias/9.jpg" srcset="https://img2.baidu.com/it/u=2037979560,2772131037&fm=26&fmt=auto&gp=0.jpg" alt="">
-              </a>
-            </div>
-            <div class="post-date-title">
-              <div>
-                <span class="post-date">08-18</span>
-              </div>
-              <a class="post-title" href="/2022/08/18/DLL%E4%B8%8E%E5%8A%A8%E6%80%81%E9%93%BE%E6%8E%A5/">程序员的自我修养 chapter 9 DLL</a>
-            </div>
-          </li>
-        
-          
-          <li class="post-item" data-aos="fade-left">
-            
-            <div class="post-img-box">
-              <a href="/2022/08/17/windows%20SDK%20chapter%207%20mouse/" class="post-img " style="background-size: cover; 
-                background-position: center center;">
-                <img class="lazyload lazyload placeholder" src="/medias/15.jpg" class="lazyload placeholder" data-srcset="/medias/15.jpg" srcset="https://img2.baidu.com/it/u=2037979560,2772131037&fm=26&fmt=auto&gp=0.jpg" alt="">
-              </a>
-            </div>
-            <div class="post-date-title">
-              <div>
-                <span class="post-date">08-17</span>
-              </div>
-              <a class="post-title" href="/2022/08/17/windows%20SDK%20chapter%207%20mouse/">win32程序设计-chapter7 鼠标</a>
-            </div>
-          </li>
-        
-          
-          <li class="post-item" data-aos="fade-left">
-            
-            <div class="post-img-box">
-              <a href="/2022/08/12/windows%20SDK%20chapter%206%20keyboard/" class="post-img " style="background-size: cover; 
-                background-position: center center;">
-                <img class="lazyload lazyload placeholder" src="/medias/14.jpg" class="lazyload placeholder" data-srcset="/medias/14.jpg" srcset="https://img2.baidu.com/it/u=2037979560,2772131037&fm=26&fmt=auto&gp=0.jpg" alt="">
-              </a>
-            </div>
-            <div class="post-date-title">
-              <div>
-                <span class="post-date">08-12</span>
-              </div>
-              <a class="post-title" href="/2022/08/12/windows%20SDK%20chapter%206%20keyboard/">win32程序设计-chapter6 键盘</a>
-            </div>
-          </li>
-        
-          
-          <li class="post-item" data-aos="fade-left">
-            
-            <div class="post-img-box">
-              <a href="/2022/08/11/%E7%A8%8B%E5%BA%8F%E5%91%98%E7%9A%84%E8%87%AA%E6%88%91%E4%BF%AE%E5%85%BB-chapter-5-COFF/" class="post-img " style="background-size: cover; 
-                background-position: center center;">
-                <img class="lazyload lazyload placeholder" src="/medias/3.jpg" class="lazyload placeholder" data-srcset="/medias/3.jpg" srcset="https://img2.baidu.com/it/u=2037979560,2772131037&fm=26&fmt=auto&gp=0.jpg" alt="">
-              </a>
-            </div>
-            <div class="post-date-title">
-              <div>
-                <span class="post-date">08-11</span>
-              </div>
-              <a class="post-title" href="/2022/08/11/%E7%A8%8B%E5%BA%8F%E5%91%98%E7%9A%84%E8%87%AA%E6%88%91%E4%BF%AE%E5%85%BB-chapter-5-COFF/">程序员的自我修养 chapter 5 COFF</a>
-            </div>
-          </li>
-        
-          
-          <li class="post-item" data-aos="fade-left">
-            
-            <div class="post-img-box">
-              <a href="/2022/08/08/%E7%9B%AE%E6%A0%87%E6%96%87%E4%BB%B6/" class="post-img " style="background-size: cover; 
-                background-position: center center;">
-                <img class="lazyload lazyload placeholder" src="/medias/10.jpg" class="lazyload placeholder" data-srcset="/medias/10.jpg" srcset="https://img2.baidu.com/it/u=2037979560,2772131037&fm=26&fmt=auto&gp=0.jpg" alt="">
-              </a>
-            </div>
-            <div class="post-date-title">
-              <div>
-                <span class="post-date">08-08</span>
-              </div>
-              <a class="post-title" href="/2022/08/08/%E7%9B%AE%E6%A0%87%E6%96%87%E4%BB%B6/">程序员的自我修养 chapter3 ELF文件格式</a>
-            </div>
-          </li>
-        
-          
-          <li class="post-item" data-aos="fade-left">
-            
-            <div class="post-img-box">
-              <a href="/2022/08/08/win32%20chapter4/" class="post-img " style="background-size: cover; 
-                background-position: center center;">
-                <img class="lazyload lazyload placeholder" src="/medias/13.jpg" class="lazyload placeholder" data-srcset="/medias/13.jpg" srcset="https://img2.baidu.com/it/u=2037979560,2772131037&fm=26&fmt=auto&gp=0.jpg" alt="">
-              </a>
-            </div>
-            <div class="post-date-title">
-              <div>
-                <span class="post-date">08-08</span>
-              </div>
-              <a class="post-title" href="/2022/08/08/win32%20chapter4/">win32程序设计-chapter4 设备无关代码</a>
-            </div>
-          </li>
-        
-          
-          <li class="post-item" data-aos="fade-left">
-            
-            <div class="post-img-box">
-              <a href="/2022/07/27/C++%E9%80%86%E5%90%91%E5%B7%A5%E7%A8%8B%E5%9F%BA%E7%A1%80/" class="post-img " style="background-size: cover; 
-                background-position: center center;">
-                <img class="lazyload lazyload placeholder" src="/medias/4.jpg" class="lazyload placeholder" data-srcset="/medias/4.jpg" srcset="https://img2.baidu.com/it/u=2037979560,2772131037&fm=26&fmt=auto&gp=0.jpg" alt="">
-              </a>
-            </div>
-            <div class="post-date-title">
-              <div>
-                <span class="post-date">07-27</span>
-              </div>
-              <a class="post-title" href="/2022/07/27/C++%E9%80%86%E5%90%91%E5%B7%A5%E7%A8%8B%E5%9F%BA%E7%A1%80/">C++ reverse</a>
-            </div>
-          </li>
-        
-          
-          <li class="post-item" data-aos="fade-left">
-            
-            <div class="post-img-box">
-              <a href="/2022/07/24/Docker/" class="post-img " style="background-size: cover; 
-                background-position: center center;">
-                <img class="lazyload lazyload placeholder" src="/medias/13.jpg" class="lazyload placeholder" data-srcset="/medias/13.jpg" srcset="https://img2.baidu.com/it/u=2037979560,2772131037&fm=26&fmt=auto&gp=0.jpg" alt="">
-              </a>
-            </div>
-            <div class="post-date-title">
-              <div>
-                <span class="post-date">07-24</span>
-              </div>
-              <a class="post-title" href="/2022/07/24/Docker/">Docker@wsl</a>
-            </div>
-          </li>
-        
-          
-          <li class="post-item" data-aos="fade-left">
-            
-            <div class="post-img-box">
-              <a href="/2022/07/21/php%E5%8F%8D%E5%BA%8F%E5%88%97%E5%8C%96/" class="post-img " style="background-size: cover; 
-                background-position: center center;">
-                <img class="lazyload lazyload placeholder" src="/medias/2.jpg" class="lazyload placeholder" data-srcset="/medias/2.jpg" srcset="https://img2.baidu.com/it/u=2037979560,2772131037&fm=26&fmt=auto&gp=0.jpg" alt="">
-              </a>
-            </div>
-            <div class="post-date-title">
-              <div>
-                <span class="post-date">07-21</span>
-              </div>
-              <a class="post-title" href="/2022/07/21/php%E5%8F%8D%E5%BA%8F%E5%88%97%E5%8C%96/">php反序列化漏洞</a>
-            </div>
-          </li>
-        
-          
-          <li class="post-item" data-aos="fade-left">
-            
-            <div class="post-img-box">
-              <a href="/2022/07/15/win32%E7%BC%96%E7%A8%8B/" class="post-img " style="background-size: cover; 
-                background-position: center center;">
-                <img class="lazyload lazyload placeholder" src="/medias/1.jpg" class="lazyload placeholder" data-srcset="/medias/1.jpg" srcset="https://img2.baidu.com/it/u=2037979560,2772131037&fm=26&fmt=auto&gp=0.jpg" alt="">
-              </a>
-            </div>
-            <div class="post-date-title">
-              <div>
-                <span class="post-date">07-15</span>
-              </div>
-              <a class="post-title" href="/2022/07/15/win32%E7%BC%96%E7%A8%8B/">win32程序设计-chapter3 窗口与消息</a>
-            </div>
-          </li>
-        
-      </ul>
-    </div>
-  </section>
-  <div class="w-70">
-    
-  <!-- <nav class="page-nav">
-    <a class="extend prev" rel="prev" href="/archives/page/2/">Prev</a><a class="page-number" href="/archives/">1</a><a class="page-number" href="/archives/page/2/">2</a><span class="page-number current">3</span><a class="page-number" href="/archives/page/4/">4</a><a class="page-number" href="/archives/page/5/">5</a><a class="page-number" href="/archives/page/6/">6</a><a class="extend next" rel="next" href="/archives/page/4/">Next</a>
-  </nav> -->
-  <div class="page-nav">
-    
-      <a href="/archives/page/2/"
-         class="page-nav-pre">
-         <i class="fas fa-angle-left"></i><span class="ml-5">Prev</span>
-      </a>
-    
-    <div class="page-info">
-        <div class="page-info-text">3 / 6</div>
-    </div>
-    
-      <a href="/archives/page/4/"
-         class="page-nav-next">
-          <span class="mr-5">Next</span><i class="fas fa-angle-right"></i>
-      </a>
-      
-  </div>
-
-  </div>
-</div>
 
       </main>
     </div>
