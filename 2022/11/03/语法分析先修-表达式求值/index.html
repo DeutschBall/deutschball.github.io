@@ -591,11 +591,216 @@ TERM23----FACT3----ID3</pre>
 <h4 id="两种树的区别"><a href="#两种树的区别" class="headerlink" title="两种树的区别"></a>两种树的区别</h4><p>抽象语法树中,叶子节点都是字面量,不能再推导,内部节点肯定都是运算符.</p>
 <p>求值时当前节点只需要根据自己的运算规则,取出左右儿子递归运算值,算一下然后交给父节点</p>
 <p>咱也不知道这具体语法树有什么作用,明明抽象语法树简洁清晰并且也能完成功能</p>
-<h3 id="代码实现"><a href="#代码实现" class="headerlink" title="代码实现"></a>代码实现</h3><h4 id="表达式求值"><a href="#表达式求值" class="headerlink" title="表达式求值"></a>表达式求值</h4><p>贴出来又臭又长,不如放到pasbin了<a target="_blank" rel="noopener" href="https://pastebin.com/4KPSsPBb">递归下降求解表达式 - Pastebin.com</a></p>
+<h3 id="状态转移图和EBNF"><a href="#状态转移图和EBNF" class="headerlink" title="状态转移图和EBNF"></a>状态转移图和EBNF</h3><h4 id="一眼丁真"><a href="#一眼丁真" class="headerlink" title="一眼丁真"></a>一眼丁真</h4><p>状态转移图实际上就是为了形式化地得到EBNF,要是能够从本来的文法直接看出EBNF文法,则不需要状态转移图</p>
+<p>对于表达式这种简单的文法,直接就能看出EBNF来</p>
+<script type="math/tex; mode=display">
+\begin{aligned}
+Expression&\rightarrow Term\ \{(+|-)Term\}\\
+Term&\rightarrow Factor\ \{(\times |/) Factor\}\\
+Factor&\rightarrow (Expression)\ |\ id\ |num
+\end{aligned}</script><p>​    其中</p>
+<p>花括号{}中的内容可以重复0次或者若干次,相当于星闭包</p>
+<p>怎么理解文法的EBNF表示呢?</p>
+<script type="math/tex; mode=display">
+\begin{aligned}
+Expression &\rightarrow Term\ \{(+|-)Term\}\\
+        &\rightarrow Term±Term±Term±...±Term
+        \end{aligned}</script><p>也就是说Expression至少由一个Term组成,还可以是若干个Term的加减组成</p>
+<h4 id="一眼看不出来咋办"><a href="#一眼看不出来咋办" class="headerlink" title="一眼看不出来咋办?"></a>一眼看不出来咋办?</h4><p>现在已经知道的是文法规则</p>
+<script type="math/tex; mode=display">
+\begin{aligned}
+Language&\rightarrow Expression;Language|\epsilon\\
+Expression&\rightarrow Term\ Expression'\\
+Expression'&\rightarrow +Term\ Expression'|\epsilon\\
+Term&\rightarrow Factor \ Term'\\
+Term'&\rightarrow \times Factor\ Term'|\epsilon\\
+Factor&\rightarrow (Expression)|-Factor|id
+\end{aligned}</script><p>要求出文法的EBNF表示.</p>
+<p>眼神不好,不能一眼丁真,就得借助状态转移图</p>
+<p>怎么由原来的文法翻译成状态转移图?</p>
+<p>以Language为例子:</p>
+<pre class="mermaid">flowchart LR
+0((0))
+1((1))
+2((2))
+3((3))
+Language ---->0--Expression-->1--";"-->2--Language-->3
+0--ε-->3
+style 3 fill:red</pre>
+
+<p>推导式中的所有符号,比如Language,Expression等,都作为有向图上的边,代表状态转移.状态作为节点</p>
+<p>显然目前建立的所有有向图都是没有圈的,因为目前的文法定义已经消除了所有直接或者间接的左递归,表现到图上就是没有强连通分量</p>
+<p>又如对于Expression和Expression’</p>
+<pre class="mermaid">flowchart LR
+4((4))
+5((5))
+6((6))
+Expression-->4--Term-->5--"Expression'"-->6</pre>
+
+<pre class="mermaid">flowchart LR
+7((7))
+8((8))
+9((9))
+10((10))
+Expression'-->7--+-->8--Term-->9--Expression'-->10
+7--ε-->10</pre>
+
+<p>下面就是化简状态转移图,怎么化简?</p>
+<p>对于Expression’,有一个规则1:</p>
+<p>标记为A的边可等价为标记ε的边转向A转换图的初态；</p>
+<pre class="mermaid">flowchart LR
+7((7))
+8((8))
+9((9))
+10((10))
+7--ε-->10
+Expression'-->7--+-->8--Term-->9
+9--ε-->7
+style 10 fill:red</pre>
+
+<p>然后紧接着可以应用规则2:</p>
+<p>ε两头的节点可以合并,也就是说,epsilon闭包中的节点算成一个点</p>
+<pre class="mermaid">flowchart LR
+7((7))
+8((8))
+
+Expression'-->7--+-->8--Term-->7
+
+style 7 fill:red</pre>
+
+<p>然后紧接着可以应用规则3:</p>
+<p>标记相同的路径可以合并</p>
+<p>啥意思呢?Expression’现在可以带入到Expression中了</p>
+<pre class="mermaid">flowchart LR
+4((4))
+
+7((7))
+8((8))
+
+7--+-->8--Term-->7
+Expression-->4--Term-->7
+style 7 fill:red</pre>
+
+<p>还有一条规则可以继续化简:</p>
+<p>不可区分的状态可以合并</p>
+<p>这里4状态和8状态都是经过Term转移到7,不可区分,因此有</p>
+<pre class="mermaid">flowchart LR
+4((4))
+
+7((7))
+
+
+7--+-->4
+Expression-->4--Term-->7
+style 7 fill:red</pre>
+
+<p>此时Expression’已经被扬了,Expression也是不能再简了,这就是最简结构了.根据这个结构,终于一眼丁真了</p>
+<script type="math/tex; mode=display">
+Expression\rightarrow Term\{+Term\}</script><blockquote>
+<p>这里只考虑了加法,减法和加法同级,也容易扩充</p>
+<script type="math/tex; mode=display">
+Expression\rightarrow Term\{(+|-)Term\}</script></blockquote>
+<p>以此类推,可以得到所有符号的EBNF文法</p>
+<script type="math/tex; mode=display">
+\begin{aligned}
+Language&\rightarrow \{Expression;\}\\
+Expression&\rightarrow Term\{(+|-)Term\}\\
+Term&\rightarrow Factor\{(\times |/)Factor\}\\
+Factor&\rightarrow (Expression)|id|num
+\end{aligned}</script><p>得到该EBNF表示的文法之后,已经可以动手写程序了.</p>
+<h3 id="硬编码的代码实现"><a href="#硬编码的代码实现" class="headerlink" title="硬编码的代码实现"></a>硬编码的代码实现</h3><h4 id="表达式求值"><a href="#表达式求值" class="headerlink" title="表达式求值"></a>表达式求值</h4><p>贴出来又臭又长,不如放到pasbin了<a target="_blank" rel="noopener" href="https://pastebin.com/4KPSsPBb">递归下降求解表达式 - Pastebin.com</a></p>
 <h4 id="表达式建立语法树"><a href="#表达式建立语法树" class="headerlink" title="表达式建立语法树"></a>表达式建立语法树</h4><p>源代码中有反引号,并且博客渲染的时候代码块会匹配最近的反引号,<del>这应该是语法分析的错误罢</del></p>
 <p>发生代码块反引号匹配错误,只能放到pastbin里了<a target="_blank" rel="noopener" href="https://pastebin.com/xJuqQx3E">表达式树 - Pastebin.com</a></p>
 <p>将树的结构按照mermaid语法规则输出到tree.md文件,然后用typora打开就可以实现可视化</p>
 <p><img src="https://raw.githubusercontent.com/DeutschBall/DeutschBall/main/image-20221103222106328.png" class="lazyload placeholder" data-srcset="https://raw.githubusercontent.com/DeutschBall/DeutschBall/main/image-20221103222106328.png" srcset="https://img2.baidu.com/it/u=2037979560,2772131037&fm=26&fmt=auto&gp=0.jpg" alt="visiable"></p>
+<h3 id="为啥还需要预测分析"><a href="#为啥还需要预测分析" class="headerlink" title="为啥还需要预测分析?"></a>为啥还需要预测分析?</h3><p>上面我们已经写出代码了,表达式的语法分析可以说已经竣工了,但是为啥本章后面教材还是不依不饶地给了60页?</p>
+<p>感觉教材也没有给预测分析器做一个铺垫,直接就抛出了这么一个概念干说.</p>
+<p>我觉得,这是因为从EBNF构建语法分析器有很大的局限性,类比一下</p>
+<p>根据EBNF写语法分析器,就类似于词法分析器用硬编码的DFA</p>
+<p>为什么这样说呢?或者说根据EBNF写代码有啥缺点呢?</p>
+<p>首先,EBNF中规定了死了,基本算数运算只有三种优先级,这对应到代码中的三个函数</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">evalExpression</span><br><span class="line">evalTerm</span><br><span class="line">evalFactor</span><br></pre></td></tr></table></figure>
+<p>试想,如果写完程序之后,又想加入新的优先级,比如规定乘方运算的优先级高于乘除低于括号.</p>
+<p>又如方括号优先级低于小括号但是高于其他表达式.</p>
+<p>这就意味着程序需要大改,新加入<code>evalPower</code>来处理乘方运算,并且函数的调用关系都得改</p>
+<p>这就是从EBNF直接写代码的局限性,也就是说可拓展性差</p>
+<p>怎么解决呢?还是回顾词法分析中的做法</p>
+<blockquote>
+<p>当时我们也是嫌硬编码的DFA不灵活,于是使用了表驱动或者有向图驱动的DFA.</p>
+<p>DFA对外提供三个接口,都屏蔽了自身实现的差异.</p>
+<p>表驱动的DFA想要拓展只需要新增表记录就可以了</p>
+</blockquote>
+<p>这就是<strong>预测分析器</strong>的<strong>预测分析表</strong>将要干的事情</p>
+<h3 id="预测分析器"><a href="#预测分析器" class="headerlink" title="预测分析器"></a>预测分析器</h3><h4 id="类比词法分析"><a href="#类比词法分析" class="headerlink" title="类比词法分析"></a>类比词法分析</h4><p>前面我们已经给预测分析器做好铺垫了</p>
+<p>预测分析器是词法分析器的一种实现方式,是下推自动机的一种实现</p>
+<p><img src="https://raw.githubusercontent.com/DeutschBall/DeutschBall/main/image-20221105150413813.png" class="lazyload placeholder" data-srcset="https://raw.githubusercontent.com/DeutschBall/DeutschBall/main/image-20221105150413813.png" srcset="https://img2.baidu.com/it/u=2037979560,2772131037&fm=26&fmt=auto&gp=0.jpg" alt="预测分析器是下推自动机的实例"></p>
+<blockquote>
+<p>ip指向当前输入</p>
+</blockquote>
+<p>这个预测分析器和使用表驱动DFA的词法分析器有一定的相似之处,可以类比理解一下</p>
+<p><img src="https://raw.githubusercontent.com/DeutschBall/DeutschBall/main/image-20221105150714522.png" class="lazyload placeholder" data-srcset="https://raw.githubusercontent.com/DeutschBall/DeutschBall/main/image-20221105150714522.png" srcset="https://img2.baidu.com/it/u=2037979560,2772131037&fm=26&fmt=auto&gp=0.jpg" alt="左表驱动DFA词法分析,右预测分析语法分析"></p>
+<p>词法分析器上的状态转移,只需要看一下输入序列,然后去分析表查一下下一个状态就可以了</p>
+<p>相比于词法分析器,语法分析器多一个符号栈,也就是说预测分析器上的状态转移,不仅要考虑当前记号流中的记号,还要考虑当前符号栈的状态</p>
+<h4 id="没有递归"><a href="#没有递归" class="headerlink" title="没有递归?"></a>没有递归?</h4><p>同时,从这个类比中,我们也可以隐约发现,<strong>预测分析器是没有递归的</strong></p>
+<p>之前根据EBNF写的代码,递归很明显,<code>evalExpression-&gt;evalTerm-&gt;evalFactor</code></p>
+<p>而现在只需要从预测分析表上进行状态转移.消除了递归</p>
+<p>这意味着,现在可以将递归的方法,从表达式推广到绘图语言,写”编译原理的实验二—语法分析器”了,</p>
+<p>实际上WXQ老师给出了2019C++实现版也就是基于递归下降方法实现的</p>
+<h4 id="预测分析表是干啥的"><a href="#预测分析表是干啥的" class="headerlink" title="预测分析表是干啥的?"></a>预测分析表是干啥的?</h4><p>首先考虑这么一个表达式$id+id\times id$,如果使用前面定义的文法进行匹配,手工做的话应该如何</p>
+<script type="math/tex; mode=display">
+\begin{aligned}
+Language&\rightarrow Expression;Language|\epsilon\\
+Expression&\rightarrow Term\ Expression'\\
+Expression'&\rightarrow +Term\ Expression'|\epsilon\\
+Term&\rightarrow Factor \ Term'\\
+Term'&\rightarrow \times Factor\ Term'|\epsilon\\
+Factor&\rightarrow (Expression)|-Factor|id
+\end{aligned}</script><script type="math/tex; mode=display">
+\begin{aligned}
+L&\rightarrow E\\
+&\rightarrow TE'\\
+&\rightarrow FT'E'\\
+&\rightarrow idT'E'\\
+&\rightarrow idE'\\
+&\rightarrow id+TE'\\
+&\rightarrow id+FT'E'\\
+&\rightarrow id+idT'E'\\
+&\rightarrow id+id\times FT'E'\\
+&\rightarrow id+id\times idT'E'\\
+&\rightarrow id+id\times id
+\end{aligned}</script><p>我们这样做的依据就是文法规则中定义好的推导方式</p>
+<p>预测分析表就干了我们脑子干的事情——匹配使用哪个推导规则</p>
+<p>先给出这么一个状态转移表,简单地用它分析一下id+id<em>id,<em>*后来再关心这个表是怎么建立的</em></em></p>
+<p><img src="https://raw.githubusercontent.com/DeutschBall/DeutschBall/main/image-20221109212543264.png" class="lazyload placeholder" data-srcset="https://raw.githubusercontent.com/DeutschBall/DeutschBall/main/image-20221109212543264.png" srcset="https://img2.baidu.com/it/u=2037979560,2772131037&fm=26&fmt=auto&gp=0.jpg" alt="image-20221109212543264"></p>
+<p>比如当前栈顶是L,输入符号是id,那么就应该首先L弹栈,然后把符号E压栈,转移到下一个<strong>格局</strong></p>
+<p>当前栈顶是E,输入符号id,就应该首先E弹栈,然后把TE’压栈,转移到下一个格局</p>
+<p>当前栈顶是T,输入id,就应该首先T弹栈,然后FT’压栈,转移到下一个格局</p>
+<p>当前栈顶是F,输入id,就应该首先F弹栈,然后id压栈,转移到下一个格局</p>
+<p>当前栈顶是id,输入id,匹配成功,都退栈</p>
+<p>整个过程中”输入id”一直没变,也就是说指向输入串的指针始终没有移动</p>
+<p>这里有一个新名词”格局”,实际上类似于状态,它受到当前栈顶,当前输入,预测分析表三者的影响</p>
+<blockquote>
+<p>实际上就是迪杰斯特拉双栈算法求解算数表达式的算法思想</p>
+<p>不断压栈直到栈顶和当前符号匹配实际上维护了一个单调栈,越靠近栈顶的符号优先级越高</p>
+</blockquote>
+<h4 id="如何定义格局"><a href="#如何定义格局" class="headerlink" title="如何定义格局?"></a>如何定义格局?</h4><p>表驱动的词法分析器中定义了一个状态,然后根据当前输入和状态转移表这里两个因素,从当前状态转移到下一个状态</p>
+<p>对于预测分析表驱动的语法分析器,定义了一个类似状态的东西叫做”格局”,</p>
+<p>区别于状态转移,格局转换时需要考虑当前栈顶,预测分析表,当前输入符号,共3个因素</p>
+<p>实际上格局变化是状态转移的推广</p>
+<p>状态转移时维护一个栈当摆设就成了格局变化</p>
+<h4 id="格局如何转移"><a href="#格局如何转移" class="headerlink" title="格局如何转移?"></a>格局如何转移?</h4><figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line">设置ip使它指向w的第一个符号，其中ip 是输入指针；</span><br><span class="line">令X=栈顶符号；</span><br><span class="line"><span class="keyword">while</span>  ( X ≠ ＄ )｛     /   *      栈非空 */ </span><br><span class="line">            <span class="keyword">if</span> ( X 等于ip所指向的符号a) 执行栈的弹出操作，将ip向前移动一个位置；</span><br><span class="line">            <span class="keyword">else</span>  <span class="keyword">if</span> ( X是一个终结符号)  error ( ) ;</span><br><span class="line">            <span class="keyword">else</span>  <span class="keyword">if</span> ( M[X，a]是一个报错条目)  error ( ) ;           </span><br><span class="line">            <span class="keyword">else</span>  <span class="keyword">if</span> ( M[X，a] = X →Y1Y2 … Yk  )｛ </span><br><span class="line">                         输出产生式 X →Y1Y2 … Yk  ；</span><br><span class="line">                         弹出栈顶符号；</span><br><span class="line">                        将Yk，Yk<span class="number">-1</span> …，Yi 压入栈中，其中Y1位于栈顶。</span><br><span class="line">            &#125;</span><br><span class="line">            令X=栈顶符号</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>这里面M[X,a]就是当前栈顶为X,当前符号为a时查表能够转移到的下一个格局</p>
+<p>匹配id+id*id的整个过程如图</p>
+<p><img src="https://raw.githubusercontent.com/DeutschBall/DeutschBall/main/image-20221109215743134.png" class="lazyload placeholder" data-srcset="https://raw.githubusercontent.com/DeutschBall/DeutschBall/main/image-20221109215743134.png" srcset="https://img2.baidu.com/it/u=2037979560,2772131037&fm=26&fmt=auto&gp=0.jpg" alt="image-20221109215743134"></p>
+<p>语法分析阶段不管是递归下降还是预测分析,其目的相同</p>
+<p>1.首先检查有没有语法错误.</p>
+<p>2.给出抽象语法树.</p>
+<p>递归下降法自顶向下建立抽象语法树是自然而然的</p>
+<p>预测分析法怎么建立抽象语法树呢?</p>
+<p>一时间竟想不到</p>
+<p>蚌埠住了</p>
+<h4 id="如何建立预测分析表"><a href="#如何建立预测分析表" class="headerlink" title="如何建立预测分析表?"></a>如何建立预测分析表?</h4><p>预测分析器算法和文法定义没有关系,文法定义体现在预测分析表上</p>
+<p>预测分析器的算法是写死的,但是预测分析表是活的</p>
 
       </div>
       <div class="post-tags-categories">
