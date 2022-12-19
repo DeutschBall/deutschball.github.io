@@ -771,8 +771,7 @@ L&\rightarrow E\\
 \end{aligned}</script><p>我们这样做的依据就是文法规则中定义好的推导方式</p>
 <p>预测分析表就干了我们脑子干的事情——匹配使用哪个推导规则</p>
 <p>先给出这么一个状态转移表,简单地用它分析一下id+id<em>id,<em>*后来再关心这个表是怎么建立的</em></em></p>
-<p><img src="https://raw.githubusercontent.com/DeutschBall/DeutschBall/main/image-20221109212543264.png" class="lazyload placeholder" data-srcset="https://raw.githubusercontent.com/DeutschBall/DeutschBall/main/image-20221109212543264.png" srcset="https://img2.baidu.com/it/u=2037979560,2772131037&fm=26&fmt=auto&gp=0.jpg" alt="image-20221109212543264"></p>
-<p>比如当前栈顶是L,输入符号是id,那么就应该首先L弹栈,然后把符号E压栈,转移到下一个<strong>格局</strong></p>
+<h6 id=""><a href="#" class="headerlink" title=""></a><img src="https://raw.githubusercontent.com/DeutschBall/DeutschBall/main/image-20221109212543264.png" class="lazyload placeholder" data-srcset="https://raw.githubusercontent.com/DeutschBall/DeutschBall/main/image-20221109212543264.png" srcset="https://img2.baidu.com/it/u=2037979560,2772131037&fm=26&fmt=auto&gp=0.jpg" alt="image-20221109212543264"></h6><p>比如当前栈顶是L,输入符号是id,那么就应该首先L弹栈,然后把符号E压栈,转移到下一个<strong>格局</strong></p>
 <p>当前栈顶是E,输入符号id,就应该首先E弹栈,然后把TE’压栈,转移到下一个格局</p>
 <p>当前栈顶是T,输入id,就应该首先T弹栈,然后FT’压栈,转移到下一个格局</p>
 <p>当前栈顶是F,输入id,就应该首先F弹栈,然后id压栈,转移到下一个格局</p>
@@ -801,7 +800,29 @@ L&\rightarrow E\\
 <p>蚌埠住了</p>
 <h4 id="如何建立预测分析表"><a href="#如何建立预测分析表" class="headerlink" title="如何建立预测分析表?"></a>如何建立预测分析表?</h4><p>预测分析器算法和文法定义没有关系,文法定义体现在预测分析表上</p>
 <p>预测分析器的算法是写死的,但是预测分析表是活的</p>
-
+<h5 id="First集合"><a href="#First集合" class="headerlink" title="First集合"></a>First集合</h5><p>$First(\alpha)=\{a|\alpha\Rightarrow a,a\in T\}$也就是$\alpha$可以推导出的一个非终结字符的集合,如果$\alpha\Rightarrow \epsilon$,则$\epsilon \in First(\alpha)$</p>
+<p>$First(E)=\{(,id,num\}$</p>
+<h5 id="Follow集合"><a href="#Follow集合" class="headerlink" title="Follow集合"></a>Follow集合</h5><script type="math/tex; mode=display">
+Follow(A)=\{a|S\Rightarrow ...Aa...,a\in T\}</script><p>紧跟在非终结符A后面的终结符集合</p>
+<p>$Follow(E)=\{;,)\}$</p>
+<h5 id="算法求解First集合"><a href="#算法求解First集合" class="headerlink" title="算法求解First集合"></a>算法求解First集合</h5><script type="math/tex; mode=display">
+X\rightarrow \alpha_1|\alpha_2|...|\alpha_m,m\ge1\\First(X)=\cup First(\alpha_i)</script><p>非终结符的First集合,等于其所有推导的First集合的并集</p>
+<p>对于$First(\alpha_i)$的求法:</p>
+<p>其中如果$\alpha_i=\epsilon$,则$\epsilon\in First(\alpha_i)$</p>
+<p>否则,假设$\alpha_i\Rightarrow Y_1,Y_2,…,Y_n$</p>
+<p>如果$Y1$可以推导出$\epsilon$,则Y2就有可能成为最前面的,那么就得考虑$First(Y_2)$</p>
+<p>如果$Y_1$推导不出$\epsilon$,则Y2就肯定不可能成为最前面,因此不用考虑$First(Y_2)$</p>
+<script type="math/tex; mode=display">
+First(\alpha_i)=\cup _{j=1}^k (First(Y_j)-\epsilon)</script><p>当$Y_k$推导不出$\epsilon$时,才会停止j往后遍历</p>
+<h5 id="求解Follow集合"><a href="#求解Follow集合" class="headerlink" title="求解Follow集合"></a>求解Follow集合</h5><h3 id="算数表达式的预测分析语法分析"><a href="#算数表达式的预测分析语法分析" class="headerlink" title="算数表达式的预测分析语法分析"></a>算数表达式的预测分析语法分析</h3><script type="math/tex; mode=display">
+\begin{aligned}
+Language&\rightarrow Expression;Language|\epsilon\\
+Expression&\rightarrow Term\ Expression'\\
+Expression'&\rightarrow +Term\ Expression'|\epsilon\\
+Term&\rightarrow Factor \ Term'\\
+Term'&\rightarrow \times Factor\ Term'|\epsilon\\
+Factor&\rightarrow (Expression)|-Factor|id
+\end{aligned}</script>
       </div>
       <div class="post-tags-categories">
         
