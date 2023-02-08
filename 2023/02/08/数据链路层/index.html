@@ -1,0 +1,2161 @@
+<!DOCTYPE html>
+<html>
+  <!-- meta/link... -->
+  
+
+
+
+<head>
+  <meta http-equiv="content-type" content="text/html; charset=utf-8">
+  <meta content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=0" name="viewport">
+  <!-- Global site tag (gtag.js) - Google Analytics -->
+
+
+  <title>计算机网络-数据链路层 | Deutschball&#39;s blog</title>
+
+  <link rel="icon" type="image/png" href="https://raw.githubusercontent.com/DeutschBall/test/master/emp.png">
+  <link rel="stylesheet" href="https://at.alicdn.com/t/font_1911880_c1nvbyezg17.css">
+  <link href="https://cdn.jsdelivr.net/gh/inkss/fontawesome@5.15.3/css/all.min.css" rel="stylesheet">
+  <link href="/js/swiper/swiper@5.4.1.min.css" rel="stylesheet">
+  
+  
+    <script>
+        var themeModelId = '';
+        if (themeModelId) {
+            localStorage.setItem('modelId', themeModelId);
+        }
+    </script>
+    
+    <script src="https://cdn.jsdelivr.net/gh/yuang01/live2d-widget@latest/autoload.js"></script>
+    <script>
+        var live2dOpen = eval('true') || false;
+        if (!live2dOpen) {
+            localStorage.setItem('waifu-display', 1609323474481);
+        }
+    </script>
+  
+  
+  
+<link rel="stylesheet" href="/css/animate.min.css">
+
+  
+<link rel="stylesheet" href="/css/style.css">
+
+  
+  
+    
+<link rel="stylesheet" href="/js/fancybox/jquery.fancybox.min.css">
+
+  
+  
+    
+<link rel="stylesheet" href="/js/shareJs/share.min.css">
+
+  
+  <style>
+        @media (max-width: 992px) {
+            #waifu {
+                display: none;
+            }
+        }
+    </style>
+    <script src="//cdn.bootcss.com/pace/1.0.2/pace.min.js"></script>
+    <link href="//cdn.bootcss.com/pace/1.0.2/themes/pink/pace-theme-flash.css" rel="stylesheet">
+
+    
+        <script src="/js/valine/av-min@3.0.4.js"></script>
+        <script src="https://cdn.jsdelivr.net/gh/HCLonely/Valine@latest/dist/Valine.min.js"></script>
+    
+
+    <!-- import link -->
+    
+        
+            
+        
+            
+        
+    
+    <!-- import script -->
+    
+        
+            
+        
+            
+        
+    
+
+<!-- hexo injector head_end start -->
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.12.0/dist/katex.min.css">
+<!-- hexo injector head_end end --><meta name="generator" content="Hexo 6.2.0"></head>
+
+  
+  <!-- 依赖于jquery和vue -->
+  
+    
+<script src="https://cdn.jsdelivr.net/npm/jquery@3.5.1/dist/jquery.min.js"></script>
+
+  
+
+  
+    
+<script src="https://cdn.jsdelivr.net/npm/vue@2.6.11/dist/vue.min.js"></script>
+
+  
+  
+  <body>
+    <!-- 预加载动画 -->
+    <!-- 页面预加载动画 -->
+
+<div id='loader'>
+  <link rel="stylesheet" href="/js/loaded/index.css" >
+  <div class="loading-left-bg"></div>
+  <div class="loading-right-bg"></div>
+  <div class="spinner-box">
+    <div class="configure-border-1">
+      <div class="configure-core"></div>
+    </div>
+    <div class="configure-border-2">
+      <div class="configure-core"></div>
+    </div>
+    <div class="loading-word">loading...</div>
+  </div>
+</div>
+
+<script>
+  var endLoading = function () {
+    document.body.style.overflow = 'auto';
+    document.getElementById('loader').classList.add("loading");
+  }
+  window.addEventListener('DOMContentLoaded',endLoading);
+  
+</script>
+
+    
+    <!-- 判断是否为暗黑风格 -->
+    <!-- 判断是否为黑夜模式 -->
+<script>
+  let isDark = JSON.parse(localStorage.getItem('dark')) || JSON.parse('true');
+
+  if (isDark) {
+    $(document.body).addClass('darkModel');
+  }
+</script>
+
+    <!-- 需要在上面加载的js -->
+    <script>
+  function loadScript(src, cb) {
+    return new Promise(resolve => {
+      setTimeout(function () {
+        var HEAD = document.getElementsByTagName("head")[0] || document.documentElement;
+        var script = document.createElement("script");
+        script.setAttribute("type", "text/javascript");
+        if (cb) {
+          if (JSON.stringify(cb)) {
+            for (let p in cb) {
+              if (p == "onload") {
+                script[p] = () => {
+                  cb[p]()
+                  resolve()
+                }
+              } else {
+                script[p] = cb[p]
+                script.onload = resolve
+              }
+            }
+          } else {
+            script.onload = () => {
+              cb()
+              resolve()
+            };
+          }
+        } else {
+          script.onload = resolve
+        }
+        script.setAttribute("src", src);
+        HEAD.appendChild(script);
+      });
+    });
+  }
+
+  //https://github.com/filamentgroup/loadCSS
+  var loadCSS = function (href, before, media, attributes) {
+    return new Promise(resolve => {
+      setTimeout(function () {
+        var link = document.createElement('link');
+        link.rel = "stylesheet";
+        link.href = src;
+        link.onload = resolve;
+        document.getElementsByTagName("head")[0].appendChild(link);
+      });
+    });
+  };
+
+</script> 
+
+<!-- 轮播图所需要的js -->
+<script src="/js/swiper/swiper.min.js"></script>
+<script src="/js/swiper/vue-awesome-swiper.js"></script>
+<script src="/js/swiper/swiper.animate1.0.3.min.js"></script>
+
+<script type="text/javascript">
+  Vue.use(window.VueAwesomeSwiper)
+</script>
+
+
+  <script src="/js/vue-typed-js/index.js"></script>
+
+
+<!-- 首页的公告滚动插件的js需要重新加载 -->
+<script src="/js/vue-seamless-scroll/index.js"></script>
+
+<!-- 打字机效果js -->
+<script src="https://cdn.jsdelivr.net/npm/typed.js@2.0.11"></script>
+
+
+    <div id="safearea">
+      <main class="main" id="pjax-container">
+        <!-- 头部导航 -->
+        
+<header class="header   " 
+  id="navHeader"
+  style="position: fixed;
+  left: 0; top: 0; z-index: 10;width: 100%;"
+>
+  <div class="header-content">
+    <div class="bars">
+      <div id="appDrawer" class="sidebar-image">
+  <div class="drawer-box-icon">
+    <i class="fas fa-bars" aria-hidden="true" @click="showDialogDrawer"></i>
+  </div>
+  
+  <transition name="fade">
+    <div class="drawer-box_mask" v-cloak style="display: none;" v-show="visible" @click.self="cancelDialogDrawer">
+    </div>
+  </transition>
+  <div class="drawer-box" :class="{'active': visible}">
+    <div class="drawer-box-head bg-color">
+      <img class="drawer-box-head_logo lazyload placeholder" src="https://raw.githubusercontent.com/DeutschBall/test/master/emp.png" class="lazyload placeholder" data-srcset="https://raw.githubusercontent.com/DeutschBall/test/master/emp.png" srcset="https://img2.baidu.com/it/u=2037979560,2772131037&fm=26&fmt=auto&gp=0.jpg" alt="logo">
+      <h3 class="drawer-box-head_title">Deutschball&#39;s blog</h3>
+      <h5 class="drawer-box-head_desc"></h5>
+    </div>
+    
+    <div class="drawer-box-content">
+      <ul class="drawer-box-content_menu">
+        
+        
+          <li class="drawer-box-content_item">
+            <a target="_blank" rel="noopener" href="https://github.com/DeutschBall">
+              <i class="fas fa-github" aria-hidden="true"></i>
+              <span>Github</span>
+            </a>
+          </li>
+        
+      </ul>
+    </div>
+  </div>
+</div>
+
+<script>
+  var body = document.body || document.documentElement || window;
+  var vm = new Vue({
+    el: '#appDrawer',
+    data: {
+      visible: false,
+      top: 0,
+      openArr: [],
+    },
+    computed: {
+    },
+    mounted() {
+    },
+    methods: {
+      isOpen(index) {
+        if (this.openArr.includes(index)) {
+          return true;
+        } else {
+          return false;
+        }
+      },
+      openOrCloseMenu(curIndex) {
+        const index = this.openArr.indexOf(curIndex);
+        if (index !== -1) {
+          this.openArr.splice(index, 1);
+        } else {
+          this.openArr.push(curIndex);
+        }
+      },
+      showDialogDrawer() {
+        this.visible = true;
+        // 防止页面滚动，只能让弹框滚动
+        this.top = $(document).scrollTop()
+        body.style.cssText = 'width: 100%; height: 100%;overflow: hidden;';
+      },
+      cancelDialogDrawer() {
+        this.visible = false;
+        body.removeAttribute('style');
+        $(document).scrollTop(this.top)
+      }
+    },
+    created() {}
+  })
+</script>
+
+    </div>
+    <div class="blog-title" id="author-avatar">
+      
+        <div class="avatar">
+          <img src="https://raw.githubusercontent.com/DeutschBall/test/master/emp.png" class="lazyload placeholder" data-srcset="https://raw.githubusercontent.com/DeutschBall/test/master/emp.png" srcset="https://img2.baidu.com/it/u=2037979560,2772131037&fm=26&fmt=auto&gp=0.jpg" alt="logo">
+        </div>
+      
+      <a href="/" class="logo">Deutschball&#39;s blog</a>
+    </div>
+    <nav class="navbar">
+      <ul class="menu">
+        
+      </ul>
+      
+      
+        <div id="appSearch">
+  <div class="search"  @click="showDialog()"><i class="fas fa-search" aria-hidden="true"></i></div>
+  <transition name="fade">
+    <div class="message-box_wrapper" style="display: none;" v-cloak v-show="dialogVisible" @click.self="cancelDialogVisible()">
+      <div class="message-box animated bounceInDown">
+        <h2>
+          <span>
+            <i class="fas fa-search" aria-hidden="true"></i>
+            <span class="title">Search</span>
+          </span>
+          <i class="fas fa-times close" pointer style="float:right;" aria-hidden="true" @click.self="cancelDialogVisible()"></i>
+        </h2>
+        <form class="site-search-form">
+          <input type="text"
+            placeholder="Please enter keywords"
+            id="local-search-input" 
+            @click="getSearchFile()"
+            class="st-search-input"
+            v-model="searchInput"
+          />
+        </form>
+        <div class="result-wrapper">
+          <div id="local-search-result" class="local-search-result-cls"></div>
+        </div>
+      </div>
+    </div>
+  </transition>
+</div>
+<script src="/js/local_search.js"></script>
+<script>
+  var body = document.body || document.documentElement || window;
+  var vm = new Vue({
+    el: '#appSearch',
+    data: {
+      dialogVisible: false,
+      searchInput: '',
+      top: 0,
+    },
+    computed: {
+    },
+    mounted() {
+      window.addEventListener('pjax:complete', () => {
+        this.cancelDialogVisible();
+      })
+    },
+    methods: {
+      showDialog() {
+        this.dialogVisible = true;
+        // 防止页面滚动，只能让弹框滚动
+        this.top = $(document).scrollTop()
+        body.style.cssText = 'overflow: hidden;';
+      },
+      getSearchFile() {
+        if (!this.searchInput) {
+          getSearchFile("/search.xml");
+        }
+      },
+      cancelDialogVisible() {
+        this.dialogVisible = false;
+        body.removeAttribute('style');
+        $(document).scrollTop(this.top)
+      },
+    },
+    created() {}
+  })
+</script>
+<!-- 解决刷新页面闪烁问题，可以在元素上添加display: none, 或者用vue.extend方法，详情：https://blog.csdn.net/qq_31393401/article/details/81017912 -->
+<!-- 下面是搜索基本写法 -->
+<!-- <script type="text/javascript" id="local.search.active">
+  var inputArea = document.querySelector("#local-search-input");
+  inputArea.onclick   = function(){ getSearchFile(); this.onclick = null }
+  inputArea.onkeydown = function(){ if(event.keyCode == 13) return false }
+</script> -->
+
+      
+
+    </nav>
+  </div>
+  
+    <a target="_blank" rel="noopener" href="https://github.com/DeutschBall" class="github-corner color-primary" aria-label="View source on GitHub"><svg width="60" height="60" viewBox="0 0 250 250" style="fill:#fff; position: absolute; top: 0; border: 0; right: 0;" aria-hidden="true"><path d="M0,0 L115,115 L130,115 L142,142 L250,250 L250,0 Z"></path><path d="M128.3,109.0 C113.8,99.7 119.0,89.6 119.0,89.6 C122.0,82.7 120.5,78.6 120.5,78.6 C119.2,72.0 123.4,76.3 123.4,76.3 C127.3,80.9 125.5,87.3 125.5,87.3 C122.9,97.6 130.6,101.9 134.4,103.2" fill="currentColor" style="transform-origin: 130px 106px;" class="octo-arm"></path><path d="M115.0,115.0 C114.9,115.1 118.7,116.5 119.8,115.4 L133.7,101.6 C136.9,99.2 139.9,98.4 142.2,98.6 C133.8,88.0 127.5,74.4 143.8,58.0 C148.5,53.4 154.0,51.2 159.7,51.0 C160.3,49.4 163.2,43.6 171.4,40.1 C171.4,40.1 176.1,42.5 178.8,56.2 C183.1,58.6 187.2,61.8 190.9,65.4 C194.5,69.0 197.7,73.2 200.1,77.6 C213.8,80.2 216.3,84.9 216.3,84.9 C212.7,93.1 206.9,96.0 205.4,96.6 C205.1,102.4 203.0,107.8 198.3,112.5 C181.9,128.9 168.3,122.5 157.7,114.1 C157.9,116.9 156.7,120.9 152.7,124.9 L141.0,136.5 C139.8,137.7 141.6,141.9 141.8,141.8 Z" fill="currentColor" class="octo-body"></path></svg></a><style>.github-corner:hover .octo-arm{animation:octocat-wave 560ms ease-in-out}@keyframes octocat-wave{0%,100%{transform:rotate(0)}20%,60%{transform:rotate(-25deg)}40%,80%{transform:rotate(10deg)}}@media (max-width:500px){.github-corner:hover .octo-arm{animation:none}.github-corner .octo-arm{animation:octocat-wave 560ms ease-in-out}}</style>
+  
+  
+</header>
+        <!-- 内容区域 -->
+        
+ <!-- prismjs 代码高亮 -->
+ 
+
+
+<div class="bg-dark-floor" style="position: fixed;left: 0;top: 0;width: 100%;height: 100%;z-index: -1;"></div>
+
+
+  <!-- 文章详情页顶部图片和标题 -->
+
+
+
+
+<div class="post-detail-header" id="thumbnail_canvas" style="background-repeat: no-repeat; background-size: cover; 
+  background-position: center center;position: relative;background-image:url('/medias/10.jpg')">
+  <div class="post-detail-header-mask"></div>
+  <canvas id="header_canvas"style="position:absolute;bottom:0;pointer-events:none;"></canvas>
+  
+  <div class="post-detail-header_info-box">
+    <div class="title-box">
+      <span class="title">
+        计算机网络-数据链路层
+      </span>
+    </div>
+    
+    
+      
+        <span class="post-detail-header_date">
+          <i class="fas fa-calendar"></i> Published in：2023-02-08 |
+        </span>
+      
+
+      
+
+      
+    
+  </div>
+  
+  
+    <script src="/js/bubble/bubble.js"></script>
+  
+</div>
+
+
+
+
+
+<div class="row justify-position" 
+  style="padding-top: 0px;">
+  <div class="main-content">
+    <article class="post post-detail">
+      <div class="post-content">
+        <h1 id="计算机网络-数据链路层"><a href="#计算机网络-数据链路层" class="headerlink" title="计算机网络-数据链路层"></a>计算机网络-数据链路层</h1><h2 id="数据链路层"><a href="#数据链路层" class="headerlink" title="数据链路层"></a>数据链路层</h2><h3 id="数据链路层的任务"><a href="#数据链路层的任务" class="headerlink" title="数据链路层的任务"></a>数据链路层的任务</h3><p>数据链路层的功能:成帧,流量控制,差错控制,通信</p>
+<p>成帧:多个数据帧之间如何区分?添加标志位,比如011111,如果接收方发现一个0后面连着5个1,就认为这和刚才接收到的数据不是一个帧的.</p>
+<p>流量控制用于,限制发送方在等到确认之前发送的数据数量</p>
+<p>差错控制指望重发,说官话就是”自动重复请求”(ARQ,Automatic Repeat Request)</p>
+<h3 id="冗余编码"><a href="#冗余编码" class="headerlink" title="冗余编码"></a>冗余编码</h3><p>冗余:Redundancy</p>
+<p>冗余本是多余的意思,在计算机中,冗余量和业务逻辑无关,没有冗余照样执行业务</p>
+<p>但是冗余可以增强非业务性能,比如信息论上的冗余可以提高发现错误和纠正错误的能力</p>
+<blockquote>
+<p>考虑8个工件有一个坏件,质量和其他的不同(具体重了还是清了不知道)</p>
+<p>最快多少次找到?这实际上就是尽量减少冗余,尽最大可能利用信息熵的问题</p>
+<p>采用二分需要单调性,即知道这个坏件轻了还是重了,现在不知道,没法二分</p>
+<p>三分?3v3v2,还是那个问题,3v3不知道哪个是标准</p>
+<p>四分?(2v2)v(2v2).其中必有一组2v2都是标准件,天平平衡</p>
+<p>不妨设前一个2v2平等,说明坏件一定在后面的2v2中,并且前面四个都是标准件,可以用来参考</p>
+<p>后面的2v2就不用称了,每个2直接和两个标准件比较</p>
+<p>必然有一组不平衡,这就意味着另一组必定平衡,从不平衡组任意拿出一个,和标准件对比</p>
+<p>如果是坏件则天平不平衡,否则如果是好件,则同组另一件必定坏件</p>
+</blockquote>
+<h4 id="块编码"><a href="#块编码" class="headerlink" title="块编码"></a>块编码</h4><blockquote>
+<p>数据字+冗余=码字</p>
+<p>什么思想呢?</p>
+<p>假如原来要传输一个比特,要么是0要么是1</p>
+<p>但是路上可能发生各种变故导致1变成0.但是接收方不知道发生了变故,它认为人家就是发送的0,于是错误接收了0</p>
+<p>为了增加检错能力</p>
+<p>添加一位冗余,比如数据字为0,码字就为00.数据字为1,码字就为11</p>
+<p>这样如果有一位发生突变(认为两位同突变的概率低),会形成01或者10这种无效码字,发现错误</p>
+<p>那么问题又来了,如果接到01,怎么确定它是00还是11变来的?两者都只需要突变一位就能形成01,因而只添加一位冗余无法纠错</p>
+<p>于是再添加一位冗余,只有000和111合法</p>
+<p>那么接到100,认为它是000突变来的,这个概率要比他是从111突变来的大.</p>
+<p>于是就有了纠错能力.</p>
+</blockquote>
+<p>实际上的块编码,是多位为一个数据字</p>
+<p>整个报文划分为弱干块,每块k位,称为数据字</p>
+<p>每块中假如r个冗余位,块长度变为n=k+r,形成这个n位的块叫做码字</p>
+<p>码字有$2^n$种,但是其中实际承载数据字的只有$2^k$种</p>
+<p>如果一个承载数据的码字,其中的一位或者几位发生突变,突变之后的码字:</p>
+<p>如果如果不承载数据,则可以被检错</p>
+<p>如果也是承载数据的码字,则无法检错</p>
+<p>比如4B/5B编码(部分)中:</p>
+<p><img src="https://raw.githubusercontent.com/DeutschBall/VideoBed/main/image-20230208093738919.png" class="lazyload placeholder" data-srcset="https://raw.githubusercontent.com/DeutschBall/VideoBed/main/image-20230208093738919.png" srcset="https://img2.baidu.com/it/u=2037979560,2772131037&fm=26&fmt=auto&gp=0.jpg" alt="image-20230208093738919"></p>
+<p>如果0100的编码01010最后一位发生突变,编程了01011,这是0101的编码.那么错误就检查不出来了,接收方会认为发送方一开始就是发的0101</p>
+<p>下面推导,检错能力和纠错能力的条件是什么</p>
+<h5 id="汉明距离"><a href="#汉明距离" class="headerlink" title="汉明距离"></a>汉明距离</h5><p>假设只有一位突变</p>
+<p>如果两个有效码字只有一位不同,这样不具备检错能力</p>
+<p>如果任何两个有效码字至少有两位不同.这样才具备检错能力,但是不具备纠错能力</p>
+<p>如果任何两个有效码字至少有三位不同.这样才具备纠错一位的能力,也可以检错两位</p>
+<p>定义两个长度相同的字x,y的汉明距离是对应位不同的数量,记作$d(x,y)$</p>
+<script type="math/tex; mode=display">
+d(x,y)=x\oplus y 结果中1的数量</script><p>最小汉明距离:一组字所有对中最小的汉明距离</p>
+<h5 id="编码方案"><a href="#编码方案" class="headerlink" title="编码方案"></a>编码方案</h5><p>块编码方案记为$C(n,k)\ with\ d_{min}=x$</p>
+<p>其中n是码字长度,k是数据字长度.$d_{min}$是<strong>有效</strong>码字的最小汉明距离</p>
+<p>当可以检错$s$个错误时,要求$d_{min}=s+1$</p>
+<p>当可以纠错$s$个错误时,要求$d_{min}&gt; 2s$,也就是$d_{min}=2s+1$</p>
+<blockquote>
+<p>因此最好采用奇数长度的码字</p>
+</blockquote>
+<p><img src="https://raw.githubusercontent.com/DeutschBall/VideoBed/main/image-20230208100459337.png" class="lazyload placeholder" data-srcset="https://raw.githubusercontent.com/DeutschBall/VideoBed/main/image-20230208100459337.png" srcset="https://img2.baidu.com/it/u=2037979560,2772131037&fm=26&fmt=auto&gp=0.jpg" alt="image-20230208100459337"></p>
+<p>x和y两个有效码字,有相同的概率突变为同一个错误码字,因而无法纠错</p>
+<p><img src="https://raw.githubusercontent.com/DeutschBall/VideoBed/main/image-20230208101051053.png" class="lazyload placeholder" data-srcset="https://raw.githubusercontent.com/DeutschBall/VideoBed/main/image-20230208101051053.png" srcset="https://img2.baidu.com/it/u=2037979560,2772131037&fm=26&fmt=auto&gp=0.jpg" alt="image-20230208101051053"></p>
+<p>x突变s位之后依然落在半径为s的圈里,而任意两个圈相离,也就是说一个错误码字一定有一个概率最大的突变来源.</p>
+<p>这就有了纠错能力</p>
+<h4 id="线性块编码"><a href="#线性块编码" class="headerlink" title="线性块编码"></a>线性块编码</h4><p>线性块编码:任何两个有效码字的异或生成另一个有效码字.比如:</p>
+<p><img src="https://raw.githubusercontent.com/DeutschBall/VideoBed/main/image-20230208101612648.png" class="lazyload placeholder" data-srcset="https://raw.githubusercontent.com/DeutschBall/VideoBed/main/image-20230208101612648.png" srcset="https://img2.baidu.com/it/u=2037979560,2772131037&fm=26&fmt=auto&gp=0.jpg" alt="image-20230208101612648"></p>
+<h5 id="最小汉明距离"><a href="#最小汉明距离" class="headerlink" title="最小汉明距离"></a>最小汉明距离</h5><p>线性快编码的最小汉明距离:1的个数最少的非零有效码字中的1的个数</p>
+<p>还是以上图为例</p>
+<div class="table-container">
+<table>
+<thead>
+<tr>
+<th>非零码字</th>
+<th>1的个数</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>01011</td>
+<td>3</td>
+</tr>
+<tr>
+<td>10101</td>
+<td>3</td>
+</tr>
+<tr>
+<td>11110</td>
+<td>4</td>
+</tr>
+</tbody>
+</table>
+</div>
+<p>因此$d_{min}=3$</p>
+<h5 id="简单奇偶校验编码"><a href="#简单奇偶校验编码" class="headerlink" title="简单奇偶校验编码"></a>简单奇偶校验编码</h5><p>$n=k+1,d_{min}=2$</p>
+<p>只有一位校验位</p>
+<p>比如$C(5,4)$</p>
+<p><img src="https://raw.githubusercontent.com/DeutschBall/VideoBed/main/image-20230208102201761.png" class="lazyload placeholder" data-srcset="https://raw.githubusercontent.com/DeutschBall/VideoBed/main/image-20230208102201761.png" srcset="https://img2.baidu.com/it/u=2037979560,2772131037&fm=26&fmt=auto&gp=0.jpg" alt="image-20230208102201761"></p>
+<p>突变奇数位可以被检查出</p>
+<p>突变偶数位不可以</p>
+<h5 id="二维奇偶校验"><a href="#二维奇偶校验" class="headerlink" title="二维奇偶校验"></a>二维奇偶校验</h5><p><img src="https://raw.githubusercontent.com/DeutschBall/VideoBed/main/image-20230208102627543.png" class="lazyload placeholder" data-srcset="https://raw.githubusercontent.com/DeutschBall/VideoBed/main/image-20230208102627543.png" srcset="https://img2.baidu.com/it/u=2037979560,2772131037&fm=26&fmt=auto&gp=0.jpg" alt="image-20230208102627543"></p>
+<p>两维奇偶校验能检测出所有3位或3位以下的错误（因为此时至少在某一行或某一列上有一位错）、奇数位错以及很大一部分偶数位错。</p>
+<h4 id="汉明编码"><a href="#汉明编码" class="headerlink" title="汉明编码"></a>汉明编码</h4><p>对于汉明编码$C(n,k),d_{min}=3$,有如下关系:</p>
+<script type="math/tex; mode=display">
+\begin{cases}
+n=2^m-1\\
+k=n-m\\
+r=m
+\end{cases}</script><p>比如$C(7,4)$中,$n=7=2^m-1$得到m=3</p>
+<p>$k=n-m=7-3=4$即数据字位数</p>
+<p>$r=m=3$即冗余位数</p>
+<p><img src="https://raw.githubusercontent.com/DeutschBall/VideoBed/main/image-20230208103155013.png" class="lazyload placeholder" data-srcset="https://raw.githubusercontent.com/DeutschBall/VideoBed/main/image-20230208103155013.png" srcset="https://img2.baidu.com/it/u=2037979560,2772131037&fm=26&fmt=auto&gp=0.jpg" alt="image-20230208103155013"></p>
+<p>如何检错?</p>
+<p>比如数据字0111,计算冗余校验位:</p>
+<script type="math/tex; mode=display">
+\begin{cases}
+r_0=a_2+a_1+a_0=1+1+1=1\\
+r_1=a_3+a_2+a_1=0+1+1=0\\
+r_2=a_1+a_0+a_3=1+1+0=0
+
+\end{cases}</script><p>得到码字$0111001$</p>
+<p>如果码字没有错误,那么接收方计算得到的q2q1q0应该全零</p>
+<p>如果码字有一位出现错误,变成$0110001$</p>
+<p>在接收方(接收方认为顶多有一位发生错误):</p>
+<script type="math/tex; mode=display">
+q_0=b_2+b_1+b_0+q_0=1+1+0+1=1</script><p>此时已经发现错误了,但是不能确认是b2,b1,b0,q0这四位中的哪一位出现的差错</p>
+<p>然后又算得</p>
+<script type="math/tex; mode=display">
+q_1=b_3+b_2+b_1+q_1=0+1+1+0=0</script><p>说明b3b2b1q1都没错误,那么只有b0,q0中有错误</p>
+<p>然后又算得</p>
+<script type="math/tex; mode=display">
+q_2=b_1+b_0+b_3+q_2=1+0+0+0=1</script><p>可以肯定是$b_0$的错误了</p>
+<blockquote>
+<p>如果数据字至少是7位,计算满足一位检错条件的汉明编码方案</p>
+<script type="math/tex; mode=display">
+\begin{cases}
+n=2^m-1\\
+k=n-m\\
+r=m
+\end{cases}</script><script type="math/tex; mode=display">
+k=n-m=2^m-1-m\ge7</script><p>解得</p>
+<p>$m=4,n=15,k=11$</p>
+<p>因此满足条件的编码方案是$C(15,11)$</p>
+</blockquote>
+<h4 id="循环冗余编码"><a href="#循环冗余编码" class="headerlink" title="循环冗余编码"></a>循环冗余编码</h4><p>Cyclic Redundancy Check,CRC</p>
+<p>$C(n,k)$</p>
+<p>n位的码字,其中k位数据字,最右边加上n-k个0作为校正子的初始值,这样n位传递给生成器</p>
+<p>生成器用长度n-k+1的除数去除码字</p>
+<p>得到n-k位余数,填到校正子上</p>
+<p>真码字(数据字:校正子)就计算完毕了,然后传输,然后被接收</p>
+<p>接收方校验器用相同除数除码字</p>
+<p>如果得到n-k位余数是0则无误,码字前k位就是数据字</p>
+<p>否则丢弃</p>
+<p><img src="https://raw.githubusercontent.com/DeutschBall/VideoBed/main/image-20230208110416498.png" class="lazyload placeholder" data-srcset="https://raw.githubusercontent.com/DeutschBall/VideoBed/main/image-20230208110416498.png" srcset="https://img2.baidu.com/it/u=2037979560,2772131037&fm=26&fmt=auto&gp=0.jpg" alt="image-20230208110416498"></p>
+<p>计算过程</p>
+<p><img src="https://raw.githubusercontent.com/DeutschBall/VideoBed/main/image-20230208111036131.png" class="lazyload placeholder" data-srcset="https://raw.githubusercontent.com/DeutschBall/VideoBed/main/image-20230208111036131.png" srcset="https://img2.baidu.com/it/u=2037979560,2772131037&fm=26&fmt=auto&gp=0.jpg" alt="image-20230208111036131"></p>
+<h5 id="多项式"><a href="#多项式" class="headerlink" title="多项式"></a>多项式</h5><p>CRC的除数称为生成多项式,简称生成子或者生成器$g(x)$</p>
+<p>码字$c(x)=d(x):s(x)$,码字就是数据字和校正子的增广</p>
+<p>差错$e(x)$</p>
+<p>校验原理:</p>
+<p><img src="https://raw.githubusercontent.com/DeutschBall/VideoBed/main/image-20230208111438640.png" class="lazyload placeholder" data-srcset="https://raw.githubusercontent.com/DeutschBall/VideoBed/main/image-20230208111438640.png" srcset="https://img2.baidu.com/it/u=2037979560,2772131037&fm=26&fmt=auto&gp=0.jpg" alt="image-20230208111438640"></p>
+<p>在发送端计算完的真码字一定满足$\frac{c(x)}{g(x)}=0$</p>
+<p>因此对接收方的码字除以$g(x)$,如果不为零,说明一定存在$\frac{e(x)}{g(x)}$这一项,也就是说分子不为零,即存在$e(x)$这一项,即存在差错</p>
+<p>生成多项式的形式决定了检错能力</p>
+<h5 id="单个位差错"><a href="#单个位差错" class="headerlink" title="单个位差错"></a>单个位差错</h5><p>单个位差错是指$e(x)=x^i$的情形</p>
+<p>检测单个位差错需要保证$e(x)$不能被$g(x)$整除</p>
+<p>比如如果设置$g(x)=1$,则任何多项式都被$g(x)$整除,这就查不出任何错误来</p>
+<p>如果生成多项式至少有两项,并且有1这一项(也就是$x^0$这一项),那么所有单比特错误都可以检出</p>
+<p><strong>也就是说,$g(x)$的作用是,出现差错时,$e(x)$无法被$g(x)$整除</strong></p>
+<h5 id="两独立位差错"><a href="#两独立位差错" class="headerlink" title="两独立位差错"></a>两独立位差错</h5><p>两独立位差错指$e(x)=x^i+x^j$的情形</p>
+<script type="math/tex; mode=display">
+e(x)=x^i+x^j=x^i(x^{j-i}+1)=x^i(x^t+1)</script><p>如果生成多项式$g(x)$无法整除$x^t+1$则所有独立两位错误都可以检查出来</p>
+<p>比如$x+1$不能检查出两个相邻位的错误</p>
+<p>$x^4+1$无法检查出两个相隔4位的错误</p>
+<p>$x^3+x^2+1$就可以检查所有两个独立位错误</p>
+<h5 id="奇数个位差错"><a href="#奇数个位差错" class="headerlink" title="奇数个位差错"></a>奇数个位差错</h5><p>奇数个位错误指:</p>
+<script type="math/tex; mode=display">
+e(x)=x^{i1}+x^{i2}+...+x^{ik}</script><p>其中k是奇数</p>
+<p>只要是$g(x)$包含$x+1$因式,就可以检查出$e(x)$,证明:</p>
+<p>假设检查不出来,即$g(x)|e(x)$</p>
+<script type="math/tex; mode=display">
+g(x)|e(x),x+1|g(x)\rightarrow x+1|e(x)</script><p>只需要证明$x+1|e(x)$不能成立</p>
+<p>如果任何一个偶数项多项式都可以被$x+1$整除,那么任何奇数项多项式,就可以拆成一个偶数项多项式加一个单独的多项式.那么问题转化为单个比特错误</p>
+<p>于是只需要证明任何偶数项多项式可以被$x+1$整除</p>
+<p>由于任何偶数项多项式,都可以转化为若干个这种形式的和</p>
+<script type="math/tex; mode=display">
+x^a(x^t+1)</script><p>由于多项式系数在<strong>模2域上,</strong>因此上式又可以写为</p>
+<script type="math/tex; mode=display">
+x^n(1-x+x^2-x^3+...)=x^n\frac{1-(-x)^t}{1-(-x)}</script><p>当t是奇数时由上式得到</p>
+<script type="math/tex; mode=display">
+x^t+1=(x+1)(x^{t-1}-x^{t-2}+x^{t-3}-...)</script><p>当t不是奇数,是偶数比如$e(x)=x^2+1$,此时t=2是偶数</p>
+<p>这就可以利用系数在模2域上的性质了</p>
+<p>此时$e(x)=x^2+1=x^2+2x+1=(x+1)^2$</p>
+<p>推广一下,可以得到$x^t+1=(x+1)^t$其中t是偶数,并且系数在模2域上</p>
+<p>这就证明了$x+1$整除任何偶数项多项式</p>
+<h5 id="突发性错误"><a href="#突发性错误" class="headerlink" title="突发性错误"></a>突发性错误</h5><p>突发恶疾指接连几个bit位都可能发生错误</p>
+<script type="math/tex; mode=display">
+e(x)=x^j+...x^i=x^j(1+...+x^{i-j})</script><p>令$e’(x)=1+…+x^{i-j}$</p>
+<p>意思时,起码两头的i,j两位是有错误的,中间的位可能有错误也可能无误,但是无所谓</p>
+<p>设$L=i-j+1$,意思是突发性错误的长度</p>
+<p>这L位中,提出公因式$x^j$之后,最低次项是1,最高次项是$x^{i-j}$,这两项肯定得有</p>
+<p>设$g(x)=x^r+…+1$表示生成多项式,它至少包含$x^r+1$两项,这保证了可以检测任何单比特错误.其他比r低次的项可有可无.</p>
+<p><strong>如果$g(x)$阶比$e’(x)$大</strong>,即r&gt;L-1,显然$\frac{e’(x)}{g(x)}$是有余数的,此时任何差错都可以检查出来</p>
+<p><strong>如果$g(x)$和$e’(x)$同阶</strong>,即r=L-1,</p>
+<p>此时只有$e’(x)=g(x)$只有这种情况没有余数,这个概率是多大呢?</p>
+<p>要求$g(x)$和$e’(x)$的每一项系数都相同,根据概率论独立事件乘法原则,这个概率是</p>
+<script type="math/tex; mode=display">
+P(g(x)=e'(x))=(\frac{1}{2})^{L-2}=(\frac{1}{2})^{r-1}</script><blockquote>
+<p>这里L-2的原因是,$g(x),e’(x)$最高次项和常数项1都已经是相同的了,只需要考虑中间各项的情况</p>
+</blockquote>
+<p>因此r=L-1时,能够检查出错误的概率是$1-(\frac{1}{2})^{r-1}$</p>
+<p><strong>如果$g(x)$比$e’(x)$阶小</strong>,即L&gt;r+1时,考虑啥情况检查不出错误?</p>
+<p>比如$e(x)=x^6+x^5+x+1$,$g(x)=x^5+1$</p>
+<p>此时$\frac{e(x)}{g(x)}=x+1$可以被整除,无法检查出错误</p>
+<p>考虑对于任意一个$g(x)$,只要是其阶比$e’(x)$小,一定存在$e’(x)$,使得$g(x)|e’(x)$吗?</p>
+<p>确实如此,只需要构造$e’(x)=x^{L-1-r}g(x)+g(x)=(x^{L-1-r}+1)g(x)$</p>
+<p>这是一个临界条件,保证了阶是L-1并且存在常数项1</p>
+<p>还可以往里随便加$x^kg(x),k\in(0,L-1-r)$项</p>
+<p>这样满足条件的构造共有$2^{L-2-r}$种</p>
+<p>而L-1阶含常数项1的多项式共有$2^{L-2}$个</p>
+<p>因此构造的出现概率就是$\frac{2^{L-2-r}}{2^{L-2}}=(\frac{1}{2})^r$,也就是检不出错误的概率</p>
+<p>那么能够检查出错误的概率就是$1-(\frac{1}{2})^r$</p>
+<p>总结:</p>
+<p>所有$L ≤ r $的突发性差错均可被检测到。</p>
+<p>所有$L = r + 1 $的突发性差错有$1 – (1/2)r–1      $的概率被检测到。</p>
+<p>所有$L &gt; r + 1 $的突发性差错有$1 – (1/2)r     $ 的概率被检测到。</p>
+<h5 id="高性能多项式特性"><a href="#高性能多项式特性" class="headerlink" title="高性能多项式特性"></a>高性能多项式特性</h5><ol>
+<li>至少有两项,要有常数项1,保证检查一位错误</li>
+<li>不能整除 $x^t + 1(2 ≤ t ≤ n − 1)$,保证检查两个独立位错误</li>
+<li>应当有因子 $x + 1$,保证检查所有奇数位数错误</li>
+</ol>
+<h4 id="校验和"><a href="#校验和" class="headerlink" title="校验和"></a>校验和</h4><p>脚丫子都知道怎么算,注意结果要取反</p>
+<h3 id="数据链路层协议"><a href="#数据链路层协议" class="headerlink" title="数据链路层协议:"></a>数据链路层协议:</h3><p><img src="https://raw.githubusercontent.com/DeutschBall/VideoBed/main/image-20230204191849501.png" class="lazyload placeholder" data-srcset="https://raw.githubusercontent.com/DeutschBall/VideoBed/main/image-20230204191849501.png" srcset="https://img2.baidu.com/it/u=2037979560,2772131037&fm=26&fmt=auto&gp=0.jpg" alt="image-20230204191849501"></p>
+<p>只要带上ARQ的肯定有差错控制功能</p>
+<p>noiseless channel是没有噪声,不会丢包,不会重复,无损坏帧的理想信道,最简单协议和停止等待协议只是最初的一厢情愿</p>
+<div class="table-container">
+<table>
+<thead>
+<tr>
+<th>协议</th>
+<th>特点</th>
+<th></th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>simplest</td>
+<td>纯纯理想环境,<br />发送方不需要考虑丢包坏帧的情况,要说啥只说一遍,不多废话<br />接收方就洗耳恭听,也不需要回复收到</td>
+<td></td>
+</tr>
+<tr>
+<td>stop-and-wait</td>
+<td>发送方发<strong>一个</strong>帧,就等着接收方回复收到<br />如果没有收到回复,那么可能是网络阻塞或者接收方死球了<br />长时间没有收到回复就认为超时了,重发该帧<br />啥时候收到回复确认,啥时候发下一帧</td>
+<td></td>
+</tr>
+<tr>
+<td></td>
+<td></td>
+<td></td>
+</tr>
+<tr>
+<td>Stop-and-wait ARQ</td>
+<td>停等ARQ协议中,每个帧要么编号1要么编号0(原序号模2得到)<br />如果收到0号帧,则下一个期望的就是1号帧<br />如果接收方接收到的帧不是期望帧,回复自己期望的那一帧<br />已发送的帧会被保留副本,如果超时没有收到该帧的确认(或者说下一帧的期待)<br />则重发超时帧</td>
+<td><img src="https://raw.githubusercontent.com/DeutschBall/VideoBed/main/image-20230204193901028.png" class="lazyload placeholder" data-srcset="https://raw.githubusercontent.com/DeutschBall/VideoBed/main/image-20230204193901028.png" srcset="https://img2.baidu.com/it/u=2037979560,2772131037&fm=26&fmt=auto&gp=0.jpg" alt="image-20230204193901028"></td>
+</tr>
+<tr>
+<td>Go-Back-N ARQ</td>
+<td>实际上是Stop-and-wait ARQ的增强版<br />Stop-and-wait ARQ协议中没发一个包都要确认一下<br />现在可以<strong>发一组</strong>包然后确认一下<br />让确认这种控制信息比重更少</td>
+<td></td>
+</tr>
+<tr>
+<td>Selective Repeat ARQ</td>
+<td>Go-Back-N ARQ的增强版<br />Go-Back-N ARQ中接收方窗口为1,<br />本算法中将接收方窗口增强到和发送方窗口一样大<br />但是窗口大小更小了,为$2^{m-1}$<br />(Go-Back-N ARQ中发送方窗口是$2^m-1$)</td>
+</tr>
+</tbody>
+</table>
+</div>
+<h5 id="回退N帧自动重发请求"><a href="#回退N帧自动重发请求" class="headerlink" title="回退N帧自动重发请求"></a>回退N帧自动重发请求</h5><p>Go-Back-N Automatic Repeat Request</p>
+<p>在帧头部设置一个帧序号字段,假设这个字段使用m位,那么可以编号$[0,2^m)$,即帧序号是模$2^m$的</p>
+<p>发送窗口:</p>
+<p>发送方的发送窗口大小就设置为$S_{size}=2^m-1$,</p>
+<blockquote>
+<p>为什么要设置成这个值呢?为什么不设置成$2^m$?留作后话</p>
+</blockquote>
+<p>比如帧序号字段占用4bit,那么发送方滑动窗口大小就是16-1=15</p>
+<p>两个指针,</p>
+<p>其中$S_f$永远指向最早没有被确认的窗口</p>
+<p>$S_n$指向当前发送方应该发送的窗口位置</p>
+<p><img src="https://raw.githubusercontent.com/DeutschBall/VideoBed/main/image-20230204195038189.png" class="lazyload placeholder" data-srcset="https://raw.githubusercontent.com/DeutschBall/VideoBed/main/image-20230204195038189.png" srcset="https://img2.baidu.com/it/u=2037979560,2772131037&fm=26&fmt=auto&gp=0.jpg" alt="发送窗口"></p>
+<p>接收窗口:</p>
+<p><img src="https://raw.githubusercontent.com/DeutschBall/VideoBed/main/image-20230204195932727.png" class="lazyload placeholder" data-srcset="https://raw.githubusercontent.com/DeutschBall/VideoBed/main/image-20230204195932727.png" srcset="https://img2.baidu.com/it/u=2037979560,2772131037&fm=26&fmt=auto&gp=0.jpg" alt="image-20230204195932727"></p>
+<p>接收方只需要一个指针即可,只需要记录下一个期待接收的窗口</p>
+<p><strong>两个窗口如何交互?</strong></p>
+<p>假设发送方连续发了0到14帧,这几个帧是陆续到达的,接收方收到第n帧就会回复期待n+1帧.也可能一股脑收到了n,n+1,n+2这三帧,此时接收方直接回复一个累计确认,期望第n+3帧</p>
+<p>考虑有丢包,可能接收方对0到5帧的确认都丢了,但是对第6帧的确认没丢,被发送方收到了,这时发送方Sf指针直接移动到第7帧,也就是发送方窗口右移,此时发送方就可以继续发送第15,16,17等等帧了</p>
+<p>也可能发送方第0帧就在路上丢包了,第1,2,等等帧都到了,但是接收方不要,就要第一帧,于是接收方直接丢弃并保持沉默,</p>
+<p>发送方发现从第0帧往后,一直长时间没有收到回应,就要从第0帧这里开始重发0到14帧</p>
+<p><strong>发送方滑动窗口大小设为$2^m-1$</strong>的目的</p>
+<blockquote>
+<p>假设m=4,即帧的编号$\in[0,15]$</p>
+<p>并且假设滑动窗口大小大于等于$2^m=16$,不妨就设置为16</p>
+<p>好,现在一个大文件成帧之后</p>
+<p>0 1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 0 1 2 3 4 5 6 7 8 9 10 11 12 13 14 15…</p>
+<p>滑动窗口要是16就会包含[0,15],假设发送方这16帧全都发出去了,但是网络太垃圾了,没有收到任何回复,而接收方实际上全都回复了,并且接收方已经准备接收下一个0号帧了</p>
+<p>此时发送方认为接收方本次[0,15]全都没有收到,于是从0开始重发,但是接收方期望的是下一个0号帧</p>
+<p>但是两个帧都是编号0,接收方无法发现错误,于是就错误地接受了</p>
+<p><img src="https://raw.githubusercontent.com/DeutschBall/VideoBed/main/image-20230204201039834.png" class="lazyload placeholder" data-srcset="https://raw.githubusercontent.com/DeutschBall/VideoBed/main/image-20230204201039834.png" srcset="https://img2.baidu.com/it/u=2037979560,2772131037&fm=26&fmt=auto&gp=0.jpg" alt="image-20230204201039834"></p>
+</blockquote>
+<h5 id="选择性重传"><a href="#选择性重传" class="headerlink" title="选择性重传"></a>选择性重传</h5><p>在回退N帧自动重发中只有发送方会累计确认</p>
+<p>在选择性重传中,发送方和接收方都会累计确认</p>
+<p>解决了啥问题呢?</p>
+<p>发送方如果发送了$[0,14]$这些帧,接收方可能就得发送15个确认回复,回复太多这是其一</p>
+<p>其二是,如果发送方已经接到了[1,14],唯独0号帧路上丢包了,在回退N帧自动重发中,发送方就得从0开始重发[0,14]</p>
+<p>而实际上只需要重发一个0就足够了,但是接收方脑子太小了,只认一个数,[1,14]已经忘记了.</p>
+<p>于是就改进成<strong>选择性重传算法</strong></p>
+<p>接收方加上了窗口,就有了缓存的能力</p>
+<p><img src="https://raw.githubusercontent.com/DeutschBall/VideoBed/main/image-20230206220446089.png" class="lazyload placeholder" data-srcset="https://raw.githubusercontent.com/DeutschBall/VideoBed/main/image-20230206220446089.png" srcset="https://img2.baidu.com/it/u=2037979560,2772131037&fm=26&fmt=auto&gp=0.jpg" alt="image-20230206220446089"></p>
+<p>关键注意1号帧在发送途中丢包,但是2号帧顺利抵达,此时接收方回复NAK1,意思是期望1.然而在发送方针对NAK1的回应到达之前,3号帧也顺利抵达了,此时接收方默默收下,但是啥回复都没有</p>
+<p>然后发送方的针对NAK1的回复1号帧到了,</p>
+<p>此时接收方回复的是ACK4,通知发送方,3之前已经都接收到了,可以发送4及之后的帧了,</p>
+<p>发送方接收到ACK4之后会调整自己的发送窗口,然后继续发送4,5,…号帧</p>
+<p><strong>为啥发送方和接收方的窗口都得是$2^{m-1}$</strong>呢?</p>
+<p><img src="https://raw.githubusercontent.com/DeutschBall/VideoBed/main/image-20230204204344648.png" class="lazyload placeholder" data-srcset="https://raw.githubusercontent.com/DeutschBall/VideoBed/main/image-20230204204344648.png" srcset="https://img2.baidu.com/it/u=2037979560,2772131037&fm=26&fmt=auto&gp=0.jpg" alt="image-20230204204344648"></p>
+<p>假设m=2,那么帧编号就是$[0,3]$此时窗口大小最大为2,否则,假设是3</p>
+<p>发送方发送0,1,2三帧之后,都被接收方收到,但是所有回复都丢包了</p>
+<p>此时接收方已经后移了接收窗口,此时接收方窗口内的期待0号帧是下一个0号帧.</p>
+<p>但是发送方超时重发了刚才的0号帧</p>
+<p>于是接收方就把刚才的0号帧当成下一个0号帧错误接收了</p>
+<h5 id="带捎带的N步返回NRQ"><a href="#带捎带的N步返回NRQ" class="headerlink" title="带捎带的N步返回NRQ"></a>带捎带的N步返回NRQ</h5><p>捎带:将控制报文,比如NAK,ACK等等,附带到数据报文中一起发送</p>
+<h4 id="带宽利用率"><a href="#带宽利用率" class="headerlink" title="带宽利用率"></a>带宽利用率</h4><p>首先计算整个链路充满数据,能放开多少数据,也就是带宽时延积</p>
+<p>然后使用的协议在传播时间内最多能有多少帧,多少bit上到信道上传输</p>
+<p>做比即可</p>
+<p><img src="https://raw.githubusercontent.com/DeutschBall/VideoBed/main/image-20230206221303181.png" class="lazyload placeholder" data-srcset="https://raw.githubusercontent.com/DeutschBall/VideoBed/main/image-20230206221303181.png" srcset="https://img2.baidu.com/it/u=2037979560,2772131037&fm=26&fmt=auto&gp=0.jpg" alt="image-20230206221303181"></p>
+<h3 id="多路访问"><a href="#多路访问" class="headerlink" title="多路访问"></a>多路访问</h3><p><img src="https://raw.githubusercontent.com/DeutschBall/VideoBed/main/image-20230206222507328.png" class="lazyload placeholder" data-srcset="https://raw.githubusercontent.com/DeutschBall/VideoBed/main/image-20230206222507328.png" srcset="https://img2.baidu.com/it/u=2037979560,2772131037&fm=26&fmt=auto&gp=0.jpg" alt="image-20230206222507328"></p>
+<h4 id="随机访问协议"><a href="#随机访问协议" class="headerlink" title="随机访问协议"></a>随机访问协议</h4><p>所有站点低位相同,任何站点都不能组织其他站点说话</p>
+<p>有话要说就根据自己的协议说</p>
+<h5 id="AlOHA"><a href="#AlOHA" class="headerlink" title="AlOHA"></a>AlOHA</h5><p>任何站点,在任何时间,想说啥就说啥</p>
+<p><img src="https://raw.githubusercontent.com/DeutschBall/VideoBed/main/image-20230207093146683.png" class="lazyload placeholder" data-srcset="https://raw.githubusercontent.com/DeutschBall/VideoBed/main/image-20230207093146683.png" srcset="https://img2.baidu.com/it/u=2037979560,2772131037&fm=26&fmt=auto&gp=0.jpg" alt="image-20230207093146683"></p>
+<p>只要同一时间在信道上有两个帧,就会造成冲突,发生冲突的帧都会废掉</p>
+<p>ALOHA协议流程:</p>
+<p><img src="https://raw.githubusercontent.com/DeutschBall/VideoBed/main/image-20230207093619308.png" class="lazyload placeholder" data-srcset="https://raw.githubusercontent.com/DeutschBall/VideoBed/main/image-20230207093619308.png" srcset="https://img2.baidu.com/it/u=2037979560,2772131037&fm=26&fmt=auto&gp=0.jpg" alt="image-20230207093619308"></p>
+<p>最多重发$K_{max}$次,如果一直没有收到ACK回复则放弃</p>
+<p>每次发送之后等待$2\times T_{p}$,这是接收ACK的窗口期</p>
+<p>如果没有收到,则等待一个随机数的时间$T_{B}= T_{p}\times R,r\in[0,2^k)$.然后再重发</p>
+<h6 id="传输和传播"><a href="#传输和传播" class="headerlink" title="传输和传播"></a>传输和传播</h6><p>传输,transmission,又可以翻译为发射,是发送方将信号全放到信道上用的时间</p>
+<script type="math/tex; mode=display">
+传输时间=\frac{帧长}{带宽}</script><p><img src="https://raw.githubusercontent.com/DeutschBall/VideoBed/main/image-20230207093935960.png" class="lazyload placeholder" data-srcset="https://raw.githubusercontent.com/DeutschBall/VideoBed/main/image-20230207093935960.png" srcset="https://img2.baidu.com/it/u=2037979560,2772131037&fm=26&fmt=auto&gp=0.jpg" alt="image-20230207093935960"></p>
+<p>传播,propagation,信号的一位经过信道用时</p>
+<script type="math/tex; mode=display">
+传播时间=\frac{电缆长度}{信号速度(一般是光速)}</script><h6 id="冲突时间"><a href="#冲突时间" class="headerlink" title="冲突时间:"></a>冲突时间:</h6><p>假设各帧长度相同,ALOHA的冲突时间是传输时间的两倍</p>
+<p><img src="https://raw.githubusercontent.com/DeutschBall/VideoBed/main/image-20230207094413864.png" class="lazyload placeholder" data-srcset="https://raw.githubusercontent.com/DeutschBall/VideoBed/main/image-20230207094413864.png" srcset="https://img2.baidu.com/it/u=2037979560,2772131037&fm=26&fmt=auto&gp=0.jpg" alt="image-20230207094413864"></p>
+<p>即在$[t-T_{fr},t+T_{fr}]$这期间,不允许有第二个帧</p>
+<h6 id="吞吐量"><a href="#吞吐量" class="headerlink" title="吞吐量"></a>吞吐量</h6><script type="math/tex; mode=display">
+S=G\times e^{-2G}</script><p>单位:帧</p>
+<blockquote>
+<p>注意这里的吞吐量单位不是bps</p>
+</blockquote>
+<p>当且仅当$G=\frac{1}{2}$,$S_{max}=0.184$</p>
+<p>G是帧传输时间内系统平均产生帧的数量</p>
+<p>对于$G=\frac{1}{2}$也好立即,因为冲突时间就是两个帧传输时间,如果整个系统在一个传输时间内产生的帧数均值是$G=\frac{1}{2}$,则冲突事件内产生的帧数均值就是1</p>
+<p>如果$G&gt;\frac{1}{2}$则冲突的概率增大,一旦发生冲突,两个帧都是废物</p>
+<p>而吞吐量的定义是:单位时间内<strong>成功</strong>传送的数据量.</p>
+<p>两个废物帧都不是成功传送,因此导致了吞吐量降低</p>
+<blockquote>
+<p>推导$S=G\times e^{-2G}$</p>
+<p>假设传输时间是T,当一个帧发射之后,在T时间内,系统中又发送帧数均值是G</p>
+<p>也就是说,T时间内系统又发送一帧的概率为$G$</p>
+<p>首先考虑吞吐量怎么计算</p>
+<p>定义吞吐量:传输时间内,能够成功传输的帧数,则有:</p>
+<script type="math/tex; mode=display">
+S=GP_0</script><p>其中$P_0$为一帧发送成功的概率,也就是冲突时间内没有第二个帧的概率.</p>
+<p>$G$是T时间内系统发送帧数的<strong>均值</strong></p>
+<p>$P_0$是成功率</p>
+<p>那么$S=GP_0$就计算了T时间内发送成功的帧数的<strong>均值</strong></p>
+<p>下面考虑$P_0$怎么算</p>
+<p>计算一帧成功传输的概率,也就是发送一帧之后2T时间内没有其他帧的概率</p>
+<p>假设T时间内有其他X个帧发射.显然$X\sim P(G)$泊松分布,则分布律为</p>
+<script type="math/tex; mode=display">
+P(X=k)=\frac{G ^k}{k!}e^{-G}</script><p>在2T时间即冲突时间内,不发生冲突,意味着没有其他帧发送,其概率是</p>
+<script type="math/tex; mode=display">
+P(X=0)\times P(X=0)=(\frac{G^0}{0!}e^{-G})^2=e^{-2G}</script><p>带入$P_0=P(X=0)\times P(X=0)=e^{-2G}$得到</p>
+<script type="math/tex; mode=display">
+S=GP_0=Ge^{-2G}</script><p>如果定义吞吐量为:传输时间内成功传输的帧数.那么算到这里就结束了</p>
+<p>如果定义吞吐量为:单位时间内成功传输的帧数.那么$S=\frac{G{e^{-2G}}}{T}$</p>
+<p>如果定义吞吐量为:单位时间内成功传输的bit数.那么$S=\frac{G{e^{-2G}}}{T}\times 帧大小$</p>
+</blockquote>
+<h5 id="时隙ALOHA"><a href="#时隙ALOHA" class="headerlink" title="时隙ALOHA"></a>时隙ALOHA</h5><p><img src="https://raw.githubusercontent.com/DeutschBall/VideoBed/main/image-20230207102708453.png" class="lazyload placeholder" data-srcset="https://raw.githubusercontent.com/DeutschBall/VideoBed/main/image-20230207102708453.png" srcset="https://img2.baidu.com/it/u=2037979560,2772131037&fm=26&fmt=auto&gp=0.jpg" alt="image-20230207102708453"></p>
+<p>规定只能在每个Slotn一开始发送,每个帧顶多占用一个Slot,不会影响其他Slot</p>
+<p>那么冲突只会发生在一个Slot之内,并且一旦发生冲突,一定是两个帧在时间上完全重合</p>
+<h6 id="吞吐量-1"><a href="#吞吐量-1" class="headerlink" title="吞吐量"></a>吞吐量</h6><p>假设每个Slot开始时,系统中传输帧的均值为G帧,则Slot时间内又发送的帧数还是满足泊松分布</p>
+<p>只不过冲突时间降为一个Slot,成功发送一帧的概率变为</p>
+<script type="math/tex; mode=display">
+P_0=P(X=0)=e^{-G}</script><p>吞吐量就是$S=GP_0=Ge^{-G}$</p>
+<h5 id="CSMA"><a href="#CSMA" class="headerlink" title="CSMA"></a>CSMA</h5><p>Carrier Sense Multiple Access</p>
+<p>载波侦听 多路访问</p>
+<p>发送前首先侦听,看看有没有其他帧在发送,可以缓解冲突,但是不能解决冲突</p>
+<p>因为一个站点侦听时,可能另一个站点已经传输了信号,但是由于<strong>传播</strong>延迟,没有被本站点侦听到,如图所示:</p>
+<p><img src="https://raw.githubusercontent.com/DeutschBall/VideoBed/main/image-20230207103600938.png" class="lazyload placeholder" data-srcset="https://raw.githubusercontent.com/DeutschBall/VideoBed/main/image-20230207103600938.png" srcset="https://img2.baidu.com/it/u=2037979560,2772131037&fm=26&fmt=auto&gp=0.jpg" alt="image-20230207103600938"></p>
+<p>B站点在t1时刻传输一个信号,C在t2时刻要发送一个信号,但是t2时刻信号尚未传播到C处,因此C在t2传输一个信号,就会和B传输的信号发生冲突</p>
+<h6 id="冲突时间-1"><a href="#冲突时间-1" class="headerlink" title="冲突时间"></a>冲突时间</h6><p>在B开始传输消息,到消息传播到其他站点之前,这段时间是不能有第二个消息传播的</p>
+<p>因此冲突时间就等于传播时间</p>
+<p><img src="https://raw.githubusercontent.com/DeutschBall/VideoBed/main/image-20230207104138197.png" class="lazyload placeholder" data-srcset="https://raw.githubusercontent.com/DeutschBall/VideoBed/main/image-20230207104138197.png" srcset="https://img2.baidu.com/it/u=2037979560,2772131037&fm=26&fmt=auto&gp=0.jpg" alt="image-20230207104138197"></p>
+<h6 id="冲突缓解方法"><a href="#冲突缓解方法" class="headerlink" title="冲突缓解方法"></a>冲突缓解方法</h6><p><img src="https://raw.githubusercontent.com/DeutschBall/VideoBed/main/image-20230207104446245.png" class="lazyload placeholder" data-srcset="https://raw.githubusercontent.com/DeutschBall/VideoBed/main/image-20230207104446245.png" srcset="https://img2.baidu.com/it/u=2037979560,2772131037&fm=26&fmt=auto&gp=0.jpg" alt="image-20230207104446245"></p>
+<h5 id="CSMA-CD"><a href="#CSMA-CD" class="headerlink" title="CSMA/CD"></a>CSMA/CD</h5><p>Carrier Sense Multiple Access with Collision Detection,带冲突检测的载波侦听多路访问</p>
+<p><img src="https://raw.githubusercontent.com/DeutschBall/VideoBed/main/image-20230207105245273.png" class="lazyload placeholder" data-srcset="https://raw.githubusercontent.com/DeutschBall/VideoBed/main/image-20230207105245273.png" srcset="https://img2.baidu.com/it/u=2037979560,2772131037&fm=26&fmt=auto&gp=0.jpg" alt="image-20230207105245273"></p>
+<p>之前CSMA协议中,一个站点只会在发送前进行检查,如果信道空闲就发送</p>
+<p>现在CSMA/CD在CSMA的基础上,一个站点会在发送时同时检查,如果侦测到信道中有其他信号,立刻终止发送</p>
+<p>因为起码顺着该信号的传播方向上,如果再发送信号肯定是冲突了,那就不如立刻闭嘴不发了</p>
+<h6 id="冲突检测时间"><a href="#冲突检测时间" class="headerlink" title="冲突检测时间"></a>冲突检测时间</h6><p>首先考虑如图所示情况</p>
+<p><img src="https://raw.githubusercontent.com/DeutschBall/VideoBed/main/image-20230207110344621.png" class="lazyload placeholder" data-srcset="https://raw.githubusercontent.com/DeutschBall/VideoBed/main/image-20230207110344621.png" srcset="https://img2.baidu.com/it/u=2037979560,2772131037&fm=26&fmt=auto&gp=0.jpg" alt="image-20230207110344621"></p>
+<p>如果传输时间很短但是传播延迟很长,可能就存在双方均检测不到冲突或者只有一方能够检测到冲突的情形</p>
+<p>此时冲突废帧会被错误交付</p>
+<p>为了避免这种情况,就需要传输时间和传播时间有约束关系</p>
+<p>直接考虑距离最远的两个站点A,B的情况即可</p>
+<p><img src="https://raw.githubusercontent.com/DeutschBall/VideoBed/main/image-20230207111015408.png" class="lazyload placeholder" data-srcset="https://raw.githubusercontent.com/DeutschBall/VideoBed/main/image-20230207111015408.png" srcset="https://img2.baidu.com/it/u=2037979560,2772131037&fm=26&fmt=auto&gp=0.jpg" alt="image-20230207111015408"></p>
+<p>如果B在A的信号马上就要发到时才开始发送,直到B的信号被A侦听到时,A必须仍在发送</p>
+<p>也就是说<strong>最小传输时间应为最大传播时间的两倍</strong>,如下图</p>
+<blockquote>
+<p>因为A,B是两个距离最远的站点,因此是最大传播时间</p>
+</blockquote>
+<p><img src="https://raw.githubusercontent.com/DeutschBall/VideoBed/main/image-20230207111728369.png" class="lazyload placeholder" data-srcset="https://raw.githubusercontent.com/DeutschBall/VideoBed/main/image-20230207111728369.png" srcset="https://img2.baidu.com/it/u=2037979560,2772131037&fm=26&fmt=auto&gp=0.jpg" alt="image-20230207111728369"></p>
+<blockquote>
+<p>CSMA/CD网络中，带宽10Mbps，最大传播时间为25.6us，那么最小帧长度是多少？</p>
+<p>假设帧长是x,则传输时间是$T_{fr}=\frac{x}{10M}$</p>
+<p>由$T_{fr}\ge 2T_p$得到</p>
+<script type="math/tex; mode=display">
+\frac{x}{10\times 10^6}\ge 25.6\times 10^{-6}\times 2</script><p>即$x\ge 512bit$</p>
+<p>因此帧长最小为512比特</p>
+</blockquote>
+<h6 id="CSMA-CD算法流程"><a href="#CSMA-CD算法流程" class="headerlink" title="CSMA/CD算法流程"></a>CSMA/CD算法流程</h6><p><img src="https://raw.githubusercontent.com/DeutschBall/VideoBed/main/image-20230207112317356.png" class="lazyload placeholder" data-srcset="https://raw.githubusercontent.com/DeutschBall/VideoBed/main/image-20230207112317356.png" srcset="https://img2.baidu.com/it/u=2037979560,2772131037&fm=26&fmt=auto&gp=0.jpg" alt="image-20230207112317356"></p>
+<h5 id="CSMA-CA"><a href="#CSMA-CA" class="headerlink" title="CSMA/CA"></a>CSMA/CA</h5><p>Carrier Sense Multiple Access with Collision Avoidance,带冲突避免的载波侦听多路访问</p>
+<p>这个协议挺有意思</p>
+<p><img src="https://raw.githubusercontent.com/DeutschBall/VideoBed/main/image-20230207151754370.png" class="lazyload placeholder" data-srcset="https://raw.githubusercontent.com/DeutschBall/VideoBed/main/image-20230207151754370.png" srcset="https://img2.baidu.com/it/u=2037979560,2772131037&fm=26&fmt=auto&gp=0.jpg" alt="image-20230207151754370"></p>
+<p>IFS:Interframe Space,IFS 帧间间隔</p>
+<blockquote>
+<p>IFS用于定义一个站点的优先权,优先权高的站点,其IFS就短</p>
+<p>为啥IFS短了就意味着优先权高呢?这就需要了解协议如何工作的</p>
+</blockquote>
+<p>Contention Window 竞争窗口</p>
+<p>工作流程:</p>
+<p><img src="https://raw.githubusercontent.com/DeutschBall/VideoBed/main/image-20230207151820663.png" class="lazyload placeholder" data-srcset="https://raw.githubusercontent.com/DeutschBall/VideoBed/main/image-20230207151820663.png" srcset="https://img2.baidu.com/it/u=2037979560,2772131037&fm=26&fmt=auto&gp=0.jpg" alt="CSMA/CA" style="zoom:25%;" /></p>
+<p>1.首先检查信道是否空闲,如果不是,重新检查</p>
+<p>2.如果信道空闲,等待IFS时间</p>
+<p>3.等完了再检查一下信道是否空闲,如果忙,退回1.</p>
+<p>4.挑一个随机数$R\in[0,2^K)$,也就是在竞争窗口中抓阄</p>
+<p>5.等R个时间片,然后检查信道是否忙,如果忙,就等会不忙了再发送.如果不忙就发送</p>
+<p>6.发完了设置窗口期等待ACK回复,如果收到,则通信成功,否则K++,回头从1开始,如果K&gt;15则不再尝试,通信事变</p>
+<h3 id="以太网"><a href="#以太网" class="headerlink" title="以太网"></a>以太网</h3><p>低层协议的组成</p>
+<p><img src="https://raw.githubusercontent.com/DeutschBall/VideoBed/main/image-20230207155541312.png" class="lazyload placeholder" data-srcset="https://raw.githubusercontent.com/DeutschBall/VideoBed/main/image-20230207155541312.png" srcset="https://img2.baidu.com/it/u=2037979560,2772131037&fm=26&fmt=auto&gp=0.jpg" alt="image-20230207155541312"></p>
+<p>OSI规定的数据链路层分成两个子层,一个是LLC层,一个是MAC层.前者承上后者启下</p>
+<p>以太网是MAC的一种实现方式,并且是目前最成功的实现方式</p>
+<h4 id="MAC地址"><a href="#MAC地址" class="headerlink" title="MAC地址"></a>MAC地址</h4><h5 id="MAC地址规定"><a href="#MAC地址规定" class="headerlink" title="MAC地址规定"></a>MAC地址规定</h5><p>以太网地址是一个6字节数,每个网卡都有一个固定的MAC地址</p>
+<p>一个计算机可能由多张网卡,因此计算机可以有多个MAC地址</p>
+<p><code>ipconfig /all</code>即可查看</p>
+<figure class="highlight sh"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line">以太网适配器 以太网:</span><br><span class="line"></span><br><span class="line">   媒体状态  . . . . . . . . . . . . : 媒体已断开连接</span><br><span class="line">   连接特定的 DNS 后缀 . . . . . . . :</span><br><span class="line">   描述. . . . . . . . . . . . . . . : Realtek PCIe GbE Family Controller</span><br><span class="line">   物理地址. . . . . . . . . . . . . : 84-A9-38-F4-9B-69</span><br><span class="line">...</span><br><span class="line">  </span><br><span class="line">无线局域网适配器 WLAN:</span><br><span class="line"></span><br><span class="line">   连接特定的 DNS 后缀 . . . . . . . :</span><br><span class="line">   描述. . . . . . . . . . . . . . . : Intel(R) Wi-Fi 6 AX201 160MHz</span><br><span class="line">   物理地址. . . . . . . . . . . . . : 2C-6D-C1-98-7D-03</span><br><span class="line">....</span><br></pre></td></tr></table></figure>
+<p>以<code>2C-6D-C1-98-7D-03</code>为例子,最左边是最高位,</p>
+<p>称”第一个字节”为最左边的0x2C,第二个就是0x6D</p>
+<h5 id="特殊地址"><a href="#特殊地址" class="headerlink" title="特殊地址"></a>特殊地址</h5><p>如果一个MAC地址第一个字节的最低为是0,则该地址是一个单播地址,是1则为多播地址</p>
+<p>特殊的,如果MAC addr=FF:FF:FF:FF:FF:FF,则该地址是一个广播地址</p>
+<p>0x2C=00101100b,显然所有的物理网卡地址必然是一个单播地址</p>
+<p>怎么观察广播地址呢?可以观察ARP协议需要在以太网中广播寻找目标IP地址的主机</p>
+<p><img src="https://raw.githubusercontent.com/DeutschBall/VideoBed/main/image-20230207160905292.png" class="lazyload placeholder" data-srcset="https://raw.githubusercontent.com/DeutschBall/VideoBed/main/image-20230207160905292.png" srcset="https://img2.baidu.com/it/u=2037979560,2772131037&fm=26&fmt=auto&gp=0.jpg" alt="image-20230207160905292"></p>
+<p>源地址就是本机WLAN网卡的地址2C-6D-C1-98-7D-03,目的地址12个F,显然是一个广播</p>
+<p>wireshark已经自动根据本机WLAN网卡的<strong>前三个字节</strong>判断出本网卡产自Intel公司</p>
+<p>再一查好家伙made in 马来西亚</p>
+<p><img src="https://raw.githubusercontent.com/DeutschBall/VideoBed/main/image-20230207161145923.png" class="lazyload placeholder" data-srcset="https://raw.githubusercontent.com/DeutschBall/VideoBed/main/image-20230207161145923.png" srcset="https://img2.baidu.com/it/u=2037979560,2772131037&fm=26&fmt=auto&gp=0.jpg" alt="image-20230207161145923"></p>
+<p>同理华为公司也会买下前三个字节用来标志自己公司的网卡</p>
+<p><img src="https://raw.githubusercontent.com/DeutschBall/VideoBed/main/image-20230207161443085.png" class="lazyload placeholder" data-srcset="https://raw.githubusercontent.com/DeutschBall/VideoBed/main/image-20230207161443085.png" srcset="https://img2.baidu.com/it/u=2037979560,2772131037&fm=26&fmt=auto&gp=0.jpg" alt="image-20230207161443085"></p>
+<p>如果前三个字节是公司编号</p>
+<p>那么一个公司编号最多能够产$2^{24}\approx400万$张网卡</p>
+<p>如果一部手机使用一个wifi网卡,光中国就有13亿人,假设有1亿人用华为手机,显然一个公司编号是不够用的</p>
+<h5 id="网络序"><a href="#网络序" class="headerlink" title="网络序"></a>网络序</h5><p>字节序不变,但是每个字节内的比特位分别调转(不是取反,是前后调转)</p>
+<p><img src="https://raw.githubusercontent.com/DeutschBall/VideoBed/main/image-20230207161313727.png" class="lazyload placeholder" data-srcset="https://raw.githubusercontent.com/DeutschBall/VideoBed/main/image-20230207161313727.png" srcset="https://img2.baidu.com/it/u=2037979560,2772131037&fm=26&fmt=auto&gp=0.jpg" alt="image-20230207161313727"></p>
+<h4 id="MAC帧格式"><a href="#MAC帧格式" class="headerlink" title="MAC帧格式"></a>MAC帧格式</h4><p>MAC帧有两种格式,</p>
+<p>不常用的802.2LLC帧,这是IEEE802工作组制定的答辩</p>
+<p>最常用的EthernetV2帧</p>
+<p><img src="https://raw.githubusercontent.com/DeutschBall/VideoBed/main/image-20230207162023980.png" class="lazyload placeholder" data-srcset="https://raw.githubusercontent.com/DeutschBall/VideoBed/main/image-20230207162023980.png" srcset="https://img2.baidu.com/it/u=2037979560,2772131037&fm=26&fmt=auto&gp=0.jpg" alt="image-20230207162023980"></p>
+<p>MAC帧=MAC头+MAC数据+FCS</p>
+<p>其中MAC头包括目的地址,源地址,MAC数据类型</p>
+<p>FCS就是校验和</p>
+<p>MAC数据一般是IP数据报,包括IPv4包或者IPv6数据包</p>
+<h5 id="不合法的MAC帧"><a href="#不合法的MAC帧" class="headerlink" title="不合法的MAC帧"></a>不合法的MAC帧</h5><p>以下有一则为不合法MAC帧</p>
+<p>数据字段的长度与长度字段的值不一致；</p>
+<p>帧的长度不是整数个字节；</p>
+<p>用收到的帧检验序列 FCS 查出有差错；</p>
+<p><strong>数据字段的长度不在 46 ~ 1500 字节之间；</strong></p>
+<p> <strong>MAC 帧长度不在64 ~ 1518 字节之间；</strong></p>
+<p>对于检查出的无效 MAC 帧就简单地丢弃，以太网<strong>不负责重传丢弃的帧。</strong> </p>
+<p>这里对帧长度有一个规定,[64,1518]为啥会有这两头的限制呢?</p>
+<h5 id="合法帧长度"><a href="#合法帧长度" class="headerlink" title="合法帧长度"></a>合法帧长度</h5><p>[64,1518]bytes</p>
+<p>由于有限以太网使用CSMA/CD协议,因此需要保证最小传输时间大于等于两倍的最大传播时间</p>
+<p>而这两个时间的关系,关乎帧长度啥事呢?</p>
+<p>显然帧长越长,传输时间就越长,可以推测帧长为64bytes时达到临界值</p>
+<p>根据802.3规定,以太网最长2500米,带宽10Mbps,四个中继器,最坏情况下,往返时间(也就是两倍的最长传播时间)大约是50μs.</p>
+<p>那么传输速度应该大于50μs.</p>
+<p>又带宽是10Mbps,在50微妙内能够发送$50\times 10^{-6}s\times 10\times 10^6bps=500bit$</p>
+<p>增加安全边际,往上取整到512bit=64byte</p>
+<p>因此规定最小帧长就是64byte</p>
+<p>那么又为啥限制最长帧长为1500呢?</p>
+<p>因为网络是多台计算机共享的,如果一台主机一直喋喋不休地说,其他主机就得等着,因此一句话不能说太长</p>
+<p>于是人为规定为最长1518byte</p>
+<p>那么在以太网上的IP包长度就跟着被限制到[48,1500]字节</p>
+<p>这个1500字节也就是MTU,最大传输单元</p>
+<h3 id="网络连接"><a href="#网络连接" class="headerlink" title="网络连接"></a>网络连接</h3><h4 id="数据链路层设备"><a href="#数据链路层设备" class="headerlink" title="数据链路层设备"></a>数据链路层设备</h4><p>网桥,集线器,二层交换机都是链路层设备</p>
+<div class="table-container">
+<table>
+<thead>
+<tr>
+<th>一层设备</th>
+<th>结构</th>
+<th>作用</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>中继器</td>
+<td><img src="https://raw.githubusercontent.com/DeutschBall/VideoBed/main/image-20230207210513001.png" class="lazyload placeholder" data-srcset="https://raw.githubusercontent.com/DeutschBall/VideoBed/main/image-20230207210513001.png" srcset="https://img2.baidu.com/it/u=2037979560,2772131037&fm=26&fmt=auto&gp=0.jpg" alt="image-20230207210513001"></td>
+<td>再生信号(不是放大信号),延长通信距离</td>
+</tr>
+<tr>
+<td>集线器</td>
+<td><img src="https://raw.githubusercontent.com/DeutschBall/VideoBed/main/image-20230207210909500.png" class="lazyload placeholder" data-srcset="https://raw.githubusercontent.com/DeutschBall/VideoBed/main/image-20230207210909500.png" srcset="https://img2.baidu.com/it/u=2037979560,2772131037&fm=26&fmt=auto&gp=0.jpg" alt="image-20230207210909500"><br />所有计算机同处于一个冲突域<br />集线器从一个端口进来的包会被无脑拷贝到所有的出端口</td>
+<td>只是把多个主机联通,<br />相当于多通水管<br />多端口的中继器</td>
+</tr>
+<tr>
+<td></td>
+<td></td>
+</tr>
+</tbody>
+</table>
+</div>
+<div class="table-container">
+<table>
+<thead>
+<tr>
+<th>二层设备</th>
+<th>结构</th>
+<th>作用</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>网桥</td>
+<td><img src="https://raw.githubusercontent.com/DeutschBall/VideoBed/main/image-20230207211056989.png" class="lazyload placeholder" data-srcset="https://raw.githubusercontent.com/DeutschBall/VideoBed/main/image-20230207211056989.png" srcset="https://img2.baidu.com/it/u=2037979560,2772131037&fm=26&fmt=auto&gp=0.jpg" alt="image-20230207211056989" style="zoom:25%;" /><br />网桥可以检查目标地址,根据自己学习建立的转发表,决定从哪个端口转发,相对集线器聪明了不少</td>
+<td>减小冲突域,网桥的一个接口是一个冲突域<br />但是所有达到接口都在同一个广播域</td>
+</tr>
+<tr>
+<td>二层交换机</td>
+<td><img src="https://raw.githubusercontent.com/DeutschBall/VideoBed/main/image-20230207163904317.png" class="lazyload placeholder" data-srcset="https://raw.githubusercontent.com/DeutschBall/VideoBed/main/image-20230207163904317.png" srcset="https://img2.baidu.com/it/u=2037979560,2772131037&fm=26&fmt=auto&gp=0.jpg" alt="image-20230207163904317" style="zoom:25%;" /></td>
+<td>消除冲突域,从此不再有冲突<br />相当于带阀门的多通水管<br />但是所有接口都在同一广播域</td>
+</tr>
+</tbody>
+</table>
+</div>
+<p>区分两个术语:广播域,冲突域</p>
+<p>广播域:能够接收广播帧的所有设备的集合</p>
+<p>冲突域:所有共享介质(比如电缆)都是冲突域</p>
+<p>显然广播域的范围要大于等于冲突域</p>
+<p><img src="https://raw.githubusercontent.com/DeutschBall/VideoBed/main/image-20230207213901157.png" class="lazyload placeholder" data-srcset="https://raw.githubusercontent.com/DeutschBall/VideoBed/main/image-20230207213901157.png" srcset="https://img2.baidu.com/it/u=2037979560,2772131037&fm=26&fmt=auto&gp=0.jpg" alt="image-20230207213901157"></p>
+<p>以太网:有线局域网的一种实现,链路层使用CSMA/CD技术</p>
+<h5 id="网桥"><a href="#网桥" class="headerlink" title="网桥"></a>网桥</h5><h6 id="爱学习の网桥"><a href="#爱学习の网桥" class="headerlink" title="爱学习の网桥"></a>爱学习の网桥</h6><p><img src="https://raw.githubusercontent.com/DeutschBall/VideoBed/main/image-20230207211927143.png" class="lazyload placeholder" data-srcset="https://raw.githubusercontent.com/DeutschBall/VideoBed/main/image-20230207211927143.png" srcset="https://img2.baidu.com/it/u=2037979560,2772131037&fm=26&fmt=auto&gp=0.jpg" alt="image-20230207211927143"></p>
+<p>刚接入局域网的网桥是个傻子,啥也不知道,但是他很快就会知道</p>
+<p>一开始他的MAC:Port映射表是空的</p>
+<p>当A@LAN1 向 D@LAN2发送一个数据帧之后,这个帧显然必须从网桥的1号端口进入.网桥从帧中得知,源地址A在1端口对应的LAN上,于是将A:1写入映射表</p>
+<p>如果D回复A收到,立刻就会把D的MAC暴露给网桥,网桥就会记录D:2</p>
+<p>D不回复也没关系,反正D只要一说话立刻就会被网桥学会</p>
+<h6 id="环路问题"><a href="#环路问题" class="headerlink" title="环路问题"></a>环路问题</h6><p><img src="https://raw.githubusercontent.com/DeutschBall/VideoBed/main/image-20230207212358099.png" class="lazyload placeholder" data-srcset="https://raw.githubusercontent.com/DeutschBall/VideoBed/main/image-20230207212358099.png" srcset="https://img2.baidu.com/it/u=2037979560,2772131037&fm=26&fmt=auto&gp=0.jpg" alt="image-20230207212358099"></p>
+<p>如果有两个网桥同时连接了两个LAN</p>
+<p>那么一个LAN发出的帧会同时被两个网桥转发,导致另一个LAN中出现两次该帧</p>
+<h6 id="生成树算法"><a href="#生成树算法" class="headerlink" title="生成树算法"></a>生成树算法</h6><p>生成树算法用于建立多个LAN的最优联通路径</p>
+<p>这里的最优可能是最小跳数,最小延迟,最大带宽等等</p>
+<p>假设从网桥到LAN跳数为1，从LAN到网桥跳数为0。</p>
+<blockquote>
+<p>为啥要这样假设呢?</p>
+<p>因为网桥不会主动向一个LAN发送帧,除非该帧的目的在这个LAN中</p>
+<p>而一个LAN的帧要想传送到另一个LAN,必须要经过网桥</p>
+<p>也就是说,网桥转发帧需要一定的代价,应该尽量减少转发量</p>
+<p>而LAN向网桥发送帧这是不可阻阻挡的,几乎没有代价</p>
+<p>因此有这么一个假设</p>
+</blockquote>
+<p>首先将网桥和LAN进行有向图建模,并标注边权</p>
+<p><img src="https://raw.githubusercontent.com/DeutschBall/VideoBed/main/image-20230207212859184.png" class="lazyload placeholder" data-srcset="https://raw.githubusercontent.com/DeutschBall/VideoBed/main/image-20230207212859184.png" srcset="https://img2.baidu.com/it/u=2037979560,2772131037&fm=26&fmt=auto&gp=0.jpg" alt="image-20230207212859184"></p>
+<blockquote>
+<p>为啥没有两个网桥直接连接?或者两个LAN直接连接?</p>
+<p>这不废话吗</p>
+<p>两个网桥连接和只用一个网桥不一样吗?</p>
+<p>两个LAN连接就是一个LAN</p>
+<blockquote>
+<p>两个LAN连接也得使用网桥啊(</p>
+</blockquote>
+</blockquote>
+<p>生成树算法:</p>
+<p>spanning tree algorithm:</p>
+<p>1.每个网桥广播ID,选择最小的ID作为根网桥</p>
+<p><strong>2.找出从根网桥到其它网桥或LAN的最短路径</strong></p>
+<p>3.最短路径组合生成最短的树</p>
+<p>4.标记转发端口和阻塞端口</p>
+<p>注意生成树算法目的是,找出从根网桥到其他网桥和LAN的最短路,</p>
+<p>而不是为每个LAN找出到其他各个LAN的最短路</p>
+<p>使用生成树算法之后,阻塞端口不再使用,转发端口活跃</p>
+<h5 id="交换机"><a href="#交换机" class="headerlink" title="交换机"></a>交换机</h5><p>交换机相对于集线器的优点:</p>
+<p>1.每个端口是一个冲突域</p>
+<p>2.根据目标MAC地址查转发表,决定发往哪个端口</p>
+<p>3.全双工,由于没有冲突域,不需要CSMA/CD协议</p>
+<p>4.有缓存,各个接口的带宽可以不同</p>
+<h4 id="网络层设备"><a href="#网络层设备" class="headerlink" title="网络层设备"></a>网络层设备</h4><p>链路层设备关心帧的MAC地址</p>
+<p>网络层设备关心包的IP地址</p>
+<p>三层设备就一个三层交换机和一个路由器</p>
+<p>这个三层交换机不伦不类,它既有二层交换机那个交换转发的功能,也有路由器的路由功能</p>
+<p>两者本身上的区别是,三层交换机主要是硬件驱动的,但是路由器是CPU+操作系统软件驱动的.这就导致三层交换机的效率远快于路由器</p>
+<p>两者功能上的区别是,三层交换机用于连接相同性质的网络,比如连接两个LAN:192.168.2.1/24和192.168.1.1/24</p>
+<p>但是路由器主要用于不同类型的网络连接,比如因特网和局域网的连接,入户网线可能给一个互联网的公网地址,需要使用一个路由器NAT转化为一个LAN.并且实际上的路由选择,负荷分担,链路备份,和其他网络交换路由信息,都是路由器实现的</p>
+<p>路由功能:当IP报文抵达路由器时,决定转发给哪一个下一跳路由器</p>
+<p>这个决策是基于路由器的路由表做出的</p>
+<p>路由表可以人工填写静态的,也可以让路由器自己学,就跟网桥交换机的转发表差不多</p>
+<h4 id="网关"><a href="#网关" class="headerlink" title="网关"></a>网关</h4><p>比较特殊的路由器</p>
+<p>一个LAN内的主机如果想要跨LAN访问另一个主机,只通过二层交换机是做不到的,因为二层交换机是连IP地址都不知道的傻子.网关就是一个LAN和外部网络连接的关口.LAN内的主机只要是想和外部通信,无脑往网关发包就可以了,网关负责决定这个包如何路由</p>
+<h4 id="虚拟局域网"><a href="#虚拟局域网" class="headerlink" title="虚拟局域网"></a>虚拟局域网</h4><p>交换机可以隔离冲突域但是无法隔离广播域</p>
+<p>划分虚拟局域网之后可以隔离冲突域和广播域</p>
+<p>在一个交换机上划分了VLAN,实际上相当于虚拟出多个交换机,每个交换机都分别连接到路由器上,形成多个LAN,并且这几个LAN互不连通.这个路由器就是各个LAN的网关</p>
+<h5 id="等效结构"><a href="#等效结构" class="headerlink" title="等效结构"></a>等效结构</h5><p>如图所示</p>
+<p><img src="https://raw.githubusercontent.com/DeutschBall/VideoBed/main/image-20230207220800643.png" class="lazyload placeholder" data-srcset="https://raw.githubusercontent.com/DeutschBall/VideoBed/main/image-20230207220800643.png" srcset="https://img2.baidu.com/it/u=2037979560,2772131037&fm=26&fmt=auto&gp=0.jpg" alt="image-20230207220800643"></p>
+<p>这实际上就相当于</p>
+<p><img src="https://raw.githubusercontent.com/DeutschBall/VideoBed/main/image-20230207220913692.png" class="lazyload placeholder" data-srcset="https://raw.githubusercontent.com/DeutschBall/VideoBed/main/image-20230207220913692.png" srcset="https://img2.baidu.com/it/u=2037979560,2772131037&fm=26&fmt=auto&gp=0.jpg" alt="image-20230207220913692"></p>
+<h5 id="如何实现"><a href="#如何实现" class="headerlink" title="如何实现"></a>如何实现</h5><p><img src="https://raw.githubusercontent.com/DeutschBall/VideoBed/main/image-20230207221014728.png" class="lazyload placeholder" data-srcset="https://raw.githubusercontent.com/DeutschBall/VideoBed/main/image-20230207221014728.png" srcset="https://img2.baidu.com/it/u=2037979560,2772131037&fm=26&fmt=auto&gp=0.jpg" alt="image-20230207221014728"></p>
+<p>如果一个VLAN跨越了两个交换机,那么这个VLAN中两个计算机通过交换机通信时,交换机在发往另一个交换机之前,检查A计算机所处VLAN,然后在链路层帧后面加上VLAN标志,这样另一个交换机就知道把改帧转发给哪一个目标VLAN了</p>
+<p><img src="https://raw.githubusercontent.com/DeutschBall/VideoBed/main/image-20230207223219150.png" class="lazyload placeholder" data-srcset="https://raw.githubusercontent.com/DeutschBall/VideoBed/main/image-20230207223219150.png" srcset="https://img2.baidu.com/it/u=2037979560,2772131037&fm=26&fmt=auto&gp=0.jpg" alt="image-20230207223219150"></p>
+<p>如图所示的拓扑中,经过实验,PC9@192.168.10.1 ping PC13@192.168.10.3时,ICMP报文会被LSW5交换机准确地从GE0/0/4口转发到GE0/0/2端口,报文中也没有体现VLAN</p>
+<p><img src="https://raw.githubusercontent.com/DeutschBall/VideoBed/main/image-20230207223605022.png" class="lazyload placeholder" data-srcset="https://raw.githubusercontent.com/DeutschBall/VideoBed/main/image-20230207223605022.png" srcset="https://img2.baidu.com/it/u=2037979560,2772131037&fm=26&fmt=auto&gp=0.jpg" alt="image-20230207223605022"></p>
+<p>PC13@192.168.10.3 ping PC11@192.168.10.2时会经过两个路由器的Trunk端口,其报文中,以太网头和IP头之间加上了VLAN编号,占用四个字节,这个玩意叫做tag(标签)</p>
+<p><img src="https://raw.githubusercontent.com/DeutschBall/VideoBed/main/image-20230207223506096.png" class="lazyload placeholder" data-srcset="https://raw.githubusercontent.com/DeutschBall/VideoBed/main/image-20230207223506096.png" srcset="https://img2.baidu.com/it/u=2037979560,2772131037&fm=26&fmt=auto&gp=0.jpg" alt="image-20230207223506096"></p>
+<h5 id="交换机端口类型"><a href="#交换机端口类型" class="headerlink" title="交换机端口类型"></a>交换机端口类型</h5><p>access类型,只属于一个VLAN,用于连接计算机</p>
+<p>trunk类型,主干道,可以设置允许哪些VLAN通过,用于连接交换机</p>
+<p>hybrid类型,类似于trunk,但是hybrid允许通过改接口的帧不带VLAN tag,而trunk要求必须带VLAN tag(除了缺省VLAN,默认是VLAN 1,的帧不需要带tag)</p>
+<p>当端口接收到不带VLAN Tag的报文后，则将报文转发到<strong>属于缺省VLAN的端口</strong>(如果设置了端口的缺省VLAN ID,默认是VLAN 1)。</p>
+<p>当端口发送带有VLAN Tag的报文时，如果该报文的VLAN ID与端口缺省的VLAN ID相同，则系统将去掉报文的VLAN Tag，然后再发送该报文。</p>
+
+      </div>
+      <div class="post-tags-categories">
+        
+        <div class="tags">
+          
+            <a href="/tags/%E8%AE%A1%E7%BD%91/" class="">
+              计网
+            </a>
+          
+        </div>
+        
+      </div>
+      
+    </article>
+    <!-- 上一篇文章和下一篇文章 -->
+    
+      <!-- 文章详情页的上一页和下一页 -->
+<div class="post-nav">
+
+
+
+
+
+  
+  <div class="post-nav-next post-nav-item">
+    <div class="post-nav-img" style="background-size: cover; 
+      background-position: center center;">
+      <img class="lazyload lazyload placeholder" src="/medias/12.jpg" class="lazyload placeholder" data-srcset="/medias/12.jpg" srcset="https://img2.baidu.com/it/u=2037979560,2772131037&fm=26&fmt=auto&gp=0.jpg" src="" alt="">
+    </div>
+    <a href="/2023/01/30/Spring/" class="post-nav-link">
+      <div class="title">
+        Next: <i class="fas fa-angle-right"></i>
+        <div class="title-text">Spring Core</div>
+      </div>
+      <!-- <div class="content">
+        Spring CoreSpring Ioc容器容器配置文件maven管理的Spring项目中,spring配置文件一半放
+      </div> -->
+    </a>
+  </div>
+
+</div>
+
+    
+    
+
+    <!-- 打赏 -->
+    
+
+    <!-- 分享 -->
+    
+      <!-- https://github.com/overtrue/share.js -->
+<!-- 文章详情页的分享 -->
+<div class="social-share" data-sites="twitter,facebook,google,qq,qzone,wechat,weibo,douban,linkedin" data-wechat-qrcode-helper="<p>微信扫一扫即可分享！</p>"></div>
+
+<script src="/js/shareJs/social-share.min.js"></script>
+</script>
+
+<style>
+  .social-share {
+    margin: 20px 0;
+  }
+</style>
+
+
+    
+    
+    <!-- 评论 -->
+    <!-- 评论 -->
+
+  <div id="myComment">
+    
+      
+<section id="comments" style="padding: 1em; margin: 15px auto;"
+	class="animated bounceInUp">
+	<div id="vcomment" class="comment"></div>
+</section>
+<style>
+	#comments {
+		background: rgba(255,255,255,0.9);
+	}
+	#veditor {
+		background-image: url('https://raw.githubusercontent.com/DeutschBall/test/master/R.3c3e443dfe9ddbddc93730c482ed0461');
+		background-size: contain;
+		background-repeat: no-repeat;
+		background-position: right;
+		background-color: rgba(255, 255, 255, 0);
+		resize: vertical;
+	}
+	#veditor:focus{
+		background-position-y: 200px;
+		transition: all 0.2s ease-in-out 0s;
+	}
+	#vcomment .vcards .vcard .vh .vhead .vtag.vvisitor {
+		background-color: #42b983;
+	}
+	.v[data-class=v] .vbtn:active, .v[data-class=v] .vbtn:hover {
+		color: #42b983;
+		border-color: #42b983;
+	}
+	#vcomment .vcards .vcard .vhead .vsys i {
+		display: none;
+	}
+	/* 底部valine链接 */
+	#vcomment .vpower {
+		display: none;
+	}
+	
+	/* 底下注释是修改 名称和邮箱和网址输入框的样式 */
+	/* #vcomment .vheader {
+		display: flex;
+		justify-content: space-around;
+	}
+	
+	#vcomment .vheader .vnick {
+		width: 31%;
+		border: 2px solid #dedede;
+		padding-left: 10px;
+		padding-right: 10px;
+		border-radius: 5px
+	}
+
+	#vcomment .vheader .vmail {
+		width: 31%;
+		border: 2px solid #dedede;
+		padding-left: 10px;
+		padding-right: 10px;
+		border-radius: 5px
+	}
+
+	#vcomment .vheader .vlink {
+		width: 31%;
+		border: 2px solid #dedede;
+		padding-left: 10px;
+		padding-right: 10px;
+		border-radius: 5px
+	} */
+
+	img.vimg {
+		transition: all 1s;
+		/* 头像旋转时间为 1s */
+	}
+
+	img.vimg:hover {
+		transform: rotate(360deg);
+		-webkit-transform: rotate(360deg);
+		-moz-transform: rotate(360deg);
+		-o-transform: rotate(360deg);
+		-ms-transform: rotate(360deg);
+	}
+
+	#vcomment .vcards .vcard {
+		padding: 15px 20px 0 20px;
+		border-radius: 10px;
+		margin-bottom: 15px;
+		box-shadow: 0 0 4px 1px rgba(0, 0, 0, .12);
+		transition: all .3s
+	}
+
+	#vcomment .vcards .vcard:hover {
+		box-shadow: 0 0 8px 3px rgba(0, 0, 0, .12)
+	}
+
+	#vcomment .vcards .vcard .vh .vcard {
+		border: none;
+		box-shadow: none;
+	}
+</style>
+    
+  </div>
+
+<!-- comment script in themes\hexo-theme-bamboo\layout\_partial\scripts\index.ejs -->
+
+
+  </div>
+
+  <!-- 目录 -->
+  <!-- 文章详情页右侧目录 -->
+
+  <div class="toc-aside">
+    <div class="toc-main">
+      <div class="toc-aside-title">
+        <i class="fas fa-list-ul" aria-hidden="true"></i><span>catalog</span>
+        
+          <div class="toc-open-close">catalog</div>
+        
+      </div>
+      <div class="toc-content">
+        <div class="toc"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 手机端目录按钮 -->
+  <div id="toc-mobile-btn">
+    <i class="fas fa-list-ul" aria-hidden="true"></i>
+  </div>
+
+
+<script>
+  function closeToc(init) {
+    $(".toc-aside").css({'width': 0, 'padding': 0, 'transition': init ?  'noe' : 'width 0.3s' });
+    $(".toc-content").css({'width': 0});
+    $(".toc-aside-title span, .toc-aside-title i").css({'display': 'none'});
+    $(".main-content").css({'width': '75%', 'margin': '10px auto'});
+  };
+  function openToc() {
+    $(".main-content").css({'width': '65%', 'margin-right': '10px', 'margin-left': 'calc(35% - 350px)'});
+    $(".toc-aside").css({'width': '300px', 'padding': '0 10px', 'transition': 'width 0.3s'});
+    $(".toc-content").css({'width': '300px'});
+    $(".toc-aside-title span, .toc-aside-title i").css({'display': 'inline-block'});
+  }
+  function openBtnClickFn () {
+    let openOrCloseBtn = $('.toc-aside .toc-aside-title .toc-open-close');
+    let open = eval('' || 'true');
+    openOrCloseBtn.click(function() {
+      if (open) {
+        closeToc();
+        open = false;
+      } else {
+        openToc();
+        open = true;
+      }
+    });
+  };
+  openBtnClickFn();
+  initCloseTocWidth(true);
+
+  function initCloseTocWidth(init) {
+    if (window.innerWidth >= 992) {
+      let isClose = false;
+      isClose && closeToc(init)
+    }
+  }
+
+  document.addEventListener('pjax:complete', function () {
+    $(".toc-aside").css({'transition': 'no'});
+  })
+  document.addEventListener('pjax:complete', function () {
+    openBtnClickFn();
+  })
+  
+</script>
+
+  <!-- 图片放大 Wrap images with fancybox support -->
+  <script src="/js/wrapImage.js"></script>
+</div>
+
+<!-- 文章详情页背景图 -->
+<div id="appBgSwiper" style="position: fixed;left: 0;top: 0;width: 100%;height: 100%;z-index: -2;"
+	:style="{'background-color': bgColor ? bgColor : 'transparent'}">
+	<transition-group tag="ul" :name="names">
+		<li v-for='(image,index) in img' :key='index' v-show="index === mark" class="bg-swiper-box">
+			<img :src="image" class="bg-swiper-img no-lazy">
+		</li>
+	</transition-group>
+</div>
+<script>
+	var vm = new Vue({
+		el: '#appBgSwiper',
+		data: {
+			names: '' || 'fade' || 'fade', // translate-fade fade
+			mark: 0,
+			img: [],
+			bgColor: '',
+			time: null
+		},
+		methods: {   //添加方法
+			change(i, m) {
+				if (i > m) {
+					// this.names = 'fade';
+				} else if (i < m) {
+					// this.names = 'fade';
+				} else {
+					return;
+				}
+				this.mark = i;
+			},
+			prev() {
+				// this.names = 'fade';
+				this.mark--;
+				if (this.mark === -1) {
+					this.mark = 3;
+					return
+				}
+			},
+			next() {
+				// this.names = 'fade';
+				this.mark++;
+				if (this.mark === this.img.length) {
+					this.mark = 0;
+					return
+				}
+			},
+			autoPlay() {
+				// this.names = 'fade';
+				this.mark++;
+				if (this.mark === this.img.length) {
+					this.mark = 0;
+					return
+				}
+			},
+			play() {
+				let bgImgDelay = '' || '180000'
+				let delay = parseInt(bgImgDelay) || 180000;
+				this.time = setInterval(this.autoPlay, delay);
+			},
+			enter() {
+				clearInterval(this.time);
+			},
+			leave() {
+				this.play();
+			}
+		},
+		created() {
+			this.play()
+		},
+		beforeDestroy() {
+			clearInterval(this.time);
+		},
+		mounted() {
+			let prop = '' || '';
+			let isImg = prop.includes('.bmp') || prop.includes('.jpg') || prop.includes('.png') || prop.includes('.tif') || prop.includes('.gif') || prop.includes('.pcx') || prop.includes('.tga') || prop.includes('.exif') || prop.includes('.fpx') || prop.includes('.psd') || prop.includes('.cdr') || prop.includes('.pcd') || prop.includes('.dxf') || prop.includes('.ufo') || prop.includes('.eps') || prop.includes('.ai') || prop.includes('.raw') || prop.includes('.WMF') || prop.includes('.webp') || prop.includes('.jpeg') || prop.includes('http://') || prop.includes('https://')
+			if (isImg) {
+				let img = prop.split(',');
+				let configRoot = '/'
+				let arrImg = [];
+				img.forEach(el => {
+					var Expression = /http(s)?:\/\/([\w-]+\.)+[\w-]+(\/[\w- .\/?%&=]*)?/;
+					var objExp = new RegExp(Expression);
+
+					if (objExp.test(el)) {
+						// http or https
+						arrImg.push(el);
+					} else {
+						// 非http or https开头
+						// 本地文件
+						let firstStr = el.charAt(0);
+						if (firstStr == '/') {
+							el = el.substr(1); // 删除第一个字符 '/',因为 configRoot最后一个字符为 /
+						}
+						el = configRoot + el;
+						arrImg.push(el);
+					}
+				})
+				this.img = arrImg;
+			} else {
+				this.bgColor = prop;
+			}
+		}
+	})
+</script>
+
+<style>
+	.bg-swiper-box {
+		position: absolute;
+		display: block;
+		width: 100%;
+		height: 100%;
+	}
+
+	.bg-swiper-img {
+		object-fit: cover;
+		width: 100%;
+		height: 100%;
+	}
+</style>
+
+
+  <script>
+  // https://github.com/theme-next/hexo-theme-next/blob/master/layout/_third-party/math/mathjax.swig
+  if (typeof MathJax === 'undefined') {
+    window.MathJax = {
+      loader: {
+        source: {
+          '[tex]/amsCd': '[tex]/amscd',
+          '[tex]/AMScd': '[tex]/amscd'
+        }
+      },
+      tex: {
+        inlineMath: {'[+]': [['$', '$']]},
+        tags: 'ams'
+      },
+      options: {
+        renderActions: {
+          findScript: [10, doc => {
+            document.querySelectorAll('script[type^="math/tex"]').forEach(node => {
+              const display = !!node.type.match(/; *mode=display/);
+              const math = new doc.options.MathItem(node.textContent, doc.inputJax[0], display);
+              const text = document.createTextNode('');
+              node.parentNode.replaceChild(text, node);
+              math.start = {node: text, delim: '', n: 0};
+              math.end = {node: text, delim: '', n: 0};
+              doc.math.push(math);
+            });
+          }, '', false],
+          insertedScript: [200, () => {
+            document.querySelectorAll('mjx-container').forEach(node => {
+              let target = node.parentNode;
+              if (target.nodeName.toLowerCase() === 'li') {
+                target.parentNode.classList.add('has-jax');
+              }
+            });
+          }, '', false]
+        }
+      }
+    };
+    (function () {
+      var script = document.createElement('script');
+      script.src = 'https://cdn.jsdelivr.net/npm/mathjax@3.0/es5/tex-mml-chtml.js';
+      script.defer = true;
+      document.head.appendChild(script);
+    })();
+  } else {
+    // 文章章节标题不能为 “MathJax” ，否则会报错。
+    MathJax.startup.document.state(0);
+    MathJax.texReset();
+    MathJax.typeset();
+  }
+</script>
+
+
+
+
+  <script>
+  function loadMermaid() {
+    if (document.getElementsByClassName('mermaid').length) {
+      if (window.mermaidJsLoad) mermaid.init()
+      else {
+        loadScript('https://cdn.jsdelivr.net/npm/mermaid/dist/mermaid.min.js').then(() => {
+          window.mermaidJsLoad = true
+          mermaid.initialize({
+            theme: 'default',
+          })
+          if ('true') {
+            mermaid.init();
+          }
+        })
+      }
+    }
+  };
+  document.addEventListener("DOMContentLoaded", function () {
+    loadMermaid();
+  })
+
+  document.addEventListener('pjax:complete', function () {
+    loadMermaid();
+  })
+  
+</script>
+
+
+      </main>
+    </div>
+
+    <!-- 页脚 -->
+    
+  
+  <div class="footer bg-color">
+    <div class="footer-main">
+      
+        
+          <div class="link">
+            
+          </div>
+        
+      
+        
+          <div class="footer-copyright">
+            <p>Copyright © 2019 - 2020 <a target="_blank" rel="noopener" href="https://github.com/yuang01">Deutschball</a> | Powered by <a target="_blank" rel="noopener" href="https://hexo.io/zh-cn/docs/">Deutschball</a> | Theme <a target="_blank" rel="noopener" href="https://github.com/yuang01/theme">Bamboo</a> </p>
+
+          </div>
+        
+      
+        
+          
+        
+      
+        
+          <div class="footer-custom">
+            
+          </div>
+        
+      
+    </div>
+  </div>
+
+<script src='https://unpkg.com/mermaid@/dist/mermaid.min.js'></script>
+<script>
+  if (window.mermaid) {
+    mermaid.initialize({theme: 'forest'});
+  }
+</script>
+
+
+
+
+    <!-- 渲染暗黑按钮 -->
+    
+    <!-- 渲染回到顶部按钮 -->
+    
+      <div class="goTop top-btn-color" pointer>
+  <i class="fas fa-arrow-up" aria-hidden="true"></i>
+</div>
+<script src="/js/goTop.js"></script>
+
+    
+    <!-- 渲染左下角音乐播放器 -->
+    
+
+    <!-- 图片放大 -->
+    
+      <script src="/js/fancybox/jquery.fancybox.min.js"></script>
+    
+
+    <!-- 百度解析 -->
+    <!-- Baidu Analytics -->
+
+    <!-- Baidu Push -->
+
+<script>
+    (function () {
+        var bp = document.createElement('script');
+        var curProtocol = window.location.protocol.split(':')[0];
+        if (curProtocol === 'https') {
+            bp.src = 'https://zz.bdstatic.com/linksubmit/push.js';
+        } else {
+            bp.src = 'http://push.zhanzhang.baidu.com/push.js';
+        }
+        var s = document.getElementsByTagName("script")[0];
+        s.parentNode.insertBefore(bp, s);
+    })();
+</script>
+
+    
+    <!-- 背景彩带 -->
+    
+      <script type="text/javascript" size="100" alpha='0.4' zIndex="-1" src="/js/ribbon.min.js"></script>
+    
+
+    <script src="/js/utils/index.js"></script>
+    <script src="/js/app.js"></script>
+    
+    <!-- 文章目录所需js -->
+<link href="/js/tocbot/tocbot.css" rel="stylesheet">
+<script src="/js/tocbot/tocbot.min.js"></script>
+
+<script>
+  var headerEl = 'h2, h3, h4, h5, h6',  //headers 
+    content = '.post-detail',//文章容器
+    idArr = {};  //标题数组以确定是否增加索引id
+  //add #id
+  var option = {
+    // Where to render the table of contents.
+    tocSelector: '.toc',
+    // Where to grab the headings to build the table of contents.
+    contentSelector: content,
+    // Which headings to grab inside of the contentSelector element.
+    headingSelector: headerEl,
+    scrollSmooth: true,
+    scrollSmoothOffset: -80,
+    headingsOffset: -($(window).height() * 0.4 - 45),
+    positionFixedSelector: '.toc-main',
+    positionFixedClass: 'is-position-fixed',
+    fixedSidebarOffset: 'auto',
+    activeLinkClass: 'is-active-link',
+    // onClick: function (e) {},
+  }
+  if ($('.toc').length > 0) {
+
+    $(content).children(headerEl).each(function () {
+      //去除空格以及多余标点
+      var headerId = $(this).text().replace(/[\s|\~|`|\!|\@|\#|\$|\%|\^|\&|\*|\(|\)|\_|\+|\=|\||\|\[|\]|\{|\}|\;|\:|\"|\'|\,|\<|\.|\>|\/|\?|\：|\，|\。]/g, '');
+
+      headerId = headerId.toLowerCase();
+      if (idArr[headerId]) {
+        //id已经存在
+        $(this).attr('id', headerId + '-' + idArr[headerId]);
+        idArr[headerId]++;
+      }
+      else {
+        //id未存在
+        idArr[headerId] = 1;
+        $(this).attr('id', headerId);
+      }
+    });
+
+    document.addEventListener("DOMContentLoaded", function () {
+      tocbot.init(option);
+      mobileTocClick();
+    });
+
+  }
+
+  window.tocScrollFn = function () {
+    return bamboo.throttle(function () {
+      findHeadPosition();
+    }, 100)()
+  }
+  window.addEventListener('scroll', tocScrollFn);
+
+  const findHeadPosition = function (top) {
+    if ($('.toc-list').length <= 0) {
+      return false;
+    }
+    setTimeout(() => {  // or DOMContentLoaded 
+      autoScrollToc();
+    }, 0);
+  }
+
+  const autoScrollToc = function () {
+    const $activeItem = document.querySelector('.is-active-link');
+    const $cardToc = document.querySelector('.toc-content');
+    const activePosition = $activeItem.getBoundingClientRect().top
+    const sidebarScrollTop = $cardToc.scrollTop
+    if (activePosition > (document.documentElement.clientHeight - 100)) {
+      $cardToc.scrollTop = sidebarScrollTop + 150
+    }
+    if (activePosition < 100) {
+      $cardToc.scrollTop = sidebarScrollTop - 150
+    }
+  }
+
+  document.addEventListener('pjax:send', function () {
+    if ($('.toc').length) {
+      tocbot.destroy();
+    }
+  });
+
+  document.addEventListener('pjax:complete', function () {
+    if ($('.toc').length) {
+      tocbot.init(option);
+      mobileTocClick();
+    }
+  });
+  
+  // 手机端toc按钮点击出现目录
+  const mobileTocClick = function () {
+    const $cardTocLayout = document.getElementsByClassName('toc-aside')[0];
+    const $cardToc = $cardTocLayout.getElementsByClassName('toc-content')[0];
+    let right = '45px';
+    if (window.innerWidth >= 551 && window.innerWidth <= 992) {
+      right = '100px'
+    }
+    const mobileToc = {
+      open: () => {
+        $cardTocLayout.style.cssText = 'animation: toc-open .3s; opacity: 1; right: ' + right
+      },
+
+      close: () => {
+        $cardTocLayout.style.animation = 'toc-close .2s'
+        setTimeout(() => {
+          $cardTocLayout.style.cssText = "opacity:''; animation: ''; right: ''"
+        }, 100)
+      }
+    }
+    document.getElementById('toc-mobile-btn').addEventListener('click', () => {
+      if (window.getComputedStyle($cardTocLayout).getPropertyValue('opacity') === '0') mobileToc.open()
+      else mobileToc.close()
+    })
+
+    $cardToc.addEventListener('click', (e) => {
+      if (window.innerWidth < 992) { // 小于992px的时候
+        mobileToc.close()
+      }
+    })
+  }
+</script>
+
+<style>
+  .is-position-fixed {
+    position: sticky !important;
+    top: 74px;
+  }
+
+  .toc-main ul {
+    counter-reset: show-list;
+  }
+
+  .toc-main ul li::before {
+    content: counter(item)".";
+    display: block;
+    position: absolute;
+    left: 12px;
+    top: 0;
+  }
+</style> 
+
+<!-- 设置导航背景 -->
+<script>
+  let setHeaderClass = () => {
+    const headerMenuTransparent = true;
+    if (!headerMenuTransparent) { return; }
+    const nav = $('#navHeader');
+    const navTop = nav.outerHeight();
+    const winTop = $(window).scrollTop();
+    if(winTop > navTop) {
+      nav.addClass('header-bg-color');
+    }
+    else {
+      nav.removeClass('header-bg-color');
+    }
+  };
+
+  let scrollCollect = () => {
+    return bamboo.throttle(function (e) {
+      setHeaderClass();
+    }, 200)()
+  }
+
+  let initHeaderBg = () => {
+    setHeaderClass();
+  }
+
+  setHeaderClass();
+  window.addEventListener('scroll', scrollCollect);
+
+  document.addEventListener('pjax:send', function () {
+    window.removeEventListener('scroll', scrollCollect)
+  })
+  document.addEventListener('pjax:complete', function () {
+    window.addEventListener('scroll', scrollCollect);
+    setHeaderClass();
+  })
+</script> 
+
+<!-- 渲染issues标签里的内容 -->
+<script>
+  function loadIssuesJS() {
+    if ($(".post-detail").find(".issues-api").length == 0) {
+      return;
+    } 
+    loadScript('/js/issues/index.js');
+  };
+  $(function () {
+    loadIssuesJS();
+  });
+  document.addEventListener('pjax:complete', function () {
+    if (typeof IssuesAPI == "undefined") {
+      loadIssuesJS();
+    }
+  })
+</script>
+
+<!-- 输入框打字特效 -->
+<!-- 输入框打字特效 -->
+
+  <script src="/js/activate-power-mode.js"></script>
+  <script>
+    POWERMODE.colorful = true;  // 打开随机颜色特效
+    POWERMODE.shake = false;    // 关闭输入框抖动
+    document.body.addEventListener('input', POWERMODE);//监听打字事件
+  </script>
+
+
+<!-- markdown代码一键复制功能 -->
+
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/v-plugs-ayu/lib/ayu.css">
+  <script src="https://cdn.jsdelivr.net/npm/v-plugs-ayu/lib/ayu.umd.min.js"></script>
+  <script src="/js/clipboard/clipboard.min.js"></script>
+  <div id="appCopy">
+  </div>
+  <script data-pjax>
+    var vm = new Vue({
+      el: '#appCopy',
+      data: {
+      },
+      computed: {
+      },
+      mounted() {
+        const that = this;
+        var copy = 'copy';
+        /* code */
+        var initCopyCode = function () {
+          var copyHtml = '';
+          copyHtml += '<button class="btn-copy" data-clipboard-snippet="" style="position:absolute;top:0;right:0;z-index:1;">';
+          copyHtml += '<i class="fas fa-copy"></i><span>' + copy + '</span>';
+          copyHtml += '</button>';
+          $(".post-detail pre").not('.gutter pre').wrap("<div class='codeBox' style='position:relative;width:100%;'></div>")
+          $(".post-detail pre").not('.gutter pre').before(copyHtml);
+          new ClipboardJS('.btn-copy', {
+            target: function (trigger) {
+              return trigger.nextElementSibling;
+            }
+          });
+        }
+        initCopyCode();
+        $('.btn-copy').unbind('click').bind('click', function () {
+          doSomething();
+        })
+        $(document).unbind('keypress').bind('keypress', function (e) {
+          if (e.ctrlKey && e.keyCode == 67) {
+            doSomething();
+          }
+        })
+
+        function doSomething() {
+          that.$notify({
+            title: "成功",
+            content: "copy that",
+            type: 'success'
+          })
+        }
+      },
+      methods: {
+      },
+      created() { }
+    })
+  </script>
+  
+
+<!-- 图片懒加载 -->
+<script defer src="https://cdn.jsdelivr.net/npm/vanilla-lazyload@17.1.0/dist/lazyload.min.js"></script>
+<script>
+  // https://www.npmjs.com/package/vanilla-lazyload
+  // Set the options globally
+  // to make LazyLoad self-initialize
+  window.lazyLoadOptions = {
+    elements_selector: ".lazyload",
+    threshold: 0
+  };
+  // Listen to the initialization event
+  // and get the instance of LazyLoad
+  window.addEventListener(
+    "LazyLoad::Initialized",
+    function (event) {
+      window.lazyLoadInstance = event.detail.instance;
+    },
+    false
+  );
+  document.addEventListener('DOMContentLoaded', function () {
+    lazyLoadInstance.update();
+  });
+  document.addEventListener('pjax:complete', function () {
+    lazyLoadInstance.update();
+  });
+</script>
+
+
+<!-- 卡片滚动动画 -->
+   
+
+<!-- 评论所需js -->
+
+  
+    <!-- 弹幕所需的css和js -->
+    
+<!-- 具体js，请前往valine/script.ejs查看 -->
+
+    <script>
+  var requiredFields = '';
+  requiredFields = requiredFields.split(',');
+  comment_el = '.comment';
+  let looperValine = null;
+  load_valine = function () {
+    if ($(comment_el).length) {
+      var valine = new Valine({
+        el: '#vcomment',
+        path: window.location.pathname,
+        notify: false,
+        verify: false,
+        app_id: "",
+        app_key: "",
+        placeholder: "客官，说点什么吧",
+        avatar: "",
+        master: "",   //博主邮箱md5
+        tagMeta: ["博主","小伙伴","访客"],     //标识字段名
+        friends: "",
+        metaPlaceholder: { "nick": "昵称/QQ号", "mail": "邮箱" },
+        requiredFields: requiredFields,
+        enableQQ: true,
+      });
+      function debounce(fn) {
+        var timerID = null
+        return function () {
+          var arg = arguments[0]   //获取事件
+          if (timerID) {
+            clearTimeout(timerID)
+          }
+          timerID = setTimeout(function () {
+            fn(arg)              //事件传入函数
+          }, 200)
+        }
+      }
+      //查询评论 valine.Q('*').limit(7) -- 查询所有，限制7条, 下面的的代码是查询当前页面
+      var themeDanmu = eval('false');
+      var themeLoop = eval('false');
+      var themeLooperTime = '5000' || 5000;
+      var speed = '40' || 20;
+      var isBarrager = true;
+      if (themeDanmu == true) {
+        do_barrager();
+        if ($('.danmuBox').length <= 0) {
+          $('.navbar').append('<div class="danmuBox"><div class="danmuBtn open"><span class="danmuCircle"></span><span class="danmuText">弹幕</span></div></div>');
+        }
+        $('.danmuBtn').on('click', debounce(
+          function () {
+            if ($('.danmuBtn').hasClass('open')) {
+              $('.danmuBtn').removeClass('open')
+              clearInterval(looperValine);
+              $.fn.barrager.removeAll();
+            } else {
+              $('.danmuBtn').addClass("open");
+              do_barrager();
+            }
+          }
+        ))
+      }
+      function do_barrager() {
+        isBarrager && valine.Q(window.location.pathname).find().then(function (comments) {
+          // var num = 0; // 可以记录条数，循环调用的时候只取最新的评论放入弹幕中
+          var run_once = true;
+          var looper_time = themeLooperTime;
+          var total = comments.length;
+          // var looper = null;
+          var index = 0;
+          if (total > 0) {
+            barrager();
+          } else {
+            // 当评论数为0的时候，自动关闭弹幕
+            // $('.danmuBtn').removeClass('open');
+          }
+          function barrager() {
+            if (run_once) {
+              //如果是首次执行,则设置一个定时器,并且把首次执行置为false
+              looperValine = setInterval(barrager, looper_time);
+              run_once = false;
+            }
+            var content = comments[index]._serverData.comment;
+            var email = comments[index]._serverData.mail;
+            var link = comments[index]._serverData.link;
+            var newcontent = content.substring(0, 50).replace(/<[^>]+>/g, "");
+            //发布一个弹幕
+            const item = {
+              img: `https://q1.qlogo.cn/g?b=qq&nk=${email}&s=640`, //图片 
+              info: newcontent, //文字 
+              href: link, //链接 
+              close: true, //显示关闭按钮 
+              speed: speed, //延迟,单位秒,默认6 
+              color: '#fff', //颜色,默认白色 
+              old_ie_color: '#000000', //ie低版兼容色,不能与网页背景相同,默认黑色
+            }
+            $('body').barrager(item);
+            //索引自增
+            index++;
+            //所有弹幕发布完毕，清除计时器。
+            if (index == total) {
+              clearInterval(looperValine);
+              if (themeLoop === true) {
+                setTimeout(function () {
+                  do_barrager();
+                }, 5000);
+              } else {
+                $('.danmuBtn').removeClass('open');
+              }
+              return false;
+            }
+
+          }
+        })
+      }
+    }
+  };
+  $(document).ready(load_valine);
+  document.addEventListener('pjax:send', function (e) {
+    
+  })
+  document.addEventListener('pjax:complete', function () {
+    load_valine();
+  });
+</script>
+
+  
+
+
+<!-- 鼠标点击特效 -->
+<!-- 爱心点击 -->
+
+  
+    <canvas class="fireworks" style="position: fixed;left: 0;top: 0;z-index: 999; pointer-events: none;" ></canvas>
+    <script src="//cdn.bootcss.com/animejs/2.2.0/anime.min.js"></script>
+    <script src="/js/cursor/explosion.min.js"></script>
+  
+
+
+
+
+
+    <!-- pjax -->
+    
+
+<!-- pjax -->
+
+
+  <script src="/js/pjax@0.2.8/index.js"></script>
+  
+    <!-- 样式位于：source/css/_third-party/pjaxanimate.styl -->
+
+<div class="pjax-animate">
+  
+    <div class="loading-circle"><div id="loader-circle"></div></div>
+    <script>
+      window.ShowLoading = function() {
+        $(".loading-circle").css("display", "block");
+      };
+      window.HideLoading = function() {
+        $(".loading-circle").css("display", "none");
+      }
+    </script>
+  
+	<script>
+    document.addEventListener('pjax:complete', function () {
+      window.HideLoading();
+    })
+    document.addEventListener('pjax:send', function () {
+      window.ShowLoading();
+    })
+    document.addEventListener('pjax:error', function () {
+      window.HideLoading();
+    })
+	</script>
+</div>
+
+  
+
+  <script>
+    var pjax = new Pjax({
+      elements: 'a[href]:not([href^="#"]):not([href="javascript:void(0)"]):not([no-pjax])',   // 拦截正常带链接的 a 标签
+      selectors: ["#pjax-container","title"],                                   // 根据实际需要确认重载区域
+      cacheBust: false,   // url 地址追加时间戳，用以避免浏览器缓存
+      timeout: 5000
+    });
+
+    document.addEventListener('pjax:send', function (e) {
+
+      try {
+        var currentUrl = window.location.pathname;
+        var targetUrl = e.triggerElement.href;
+        var banUrl = [""];
+        if (banUrl[0] != "") {
+          banUrl.forEach(item => {
+            if(currentUrl.indexOf(item) != -1 || targetUrl.indexOf(item) != -1) {
+              window.location.href = targetUrl;
+            }
+          });
+        }
+      } catch (error) {}
+
+      $(window).unbind('resize');
+      $(window).unbind('scroll');
+      $(document).unbind('scroll');
+      $(document).unbind('click');
+      $('body').unbind('click');
+
+    })
+    
+    document.addEventListener('pjax:complete', function () {
+      $('script[data-pjax], .pjax-reload script').each(function () {
+        $(this).parent().append($(this).remove());
+      });
+    });
+
+    document.addEventListener('pjax:error', function (e) {
+      window.location.href = e.triggerElement.href;
+    })
+    
+    // 刷新不从顶部开始
+    document.addEventListener("DOMContentLoaded", function () {
+      history.scrollRestoration = 'auto';
+    })
+  </script>
+
+
+
+  </body>
+</html>
