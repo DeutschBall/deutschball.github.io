@@ -1,0 +1,695 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 7.3.0">
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png">
+  <link rel="mask-icon" href="/images/logo.svg" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+<link rel="stylesheet" href="/lib/font-awesome/css/all.min.css">
+
+<script id="hexo-configurations">
+    var NexT = window.NexT || {};
+    var CONFIG = {"hostname":"example.com","root":"/","scheme":"Muse","version":"7.8.0","exturl":false,"sidebar":{"position":"left","display":"post","padding":18,"offset":12,"onmobile":false},"copycode":{"enable":false,"show_result":false,"style":null},"back2top":{"enable":true,"sidebar":false,"scrollpercent":false},"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":false,"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"algolia":{"hits":{"per_page":10},"labels":{"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}},"localsearch":{"enable":false,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false},"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}}};
+  </script>
+
+  <meta name="description" content="抽象代数参考教材:密码编码学与网络安全 AES加密的数学基础 第一遍读感觉教材上对数学基础(群环域,多项式运算)P72-P91给的莫名奇妙 然后参考了知乎回答对群环域的解释 此时第二遍读教材,发现其实教材在讲每一部分的开始都写了为什么要讲. 学习这部分一定要明确目的,在陷入定理的证明时或者公式应用时时刻想想是在干什么 引入多项式构造$GF(p^n)$这一想法真的太神奇了,将整数上的数论定理应用于多">
+<meta property="og:type" content="article">
+<meta property="og:title" content="抽象代数">
+<meta property="og:url" content="http://example.com/2022/04/18/%E6%8A%BD%E8%B1%A1%E4%BB%A3%E6%95%B0/index.html">
+<meta property="og:site_name" content="Hexo">
+<meta property="og:description" content="抽象代数参考教材:密码编码学与网络安全 AES加密的数学基础 第一遍读感觉教材上对数学基础(群环域,多项式运算)P72-P91给的莫名奇妙 然后参考了知乎回答对群环域的解释 此时第二遍读教材,发现其实教材在讲每一部分的开始都写了为什么要讲. 学习这部分一定要明确目的,在陷入定理的证明时或者公式应用时时刻想想是在干什么 引入多项式构造$GF(p^n)$这一想法真的太神奇了,将整数上的数论定理应用于多">
+<meta property="og:locale" content="en_US">
+<meta property="og:image" content="https://pica.zhimg.com/feb8dbb0222be967e7b04f81d69267cc_1440w.jpg?source=172ae18b">
+<meta property="article:published_time" content="2022-04-18T08:27:20.000Z">
+<meta property="article:modified_time" content="2024-01-15T12:41:05.196Z">
+<meta property="article:author" content="John Doe">
+<meta property="article:tag" content="抽象代数">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://pica.zhimg.com/feb8dbb0222be967e7b04f81d69267cc_1440w.jpg?source=172ae18b">
+
+<link rel="canonical" href="http://example.com/2022/04/18/%E6%8A%BD%E8%B1%A1%E4%BB%A3%E6%95%B0/">
+
+
+<script id="page-configurations">
+  // https://hexo.io/docs/variables.html
+  CONFIG.page = {
+    sidebar: "",
+    isHome : false,
+    isPost : true,
+    lang   : 'en'
+  };
+</script>
+
+  <title>抽象代数 | Hexo</title>
+  
+
+
+
+
+
+
+  <noscript>
+  <style>
+  .use-motion .brand,
+  .use-motion .menu-item,
+  .sidebar-inner,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-header { opacity: initial; }
+
+  .use-motion .site-title,
+  .use-motion .site-subtitle {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line-before i { left: initial; }
+  .use-motion .logo-line-after i { right: initial; }
+  </style>
+</noscript>
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage">
+  <div class="container use-motion">
+    <div class="headband"></div>
+
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="Toggle navigation bar">
+      <span class="toggle-line toggle-line-first"></span>
+      <span class="toggle-line toggle-line-middle"></span>
+      <span class="toggle-line toggle-line-last"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <span class="logo-line-before"><i></i></span>
+      <h1 class="site-title">Hexo</h1>
+      <span class="logo-line-after"><i></i></span>
+    </a>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger">
+    </div>
+  </div>
+</div>
+
+
+
+
+<nav class="site-nav">
+  <ul id="menu" class="main-menu menu">
+        <li class="menu-item menu-item-home">
+
+    <a href="/" rel="section"><i class="fa fa-home fa-fw"></i>Home</a>
+
+  </li>
+        <li class="menu-item menu-item-archives">
+
+    <a href="/archives/" rel="section"><i class="fa fa-archive fa-fw"></i>Archives</a>
+
+  </li>
+  </ul>
+</nav>
+
+
+
+
+</div>
+    </header>
+
+    
+  <div class="back-to-top">
+    <i class="fa fa-arrow-up"></i>
+    <span>0%</span>
+  </div>
+
+
+    <main class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+
+          <div class="content post posts-expand">
+            
+
+    
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="en">
+    <link itemprop="mainEntityOfPage" href="http://example.com/2022/04/18/%E6%8A%BD%E8%B1%A1%E4%BB%A3%E6%95%B0/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.gif">
+      <meta itemprop="name" content="John Doe">
+      <meta itemprop="description" content="">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Hexo">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          抽象代数
+        </h1>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-calendar"></i>
+              </span>
+              <span class="post-meta-item-text">Posted on</span>
+
+              <time title="Created: 2022-04-18 16:27:20" itemprop="dateCreated datePublished" datetime="2022-04-18T16:27:20+08:00">2022-04-18</time>
+            </span>
+              <span class="post-meta-item">
+                <span class="post-meta-item-icon">
+                  <i class="far fa-calendar-check"></i>
+                </span>
+                <span class="post-meta-item-text">Edited on</span>
+                <time title="Modified: 2024-01-15 20:41:05" itemprop="dateModified" datetime="2024-01-15T20:41:05+08:00">2024-01-15</time>
+              </span>
+
+          
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+        <h1 id="抽象代数"><a href="#抽象代数" class="headerlink" title="抽象代数"></a>抽象代数</h1><p>参考教材:密码编码学与网络安全</p>
+<p>AES加密的数学基础</p>
+<p>第一遍读感觉教材上对数学基础(群环域,多项式运算)P72-P91给的莫名奇妙</p>
+<p><a target="_blank" rel="noopener" href="https://www.zhihu.com/question/22072020">然后参考了知乎回答</a>对群环域的解释</p>
+<p>此时第二遍读教材,发现其实教材在讲每一部分的开始都写了为什么要讲.</p>
+<p>学习这部分一定要明确目的,在陷入定理的证明时或者公式应用时时刻想想是在干什么</p>
+<p>引入多项式构造$GF(p^n)$这一想法真的太神奇了,将整数上的数论定理应用于多项式也真的太神奇了</p>
+<p>另,教材P74页的图4.2是有错误的</p>
+<h2 id="抽象代数基础"><a href="#抽象代数基础" class="headerlink" title="抽象代数基础"></a>抽象代数基础</h2><p>图片来自<a target="_blank" rel="noopener" href="https://zhuanlan.zhihu.com/p/21583674">代数结构入门：群、环、域、向量空间 - 知乎 (zhihu.com)</a></p>
+<p><img src="https://pica.zhimg.com/feb8dbb0222be967e7b04f81d69267cc_1440w.jpg?source=172ae18b" alt="代数结构入门：群、环、域、向量空间"></p>
+<h3 id="群"><a href="#群" class="headerlink" title="群"></a>群</h3><h4 id="群-1"><a href="#群-1" class="headerlink" title="群"></a>群</h4><p>$&lt;G,·&gt;$表示一个定义了二元关系$·$的集合(注意这里$·$不一定是乘号,可以是所有二元关系的抽象表示)</p>
+<p>如果G满足:</p>
+<p>A1封闭性:$\forall a,b\in G\rightarrow a·b\in b$</p>
+<p>A2结合律:$\forall a,b\in G,a·(b·c)&#x3D;(a·b)·c$</p>
+<p>A3单位元:$\exist e\in G,\forall a\in G,e·a&#x3D;a·e&#x3D;a$</p>
+<p>A4逆元:$\forall a\in G,\exist a^{-1},a·a^{-1}&#x3D;a^{-1}·a&#x3D;e$</p>
+<blockquote>
+<p>这里$^{-1}$不是一定是-1次幂,只是逆元的表示形式</p>
+</blockquote>
+<p>集合G+A1+A2+A3+A4&#x3D;群G</p>
+<blockquote>
+<p>&lt;Z,+&gt;就是一个群</p>
+<p>&lt;N,+&gt;就不是一个群,因为如果定义单位元是0,那么1的逆元就是-1,但是-1不在自然数范围内,满足A1A2A3但是不满足A4的代数系统被称为幺半群</p>
+</blockquote>
+<h5 id="变换群"><a href="#变换群" class="headerlink" title="变换群"></a>变换群</h5><p>设A是一非空集合,G是A到A的映射集合,如果G关于运算*构成一个群,则称$&lt;G,✳&gt;$是集合A上的一个变换群,简称变换群</p>
+<h5 id="置换群"><a href="#置换群" class="headerlink" title="置换群"></a>置换群</h5><p>设A是一非空有限集合,则A上的一个变换群就是A的一个置换群,简称置换群</p>
+<h4 id="交换群"><a href="#交换群" class="headerlink" title="交换群"></a>交换群</h4><p>A5交换律:$\forall a,b\in G,a·b&#x3D;b·a$</p>
+<p>群G+A5&#x3D;交换群G</p>
+<p>l</p>
+<h3 id="环"><a href="#环" class="headerlink" title="环"></a>环</h3><h4 id="环-1"><a href="#环-1" class="headerlink" title="环"></a>环</h4><p>$&lt;R,+,\times&gt;$R是一个有两种二元运算的集合,这两种二元运算分别为加法$+$和乘法$\times$</p>
+<p>已知$&lt;R,+&gt;$是交换群</p>
+<p>如果R再满足</p>
+<p>M1乘法封闭性:$\forall a,b\in R,a\times b\in R$</p>
+<p>M2乘法结合律:$\forall a,b,c\in R,a\times (b\times c)&#x3D;(a\times b)\times c$</p>
+<p>M3乘法对加法的分配律:$\forall a,b,c\in R,\begin{cases}a\times (b+c)&#x3D;a\times b+a\times c\(a+b)\times c&#x3D;a\times c+b\times c\end{cases}$</p>
+<blockquote>
+<p>注意这里没有写$a \times (b+c)&#x3D;(b+c)\times a$</p>
+<p>因为这样写实际上是满足乘法交换律,而满足分配律不一定满足交换律,比如矩阵乘法</p>
+<p>矩阵的左右乘结果一般是不一样的,但是矩阵乘法对矩阵加法是有结合律的</p>
+</blockquote>
+<p>则称R为环</p>
+<h4 id="交换环"><a href="#交换环" class="headerlink" title="交换环"></a>交换环</h4><p>如果环R再满足</p>
+<p>M4乘法交换律:$\forall a,b,c\in R,(a\times b)\times c&#x3D;a\times (b\times c)$</p>
+<blockquote>
+<p>显然$R_n(Q)$是环但不是交换环</p>
+</blockquote>
+<p>则称R为交换环</p>
+<h4 id="整环"><a href="#整环" class="headerlink" title="整环"></a>整环</h4><p>如果交换环R再满足</p>
+<p>M5乘法单位元:$\exist e,\forall a\in R,e\times a&#x3D;a\times e&#x3D;a$</p>
+<blockquote>
+<p>当$R&#x3D;S$为整数时,$e&#x3D;1$</p>
+<p>当$R&#x3D;R_n(Q)$,n阶实数矩阵集合,$e&#x3D;E(n)$n阶单位矩阵</p>
+</blockquote>
+<p>M6无零因子,:$\forall a,b\in R,a\times b&#x3D;0\rightarrow a&#x3D;0\ or\ b&#x3D;0$</p>
+<p>则称R为整环</p>
+<blockquote>
+<p>怎么理解”无0因子”?</p>
+<p>显然$R_n(Q)$不满足M6,因为两个矩阵$A,B$乘积是个0矩阵并不能说明$A$或者$B$矩阵有至少一个是零矩阵</p>
+<p>比如</p>
+<p>$$<br>A&#x3D;\begin{bmatrix}<br>0\ 0\ 0\<br>0\ 0\ 0\<br>0\ 0\ 1\<br>\end{bmatrix}\ \ \ \ \<br>B&#x3D;\begin{bmatrix}<br>0\ 0\ 1\<br>0\ 0\ 0\<br>0\ 0\ 0\<br>\end{bmatrix}<br>$$<br>又如,</p>
+<p>令$Z_6&#x3D;{0,1,2,3,4,5}$,</p>
+<p>定义$Z_6$上的乘法$\otimes$为$a\otimes b&#x3D;(a\times b\ )mod\ 6$</p>
+<p>定义$Z_6$上的加法$\oplus$为$a\oplus b&#x3D;(a+b)mod\ 6$</p>
+<p>显然$Z_6$满足$A_1-A_5,M_1-M_5$</p>
+<p>但是$&lt;Z_6,+,\times&gt;$不满足无零因子,比如</p>
+<p>$2\otimes 3&#x3D;(2\times 3)mod \ 6&#x3D;6mod\ 6&#x3D;0$</p>
+<p>就是说,0这个元素一定也是在集合R中存在的,并且乘法运算结果为0一定和引入这个元素0有关</p>
+</blockquote>
+<h3 id="域"><a href="#域" class="headerlink" title="域"></a>域</h3><p>设$&lt;R,+,\times&gt;$为一个整环,如果R再满足</p>
+<p>M7乘法逆元:$\forall a≠0\in R,\exist a^{-1}\in R,a\times a^{-1}&#x3D;1$则称$a^{-1}$为a的乘法逆元</p>
+<blockquote>
+<p>注意乘法逆元也是$R$中的</p>
+<p>定义乘法逆元的作用实际上是可以使用除法,除以一个数等于乘以该数的乘法逆元</p>
+<p>比如对于$&lt;Z_7,+,\times&gt;$,由拓展欧几里得定理可知,由于模数为7是一个质数,因此0到6都存在$Z_7$上的mod 7意义下的乘法逆元</p>
+<p>再比如全体整数就不是任何元素都有乘法逆元,只有1和-1有乘法逆元,任何绝对值大于1的整数其乘法逆元应该是分数,不属于整数.</p>
+</blockquote>
+<p>则称R为域F</p>
+<h2 id="有限域GF-p"><a href="#有限域GF-p" class="headerlink" title="有限域GF(p)"></a>有限域GF(p)</h2><p>符号意义:</p>
+<p>$GF(p)&#x3D;&lt;Z_p,\oplus,\otimes &gt;$</p>
+<p>$GF:Galois Field$,伽罗华域</p>
+<p>$p$:表示一个正素数</p>
+<p>$\oplus:\forall a,b\in Z_p,a\oplus b&#x3D;(a+b)\ mod\ p$即模p加法</p>
+<p>$\otimes : \forall a,b\in Z_p,a\otimes b&#x3D;(a\times b)\ mod\ p$即模屁乘法</p>
+<blockquote>
+<p>为什么一定要求是一个素数?</p>
+<p>当N为一个合数的时候$Z_N&#x3D;{1,2,3,…,N-2,N-1}$不满足$M_6$无零因子,不是整环,因此不是域</p>
+<p>为什么不满足$M_6$?</p>
+<p>由已知,N是合数,则至少存在$n\in Z_N,1&lt;n&lt;N,n|N$</p>
+<p>如果$n^2&#x3D;N$,则有$n\otimes n&#x3D;n\times n\ mod\ N&#x3D;0$</p>
+<p>如果$n^2!&#x3D;N$,则$\exist n’\in (1,N),nn’&#x3D;N$那么$n\otimes n’&#x3D;nn’\ mod\ N&#x3D;N\ mod \ N&#x3D;0$</p>
+<p>故选取p为素数,就是为了保证$M_6$无零因子</p>
+<p>同时,选取一个素数作为mod值,保证了$M_7$乘法逆元:</p>
+<p>$\forall a\in Z_p,a\otimes x&#x3D;1$,即$ax\equiv 1(mod\ p)$,显然当p为一个素数时有$gcd(a,p)&#x3D;1$由2拓展欧几里得定理即可求出x的值</p>
+<p>因此$Z_p$就是一个有限域,用$GF(p)$表示</p>
+</blockquote>
+<h3 id="Z-p-上的数论定理"><a href="#Z-p-上的数论定理" class="headerlink" title="$Z_p$上的数论定理"></a>$Z_p$上的数论定理</h3><h4 id="拓展欧几里得定理求乘法逆元"><a href="#拓展欧几里得定理求乘法逆元" class="headerlink" title="拓展欧几里得定理求乘法逆元"></a>拓展欧几里得定理求乘法逆元</h4><figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="type">int</span> <span class="title">exgcd</span><span class="params">(<span class="type">const</span> <span class="type">int</span> &amp;a, <span class="type">const</span> <span class="type">int</span> &amp;b, <span class="type">int</span> &amp;x, <span class="type">int</span> &amp;y)</span> </span>&#123;<span class="comment">//拓展欧几里得算法ax+by=1=gcd(a,b)</span></span><br><span class="line">	<span class="keyword">if</span> (b == <span class="number">0</span>) &#123;</span><br><span class="line">		x = <span class="number">1</span>;</span><br><span class="line">		y = <span class="number">0</span>;</span><br><span class="line">		<span class="keyword">return</span> a;</span><br><span class="line">	&#125;</span><br><span class="line">	<span class="type">int</span> x2, y2;</span><br><span class="line">	<span class="type">int</span> d = <span class="built_in">exgcd</span>(b, a % b, x2, y2);</span><br><span class="line">	x = y2;</span><br><span class="line">	y = x2 - a / b * y2;</span><br><span class="line">	<span class="keyword">return</span> d;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="type">int</span> <span class="title">inverse</span><span class="params">(<span class="type">const</span> <span class="type">int</span> &amp;a, <span class="type">const</span> <span class="type">int</span> &amp;mod)</span> </span>&#123;<span class="comment">//求a在模mod下的逆元</span></span><br><span class="line">	<span class="type">int</span> x, y;</span><br><span class="line">	<span class="built_in">exgcd</span>(a, mod, x, y);</span><br><span class="line">	<span class="keyword">return</span> ((x % mod) + mod) % mod;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h4 id="快速幂"><a href="#快速幂" class="headerlink" title="快速幂"></a>快速幂</h4><figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line"></span><br><span class="line"><span class="function"><span class="type">int</span> <span class="title">quick_pow</span><span class="params">(<span class="type">const</span> <span class="type">int</span> &amp;base, <span class="type">const</span> <span class="type">int</span> &amp;index, <span class="type">const</span> <span class="type">int</span> &amp;mod)</span> </span>&#123;<span class="comment">//bash^index(% mod)</span></span><br><span class="line">	<span class="keyword">if</span> (index == <span class="number">0</span>)</span><br><span class="line">		<span class="keyword">return</span> <span class="number">1</span>;</span><br><span class="line">	<span class="keyword">else</span> <span class="keyword">if</span> (index == <span class="number">1</span>)</span><br><span class="line">		<span class="keyword">return</span> base % mod;</span><br><span class="line">	<span class="keyword">else</span> <span class="keyword">if</span> (index % <span class="number">2</span>) &#123;</span><br><span class="line">		<span class="keyword">return</span> <span class="built_in">quick_pow</span>(base * base % mod, index &gt;&gt; <span class="number">1</span>, mod) % mod;</span><br><span class="line">	&#125; <span class="keyword">else</span> &#123;</span><br><span class="line">		<span class="keyword">return</span> base * <span class="built_in">quick_pow</span>(base * base % mod, index &gt;&gt; <span class="number">1</span>, mod) % mod;</span><br><span class="line">	&#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+
+
+<h2 id="多项式算术"><a href="#多项式算术" class="headerlink" title="多项式算术"></a>多项式算术</h2><h3 id="为什么突然扯到”多项式算数”呢"><a href="#为什么突然扯到”多项式算数”呢" class="headerlink" title="为什么突然扯到”多项式算数”呢?"></a>为什么突然扯到”多项式算数”呢?</h3><p>前面我们证明了<strong>对于整数集$Z_N&#x3D;{0,1,2,3,…,N-1}$,只有当$|Z_N|&#x3D;N$为素数p时,$Z_p$才为一个域</strong></p>
+<p>如果想要得到一个元素个数为$2^n$的域,显然$Z_p$做不到.</p>
+<p>为什么要得到一个元素个数为$2^n$的域?计算机使用二进制编码,AES加密算法就用到了$GF(2^8)$</p>
+<p>一个3位二进制数可以表示8中状态,明文和密码就在这八种状态之中</p>
+<table>
+<thead>
+<tr>
+<th>模8乘法</th>
+<th>0</th>
+<th>1</th>
+<th>2</th>
+<th>3</th>
+<th>4</th>
+<th>5</th>
+<th>6</th>
+<th>7</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>0</td>
+<td>0</td>
+<td>0</td>
+<td>0</td>
+<td>0</td>
+<td>0</td>
+<td>0</td>
+<td>0</td>
+<td>0</td>
+</tr>
+<tr>
+<td>1</td>
+<td>0</td>
+<td>1</td>
+<td>2</td>
+<td>3</td>
+<td>4</td>
+<td>5</td>
+<td>6</td>
+<td>7</td>
+</tr>
+<tr>
+<td>2</td>
+<td>0</td>
+<td>2</td>
+<td>4</td>
+<td>6</td>
+<td>0</td>
+<td>2</td>
+<td>4</td>
+<td>6</td>
+</tr>
+<tr>
+<td>3</td>
+<td>0</td>
+<td>3</td>
+<td>6</td>
+<td>1</td>
+<td>4</td>
+<td>7</td>
+<td>2</td>
+<td>5</td>
+</tr>
+<tr>
+<td>4</td>
+<td>0</td>
+<td>4</td>
+<td>0</td>
+<td>4</td>
+<td>0</td>
+<td>4</td>
+<td>4</td>
+<td>3</td>
+</tr>
+<tr>
+<td>5</td>
+<td>0</td>
+<td>5</td>
+<td>2</td>
+<td>7</td>
+<td>4</td>
+<td>1</td>
+<td>6</td>
+<td>3</td>
+</tr>
+<tr>
+<td>6</td>
+<td>0</td>
+<td>6</td>
+<td>4</td>
+<td>2</td>
+<td>4</td>
+<td>3</td>
+<td>4</td>
+<td>2</td>
+</tr>
+<tr>
+<td>7</td>
+<td>0</td>
+<td>7</td>
+<td>6</td>
+<td>5</td>
+<td>3</td>
+<td>3</td>
+<td>2</td>
+<td>1</td>
+</tr>
+</tbody></table>
+<p>在$Z_8$中的数字乘法,其结果中个数字的出现次数显然是不均匀的,比如1出现了4次,2就出现了8次</p>
+<p>而一个理想的密码是不能暴露词频信息的,显然用$Z_8$上的变换进行加密不理想,于是想一种乘法和除法的构造方法, 使得有8个元素的域其乘法或者加法的结果的频率相等</p>
+<p>而使用多项式运算就可以解决这个问题,因此引入了多项式运算</p>
+<p>首先要研究的是&#x3D;&#x3D;如何构造一个有8个元素($p^n$)的域&#x3D;&#x3D;</p>
+<h3 id="将数的性质拓展到多项式式上"><a href="#将数的性质拓展到多项式式上" class="headerlink" title="&#x3D;&#x3D;将数的性质拓展到多项式式上&#x3D;&#x3D;"></a>&#x3D;&#x3D;将数的性质拓展到多项式式上&#x3D;&#x3D;</h3><p>我们使用的一般是<strong>代数基本规则的普通多项式运算</strong></p>
+<p><strong>然后拓展到系数在$GF(p)$中的多项式运算</strong></p>
+<p><strong>然后再拓展到系数在$GF(p)$,模一个$n$次多项式$m(x)$的多项式运算</strong></p>
+<p>最终目标是理解并应用最后一种多项式</p>
+<h3 id="普通多项式运算"><a href="#普通多项式运算" class="headerlink" title="普通多项式运算"></a>普通多项式运算</h3><p>多项式次数:最高次项的次数</p>
+<p>多项式的表示:<br>$$<br>f(x)&#x3D;a_nx^n+a_{n-1}x^{n-1}+…+a_1x+a_0&#x3D;\sum_{i&#x3D;0}^na_ix^i,a_n≠0<br>$$<br>如果$\forall a_i\in S$则称$f(x)$是系数集$S$上的多项式,令$&lt;A,+,\times &gt;$表示S上的所有多项式以及加法和乘法二元关系</p>
+<blockquote>
+<p>当$S&#x3D;Z$表示整数集的时候,显然A是满足$A_1-A_5,M_1-M_6$,是个整环,</p>
+<p>但是不满足乘法逆元,比如$x$的乘法逆元$x^{-1}$,是一个指数为负的多项式,显然不在$A$</p>
+</blockquote>
+<p>设<br>$$<br>f(x)&#x3D;\sum_{i&#x3D;0}^na_ix^i\<br>g(x)&#x3D;\sum_{i&#x3D;0}^mb_ix^i\<br>a_nb_m≠0,n\ge m<br>$$<br>则普通多项式的加法运算<br>$$<br>f(x)+g(x)&#x3D;\sum_{i&#x3D;0}^m(a_i+b_i)x^i+\sum_{i&#x3D;m+1}^na_i x^i<br>$$<br>普通多项式乘法<br>$$<br>f(x)g(x)&#x3D;\sum_{i&#x3D;0}^{n+m}c_ix^i\<br>c_i&#x3D;a_0b_i+a_1b_{i-1}+…+a_ib_0<br>$$</p>
+<h3 id="系数在-Z-p-中的多项式运算"><a href="#系数在-Z-p-中的多项式运算" class="headerlink" title="系数在$Z_p$中的多项式运算"></a>系数在$Z_p$中的多项式运算</h3><p>当系数集是全体整数的时候,由于系数不都有乘法逆元,因此无法进行多项式除法</p>
+<p>当系数集是一个域的时候,系数都有了乘法逆元,可以对多项式引入除法(带余除法)</p>
+<p>可以类比整数的除法,求余数用$%$,求商用$&#x2F;$</p>
+<p>那么在$Z_p$中的多项式,求余式用$%$,求商式用$&#x2F;$</p>
+<blockquote>
+<p>比如对于$Z_2$上的多项式$f(x)&#x3D;x^4+1&#x3D;(x+1)(x^3+x^2+x+1)$,则$f(x)&#x2F;(x+1)&#x3D;x^3+x^2+x+1$</p>
+</blockquote>
+<p>设系数域为$&lt;Z_p,\oplus,\otimes &gt;$</p>
+<p>设$Z_p$上的两个多项式<br>$$<br>f(x)&#x3D;\sum_{i&#x3D;0}^na_ix^i\<br>g(x)&#x3D;\sum_{i&#x3D;0}^mb_ix^i\<br>a_n,b_m≠0,n\ge m<br>$$</p>
+<h4 id="Z-p-多项式的四则运算"><a href="#Z-p-多项式的四则运算" class="headerlink" title="$Z_p$多项式的四则运算"></a>$Z_p$多项式的四则运算</h4><p>则$Z_p$上的多项式加法(减法类似)为<br>$$<br>f(x)+g(x)&#x3D;\sum_{i&#x3D;0}^m(a_i\oplus b_i)x^i+\sum_{i&#x3D;m+1}^na_i x^i\<br>&#x3D;\sum_{i&#x3D;0}^m(a_i+ b_i)mod\ p\ \times x^i+\sum_{i&#x3D;m+1}^na_i x^i<br>$$</p>
+<p>$Z_p$上的多项式乘法为<br>$$<br>f(x)g(x)&#x3D;\sum_{i&#x3D;0}^{n+m}c_ix^i\<br>c_i&#x3D;(a_0b_i+a_1b_{i-1}+…+a_ib_0)mod\ p<br>$$<br>$Z_p$上的带余式除法<br>$$<br>f(x)&#x3D;q(x)g(x)+r(x)<br>$$<br>意思是$f(x)\div g(x)&#x3D;q(x)…r(x)$</p>
+<p>以$Degree(f)$表示多项式f的阶,并且$Degree(f)&#x3D;n,\<br>Degree(g)&#x3D;m,\$则有$Degree(q)&#x3D;n-m\<br>Degree(r)\le m-1$</p>
+<h4 id="Z-p-多项式的欧几里得定理"><a href="#Z-p-多项式的欧几里得定理" class="headerlink" title="$Z_p$多项式的欧几里得定理"></a>$Z_p$多项式的欧几里得定理</h4><p>定义$d(x)$是$a(x),b(x)$的最大公因式,即$d(x)$是能够整除$a(x),b(x)$的所有多项式中次数最高的<br>$$<br>gcd(a(x),b(x))&#x3D;gcd[b(x),a(x)%b(x)]<br>$$</p>
+<h3 id="Z-p-上多项式再mod-n次素多项式"><a href="#Z-p-上多项式再mod-n次素多项式" class="headerlink" title="$Z_p$上多项式再mod n次素多项式"></a>$Z_p$上多项式再mod n次素多项式</h3><p>对于$Z_p$上次数高于n-1的多项式$f(x)$,需要mod一个$Z_p$上的n次<strong>素多项式</strong>$m(x)$,如此限制$f(x)$的次数在$[0,n-1]$</p>
+<p>什么是”素多项式”?$Z_p$上的素多项式$m(x)$无法被$Z_p$上的任意多项式整除</p>
+<p>当$m(x)$的次数为n,则$Z_p$上的多项式$mod\ m(x)$都会落在次数小于等于n-1的多项式集$F$中</p>
+<p>显然$F$中的多项式都可以表示为<br>$$<br>\forall f(x)\in F,f(x)&#x3D;a_0+a_1x+…+a_{n-1}x^{n-1},\forall a_i\in Z_p<br>$$<br>那么这样的多项式一共有$p^n$个(系数的乘法原理),即模$m(x)$构成的剩余类</p>
+<p>现在类比$Z_p$,<strong>证明$F$是一个域</strong></p>
+<p>显然加减乘封闭且结合律分配律交换律均满足,$F$容易判定为交换环</p>
+<p>由于1也是$F$中的多项式,因此存在乘法单位元1,</p>
+<p><strong>下面证明M6无零因子</strong></p>
+<p>由于k阶多项式的k次项系数不为零,假设有两个非零多项式,其最高次项分别为$a_ix^i,b_jx^j$</p>
+<p>乘积多项式的最高次项为$a_ib_jx^{i+j}$如果指数$i+j\ge n$则对$m(x)$取模,如果系数$a_ib_j\ge p$则对$p$取模</p>
+<p>显然p是一个素数,$a_ib_j&#x3D;a_i\times b_j$是一个合数,合数对素数取模显然不为0</p>
+<p>因此任何两个非零多项式乘积一定非零,M6无零因子得证</p>
+<p>到此F被证明是整环</p>
+<blockquote>
+<p>无零因子就是$GF(2^3)$是域但是$Z_8$不是域的本质原因</p>
+</blockquote>
+<p><strong>下面证明任意F中的非0多项式都在F中有乘法逆元</strong></p>
+<p>$f(x)g(x)\equiv 1(mod\ m(x))$</p>
+<p>$g(x)f(x)+k(x)m(x)&#x3D;1$</p>
+<p>又$m(x)$为素因式,有欧几里得定理知上式有解</p>
+<p>因此M7乘法逆元得证</p>
+<p>因此$F$是域</p>
+<h3 id="F-和-Z-p-的不同"><a href="#F-和-Z-p-的不同" class="headerlink" title="$F$和$Z_p$的不同"></a>$F$和$Z_p$的不同</h3><p>我们在证明$Z_p$是域的时候发现,对于整数集$Z_N&#x3D;{0,1,2,3,…,N-1}$,只有当$|Z_N|&#x3D;N$为素数p时,$Z_p$才为一个域</p>
+<p>而现在$|F|&#x3D;p^n$显然当$n&gt;1$时是一个合数,但是$F$仍然是一个域</p>
+<p>将$F$记作$GF(p^n)$表示伽罗华域</p>
+<h3 id="F-GF-p-n-上的乘法逆元"><a href="#F-GF-p-n-上的乘法逆元" class="headerlink" title="$F&#x3D;GF(p^n)$上的乘法逆元"></a>$F&#x3D;GF(p^n)$上的乘法逆元</h3><p>$$<br>f(x)g(x)\equiv 1(mod \ m(x))\<br>g(x)f(x)+k(x)m(x)&#x3D;1\<br>gcd(f(x),m(x))&#x3D;1<br>$$</p>
+<p>显然可以将整数上的拓展欧几里得推广到F上</p>
+<h2 id="GF-2-n-上构造结果分布均匀的二元运算"><a href="#GF-2-n-上构造结果分布均匀的二元运算" class="headerlink" title="$GF(2^n)$上构造结果分布均匀的二元运算"></a>$GF(2^n)$上构造结果分布均匀的二元运算</h2><p>$GF(2^n)$上的多项式各项的系数要么是0,要么是1,可以用二进制数表示</p>
+<p>比如$x^3+x^2+1$就可以表示为1101</p>
+<h3 id="加法"><a href="#加法" class="headerlink" title="加法"></a>加法</h3><p>由于系数要么是0要么是1,即系数要自动对2取模</p>
+<p>那么多项式的加法就是二进制数按位异或</p>
+<p>比如$(x^3+x^2+x)+(x^4+x+1)&#x3D;x^4+x^3+x^2+2x+1&#x3D;x^4+x^3+x^2+1$</p>
+<p>$01110\oplus 10011&#x3D;11101$</p>
+<h3 id="乘法"><a href="#乘法" class="headerlink" title="乘法"></a>乘法</h3><p>教材上一本正经地写了一堆用字母表示的多项式,看上去头大.</p>
+<p>从一个例子入手可能比较容易理解:</p>
+<p>考虑AES加密算法使用到的$GF(2^8)$,取$m(x)&#x3D;x^8+x^4+x^3+x+1$为模.</p>
+<p>$f(x)&#x3D;x^6+x^4+x^2+x+1$</p>
+<p>$g(x)&#x3D;x^7+x+1$</p>
+<p>求$f(x)\otimes g(x)&#x3D;f(x)\times g(x)\mod m(x)$</p>
+<h4 id="拆分成项"><a href="#拆分成项" class="headerlink" title="拆分成项"></a>拆分成项</h4><p>容易想到的是把$g(x)$按幂次拆分成项然后用f(x)与g(x)的各项相乘之后相加,而相加在”加法”中我们已经认识到可以通过两个多项式异或这种简洁的方式实现,因此我们现在把精力放在$f(x)$如何和一个$x^k$项相乘上<br>$$<br>f(x)\times g(x)\mod m(x)\<br>&#x3D;f(x)\times(1+x+x^7)\mod m(x)\<br>&#x3D;f(x)\times 1\mod m(x)+f(x)\times x\mod m(x)+f(x)\times x^7\mod m(x)<br>$$<br>问题转化为如何求$f(x)\times x^k\mod m(x)$</p>
+<h4 id="求-f-x-times-x-k-mod-m-x"><a href="#求-f-x-times-x-k-mod-m-x" class="headerlink" title="求$f(x)\times x^k\mod m(x)$"></a>求$f(x)\times x^k\mod m(x)$</h4><p>由于<br>$$<br>f(x)\times x^k\mod m(x)\<br>&#x3D;{[(f(x)\times x\mod m(x))\times x\mod m(x)]\times …\times x\mod m(x)}\times x\mod m(x)<br>$$<br>因此问题又可以转换为怎么跨出求$f(x)$到$f(x)\times x\mod m(x)$这第一步</p>
+<h4 id="求-f-x-times-x-mod-m-x"><a href="#求-f-x-times-x-mod-m-x" class="headerlink" title="求$f(x)\times x\mod m(x)$"></a>求$f(x)\times x\mod m(x)$</h4><p>假设$f(x)&#x3D;a_7x^7+a_6x^6+…+a_1x+a_0$表示$GF(2^8)$上的任意多项式</p>
+<p>则$x\times f(x)&#x3D;a_7x^8+a_6x^7+…+a_0x$</p>
+<p>如果用二进制表示,那么<br>$$<br>f(x)&#x3D;&amp;a_7&amp;a_6&amp;a_5&amp;a_4&amp;a_3&amp;a_2&amp;a_1&amp;a_0\<br>x\times f(x)&#x3D;a_7&amp;a_6&amp;a_5&amp;a_4&amp;a_3&amp;a_2&amp;a_1&amp;a_0&amp;0<br>$$<br>在还没有取模时,我们可以发现$f(x)$到$x\times f(x)$只需要将$f(x)$的二进制表示左移一位,下面考虑如何取模</p>
+<p>如果$a_7&#x3D;0$则$x\times f(x)$顶多是一个7次多项式,如果有$a_6&#x3D;0$则顶多是一个6次多项式,一个七次多项式$x\times f(x)$去mod一个8次多项式$m(x)$实乃以卵击石,直接被8次多项式劝返</p>
+<p>如果$a_7&#x3D;1$则$x\times f(x)$与$m(x)$都是8次多项式,算是旗鼓相当,可以一战</p>
+<p>此时$x\times f(x)$可以分成精锐的头部$x^8$与累赘的尾部$a_6x^7+a_5x^6+…+a_0x$,</p>
+<p>这个尾部对$m(x)$取模还是被劝返,只留下精锐的头部$x^8$独自抗衡$m(x)$</p>
+<p>那么问题转化为$x^8$对$m(x)&#x3D;x^8+x^4+x^3+x+1$取模,考虑如何取模?</p>
+<h4 id="求-x-8-mod-m-x"><a href="#求-x-8-mod-m-x" class="headerlink" title="求$x^8 \mod m(x)$"></a>求$x^8 \mod m(x)$</h4><p>$x^8$形单影只,只能单挑$m(x)$的$x^8$项,无暇处理$m(x)$的一伙子小弟,</p>
+<p>于是$x^8$利用其系数都在$GF(2)$上,无中生有搬来了一伙子小弟:<br>$$<br>x^8\equiv x^8+2x^7+2x^6+…+2x+2(系数mod 2)<br>$$<br>此时用$x^8+2x^7+2x^6+…+2x+2$去$\mod m(x)$终于可以大干一场了,还得是门当户对地干,次数相同的项单挑</p>
+<p>$x^8\equiv x^8+2x^7+2x^6+…+2x+2(系数mod 2)$作为被除数,$m(x)$作为除数,余数即为所求结果</p>
+<p>战争一开始,商1之后被除数减去除数得到$2x^7+2x^6+2x^5+x^4+x^3+2x^2+x+1\equiv x^4+x^3+x+1(系数mod2)$</p>
+<p>立刻发现刚才”精锐的头部”那个$x^8$在和$m(x)$的8次项的决斗中阵亡了,剩下的小弟都是7次方以下的项,无力与$m(x)$抗衡,直接作为余数</p>
+<p>即刚才的”战争”可以写为:<br>$$<br>x^8\equiv x^4+x^3+x+1 \mod m(x)&amp;系数mod2\<br>其中m(x)&#x3D;x^8+x^4+x^3+x+1<br>$$<br>突然发现$x^8\mod m(x)&#x3D;m(x)-x^8&#x3D;x^4+x^3+x+1$</p>
+<p>这是巧合吗?</p>
+<p>这是系数mod2的必然结果,并且可以从8次推广到n次:</p>
+<p>$m(x)$为n次多项式<br>$$<br>x^n\mod m(x)&#x3D;m(x)-x^n(系数mod2)<br>$$<br>$x^8$独自面对$m(x)$,最终壮烈牺牲但是换回$x^4+x^3+x+1$颇有”将军百战死,壮士十年归”的感觉</p>
+<p>在战争之前我们把”累赘的尾部$a_6x^7+a_5x^6+…+a_0x$”留下不参战,原因是他们参战也会被敌人$m(x)$直接劝返</p>
+<p>现在我们知道了精锐的头部$x^8$和累赘的尾部$a_6x^7+a_5x^6+…+a_0x$各自参战的结果了,此时可以总结一支部队$x\times f(x)&#x3D;x^8+a_6x^7+a_5x^6+…+a_0x$参战的结果了:<br>$$<br>x\times f(x)\mod m(x)&#x3D;[m(x)-x^8]+a_6x^7+a_5x^6+…+a_0x<br>$$<br>比如当$f(x)&#x3D;x^7+x^4+x^2+x+1,m(x)&#x3D;x^8+x^4+x^3+x+1$时<br>$$<br>\begin{aligned}<br>&amp;x\times f(x)\mod m(x)\<br>&amp;&#x3D;(x^8+x^5+x^3+x^2+x)\mod (x^8+x^4+x^3+x+1)\<br>&amp;&#x3D;[x^4+x^3+x+1]+[x^5+x^3+x^2+x]\<br>&amp;&#x3D;011011\oplus 101110\<br>&amp;&#x3D;110101<br>\end{aligned}<br>$$<br>到此我们知道$x\times f(x)\mod m(x)$如何计算了,</p>
+<p>那么$x^2\times f(x)\mod m(x)&#x3D;x\times (x\times f(x)\mod m(x))\mod m(x)$</p>
+<p>以此类推可以得到$x^k\times f(x)\mod m(x)$如何计算了</p>
+<h4 id="回到求-f-x-times-g-x-mod-m-x"><a href="#回到求-f-x-times-g-x-mod-m-x" class="headerlink" title="回到求$f(x)\times g(x)\mod m(x)$"></a>回到求$f(x)\times g(x)\mod m(x)$</h4><p>不管你$g(x)$长什么样,我先预处理出$f(x)\times x\mod x,f(x)\times x^2\mod m(x),f(x)\times x^k\mod m(x)$等等情况</p>
+<p>如果你$g(x)&#x3D;1+x+x^2$长得很虚,那么<br>$$<br>f(x)\times g(x)\mod m(x)\<br>&#x3D;f(x)\times (1+x+x^2)\mod m(x)\<br>&#x3D;(f(x)+x\times f(x)+x^2\times f(x))\mod m(x)\<br>&#x3D;f(x)+x\times f(x)\mod m(x)+x^2\times f(x)\mod m(x)<br>$$<br>直接利用预处理得出的结果,然后计算加法直接用二进制异或</p>
+<h2 id="总结"><a href="#总结" class="headerlink" title="总结"></a>总结</h2><p>到此我们构造出了$GF(2^n)$,即有$2^n$个元素的伽罗华域</p>
+<p>怎么构造出的?由系数在$GF(2)$上的多项式模一个$2^n$次的素多项式拓展出的</p>
+<p>多项式和这$2^n$个数怎么产生联系?每一个多项式都对应一个二进制数</p>
+<p>这$2^n$个数的加减乘除运算怎么定义的?还是通过多项式的运算得到的</p>
+<p>下一步可以向AES加密算法进军了</p>
+
+    </div>
+
+    
+    
+    
+
+      <footer class="post-footer">
+          <div class="post-tags">
+              <a href="/tags/%E6%8A%BD%E8%B1%A1%E4%BB%A3%E6%95%B0/" rel="tag"># 抽象代数</a>
+          </div>
+
+        
+
+
+        
+    <div class="post-nav">
+      <div class="post-nav-item">
+    <a href="/2022/02/07/MySQL/" rel="prev" title="MYSQL命令">
+      <i class="fa fa-chevron-left"></i> MYSQL命令
+    </a></div>
+      <div class="post-nav-item">
+    <a href="/2022/04/22/gdb%E8%B0%83%E8%AF%95%E5%99%A8/" rel="next" title="gbd调试器的使用">
+      gbd调试器的使用 <i class="fa fa-chevron-right"></i>
+    </a></div>
+    </div>
+      </footer>
+    
+  </article>
+  
+  
+  
+
+
+
+          </div>
+          
+
+<script>
+  window.addEventListener('tabs:register', () => {
+    let { activeClass } = CONFIG.comments;
+    if (CONFIG.comments.storage) {
+      activeClass = localStorage.getItem('comments_active') || activeClass;
+    }
+    if (activeClass) {
+      let activeTab = document.querySelector(`a[href="#comment-${activeClass}"]`);
+      if (activeTab) {
+        activeTab.click();
+      }
+    }
+  });
+  if (CONFIG.comments.storage) {
+    window.addEventListener('tabs:click', event => {
+      if (!event.target.matches('.tabs-comment .tab-content .tab-pane')) return;
+      let commentClass = event.target.classList[1];
+      localStorage.setItem('comments_active', commentClass);
+    });
+  }
+</script>
+
+        </div>
+          
+  
+  <div class="toggle sidebar-toggle">
+    <span class="toggle-line toggle-line-first"></span>
+    <span class="toggle-line toggle-line-middle"></span>
+    <span class="toggle-line toggle-line-last"></span>
+  </div>
+
+  <aside class="sidebar">
+    <div class="sidebar-inner">
+
+      <ul class="sidebar-nav motion-element">
+        <li class="sidebar-nav-toc">
+          Table of Contents
+        </li>
+        <li class="sidebar-nav-overview">
+          Overview
+        </li>
+      </ul>
+
+      <!--noindex-->
+      <div class="post-toc-wrap sidebar-panel">
+          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#%E6%8A%BD%E8%B1%A1%E4%BB%A3%E6%95%B0"><span class="nav-number">1.</span> <span class="nav-text">抽象代数</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#%E6%8A%BD%E8%B1%A1%E4%BB%A3%E6%95%B0%E5%9F%BA%E7%A1%80"><span class="nav-number">1.1.</span> <span class="nav-text">抽象代数基础</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E7%BE%A4"><span class="nav-number">1.1.1.</span> <span class="nav-text">群</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#%E7%BE%A4-1"><span class="nav-number">1.1.1.1.</span> <span class="nav-text">群</span></a><ol class="nav-child"><li class="nav-item nav-level-5"><a class="nav-link" href="#%E5%8F%98%E6%8D%A2%E7%BE%A4"><span class="nav-number">1.1.1.1.1.</span> <span class="nav-text">变换群</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#%E7%BD%AE%E6%8D%A2%E7%BE%A4"><span class="nav-number">1.1.1.1.2.</span> <span class="nav-text">置换群</span></a></li></ol></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E4%BA%A4%E6%8D%A2%E7%BE%A4"><span class="nav-number">1.1.1.2.</span> <span class="nav-text">交换群</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E7%8E%AF"><span class="nav-number">1.1.2.</span> <span class="nav-text">环</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#%E7%8E%AF-1"><span class="nav-number">1.1.2.1.</span> <span class="nav-text">环</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E4%BA%A4%E6%8D%A2%E7%8E%AF"><span class="nav-number">1.1.2.2.</span> <span class="nav-text">交换环</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E6%95%B4%E7%8E%AF"><span class="nav-number">1.1.2.3.</span> <span class="nav-text">整环</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%9F%9F"><span class="nav-number">1.1.3.</span> <span class="nav-text">域</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E6%9C%89%E9%99%90%E5%9F%9FGF-p"><span class="nav-number">1.2.</span> <span class="nav-text">有限域GF(p)</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#Z-p-%E4%B8%8A%E7%9A%84%E6%95%B0%E8%AE%BA%E5%AE%9A%E7%90%86"><span class="nav-number">1.2.1.</span> <span class="nav-text">$Z_p$上的数论定理</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#%E6%8B%93%E5%B1%95%E6%AC%A7%E5%87%A0%E9%87%8C%E5%BE%97%E5%AE%9A%E7%90%86%E6%B1%82%E4%B9%98%E6%B3%95%E9%80%86%E5%85%83"><span class="nav-number">1.2.1.1.</span> <span class="nav-text">拓展欧几里得定理求乘法逆元</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E5%BF%AB%E9%80%9F%E5%B9%82"><span class="nav-number">1.2.1.2.</span> <span class="nav-text">快速幂</span></a></li></ol></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%A4%9A%E9%A1%B9%E5%BC%8F%E7%AE%97%E6%9C%AF"><span class="nav-number">1.3.</span> <span class="nav-text">多项式算术</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E4%B8%BA%E4%BB%80%E4%B9%88%E7%AA%81%E7%84%B6%E6%89%AF%E5%88%B0%E2%80%9D%E5%A4%9A%E9%A1%B9%E5%BC%8F%E7%AE%97%E6%95%B0%E2%80%9D%E5%91%A2"><span class="nav-number">1.3.1.</span> <span class="nav-text">为什么突然扯到”多项式算数”呢?</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%B0%86%E6%95%B0%E7%9A%84%E6%80%A7%E8%B4%A8%E6%8B%93%E5%B1%95%E5%88%B0%E5%A4%9A%E9%A1%B9%E5%BC%8F%E5%BC%8F%E4%B8%8A"><span class="nav-number">1.3.2.</span> <span class="nav-text">&#x3D;&#x3D;将数的性质拓展到多项式式上&#x3D;&#x3D;</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%99%AE%E9%80%9A%E5%A4%9A%E9%A1%B9%E5%BC%8F%E8%BF%90%E7%AE%97"><span class="nav-number">1.3.3.</span> <span class="nav-text">普通多项式运算</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E7%B3%BB%E6%95%B0%E5%9C%A8-Z-p-%E4%B8%AD%E7%9A%84%E5%A4%9A%E9%A1%B9%E5%BC%8F%E8%BF%90%E7%AE%97"><span class="nav-number">1.3.4.</span> <span class="nav-text">系数在$Z_p$中的多项式运算</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#Z-p-%E5%A4%9A%E9%A1%B9%E5%BC%8F%E7%9A%84%E5%9B%9B%E5%88%99%E8%BF%90%E7%AE%97"><span class="nav-number">1.3.4.1.</span> <span class="nav-text">$Z_p$多项式的四则运算</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#Z-p-%E5%A4%9A%E9%A1%B9%E5%BC%8F%E7%9A%84%E6%AC%A7%E5%87%A0%E9%87%8C%E5%BE%97%E5%AE%9A%E7%90%86"><span class="nav-number">1.3.4.2.</span> <span class="nav-text">$Z_p$多项式的欧几里得定理</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Z-p-%E4%B8%8A%E5%A4%9A%E9%A1%B9%E5%BC%8F%E5%86%8Dmod-n%E6%AC%A1%E7%B4%A0%E5%A4%9A%E9%A1%B9%E5%BC%8F"><span class="nav-number">1.3.5.</span> <span class="nav-text">$Z_p$上多项式再mod n次素多项式</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#F-%E5%92%8C-Z-p-%E7%9A%84%E4%B8%8D%E5%90%8C"><span class="nav-number">1.3.6.</span> <span class="nav-text">$F$和$Z_p$的不同</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#F-GF-p-n-%E4%B8%8A%E7%9A%84%E4%B9%98%E6%B3%95%E9%80%86%E5%85%83"><span class="nav-number">1.3.7.</span> <span class="nav-text">$F&#x3D;GF(p^n)$上的乘法逆元</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#GF-2-n-%E4%B8%8A%E6%9E%84%E9%80%A0%E7%BB%93%E6%9E%9C%E5%88%86%E5%B8%83%E5%9D%87%E5%8C%80%E7%9A%84%E4%BA%8C%E5%85%83%E8%BF%90%E7%AE%97"><span class="nav-number">1.4.</span> <span class="nav-text">$GF(2^n)$上构造结果分布均匀的二元运算</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%8A%A0%E6%B3%95"><span class="nav-number">1.4.1.</span> <span class="nav-text">加法</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E4%B9%98%E6%B3%95"><span class="nav-number">1.4.2.</span> <span class="nav-text">乘法</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#%E6%8B%86%E5%88%86%E6%88%90%E9%A1%B9"><span class="nav-number">1.4.2.1.</span> <span class="nav-text">拆分成项</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E6%B1%82-f-x-times-x-k-mod-m-x"><span class="nav-number">1.4.2.2.</span> <span class="nav-text">求$f(x)\times x^k\mod m(x)$</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E6%B1%82-f-x-times-x-mod-m-x"><span class="nav-number">1.4.2.3.</span> <span class="nav-text">求$f(x)\times x\mod m(x)$</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E6%B1%82-x-8-mod-m-x"><span class="nav-number">1.4.2.4.</span> <span class="nav-text">求$x^8 \mod m(x)$</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E5%9B%9E%E5%88%B0%E6%B1%82-f-x-times-g-x-mod-m-x"><span class="nav-number">1.4.2.5.</span> <span class="nav-text">回到求$f(x)\times g(x)\mod m(x)$</span></a></li></ol></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E6%80%BB%E7%BB%93"><span class="nav-number">1.5.</span> <span class="nav-text">总结</span></a></li></ol></li></ol></div>
+      </div>
+      <!--/noindex-->
+
+      <div class="site-overview-wrap sidebar-panel">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+  <p class="site-author-name" itemprop="name">John Doe</p>
+  <div class="site-description" itemprop="description"></div>
+</div>
+<div class="site-state-wrap motion-element">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+          <a href="/archives/">
+        
+          <span class="site-state-item-count">78</span>
+          <span class="site-state-item-name">posts</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-tags">
+        <span class="site-state-item-count">30</span>
+        <span class="site-state-item-name">tags</span>
+      </div>
+  </nav>
+</div>
+
+
+
+      </div>
+
+    </div>
+  </aside>
+  <div id="sidebar-dimmer"></div>
+
+
+      </div>
+    </main>
+
+    <footer class="footer">
+      <div class="footer-inner">
+        
+
+        
+
+<div class="copyright">
+  
+  &copy; 
+  <span itemprop="copyrightYear">2024</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">John Doe</span>
+</div>
+  <div class="powered-by">Powered by <a href="https://hexo.io/" class="theme-link" rel="noopener" target="_blank">Hexo</a> & <a href="https://muse.theme-next.org/" class="theme-link" rel="noopener" target="_blank">NexT.Muse</a>
+  </div>
+
+        
+
+
+
+
+
+
+
+
+      </div>
+    </footer>
+  </div>
+
+  
+  <script src="/lib/anime.min.js"></script>
+  <script src="/lib/velocity/velocity.min.js"></script>
+  <script src="/lib/velocity/velocity.ui.min.js"></script>
+
+<script src="/js/utils.js"></script>
+
+<script src="/js/motion.js"></script>
+
+
+<script src="/js/schemes/muse.js"></script>
+
+
+<script src="/js/next-boot.js"></script>
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+  
+
+</body>
+</html>

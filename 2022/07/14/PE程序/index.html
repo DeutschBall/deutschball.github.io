@@ -1,0 +1,1728 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 7.3.0">
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png">
+  <link rel="mask-icon" href="/images/logo.svg" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+<link rel="stylesheet" href="/lib/font-awesome/css/all.min.css">
+
+<script id="hexo-configurations">
+    var NexT = window.NexT || {};
+    var CONFIG = {"hostname":"example.com","root":"/","scheme":"Muse","version":"7.8.0","exturl":false,"sidebar":{"position":"left","display":"post","padding":18,"offset":12,"onmobile":false},"copycode":{"enable":false,"show_result":false,"style":null},"back2top":{"enable":true,"sidebar":false,"scrollpercent":false},"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":false,"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"algolia":{"hits":{"per_page":10},"labels":{"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}},"localsearch":{"enable":false,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false},"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}}};
+  </script>
+
+  <meta name="description" content="Portable Executable前置知识notepad.exe on winXP首先,win11上的notepad.exe和winXP上的notepad.exe不一样 左是winxp上的notepad.exe,右是win11上的  方便获取核心原理的讲解,还是使用winxp的notepad.exe 直接从虚拟机拽到win11上用010editor分析就可以 PE文件windows上的目标文件">
+<meta property="og:type" content="article">
+<meta property="og:title" content="程序员的自我修养 chapter 5 PE&#x2F;COFF">
+<meta property="og:url" content="http://example.com/2022/07/14/PE%E7%A8%8B%E5%BA%8F/index.html">
+<meta property="og:site_name" content="Hexo">
+<meta property="og:description" content="Portable Executable前置知识notepad.exe on winXP首先,win11上的notepad.exe和winXP上的notepad.exe不一样 左是winxp上的notepad.exe,右是win11上的  方便获取核心原理的讲解,还是使用winxp的notepad.exe 直接从虚拟机拽到win11上用010editor分析就可以 PE文件windows上的目标文件">
+<meta property="og:locale" content="en_US">
+<meta property="og:image" content="https://raw.githubusercontent.com/DeutschBall/test/master/image-20220710191351701.png">
+<meta property="og:image" content="https://raw.githubusercontent.com/DeutschBall/test/master/image-20220710112514843.png">
+<meta property="og:image" content="https://raw.githubusercontent.com/DeutschBall/test/master/PE%E5%A4%B4.png">
+<meta property="og:image" content="https://raw.githubusercontent.com/DeutschBall/test/master/image-20220710193646618.png">
+<meta property="og:image" content="https://raw.githubusercontent.com/DeutschBall/test/master/image-20220710205215866.png">
+<meta property="og:image" content="https://raw.githubusercontent.com/DeutschBall/test/master/image-20220710193746654.png">
+<meta property="og:image" content="https://raw.githubusercontent.com/DeutschBall/test/master/image-20220710200602144.png">
+<meta property="og:image" content="https://raw.githubusercontent.com/DeutschBall/test/master/image-20220711122440212.png">
+<meta property="og:image" content="https://raw.githubusercontent.com/DeutschBall/test/master/image-20220711122847055.png">
+<meta property="og:image" content="https://raw.githubusercontent.com/DeutschBall/test/master/image-20220711123000530.png">
+<meta property="og:image" content="https://raw.githubusercontent.com/DeutschBall/test/master/image-20220711123225586.png">
+<meta property="og:image" content="https://raw.githubusercontent.com/DeutschBall/test/master/image-20220711123352685.png">
+<meta property="og:image" content="https://raw.githubusercontent.com/DeutschBall/test/master/image-20220711123559456.png">
+<meta property="og:image" content="https://raw.githubusercontent.com/DeutschBall/test/master/image-20220711131155606.png">
+<meta property="og:image" content="https://raw.githubusercontent.com/DeutschBall/test/master/image-20220711131247686.png">
+<meta property="og:image" content="https://raw.githubusercontent.com/DeutschBall/test/master/image-20220711125018251.png">
+<meta property="og:image" content="https://raw.githubusercontent.com/DeutschBall/test/master/image-20220711132424181.png">
+<meta property="og:image" content="https://raw.githubusercontent.com/DeutschBall/test/master/image-20220711132938159.png">
+<meta property="og:image" content="https://raw.githubusercontent.com/DeutschBall/test/master/v2-eb05f1dde948bdceb87f74864f6fe85d_1440w.jpg">
+<meta property="og:image" content="https://raw.githubusercontent.com/DeutschBall/test/master/image-20220711133034580.png">
+<meta property="og:image" content="https://raw.githubusercontent.com/DeutschBall/test/master/image-20220711133237229.png">
+<meta property="og:image" content="https://raw.githubusercontent.com/DeutschBall/test/master/image-20220711134050894.png">
+<meta property="og:image" content="https://raw.githubusercontent.com/DeutschBall/test/master/image-20220711134530037.png">
+<meta property="og:image" content="https://raw.githubusercontent.com/DeutschBall/test/master/image-20220711134550293.png">
+<meta property="og:image" content="https://raw.githubusercontent.com/DeutschBall/test/master/image-20220711134856362.png">
+<meta property="og:image" content="https://raw.githubusercontent.com/DeutschBall/test/master/image-20220711134923197.png">
+<meta property="og:image" content="https://raw.githubusercontent.com/DeutschBall/test/master/image-20220711135628794.png">
+<meta property="og:image" content="https://raw.githubusercontent.com/DeutschBall/test/master/image-20220711135744137.png">
+<meta property="og:image" content="https://raw.githubusercontent.com/DeutschBall/test/master/image-20220711135949436.png">
+<meta property="og:image" content="https://raw.githubusercontent.com/DeutschBall/test/master/image-20220711141108874.png">
+<meta property="og:image" content="https://raw.githubusercontent.com/DeutschBall/test/master/image-20220711141602298.png">
+<meta property="og:image" content="https://raw.githubusercontent.com/DeutschBall/test/master/image-20220711142150809.png">
+<meta property="og:image" content="https://raw.githubusercontent.com/DeutschBall/test/master/image-20220711142522560.png">
+<meta property="og:image" content="https://raw.githubusercontent.com/DeutschBall/test/master/image-20220711165812127.png">
+<meta property="og:image" content="https://raw.githubusercontent.com/DeutschBall/test/master/image-20220711170645587.png">
+<meta property="og:image" content="https://raw.githubusercontent.com/DeutschBall/test/master/image-20220711171954659.png">
+<meta property="og:image" content="https://raw.githubusercontent.com/DeutschBall/test/master/image-20220711172941299.png">
+<meta property="og:image" content="https://raw.githubusercontent.com/DeutschBall/test/master/image-20220711173959730.png">
+<meta property="og:image" content="https://raw.githubusercontent.com/DeutschBall/test/master/image-20220711174053133.png">
+<meta property="og:image" content="https://raw.githubusercontent.com/DeutschBall/test/master/image-20220711174407510.png">
+<meta property="og:image" content="https://raw.githubusercontent.com/DeutschBall/test/master/image-20220711174508519.png">
+<meta property="og:image" content="https://raw.githubusercontent.com/DeutschBall/test/master/image-20220711185609155.png">
+<meta property="og:image" content="https://raw.githubusercontent.com/DeutschBall/test/master/image-20220711185848617.png">
+<meta property="og:image" content="https://raw.githubusercontent.com/DeutschBall/test/master/image-20220711193701271.png">
+<meta property="og:image" content="https://raw.githubusercontent.com/DeutschBall/test/master/image-20220711193728974.png">
+<meta property="og:image" content="https://raw.githubusercontent.com/DeutschBall/test/master/image-20220711193741398.png">
+<meta property="og:image" content="https://raw.githubusercontent.com/DeutschBall/test/master/image-20220711193752606.png">
+<meta property="og:image" content="https://raw.githubusercontent.com/DeutschBall/test/master/image-20220711193823319.png">
+<meta property="og:image" content="https://raw.githubusercontent.com/DeutschBall/test/master/image-20220711193840091.png">
+<meta property="og:image" content="https://raw.githubusercontent.com/DeutschBall/test/master/image-20220711193848414.png">
+<meta property="og:image" content="https://raw.githubusercontent.com/DeutschBall/test/master/image-20220711193921306.png">
+<meta property="og:image" content="https://raw.githubusercontent.com/DeutschBall/test/master/image-20220711194026471.png">
+<meta property="og:image" content="https://raw.githubusercontent.com/DeutschBall/test/master/image-20220711194252567.png">
+<meta property="og:image" content="https://raw.githubusercontent.com/DeutschBall/test/master/image-20220711195943323.png">
+<meta property="og:image" content="https://raw.githubusercontent.com/DeutschBall/test/master/image-20220711200402067.png">
+<meta property="og:image" content="https://raw.githubusercontent.com/DeutschBall/test/master/image-20220714232816684.png">
+<meta property="og:image" content="https://raw.githubusercontent.com/DeutschBall/test/master/image-20220711202828849.png">
+<meta property="og:image" content="https://raw.githubusercontent.com/DeutschBall/test/master/image-20220711202847174.png">
+<meta property="og:image" content="https://raw.githubusercontent.com/DeutschBall/test/master/image-20220711200716003.png">
+<meta property="og:image" content="https://raw.githubusercontent.com/DeutschBall/test/master/image-20220711201710792.png">
+<meta property="og:image" content="https://raw.githubusercontent.com/DeutschBall/test/master/image-20220711201719842.png">
+<meta property="og:image" content="https://raw.githubusercontent.com/DeutschBall/test/master/image-20220711204300399.png">
+<meta property="og:image" content="https://raw.githubusercontent.com/DeutschBall/test/master/image-20220711204911890.png">
+<meta property="og:image" content="https://raw.githubusercontent.com/DeutschBall/test/master/image-20220711210809700.png">
+<meta property="og:image" content="https://raw.githubusercontent.com/DeutschBall/test/master/image-20220711210848527.png">
+<meta property="og:image" content="https://raw.githubusercontent.com/DeutschBall/test/master/image-20220712111448720.png">
+<meta property="og:image" content="https://raw.githubusercontent.com/DeutschBall/test/master/image-20220711205101433.png">
+<meta property="og:image" content="https://raw.githubusercontent.com/DeutschBall/test/master/image-20220712111646633.png">
+<meta property="og:image" content="https://raw.githubusercontent.com/DeutschBall/test/master/image-20220712112009554.png">
+<meta property="og:image" content="https://raw.githubusercontent.com/DeutschBall/test/master/image-20220712112522955.png">
+<meta property="og:image" content="https://raw.githubusercontent.com/DeutschBall/test/master/image-20220712112658025.png">
+<meta property="og:image" content="https://raw.githubusercontent.com/DeutschBall/test/master/PE.jpg">
+<meta property="og:image" content="https://raw.githubusercontent.com/DeutschBall/test/master/image-20220712121817219.png">
+<meta property="og:image" content="https://raw.githubusercontent.com/DeutschBall/test/master/image-20220712124021808.png">
+<meta property="og:image" content="https://raw.githubusercontent.com/DeutschBall/test/master/image-20220712130001523.png">
+<meta property="og:image" content="https://raw.githubusercontent.com/DeutschBall/test/master/image-20220712130506645.png">
+<meta property="og:image" content="https://raw.githubusercontent.com/DeutschBall/test/master/image-20220712131357758.png">
+<meta property="og:image" content="https://raw.githubusercontent.com/DeutschBall/test/master/image-20220712132332297.png">
+<meta property="og:image" content="https://raw.githubusercontent.com/DeutschBall/test/master/image-20220714145105577.png">
+<meta property="og:image" content="https://raw.githubusercontent.com/DeutschBall/test/master/image-20220712142026145.png">
+<meta property="og:image" content="https://raw.githubusercontent.com/DeutschBall/test/master/image-20220712145612859.png">
+<meta property="og:image" content="https://raw.githubusercontent.com/DeutschBall/test/master/image-20220714223418977.png">
+<meta property="og:image" content="https://raw.githubusercontent.com/DeutschBall/test/master/image-20220714144520852.png">
+<meta property="og:image" content="https://raw.githubusercontent.com/DeutschBall/test/master/image-20220714152432702.png">
+<meta property="og:image" content="https://raw.githubusercontent.com/DeutschBall/test/master/image-20220714152202138.png">
+<meta property="og:image" content="https://raw.githubusercontent.com/DeutschBall/test/master/image-20220714152703198.png">
+<meta property="og:image" content="https://raw.githubusercontent.com/DeutschBall/test/master/image-20220714152850743.png">
+<meta property="og:image" content="https://raw.githubusercontent.com/DeutschBall/test/master/image-20220714152949332.png">
+<meta property="og:image" content="https://raw.githubusercontent.com/DeutschBall/test/master/image-20220711212317715.png">
+<meta property="og:image" content="https://raw.githubusercontent.com/DeutschBall/test/master/image-20220714233554055.png">
+<meta property="og:image" content="https://raw.githubusercontent.com/DeutschBall/test/master/image-20220714232136762.png">
+<meta property="og:image" content="https://raw.githubusercontent.com/DeutschBall/test/master/image-20220710144537819.png">
+<meta property="og:image" content="https://raw.githubusercontent.com/DeutschBall/test/master/image-20220710145018095.png">
+<meta property="og:image" content="https://raw.githubusercontent.com/DeutschBall/test/master/image-20220710145058360.png">
+<meta property="og:image" content="https://raw.githubusercontent.com/DeutschBall/test/master/image-20220710155642134.png">
+<meta property="og:image" content="https://raw.githubusercontent.com/DeutschBall/test/master/image-20220710160314871.png">
+<meta property="article:published_time" content="2022-07-14T15:44:00.000Z">
+<meta property="article:modified_time" content="2023-09-25T11:37:48.002Z">
+<meta property="article:author" content="John Doe">
+<meta property="article:tag" content="程序员的自我修养">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://raw.githubusercontent.com/DeutschBall/test/master/image-20220710191351701.png">
+
+<link rel="canonical" href="http://example.com/2022/07/14/PE%E7%A8%8B%E5%BA%8F/">
+
+
+<script id="page-configurations">
+  // https://hexo.io/docs/variables.html
+  CONFIG.page = {
+    sidebar: "",
+    isHome : false,
+    isPost : true,
+    lang   : 'en'
+  };
+</script>
+
+  <title>程序员的自我修养 chapter 5 PE/COFF | Hexo</title>
+  
+
+
+
+
+
+
+  <noscript>
+  <style>
+  .use-motion .brand,
+  .use-motion .menu-item,
+  .sidebar-inner,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-header { opacity: initial; }
+
+  .use-motion .site-title,
+  .use-motion .site-subtitle {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line-before i { left: initial; }
+  .use-motion .logo-line-after i { right: initial; }
+  </style>
+</noscript>
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage">
+  <div class="container use-motion">
+    <div class="headband"></div>
+
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="Toggle navigation bar">
+      <span class="toggle-line toggle-line-first"></span>
+      <span class="toggle-line toggle-line-middle"></span>
+      <span class="toggle-line toggle-line-last"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <span class="logo-line-before"><i></i></span>
+      <h1 class="site-title">Hexo</h1>
+      <span class="logo-line-after"><i></i></span>
+    </a>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger">
+    </div>
+  </div>
+</div>
+
+
+
+
+<nav class="site-nav">
+  <ul id="menu" class="main-menu menu">
+        <li class="menu-item menu-item-home">
+
+    <a href="/" rel="section"><i class="fa fa-home fa-fw"></i>Home</a>
+
+  </li>
+        <li class="menu-item menu-item-archives">
+
+    <a href="/archives/" rel="section"><i class="fa fa-archive fa-fw"></i>Archives</a>
+
+  </li>
+  </ul>
+</nav>
+
+
+
+
+</div>
+    </header>
+
+    
+  <div class="back-to-top">
+    <i class="fa fa-arrow-up"></i>
+    <span>0%</span>
+  </div>
+
+
+    <main class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+
+          <div class="content post posts-expand">
+            
+
+    
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="en">
+    <link itemprop="mainEntityOfPage" href="http://example.com/2022/07/14/PE%E7%A8%8B%E5%BA%8F/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.gif">
+      <meta itemprop="name" content="John Doe">
+      <meta itemprop="description" content="">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Hexo">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          程序员的自我修养 chapter 5 PE/COFF
+        </h1>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-calendar"></i>
+              </span>
+              <span class="post-meta-item-text">Posted on</span>
+
+              <time title="Created: 2022-07-14 23:44:00" itemprop="dateCreated datePublished" datetime="2022-07-14T23:44:00+08:00">2022-07-14</time>
+            </span>
+              <span class="post-meta-item">
+                <span class="post-meta-item-icon">
+                  <i class="far fa-calendar-check"></i>
+                </span>
+                <span class="post-meta-item-text">Edited on</span>
+                <time title="Modified: 2023-09-25 19:37:48" itemprop="dateModified" datetime="2023-09-25T19:37:48+08:00">2023-09-25</time>
+              </span>
+
+          
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+        <h1 id="Portable-Executable"><a href="#Portable-Executable" class="headerlink" title="Portable Executable"></a>Portable Executable</h1><h2 id="前置知识"><a href="#前置知识" class="headerlink" title="前置知识"></a>前置知识</h2><h3 id="notepad-exe-on-winXP"><a href="#notepad-exe-on-winXP" class="headerlink" title="notepad.exe on winXP"></a>notepad.exe on winXP</h3><p>首先,win11上的notepad.exe和winXP上的notepad.exe不一样</p>
+<p>左是winxp上的notepad.exe,右是win11上的</p>
+<p><img src="https://raw.githubusercontent.com/DeutschBall/test/master/image-20220710191351701.png" alt="image-20220710191351701"></p>
+<p>方便获取核心原理的讲解,还是使用winxp的notepad.exe</p>
+<p>直接从虚拟机拽到win11上用010editor分析就可以</p>
+<h3 id="PE文件"><a href="#PE文件" class="headerlink" title="PE文件"></a>PE文件</h3><p>windows上的目标文件叫做PE</p>
+<blockquote>
+<p>可执行的有.exe,.src(即可执行目标模块,类似于linux上的.out)</p>
+<p>库文件有.dll等(动态库,类似于linux上的.so)</p>
+<p>驱动程序有.sys等</p>
+<p>对象文件有.obj(即可重定位目标模块,类似于linux上的.o文件)</p>
+</blockquote>
+<p>PE文件可以分成两部分,头和身子</p>
+<p>头就是PE头,身子就是各节区内容</p>
+<p>PE在磁盘中存放时的状态和运行时加载进入虚拟内存的状态不完全相同</p>
+<p><img src="https://raw.githubusercontent.com/DeutschBall/test/master/image-20220710112514843.png" alt="image-20220710112514843"></p>
+<h3 id="虚拟地址-相对虚拟地址-映像基址-文件偏移"><a href="#虚拟地址-相对虚拟地址-映像基址-文件偏移" class="headerlink" title="虚拟地址,相对虚拟地址,映像基址,文件偏移"></a>虚拟地址,相对虚拟地址,映像基址,文件偏移</h3><p>一些符号约定,后面会推导这些量的转化关系</p>
+<p>VA(Virtual Address):虚拟地址空间中的地址</p>
+<p><code>RVA(Relative Virtual Address)</code>:相对虚拟地址,相对于虚拟地址空间中基地址的偏移量</p>
+<p>ImageBase:进程映像在虚拟地址空间中的基地址</p>
+<p>关系:$VA&#x3D;RVA+ImageBase$</p>
+<p>文件中保存的都是RVA,实际运行时需要选定一个ImageBase,其他RVA地址基于该ImageBase计算得到运行时的虚拟地址.</p>
+<p>RAW:文件偏移,符号在磁盘文件中躺着时,相对于文件开始的偏移量</p>
+<figure class="highlight mathematica"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="variable">RAW</span><span class="punctuation">(</span><span class="variable">x</span><span class="punctuation">)</span><span class="operator">=</span><span class="variable">RVA</span><span class="punctuation">(</span><span class="variable">x</span><span class="punctuation">)</span><span class="operator">-</span><span class="variable">section</span><span class="punctuation">[</span><span class="variable">i</span><span class="punctuation">]</span><span class="operator">.</span><span class="variable">VirtualAddress</span><span class="operator">+</span><span class="variable">section</span><span class="punctuation">[</span><span class="variable">i</span><span class="punctuation">]</span><span class="operator">.</span><span class="variable">PointerToRawData</span></span><br></pre></td></tr></table></figure>
+
+
+
+<h2 id="PE头"><a href="#PE头" class="headerlink" title="PE头"></a>PE头</h2><p><img src="https://raw.githubusercontent.com/DeutschBall/test/master/PE%E5%A4%B4.png"></p>
+<h3 id="DOS头"><a href="#DOS头" class="headerlink" title="DOS头"></a>DOS头</h3><p><img src="https://raw.githubusercontent.com/DeutschBall/test/master/image-20220710193646618.png" alt="image-20220710193646618"></p>
+<p>DOS头的最后一个成员是AddressOfNewExeHeader,其值是NT头相对于本文件开始的偏移量</p>
+<p>可以看到NotePad.exe中其值为E8h,而本文件的E8h处正好就是NtHeader的起始地址</p>
+<p><img src="https://raw.githubusercontent.com/DeutschBall/test/master/image-20220710205215866.png" alt="image-20220710205215866"></p>
+<p>为啥要设置这么一个值呢?</p>
+<p>因为DOS头和NtHeader之间有一个DOS桩,如果这个DOS桩也是定长的,则显然不需要记录Nt头的偏移量</p>
+<p>然而DOS桩长度可变,因此为了定位Nt头需要专门记录一下</p>
+<p>为啥不在DOS桩里面记录Nt头的位置?DOS桩只有在DOS环境下才会执行,桌面环境下轮不到DOS桩执行</p>
+<h3 id="DOS桩"><a href="#DOS桩" class="headerlink" title="DOS桩"></a>DOS桩</h3><blockquote>
+<p>桩,存根, 占位代码，粘合代码，残存代码, 指满足形式要求但没有实现实际功能的占坑&#x2F;代理代码。</p>
+</blockquote>
+<p><img src="https://raw.githubusercontent.com/DeutschBall/test/master/image-20220710193746654.png" alt="image-20220710193746654"></p>
+<p>32位PE程序中,由于DOS头是定长的,因此从40h开始是DOS桩,而DOS桩不一定是定长的</p>
+<p>winXP上的notepad.exe,其dos桩长度为90h</p>
+<p>DOS桩是干啥的呢?在DOS环境下执行PE程序会执行DOS桩内的指令,而不是执行正儿八经的PE程序</p>
+<p>为啥呢?DOS环境是16位的,并且没有GUI,当然跑不起来正儿八经的记事本了.</p>
+<p>既然DOS桩也可以执行,那么它干了啥事呢?</p>
+<p>将DOS桩提出来用ida 16位反编译</p>
+<p>发现前D个字节确实可以反汇编成指令</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line">seg000:0000 0E                       push    cs</span><br><span class="line">seg000:0001 1F                       pop     ds</span><br><span class="line">seg000:0002 BA 0E 00                 mov     dx, 0Eh</span><br><span class="line">seg000:0005 B4 09                    mov     ah, 9</span><br><span class="line">seg000:0007 CD 21                    int     21h             ; DOS - PRINT STRING</span><br><span class="line">seg000:0007                                                  ; DS:DX -&gt; string terminated by &quot;$&quot;</span><br><span class="line">seg000:0009 B8 01 4C                 mov     ax, 4C01h</span><br><span class="line">seg000:000C CD 21                    int     21h             ; DOS - 2+ - QUIT WITH EXIT CODE (EXIT)</span><br><span class="line">seg000:000C                                                  ; AL = exit code</span><br></pre></td></tr></table></figure>
+
+<p>此后紧跟着就是有实际意义的字符串</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">seg000:000E aThisProgramCan db &#x27;This program cannot be run in DOS mode.&#x27;,0Dh,0Dh,0Ah</span><br><span class="line">seg000:000E                 db &#x27;$&#x27;,0</span><br></pre></td></tr></table></figure>
+
+<blockquote>
+<p>注意到字符串下面有一个美元符号’$’,它也是有作用的,后面就知道了</p>
+</blockquote>
+<p>那么这前D个字节的指令干了啥事呢</p>
+<p>首先将cs拷贝给ds,然后将<code>This program cannot be run in DOS mode.$</code>这个字符串的起始地址0Eh放到dx中,目的是为后来的函数调用做准备</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">seg000:0000 0E                       push    cs</span><br><span class="line">seg000:0001 1F                       pop     ds</span><br><span class="line">seg000:0002 BA 0E 00                 mov     dx, 0Eh</span><br></pre></td></tr></table></figure>
+
+<blockquote>
+<p>为啥要把cs拷贝给ds呢?因为这时候cs段寄存器存放的就是当前正在执行的代码段的起始地址,</p>
+<p>后面的字符串虽然是数据,但是也是存放在当前代码段的,</p>
+<p>访问数据要使用ds:dx两个寄存器,</p>
+<p>要想指向这个字符串,ds需要等于字符串的段地址,也就是cs</p>
+</blockquote>
+<p>然后<code>ah=9h</code>决定<code>int 21h</code>做什么工作</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">seg000:<span class="number">0005</span> B4 <span class="number">09</span>                    mov     ah, <span class="number">9</span></span><br><span class="line">seg000:<span class="number">0007</span> CD <span class="number">21</span>                    <span class="type">int</span>     <span class="number">21</span>h             ; DOS - PRINT STRING</span><br></pre></td></tr></table></figure>
+
+<p>当<code>AH=9</code>的时候,<code>int 21h</code>显示字符串,将<code>DS:DX</code>开始的字符串一直<strong>打印到<code>$</code>结束</strong></p>
+<p>然后<code>4c01h</code>放在<code>ax</code>中,再次决定<code>int 21h</code>做什么工作</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">seg000:0009 B8 01 4C                 mov     ax, 4C01h</span><br><span class="line">seg000:000C CD 21                    int     21h             ; DOS - 2+ - QUIT WITH EXIT CODE (EXIT)</span><br></pre></td></tr></table></figure>
+
+<p>当<code>ah=4c</code>时,<code>int 21h</code>决定带返回码返回,返回码就放在<code>al</code>中,显然这里是<code>01h</code></p>
+<p>现在DOS桩的逻辑弄明白了,但是但是,代码和数据只是占了一小部分,桩后半部分那些乱码是啥呢?</p>
+<p>010editor给出了一些线索</p>
+<p><img src="https://raw.githubusercontent.com/DeutschBall/test/master/image-20220710200602144.png" alt="image-20220710200602144"></p>
+<p>DOS桩剩下这一部分叫做Rich Header,</p>
+<p>单凭其最后一个成员XorKey,一个异或钥匙,就知道这rich_header玩意儿应该是加密的,</p>
+<p>既然给了异或钥匙,直接解密试试</p>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;iostream&gt;</span></span></span><br><span class="line"><span class="keyword">using</span> <span class="keyword">namespace</span> std;</span><br><span class="line"></span><br><span class="line"><span class="keyword">union</span> <span class="title class_">ElemType</span>&#123;</span><br><span class="line">    <span class="type">char</span> str[<span class="number">4</span>];</span><br><span class="line">    <span class="type">unsigned</span> <span class="type">int</span> value;</span><br><span class="line">    <span class="built_in">ElemType</span>()&#123;</span><br><span class="line">        value=<span class="number">0</span>;</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="built_in">ElemType</span>(<span class="type">const</span> <span class="type">unsigned</span> <span class="type">int</span> &amp;i)&#123;</span><br><span class="line">        value=i;</span><br><span class="line">    &#125;</span><br><span class="line">    ElemType <span class="keyword">operator</span>=(<span class="type">const</span> ElemType &amp;e)&#123;</span><br><span class="line">        value=e.value;</span><br><span class="line">        <span class="keyword">return</span> (*<span class="keyword">this</span>);</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">friend</span> ostream &amp;<span class="keyword">operator</span>&lt;&lt;(ostream &amp;os,<span class="type">const</span> ElemType &amp;e)&#123;</span><br><span class="line">        cout&lt;&lt;hex&lt;&lt;e.value&lt;&lt;<span class="string">&quot;   &quot;</span>;</span><br><span class="line">        <span class="keyword">for</span>(<span class="type">int</span> i=<span class="number">0</span>;i&lt;<span class="number">4</span>;++i)&#123;</span><br><span class="line">            os&lt;&lt;e.str[i];</span><br><span class="line">        &#125;</span><br><span class="line">        <span class="keyword">return</span> os;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="type">void</span> <span class="keyword">operator</span>^=(<span class="type">const</span> ElemType &amp;e)&#123;</span><br><span class="line">        value^=e.value;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;;</span><br><span class="line">ElemType data[<span class="number">17</span>] = &#123;</span><br><span class="line">    <span class="number">0x9B166DA5</span>, <span class="number">0xC8780CE1</span>, <span class="number">0xC8780CE1</span>, <span class="number">0xC8780CE1</span>, <span class="number">0xC8382F1B</span>, <span class="number">0xC8780CE0</span>, <span class="number">0xC8780CE1</span>, <span class="number">0xC8780CE0</span>, </span><br><span class="line">    <span class="number">0xC8612F1B</span>, <span class="number">0xC8780CF2</span>, <span class="number">0xC8790CE1</span>, <span class="number">0xC8780C23</span>, <span class="number">0xC83D2F76</span>, <span class="number">0xC8780CE0</span>, <span class="number">0xC8642F3B</span>, <span class="number">0xC8780CF2</span>, </span><br><span class="line">    <span class="number">0xC8452F1B</span></span><br><span class="line">&#125;;</span><br><span class="line"><span class="type">unsigned</span> <span class="type">int</span> key=<span class="number">0xC8780CE1</span>;</span><br><span class="line"><span class="function"><span class="type">int</span> <span class="title">main</span><span class="params">()</span></span>&#123;</span><br><span class="line">	<span class="keyword">for</span>(<span class="type">int</span> i=<span class="number">0</span>;i&lt;<span class="number">17</span>;++i)&#123;</span><br><span class="line">        data[i]^=key;</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">for</span>(<span class="type">int</span> i=<span class="number">0</span>;i&lt;<span class="number">17</span>;++i)&#123;</span><br><span class="line">        cout&lt;&lt;data[i]&lt;&lt;endl;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">&#125;</span><br><span class="line"></span><br></pre></td></tr></table></figure>
+
+<p>运行结果</p>
+<figure class="highlight powershell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="built_in">PS</span> C:\Users\<span class="number">86135</span>\Desktop\PE&gt; g++ main.cpp <span class="literal">-O0</span> <span class="literal">-o</span> main</span><br><span class="line"><span class="built_in">PS</span> C:\Users\<span class="number">86135</span>\Desktop\PE&gt; ./main</span><br><span class="line"><span class="number">536</span>e6144   DanS</span><br><span class="line"><span class="number">0</span>   </span><br><span class="line"><span class="number">0</span>   </span><br><span class="line"><span class="number">0</span>   </span><br><span class="line"><span class="number">4023</span>fa   ?</span><br></pre></td></tr></table></figure>
+
+<p>结果给了一个”DanS”字符串还有一堆乱码</p>
+<p>我猜DanS是一个开发者姓名的前缀.但是上网搜不到…</p>
+<p>尤其是搜NotePad作者的时候总是铺天盖地的降智辱华话题,凡是能在这种话题上引起讨论的都是大聪明</p>
+<h3 id="NT头"><a href="#NT头" class="headerlink" title="NT头"></a>NT头</h3><figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">typedef</span> <span class="class"><span class="keyword">struct</span> _<span class="title">IMAGE_NT_HEADERS64</span> &#123;</span><span class="comment">//64位程序的NT头</span></span><br><span class="line">  DWORD Signature;</span><br><span class="line">  IMAGE_FILE_HEADER FileHeader;</span><br><span class="line">  IMAGE_OPTIONAL_HEADER64 OptionalHeader;</span><br><span class="line">&#125; IMAGE_NT_HEADERS64,*PIMAGE_NT_HEADERS64;</span><br><span class="line"></span><br><span class="line"><span class="keyword">typedef</span> <span class="class"><span class="keyword">struct</span> _<span class="title">IMAGE_NT_HEADERS</span> &#123;</span><span class="comment">//32位程序的NT头</span></span><br><span class="line">  DWORD Signature;</span><br><span class="line">  IMAGE_FILE_HEADER FileHeader;</span><br><span class="line">  IMAGE_OPTIONAL_HEADER32 OptionalHeader;</span><br><span class="line">&#125; IMAGE_NT_HEADERS32,*PIMAGE_NT_HEADERS32;</span><br></pre></td></tr></table></figure>
+
+<p>对于notepad.exe</p>
+<p><img src="https://raw.githubusercontent.com/DeutschBall/test/master/image-20220711122440212.png" alt="image-20220711122440212"></p>
+<p>其NT头从E8h开始,长度为F8h</p>
+<p>包括三个成员,一个双字类型的签名魔数4550h,表明NT头开始了</p>
+<p>两个结构体成员,一个文件头,一个可选头</p>
+<h4 id="Nt文件头"><a href="#Nt文件头" class="headerlink" title="Nt文件头"></a>Nt文件头</h4><figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">typedef</span> <span class="class"><span class="keyword">struct</span> _<span class="title">IMAGE_FILE_HEADER</span> &#123;</span></span><br><span class="line">  WORD Machine;</span><br><span class="line">  WORD NumberOfSections;</span><br><span class="line">  DWORD TimeDateStamp;</span><br><span class="line">  DWORD PointerToSymbolTable;</span><br><span class="line">  DWORD NumberOfSymbols;</span><br><span class="line">  WORD SizeOfOptionalHeader;</span><br><span class="line">  WORD Characteristics;</span><br><span class="line">&#125; IMAGE_FILE_HEADER,*PIMAGE_FILE_HEADER;</span><br></pre></td></tr></table></figure>
+
+<p>notepad.exe的文件头</p>
+<p><img src="https://raw.githubusercontent.com/DeutschBall/test/master/image-20220711122847055.png" alt="image-20220711122847055"></p>
+<h5 id="Machine"><a href="#Machine" class="headerlink" title="Machine"></a>Machine</h5><p>Machine是机器码,表征该程序可以在哪种计算机体系上运行</p>
+<p><img src="https://raw.githubusercontent.com/DeutschBall/test/master/image-20220711123000530.png" alt="image-20220711123000530"></p>
+<p>显然winXP上的notepad.exe的Machine值是14Ch,对应x86体系</p>
+<h5 id="NumberOfSections"><a href="#NumberOfSections" class="headerlink" title="NumberOfSections"></a>NumberOfSections</h5><p>节区数量,该值和节区头表中存在的节区数量一定相等</p>
+<p>NotePad.exe中该值为3,其后面的节区数量也确实为3</p>
+<p><img src="https://raw.githubusercontent.com/DeutschBall/test/master/image-20220711123225586.png" alt="image-20220711123225586"></p>
+<p>该值决定了节区头表的大小(每个节都在节区头表中有相同大小的一项)</p>
+<p><img src="https://raw.githubusercontent.com/DeutschBall/test/master/image-20220711123352685.png" alt="image-20220711123352685"></p>
+<p>可以看出节区头表中的项目都是28h字节大小的</p>
+<h5 id="TimeDateStamp"><a href="#TimeDateStamp" class="headerlink" title="TimeDateStamp"></a>TimeDateStamp</h5><p>链接器生成该文件的时间,该值是从1970年1月1日0时(UTC时间)开始的秒数</p>
+<p>notepad.exe中该值为</p>
+<p><img src="https://raw.githubusercontent.com/DeutschBall/test/master/image-20220711123559456.png" alt="image-20220711123559456"></p>
+<p>010editor已经帮我们换算好了时间,是<code>2001.8.17 20:52:29</code></p>
+<h5 id="PointerToSymbolTable"><a href="#PointerToSymbolTable" class="headerlink" title="PointerToSymbolTable"></a>PointerToSymbolTable</h5><p>符号表symbol table的偏移量,如果没有符号表则该值为0</p>
+<p>notepad.exe中没有符号表,该值为0</p>
+<blockquote>
+<p>为啥可以没有符号表呢?</p>
+<p>符号是给人看的,比如每个函数,每个变量都有一个名字.这是为了方便人记忆与理解</p>
+<p>但是机器不需要,要执行哪个函数只会在汇编语言中写上call 地址,只认地址不认名</p>
+<p>可能编译链接阶段需要符号解析,用到符号表,但是一旦编译链接完成,生成了可执行目标文件,符号表就纯纯的没用了</p>
+</blockquote>
+<h5 id="NumberOfSymbols"><a href="#NumberOfSymbols" class="headerlink" title="NumberOfSymbols"></a>NumberOfSymbols</h5><p>记录符号表中的符号数量</p>
+<p>notepad.exe没有符号表,该项也为0</p>
+<h5 id="SizeOfOptionalHeader"><a href="#SizeOfOptionalHeader" class="headerlink" title="SizeOfOptionalHeader"></a>SizeOfOptionalHeader</h5><p>可选头的大小</p>
+<p>在notepad.exe中该值为224D&#x3D;E0h</p>
+<p><img src="https://raw.githubusercontent.com/DeutschBall/test/master/image-20220711131155606.png" alt="image-20220711131155606"></p>
+<p>紧跟在文件头后面的可选头恰好就这么大</p>
+<p><img src="https://raw.githubusercontent.com/DeutschBall/test/master/image-20220711131247686.png" alt="image-20220711131247686"></p>
+<blockquote>
+<p>DOS头记录了NT头的偏移量,类比一下,为啥没有记录可选头的起始位置呢?</p>
+<p>因为文件头的大小是固定的14h,Characterstics是一些二进制位按位或,其总长度就是一个WORD不变</p>
+<p>因此可选头紧接着文件头,只要文件头的偏移量知道了,立刻可以算出</p>
+<p>可选头的偏移量&#x3D;文件头+14h字节</p>
+<p>而文件头的偏移量是多少?文件头是Nt头的第二个成员,第一个成员是一个双字类型的NT签名,</p>
+<p>因此文件头的偏移量&#x3D;Nt头的偏移量+4字节</p>
+<p>Nt头的偏移量是多少?DOS头的<code>DWORD AddressOfNewExeHeader</code>会直接给出</p>
+<p>AddressOfNewExeHeader在哪里?DOS头是PE文件的开始,AddressOfNewExeHeader是其3C偏移处,即AddressOfNewHeader永远是PE文件的3Ch到40h字节</p>
+</blockquote>
+<h5 id="Characteristics"><a href="#Characteristics" class="headerlink" title="Characteristics"></a>Characteristics</h5><p>本文件属性,多个属性时按位或</p>
+<p>比如0x0002就表示可执行映像,意味本文件可以执行(没有未解析的外部引用),</p>
+<p>显然括号里是说给可重定位目标模块听的,因为.obj只是完成了编译,尚未经过链接,外部符号仍未解析</p>
+<p>又如0x2000就表示DLL动态库文件,虽然它是可执行文件,但是它不能直接运行.</p>
+<p>又如0x4000表示本文件只能在单处理机计算机上运行</p>
+<table>
+<thead>
+<tr>
+<th align="left">Value</th>
+<th align="left">Meaning</th>
+</tr>
+</thead>
+<tbody><tr>
+<td align="left"><strong>IMAGE_FILE_RELOCS_STRIPPED</strong>0x0001</td>
+<td align="left">Relocation information was stripped from the file. The file must be loaded at its preferred base address. If the base address is not available, the loader reports an error.</td>
+</tr>
+<tr>
+<td align="left"><strong>IMAGE_FILE_EXECUTABLE_IMAGE</strong>0x0002</td>
+<td align="left">The file is executable (there are no unresolved external references).</td>
+</tr>
+<tr>
+<td align="left"><strong>IMAGE_FILE_LINE_NUMS_STRIPPED</strong>0x0004</td>
+<td align="left">COFF line numbers were stripped from the file.</td>
+</tr>
+<tr>
+<td align="left"><strong>IMAGE_FILE_LOCAL_SYMS_STRIPPED</strong>0x0008</td>
+<td align="left">COFF symbol table entries were stripped from file.</td>
+</tr>
+<tr>
+<td align="left"><strong>IMAGE_FILE_AGGRESIVE_WS_TRIM</strong>0x0010</td>
+<td align="left">Aggressively trim the working set. This value is obsolete.</td>
+</tr>
+<tr>
+<td align="left"><strong>IMAGE_FILE_LARGE_ADDRESS_AWARE</strong>0x0020</td>
+<td align="left">The application can handle addresses larger than 2 GB.</td>
+</tr>
+<tr>
+<td align="left"><strong>IMAGE_FILE_BYTES_REVERSED_LO</strong>0x0080</td>
+<td align="left">The bytes of the word are reversed. This flag is obsolete.</td>
+</tr>
+<tr>
+<td align="left"><strong>IMAGE_FILE_32BIT_MACHINE</strong>0x0100</td>
+<td align="left">The computer supports 32-bit words.</td>
+</tr>
+<tr>
+<td align="left"><strong>IMAGE_FILE_DEBUG_STRIPPED</strong>0x0200</td>
+<td align="left">Debugging information was removed and stored separately in another file.</td>
+</tr>
+<tr>
+<td align="left"><strong>IMAGE_FILE_REMOVABLE_RUN_FROM_SWAP</strong>0x0400</td>
+<td align="left">If the image is on removable media, copy it to and run it from the swap file.</td>
+</tr>
+<tr>
+<td align="left"><strong>IMAGE_FILE_NET_RUN_FROM_SWAP</strong>0x0800</td>
+<td align="left">If the image is on the network, copy it to and run it from the swap file.</td>
+</tr>
+<tr>
+<td align="left"><strong>IMAGE_FILE_SYSTEM</strong>0x1000</td>
+<td align="left">The image is a system file.</td>
+</tr>
+<tr>
+<td align="left"><strong>IMAGE_FILE_DLL</strong>0x2000</td>
+<td align="left">The image is a DLL file. While it is an executable file, it cannot be run directly.</td>
+</tr>
+<tr>
+<td align="left"><strong>IMAGE_FILE_UP_SYSTEM_ONLY</strong>0x4000</td>
+<td align="left">The file should be run only on a uniprocessor computer.</td>
+</tr>
+<tr>
+<td align="left"><strong>IMAGE_FILE_BYTES_REVERSED_HI</strong>0x8000</td>
+<td align="left">The bytes of the word are reversed. This flag is obsolete.</td>
+</tr>
+</tbody></table>
+<p>notepad.exe中该值为010Fh(小端序)</p>
+<p><img src="https://raw.githubusercontent.com/DeutschBall/test/master/image-20220711125018251.png" alt="image-20220711125018251"></p>
+<p><code>010F=0100 | 0001 | 0002 | 0004 | 0008</code>,即集合了5个属性</p>
+<p>包括:</p>
+<p>0001:重定位信息被删,本程序必须加载到其可选头中规定的ImageBase处,否则报错</p>
+<p>0002:可执行</p>
+<p>0004:COFF行号被删</p>
+<blockquote>
+<p>COFF:common object file format.通用对象文件格式,这是Unix的目标文件格式,windows最初的目标文件就是抄的COFF</p>
+</blockquote>
+<blockquote>
+<p>编译时加入-g选项就会生成,<code>gcc -g</code>,该选项的作用是生成调试信息,因此COFF行号的作用之一就是调试,之二是啥我目前不知道</p>
+</blockquote>
+<p>0008:COFF符号表被删</p>
+<blockquote>
+<p>符号表是从可重定位目标文件连接到可执行目标文件进行符号解析时需要的.</p>
+<p>.o和.obj这种可重定位目标模块必须要有符号表</p>
+<p>.exe和.out这种可执行目标模块不需要有</p>
+<p>显然notepad.exe已经编译链接好了,不需要符号表了</p>
+</blockquote>
+<p>0100:计算机支持32位的字,意思是CPU可以一次性处理32位宽的数据.</p>
+<blockquote>
+<p>显然x86_32上的大部分寄存器(比如eax,esp)等都是32位宽的,总线宽度也是32位,CPU完全有能力一次性处理32位宽的数据</p>
+</blockquote>
+<h4 id="可选头"><a href="#可选头" class="headerlink" title="可选头"></a>可选头</h4><figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">typedef</span> <span class="class"><span class="keyword">struct</span> _<span class="title">IMAGE_OPTIONAL_HEADER</span> &#123;</span></span><br><span class="line">  WORD Magic;</span><br><span class="line">  BYTE MajorLinkerVersion;</span><br><span class="line">  BYTE MinorLinkerVersion;</span><br><span class="line">  DWORD SizeOfCode;</span><br><span class="line">  DWORD SizeOfInitializedData;</span><br><span class="line">  DWORD SizeOfUninitializedData;</span><br><span class="line">  DWORD AddressOfEntryPoint;</span><br><span class="line">  DWORD BaseOfCode;</span><br><span class="line">  DWORD BaseOfData;</span><br><span class="line">  DWORD ImageBase;</span><br><span class="line">  DWORD SectionAlignment;</span><br><span class="line">  DWORD FileAlignment;</span><br><span class="line">  WORD MajorOperatingSystemVersion;</span><br><span class="line">  WORD MinorOperatingSystemVersion;</span><br><span class="line">  WORD MajorImageVersion;</span><br><span class="line">  WORD MinorImageVersion;</span><br><span class="line">  WORD MajorSubsystemVersion;</span><br><span class="line">  WORD MinorSubsystemVersion;</span><br><span class="line">  DWORD Win32VersionValue;</span><br><span class="line">  DWORD SizeOfImage;</span><br><span class="line">  DWORD SizeOfHeaders;</span><br><span class="line">  DWORD CheckSum;</span><br><span class="line">  WORD Subsystem;</span><br><span class="line">  WORD DllCharacteristics;</span><br><span class="line">  DWORD SizeOfStackReserve;</span><br><span class="line">  DWORD SizeOfStackCommit;</span><br><span class="line">  DWORD SizeOfHeapReserve;</span><br><span class="line">  DWORD SizeOfHeapCommit;</span><br><span class="line">  DWORD LoaderFlags;</span><br><span class="line">  DWORD NumberOfRvaAndSizes;</span><br><span class="line">  IMAGE_DATA_DIRECTORY DataDirectory[IMAGE_NUMBEROF_DIRECTORY_ENTRIES];</span><br><span class="line">&#125; IMAGE_OPTIONAL_HEADER32,*PIMAGE_OPTIONAL_HEADER32;</span><br></pre></td></tr></table></figure>
+
+
+
+<h5 id="Magic"><a href="#Magic" class="headerlink" title="Magic"></a>Magic</h5><p>区分本文件是32位还是64位又或者是ROM映像的魔数</p>
+<p>magic&#x3D;0x10B表示32位</p>
+<p>magic&#x3D;0x20B表示64位</p>
+<p>magic&#x3D;0x107表示ROM映像</p>
+<blockquote>
+<p>前两个好理解,这第三个ROM映像是啥呢?</p>
+<p>表明本程序是烧录到一个ROM存储器中的<strong>固件</strong></p>
+<p>比如BIOS中的程序,CD-ROM中的程序等等</p>
+</blockquote>
+<p>winXP上的notepad.exe自然是32位的</p>
+<p><img src="https://raw.githubusercontent.com/DeutschBall/test/master/image-20220711132424181.png" alt="image-20220711132424181"></p>
+<p>010editor也帮我们把枚举类型10Bh翻译成了PE32</p>
+<h5 id="Major-MinorLinkerVersion"><a href="#Major-MinorLinkerVersion" class="headerlink" title="Major&#x2F;MinorLinkerVersion"></a>Major&#x2F;MinorLinkerVersion</h5><p>主&#x2F;次链接器版本</p>
+<p>对于notepad.exe这种已经编译链接完成的程序来说,自然这两个值白给</p>
+<p>这两个值是相对于可重定位目标模块.o,.obj或者库文件.so,.dll这种需要参与链接的目标文件而言的</p>
+<p>notepad.exe的这两个值分别是7和0</p>
+<p><img src="https://raw.githubusercontent.com/DeutschBall/test/master/image-20220711132938159.png" alt="image-20220711132938159"></p>
+<blockquote>
+<p>这个版本号应该是MSVC的版本,不是GCC的ld链接器的版本</p>
+<p><img src="https://raw.githubusercontent.com/DeutschBall/test/master/v2-eb05f1dde948bdceb87f74864f6fe85d_1440w.jpg" alt="img"></p>
+<p>根据notepad.exe的开发时间2001年,差不多就是MSVC++ 7.0的时间</p>
+<p>而GCC ld到现在才是版本2</p>
+<p><img src="https://raw.githubusercontent.com/DeutschBall/test/master/image-20220711133034580.png" alt="image-20220711133034580"></p>
+<p>就算是gcc本身的版本在2001年左右也才是3,目前在linux上是11,windows上是9</p>
+<p><img src="https://raw.githubusercontent.com/DeutschBall/test/master/image-20220711133237229.png" alt="image-20220711133237229"></p>
+<p>胡乱写了一个main.c用gcc编译链接成main.exe然后用010editor打开观察,</p>
+<p>发现主链接器版本确实就是ld的当前版本2</p>
+<p><img src="https://raw.githubusercontent.com/DeutschBall/test/master/image-20220711134050894.png" alt="image-20220711134050894"></p>
+<p>但是次链接器版本就是乱码了,看来这个值不重要</p>
+</blockquote>
+<h5 id="SizeOfCode"><a href="#SizeOfCode" class="headerlink" title="SizeOfCode"></a>SizeOfCode</h5><p>code节的大小,然而我从来没有见过叫.code的节,code不就是代码吗,不就是指令吗,不就是.text节咩?</p>
+<p>在notepad.exe上SizeOfCode是6E00h</p>
+<p><img src="https://raw.githubusercontent.com/DeutschBall/test/master/image-20220711134530037.png" alt="image-20220711134530037"></p>
+<p>后面.text节区恰好就是6E00h这么大</p>
+<p><img src="https://raw.githubusercontent.com/DeutschBall/test/master/image-20220711134550293.png" alt="image-20220711134550293"></p>
+<h5 id="SizeOfInitializedData"><a href="#SizeOfInitializedData" class="headerlink" title="SizeOfInitializedData"></a>SizeOfInitializedData</h5><p>已初始化的数据节</p>
+<p>notepad.exe中SizeOfInitializedData&#x3D;36864D&#x3D;9000H</p>
+<p><img src="https://raw.githubusercontent.com/DeutschBall/test/master/image-20220711134856362.png" alt="image-20220711134856362"></p>
+<p>.data和.rsrc节合起来才刚好是9000h这么大,看来不光是.data节,还得算上类似性质的节</p>
+<p><img src="https://raw.githubusercontent.com/DeutschBall/test/master/image-20220711134923197.png" alt="image-20220711134923197"></p>
+<blockquote>
+<p>.data节是已初始化的全局变量和静态变量,这容易理解,那么.rsrc是个什么节呢?</p>
+<p>查阅<a target="_blank" rel="noopener" href="https://docs.microsoft.com/zh-cn/windows/win32/debug/pe-format#the-rsrc-section">PE 格式 - Win32 apps | Microsoft Docs</a></p>
+<p>rsrc节用来存放资源</p>
+<p><img src="https://raw.githubusercontent.com/DeutschBall/test/master/image-20220711135628794.png" alt="image-20220711135628794"></p>
+<p>这里”资源”包括图标等,看介绍是以树形结构组织的,类似于HTML?</p>
+<p><img src="https://raw.githubusercontent.com/DeutschBall/test/master/image-20220711135744137.png" alt="image-20220711135744137"></p>
+</blockquote>
+<h5 id="SizeOfUninitializedData"><a href="#SizeOfUninitializedData" class="headerlink" title="SizeOfUninitializedData"></a>SizeOfUninitializedData</h5><p>未初始化的数据节,应该是指.bss节,然而notepad.exe上该值为0,自然也就没有.bss节</p>
+<p>(应该说节区头表中就没有.bss节的记录,真正的节区中永远都没有.bss节,因为它只会在执行时才会形成</p>
+<p><img src="https://raw.githubusercontent.com/DeutschBall/test/master/image-20220711135949436.png" alt="image-20220711135949436"></p>
+<h5 id="AddressOfEntryPoint"><a href="#AddressOfEntryPoint" class="headerlink" title="AddressOfEntryPoint"></a>AddressOfEntryPoint</h5><p>入口点函数指针,具体指向谁呢?看看notepad.exe是啥样的</p>
+<p>AddressOfEntryPoint&#x3D;6AE0</p>
+<blockquote>
+<p>这个值是个相对进程映像基地址ImageBase 的偏移量,或者叫RVA</p>
+</blockquote>
+<p><img src="https://raw.githubusercontent.com/DeutschBall/test/master/image-20220711141108874.png" alt="image-20220711141108874"></p>
+<p>010editor给了提示,.text节中偏移量为0x5EE0的地方,为啥从6AE0变成5EE0了?</p>
+<p>先用010editor看看0x5EE0这个地方发生了啥</p>
+<p><img src="https://raw.githubusercontent.com/DeutschBall/test/master/image-20220711141602298.png" alt="image-20220711141602298"></p>
+<p>两个压栈,好像是函数开端的样子,然而两个地址分别是啥,这个问题还没有解决.</p>
+<p>用ida打开notepad.exe观察<code>0x1006AE0</code>这个位置</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">.text:01006AE0 ; __unwind &#123; // __SEH_prolog</span><br><span class="line">.text:01006AE0                 push    70h</span><br><span class="line">.text:01006AE2                 push    offset stru_1001888 ; struct _exception *</span><br><span class="line">.text:01006AE7                 call    __SEH_prolog</span><br><span class="line">.text:01006AEC                 xor     ebx, ebx</span><br></pre></td></tr></table></figure>
+
+<p>发现这里的指令和在010editor中观察0x5EE0是一模一样的.</p>
+<p>到底发生甚么事了?</p>
+<blockquote>
+<p>为啥是0x1006AE0不是0x6AE0?为啥不观察0x5EE0或者0x1005EE0?</p>
+<p>ida打开的文件实际上是文件加载到内存之后的映像,不然任务管理器上看IDA为啥会一枝独秀地使用133.3M这么大的内存空间?</p>
+<p><img src="https://raw.githubusercontent.com/DeutschBall/test/master/image-20220711142150809.png" alt="image-20220711142150809"></p>
+<p>而010editor打开的是磁盘文件系统中躺着的静态文件</p>
+<p>前面权位指南也讲过,两者是有很大差别的</p>
+<p>文件系统中的静态文件都是从0开始计算偏移量RAW</p>
+<p>进程映像则从一个指定的基地址开始计算实际虚拟地址空间中的地址,VA&#x3D;RVA+ImageBase</p>
+<p>而notepad.exe的ImageBase就在可选头中规定为1000000h</p>
+<p><img src="https://raw.githubusercontent.com/DeutschBall/test/master/image-20220711142522560.png" alt="image-20220711142522560"></p>
+<p>因此notepad.exe的进程映像就是从1000000h开始的,这就解释了为啥要用ida观察0x1006AE0,而不是0x6AE0</p>
+<p>至于另一个问题,这是因为,节区在磁盘文件中存放和加载到内存映像中时,有不同的对齐要求</p>
+<p>往往内存中的对齐要求更大,因此对于PE头和text节之间的空隙,进程映像中的更大,</p>
+<p>因此text节的RAW(文件偏移 )和RVA(虚拟地址偏移)是不同的,并且有RVA&gt;RAW</p>
+<p>更详细的原因需要学习后面的RAW to RVA,将进程从文件装载进入内存的知识</p>
+</blockquote>
+<h5 id="BaseOfCode"><a href="#BaseOfCode" class="headerlink" title="BaseOfCode"></a>BaseOfCode</h5><p>代码段在虚拟地址空间中的开始地址</p>
+<p>notepad.exe这种BaseOfCode&#x3D;1000h,即虚拟内存中的相对偏移量RVA&#x3D;1000h,那么实际虚拟地址为VA&#x3D;Image+RVA&#x3D;1000000h+1000h&#x3D;1001000h</p>
+<p><img src="https://raw.githubusercontent.com/DeutschBall/test/master/image-20220711165812127.png" alt="image-20220711165812127"></p>
+<p>使用ida观察这个<code>1001000h</code>地址</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br></pre></td><td class="code"><pre><span class="line">.idata:01001000 ; Section 1. (virtual address 00001000)</span><br><span class="line">.idata:01001000 ; Virtual size                  : 00006D72 (  28018.)</span><br><span class="line">.idata:01001000 ; Section size in file          : 00006E00 (  28160.)</span><br><span class="line">.idata:01001000 ; Offset to raw data for section: 00000400</span><br><span class="line">.idata:01001000 ; Flags 60000020: Text Executable Readable</span><br><span class="line">.idata:01001000 ; Alignment     : default</span><br><span class="line">.idata:01001000 ;</span><br><span class="line">.idata:01001000 ; Imports from ADVAPI32.dll</span><br><span class="line">.idata:01001000 ;</span><br><span class="line">.idata:01001000 ; PDB File Name : notepad.pdb</span><br><span class="line">.idata:01001000</span><br><span class="line">.idata:01001000                 .686p</span><br><span class="line">.idata:01001000                 .mmx</span><br><span class="line">.idata:01001000                 .model flat</span><br><span class="line">.idata:01001000</span><br><span class="line">.idata:01001000 ; ===========================================================================</span><br><span class="line">.idata:01001000</span><br><span class="line">.idata:01001000 ; Segment type: Externs</span><br><span class="line">.idata:01001000 ; _idata</span><br><span class="line">.idata:01001000 ; LSTATUS __stdcall RegQueryValueExW(HKEY hKey, LPCWSTR lpValueName, LPDWORD lpReserved, LPDWORD lpType, LPBYTE lpData, LPDWORD lpcbData)</span><br><span class="line">.idata:01001000                 extrn RegQueryValueExW:dword</span><br><span class="line">.idata:01001000                                         ; CODE XREF: RegGetInt(x,x,x)+32↓p</span><br><span class="line">.idata:01001000                                         ; RegGetString(x,x,x,x,x)+27↓p</span><br><span class="line">.idata:01001000                                         ; DATA XREF: ...</span><br><span class="line">.idata:01001004 ; LSTATUS __stdcall RegCloseKey(HKEY hKey)</span><br><span class="line">.idata:01001004                 extrn RegCloseKey:dword ; CODE XREF: SaveGlobals()+24A↓p</span><br><span class="line">.idata:01001004                                         ; GetGlobals()+29B↓p ...</span><br><span class="line">...</span><br></pre></td></tr></table></figure>
+
+<p>发现是.idata节的开始</p>
+<blockquote>
+<p>ida在该节一开始给出了一块注释:</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">.idata:01001000 ; Section 1. (virtual address 00001000)</span><br><span class="line">.idata:01001000 ; Virtual size                  : 00006D72 (  28018.)</span><br><span class="line">.idata:01001000 ; Section size in file          : 00006E00 (  28160.)</span><br><span class="line">.idata:01001000 ; Offset to raw data for section: 00000400</span><br><span class="line">.idata:01001000 ; Flags 60000020: Text Executable Readable</span><br><span class="line">.idata:01001000 ; Alignment     : default</span><br></pre></td></tr></table></figure>
+
+<p>第一节(相对虚拟地址1000h)</p>
+<p>虚拟内存中的大小6D72h</p>
+<p>磁盘文件中的大小6E00h</p>
+<p>磁盘文件中的基地址400h</p>
+<p>标志:60000020,意思是可执行可读 不可写</p>
+<p>对齐:默认</p>
+<p>这些都和010editor给出的结果相吻合</p>
+</blockquote>
+<p>问题是,<code>idata</code>名字里都带有<code>data</code>了,不应该算是数据吗?怎么就是代码了?</p>
+<p>但是观察ida反汇编的结果,这里都是<code>extern</code>声明的函数接口,确实不是数据,但你说它是代码吧,它还没有实现</p>
+<blockquote>
+<p>微软对于该节给出的解释是:</p>
+<p>These tables were added to the image to support a uniform mechanism for applications to delay the loading of a DLL until the first call into that DLL. The layout of the tables matches that of the traditional import tables that are described in section 6.4, <a target="_blank" rel="noopener" href="https://docs.microsoft.com/en-us/windows/win32/debug/pe-format#the-idata-section">The .idata Section</a>.” Only a few details are discussed here.</p>
+<p>作用是允许DLL库函数在首次被调用是加载</p>
+</blockquote>
+<blockquote>
+<p>win32exe程序中的idata节非常像linux可执行目标文件中的extern节,</p>
+<p>也确实,因为ida给idata节一开始的注释就是<code>Segment Type:extern</code></p>
+<p><img src="https://raw.githubusercontent.com/DeutschBall/test/master/image-20220711170645587.png" alt="image-20220711170645587"></p>
+<p>Linux上从<code>.text</code>到<code>extern</code>的调用顺序为</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br></pre></td><td class="code"><pre><span class="line">首先是.text:000011C2                 call    _printf</span><br><span class="line">	</span><br><span class="line">然后是</span><br><span class="line">.plt:00001030 ; int printf(const char *format, ...)</span><br><span class="line">.plt:00001030 _printf         proc near               ; CODE XREF: main+25↓p</span><br><span class="line">.plt:00001030</span><br><span class="line">.plt:00001030 format          = dword ptr  4</span><br><span class="line">.plt:00001030</span><br><span class="line">.plt:00001030                 jmp     ds:off_400C     ; PIC mode</span><br><span class="line">.plt:00001030 _printf         endp</span><br><span class="line">.plt:00001030	</span><br><span class="line"></span><br><span class="line">然后是</span><br><span class="line">.got.plt:0000400C off_400C        dd offset printf        ; DATA XREF: _printf↑r</span><br><span class="line"></span><br><span class="line">然后是</span><br><span class="line">extern:0000402C ; int printf(const char *format, ...)</span><br><span class="line">extern:0000402C                 extrn printf:near       ; CODE XREF: _printf↑j</span><br><span class="line">extern:0000402C                                         ; DATA XREF: .got.plt:off_400C↑o</span><br></pre></td></tr></table></figure>
+
+<p><code>.text-&gt;.plt-&gt;.got.plt-&gt;extern</code></p>
+<p>类比windows上的32位exe是</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">首先是.text:010069CC                 call    ds:IsTextUnicode</span><br><span class="line"></span><br><span class="line">然后是</span><br><span class="line">.idata:0100100C ; BOOL __stdcall IsTextUnicode(const void *lpv, int iSize, LPINT lpiResult)</span><br><span class="line">.idata:0100100C                 extrn IsTextUnicode:dword</span><br><span class="line">.idata:0100100C                                         ; CODE XREF: sub_10069BA+12↓p</span><br><span class="line">.idata:0100100C                                         ; DATA XREF: sub_10069BA+12↓r</span><br></pre></td></tr></table></figure>
+
+<p><code>.text-&gt;.idata(extern)</code></p>
+<p>windows上对动态库函数的调用貌似比linux上少了got,plt表这一步.</p>
+</blockquote>
+<p>windows上idata具体什么机制呢?这需要学了核心原理后面的IAT才能知道</p>
+<h5 id="BaseOfData"><a href="#BaseOfData" class="headerlink" title="BaseOfData"></a>BaseOfData</h5><p>数据段的相对虚拟地址RVA</p>
+<p>notepad.exe中该值为8000h,那么实际虚拟内存地址就是<code>1000000h+8000h=1008000h</code></p>
+<p><img src="https://raw.githubusercontent.com/DeutschBall/test/master/image-20220711171954659.png" alt="image-20220711171954659"></p>
+<p>ida跳转该地址观察</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br></pre></td><td class="code"><pre><span class="line">.data:01008000 ; Section 2. (virtual address 00008000)</span><br><span class="line">.data:01008000 ; Virtual size                  : 00001BA8 (   7080.)</span><br><span class="line">.data:01008000 ; Section size in file          : 00000600 (   1536.)</span><br><span class="line">.data:01008000 ; Offset to raw data for section: 00007200</span><br><span class="line">.data:01008000 ; Flags C0000040: Data Readable Writable</span><br><span class="line">.data:01008000 ; Alignment     : default</span><br><span class="line">.data:01008000 ; ===========================================================================</span><br><span class="line">.data:01008000</span><br><span class="line">.data:01008000 ; Segment type: Pure data</span><br><span class="line">.data:01008000 ; Segment permissions: Read/Write</span><br><span class="line">.data:01008000 _data           segment para public &#x27;DATA&#x27; use32</span><br><span class="line">.data:01008000                 assume cs:_data</span><br><span class="line">.data:01008000                 ;org 1008000h</span><br><span class="line">.data:01008000 ; BYTE Data</span><br><span class="line">.data:01008000 Data            dd 78h                  ; DATA XREF: NPCommand(x,x,x)+4D6↑r</span><br><span class="line">.data:01008000                                         ; NPCommand(x,x,x)+569↑w ...</span><br><span class="line">.data:01008004 dword_1008004   dd 1                    ; DATA XREF: CheckSave(x)+27↑r</span><br><span class="line">.data:01008004                                         ; CheckSave(x)+65↑r ...</span><br><span class="line">.data:01008008 ; WCHAR ClassName</span><br><span class="line">.data:01008008 ClassName:                              ; DATA XREF: sub_1004143+59↑o</span><br><span class="line">.data:01008008                                         ; NPInit(x,x,x,x)+10D↑o</span><br><span class="line">.data:01008008                 text &quot;UTF-16LE&quot;, &#x27;Notepad&#x27;,0</span><br><span class="line">.data:01008018 ; int dword_1008018</span><br><span class="line">.data:01008018 dword_1008018   dd 0FFFFFFFFh           ; DATA XREF: NpSaveDialogHookProc(x,x,x,x)+94↑r</span><br><span class="line">.data:01008018                                         ; NpOpenDialogHookProc(x,x,x,x)+4F↑w ...</span><br><span class="line">....</span><br></pre></td></tr></table></figure>
+
+<blockquote>
+<p>ida一开始给出的一块注释</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">.data:01008000 ; Section 2. (virtual address 00008000)</span><br><span class="line">.data:01008000 ; Virtual size                  : 00001BA8 (   7080.)</span><br><span class="line">.data:01008000 ; Section size in file          : 00000600 (   1536.)</span><br><span class="line">.data:01008000 ; Offset to raw data for section: 00007200</span><br><span class="line">.data:01008000 ; Flags C0000040: Data Readable Writable</span><br><span class="line">.data:01008000 ; Alignment     : default</span><br></pre></td></tr></table></figure>
+
+<p>第二节(相对虚拟地址8000h)</p>
+<p>虚拟内存中的大小1BA8h字节</p>
+<p>磁盘文件中的大小600h字节</p>
+<p>磁盘文件中本节的基地址7200h</p>
+<p>标志:c0000040,数据段可读写,不可执行</p>
+<p>对齐:默认</p>
+</blockquote>
+<h5 id="ImageBase"><a href="#ImageBase" class="headerlink" title="ImageBase"></a>ImageBase</h5><p><img src="https://raw.githubusercontent.com/DeutschBall/test/master/image-20220711172941299.png" alt="image-20220711172941299"></p>
+<p>虚拟地址空间中进程的基地址,也就是PE头将会从0x1000000这个地址开始装载</p>
+<p>这一点已经在前面的实验中多次证实了</p>
+<blockquote>
+<p>微软给出的解释是:</p>
+<p>The preferred address of the first byte of the image when it is loaded in memory. This value is a multiple of 64K bytes. The default value for DLLs is 0x10000000. The default value for applications is 0x00400000, except on Windows CE where it is 0x00010000.</p>
+<p>映像首个字节在装载进内存时最好使用ImageBase这个地址</p>
+<p>ImageBase这个值必须是64K(0x10000)的倍数,也就是说,就算装不进0x1000000,下一个有效地址应该是0x1010000,再下一个就得是0x1020000,啃腚不会出现0x1011000这种ImageBase值</p>
+<p>DLL动态库该值的默认值是0x10000000</p>
+<p>应用程序该值默认为0x400000</p>
+<p>应用程序在<code>windows CE</code>系统上该值为默认为0x10000</p>
+</blockquote>
+<p>显然notepad.exe的ImageBase&#x3D;0x1000000不是DLL的ImageBase默认值(注意零的个数不一样)</p>
+<p>也不是应用程序的,它就非得搞那个特殊</p>
+<p>我们自己写一个helloworld然后<code>gcc helloworld.c -O0 -o helloworld -m32</code>编译成一个32为程序,用010editor观察其ImageBase确实是0x400000</p>
+<p><img src="https://raw.githubusercontent.com/DeutschBall/test/master/image-20220711173959730.png" alt="image-20220711173959730"></p>
+<blockquote>
+<p>为啥ida最上最上只能观察到0x1001000这个位置?不是应当从0x1000000开始吗?</p>
+<p><img src="https://raw.githubusercontent.com/DeutschBall/test/master/image-20220711174053133.png" alt="image-20220711174053133"></p>
+<p>并且就算使用G企图跳转到1000000这个位置,ida也会报告Command “JumpAsk” failed</p>
+<p>这是为啥?前面的东西让ida吃了?</p>
+<p>原因是ida反汇编显示的只有PE体,即去掉PE头剩下的各节区(注意不是节区头表)</p>
+<p>而ollydbg就可以Ctrl+G跳转到0x1000000这个位置</p>
+<p><img src="https://raw.githubusercontent.com/DeutschBall/test/master/image-20220711174407510.png" alt="image-20220711174407510"></p>
+<p>上来是PE魔数0x5A 4D</p>
+<p>而ollydbg的反汇编窗口把它也当成指令了</p>
+<p>这时候应该看16进制视图</p>
+<p><img src="https://raw.githubusercontent.com/DeutschBall/test/master/image-20220711174508519.png" alt="image-20220711174508519"></p>
+<p>可以看到最开始的MZ魔数</p>
+</blockquote>
+<h5 id="SectionAlignment"><a href="#SectionAlignment" class="headerlink" title="SectionAlignment"></a>SectionAlignment</h5><p>节对齐要求,每个节都必须按照该要求装进虚拟地址空间的合适位置</p>
+<p>该值必须大于等于FileAlignment的值,这就解释了为啥进程映像在虚拟内存中的大小要比躺在为你文件中时要大</p>
+<p>默认的SectionAlignment大小为一个页框的大小(win32上一个页框$4K&#x3D;2^{12}&#x3D;0x1000h$)</p>
+<p><img src="https://raw.githubusercontent.com/DeutschBall/test/master/image-20220711185609155.png" alt="image-20220711185609155"></p>
+<p>notepad.exe是满足该对齐要求的</p>
+<h5 id="FileAlignment"><a href="#FileAlignment" class="headerlink" title="FileAlignment"></a>FileAlignment</h5><p>磁盘文件中的节对齐要求,这个值必须是一个2的幂$[2^8,2^{16}]$</p>
+<p>默认是512,如果SectionAlignment的值比页框要小,则FileAlignment必须和SectionAlignment相同</p>
+<p><img src="https://raw.githubusercontent.com/DeutschBall/test/master/image-20220711185848617.png" alt="image-20220711185848617"></p>
+<p>notepad.exe上由于SectionAlignment和页框一样大,因此FileAlignment可以小</p>
+<p>实际上是默认值512&#x3D;200h</p>
+<h5 id="Major-MinorOperatingSystemVersion"><a href="#Major-MinorOperatingSystemVersion" class="headerlink" title="Major&#x2F;MinorOperatingSystemVersion"></a>Major&#x2F;MinorOperatingSystemVersion</h5><p>主要&#x2F;次要操作系统版本号</p>
+<p><img src="https://raw.githubusercontent.com/DeutschBall/test/master/image-20220711193701271.png" alt="image-20220711193701271"></p>
+<p>这个版本号可以在CMD命令提示符上使用ver命令查询(在powershell上不能用这个命令)</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">C:\Users\86135&gt;ver</span><br><span class="line"></span><br><span class="line">Microsoft Windows [版本 10.0.22621.105]</span><br></pre></td></tr></table></figure>
+
+<p>系统版本号表:</p>
+<table>
+<thead>
+<tr>
+<th align="left">Operating system</th>
+<th align="left">Version number</th>
+</tr>
+</thead>
+<tbody><tr>
+<td align="left">Windows 11</td>
+<td align="left">10.0*</td>
+</tr>
+<tr>
+<td align="left">Windows 10</td>
+<td align="left">10.0*</td>
+</tr>
+<tr>
+<td align="left">Windows Server 2022</td>
+<td align="left">10.0*</td>
+</tr>
+<tr>
+<td align="left">Windows Server 2019</td>
+<td align="left">10.0*</td>
+</tr>
+<tr>
+<td align="left">Windows Server 2016</td>
+<td align="left">10.0*</td>
+</tr>
+<tr>
+<td align="left">Windows 8.1</td>
+<td align="left">6.3*</td>
+</tr>
+<tr>
+<td align="left">Windows Server 2012 R2</td>
+<td align="left">6.3*</td>
+</tr>
+<tr>
+<td align="left">Windows 8</td>
+<td align="left">6.2</td>
+</tr>
+<tr>
+<td align="left">Windows Server 2012</td>
+<td align="left">6.2</td>
+</tr>
+<tr>
+<td align="left">Windows 7</td>
+<td align="left">6.1</td>
+</tr>
+<tr>
+<td align="left">Windows Server 2008 R2</td>
+<td align="left">6.1</td>
+</tr>
+<tr>
+<td align="left">Windows Server 2008</td>
+<td align="left">6.0</td>
+</tr>
+<tr>
+<td align="left">Windows Vista</td>
+<td align="left">6.0</td>
+</tr>
+<tr>
+<td align="left">Windows Server 2003 R2</td>
+<td align="left">5.2</td>
+</tr>
+<tr>
+<td align="left">Windows Server 2003</td>
+<td align="left">5.2</td>
+</tr>
+<tr>
+<td align="left">Windows XP 64-Bit Edition</td>
+<td align="left">5.2</td>
+</tr>
+<tr>
+<td align="left">Windows XP</td>
+<td align="left">5.1</td>
+</tr>
+<tr>
+<td align="left">Windows 2000</td>
+<td align="left">5.0</td>
+</tr>
+<tr>
+<td align="left">Windows 98 &#x2F; Windows Me</td>
+<td align="left">4.0</td>
+</tr>
+<tr>
+<td align="left">Windows 95</td>
+<td align="left">4.0</td>
+</tr>
+</tbody></table>
+<p>也就是说是最早可以运行notepad.exe的windows系统就是win 2000,</p>
+<p>只要版本号比5高的系统都可以运行notepad.exe</p>
+<h5 id="Major-MinorImageVersion"><a href="#Major-MinorImageVersion" class="headerlink" title="Major&#x2F;MinorImageVersion"></a>Major&#x2F;MinorImageVersion</h5><p>主要&#x2F;次要映像版本</p>
+<p><img src="https://raw.githubusercontent.com/DeutschBall/test/master/image-20220711193728974.png" alt="image-20220711193728974"></p>
+<p>也可以在CMD上用<code>dism /online /get-targeteditions</code>命令查看</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">C:\Users\<span class="number">86135</span>&gt;dism /online /get-targeteditions</span><br><span class="line"></span><br><span class="line">部署映像服务和管理工具</span><br><span class="line">版本: <span class="number">10.0</span><span class="number">.22621</span><span class="number">.1</span></span><br><span class="line"></span><br><span class="line">映像版本: <span class="number">10.0</span><span class="number">.22621</span><span class="number">.105</span></span><br></pre></td></tr></table></figure>
+
+<p>这个东西是干啥的,没有搜到</p>
+<h5 id="Major-MinorSubsystemVersion"><a href="#Major-MinorSubsystemVersion" class="headerlink" title="Major&#x2F;MinorSubsystemVersion"></a>Major&#x2F;MinorSubsystemVersion</h5><p>主要&#x2F;次要子系统版本</p>
+<p><img src="https://raw.githubusercontent.com/DeutschBall/test/master/image-20220711193741398.png" alt="image-20220711193741398"></p>
+<h5 id="Win32VersionValue"><a href="#Win32VersionValue" class="headerlink" title="Win32VersionValue"></a>Win32VersionValue</h5><p>预留值,必须为0</p>
+<p><img src="https://raw.githubusercontent.com/DeutschBall/test/master/image-20220711193752606.png" alt="image-20220711193752606"></p>
+<h5 id="SizeOfImage"><a href="#SizeOfImage" class="headerlink" title="SizeOfImage"></a>SizeOfImage</h5><p>映像大小,即本文件完全装载进入虚拟内存中占用的空间</p>
+<p><img src="https://raw.githubusercontent.com/DeutschBall/test/master/image-20220711193823319.png" alt="image-20220711193823319"></p>
+<p>该值必须是节对齐要求的整数倍</p>
+<h5 id="SizeOfHeaders"><a href="#SizeOfHeaders" class="headerlink" title="SizeOfHeaders"></a>SizeOfHeaders</h5><p>包括DOS头,Nt头,节头表三个的总大小,然后向上舍入到一个FileAlignment的倍数值</p>
+<p><img src="https://raw.githubusercontent.com/DeutschBall/test/master/image-20220711193840091.png" alt="image-20220711193840091"></p>
+<h5 id="CheckSum"><a href="#CheckSum" class="headerlink" title="CheckSum"></a>CheckSum</h5><p>检校和</p>
+<p><img src="https://raw.githubusercontent.com/DeutschBall/test/master/image-20220711193848414.png" alt="image-20220711193848414"></p>
+<p>从程序最开始,以两个字节为单位不断相加,忽略溢出,最后加上文件长度得到校验和</p>
+<p>在加载任何驱动程序,启动时任何动态库,任何系统进程加载动态库时</p>
+<p>都需要经过检校</p>
+<h5 id="SubSystem"><a href="#SubSystem" class="headerlink" title="SubSystem"></a>SubSystem</h5><p>这是一个枚举值,每个值对应一个序号,表示运行本镜像需要的子系统</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#<span class="keyword">define</span> IMAGE_SUBSYSTEM_UNKNOWN 0</span></span><br><span class="line"><span class="meta">#<span class="keyword">define</span> IMAGE_SUBSYSTEM_NATIVE 1</span></span><br><span class="line"><span class="meta">#<span class="keyword">define</span> IMAGE_SUBSYSTEM_WINDOWS_GUI 2</span></span><br><span class="line"><span class="meta">#<span class="keyword">define</span> IMAGE_SUBSYSTEM_WINDOWS_CUI 3</span></span><br><span class="line"><span class="meta">#<span class="keyword">define</span> IMAGE_SUBSYSTEM_OS2_CUI 5</span></span><br><span class="line"><span class="meta">#<span class="keyword">define</span> IMAGE_SUBSYSTEM_POSIX_CUI 7</span></span><br><span class="line"><span class="meta">#<span class="keyword">define</span> IMAGE_SUBSYSTEM_NATIVE_WINDOWS 8</span></span><br><span class="line"><span class="meta">#<span class="keyword">define</span> IMAGE_SUBSYSTEM_WINDOWS_CE_GUI 9</span></span><br><span class="line"><span class="meta">#<span class="keyword">define</span> IMAGE_SUBSYSTEM_EFI_APPLICATION 10</span></span><br><span class="line"><span class="meta">#<span class="keyword">define</span> IMAGE_SUBSYSTEM_EFI_BOOT_SERVICE_DRIVER 11</span></span><br><span class="line"><span class="meta">#<span class="keyword">define</span> IMAGE_SUBSYSTEM_EFI_RUNTIME_DRIVER 12</span></span><br><span class="line"><span class="meta">#<span class="keyword">define</span> IMAGE_SUBSYSTEM_EFI_ROM 13</span></span><br><span class="line"><span class="meta">#<span class="keyword">define</span> IMAGE_SUBSYSTEM_XBOX 14</span></span><br><span class="line"><span class="meta">#<span class="keyword">define</span> IMAGE_SUBSYSTEM_WINDOWS_BOOT_APPLICATION 16</span></span><br></pre></td></tr></table></figure>
+
+<p>比如2号就是windows用户图形界面接口子系统,就是窗口程序</p>
+<p>比如3号就是windows字符模式用户接口子系统,就是控制台程序</p>
+<p>notepad.exe当然需要GUI界面,因此该值为2</p>
+<p><img src="https://raw.githubusercontent.com/DeutschBall/test/master/image-20220711193921306.png" alt="image-20220711193921306"></p>
+<blockquote>
+<p>自己写的控制台程序helloworld.exe,这个值就是CUI</p>
+<p><img src="https://raw.githubusercontent.com/DeutschBall/test/master/image-20220711194026471.png" alt="image-20220711194026471"></p>
+</blockquote>
+<p>如果使用010editor将notepad.exe的SubSystem值给他改一下,改成CUI,会发生啥呢?</p>
+<p>会同时运行一个控制台和一个窗口程序</p>
+<p><img src="https://raw.githubusercontent.com/DeutschBall/test/master/image-20220711194252567.png" alt="image-20220711194252567"></p>
+<p>在控制台上使用ctrl+C中断进程</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">[已退出进程，代码为 3221225786 (0xc000013a)]</span><br></pre></td></tr></table></figure>
+
+<p>窗口也会跟着关闭</p>
+<p>同理点选窗口右上角的❌,控制台也会关闭</p>
+<p>将SubSystem值再改为其他值都会报错无法在win32环境运行</p>
+<h5 id="DllCharacteristics"><a href="#DllCharacteristics" class="headerlink" title="DllCharacteristics"></a>DllCharacteristics</h5><p>枚举值,描述本映像加载动态库的属性</p>
+<table>
+<thead>
+<tr>
+<th align="left">Value</th>
+<th align="left">Meaning</th>
+</tr>
+</thead>
+<tbody><tr>
+<td align="left">0x0001</td>
+<td align="left">Reserved.</td>
+</tr>
+<tr>
+<td align="left">0x0002</td>
+<td align="left">Reserved.</td>
+</tr>
+<tr>
+<td align="left">0x0004</td>
+<td align="left">Reserved.</td>
+</tr>
+<tr>
+<td align="left">0x0008</td>
+<td align="left">Reserved.</td>
+</tr>
+<tr>
+<td align="left"><strong>IMAGE_DLL_CHARACTERISTICS_HIGH_ENTROPY_VA</strong>0x0020</td>
+<td align="left">ASLR with 64 bit address space.</td>
+</tr>
+<tr>
+<td align="left"><strong>IMAGE_DLLCHARACTERISTICS_DYNAMIC_BASE</strong>0x0040</td>
+<td align="left">The DLL can be relocated at load time.</td>
+</tr>
+<tr>
+<td align="left"><strong>IMAGE_DLLCHARACTERISTICS_FORCE_INTEGRITY</strong>0x0080</td>
+<td align="left">Code integrity checks are forced. If you set this flag and a section contains only uninitialized data, set the <strong>PointerToRawData</strong> member of <a target="_blank" rel="noopener" href="https://docs.microsoft.com/en-us/windows/desktop/api/winnt/ns-winnt-image_section_header">IMAGE_SECTION_HEADER</a> for that section to zero; otherwise, the image will fail to load because the digital signature cannot be verified.</td>
+</tr>
+<tr>
+<td align="left"><strong>IMAGE_DLLCHARACTERISTICS_NX_COMPAT</strong>0x0100</td>
+<td align="left">The image is compatible with data execution prevention (DEP).</td>
+</tr>
+<tr>
+<td align="left"><strong>IMAGE_DLLCHARACTERISTICS_NO_ISOLATION</strong>0x0200</td>
+<td align="left">The image is isolation aware, but should not be isolated.</td>
+</tr>
+<tr>
+<td align="left"><strong>IMAGE_DLLCHARACTERISTICS_NO_SEH</strong>0x0400</td>
+<td align="left">The image does not use structured exception handling (SEH). No handlers can be called in this image.</td>
+</tr>
+<tr>
+<td align="left"><strong>IMAGE_DLLCHARACTERISTICS_NO_BIND</strong>0x0800</td>
+<td align="left">Do not bind the image.</td>
+</tr>
+<tr>
+<td align="left"><strong>IMAGE_DLL_CHARACTERISTICS_APPCONTAINER</strong>0x1000</td>
+<td align="left">Image should execute in an AppContainer.</td>
+</tr>
+<tr>
+<td align="left"><strong>IMAGE_DLLCHARACTERISTICS_WDM_DRIVER</strong>0x2000</td>
+<td align="left">A WDM driver.</td>
+</tr>
+<tr>
+<td align="left"><strong>IMAGE_DLL_CHARACTERISTICS_GUARD_CF</strong>0x4000</td>
+<td align="left">Image supports Control Flow Guard.</td>
+</tr>
+<tr>
+<td align="left"><strong>IMAGE_DLLCHARACTERISTICS_TERMINAL_SERVER_AWARE</strong>0x8000</td>
+<td align="left">The image is terminal server aware.</td>
+</tr>
+</tbody></table>
+<p>比如0x0020表示ASLR,地址随机化</p>
+<p>比如0x0040表示动态库可以在装载时重定位</p>
+<p>0x0080,强迫进行代码完整性检查,作用是防止恶意代码注入等等安全问题</p>
+<p>0x0100,NX保护,数据段不可执行</p>
+<p>…</p>
+<p><img src="https://raw.githubusercontent.com/DeutschBall/test/master/image-20220711195943323.png" alt="image-20220711195943323"></p>
+<p>notepad.exe上这个值为0x8000(小端)</p>
+<h5 id="SizeOfStackReserve"><a href="#SizeOfStackReserve" class="headerlink" title="SizeOfStackReserve"></a>SizeOfStackReserve</h5><p>栈区预留空间大小,notepad.exe上栈区的预留了大小是40000h,即256K</p>
+<p><img src="https://raw.githubusercontent.com/DeutschBall/test/master/image-20220711200402067.png" alt="image-20220711200402067"></p>
+<p>该值就是栈区的最大大小,要是本地变量太多或者函数递归太深太多,则发生栈溢出,</p>
+<blockquote>
+<p>这里可以自己写一个程序实验一下,</p>
+<p><code>524288=2^19=2^9K=80000h&lt;800000=2e5</code></p>
+<p>那么我们在代码中开一个2e5的int数组,超过了524288字节,看看能否开出来</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;stdio.h&gt;</span></span></span><br><span class="line"></span><br><span class="line"><span class="type">int</span> <span class="title function_">main</span><span class="params">()</span>&#123;</span><br><span class="line">    <span class="type">int</span> arr[<span class="number">200000</span>];<span class="comment">//2e5数组</span></span><br><span class="line">    <span class="keyword">for</span>(<span class="type">int</span> i=<span class="number">0</span>;i&lt;<span class="number">200000</span>;++i)&#123;</span><br><span class="line">        arr[i]=i;</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">return</span> <span class="number">0</span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p><img src="https://raw.githubusercontent.com/DeutschBall/test/master/image-20220714232816684.png" alt="image-20220714232816684"></p>
+<p>可以看到,本来预留的 栈空间是200000h&#x3D;2M是可以放下2e5的数组的,全换算成int是0.5M个,即512K</p>
+<p>此时程序正常运行</p>
+<p>现在给他穿个小鞋</p>
+<p><img src="https://raw.githubusercontent.com/DeutschBall/test/master/image-20220711202828849.png" alt="image-20220711202828849"></p>
+<p>果然寄了</p>
+<p><img src="https://raw.githubusercontent.com/DeutschBall/test/master/image-20220711202847174.png" alt="image-20220711202847174"></p>
+<p>而这个返回代码0xc00000fd正是栈溢出的状态</p>
+<p><a target="_blank" rel="noopener" href="https://blog.csdn.net/caichengji1/article/details/53885081"> Windows 异常代码查询</a></p>
+</blockquote>
+<h5 id="SizeOfStackCommit"><a href="#SizeOfStackCommit" class="headerlink" title="SizeOfStackCommit"></a>SizeOfStackCommit</h5><p>栈提交大小,notepad.exe上栈提交大小是11000h即68K</p>
+<p><img src="https://raw.githubusercontent.com/DeutschBall/test/master/image-20220711200716003.png" alt="image-20220711200716003"></p>
+<p>啥是”提交大小”?</p>
+<p>中文站点下没找到,在stackoverflow上找到了解答</p>
+<p>[c++ - What is the Difference between reserve and commit argument to CreateThread? - Stack Overflow](<a target="_blank" rel="noopener" href="https://stackoverflow.com/questions/24260638/what-is-the-difference-between-reserve-and-commit-argument-to-createthread#:~:text=The">https://stackoverflow.com/questions/24260638/what-is-the-difference-between-reserve-and-commit-argument-to-createthread#:~:text=The</a> reserve argument sets the amount of address,be initially committed to the stack’s reserved region.)</p>
+<blockquote>
+<p>The <em>commit</em> is the size of physical memory that the system should preallocate for the stack</p>
+</blockquote>
+<p>commit就是为栈区预留的物理内存大小</p>
+<blockquote>
+<p>SizeOfStackReserve是栈区最大占用的虚拟内存空间的大小</p>
+<p>SizeOfStackCommit是栈区对应虚拟内存实际使用的物理内存大小</p>
+</blockquote>
+<h5 id="SizeOfHeapReserve"><a href="#SizeOfHeapReserve" class="headerlink" title="SizeOfHeapReserve"></a>SizeOfHeapReserve</h5><p>堆区预留空间大小,类似于SizeOfStackReserve</p>
+<p><img src="https://raw.githubusercontent.com/DeutschBall/test/master/image-20220711201710792.png" alt="image-20220711201710792"></p>
+<h5 id="SizeOfHeapCommit"><a href="#SizeOfHeapCommit" class="headerlink" title="SizeOfHeapCommit"></a>SizeOfHeapCommit</h5><p>堆区实际使用物理地址空间大小</p>
+<p><img src="https://raw.githubusercontent.com/DeutschBall/test/master/image-20220711201719842.png" alt="image-20220711201719842"></p>
+<h5 id="LoaderFlags"><a href="#LoaderFlags" class="headerlink" title="LoaderFlags"></a>LoaderFlags</h5><p>已经被官方扬了</p>
+<h5 id="NumberOfRvaAndSizes"><a href="#NumberOfRvaAndSizes" class="headerlink" title="NumberOfRvaAndSizes"></a>NumberOfRvaAndSizes</h5><p><img src="https://raw.githubusercontent.com/DeutschBall/test/master/image-20220711204300399.png" alt="image-20220711204300399"></p>
+<p>微软也是春秋笔法,这个值的解释就短短一行</p>
+<blockquote>
+<p>The number of directory entries in the remainder of the optional header. Each entry describes a location and size.</p>
+<p>可选头中剩下的部分中,目录条目的个数.</p>
+<p>每个条目描述了一个位置和大小</p>
+</blockquote>
+<p>你说你🐎呢,这说了个什么事啊?</p>
+<p>这需要联系可选头剩余的部分一起看,确实剩下的部分有16个条目</p>
+<p><img src="https://raw.githubusercontent.com/DeutschBall/test/master/image-20220711204911890.png" alt="image-20220711204911890"></p>
+<p>这16个条目顺序是固定的,</p>
+<p>如果NumberOfRvaAndSizes&#x3D;1则只有导出表条目</p>
+<p><img src="https://raw.githubusercontent.com/DeutschBall/test/master/image-20220711210809700.png" alt="image-20220711210809700"></p>
+<p>如果NumberOfRvaAndSizes&#x3D;2则有导出表和导入表两个条目</p>
+<p><img src="https://raw.githubusercontent.com/DeutschBall/test/master/image-20220711210848527.png" alt="image-20220711210848527"></p>
+<p>…</p>
+<p>以此类推</p>
+<p>每个条目对应的表是干啥的呢?</p>
+<h5 id="DataDirectory-IMAGE-NUMBEROF-DIRECTORY-ENTRIES"><a href="#DataDirectory-IMAGE-NUMBEROF-DIRECTORY-ENTRIES" class="headerlink" title="DataDirectory[IMAGE_NUMBEROF_DIRECTORY_ENTRIES]"></a>DataDirectory[IMAGE_NUMBEROF_DIRECTORY_ENTRIES]</h5><p>其中数组大小<code>#define IMAGE_NUMBEROF_DIRECTORY_ENTRIES 16</code>这个值恒为16不变,</p>
+<p>意思是,虽然<code>DataDirectory</code>一直就是16项,但是实际多少项有效,这需要上一个成员<code>NumberOfRvaAndSizes</code>来决定</p>
+<p>现在的问题是,<strong><code>DataDirectory</code>数组的元素是什么呢?</strong></p>
+<p><img src="https://raw.githubusercontent.com/DeutschBall/test/master/image-20220712111448720.png" alt="image-20220712111448720"></p>
+<p>每个数组元素的结构相同</p>
+<p><img src="https://raw.githubusercontent.com/DeutschBall/test/master/image-20220711205101433.png" alt="image-20220711205101433"></p>
+<blockquote>
+<p>DataDirectory数组中的每项都对应一个重要的技术,包括导入表,导出表,重定位等等</p>
+</blockquote>
+<p>每一个都有一个VirtualAddress,指向一个相对虚拟地址,还有一个size成员,表征一个大小</p>
+<p>指向的谁,表征的又是谁的大小呢?</p>
+<h6 id="DataDirectory-1-Import"><a href="#DataDirectory-1-Import" class="headerlink" title="DataDirectory[1]&#x3D;Import"></a>DataDirectory[1]&#x3D;Import</h6><p>以其中的导入表Import为例,其VIrtualAddress指向相对虚拟地址6D20h,010editor已经帮我们计算出了文件偏移为0x6120</p>
+<p><img src="https://raw.githubusercontent.com/DeutschBall/test/master/image-20220712111646633.png" alt="image-20220712111646633"></p>
+<p>下面用010editor观察00x6120这个位置</p>
+<p><img src="https://raw.githubusercontent.com/DeutschBall/test/master/image-20220712112009554.png" alt="image-20220712112009554"></p>
+<p><strong>发现这是一个名为ImportDescriptor[]的数组的位置</strong></p>
+<p>该位置在节区之后,显然已经出了PE头了</p>
+<p>这个数组一共有9项,下标0到8,每项大小相同都是14h&#x3D;20d,这样算下来这个数组大小是20*9&#x3D;180字节</p>
+<blockquote>
+<p>然而刚才DataDirectory的Import项中,Size&#x3D;200.这表明ImportDescriptor[]应该有10项.</p>
+<p>回到010editor观察ImportDescriptor[8]之后的编码</p>
+<p><img src="https://raw.githubusercontent.com/DeutschBall/test/master/image-20220712112522955.png" alt="image-20220712112522955"></p>
+<p>发现ImportDescriptor[8]后面还有20个自己都是0</p>
+<p><img src="https://raw.githubusercontent.com/DeutschBall/test/master/image-20220712112658025.png" alt="image-20220712112658025"></p>
+<p>也就是说ImportDescriptor[9]全空</p>
+</blockquote>
+<p><strong>现在的问题是,ImportDescriptor[]数组是干啥的呢?</strong></p>
+<blockquote>
+<h6 id="DataDirectory-1-VirtualAddress-ImportDescriptor"><a href="#DataDirectory-1-VirtualAddress-ImportDescriptor" class="headerlink" title="DataDirectory[1].VirtualAddress-&gt;&amp;ImportDescriptor[]"></a>DataDirectory[1].VirtualAddress-&gt;&amp;ImportDescriptor[]</h6><p><strong>DataDirectory[1]是数据目录 的 第二项,或者说导入目录表项</strong></p>
+<p><strong>DataDirectory[1].VirtualAddress指向ImportDescriptor导入描述符表的基址</strong></p>
+<blockquote>
+<p>_IMAGE_IMPORT_DESCRIPTOR结构体数组ImportDescriptor[],也可以叫做IMPORT Directory Table</p>
+<p>各种叫法还有指针瞎j8值的关系,一定要分清</p>
+</blockquote>
+<p>ImportDescriptor[]在节区之后,不属于PE头.</p>
+<p><img src="https://raw.githubusercontent.com/DeutschBall/test/master/PE.jpg" alt="PE"></p>
+<blockquote>
+<p>权威指南:</p>
+<p>IMAGE_IMPORT_DESCRIPTOR结构体ImportDescriptor[],</p>
+<p>其中记录着PE文件要导入哪些库文件,程序需要多少导入个库,就需要有多少个ImportDescriptor项目,这些项目组成数组,数组最后一项全空</p>
+<p>这和我们刚才观察到的是相吻合的</p>
+</blockquote>
+<p>IID是给PE装载器用的,先贴上PE装载器的干活步骤</p>
+<p><img src="https://raw.githubusercontent.com/DeutschBall/test/master/image-20220712121817219.png" alt="image-20220712121817219"></p>
+<blockquote>
+<p>其中IID是<code>_IMAGE_IMPORT_DESCRIPTOR</code>的缩写</p>
+<p>INT是<code>import name table</code>导入名称表的缩写,也就是IID中OriginalFIrstThunk指向的地址</p>
+<p>IAT是import address table 导入地址表,也就是ida反汇编之后的.idata区</p>
+<p>关于INT和IAT,权位指南也给了一张图,但是属于”会的一看就明白,不会的看了还是不会(出自祭祖老师顾新)”那种</p>
+<p><img src="https://raw.githubusercontent.com/DeutschBall/test/master/image-20220712124021808.png" alt="image-20220712124021808"></p>
+<p>这个图怎么看呢?</p>
+<p>最左边这个是一个IID结构体,也就是ImportDescriptor[]的一项</p>
+<p>其中Name&#x3D;”Kernel32.dll”,这是一个DLL库名,表明本IID的作用是导入DLL库中的函数</p>
+<p>OriginalFirstThunk指向INT表基址,这个INT表实际上是<code>_IMAGE_IMPORT_BY_NAME</code>结构体数组,每一项都由一个Hint和一个字符串名组成,每个库函数都有自己的名字,比如GetCurrentThreadld,也有在库中的唯一的编号放在Hint中</p>
+<p>FirstThunk指向IAT表基址,这个IAT表就是用ida观察时,.idata区中extern声明的函数.</p>
+<p>对于一个库,其对应INT和IAT表中的表项应该是一样多的,意思就是需要使用几个函数就解析几个函数地址,多一个也不干</p>
+<p>程序text正文代码段调用库函数时就是call idata区中的”函数”,就像<code>call    ds:DragFinish</code>.那么idata区的”函数”应当是一个地址,</p>
+<p>然而动态库是在程序装载时,运行前装载的,此时已经经过了编译链接,显然即使动态库已经映射进入进程的虚拟地址空间了,但是调用库函数的地方还是不知道库函数在哪里.</p>
+<p>这就好比我虽然和058班同学在同一所大学,但是我不知道sjf在哪个宿舍住,我想上门拜访一下却不知道应该去哪里</p>
+</blockquote>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br></pre></td><td class="code"><pre><span class="line">    <span class="keyword">typedef</span> <span class="class"><span class="keyword">struct</span> _<span class="title">IMAGE_IMPORT_BY_NAME</span> &#123;</span></span><br><span class="line">      WORD Hint;<span class="comment">//按照Hint编号加载函数</span></span><br><span class="line">      CHAR Name[<span class="number">1</span>];<span class="comment">//</span></span><br><span class="line">    &#125; IMAGE_IMPORT_BY_NAME,*PIMAGE_IMPORT_BY_NAME;</span><br><span class="line"></span><br><span class="line"><span class="keyword">typedef</span> <span class="class"><span class="keyword">struct</span> _<span class="title">IMAGE_IMPORT_DESCRIPTOR</span> &#123;</span></span><br><span class="line">  __C89_NAMELESS <span class="class"><span class="keyword">union</span> &#123;</span></span><br><span class="line">DWORD Characteristics;</span><br><span class="line">DWORD OriginalFirstThunk;<span class="comment">//指向INT数组基地址</span></span><br><span class="line">  &#125; DUMMYUNIONNAME;</span><br><span class="line">  DWORD TimeDateStamp;</span><br><span class="line"></span><br><span class="line">  DWORD ForwarderChain;</span><br><span class="line">  DWORD Name;<span class="comment">//动态库名称,注意不是函数名称</span></span><br><span class="line">  DWORD FirstThunk;<span class="comment">//指向IAT数组基地址</span></span><br><span class="line">&#125; IMAGE_IMPORT_DESCRIPTOR;</span><br><span class="line"><span class="keyword">typedef</span> IMAGE_IMPORT_DESCRIPTOR UNALIGNED *PIMAGE_IMPORT_DESCRIPTOR;</span><br></pre></td></tr></table></figure>
+
+<p>下面根据权威指南中给出PE装载器导入函数的步骤,跟踪观察一下</p>
+<p>1.读取IID的Name成员,获取库名称</p>
+<p><img src="https://raw.githubusercontent.com/DeutschBall/test/master/image-20220712130001523.png" alt="image-20220712130001523"></p>
+<p>以ImportDescriptor[0]为例,其Name成员指向RVA&#x3D;71A4,用ida观察0x10071A4这个位置</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">.text:010071A4 aComdlg32Dll    db &#x27;comdlg32.dll&#x27;,0     ; DATA XREF: .text:01006D2C↑o</span><br></pre></td></tr></table></figure>
+
+<p>确实是comdlg32.dll字符串</p>
+<p>2.LoadLibrary(“comdlg32.dll”),返回值是comdlg32.dll库的句柄,该句柄将会用于库中查函数</p>
+<p>3.读取IID的OriginalFiristThunk成员,获取INT表地址</p>
+<p><img src="https://raw.githubusercontent.com/DeutschBall/test/master/image-20220712130506645.png" alt="image-20220712130506645"></p>
+<p>OriginalFiristThunk&#x3D;0x7088h,用ida观察0x1007088这个位置</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line">.text:01007088 ;</span><br><span class="line">.text:01007088 ; Import names for comdlg32.dll</span><br><span class="line">.text:01007088 ;</span><br><span class="line">.text:01007088 off_1007088     dd rva word_1007172     ; DATA XREF: .text:__IMPORT_DESCRIPTOR_comdlg32↑o</span><br><span class="line">.text:0100708C                 dd rva word_1007156</span><br><span class="line">.text:01007090                 dd rva word_1007196</span><br><span class="line">.text:01007094                 dd rva word_1007148</span><br><span class="line">.text:01007098                 dd rva word_1007134</span><br><span class="line">.text:0100709C                 dd rva word_1007182</span><br><span class="line">.text:010070A0                 dd rva word_1007162</span><br><span class="line">.text:010070A4                 dd rva word_100710C</span><br><span class="line">.text:010070A8                 dd rva word_100711C</span><br><span class="line">.text:010070AC                 dd 0</span><br></pre></td></tr></table></figure>
+
+<p>ida也给出了注释”comdlg32.dll库需要导入函数的名称”,</p>
+<p>需要注意的是INT表的最后一项是0,也就是NULL,它的作用是判断INT表是否结束</p>
+<p>4.对于INT表的第i项,</p>
+<blockquote>
+<p>第0项就是<code>.text:01007088 off_1007088     dd rva word_1007172</code></p>
+<p>第1项就是<code>.text:0100708C                 dd rva word_1007156</code></p>
+<p>…</p>
+</blockquote>
+<p>根据<code>_IMAGE_IMPORT_BY_NAME</code>结构体的Name值,PE装载器调用<code>GetProcAddress(&lt;动态库句柄&gt;,&quot;&lt;函数名&gt;&quot;)</code>获取该名称对应函数的地址(此地址为在整个进程虚拟地址空间中的地址,也就是绝对虚拟地址,<strong>不是</strong>相对于动态库基址的偏移量)</p>
+<p>比如其中word_1007172指向一个_IMAGE_IMPORT_BY_NAME结构体</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">.text:01007172 word_1007172    dw 0Fh                  ; DATA XREF: .text:off_1007088↑o</span><br><span class="line">.text:01007174                 db &#x27;PageSetupDlgW&#x27;,0</span><br></pre></td></tr></table></figure>
+
+<p><code>Hint=0Fh</code></p>
+<p><code>Name=&quot;PageSetupDlgW&quot;</code>,一个函数名</p>
+<p>然后PE装载器调用<code>GetProcAddress(comdlg32.dll句柄号,&quot;PageSetupDlgW&quot;);</code>就获得了该函数的虚拟地址</p>
+<p>5.根据IID的FirstThunk成员,获取对应IAT表地址</p>
+<p><img src="https://raw.githubusercontent.com/DeutschBall/test/master/image-20220712131357758.png" alt="image-20220712131357758"></p>
+<p>comdlg32.dll的FirstThunk&#x3D;12A0,用ida观察0x10012A0这个地址</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line">.idata:010012A0 ; Imports from comdlg32.dll</span><br><span class="line">.idata:010012A0 ;</span><br><span class="line">.idata:010012A0 ; BOOL __stdcall PageSetupDlgW(LPPAGESETUPDLGW)</span><br><span class="line">.idata:010012A0                 extrn PageSetupDlgW:dword</span><br><span class="line">.idata:010012A0                                         ; CODE XREF: NPCommand(x,x,x)+29F↓p</span><br><span class="line">.idata:010012A0                                         ; GetPrinterDCviaDialog()+2C↓p ...</span><br><span class="line">.idata:010012A4 ; HWND __stdcall FindTextW(LPFINDREPLACEW)</span><br><span class="line">.idata:010012A4                 extrn FindTextW:dword   ; CODE XREF: NPCommand(x,x,x)+471↓p</span><br><span class="line">.idata:010012A4                                         ; DATA XREF: NPCommand(x,x,x)+471↓r</span><br><span class="line">...</span><br></pre></td></tr></table></figure>
+
+<p>每项占4个字节,也就是一个int,一个指针类型,显然要写入一个函数地址</p>
+<p>6.将4中获取到的PageSetupDlgW<strong>的地址</strong>写到5中的相应IAT表项中去</p>
+<p>假设PageSetupDlgW的地址为0x12345678,四个字节,写到.idata区的<code>0x10012A0</code>开始的四个字节</p>
+<table>
+<thead>
+<tr>
+<th>地址</th>
+<th>数据</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>0x10012A0</td>
+<td>0x78</td>
+</tr>
+<tr>
+<td>0x10012A1</td>
+<td>0x56</td>
+</tr>
+<tr>
+<td>0x10012A2</td>
+<td>0x34</td>
+</tr>
+<tr>
+<td>0x10012A3</td>
+<td>0x12</td>
+</tr>
+</tbody></table>
+<p>小端模式</p>
+<blockquote>
+<p>这里PageSetupDlgW的地址是我们假设的GetProcAddress的返回值,其实际值可以用ollydbg动态调试观察</p>
+<p><img src="https://raw.githubusercontent.com/DeutschBall/test/master/image-20220712132332297.png" alt="image-20220712132332297"></p>
+<p>实际上PageSetupDlgW被装载在进程虚拟地址空间的<code>0x503D5A75</code>.</p>
+</blockquote>
+<p>7.重复4-6直到遭遇INT最后一项0</p>
+<p>到此貌似了解了整个库函数符号解析的过程,回忆整个过程</p>
+<p>编译器和链接器不会解析动态库的符号,</p>
+<p>在text节正文代码上call的是ds:[库函数名],实际上是call这个<strong>地址上存放的地址</strong>,</p>
+<p>ds:[库函数名]是.idata区的IAT表,每个IAT条目四个字节,将来要存放一个实际的库函数地址</p>
+<p>编译器和链接器会记录没有解析的外部符号,放到DataDirectory[1]指向的<code>_IMAGE_IMPORT_DESCRIPTOR</code>数组中,</p>
+<p>每一个需要导入的库都在本数组中建立一个表项,每个表项记录要装载哪个库(Name),还有要装载这个库的哪些函数(指向<code>_IMAGE_IMPORT_BY_NAME</code>数组即INT表的指针).还有哪个地方需要解析这个库里的函数(指向.idata段IAT表基址的指针)</p>
+<p>每个INT表表项都要记录,要装载哪个函数,该函数的Hint</p>
+<p>但是但是,PE装载器是怎么从DLL库中找到函数地址的呢?</p>
+</blockquote>
+<blockquote>
+<blockquote>
+<p>符号解析可以分为三个阶段</p>
+<p>1.编译时</p>
+<p>编译器负责将本文件中的引用解析到本文件中的实现,比如</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="type">void</span> <span class="title function_">func</span><span class="params">()</span>;</span><br><span class="line"><span class="type">void</span> <span class="title function_">main</span><span class="params">()</span>&#123;</span><br><span class="line">	func();</span><br><span class="line">&#125;</span><br><span class="line"><span class="type">void</span> <span class="title function_">func</span><span class="params">()</span>&#123;</span><br><span class="line">	<span class="comment">//do something...</span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>main前面这个func就是一个引用,它的作用是给编译器说,有这么一个func函数,但只是有,func具体干了啥,编译器不知道.</p>
+<p>编译器会首先发现第一行的引用,然后在本文件中找实现,显然可以找到实现,于是就有了func的PC相对地址,再main中调用func时就可以</p>
+<p>汇编成<code>call 相对地址</code>的格式</p>
+<blockquote>
+<p>这个引用是必须的,去掉之后会发生意想不到的运行时错误</p>
+<p>比如</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// void func();</span></span><br><span class="line"><span class="type">void</span> <span class="title function_">main</span><span class="params">()</span>&#123;</span><br><span class="line">	<span class="type">int</span> a=func();</span><br><span class="line">&#125;</span><br><span class="line"><span class="type">void</span> <span class="title function_">func</span><span class="params">()</span>&#123;</span><br><span class="line">	<span class="comment">//do something...</span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>这样可以通过编译,但是显然func没有返回值.提前声明void func();再编译会直接编译报错.</p>
+</blockquote>
+<p>2.链接时</p>
+<p>一个模块可能会引用其他模块中的符号,比如全局变量或者函数</p>
+<p>比如下面这个程序</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">extern</span> <span class="type">int</span> other;</span><br><span class="line"><span class="type">void</span> <span class="title function_">func</span><span class="params">()</span>;</span><br><span class="line"><span class="type">int</span> <span class="title function_">main</span><span class="params">()</span>&#123;</span><br><span class="line">	<span class="type">int</span> a=other;</span><br><span class="line">	func();</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>编译器发现other是个外部符号,func虽然没有表明extern但是本模块中找不到实现.</p>
+<p>而编译器只负责将一个一个孤立的模块编译,将他们链接起来不是编译器的事,</p>
+<p>于是编译器就为other和func都生成一个符号链接表项,把这个皮球踢给链接器完成</p>
+<p>链接器首先进行符号解析,它会遍历每个模块,每找到一个全局符号就看看符号链接表中有没有他的引用,有则这个引用就可以落地.全遍历一遍之后还有不能解析的引用则报链接错</p>
+<p>符号解析完毕之后就是重定位,将多个参与链接的目标模块合并成一个大目标模块</p>
+<p>3.运行时</p>
+<p>这就是IAT或者说GOT,PLT发挥作用的时候</p>
+</blockquote>
+</blockquote>
+<h6 id="DataDirectory-0-Export"><a href="#DataDirectory-0-Export" class="headerlink" title="DataDirectory[0]&#x3D;Export"></a>DataDirectory[0]&#x3D;Export</h6><p><img src="https://raw.githubusercontent.com/DeutschBall/test/master/image-20220714145105577.png" alt="image-20220714145105577"></p>
+<p>类比DataDirectory[1]导入表,导入表的作用是将动态库中的函数导入</p>
+<p>那么导出表就应该把本模块中的函数向外导出,提供给其他模块使用,也就是本模块作为动态库</p>
+<p><code>notepad.exe</code>是一个引用程序,显然不是动态库,自然没有导出的函数,那么<code>DataDirectory[0]</code>就是个空记录</p>
+<p><img src="https://raw.githubusercontent.com/DeutschBall/test/master/image-20220712142026145.png" alt="image-20220712142026145"></p>
+<p>可以通过观察<code>kernel32.dll</code>动态库,了解<code>Export</code>表怎么干活</p>
+<blockquote>
+<p>notepad.exe和kernel32.dll都是直接从windowsXP虚拟机的C:&#x2F;Windows&#x2F;System32下面拽出来的</p>
+</blockquote>
+<blockquote>
+<p>notepad.exe和kernel32.dll的整体对比</p>
+<p><img src="https://raw.githubusercontent.com/DeutschBall/test/master/image-20220712145612859.png" alt="image-20220712145612859"></p>
+</blockquote>
+<p>导出表<code>ExportDir</code>至多有一个,但是导入表可以有多个</p>
+<p>因为一个应用程序可能需要多个动态库支持,而一个动态库只需要一个导出表导出自身函数</p>
+<p><strong>kernel32.dll</strong></p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">PE头</span><br><span class="line">	NT头</span><br><span class="line">		可选头</span><br><span class="line">			数据目录表[0]=Export表</span><br><span class="line">				-&gt;AddressOfFunctions</span><br><span class="line">				-&gt;AddressOfNames</span><br><span class="line">				-&gt;AddressOfNameOrdinals</span><br></pre></td></tr></table></figure>
+
+
+
+<p><img src="https://raw.githubusercontent.com/DeutschBall/test/master/image-20220714223418977.png" alt="image-20220714223418977"></p>
+<p>两个表项,分别是相对虚拟地址0x22140h和十进制表示的大小27016</p>
+<p>由于ImageBase为0x77e40000h,因此实际虚拟地址就是0x77e62140</p>
+<p><img src="https://raw.githubusercontent.com/DeutschBall/test/master/image-20220714144520852.png" alt="image-20220714144520852"></p>
+<p>如果使用ida就观察0x77e62140这个位置</p>
+<p>如果使用010editor就观察0x21540这个位置</p>
+<p>这个位置就是<code>IMAGE_EXPORT_DIRECTORY</code>结构体的起始地址,这个结构体是干啥的呢?</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">typedef</span> <span class="class"><span class="keyword">struct</span> _<span class="title">IMAGE_EXPORT_DIRECTORY</span> &#123;</span></span><br><span class="line">  DWORD Characteristics;</span><br><span class="line">  DWORD TimeDateStamp;<span class="comment">//该文件编译完成的事件</span></span><br><span class="line">  WORD MajorVersion;</span><br><span class="line">  WORD MinorVersion;</span><br><span class="line">  DWORD Name;<span class="comment">//库名</span></span><br><span class="line">  DWORD Base;</span><br><span class="line">  DWORD NumberOfFunctions;<span class="comment">//库函数的个数</span></span><br><span class="line">  DWORD NumberOfNames;<span class="comment">//有名字的库函数的个数</span></span><br><span class="line">  DWORD AddressOfFunctions;<span class="comment">//</span></span><br><span class="line">  DWORD AddressOfNames;<span class="comment">//函数名称数组地址</span></span><br><span class="line">  DWORD AddressOfNameOrdinals;<span class="comment">//名称顺序表地址</span></span><br><span class="line">&#125; IMAGE_EXPORT_DIRECTORY,*PIMAGE_EXPORT_DIRECTORY;</span><br></pre></td></tr></table></figure>
+
+<p>NumberOfFunctions和NumberOfNames,在kernel32.dll中数量相同,都是928,也就是说导出了928个函数,每个函数都有名字</p>
+<p><img src="https://raw.githubusercontent.com/DeutschBall/test/master/image-20220714152432702.png" alt="image-20220714152432702"></p>
+<p>这就很奇怪了,</p>
+<p><strong>一是为啥函数要有名字?</strong></p>
+<p><strong>二是,为啥每个函数都有名字了还要记录一个名字数量和一个函数数量,两个不相同吗?</strong></p>
+<p>在<strong>可执行目标文件exe</strong>中,确实不需要函数有名字,要调用函数,只需要call 函数地址.函数名字就是一个写源代码时的助记符</p>
+<p>但是库文件不一样,库需要为别的exe文件或者库提供支持.</p>
+<p>动态库在exe装载时才会映射进入进程虚拟地址空间,然后进行动态链接.</p>
+<p>我们已经在自己的模块源代码中写了”MessageBox”这种动态库中的函数符号,显然静态解析解决不了这个符号.</p>
+<p>那么动态链接的时候怎么解析这个事情呢?</p>
+<blockquote>
+<p><strong>我的想法是</strong>,在exe中保留需要调用的库函数的名字,在dll中导出库函数的名字,并且和地址挂钩.动态链接器在解析exe中动态库函数名字时,就像查字典一样,exe中看一眼,要解析MessageBox,再去dll中遍历所有[库函数名,地址]键值对,查到就把地址写到exe的相应位置.</p>
+<p>但是如果库函数很多,库函数名很长,匹配库函数名还是字符串匹配,那么遍历库函数表的效率会很低.并且这样做完全没有必要</p>
+<p>可以给每个函数编一个号,比如MessageBox编号1,MessageBoxW编号2,以此类推,这就好比建立了一个协议,exe需要一个一号函数,动态解析器就去dll库中索要1号函数,dll库和exe都知道1号函数是MessageBox.而动态链接器相当于中间信道,它没必要知道MessageBox-&gt;1-&gt;MessageBox这个过程</p>
+</blockquote>
+<p>而实际上人家是怎么解决这个问题的呢?</p>
+<p>回顾notepad.exe<strong>导入表</strong>的情形,<code>_IMAGE_IMPORT_BY_NAME</code>有两个成员,</p>
+<p>第一个Hint,就是函数编号.</p>
+<p>第二个,Name,函数名</p>
+<p><img src="https://raw.githubusercontent.com/DeutschBall/test/master/image-20220714152202138.png" alt="image-20220714152202138"></p>
+<p>和它门当户对的ExportByName是啥样的呢?只记住了一个函数名</p>
+<p><img src="https://raw.githubusercontent.com/DeutschBall/test/master/image-20220714152703198.png" alt="image-20220714152703198"></p>
+<p>奇怪了,ExportByName比ImportByName少一个Hint成员,这是为啥呢?</p>
+<p>观察一下notepad.exe的ImportByName[0]:</p>
+<p><img src="https://raw.githubusercontent.com/DeutschBall/test/master/image-20220714152850743.png" alt="image-20220714152850743"></p>
+<p>这里Hint是489,这不禁让人浮想联翩,这个数是怎么来的呢?</p>
+<p>会不会是ExportByName数组的下标?回家看看吧</p>
+<p><img src="https://raw.githubusercontent.com/DeutschBall/test/master/image-20220714152949332.png" alt="image-20220714152949332"></p>
+<p>还真是,<code>ImportByName[0].Hint</code>就是<code>GlobalUnlock</code>函数在<code>ExportByName</code>中的下标</p>
+<p>显然在notepad.exe这种应用程序中使用函数名Name或者函数下标Hint导入动态库的函数都可以达到链接目的</p>
+<p>到此貌似就了解了动态链接干活的过程,然而还有两个问题没有解决,</p>
+<p>1.为啥NumberOfNames和NumberOfFunctions值相同,但是要记两个</p>
+<p>2._IMAGE_EXPORT_DIRECTORY的AddressOfNameOrdinals成员貌似还没有发挥作用</p>
+<p>核心原理给出的动态链接器的工作过程:</p>
+<p>1.动态链接器从exe的ImportByName[x]拿到函数名Name</p>
+<p>2.动态链接器遍历dll的ExportByName[]数组,用Name匹配每一项的函数名</p>
+<p>3.如果匹配到,记录此时在ExportByName中的下标i</p>
+<p>4.用i去查dll的AddressOfNameOridinals指向的数组,用刚才得到的下标i作为下标查AddressOfNameOridinals数组,得到AddressOfNameOridinals[i]&#x3D;INDEX,这是下标</p>
+<p>5.用新下标INDEX(AddressOfNameOridinals[i])去查AddressOfFunctions,得到AddressOfFunctions[INDEX]得到Name函数的相对虚拟地址</p>
+<blockquote>
+<p>如果按照之前认为的hint就是函数下标的方法,那么这个想象的过程应该是</p>
+<p>1.动态链接器从exe的ImportByName[x]拿到函数名Name</p>
+<p>2.动态链接器遍历dll的ExportByName[]数组,用Name匹配每一项的函数名</p>
+<p>3.如果匹配到,记录此时在ExportByName中的下标i</p>
+<p>4.用下标i去查AddressOfFunctions,得到AddressOfFunctions[i]得到Name函数的相对虚拟地址</p>
+</blockquote>
+<p>而实际的方法多查了一个AddressOfNameOridinals表,这是为啥呢?</p>
+<p>还又得回到NumberOfFunction和NumberOfName,这俩值一定一样吗?</p>
+<p>重新考虑动态库的导出函数一定要有名字吗?</p>
+<p>如果exe能够根据ImportByName.hint找到该函数,完全可以不用名字</p>
+<p>那么动态库导出的函数就可以有匿名函数.</p>
+<p>这时匿名函数就不能使用ExportByName机制了,因为它根本没名字.</p>
+<p>如果每个函数都有名字,那么显然AddressOfNameOrdinals,AddressOfFunctions,AddressOfNames都有相同数量的表项</p>
+<p>如果有一个匿名函数,那么AddressOfNames就得少一项.</p>
+<p>AddressOfFunctions数组啃腚记载了所有数组的地址,包括匿名的和有名的</p>
+<p>AddressOfNameOrdinals从名字上看,名称序列,它实际完成了一个下标转换.<strong>一个有名字的函数,在所有函数中的下标是多少</strong></p>
+<p>而AddressOfNames是记录,一个函数名对应的下标是多少</p>
+<p>整个映射过程是这样的:</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">函数名	-&gt;查AddressOfNames-&gt;函数在AddressOfNames中的下标</span><br><span class="line">		-&gt;查AddressOfNameOrdinals-&gt;函数在所有库函数中的下标</span><br><span class="line">		-&gt;查AddressOfFunctions-&gt;函数相对虚拟地址</span><br><span class="line"></span><br><span class="line">匿名函数在所有库函数中的下标-&gt;查AddressOfFunctions-&gt;函数相对虚拟地址</span><br></pre></td></tr></table></figure>
+
+<p>那么AddressOfNameOrdinals的项数应该和AddressOfNames相同,有多少个具名函数,ordinal就得提供多少个映射服务</p>
+<blockquote>
+<p>用ida观察kernel32.dll的AddressOfOrdinals表,由于所有函数具名,因此AddressOfOrdinals实际上完成了一个$f(x)&#x3D;x$的映射,</p>
+<p>第一个具名函数就是kernel32中所有函数的第一个函数</p>
+<p>第n个具名函数就是kernel32中所有函数的第n个函数</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line">.text:77E63E68 ; Export Ordinals Table for KERNEL32.dll</span><br><span class="line">.text:77E63E68 ;</span><br><span class="line">.text:77E63E68 byte_77E63E68   db 2 dup(0), 1, 0, 2, 0, 3, 0, 4, 0, 5, 0, 6, 0, 7, 0</span><br><span class="line">.text:77E63E68                                         ; DATA XREF: .text:77E62164↑o</span><br><span class="line">.text:77E63E68                 db 8, 0, 9, 0, 0Ah, 0, 0Bh, 0, 0Ch, 0, 0Dh, 0, 0Eh, 0</span><br><span class="line">.text:77E63E68                 db 0Fh, 0, 10h, 0, 11h, 0, 12h, 0, 13h, 0, 14h, 0, 15h</span><br><span class="line">.text:77E63E68                 db 0, 16h, 0, 17h, 0, 18h, 0, 19h, 0, 1Ah, 0, 1Bh, 0, 1Ch</span><br><span class="line">.text:77E63E68                 db 0, 1Dh, 0, 1Eh, 0, 1Fh, 0, 20h, 0, 21h, 0, 22h, 0, 23h</span><br><span class="line">.text:77E63E68                 db 0, 24h, 0, 25h, 0, 26h, 0, 27h, 0, 28h, 0, 29h, 0, 2Ah</span><br><span class="line">.text:77E63E68                 db 0, 2Bh, 0, 2Ch, 0, 2Dh, 0, 2Eh, 0, 2Fh, 0, 30h, 0, 31h</span><br><span class="line">.text:77E63E68                 db 0, 32h, 0, 33h, 0, 34h, 0, 35h, 0, 36h, 0, 37h, 0, 38h</span><br></pre></td></tr></table></figure>
+
+<p>显然对于一个所有函数都具名的动态库kernel32,AddressOfNameOrdinals是纯纯的five.</p>
+<p>但是总是得照顾一些搞特殊的动态库</p>
+</blockquote>
+<blockquote>
+<p>AddressOfFunctions又叫EAT,export address table</p>
+</blockquote>
+<h3 id="节区头表"><a href="#节区头表" class="headerlink" title="节区头表"></a>节区头表</h3><p>节区头表,或者叫做”节头表”,实际上是节区头结构体数组</p>
+<p>数组的每个元素都是一个节区头</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><span class="line">   <span class="keyword">typedef</span> <span class="class"><span class="keyword">struct</span> _<span class="title">IMAGE_SECTION_HEADER</span> &#123;</span></span><br><span class="line">     BYTE Name[IMAGE_SIZEOF_SHORT_NAME];</span><br><span class="line">     <span class="class"><span class="keyword">union</span> &#123;</span></span><br><span class="line">DWORD PhysicalAddress;</span><br><span class="line">DWORD VirtualSize;</span><br><span class="line">     &#125; Misc;</span><br><span class="line">     DWORD VirtualAddress;</span><br><span class="line">     DWORD SizeOfRawData;</span><br><span class="line">     DWORD PointerToRawData;</span><br><span class="line">     DWORD PointerToRelocations;</span><br><span class="line">     DWORD PointerToLinenumbers;</span><br><span class="line">     WORD NumberOfRelocations;</span><br><span class="line">     WORD NumberOfLinenumbers;</span><br><span class="line">     DWORD Characteristics;</span><br><span class="line">   &#125; IMAGE_SECTION_HEADER,*PIMAGE_SECTION_HEADER;</span><br></pre></td></tr></table></figure>
+
+<h4 id="Name-IMAGE-SIZEOF-SHORT-NAME"><a href="#Name-IMAGE-SIZEOF-SHORT-NAME" class="headerlink" title="Name[IMAGE_SIZEOF_SHORT_NAME]"></a>Name[IMAGE_SIZEOF_SHORT_NAME]</h4><p>节区名称,其中<code>#define IMAGE_SIZEOF_SHORT_NAME 8</code>,即名称最长不得超过8字节</p>
+<p><img src="https://raw.githubusercontent.com/DeutschBall/test/master/image-20220711212317715.png" alt="image-20220711212317715"></p>
+<p>010editor给出的注释是”可以不以0结尾”,这与我们平时使用的字符串以<code>&#39;\0&#39;</code>结尾不同</p>
+<p>原因是Name无足轻重,机器不关心节叫啥,只关心节的排列顺序</p>
+<h4 id="PhysicalAddress-VirtualSize"><a href="#PhysicalAddress-VirtualSize" class="headerlink" title="PhysicalAddress&amp;VirtualSize"></a>PhysicalAddress&amp;VirtualSize</h4><p>哥俩生异型啊,连体婴儿是吧</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="class"><span class="keyword">union</span> &#123;</span></span><br><span class="line">	DWORD PhysicalAddress;</span><br><span class="line">	DWORD VirtualSize;</span><br><span class="line">&#125; Misc;</span><br></pre></td></tr></table></figure>
+
+
+
+<h5 id="VirtualAddress"><a href="#VirtualAddress" class="headerlink" title="VirtualAddress"></a>VirtualAddress</h5><p>节在进程加载进入虚拟地址空间之后的相对虚拟地址</p>
+<h5 id="SizeOfRawData"><a href="#SizeOfRawData" class="headerlink" title="SizeOfRawData"></a>SizeOfRawData</h5><p>节大小</p>
+<p>根据相对虚拟地址和节大小就可以确定节在虚存中的范围</p>
+<p><img src="https://raw.githubusercontent.com/DeutschBall/test/master/image-20220714233554055.png" alt="image-20220714233554055"></p>
+<p>在notepad.exe中VirtualAddress&#x3D;1000h,则绝对虚拟地址就是1001000,</p>
+<p>大小是6E00h,则节的范围就是0x1001000h~0x1007E00h</p>
+<p>这个范围中,最开始是.idata节,然后是.text节</p>
+<h5 id="PointerToRawData"><a href="#PointerToRawData" class="headerlink" title="PointerToRawData"></a>PointerToRawData</h5><p>节在磁盘文件中的起始地址</p>
+<h5 id="PointerToRelocations"><a href="#PointerToRelocations" class="headerlink" title="PointerToRelocations"></a>PointerToRelocations</h5><p>重定位使用,在exe中该值无用,在可重定位目标模块.</p>
+<p>obj中该值指向IMAGE_RELOCATION 结构体,重定位要用</p>
+<p>具体怎么重定位,需要学习核心原理第16章</p>
+<h5 id="PointerToLinenumbers"><a href="#PointerToLinenumbers" class="headerlink" title="PointerToLinenumbers"></a>PointerToLinenumbers</h5><p>行号表指针,调试使用</p>
+<h5 id="NumberOfRelocations"><a href="#NumberOfRelocations" class="headerlink" title="NumberOfRelocations"></a>NumberOfRelocations</h5><p>obj中该值作为下标,指向<strong>重定位</strong>表对应该节的表项</p>
+<h5 id="Characteristics-1"><a href="#Characteristics-1" class="headerlink" title="Characteristics"></a>Characteristics</h5><p>枚举值,节属性,起保护作用,多个属性则按位或</p>
+<table>
+<thead>
+<tr>
+<th align="left">Flag</th>
+<th align="left">Meaning</th>
+</tr>
+</thead>
+<tbody><tr>
+<td align="left">0x00000000</td>
+<td align="left">Reserved.</td>
+</tr>
+<tr>
+<td align="left">0x00000001</td>
+<td align="left">Reserved.</td>
+</tr>
+<tr>
+<td align="left">0x00000002</td>
+<td align="left">Reserved.</td>
+</tr>
+<tr>
+<td align="left">0x00000004</td>
+<td align="left">Reserved.</td>
+</tr>
+<tr>
+<td align="left"><strong>IMAGE_SCN_TYPE_NO_PAD</strong>0x00000008</td>
+<td align="left">The section should not be padded to the next boundary. This flag is obsolete and is replaced by IMAGE_SCN_ALIGN_1BYTES.</td>
+</tr>
+<tr>
+<td align="left">0x00000010</td>
+<td align="left">Reserved.</td>
+</tr>
+<tr>
+<td align="left"><strong>IMAGE_SCN_CNT_CODE</strong>0x00000020</td>
+<td align="left">The section contains executable code.</td>
+</tr>
+<tr>
+<td align="left"><strong>IMAGE_SCN_CNT_INITIALIZED_DATA</strong>0x00000040</td>
+<td align="left">The section contains initialized data.</td>
+</tr>
+<tr>
+<td align="left"><strong>IMAGE_SCN_CNT_UNINITIALIZED_DATA</strong>0x00000080</td>
+<td align="left">The section contains uninitialized data.</td>
+</tr>
+<tr>
+<td align="left"><strong>IMAGE_SCN_LNK_OTHER</strong>0x00000100</td>
+<td align="left">Reserved.</td>
+</tr>
+<tr>
+<td align="left"><strong>IMAGE_SCN_LNK_INFO</strong>0x00000200</td>
+<td align="left">The section contains comments or other information. This is valid only for object files.</td>
+</tr>
+<tr>
+<td align="left">0x00000400</td>
+<td align="left">Reserved.</td>
+</tr>
+<tr>
+<td align="left"><strong>IMAGE_SCN_LNK_REMOVE</strong>0x00000800</td>
+<td align="left">The section will not become part of the image. This is valid only for object files.</td>
+</tr>
+<tr>
+<td align="left"><strong>IMAGE_SCN_LNK_COMDAT</strong>0x00001000</td>
+<td align="left">The section contains COMDAT data. This is valid only for object files.</td>
+</tr>
+<tr>
+<td align="left">0x00002000</td>
+<td align="left">Reserved.</td>
+</tr>
+<tr>
+<td align="left"><strong>IMAGE_SCN_NO_DEFER_SPEC_EXC</strong>0x00004000</td>
+<td align="left">Reset speculative exceptions handling bits in the TLB entries for this section.</td>
+</tr>
+<tr>
+<td align="left"><strong>IMAGE_SCN_GPREL</strong>0x00008000</td>
+<td align="left">The section contains data referenced through the global pointer.</td>
+</tr>
+<tr>
+<td align="left">0x00010000</td>
+<td align="left">Reserved.</td>
+</tr>
+<tr>
+<td align="left"><strong>IMAGE_SCN_MEM_PURGEABLE</strong>0x00020000</td>
+<td align="left">Reserved.</td>
+</tr>
+<tr>
+<td align="left"><strong>IMAGE_SCN_MEM_LOCKED</strong>0x00040000</td>
+<td align="left">Reserved.</td>
+</tr>
+<tr>
+<td align="left"><strong>IMAGE_SCN_MEM_PRELOAD</strong>0x00080000</td>
+<td align="left">Reserved.</td>
+</tr>
+<tr>
+<td align="left"><strong>IMAGE_SCN_ALIGN_1BYTES</strong>0x00100000</td>
+<td align="left">Align data on a 1-byte boundary. This is valid only for object files.</td>
+</tr>
+<tr>
+<td align="left"><strong>IMAGE_SCN_ALIGN_2BYTES</strong>0x00200000</td>
+<td align="left">Align data on a 2-byte boundary. This is valid only for object files.</td>
+</tr>
+<tr>
+<td align="left"><strong>IMAGE_SCN_ALIGN_4BYTES</strong>0x00300000</td>
+<td align="left">Align data on a 4-byte boundary. This is valid only for object files.</td>
+</tr>
+<tr>
+<td align="left"><strong>IMAGE_SCN_ALIGN_8BYTES</strong>0x00400000</td>
+<td align="left">Align data on a 8-byte boundary. This is valid only for object files.</td>
+</tr>
+<tr>
+<td align="left"><strong>IMAGE_SCN_ALIGN_16BYTES</strong>0x00500000</td>
+<td align="left">Align data on a 16-byte boundary. This is valid only for object files.</td>
+</tr>
+<tr>
+<td align="left"><strong>IMAGE_SCN_ALIGN_32BYTES</strong>0x00600000</td>
+<td align="left">Align data on a 32-byte boundary. This is valid only for object files.</td>
+</tr>
+<tr>
+<td align="left"><strong>IMAGE_SCN_ALIGN_64BYTES</strong>0x00700000</td>
+<td align="left">Align data on a 64-byte boundary. This is valid only for object files.</td>
+</tr>
+<tr>
+<td align="left"><strong>IMAGE_SCN_ALIGN_128BYTES</strong>0x00800000</td>
+<td align="left">Align data on a 128-byte boundary. This is valid only for object files.</td>
+</tr>
+<tr>
+<td align="left"><strong>IMAGE_SCN_ALIGN_256BYTES</strong>0x00900000</td>
+<td align="left">Align data on a 256-byte boundary. This is valid only for object files.</td>
+</tr>
+<tr>
+<td align="left"><strong>IMAGE_SCN_ALIGN_512BYTES</strong>0x00A00000</td>
+<td align="left">Align data on a 512-byte boundary. This is valid only for object files.</td>
+</tr>
+<tr>
+<td align="left"><strong>IMAGE_SCN_ALIGN_1024BYTES</strong>0x00B00000</td>
+<td align="left">Align data on a 1024-byte boundary. This is valid only for object files.</td>
+</tr>
+<tr>
+<td align="left"><strong>IMAGE_SCN_ALIGN_2048BYTES</strong>0x00C00000</td>
+<td align="left">Align data on a 2048-byte boundary. This is valid only for object files.</td>
+</tr>
+<tr>
+<td align="left"><strong>IMAGE_SCN_ALIGN_4096BYTES</strong>0x00D00000</td>
+<td align="left">Align data on a 4096-byte boundary. This is valid only for object files.</td>
+</tr>
+<tr>
+<td align="left"><strong>IMAGE_SCN_ALIGN_8192BYTES</strong>0x00E00000</td>
+<td align="left">Align data on a 8192-byte boundary. This is valid only for object files.</td>
+</tr>
+<tr>
+<td align="left"><strong>IMAGE_SCN_LNK_NRELOC_OVFL</strong>0x01000000</td>
+<td align="left">The section contains extended relocations. The count of relocations for the section exceeds the 16 bits that is reserved for it in the section header. If the <strong>NumberOfRelocations</strong> field in the section header is 0xffff, the actual relocation count is stored in the <strong>VirtualAddress</strong> field of the first relocation. It is an error if IMAGE_SCN_LNK_NRELOC_OVFL is set and there are fewer than 0xffff relocations in the section.</td>
+</tr>
+<tr>
+<td align="left"><strong>IMAGE_SCN_MEM_DISCARDABLE</strong>0x02000000</td>
+<td align="left">The section can be discarded as needed.</td>
+</tr>
+<tr>
+<td align="left"><strong>IMAGE_SCN_MEM_NOT_CACHED</strong>0x04000000</td>
+<td align="left">The section cannot be cached.</td>
+</tr>
+<tr>
+<td align="left"><strong>IMAGE_SCN_MEM_NOT_PAGED</strong>0x08000000</td>
+<td align="left">The section cannot be paged.</td>
+</tr>
+<tr>
+<td align="left"><strong>IMAGE_SCN_MEM_SHARED</strong>0x10000000</td>
+<td align="left">The section can be shared in memory.</td>
+</tr>
+<tr>
+<td align="left"><strong>IMAGE_SCN_MEM_EXECUTE</strong>0x20000000</td>
+<td align="left">The section can be executed as code.</td>
+</tr>
+<tr>
+<td align="left"><strong>IMAGE_SCN_MEM_READ</strong>0x40000000</td>
+<td align="left">The section can be read.</td>
+</tr>
+<tr>
+<td align="left"><strong>IMAGE_SCN_MEM_WRITE</strong>0x80000000</td>
+<td align="left">The section can be written to.</td>
+</tr>
+</tbody></table>
+<p>比如notepad.exe中的text节</p>
+<p><img src="https://raw.githubusercontent.com/DeutschBall/test/master/image-20220714232136762.png" alt="image-20220714232136762"></p>
+<p>其中开启了三个标志</p>
+<p>节包含代码,节可执行,节可读</p>
+<p>其他的都不可,比如节不可写</p>
+<h2 id="RVA-to-RAW"><a href="#RVA-to-RAW" class="headerlink" title="RVA to RAW"></a>RVA to RAW</h2><p>这一部分010editor已经帮我们算好了</p>
+<p>可执行文件要运行时,首先要装载进入虚拟内存.</p>
+<p>这个映射过程不是简单的找一个<code>ImageBase</code>然后照搬磁盘中的文件到虚拟内存就完了</p>
+<p>诚如是则文件中和内存中该文件应该一样大.</p>
+<p>而实际上节区有各种对齐要求,因此虚拟内存中的文件映像往往更大</p>
+<p><img src="https://raw.githubusercontent.com/DeutschBall/test/master/image-20220710144537819.png" alt="image-20220710144537819"></p>
+<p>从<code>notepad.exe</code>的例子上可以看出,PE头部分确实是找一个<code>ImageBase</code>然后原封不动照搬的</p>
+<p><img src="https://raw.githubusercontent.com/DeutschBall/test/master/image-20220710145018095.png" alt="image-20220710145018095"></p>
+<p>文件在磁盘中存放时,基地址是0,搬到内存中假设映像基地址是<code>ImageBase=0x1000000</code></p>
+<p>可想而知,NT头如果在文件中的偏移量是<code>0xE0</code>则映射到进程地址空间中的虚拟地址就是<code>ImageBase+0xE0=0x10000E0</code></p>
+<p>可是后来的节区就得根据对齐要求来了</p>
+<p><img src="https://raw.githubusercontent.com/DeutschBall/test/master/image-20220710145058360.png" alt="image-20220710145058360"></p>
+<p>这个转化关系是什么呢?</p>
+<p>权位指南上给出的算法是</p>
+<p><img src="https://raw.githubusercontent.com/DeutschBall/test/master/image-20220710155642134.png" alt="image-20220710155642134"></p>
+<p>我看了好半天没看明白,</p>
+<p>原因一是VirtualAddress和书上先前给出的符号意义不同造成了混淆,</p>
+<p>二是对符号的定义没有完全理解,</p>
+<p>下面复习一下这几个符号的意义并推导这个计算公式</p>
+<p>要利用到<code>_IMAGE_SECTION_HEADER</code>头中的<code>PointerToRawData,VirtualAddress,SizeOfRawData</code>这几个值</p>
+<p>复习一下这几个值的含义</p>
+<p><code>PointerToRawData</code>:磁盘文件中节区的起始位置,由于文件的起始地址为0,那么PointerToRawData也就是节区基地址相对于0的偏移量,也就是RAW</p>
+<p><code>VirtualAddress</code>(不要被名字迷惑):RVA,即虚拟地址空间中相对于映像基址ImageBase的偏移量</p>
+<blockquote>
+<p>这里一定要区分清楚VirualAddress和VA</p>
+<p>VirtualAddress是定义在节头中的成员,实际上表示的是RVA,因为进程不到装载是不知掉其ImageBase在哪里的</p>
+<p>VA&#x3D;RVA+ImageBase&#x3D;VirtualAddress+ImageBase</p>
+</blockquote>
+<p><code>SizeOfRawData</code>:本节区的大小</p>
+<p>不管是躺在文件中还是站在内存里,<code>SizeOfRawData</code>大小永远不变,即一个节中间不会随便插入空隙</p>
+<p>比如对于data节,</p>
+<p><code>PointerToRawData=0x7C00</code></p>
+<p><code>ImageBase=0x1000000</code></p>
+<p><code>VA=0x1009000=ImageBase+RVA</code>得到<code>VirtualAddress=RVA=0x9000</code></p>
+<p>那么对于任意一个节区在虚拟内存中的起始地址,减去其节头中的成员<code>VirtualAddress</code>就得到<code>ImageBase</code>,</p>
+<p><strong>假设</strong></p>
+<p><code>VA(x),RVA(x)</code>分别表示符号x在虚拟地址空间中的实际地址和相对于<code>ImageBase</code>的偏移量</p>
+<p><code>RAW(x)</code>表示符号x在文件中的偏移量</p>
+<p>假设<code>section</code>表示任意节</p>
+<p><code>section.VirtualAddress</code>表示该节节头中的<code>VirtualAddress</code>成员</p>
+<p><code>section.PointerToRawData</code>表示该节节头中的<code>PointerToRawData</code>成员</p>
+<p>显然对于节区有</p>
+<p><code>RVA(section)=section.VirtualAddress</code></p>
+<p><code>RAW(section)=section.PointerToRawData</code></p>
+<p>现在考虑对于任意符号<code>x</code>,给定其虚拟地址空间中的实际地址<code>VA(x)</code>,其RVA和<code>RAW</code>怎样计算呢?</p>
+<p><code>ImageBase</code>装载后就知道了,因此可以轻松得到<code>RVA(x)=VA(x)-ImageBase</code></p>
+<p>由于每个节的<code>RVA(section)=section.VirtualAddress</code>也是已知的,该节的大小<code>section.SizeOfRawData</code>也是已知的,那么可以得到</p>
+<p>第i个节(假设节按照地址递增编号0到n)<code>section[i]</code>管理的相对虚拟地址范围是</p>
+<p><code>[section.VirtualAddress, section.VirtualAddress+section[i].SizeOfRawData)</code></p>
+<p>如果<code>RVA(x)</code>,说明x根本没有落在节区,甚至还没有出PE头,</p>
+<p>而前面分析过了,PE头装载进入虚拟内存就是加了一个<code>ImageBase</code>,因此此时<code>RAW(x)=RVA(x)</code></p>
+<p>否则,x落在了节区,需要先判断x落在了哪个节,咋判断呢?</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">for i in [0,n]</span><br><span class="line">	if(RVA(x)&gt;=section[i].VirtualAddress &amp;&amp; RVA(x)&lt; section[i].ViritualAddress+section[i].SizeOfRawData)</span><br><span class="line">		then x is located in section[i]</span><br></pre></td></tr></table></figure>
+
+<blockquote>
+<p>这就好比一层楼高3米,我闭着眼爬楼爬了8米,问我现在的位置?</p>
+<p>一楼[0,3),二楼[3,6),三楼[6,9)</p>
+<p>8在[6,9)这个范围内,因此我在3楼</p>
+</blockquote>
+<p>假设根据刚才的算法,已经知道了x落在<code>section[i]</code>,</p>
+<p>那么<strong>x相对于该节起始位置的偏移量</strong>就是<code>RVA(x)-section[i].VirtualAddress</code></p>
+<p>显然在文件中,x相对于其所在节的偏移量也是这个数,这就好比058班的sjf考数据结构时班内考号是4,换个教室考C++时班内考号还是4</p>
+<p>因此得到</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">RAW(x)-section[i].PointerToRawData=RVA(x)-section[i].VirtualAddress</span><br></pre></td></tr></table></figure>
+
+<p>移项有</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">RAW(x)=RVA(x)-section[i].VirtualAddress+section[i].PointerToRawData</span><br></pre></td></tr></table></figure>
+
+<blockquote>
+<p>这就和权威指南给出的公式很像了</p>
+<p><img src="https://raw.githubusercontent.com/DeutschBall/test/master/image-20220710160314871.png" alt="image-20220710160314871"></p>
+</blockquote>
+<p><strong>上述过程可以总结为:</strong></p>
+<p>1.查x落在哪个节区</p>
+<p>2.查x相对于该节区的偏移量</p>
+<p>3.节区相对于文件基地址的偏移量+x相对于该节区的偏移量&#x3D;x相对于文件基地址的偏移量</p>
+
+    </div>
+
+    
+    
+    
+
+      <footer class="post-footer">
+          <div class="post-tags">
+              <a href="/tags/%E7%A8%8B%E5%BA%8F%E5%91%98%E7%9A%84%E8%87%AA%E6%88%91%E4%BF%AE%E5%85%BB/" rel="tag"># 程序员的自我修养</a>
+          </div>
+
+        
+
+
+        
+    <div class="post-nav">
+      <div class="post-nav-item">
+    <a href="/2022/07/07/%E8%B0%83%E8%AF%95/" rel="prev" title="binarybook-chapter1-调试">
+      <i class="fa fa-chevron-left"></i> binarybook-chapter1-调试
+    </a></div>
+      <div class="post-nav-item">
+    <a href="/2022/07/15/win32%E7%BC%96%E7%A8%8B/" rel="next" title="win32程序设计-chapter3 窗口与消息">
+      win32程序设计-chapter3 窗口与消息 <i class="fa fa-chevron-right"></i>
+    </a></div>
+    </div>
+      </footer>
+    
+  </article>
+  
+  
+  
+
+
+
+          </div>
+          
+
+<script>
+  window.addEventListener('tabs:register', () => {
+    let { activeClass } = CONFIG.comments;
+    if (CONFIG.comments.storage) {
+      activeClass = localStorage.getItem('comments_active') || activeClass;
+    }
+    if (activeClass) {
+      let activeTab = document.querySelector(`a[href="#comment-${activeClass}"]`);
+      if (activeTab) {
+        activeTab.click();
+      }
+    }
+  });
+  if (CONFIG.comments.storage) {
+    window.addEventListener('tabs:click', event => {
+      if (!event.target.matches('.tabs-comment .tab-content .tab-pane')) return;
+      let commentClass = event.target.classList[1];
+      localStorage.setItem('comments_active', commentClass);
+    });
+  }
+</script>
+
+        </div>
+          
+  
+  <div class="toggle sidebar-toggle">
+    <span class="toggle-line toggle-line-first"></span>
+    <span class="toggle-line toggle-line-middle"></span>
+    <span class="toggle-line toggle-line-last"></span>
+  </div>
+
+  <aside class="sidebar">
+    <div class="sidebar-inner">
+
+      <ul class="sidebar-nav motion-element">
+        <li class="sidebar-nav-toc">
+          Table of Contents
+        </li>
+        <li class="sidebar-nav-overview">
+          Overview
+        </li>
+      </ul>
+
+      <!--noindex-->
+      <div class="post-toc-wrap sidebar-panel">
+          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#Portable-Executable"><span class="nav-number">1.</span> <span class="nav-text">Portable Executable</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%89%8D%E7%BD%AE%E7%9F%A5%E8%AF%86"><span class="nav-number">1.1.</span> <span class="nav-text">前置知识</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#notepad-exe-on-winXP"><span class="nav-number">1.1.1.</span> <span class="nav-text">notepad.exe on winXP</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#PE%E6%96%87%E4%BB%B6"><span class="nav-number">1.1.2.</span> <span class="nav-text">PE文件</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E8%99%9A%E6%8B%9F%E5%9C%B0%E5%9D%80-%E7%9B%B8%E5%AF%B9%E8%99%9A%E6%8B%9F%E5%9C%B0%E5%9D%80-%E6%98%A0%E5%83%8F%E5%9F%BA%E5%9D%80-%E6%96%87%E4%BB%B6%E5%81%8F%E7%A7%BB"><span class="nav-number">1.1.3.</span> <span class="nav-text">虚拟地址,相对虚拟地址,映像基址,文件偏移</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#PE%E5%A4%B4"><span class="nav-number">1.2.</span> <span class="nav-text">PE头</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#DOS%E5%A4%B4"><span class="nav-number">1.2.1.</span> <span class="nav-text">DOS头</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#DOS%E6%A1%A9"><span class="nav-number">1.2.2.</span> <span class="nav-text">DOS桩</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#NT%E5%A4%B4"><span class="nav-number">1.2.3.</span> <span class="nav-text">NT头</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#Nt%E6%96%87%E4%BB%B6%E5%A4%B4"><span class="nav-number">1.2.3.1.</span> <span class="nav-text">Nt文件头</span></a><ol class="nav-child"><li class="nav-item nav-level-5"><a class="nav-link" href="#Machine"><span class="nav-number">1.2.3.1.1.</span> <span class="nav-text">Machine</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#NumberOfSections"><span class="nav-number">1.2.3.1.2.</span> <span class="nav-text">NumberOfSections</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#TimeDateStamp"><span class="nav-number">1.2.3.1.3.</span> <span class="nav-text">TimeDateStamp</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#PointerToSymbolTable"><span class="nav-number">1.2.3.1.4.</span> <span class="nav-text">PointerToSymbolTable</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#NumberOfSymbols"><span class="nav-number">1.2.3.1.5.</span> <span class="nav-text">NumberOfSymbols</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#SizeOfOptionalHeader"><span class="nav-number">1.2.3.1.6.</span> <span class="nav-text">SizeOfOptionalHeader</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#Characteristics"><span class="nav-number">1.2.3.1.7.</span> <span class="nav-text">Characteristics</span></a></li></ol></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E5%8F%AF%E9%80%89%E5%A4%B4"><span class="nav-number">1.2.3.2.</span> <span class="nav-text">可选头</span></a><ol class="nav-child"><li class="nav-item nav-level-5"><a class="nav-link" href="#Magic"><span class="nav-number">1.2.3.2.1.</span> <span class="nav-text">Magic</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#Major-MinorLinkerVersion"><span class="nav-number">1.2.3.2.2.</span> <span class="nav-text">Major&#x2F;MinorLinkerVersion</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#SizeOfCode"><span class="nav-number">1.2.3.2.3.</span> <span class="nav-text">SizeOfCode</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#SizeOfInitializedData"><span class="nav-number">1.2.3.2.4.</span> <span class="nav-text">SizeOfInitializedData</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#SizeOfUninitializedData"><span class="nav-number">1.2.3.2.5.</span> <span class="nav-text">SizeOfUninitializedData</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#AddressOfEntryPoint"><span class="nav-number">1.2.3.2.6.</span> <span class="nav-text">AddressOfEntryPoint</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#BaseOfCode"><span class="nav-number">1.2.3.2.7.</span> <span class="nav-text">BaseOfCode</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#BaseOfData"><span class="nav-number">1.2.3.2.8.</span> <span class="nav-text">BaseOfData</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#ImageBase"><span class="nav-number">1.2.3.2.9.</span> <span class="nav-text">ImageBase</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#SectionAlignment"><span class="nav-number">1.2.3.2.10.</span> <span class="nav-text">SectionAlignment</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#FileAlignment"><span class="nav-number">1.2.3.2.11.</span> <span class="nav-text">FileAlignment</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#Major-MinorOperatingSystemVersion"><span class="nav-number">1.2.3.2.12.</span> <span class="nav-text">Major&#x2F;MinorOperatingSystemVersion</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#Major-MinorImageVersion"><span class="nav-number">1.2.3.2.13.</span> <span class="nav-text">Major&#x2F;MinorImageVersion</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#Major-MinorSubsystemVersion"><span class="nav-number">1.2.3.2.14.</span> <span class="nav-text">Major&#x2F;MinorSubsystemVersion</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#Win32VersionValue"><span class="nav-number">1.2.3.2.15.</span> <span class="nav-text">Win32VersionValue</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#SizeOfImage"><span class="nav-number">1.2.3.2.16.</span> <span class="nav-text">SizeOfImage</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#SizeOfHeaders"><span class="nav-number">1.2.3.2.17.</span> <span class="nav-text">SizeOfHeaders</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#CheckSum"><span class="nav-number">1.2.3.2.18.</span> <span class="nav-text">CheckSum</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#SubSystem"><span class="nav-number">1.2.3.2.19.</span> <span class="nav-text">SubSystem</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#DllCharacteristics"><span class="nav-number">1.2.3.2.20.</span> <span class="nav-text">DllCharacteristics</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#SizeOfStackReserve"><span class="nav-number">1.2.3.2.21.</span> <span class="nav-text">SizeOfStackReserve</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#SizeOfStackCommit"><span class="nav-number">1.2.3.2.22.</span> <span class="nav-text">SizeOfStackCommit</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#SizeOfHeapReserve"><span class="nav-number">1.2.3.2.23.</span> <span class="nav-text">SizeOfHeapReserve</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#SizeOfHeapCommit"><span class="nav-number">1.2.3.2.24.</span> <span class="nav-text">SizeOfHeapCommit</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#LoaderFlags"><span class="nav-number">1.2.3.2.25.</span> <span class="nav-text">LoaderFlags</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#NumberOfRvaAndSizes"><span class="nav-number">1.2.3.2.26.</span> <span class="nav-text">NumberOfRvaAndSizes</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#DataDirectory-IMAGE-NUMBEROF-DIRECTORY-ENTRIES"><span class="nav-number">1.2.3.2.27.</span> <span class="nav-text">DataDirectory[IMAGE_NUMBEROF_DIRECTORY_ENTRIES]</span></a><ol class="nav-child"><li class="nav-item nav-level-6"><a class="nav-link" href="#DataDirectory-1-Import"><span class="nav-number">1.2.3.2.27.1.</span> <span class="nav-text">DataDirectory[1]&#x3D;Import</span></a></li><li class="nav-item nav-level-6"><a class="nav-link" href="#DataDirectory-1-VirtualAddress-ImportDescriptor"><span class="nav-number">1.2.3.2.27.2.</span> <span class="nav-text">DataDirectory[1].VirtualAddress-&gt;&amp;ImportDescriptor[]</span></a></li><li class="nav-item nav-level-6"><a class="nav-link" href="#DataDirectory-0-Export"><span class="nav-number">1.2.3.2.27.3.</span> <span class="nav-text">DataDirectory[0]&#x3D;Export</span></a></li></ol></li></ol></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E8%8A%82%E5%8C%BA%E5%A4%B4%E8%A1%A8"><span class="nav-number">1.2.4.</span> <span class="nav-text">节区头表</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#Name-IMAGE-SIZEOF-SHORT-NAME"><span class="nav-number">1.2.4.1.</span> <span class="nav-text">Name[IMAGE_SIZEOF_SHORT_NAME]</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#PhysicalAddress-VirtualSize"><span class="nav-number">1.2.4.2.</span> <span class="nav-text">PhysicalAddress&amp;VirtualSize</span></a><ol class="nav-child"><li class="nav-item nav-level-5"><a class="nav-link" href="#VirtualAddress"><span class="nav-number">1.2.4.2.1.</span> <span class="nav-text">VirtualAddress</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#SizeOfRawData"><span class="nav-number">1.2.4.2.2.</span> <span class="nav-text">SizeOfRawData</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#PointerToRawData"><span class="nav-number">1.2.4.2.3.</span> <span class="nav-text">PointerToRawData</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#PointerToRelocations"><span class="nav-number">1.2.4.2.4.</span> <span class="nav-text">PointerToRelocations</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#PointerToLinenumbers"><span class="nav-number">1.2.4.2.5.</span> <span class="nav-text">PointerToLinenumbers</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#NumberOfRelocations"><span class="nav-number">1.2.4.2.6.</span> <span class="nav-text">NumberOfRelocations</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#Characteristics-1"><span class="nav-number">1.2.4.2.7.</span> <span class="nav-text">Characteristics</span></a></li></ol></li></ol></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#RVA-to-RAW"><span class="nav-number">1.3.</span> <span class="nav-text">RVA to RAW</span></a></li></ol></li></ol></div>
+      </div>
+      <!--/noindex-->
+
+      <div class="site-overview-wrap sidebar-panel">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+  <p class="site-author-name" itemprop="name">John Doe</p>
+  <div class="site-description" itemprop="description"></div>
+</div>
+<div class="site-state-wrap motion-element">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+          <a href="/archives/">
+        
+          <span class="site-state-item-count">78</span>
+          <span class="site-state-item-name">posts</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-tags">
+        <span class="site-state-item-count">30</span>
+        <span class="site-state-item-name">tags</span>
+      </div>
+  </nav>
+</div>
+
+
+
+      </div>
+
+    </div>
+  </aside>
+  <div id="sidebar-dimmer"></div>
+
+
+      </div>
+    </main>
+
+    <footer class="footer">
+      <div class="footer-inner">
+        
+
+        
+
+<div class="copyright">
+  
+  &copy; 
+  <span itemprop="copyrightYear">2024</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">John Doe</span>
+</div>
+  <div class="powered-by">Powered by <a href="https://hexo.io/" class="theme-link" rel="noopener" target="_blank">Hexo</a> & <a href="https://muse.theme-next.org/" class="theme-link" rel="noopener" target="_blank">NexT.Muse</a>
+  </div>
+
+        
+
+
+
+
+
+
+
+
+      </div>
+    </footer>
+  </div>
+
+  
+  <script src="/lib/anime.min.js"></script>
+  <script src="/lib/velocity/velocity.min.js"></script>
+  <script src="/lib/velocity/velocity.ui.min.js"></script>
+
+<script src="/js/utils.js"></script>
+
+<script src="/js/motion.js"></script>
+
+
+<script src="/js/schemes/muse.js"></script>
+
+
+<script src="/js/next-boot.js"></script>
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+  
+
+</body>
+</html>

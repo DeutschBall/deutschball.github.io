@@ -1,0 +1,724 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 7.3.0">
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png">
+  <link rel="mask-icon" href="/images/logo.svg" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+<link rel="stylesheet" href="/lib/font-awesome/css/all.min.css">
+
+<script id="hexo-configurations">
+    var NexT = window.NexT || {};
+    var CONFIG = {"hostname":"example.com","root":"/","scheme":"Muse","version":"7.8.0","exturl":false,"sidebar":{"position":"left","display":"post","padding":18,"offset":12,"onmobile":false},"copycode":{"enable":false,"show_result":false,"style":null},"back2top":{"enable":true,"sidebar":false,"scrollpercent":false},"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":false,"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"algolia":{"hits":{"per_page":10},"labels":{"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}},"localsearch":{"enable":false,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false},"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}}};
+  </script>
+
+  <meta name="description" content="调用约定为啥CSAPP第三章x86-64汇编学完了,但是看IDA的反汇编仍然是一头雾水?还得看一大堆东西,其中就有调用约定 为什么windows上和linux上,x86和x64上编译出来的代码有很多不同,为什么和CSAPP说的相差甚远?调用约定不同是一大原因 首先要说明的几点,也是实验中和查阅资料逐渐获得的几点 1.&#x3D;&#x3D;各种调用约定是相对于x86而言的&#x3D;&#x3D;,">
+<meta property="og:type" content="article">
+<meta property="og:title" content="调用约定">
+<meta property="og:url" content="http://example.com/2022/04/28/%E8%B0%83%E7%94%A8%E7%BA%A6%E5%AE%9A/index.html">
+<meta property="og:site_name" content="Hexo">
+<meta property="og:description" content="调用约定为啥CSAPP第三章x86-64汇编学完了,但是看IDA的反汇编仍然是一头雾水?还得看一大堆东西,其中就有调用约定 为什么windows上和linux上,x86和x64上编译出来的代码有很多不同,为什么和CSAPP说的相差甚远?调用约定不同是一大原因 首先要说明的几点,也是实验中和查阅资料逐渐获得的几点 1.&#x3D;&#x3D;各种调用约定是相对于x86而言的&#x3D;&#x3D;,">
+<meta property="og:locale" content="en_US">
+<meta property="og:image" content="https://raw.githubusercontent.com/DeutschBall/test/master/image-20220427184436835.png">
+<meta property="og:image" content="https://raw.githubusercontent.com/DeutschBall/test/master/image-20220427184750211.png">
+<meta property="og:image" content="https://raw.githubusercontent.com/DeutschBall/test/master/image-20220428152115878.png">
+<meta property="og:image" content="https://raw.githubusercontent.com/DeutschBall/test/master/image-20220427195841367.png">
+<meta property="og:image" content="https://raw.githubusercontent.com/DeutschBall/test/master/image-20220427224030429.png">
+<meta property="og:image" content="https://raw.githubusercontent.com/DeutschBall/test/master/image-20220428092006441.png">
+<meta property="og:image" content="https://raw.githubusercontent.com/DeutschBall/test/master/image-20220428092612932.png">
+<meta property="og:image" content="https://raw.githubusercontent.com/DeutschBall/test/master/image-20220428154840944.png">
+<meta property="og:image" content="https://raw.githubusercontent.com/DeutschBall/test/master/image-20220428155346372.png">
+<meta property="og:image" content="http://example.com/AppData/Roaming/Typora/typora-user-images/image-20220428161940071.png">
+<meta property="og:image" content="http://example.com/AppData/Roaming/Typora/typora-user-images/image-20220428101247431.png">
+<meta property="og:image" content="https://raw.githubusercontent.com/DeutschBall/test/master/image-20220428152348161.png">
+<meta property="og:image" content="https://raw.githubusercontent.com/DeutschBall/test/master/image-20220428152425649.png">
+<meta property="og:image" content="https://raw.githubusercontent.com/DeutschBall/test/master/image-20220427223059552.png">
+<meta property="article:published_time" content="2022-04-28T08:27:00.000Z">
+<meta property="article:modified_time" content="2022-09-17T15:54:52.502Z">
+<meta property="article:author" content="John Doe">
+<meta property="article:tag" content="reverse">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://raw.githubusercontent.com/DeutschBall/test/master/image-20220427184436835.png">
+
+<link rel="canonical" href="http://example.com/2022/04/28/%E8%B0%83%E7%94%A8%E7%BA%A6%E5%AE%9A/">
+
+
+<script id="page-configurations">
+  // https://hexo.io/docs/variables.html
+  CONFIG.page = {
+    sidebar: "",
+    isHome : false,
+    isPost : true,
+    lang   : 'en'
+  };
+</script>
+
+  <title>调用约定 | Hexo</title>
+  
+
+
+
+
+
+
+  <noscript>
+  <style>
+  .use-motion .brand,
+  .use-motion .menu-item,
+  .sidebar-inner,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-header { opacity: initial; }
+
+  .use-motion .site-title,
+  .use-motion .site-subtitle {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line-before i { left: initial; }
+  .use-motion .logo-line-after i { right: initial; }
+  </style>
+</noscript>
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage">
+  <div class="container use-motion">
+    <div class="headband"></div>
+
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="Toggle navigation bar">
+      <span class="toggle-line toggle-line-first"></span>
+      <span class="toggle-line toggle-line-middle"></span>
+      <span class="toggle-line toggle-line-last"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <span class="logo-line-before"><i></i></span>
+      <h1 class="site-title">Hexo</h1>
+      <span class="logo-line-after"><i></i></span>
+    </a>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger">
+    </div>
+  </div>
+</div>
+
+
+
+
+<nav class="site-nav">
+  <ul id="menu" class="main-menu menu">
+        <li class="menu-item menu-item-home">
+
+    <a href="/" rel="section"><i class="fa fa-home fa-fw"></i>Home</a>
+
+  </li>
+        <li class="menu-item menu-item-archives">
+
+    <a href="/archives/" rel="section"><i class="fa fa-archive fa-fw"></i>Archives</a>
+
+  </li>
+  </ul>
+</nav>
+
+
+
+
+</div>
+    </header>
+
+    
+  <div class="back-to-top">
+    <i class="fa fa-arrow-up"></i>
+    <span>0%</span>
+  </div>
+
+
+    <main class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+
+          <div class="content post posts-expand">
+            
+
+    
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="en">
+    <link itemprop="mainEntityOfPage" href="http://example.com/2022/04/28/%E8%B0%83%E7%94%A8%E7%BA%A6%E5%AE%9A/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.gif">
+      <meta itemprop="name" content="John Doe">
+      <meta itemprop="description" content="">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Hexo">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          调用约定
+        </h1>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-calendar"></i>
+              </span>
+              <span class="post-meta-item-text">Posted on</span>
+
+              <time title="Created: 2022-04-28 16:27:00" itemprop="dateCreated datePublished" datetime="2022-04-28T16:27:00+08:00">2022-04-28</time>
+            </span>
+              <span class="post-meta-item">
+                <span class="post-meta-item-icon">
+                  <i class="far fa-calendar-check"></i>
+                </span>
+                <span class="post-meta-item-text">Edited on</span>
+                <time title="Modified: 2022-09-17 23:54:52" itemprop="dateModified" datetime="2022-09-17T23:54:52+08:00">2022-09-17</time>
+              </span>
+
+          
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+        <h1 id="调用约定"><a href="#调用约定" class="headerlink" title="调用约定"></a>调用约定</h1><p>为啥CSAPP第三章x86-64汇编学完了,但是看IDA的反汇编仍然是一头雾水?还得看一大堆东西,其中就有调用约定</p>
+<p>为什么windows上和linux上,x86和x64上编译出来的代码有很多不同,为什么和CSAPP说的相差甚远?调用约定不同是一大原因</p>
+<p>首先要说明的几点,也是实验中和查阅资料逐渐获得的几点</p>
+<p>1.&#x3D;&#x3D;各种调用约定是相对于x86而言的&#x3D;&#x3D;,对x64无意义</p>
+<blockquote>
+<p>The keywords <code>_stdcall</code> and <code>_cdecl</code> specify 32-bit calling conventions. That’s why they are not relevant for 64-bit programs (i.e. x64). On x64, there is only the <a target="_blank" rel="noopener" href="https://en.wikipedia.org/wiki/X86_calling_conventions#Microsoft_x64_calling_convention">standard calling convention</a> and the extended <a target="_blank" rel="noopener" href="https://en.wikipedia.org/wiki/X86_calling_conventions#Microsoft_vectorcall"><code>__vectorcall</code></a> calling convenction.</p>
+<p>来自stackoverflow</p>
+</blockquote>
+<p>关键词<code>_stdcall</code>和<code>_cdecl</code>特指32位的调用约定.64位上不一样,64位上只有标准调用约定,还有其拓展<code>__vectorcall</code></p>
+<p>即使在64位的函数前面用<code>__cdecl</code>或者<code>__stdcall</code>修饰,编译结果也是一样的</p>
+<p>2.x86和x64汇编有较大出入,windows上和linux上的同一约定也有些许区别</p>
+<h2 id="x86上的调用约定"><a href="#x86上的调用约定" class="headerlink" title="x86上的调用约定"></a>x86上的调用约定</h2><p>微软给出的&#x3D;&#x3D;x86系统&#x3D;&#x3D;上的调用约定:</p>
+<p><img src="https://raw.githubusercontent.com/DeutschBall/test/master/image-20220427184436835.png" alt="image-20220427184436835"></p>
+<p>一定注意是x86系统上的,而我们现在的笔记本大多数都是x64系统了,会有一些出入</p>
+<h3 id="c调用约定-cdecl"><a href="#c调用约定-cdecl" class="headerlink" title="c调用约定__cdecl"></a>c调用约定<code>__cdecl</code></h3><p>C Declaration</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">&lt;return_type&gt; __cdecl &lt;func_name&gt;(para1,para2,...,paran);</span><br></pre></td></tr></table></figure>
+
+<p>对于x86系统,微软官方文档是这样写的:</p>
+<p><img src="https://raw.githubusercontent.com/DeutschBall/test/master/image-20220427184750211.png" alt="x86"></p>
+<p>维基百科这样写的:</p>
+<p><img src="https://raw.githubusercontent.com/DeutschBall/test/master/image-20220428152115878.png" alt="image-20220428152115878"></p>
+<p>在gcc编译的时候加入-m32选项即可使用32位编译,编译成x86系统的程序</p>
+<p><code>test.c</code></p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line"><span class="type">int</span> _cdecl <span class="title function_">func</span><span class="params">(<span class="type">int</span> a,<span class="type">int</span> b,<span class="type">int</span> c,<span class="type">int</span> d,<span class="type">int</span> e,<span class="type">int</span> f,<span class="type">int</span> g,<span class="type">int</span> h)</span>&#123;</span><br><span class="line">    <span class="keyword">return</span> a+b+c+d+e+f+g+h;</span><br><span class="line">&#125;</span><br><span class="line"><span class="type">int</span> _cdecl <span class="title function_">show</span><span class="params">()</span>&#123;</span><br><span class="line">    <span class="keyword">return</span> func(<span class="number">1</span>,<span class="number">2</span>,<span class="number">3</span>,<span class="number">4</span>,<span class="number">5</span>,<span class="number">6</span>,<span class="number">7</span>,<span class="number">8</span>);</span><br><span class="line">&#125;</span><br><span class="line"><span class="type">int</span> _cdecl <span class="title function_">main</span><span class="params">()</span>&#123;</span><br><span class="line">    show();</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">gcc -O0 test.c -c -m32 -o test.o|objdump -d test.o &gt; test.s|code test.s</span><br></pre></td></tr></table></figure>
+
+<p>使用-m32编译之后然后反汇编</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br></pre></td><td class="code"><pre><span class="line">test.o:     file format pe-i386</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">Disassembly of section .text:</span><br><span class="line"></span><br><span class="line">00000000 &lt;_func&gt;:</span><br><span class="line">   0:	55                   	push   %ebp</span><br><span class="line">   1:	89 e5                	mov    %esp,%ebp			;蜜汁操作,有esp为啥还要获取一个ebp作为拷贝?</span><br><span class="line">   3:	8b 55 08             	mov    0x8(%ebp),%edx</span><br><span class="line">   6:	8b 45 0c             	mov    0xc(%ebp),%eax</span><br><span class="line">   9:	01 c2                	add    %eax,%edx</span><br><span class="line">   b:	8b 45 10             	mov    0x10(%ebp),%eax</span><br><span class="line">   e:	01 c2                	add    %eax,%edx</span><br><span class="line">  10:	8b 45 14             	mov    0x14(%ebp),%eax</span><br><span class="line">  13:	01 c2                	add    %eax,%edx</span><br><span class="line">  15:	8b 45 18             	mov    0x18(%ebp),%eax</span><br><span class="line">  18:	01 c2                	add    %eax,%edx</span><br><span class="line">  1a:	8b 45 1c             	mov    0x1c(%ebp),%eax</span><br><span class="line">  1d:	01 c2                	add    %eax,%edx</span><br><span class="line">  1f:	8b 45 20             	mov    0x20(%ebp),%eax</span><br><span class="line">  22:	01 c2                	add    %eax,%edx</span><br><span class="line">  24:	8b 45 24             	mov    0x24(%ebp),%eax</span><br><span class="line">  27:	01 d0                	add    %edx,%eax</span><br><span class="line">  29:	5d                   	pop    %ebp</span><br><span class="line">  2a:	c3                   	ret    </span><br><span class="line"></span><br><span class="line">0000002b &lt;_show&gt;:</span><br><span class="line">  2b:	55                   	push   %ebp</span><br><span class="line">  2c:	89 e5                	mov    %esp,%ebp</span><br><span class="line">  2e:	83 ec 20             	sub    $0x20,%esp			;申请0x20=32字节空间,刚好8个int参数×一个int是4个字节,但是蜜汁操作,为啥不用push逐次压栈,而是一次性申请空间</span><br><span class="line">  31:	c7 44 24 1c 08 00 00 	movl   $0x8,0x1c(%esp)		</span><br><span class="line">  38:	00 </span><br><span class="line">  39:	c7 44 24 18 07 00 00 	movl   $0x7,0x18(%esp)		;每个参数占用栈上4个字节,8个参数紧挨着</span><br><span class="line">  40:	00 </span><br><span class="line">  41:	c7 44 24 14 06 00 00 	movl   $0x6,0x14(%esp)</span><br><span class="line">  48:	00 </span><br><span class="line">  49:	c7 44 24 10 05 00 00 	movl   $0x5,0x10(%esp)</span><br><span class="line">  50:	00 </span><br><span class="line">  51:	c7 44 24 0c 04 00 00 	movl   $0x4,0xc(%esp)</span><br><span class="line">  58:	00 </span><br><span class="line">  59:	c7 44 24 08 03 00 00 	movl   $0x3,0x8(%esp)</span><br><span class="line">  60:	00 </span><br><span class="line">  61:	c7 44 24 04 02 00 00 	movl   $0x2,0x4(%esp)</span><br><span class="line">  68:	00 </span><br><span class="line">  69:	c7 04 24 01 00 00 00 	movl   $0x1,(%esp)			;栈顶一定存放的是最左侧的参数</span><br><span class="line">  70:	e8 8b ff ff ff       	call   0 &lt;_func&gt;</span><br><span class="line">  75:	c9                   	leave  						;蜜汁指令,CSAPP上没有见过leave指令</span><br><span class="line">  76:	c3                   	ret    </span><br><span class="line"></span><br><span class="line">00000077 &lt;_main&gt;:</span><br><span class="line">  77:	55                   	push   %ebp</span><br><span class="line">  78:	89 e5                	mov    %esp,%ebp</span><br><span class="line">  7a:	83 e4 f0             	and    $0xfffffff0,%esp</span><br><span class="line">  7d:	e8 00 00 00 00       	call   82 &lt;_main+0xb&gt;</span><br><span class="line">  82:	e8 a4 ff ff ff       	call   2b &lt;_show&gt;</span><br><span class="line">  87:	b8 00 00 00 00       	mov    $0x0,%eax			;返回值放在eax,rax寄存器中</span><br><span class="line">  8c:	c9                   	leave  						</span><br><span class="line">  8d:	c3                   	ret    </span><br><span class="line">  8e:	90                   	nop</span><br><span class="line">  8f:	90                   	nop</span><br><span class="line"></span><br></pre></td></tr></table></figure>
+
+<p>32位系统必定不会用到r开头的4字64位寄存器比如<code>rax,rdx,rsp</code>等等,最大用到e开头的寄存器,比如<code>eax,esp</code></p>
+<p>可以发现show函数在调用func函数,传参的时候没有用到一个寄存器,全都是用的堆栈,还可以发现函数名都是由下划线前缀的<code>&lt;_main&gt;,&lt;_func&gt;,&lt;_show&gt;</code></p>
+<p>在为函数参数申请栈空间的时候是一次性完成的,即有8个参数则直接在栈上申请0x20&#x3D;32字节,然后分别用movl指令向栈上刚才申请的空间写入数据.</p>
+<blockquote>
+<p><strong>关于蜜汁操作参数的压栈方式,是一次性申请足够的空间然后mov还是逐次push?</strong></p>
+<p>stackoverflow上的说法:</p>
+<blockquote>
+<blockquote>
+<ol>
+<li>Why does x64 use <code>mov</code> rather than <code>push</code>? I assume it’s just more efficient and wasn’t available in x86.</li>
+</ol>
+</blockquote>
+<p>That is not the reason. Both of these instructions also exist in x86 assembly language.</p>
+<p>效率并且是否可实现不是原因.这两种指令(push和mov)在x86汇编语言中都存在</p>
+<p>The reason why your compiler is not emitting a <code>push</code> instruction for the x64 code is probably because it must adjust the stack pointer directly anyway, in order to create 32 bytes of “shadow space” for the called function. See <a target="_blank" rel="noopener" href="https://en.wikipedia.org/wiki/X86_calling_conventions#Microsoft_x64_calling_convention">this link</a> (which was provided by @NateEldredge) for further information on “shadow space”.</p>
+<p>编译器对x64不使用push指令的原因是:他需要直接调整栈顶指针,给前四个参数的压栈预留”影子空间”</p>
+<p>x86不需要寄存器传递参数但是x64需要寄存器并且在被调用函数的一开始会把寄存器中的参数也压栈,那么这些寄存器中的参数将会压入影子空间.具体见后文的实验</p>
+</blockquote>
+</blockquote>
+<blockquote>
+<p><strong>关于蜜汁操作ebp(rbp)寄存器的作用</strong>:</p>
+<p>行为:在每个函数开始时都会被压入栈中然后拷贝栈顶指针,在有些函数快要结束的时候又会从栈中获取先前压入栈中的值</p>
+<p>比如一个典型的结构:</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">2b:	55                   	push   %ebp</span><br><span class="line">2c:	89 e5                	mov    %esp,%ebp</span><br><span class="line">2e:	83 ec 20             	sub    $0x20,%esp</span><br></pre></td></tr></table></figure>
+
+<p>查阅<a target="_blank" rel="noopener" href="https://stackoverflow.com/questions/41912684/what-is-the-purpose-of-the-rbp-register-in-x86-64-assembler">stackoverflow</a></p>
+<p><img src="https://raw.githubusercontent.com/DeutschBall/test/master/image-20220427195841367.png" alt="image-20220427195841367"></p>
+<blockquote>
+<p><code>rbp</code> is the frame pointer on x86_64. In your generated code, it gets a snapshot of the stack pointer (<code>rsp</code>) so that when adjustments are made to <code>rsp</code> (i.e. reserving space for local variables or <code>push</code>ing values on to the stack), local variables and function parameters are still accessible from a constant offset from <code>rbp</code>.</p>
+<p>A lot of compilers offer frame pointer omission as an optimization option; this will make the generated assembly code access variables relative to <code>rsp</code> instead and free up <code>rbp</code> as another general purpose register for use in functions.</p>
+<p>In the case of GCC, which I’m guessing you’re using from the AT&amp;T assembler syntax, that switch is <code>-fomit-frame-pointer</code>. Try compiling your code with that switch and see what assembly code you get. You will probably notice that when accessing values relative to <code>rsp</code> instead of <code>rbp</code>, the offset from the pointer varies throughout the function.</p>
+</blockquote>
+<p>rbp是x86_64上的栈帧指针.在我们的代码中,rbp寄存器获取栈顶指针rsp的快照.</p>
+<p>当rsp改变时(比如为局部变量预留空间或者通过push指令压栈),我们仍然可以通过使用rbp+偏移量这种方式调用上一个函数(或者说调用者)的局部变量或者函数参数.</p>
+<p>很多编译器的优化,会不用上述方式(rbp+偏移量)调用上一个函数的局部变量或者函数参数,而是只用rsp+偏移量.然后省出rbp寄存器去干其他事.对于GCC编译器,使用<code>-fomit-frame-pointer</code>编译选项达到上述目的</p>
+<p>按照我的理解,rbp的作用就是调用者的rsp副本,然后rsp为被调用者服务,rbp为调用者服务.</p>
+<p>rbp只是在被调用者嗲用调用者的局部变量时,令寻址更方便,完全可以只用rsp达到目的</p>
+<blockquote>
+<p>后来的实践证明我一开始的理解是错误的</p>
+<p>rbp指向函数栈帧的高地址,即栈底,rsp指向函数栈帧的低地址,即栈顶</p>
+<p>二者都是为当前函数服务的</p>
+<p>函数的开端时会将上一个函数的rbp指针压栈保存,然后指向当前函数栈帧的栈底.函数尾声时会将上一个函数的rbp指针退栈还给rbp</p>
+</blockquote>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">gcc -O0 -fomit-frame-pointer test.c -c -m64 -o test.o|objdump -d test.o &gt; test.s|code test.s</span><br></pre></td></tr></table></figure>
+
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line">00000000000000d6 &lt;main&gt;:</span><br><span class="line">  d6:	48 83 ec 28          	sub    $0x28,%rsp</span><br><span class="line">  da:	e8 00 00 00 00       	callq  df &lt;main+0x9&gt;</span><br><span class="line">  df:	e8 ae ff ff ff       	callq  92 &lt;show&gt;</span><br><span class="line">  e4:	b8 00 00 00 00       	mov    $0x0,%eax</span><br><span class="line">  e9:	48 83 c4 28          	add    $0x28,%rsp</span><br><span class="line">  ed:	c3                   	retq   </span><br><span class="line">  ee:	90                   	nop</span><br><span class="line">  ef:	90                   	nop</span><br><span class="line"></span><br></pre></td></tr></table></figure>
+
+<p>使用<code>-fomit-frame-pointer</code>编译选项之后确实ebp不踪影了</p>
+<p>现在再看这个结构:</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">2b:	55                   	push   %ebp				;将上一个函数对上上个函数的ebp保存</span><br><span class="line">2c:	89 e5                	mov    %esp,%ebp		;ebp获取上一个函数esp的副本</span><br><span class="line">2e:	83 ec 20             	sub    $0x20,%esp		;esp为当前函数服务</span><br></pre></td></tr></table></figure>
+
+<p>最后将栈中刚才压入的ebp又还给ebp是还原上个函数对上上个函数的esp副本</p>
+</blockquote>
+<blockquote>
+<p><strong>关于蜜汁指令leave</strong>:</p>
+<p>百度百科给出的解释:</p>
+<p><img src="https://raw.githubusercontent.com/DeutschBall/test/master/image-20220427224030429.png" alt="image-20220427224030429"></p>
+<p>一定要注意,这里指令的源和目的操作数与我们通篇是相反的</p>
+<p>这里百科给出的解释使用的是intel风格的汇编语言,<code>mov 目的操作数,源操作数</code></p>
+<p>寄存器前面有百分号的是AT&amp;T风格的汇编语言,<code>movq 源操作数,目的操作数</code></p>
+<p>leave指令在AT&amp;T风格下相当于:</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">movl %ebp,%esp</span><br><span class="line">pop %ebp</span><br></pre></td></tr></table></figure>
+
+<p>而这刚好和每个函数一开始的</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">push   %ebp</span><br><span class="line">mov    %esp,%ebp</span><br></pre></td></tr></table></figure>
+
+<p>恰好相反</p>
+<p>因此leave指令就是还原栈的一个过程</p>
+</blockquote>
+<h3 id="标准调用约定-stdcall"><a href="#标准调用约定-stdcall" class="headerlink" title="标准调用约定__stdcall"></a>标准调用约定<code>__stdcall</code></h3><p>微软官方文档给出的解释:</p>
+<blockquote>
+<p>The <strong><code>__stdcall</code></strong> calling convention is used to call Win32 API functions. The callee cleans the stack, so the compiler makes <code>vararg</code> functions <strong><code>__cdecl</code></strong>. Functions that use this calling convention require a function prototype. The <strong><code>__stdcall</code></strong> modifier is Microsoft-specific.</p>
+</blockquote>
+<p><code>__stdcall</code>用于修饰&#x3D;&#x3D;Win32 API函数&#x3D;&#x3D;.被调用者负责情理自己的函数栈,(因此编译器会把变参函数修饰为<code>__cdecl</code>(调用者清理栈容易实现变参)).使用<code>__stdcall</code>的函数需要一个函数原型(即接口)</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">return-type __stdcall function-name[( argument-list )]</span><br></pre></td></tr></table></figure>
+
+<table>
+<thead>
+<tr>
+<th align="left">Element</th>
+<th align="left">Implementation</th>
+</tr>
+</thead>
+<tbody><tr>
+<td align="left">Argument-passing order<br />参数传递顺序</td>
+<td align="left">Right to left.<br />从右向左</td>
+</tr>
+<tr>
+<td align="left">Argument-passing convention<br />参数传递规则(值传递&#x2F;引用传递)</td>
+<td align="left">By value, unless a pointer or reference type is passed.<br />除非参数是指针或者引用类型,否则采用值传递</td>
+</tr>
+<tr>
+<td align="left">Stack-maintenance responsibility<br />栈维护</td>
+<td align="left">Called function pops its own arguments from the stack.<br />被调用者自己清理自己用到的栈</td>
+</tr>
+<tr>
+<td align="left">Name-decoration convention<br />命名修饰规则</td>
+<td align="left">An underscore (<code>_</code>) is prefixed to the name. The name is followed by the at sign (<code>@</code>) followed by the number of bytes (in decimal) in the argument list. Therefore, the function declared as <code>int func( int a, double b )</code> is decorated as follows: <code>_func@12</code><br />下划线开头,然后@,然后是十进制表示的参数表字节大小.<br />因此<code>int func(int a,double b)</code>将会被修饰为<code>_func@12</code>(int四个字节+double八个字节)</td>
+</tr>
+<tr>
+<td align="left">Case-translation convention<br />大小写转换规定</td>
+<td align="left">None<br />无</td>
+</tr>
+<tr>
+<td align="left">返回值位置</td>
+<td align="left">放在eax,rax寄存器中</td>
+</tr>
+</tbody></table>
+<blockquote>
+<p>用ida打开一个win32程序,其Winmain函数是这样分析的</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br></pre></td><td class="code"><pre><span class="line">.text:00401000 ; int __stdcall WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine, int nShowCmd)</span><br><span class="line">.text:00401000 __stdcall WinMain(x, x, x, x) proc near ; CODE XREF: start+C9↓p</span><br><span class="line">.text:00401000</span><br><span class="line">.text:00401000 hInstance       = dword ptr  4</span><br><span class="line">.text:00401000 hPrevInstance   = dword ptr  8</span><br><span class="line">.text:00401000 lpCmdLine       = dword ptr  0Ch</span><br><span class="line">.text:00401000 nShowCmd        = dword ptr  10h</span><br><span class="line">.text:00401000</span><br><span class="line">.text:00401000                 mov     eax, [esp+hInstance]</span><br><span class="line">.text:00401004                 push    0               ; dwInitParam</span><br><span class="line">.text:00401006                 push    offset DialogFunc ; lpDialogFunc</span><br><span class="line">.text:0040100B                 push    0               ; hWndParent</span><br><span class="line">.text:0040100D                 push    65h ; &#x27;e&#x27;       ; lpTemplateName</span><br><span class="line">.text:0040100F                 push    eax             ; hInstance</span><br><span class="line">.text:00401010                 mov     hInstance, eax</span><br><span class="line">.text:00401015                 call    ds:DialogBoxParamA</span><br><span class="line">.text:0040101B                 xor     eax, eax</span><br><span class="line">.text:0040101D                 retn    10h				;retn指令可以带参数</span><br><span class="line">.text:0040101D __stdcall WinMain(x, x, x, x) endp</span><br></pre></td></tr></table></figure>
+
+<p>可以明显观察到,参数只使用栈传递,从右向左压栈,Winmain函数的栈帧:</p>
+<p><img src="https://raw.githubusercontent.com/DeutschBall/test/master/image-20220428092006441.png" alt="image-20220428092006441"></p>
+<p>有一点与<code>__cdecl</code>不同的是<code>retn 10h</code>,并且貌似与官方文档不同的是,被调用者没有自己清理自己的堆栈,比如Winmain到结束了也没有看见退栈指令.</p>
+<p>实际上这就是<code>retn 10h</code>要做的事情</p>
+<p><code>10h=16字节</code>然而四个参数刚好每个4字节,即<code>retn XXh</code>就是被调用者的退栈指令,和返回指令合并成一条指令了</p>
+<p>如此减少了清理堆栈需要使用的指令</p>
+</blockquote>
+<p>还是<code>test.c</code></p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line"><span class="type">int</span> _stdcall <span class="title function_">func</span><span class="params">(<span class="type">short</span> a,<span class="type">short</span> b,<span class="type">short</span> c,<span class="type">short</span> d,<span class="type">short</span> e,<span class="type">short</span> f,<span class="type">short</span> g,<span class="type">short</span> h)</span>&#123;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">return</span> a+b+c+d+e+f+g+h;</span><br><span class="line"></span><br><span class="line">&#125;</span><br><span class="line"><span class="type">int</span> _stdcall <span class="title function_">show</span><span class="params">()</span>&#123;</span><br><span class="line">    <span class="keyword">return</span> func(<span class="number">1</span>,<span class="number">2</span>,<span class="number">3</span>,<span class="number">4</span>,<span class="number">5</span>,<span class="number">6</span>,<span class="number">7</span>,<span class="number">8</span>);</span><br><span class="line">&#125;</span><br><span class="line"><span class="type">int</span> _stdcall <span class="title function_">main</span><span class="params">()</span>&#123;</span><br><span class="line">    show();</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>使用<code>gcc,objdump,vscode</code>素质三连</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">PS C:\Users\86135\Desktop\reverse\test_call&gt; gcc test.c -O0 -m32 -c -o test.o</span><br><span class="line">PS C:\Users\86135\Desktop\reverse\test_call&gt; objdump test.o -d &gt;test.s</span><br><span class="line">PS C:\Users\86135\Desktop\reverse\test_call&gt; code test.s</span><br></pre></td></tr></table></figure>
+
+<p>反汇编如下:</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br><span class="line">75</span><br><span class="line">76</span><br><span class="line">77</span><br><span class="line">78</span><br><span class="line">79</span><br><span class="line">80</span><br><span class="line">81</span><br><span class="line">82</span><br><span class="line">83</span><br><span class="line">84</span><br><span class="line">85</span><br><span class="line">86</span><br><span class="line">87</span><br><span class="line">88</span><br><span class="line">89</span><br><span class="line">90</span><br><span class="line">91</span><br><span class="line">92</span><br><span class="line">93</span><br><span class="line">94</span><br><span class="line">95</span><br></pre></td><td class="code"><pre><span class="line"></span><br><span class="line">test.o:     file format pe-i386</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">Disassembly of section .text:</span><br><span class="line"></span><br><span class="line">00000000 &lt;_func@32&gt;:										;函数名&lt;_func@32&gt;下划线,@,参数表大小(单位:字节)</span><br><span class="line">   0:	55                   	push   %ebp</span><br><span class="line">   1:	89 e5                	mov    %esp,%ebp</span><br><span class="line">   3:	57                   	push   %edi					;寄存器临时压栈保存,为后来的运算做准备,最后还要弹栈复原</span><br><span class="line">   4:	56                   	push   %esi</span><br><span class="line">   5:	53                   	push   %ebx</span><br><span class="line">   6:	83 ec 28             	sub    $0x28,%esp</span><br><span class="line">   9:	8b 45 08             	mov    0x8(%ebp),%eax</span><br><span class="line">   c:	8b 4d 0c             	mov    0xc(%ebp),%ecx</span><br><span class="line">   f:	8b 5d 10             	mov    0x10(%ebp),%ebx</span><br><span class="line">  12:	89 5d d0             	mov    %ebx,-0x30(%ebp)</span><br><span class="line">  15:	8b 75 14             	mov    0x14(%ebp),%esi</span><br><span class="line">  18:	89 75 cc             	mov    %esi,-0x34(%ebp)</span><br><span class="line">  1b:	8b 7d 18             	mov    0x18(%ebp),%edi</span><br><span class="line">  1e:	8b 75 1c             	mov    0x1c(%ebp),%esi</span><br><span class="line">  21:	8b 5d 20             	mov    0x20(%ebp),%ebx</span><br><span class="line">  24:	8b 55 24             	mov    0x24(%ebp),%edx</span><br><span class="line">  27:	66 89 45 f0          	mov    %ax,-0x10(%ebp)</span><br><span class="line">  2b:	89 c8                	mov    %ecx,%eax</span><br><span class="line">  2d:	66 89 45 ec          	mov    %ax,-0x14(%ebp)</span><br><span class="line">  31:	0f b7 45 d0          	movzwl -0x30(%ebp),%eax</span><br><span class="line">  35:	66 89 45 e8          	mov    %ax,-0x18(%ebp)</span><br><span class="line">  39:	0f b7 45 cc          	movzwl -0x34(%ebp),%eax</span><br><span class="line">  3d:	66 89 45 e4          	mov    %ax,-0x1c(%ebp)</span><br><span class="line">  41:	89 f8                	mov    %edi,%eax</span><br><span class="line">  43:	66 89 45 e0          	mov    %ax,-0x20(%ebp)</span><br><span class="line">  47:	89 f0                	mov    %esi,%eax</span><br><span class="line">  49:	66 89 45 dc          	mov    %ax,-0x24(%ebp)</span><br><span class="line">  4d:	89 d8                	mov    %ebx,%eax</span><br><span class="line">  4f:	66 89 45 d8          	mov    %ax,-0x28(%ebp)</span><br><span class="line">  53:	89 d0                	mov    %edx,%eax</span><br><span class="line">  55:	66 89 45 d4          	mov    %ax,-0x2c(%ebp)</span><br><span class="line">  59:	0f bf 55 f0          	movswl -0x10(%ebp),%edx</span><br><span class="line">  5d:	0f bf 45 ec          	movswl -0x14(%ebp),%eax</span><br><span class="line">  61:	01 c2                	add    %eax,%edx</span><br><span class="line">  63:	0f bf 45 e8          	movswl -0x18(%ebp),%eax</span><br><span class="line">  67:	01 c2                	add    %eax,%edx</span><br><span class="line">  69:	0f bf 45 e4          	movswl -0x1c(%ebp),%eax</span><br><span class="line">  6d:	01 c2                	add    %eax,%edx</span><br><span class="line">  6f:	0f bf 45 e0          	movswl -0x20(%ebp),%eax</span><br><span class="line">  73:	01 c2                	add    %eax,%edx</span><br><span class="line">  75:	0f bf 45 dc          	movswl -0x24(%ebp),%eax</span><br><span class="line">  79:	01 c2                	add    %eax,%edx</span><br><span class="line">  7b:	0f bf 45 d8          	movswl -0x28(%ebp),%eax</span><br><span class="line">  7f:	01 c2                	add    %eax,%edx</span><br><span class="line">  81:	0f bf 45 d4          	movswl -0x2c(%ebp),%eax</span><br><span class="line">  85:	01 d0                	add    %edx,%eax</span><br><span class="line">  87:	83 c4 28             	add    $0x28,%esp</span><br><span class="line">  8a:	5b                   	pop    %ebx							;对应函数开始时将寄存器压栈保存,现在退栈复原</span><br><span class="line">  8b:	5e                   	pop    %esi</span><br><span class="line">  8c:	5f                   	pop    %edi</span><br><span class="line">  8d:	5d                   	pop    %ebp</span><br><span class="line">  8e:	c2 20 00             	ret    $0x20						;被调用者自行清理自己的栈</span><br><span class="line"></span><br><span class="line">00000091 &lt;_show@0&gt;:</span><br><span class="line">  91:	55                   	push   %ebp</span><br><span class="line">  92:	89 e5                	mov    %esp,%ebp</span><br><span class="line">  94:	83 ec 20             	sub    $0x20,%esp				;一次性分配0x20=32字节空间然后使用mov指令将参数压栈</span><br><span class="line">  97:	c7 44 24 1c 08 00 00 	movl   $0x8,0x1c(%esp)</span><br><span class="line">  9e:	00 </span><br><span class="line">  9f:	c7 44 24 18 07 00 00 	movl   $0x7,0x18(%esp)</span><br><span class="line">  a6:	00 </span><br><span class="line">  a7:	c7 44 24 14 06 00 00 	movl   $0x6,0x14(%esp)</span><br><span class="line">  ae:	00 </span><br><span class="line">  af:	c7 44 24 10 05 00 00 	movl   $0x5,0x10(%esp)</span><br><span class="line">  b6:	00 </span><br><span class="line">  b7:	c7 44 24 0c 04 00 00 	movl   $0x4,0xc(%esp)</span><br><span class="line">  be:	00 </span><br><span class="line">  bf:	c7 44 24 08 03 00 00 	movl   $0x3,0x8(%esp)</span><br><span class="line">  c6:	00 </span><br><span class="line">  c7:	c7 44 24 04 02 00 00 	movl   $0x2,0x4(%esp)</span><br><span class="line">  ce:	00 </span><br><span class="line">  cf:	c7 04 24 01 00 00 00 	movl   $0x1,(%esp)</span><br><span class="line">  d6:	e8 25 ff ff ff       	call   0 &lt;_func@32&gt;</span><br><span class="line">  db:	83 ec 20             	sub    $0x20,%esp				</span><br><span class="line">  de:	c9                   	leave  </span><br><span class="line">  df:	c3                   	ret    </span><br><span class="line"></span><br><span class="line">000000e0 &lt;_main@0&gt;:</span><br><span class="line">  e0:	55                   	push   %ebp</span><br><span class="line">  e1:	89 e5                	mov    %esp,%ebp</span><br><span class="line">  e3:	83 e4 f0             	and    $0xfffffff0,%esp</span><br><span class="line">  e6:	e8 00 00 00 00       	call   eb &lt;_main@0+0xb&gt;</span><br><span class="line">  eb:	e8 a1 ff ff ff       	call   91 &lt;_show@0&gt;</span><br><span class="line">  f0:	b8 00 00 00 00       	mov    $0x0,%eax</span><br><span class="line">  f5:	c9                   	leave  </span><br><span class="line">  f6:	c3                   	ret    </span><br><span class="line">  f7:	90                   	nop</span><br><span class="line"></span><br></pre></td></tr></table></figure>
+
+<p><strong>&lt;&lt;ida权威指南&gt;&gt;上给出的建议</strong></p>
+<p><img src="https://raw.githubusercontent.com/DeutschBall/test/master/image-20220428092612932.png" alt="image-20220428092612932"></p>
+<h3 id="微软-fastcall"><a href="#微软-fastcall" class="headerlink" title="微软__fastcall"></a>微软<code>__fastcall</code></h3><p>&lt;&lt;ida权威指南&gt;&gt;是这样写的:</p>
+<p><img src="https://raw.githubusercontent.com/DeutschBall/test/master/image-20220428154840944.png" alt="image-20220428154840944"></p>
+<p>微软官方文档:</p>
+<p><img src="https://raw.githubusercontent.com/DeutschBall/test/master/image-20220428155346372.png" alt="image-20220428155346372"></p>
+<p>同样的程序,除了main函数之外,其他函数都用<code>_fastcall</code>修饰</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line"><span class="type">int</span> _fastcall <span class="title function_">func</span><span class="params">(<span class="type">short</span> a,<span class="type">short</span> b,<span class="type">short</span> c,<span class="type">short</span> d,<span class="type">short</span> e,<span class="type">short</span> f,<span class="type">short</span> g,<span class="type">short</span> h)</span>&#123;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">return</span> a+b+c+d+e+f+g+h;</span><br><span class="line"></span><br><span class="line">&#125;</span><br><span class="line"><span class="type">int</span> _fastcall <span class="title function_">show</span><span class="params">()</span>&#123;</span><br><span class="line">    <span class="keyword">return</span> func(<span class="number">1</span>,<span class="number">2</span>,<span class="number">3</span>,<span class="number">4</span>,<span class="number">5</span>,<span class="number">6</span>,<span class="number">7</span>,<span class="number">8</span>);</span><br><span class="line">&#125;</span><br><span class="line"><span class="type">int</span>  <span class="title function_">main</span><span class="params">()</span>&#123;<span class="comment">//如果main也用_fastcall修饰则报错没有入口点</span></span><br><span class="line">    show();</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>使用MSVC编译</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line">C:\Users\86135\Desktop\reverse\test_call&gt;cl test.c</span><br><span class="line">用于 x86 的 Microsoft (R) C/C++ 优化编译器 19.29.30139 版</span><br><span class="line">版权所有(C) Microsoft Corporation。保留所有权利。</span><br><span class="line"></span><br><span class="line">test.c</span><br><span class="line">Microsoft (R) Incremental Linker Version 14.29.30139.0</span><br><span class="line">Copyright (C) Microsoft Corporation.  All rights reserved.</span><br><span class="line"></span><br><span class="line">/out:test.exe</span><br><span class="line">test.obj</span><br></pre></td></tr></table></figure>
+
+<p>然后反编译</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">objdump test.obj -d &gt;test.s</span><br></pre></td></tr></table></figure>
+
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br></pre></td><td class="code"><pre><span class="line"></span><br><span class="line">test.obj:     file format pe-i386</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">Disassembly of section .text$mn:</span><br><span class="line"></span><br><span class="line">00000000 &lt;@func@32&gt;:									;函数命名规则是@函数名@参数字节数</span><br><span class="line">   0:	55                   	push   %ebp</span><br><span class="line">   1:	8b ec                	mov    %esp,%ebp</span><br><span class="line">   3:	83 ec 08             	sub    $0x8,%esp</span><br><span class="line">   6:	66 89 55 f8          	mov    %dx,-0x8(%ebp)</span><br><span class="line">   a:	66 89 4d fc          	mov    %cx,-0x4(%ebp)</span><br><span class="line">   e:	0f bf 45 fc          	movswl -0x4(%ebp),%eax</span><br><span class="line">  12:	0f bf 4d f8          	movswl -0x8(%ebp),%ecx</span><br><span class="line">  16:	03 c1                	add    %ecx,%eax</span><br><span class="line">  18:	0f bf 55 08          	movswl 0x8(%ebp),%edx</span><br><span class="line">  1c:	03 c2                	add    %edx,%eax</span><br><span class="line">  1e:	0f bf 4d 0c          	movswl 0xc(%ebp),%ecx</span><br><span class="line">  22:	03 c1                	add    %ecx,%eax</span><br><span class="line">  24:	0f bf 55 10          	movswl 0x10(%ebp),%edx</span><br><span class="line">  28:	03 c2                	add    %edx,%eax</span><br><span class="line">  2a:	0f bf 4d 14          	movswl 0x14(%ebp),%ecx</span><br><span class="line">  2e:	03 c1                	add    %ecx,%eax</span><br><span class="line">  30:	0f bf 55 18          	movswl 0x18(%ebp),%edx</span><br><span class="line">  34:	03 c2                	add    %edx,%eax</span><br><span class="line">  36:	0f bf 4d 1c          	movswl 0x1c(%ebp),%ecx</span><br><span class="line">  3a:	03 c1                	add    %ecx,%eax</span><br><span class="line">  3c:	8b e5                	mov    %ebp,%esp</span><br><span class="line">  3e:	5d                   	pop    %ebp</span><br><span class="line">  3f:	c2 18 00             	ret    $0x18				;被调用者清理自己的栈</span><br><span class="line">  42:	cc                   	int3   </span><br><span class="line">  43:	cc                   	int3   </span><br><span class="line">  44:	cc                   	int3   </span><br><span class="line">  45:	cc                   	int3   </span><br><span class="line">  46:	cc                   	int3   </span><br><span class="line">  47:	cc                   	int3   </span><br><span class="line">  48:	cc                   	int3   </span><br><span class="line">  49:	cc                   	int3   </span><br><span class="line">  4a:	cc                   	int3   </span><br><span class="line">  4b:	cc                   	int3   </span><br><span class="line">  4c:	cc                   	int3   </span><br><span class="line">  4d:	cc                   	int3   </span><br><span class="line">  4e:	cc                   	int3   </span><br><span class="line">  4f:	cc                   	int3   </span><br><span class="line"></span><br><span class="line">00000050 &lt;@show@0&gt;:</span><br><span class="line">  50:	55                   	push   %ebp</span><br><span class="line">  51:	8b ec                	mov    %esp,%ebp</span><br><span class="line">  53:	6a 08                	push   $0x8</span><br><span class="line">  55:	6a 07                	push   $0x7</span><br><span class="line">  57:	6a 06                	push   $0x6</span><br><span class="line">  59:	6a 05                	push   $0x5</span><br><span class="line">  5b:	6a 04                	push   $0x4</span><br><span class="line">  5d:	6a 03                	push   $0x3</span><br><span class="line">  5f:	ba 02 00 00 00       	mov    $0x2,%edx					;顶多有两个参数放在寄存器传递,其余都用栈</span><br><span class="line">  64:	b9 01 00 00 00       	mov    $0x1,%ecx</span><br><span class="line">  69:	e8 00 00 00 00       	call   6e &lt;@show@0+0x1e&gt;</span><br><span class="line">  6e:	5d                   	pop    %ebp</span><br><span class="line">  6f:	c3                   	ret    </span><br><span class="line"></span><br><span class="line">00000070 &lt;_main&gt;:</span><br><span class="line">  70:	55                   	push   %ebp</span><br><span class="line">  71:	8b ec                	mov    %esp,%ebp</span><br><span class="line">  73:	e8 00 00 00 00       	call   78 &lt;_main+0x8&gt;</span><br><span class="line">  78:	33 c0                	xor    %eax,%eax</span><br><span class="line">  7a:	5d                   	pop    %ebp</span><br><span class="line">  7b:	c3                   	ret    </span><br><span class="line"></span><br></pre></td></tr></table></figure>
+
+<h3 id="微软-thiscall"><a href="#微软-thiscall" class="headerlink" title="微软__thiscall"></a>微软<code>__thiscall</code></h3><p>微软官方文档:</p>
+<blockquote>
+<p>The <strong>Microsoft-specific</strong> <strong><code>__thiscall</code></strong> calling convention is used on C++ class member functions on the x86 architecture. It’s the default calling convention used by member functions that don’t use variable arguments (<code>vararg</code> functions).</p>
+<p>微软特有的<code>__thiscall</code>调用约定用于x86体系上C++的成员函数.定参函数默认使用该种调用约定</p>
+<p>Under <strong><code>__thiscall</code></strong>, the callee cleans the stack, which is impossible for <code>vararg</code> functions. Arguments are pushed on the stack from right to left. The <strong><code>this</code></strong> pointer is passed via register ECX, and not on the stack.</p>
+<p>如果函数有<code>__thiscall</code>修饰则被调用者清理自己的栈,因此变参函数难以实现.</p>
+<p>函数参数从右向左压栈.this指针通过ECX寄存器传递</p>
+<p>On ARM, ARM64, and x64 machines, <strong><code>__thiscall</code></strong> is accepted and ignored by the compiler. That’s because they use a register-based calling convention by default.</p>
+<p>在ARM,ARM64还有x64机器上,<code>__thiscall</code>会被编译器直接忽略.因为编译器默认使用一种基于寄存器的调用约定</p>
+</blockquote>
+<p>&lt;&lt;ida权威指南&gt;&gt;</p>
+<p><img src="/../AppData/Roaming/Typora/typora-user-images/image-20220428161940071.png" alt="image-20220428161940071"></p>
+<h2 id="x64上的调用约定"><a href="#x64上的调用约定" class="headerlink" title="x64上的调用约定"></a>x64上的调用约定</h2><h3 id="Microsoft-x64-calling-convention"><a href="#Microsoft-x64-calling-convention" class="headerlink" title="Microsoft x64 calling convention"></a>Microsoft x64 calling convention</h3><p><a target="_blank" rel="noopener" href="https://en.wikipedia.org/wiki/X86_calling_conventions#Microsoft_x64_calling_convention">微软x64调用约定</a></p>
+<blockquote>
+<p>The Microsoft x64 calling convention[<a target="_blank" rel="noopener" href="https://en.wikipedia.org/wiki/X86_calling_conventions#cite_note-ms-18">18]</a>[<a target="_blank" rel="noopener" href="https://en.wikipedia.org/wiki/X86_calling_conventions#cite_note-19">19]</a> is followed on <a target="_blank" rel="noopener" href="https://en.wikipedia.org/wiki/Windows_(operating_system)">Windows</a> and pre-boot <a target="_blank" rel="noopener" href="https://en.wikipedia.org/wiki/UEFI">UEFI</a> (for <a target="_blank" rel="noopener" href="https://en.wikipedia.org/wiki/Long_mode">long mode</a> on <a target="_blank" rel="noopener" href="https://en.wikipedia.org/wiki/X86-64">x86-64</a>). The first four arguments are placed onto the registers. That means RCX, RDX, R8, R9 for integer, struct or pointer arguments (in that order),  and XMM0, XMM1, XMM2, XMM3 for floating point arguments. Additional  arguments are pushed onto the stack (right to left). Integer return  values (similar to x86) are returned in RAX if 64 bits or less. Floating point return values are returned in XMM0. Parameters less than 64 bits long are not zero extended; the high bits  are not zeroed.</p>
+<p>微软x64调用约定适用于Windows和UEFI.</p>
+<p>前四个参数,如果是整数或者结构体或者指针类型,则放在寄存器RCX,RDX,R8,R9寄存器里,如果是浮点数则放在XMM0到XMM3里</p>
+<p>额为的参数放在栈里(从右向左压栈)</p>
+<p>返回值如果小于等于64位则放在RAX寄存器里(类似于x86的情形)</p>
+<p>浮点返回值放在XMM0里</p>
+<p>小于64位的参数进行有符号拓展</p>
+<p>Structs and unions with sizes that match integers are passed and  returned as if they were integers. Otherwise they are replaced with a  pointer when used as an argument. When an oversized struct return is  needed, another pointer to a caller-provided space is prepended as the  first argument, shifting all other arguments to the right by one place.[<a target="_blank" rel="noopener" href="https://en.wikipedia.org/wiki/X86_calling_conventions#cite_note-20">20]</a></p>
+<p>结构体和联合体如果大小与整形匹配则被当作整形进行参数传递还有返回.否则,当他们作为参数时,会被一个指针替代</p>
+<p>当需要一个超大的结构体需要返回时，指向调用方提供的空间的另一个指针将作为第一个参数，将所有其他参数向右移动一个位置</p>
+<p>When compiling for the x64 architecture in a Windows context  (whether using Microsoft or non-Microsoft tools), stdcall, thiscall,  cdecl, and fastcall all resolve to using this convention.</p>
+<p>不管使用的编译器是不是微软的工具,对于x64体系,stdcall,thiscall,cdecl,fastcall都会被忽略,然后使用上述方法处理</p>
+<p>In the Microsoft x64 calling convention, it is the caller’s  responsibility to allocate 32 bytes of “shadow space” on the stack right before calling the function (regardless of the actual number of  parameters used), and to pop the stack after the call. The shadow space  is used to spill RCX, RDX, R8, and R9,[<a target="_blank" rel="noopener" href="https://en.wikipedia.org/wiki/X86_calling_conventions#cite_note-21">21]</a> but must be made available to all functions, even those with fewer than four parameters.</p>
+<p>在微软x64调用约定中,调用者在调用其他函数之前,有义务在栈上分配32字节的”影子空间”,并且忽略实际上参数占用的大小,并且在调用结束后由调用者清理被调用者的堆栈.</p>
+<p>影子空间的作用是用于将来存放RCX,RDX,R8,R9中的前四个参数,但是即使是没有不够四个参数的函数,也会预留一个32字节的影子空间</p>
+<p>The registers RAX, RCX, RDX, R8, R9, R10, R11 are considered volatile (caller-saved).[<a target="_blank" rel="noopener" href="https://en.wikipedia.org/wiki/X86_calling_conventions#cite_note-Caller/Callee_Saved_Registers-22">22]</a></p>
+<p>RAX, RCX, RDX, R8, R9, R10, R11这些寄存器都是volatile修饰的</p>
+<p><img src="/../AppData/Roaming/Typora/typora-user-images/image-20220428101247431.png" alt="image-20220428101247431"></p>
+<p>The registers RBX, RBP, RDI, RSI, RSP, R12, R13, R14, and R15 are considered nonvolatile (callee-saved).[<a target="_blank" rel="noopener" href="https://en.wikipedia.org/wiki/X86_calling_conventions#cite_note-Caller/Callee_Saved_Registers-22">22]</a></p>
+<p>RBX, RBP, RDI, RSI, RSP, R12, R13, R14, and R15不用volatile修饰</p>
+<p>For example, a function taking 5 integer arguments will take the  first to fourth in registers, and the fifth will be pushed on top of the shadow space. So when the called function is entered, the stack will be composed of (in ascending order) the return address, followed by the  shadow space (32 bytes) followed by the fifth parameter.</p>
+<p>举个例子,一个有5参数的 函数,其前四个参数将会被放在寄存器里然后第五个参数竟会别压入栈顶,并且在影子空间之上.</p>
+<p>因此当进入被调用函数时,栈中的组成按照从栈顶到栈底将是:返回值,影子空间,第五个参数</p>
+<p>这里影子空间就是给前四个参数腾空,前四个参数使用寄存器传递之后在被调用者中会被重新压栈,即压入这个预留的影子空间</p>
+</blockquote>
+<p>维基百科这样写的:</p>
+<p><img src="https://raw.githubusercontent.com/DeutschBall/test/master/image-20220428152348161.png" alt="image-20220428152348161"></p>
+<p><a target="_blank" rel="noopener" href="https://www.cnblogs.com/Archimedes/p/15044277.html">x86 x64调用约定及传参顺序 - 一瓶怡宝 - 博客园 (cnblogs.com)</a></p>
+<p>同样的程序<code>test.c</code></p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line"><span class="type">int</span>  <span class="title function_">func</span><span class="params">(<span class="type">int</span> a,<span class="type">int</span> b,<span class="type">int</span> c,<span class="type">int</span> d,<span class="type">int</span> e,<span class="type">int</span> f,<span class="type">int</span> g,<span class="type">int</span> h)</span>&#123;</span><br><span class="line">    <span class="keyword">return</span> a+b+c+d+e+f+g+h;</span><br><span class="line">&#125;</span><br><span class="line"><span class="type">int</span>  <span class="title function_">show</span><span class="params">()</span>&#123;</span><br><span class="line">    <span class="keyword">return</span> func(<span class="number">1</span>,<span class="number">2</span>,<span class="number">3</span>,<span class="number">4</span>,<span class="number">5</span>,<span class="number">6</span>,<span class="number">7</span>,<span class="number">8</span>);</span><br><span class="line">&#125;</span><br><span class="line"><span class="type">int</span>  <span class="title function_">main</span><span class="params">()</span>&#123;</span><br><span class="line">    show();</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>使用如下命令<code>gcc -O0 test.c -c -o test.o|objdump -d test.o &gt; t.s|code t.s</code></p>
+<p>首先不用编译优化,将<code>test.c</code>编译成目标文件<code>test.o</code>,</p>
+<p>然后使用<code>objdump</code>反编译得到反汇编代码<code>t.s</code></p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br></pre></td><td class="code"><pre><span class="line">test.o:     file format pe-x86-64</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">Disassembly of section .text:</span><br><span class="line"></span><br><span class="line">0000000000000000 &lt;func&gt;:</span><br><span class="line">   0:	55                   	push   %rbp</span><br><span class="line">   1:	48 89 e5             	mov    %rsp,%rbp			</span><br><span class="line">   4:	89 4d 10             	mov    %ecx,0x10(%rbp)		;蜜汁操作,将ecx中存放的参数也压入栈中</span><br><span class="line">   7:	89 55 18             	mov    %edx,0x18(%rbp)</span><br><span class="line">   a:	44 89 45 20          	mov    %r8d,0x20(%rbp)</span><br><span class="line">   e:	44 89 4d 28          	mov    %r9d,0x28(%rbp)</span><br><span class="line">  12:	8b 55 10             	mov    0x10(%rbp),%edx</span><br><span class="line">  15:	8b 45 18             	mov    0x18(%rbp),%eax</span><br><span class="line">  18:	01 c2                	add    %eax,%edx</span><br><span class="line">  1a:	8b 45 20             	mov    0x20(%rbp),%eax</span><br><span class="line">  1d:	01 c2                	add    %eax,%edx</span><br><span class="line">  1f:	8b 45 28             	mov    0x28(%rbp),%eax</span><br><span class="line">  22:	01 c2                	add    %eax,%edx</span><br><span class="line">  24:	8b 45 30             	mov    0x30(%rbp),%eax</span><br><span class="line">  27:	01 c2                	add    %eax,%edx</span><br><span class="line">  29:	8b 45 38             	mov    0x38(%rbp),%eax</span><br><span class="line">  2c:	01 c2                	add    %eax,%edx</span><br><span class="line">  2e:	8b 45 40             	mov    0x40(%rbp),%eax</span><br><span class="line">  31:	01 c2                	add    %eax,%edx</span><br><span class="line">  33:	8b 45 48             	mov    0x48(%rbp),%eax</span><br><span class="line">  36:	01 d0                	add    %edx,%eax</span><br><span class="line">  38:	5d                   	pop    %rbp</span><br><span class="line">  39:	c3                   	retq   </span><br><span class="line"></span><br><span class="line">000000000000003a &lt;show&gt;:</span><br><span class="line">  3a:	55                   	push   %rbp					</span><br><span class="line">  3b:	48 89 e5             	mov    %rsp,%rbp			</span><br><span class="line">  3e:	48 83 ec 40          	sub    $0x40,%rsp			;为子函数申请栈空间,但是蜜汁操作,8个int参数,一个int占4字节,理论上需要0x20=32字节空间,却申请了0x40=64字节的空间</span><br><span class="line">  42:	c7 44 24 38 08 00 00 	movl   $0x8,0x38(%rsp)		 ;将立即数8放在栈中rsp+0x38位置</span><br><span class="line">  49:	00 </span><br><span class="line">  4a:	c7 44 24 30 07 00 00 	movl   $0x7,0x30(%rsp)		;将7放在栈中rsp+0x30位置</span><br><span class="line">  51:	00 	</span><br><span class="line">  52:	c7 44 24 28 06 00 00 	movl   $0x6,0x28(%rsp)		;0x30-0x28=48-40=8,蜜汁操作,相邻两个参数在栈上距离8字节</span><br><span class="line">  59:	00 </span><br><span class="line">  5a:	c7 44 24 20 05 00 00 	movl   $0x5,0x20(%rsp)</span><br><span class="line">  61:	00 </span><br><span class="line">  62:	41 b9 04 00 00 00    	mov    $0x4,%r9d			;立即数4放在r9d寄存器中</span><br><span class="line">  68:	41 b8 03 00 00 00    	mov    $0x3,%r8d			</span><br><span class="line">  6e:	ba 02 00 00 00       	mov    $0x2,%edx</span><br><span class="line">  73:	b9 01 00 00 00       	mov    $0x1,%ecx			;立即数1放在ecx寄存器中</span><br><span class="line">  78:	e8 83 ff ff ff       	callq  0 &lt;func&gt;				</span><br><span class="line">  7d:	48 83 c4 40          	add    $0x40,%rsp</span><br><span class="line">  81:	5d                   	pop    %rbp</span><br><span class="line">  82:	c3                   	retq   </span><br><span class="line"></span><br><span class="line">0000000000000083 &lt;main&gt;:</span><br><span class="line">  83:	55                   	push   %rbp</span><br><span class="line">  84:	48 89 e5             	mov    %rsp,%rbp</span><br><span class="line">  87:	48 83 ec 20          	sub    $0x20,%rsp</span><br><span class="line">  8b:	e8 00 00 00 00       	callq  90 &lt;main+0xd&gt;		;蜜汁操作,90行就在下面,为啥要call一下</span><br><span class="line">  90:	e8 a5 ff ff ff       	callq  3a &lt;show&gt;</span><br><span class="line">  95:	b8 00 00 00 00       	mov    $0x0,%eax</span><br><span class="line">  9a:	48 83 c4 20          	add    $0x20,%rsp</span><br><span class="line">  9e:	5d                   	pop    %rbp</span><br><span class="line">  9f:	c3                   	retq   </span><br><span class="line"></span><br></pre></td></tr></table></figure>
+
+
+
+<p>1.函数名没有下划线前缀</p>
+<p>2.show和main函数都有固定的格式:</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">push %rbp			;rbp是被调用者保存的寄存器,当前函数可以使用,但是最后结束的时候要还原rbp的状态,因此压栈存储先前状态</span><br><span class="line">mov  %rsp,%rbp		 ;将先前的栈顶指针存放在刚刚腾出空闲的rbp寄存器中</span><br><span class="line">sub  %0x..,%rsp		 ;栈顶指针下降,在栈上为将要调用的子函数申请栈空间</span><br><span class="line">callq &lt;..&gt;			;调用函数</span><br><span class="line">..;处理返回值		;通常返回值在eax寄存器中,进行一些处理</span><br><span class="line">add  %0x..,%rsp		 ;子函数已经执行结束了,为其申请的栈帧不需要再存在了,复原栈顶指针位置 </span><br><span class="line">pop  %rbp			;将被调用者有义务保存的寄存器rbp还原</span><br><span class="line">retq				;本函数返回</span><br></pre></td></tr></table></figure>
+
+<p>3.关于show函数在调用具有8个参数的func函数时,参数如何安排</p>
+<blockquote>
+<p><strong>关于蜜汁操作参数安排</strong></p>
+<p>1.后面第5到8个参数使用栈传递,5位于0x20+rsp,8位于0x38+rsp,即约靠左的参数越靠近栈顶rsp</p>
+<p>2.前面1到4个参数&#x3D;&#x3D;使用寄存器传递&#x3D;&#x3D;</p>
+<p>3.在进入被调用者函数后,将刚才调用者通过寄存器传递的参数也放进栈里,</p>
+<p>并且x64上调用者在为子函数申请栈空间的时候也会有意申请很大,为待会儿寄存器中的参数也压栈做准备</p>
+<p>实际上这三条都完成之后和x86上的结果是相同的,</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">func(p1 ,p2 ,p3, p4 ,p5           ,...,plast	   );</span><br><span class="line">func(ecx,edx,r8d,r9d,远离栈顶的地方,...,靠近栈顶的地方);</span><br></pre></td></tr></table></figure>
+
+
+</blockquote>
+<blockquote>
+<p><strong>关于蜜汁操作四字节的int在栈上分配8字节空间</strong>:</p>
+<p>在64位不管是windows还是linux系统上int都是4字节的,long long都是8字节的</p>
+<p>上面这段程序中各个参数改成short,int,long,long long类型之后反编译得到的汇编语言,在为子函数申请栈空间的时候都是0x40&#x3D;64个字节</p>
+<p>即参数不管什么类型都是以8字节传递的,这一点可以从使用r9d寄存器传递int参数看出</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">62:	41 b9 04 00 00 00    	mov    $0x4,%r9d			;立即数4放在r9d寄存器中</span><br><span class="line">68:	41 b8 03 00 00 00    	mov    $0x3,%r8d	</span><br></pre></td></tr></table></figure>
+
+<p>r开头的寄存器都是4字寄存器,理论上是放long long 的,但是这里int也用了r9d传递</p>
+</blockquote>
+<blockquote>
+<p><strong>关于蜜汁操作就在下一行的指令还要call</strong></p>
+<p>案发现场:</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">...</span><br><span class="line">8b:	e8 00 00 00 00       	callq  90 &lt;main+0xd&gt;		;蜜汁操作,90行就在下面,为啥要call一下</span><br><span class="line">90:	e8 a5 ff ff ff       	callq  3a &lt;show&gt;</span><br><span class="line">95:	b8 00 00 00 00       	mov    $0x0,%eax</span><br><span class="line">...</span><br></pre></td></tr></table></figure>
+
+<p>写一个更短的程序观察这个事</p>
+<p><code>test.c</code></p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="type">void</span>  <span class="title function_">foo</span><span class="params">()</span>&#123;&#125;</span><br><span class="line"><span class="type">int</span>  <span class="title function_">main</span><span class="params">()</span>&#123;</span><br><span class="line"> foo();</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">gcc test.c -O0 -c -o test.o|objdump -d test.o &gt; test.s|code test.s</span><br><span class="line">不开任何编译优化,反汇编</span><br></pre></td></tr></table></figure>
+
+<p>反编译得到</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br></pre></td><td class="code"><pre><span class="line">0000000000000000 &lt;foo&gt;:</span><br><span class="line">0:	55                   	push   %rbp</span><br><span class="line">1:	48 89 e5             	mov    %rsp,%rbp</span><br><span class="line">4:	90                   	nop</span><br><span class="line">5:	5d                   	pop    %rbp</span><br><span class="line">6:	c3                   	retq   </span><br><span class="line"></span><br><span class="line">0000000000000007 &lt;main&gt;:</span><br><span class="line">7:	55                   	push   %rbp</span><br><span class="line">8:	48 89 e5             	mov    %rsp,%rbp</span><br><span class="line">b:	48 83 ec 20          	sub    <span class="variable">$0x20</span>,%rsp</span><br><span class="line">f:	e8 00 00 00 00       	callq  14 &lt;main+0xd&gt;	</span><br><span class="line">14:	e8 e7 ff ff ff       	callq  0 &lt;foo&gt;</span><br><span class="line">19:	b8 00 00 00 00       	mov    <span class="variable">$0x0</span>,%eax	</span><br><span class="line">1e:	48 83 c4 20          	add    <span class="variable">$0x20</span>,%rsp</span><br><span class="line">22:	5d                   	pop    %rbp</span><br><span class="line">23:	c3                   	retq   </span><br><span class="line">24:	90                   	nop</span><br><span class="line">...</span><br></pre></td></tr></table></figure>
+
+<p><code>main+0xf</code>处的callq,将下一条指令也就是<code>main+0x14</code>压栈,然后修改程序计数器为<code>main+0xf</code>,即执行<code>jmp main+0xf</code></p>
+<p><code>main+0x14</code>处的callq,将下一条指令地址也就是<code>main+0x19</code>压栈,然后修改程序计数器为<code>foo</code>地址,即执行<code>jmp foo</code></p>
+<p><code>foo</code>执行到最后有一个<code>retq</code>作用是将栈顶刚才压入的<code>main+0x19</code>还给程序计数器rip,然后退栈,即<code>pop %rip</code></p>
+<p>这样看起来程序已经出错了,栈顶还有一个<code>main+0xf</code>没有弹出,但是<code>main+0x22</code>处有一个退栈将位于栈顶<code>main+0xf</code>弹给了<code>%rbp</code>寄存器,然而实际上<code>%rbp</code>寄存器应当获取次栈顶的值,即在<code>main+0x7</code>压入的值</p>
+<p>出错的原因是<code>main+0xf</code>处的call指令调用的不是一个函数,没有与该call指令相对应的<code>ret</code>指令,这导致了call前压栈但是call后不退栈.</p>
+<p>下面正向编译观察这个事情</p>
+<p>使用<code>gcc -S</code>选项正向编译成汇编语言</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br></pre></td><td class="code"><pre><span class="line">main:</span><br><span class="line">	pushq	%rbp</span><br><span class="line">	.seh_pushreg	%rbp</span><br><span class="line">	movq	%rsp, %rbp</span><br><span class="line">	.seh_setframe	%rbp, 0</span><br><span class="line">	subq	$32, %rsp</span><br><span class="line">	.seh_stackalloc	32</span><br><span class="line">	.seh_endprologue</span><br><span class="line">	call	__main</span><br><span class="line">	call	show</span><br><span class="line">	movl	$0, %eax</span><br><span class="line">	addq	$32, %rsp</span><br><span class="line">	popq	%rbp</span><br><span class="line">	ret</span><br><span class="line">	.seh_endproc</span><br><span class="line">	.ident	&quot;GCC: (tdm64-1) 9.2.0&quot;</span><br></pre></td></tr></table></figure>
+
+<p>第9行有一个<code>call __main</code></p>
+<p>stackoverflow上的说法</p>
+<blockquote>
+<p>Calls the ___main function which will do initializing stuff that gcc needs. Call will push the current instruction pointer on the stack and jump to the address of ___main</p>
+</blockquote>
+<p>调用<code>__main</code>函数,初始化gcc需要的材料.该调用将当前程序计数器压栈然后跳转__main函数</p>
+<p>显然我们<code>gcc -c</code>生成的目标文件.o是没有<code>__main</code>函数的 ,该函数应当是链接阶段加上去的</p>
+<p>那么我们编译成exe文件之后再反编译进行观察</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br></pre></td><td class="code"><pre><span class="line">0000000000401633 &lt;main&gt;:</span><br><span class="line">  401633:	55                   	push   %rbp</span><br><span class="line">  401634:	48 89 e5             	mov    %rsp,%rbp</span><br><span class="line">  401637:	48 83 ec 20          	sub    $0x20,%rsp</span><br><span class="line">  40163b:	e8 c0 00 00 00       	callq  401700 &lt;__main&gt;	;此call确实调用了__main函数</span><br><span class="line">  401640:	e8 a5 ff ff ff       	callq  4015ea &lt;show&gt;	;此call调用了show函数</span><br><span class="line">  401645:	b8 00 00 00 00       	mov    $0x0,%eax</span><br><span class="line">  40164a:	48 83 c4 20          	add    $0x20,%rsp</span><br><span class="line">  40164e:	5d                   	pop    %rbp</span><br><span class="line">  40164f:	c3                   	retq   </span><br><span class="line">0000000000401700 &lt;__main&gt;:</span><br><span class="line">  401700:	8b 05 2a 59 00 00    	mov    0x592a(%rip),%eax        # 407030 &lt;initialized&gt;</span><br><span class="line">  401706:	85 c0                	test   %eax,%eax</span><br><span class="line">  401708:	74 06                	je     401710 &lt;__main+0x10&gt;</span><br><span class="line">  40170a:	c3                   	retq   						;有ret语句</span><br><span class="line">  40170b:	0f 1f 44 00 00       	nopl   0x0(%rax,%rax,1)</span><br><span class="line">  401710:	c7 05 16 59 00 00 01 	movl   $0x1,0x5916(%rip)        # 407030 &lt;initialized&gt;</span><br><span class="line">  401717:	00 00 00 </span><br><span class="line">  40171a:	e9 71 ff ff ff       	jmpq   401690 &lt;__do_global_ctors&gt;</span><br><span class="line">  40171f:	90                   	nop</span><br></pre></td></tr></table></figure>
+
+<p>此时可以看到,两个call都是调用的函数,并且调用的函数都有ret语句与call匹配</p>
+</blockquote>
+<p>还要补充的是关于对齐:申请栈空间时要按照16字节对齐申请</p>
+<h3 id="System-V-AMD64-ABI"><a href="#System-V-AMD64-ABI" class="headerlink" title="System V AMD64 ABI"></a>System V AMD64 ABI</h3><p><img src="https://raw.githubusercontent.com/DeutschBall/test/master/image-20220428152425649.png" alt="image-20220428152425649"></p>
+<p>CSAPP写道,参数传递时可以用到六个寄存器,多余的参数用栈传递,是指在64位linux环境下,</p>
+<p>而windows上只能用四个寄存器传递参数,多余的用栈传递</p>
+<p><img src="https://raw.githubusercontent.com/DeutschBall/test/master/image-20220427223059552.png" alt="image-20220427223059552"></p>
+<p>还是刚才的c程序,在ubuntu上的情况</p>
+<p><code>main.c</code></p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line">int _cdecl func(int a,int b,int c,int d,int e,int f,int g,int h)&#123;</span><br><span class="line">    return a+b+c+d+e+f+g+h;</span><br><span class="line">&#125;</span><br><span class="line">int _cdecl show()&#123;</span><br><span class="line">    return func(1,2,3,4,5,6,7,8);</span><br><span class="line">&#125;</span><br><span class="line">int _cdecl main()&#123;</span><br><span class="line">    show();</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>其反汇编代码</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br></pre></td><td class="code"><pre><span class="line">main.o:     file format elf64-x86-64</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">Disassembly of section .text:</span><br><span class="line"></span><br><span class="line">0000000000000000 &lt;func&gt;:</span><br><span class="line">   0:   f3 0f 1e fa             endbr64						;蜜汁指令</span><br><span class="line">   4:   55                      push   %rbp</span><br><span class="line">   5:   48 89 e5                mov    %rsp,%rbp</span><br><span class="line">   8:   89 7d fc                mov    %edi,-0x4(%rbp)		;寄存器传递的参数也压栈,这与windows上相同</span><br><span class="line">   b:   89 75 f8                mov    %esi,-0x8(%rbp)</span><br><span class="line">   e:   89 55 f4                mov    %edx,-0xc(%rbp)		</span><br><span class="line">  11:   89 4d f0                mov    %ecx,-0x10(%rbp)</span><br><span class="line">  14:   44 89 45 ec             mov    %r8d,-0x14(%rbp)</span><br><span class="line">  18:   44 89 4d e8             mov    %r9d,-0x18(%rbp)</span><br><span class="line">  1c:   8b 55 fc                mov    -0x4(%rbp),%edx</span><br><span class="line">  1f:   8b 45 f8                mov    -0x8(%rbp),%eax</span><br><span class="line">  22:   01 c2                   add    %eax,%edx</span><br><span class="line">  24:   8b 45 f4                mov    -0xc(%rbp),%eax</span><br><span class="line">  27:   01 c2                   add    %eax,%edx</span><br><span class="line">  29:   8b 45 f0                mov    -0x10(%rbp),%eax</span><br><span class="line">  2c:   01 c2                   add    %eax,%edx</span><br><span class="line">  2e:   8b 45 ec                mov    -0x14(%rbp),%eax</span><br><span class="line">  31:   01 c2                   add    %eax,%edx</span><br><span class="line">  33:   8b 45 e8                mov    -0x18(%rbp),%eax</span><br><span class="line">  36:   01 c2                   add    %eax,%edx</span><br><span class="line">  38:   8b 45 10                mov    0x10(%rbp),%eax</span><br><span class="line">  3b:   01 c2                   add    %eax,%edx</span><br><span class="line">  3d:   8b 45 18                mov    0x18(%rbp),%eax</span><br><span class="line">  40:   01 d0                   add    %edx,%eax</span><br><span class="line">  42:   5d                      pop    %rbp</span><br><span class="line">  43:   c3                      retq</span><br><span class="line"></span><br><span class="line">0000000000000044 &lt;show&gt;:</span><br><span class="line">  44:   f3 0f 1e fa             endbr64</span><br><span class="line">  48:   55                      push   %rbp</span><br><span class="line">  49:   48 89 e5                mov    %rsp,%rbp</span><br><span class="line">  4c:   6a 08                   pushq  $0x8					</span><br><span class="line">  4e:   6a 07                   pushq  $0x7</span><br><span class="line">  50:   41 b9 06 00 00 00       mov    $0x6,%r9d			;确实使用了6个寄存器传递参数</span><br><span class="line">  56:   41 b8 05 00 00 00       mov    $0x5,%r8d</span><br><span class="line">  5c:   b9 04 00 00 00          mov    $0x4,%ecx</span><br><span class="line">  61:   ba 03 00 00 00          mov    $0x3,%edx</span><br><span class="line">  66:   be 02 00 00 00          mov    $0x2,%esi</span><br><span class="line">  6b:   bf 01 00 00 00          mov    $0x1,%edi</span><br><span class="line">  70:   e8 00 00 00 00          callq  75 &lt;show+0x31&gt;		</span><br><span class="line">  75:   48 83 c4 10             add    $0x10,%rsp</span><br><span class="line">  79:   c9                      leaveq						</span><br><span class="line">  7a:   c3                      retq</span><br><span class="line"></span><br><span class="line">000000000000007b &lt;main&gt;:</span><br><span class="line">  7b:   f3 0f 1e fa             endbr64</span><br><span class="line">  7f:   55                      push   %rbp</span><br><span class="line">  80:   48 89 e5                mov    %rsp,%rbp</span><br><span class="line">  83:   b8 00 00 00 00          mov    $0x0,%eax</span><br><span class="line">  88:   e8 00 00 00 00          callq  8d &lt;main+0x12&gt;</span><br><span class="line">  8d:   b8 00 00 00 00          mov    $0x0,%eax</span><br><span class="line">  92:   5d                      pop    %rbp</span><br><span class="line">  93:   c3                      retq</span><br></pre></td></tr></table></figure>
+
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">func(para1,para2,para3,para4,para5,para6,para7,...,paran)</span><br><span class="line">func(edi,esi,edx,ecx,r8d,r9d,栈上远离栈顶,...,栈上靠近栈顶)</span><br></pre></td></tr></table></figure>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+    </div>
+
+    
+    
+    
+
+      <footer class="post-footer">
+          <div class="post-tags">
+              <a href="/tags/reverse/" rel="tag"># reverse</a>
+          </div>
+
+        
+
+
+        
+    <div class="post-nav">
+      <div class="post-nav-item">
+    <a href="/2022/04/22/gdb%E8%B0%83%E8%AF%95%E5%99%A8/" rel="prev" title="gbd调试器的使用">
+      <i class="fa fa-chevron-left"></i> gbd调试器的使用
+    </a></div>
+      <div class="post-nav-item">
+    <a href="/2022/05/07/xctf-reverse-%E6%96%B0%E6%89%8B12%E9%A2%98/" rel="next" title="xctf攻防世界-reverse-新手村">
+      xctf攻防世界-reverse-新手村 <i class="fa fa-chevron-right"></i>
+    </a></div>
+    </div>
+      </footer>
+    
+  </article>
+  
+  
+  
+
+
+
+          </div>
+          
+
+<script>
+  window.addEventListener('tabs:register', () => {
+    let { activeClass } = CONFIG.comments;
+    if (CONFIG.comments.storage) {
+      activeClass = localStorage.getItem('comments_active') || activeClass;
+    }
+    if (activeClass) {
+      let activeTab = document.querySelector(`a[href="#comment-${activeClass}"]`);
+      if (activeTab) {
+        activeTab.click();
+      }
+    }
+  });
+  if (CONFIG.comments.storage) {
+    window.addEventListener('tabs:click', event => {
+      if (!event.target.matches('.tabs-comment .tab-content .tab-pane')) return;
+      let commentClass = event.target.classList[1];
+      localStorage.setItem('comments_active', commentClass);
+    });
+  }
+</script>
+
+        </div>
+          
+  
+  <div class="toggle sidebar-toggle">
+    <span class="toggle-line toggle-line-first"></span>
+    <span class="toggle-line toggle-line-middle"></span>
+    <span class="toggle-line toggle-line-last"></span>
+  </div>
+
+  <aside class="sidebar">
+    <div class="sidebar-inner">
+
+      <ul class="sidebar-nav motion-element">
+        <li class="sidebar-nav-toc">
+          Table of Contents
+        </li>
+        <li class="sidebar-nav-overview">
+          Overview
+        </li>
+      </ul>
+
+      <!--noindex-->
+      <div class="post-toc-wrap sidebar-panel">
+          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#%E8%B0%83%E7%94%A8%E7%BA%A6%E5%AE%9A"><span class="nav-number">1.</span> <span class="nav-text">调用约定</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#x86%E4%B8%8A%E7%9A%84%E8%B0%83%E7%94%A8%E7%BA%A6%E5%AE%9A"><span class="nav-number">1.1.</span> <span class="nav-text">x86上的调用约定</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#c%E8%B0%83%E7%94%A8%E7%BA%A6%E5%AE%9A-cdecl"><span class="nav-number">1.1.1.</span> <span class="nav-text">c调用约定__cdecl</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%A0%87%E5%87%86%E8%B0%83%E7%94%A8%E7%BA%A6%E5%AE%9A-stdcall"><span class="nav-number">1.1.2.</span> <span class="nav-text">标准调用约定__stdcall</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%BE%AE%E8%BD%AF-fastcall"><span class="nav-number">1.1.3.</span> <span class="nav-text">微软__fastcall</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%BE%AE%E8%BD%AF-thiscall"><span class="nav-number">1.1.4.</span> <span class="nav-text">微软__thiscall</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#x64%E4%B8%8A%E7%9A%84%E8%B0%83%E7%94%A8%E7%BA%A6%E5%AE%9A"><span class="nav-number">1.2.</span> <span class="nav-text">x64上的调用约定</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#Microsoft-x64-calling-convention"><span class="nav-number">1.2.1.</span> <span class="nav-text">Microsoft x64 calling convention</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#System-V-AMD64-ABI"><span class="nav-number">1.2.2.</span> <span class="nav-text">System V AMD64 ABI</span></a></li></ol></li></ol></li></ol></div>
+      </div>
+      <!--/noindex-->
+
+      <div class="site-overview-wrap sidebar-panel">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+  <p class="site-author-name" itemprop="name">John Doe</p>
+  <div class="site-description" itemprop="description"></div>
+</div>
+<div class="site-state-wrap motion-element">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+          <a href="/archives/">
+        
+          <span class="site-state-item-count">78</span>
+          <span class="site-state-item-name">posts</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-tags">
+        <span class="site-state-item-count">30</span>
+        <span class="site-state-item-name">tags</span>
+      </div>
+  </nav>
+</div>
+
+
+
+      </div>
+
+    </div>
+  </aside>
+  <div id="sidebar-dimmer"></div>
+
+
+      </div>
+    </main>
+
+    <footer class="footer">
+      <div class="footer-inner">
+        
+
+        
+
+<div class="copyright">
+  
+  &copy; 
+  <span itemprop="copyrightYear">2024</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">John Doe</span>
+</div>
+  <div class="powered-by">Powered by <a href="https://hexo.io/" class="theme-link" rel="noopener" target="_blank">Hexo</a> & <a href="https://muse.theme-next.org/" class="theme-link" rel="noopener" target="_blank">NexT.Muse</a>
+  </div>
+
+        
+
+
+
+
+
+
+
+
+      </div>
+    </footer>
+  </div>
+
+  
+  <script src="/lib/anime.min.js"></script>
+  <script src="/lib/velocity/velocity.min.js"></script>
+  <script src="/lib/velocity/velocity.ui.min.js"></script>
+
+<script src="/js/utils.js"></script>
+
+<script src="/js/motion.js"></script>
+
+
+<script src="/js/schemes/muse.js"></script>
+
+
+<script src="/js/next-boot.js"></script>
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+  
+
+</body>
+</html>

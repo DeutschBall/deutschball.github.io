@@ -1,0 +1,680 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 7.3.0">
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png">
+  <link rel="mask-icon" href="/images/logo.svg" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+<link rel="stylesheet" href="/lib/font-awesome/css/all.min.css">
+
+<script id="hexo-configurations">
+    var NexT = window.NexT || {};
+    var CONFIG = {"hostname":"example.com","root":"/","scheme":"Muse","version":"7.8.0","exturl":false,"sidebar":{"position":"left","display":"post","padding":18,"offset":12,"onmobile":false},"copycode":{"enable":false,"show_result":false,"style":null},"back2top":{"enable":true,"sidebar":false,"scrollpercent":false},"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":false,"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"algolia":{"hits":{"per_page":10},"labels":{"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}},"localsearch":{"enable":false,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false},"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}}};
+  </script>
+
+  <meta name="description" content="应用层[TOC] 应用层概览: 熟知端口号:应用层协议在服务端的&#x3D;&#x3D;默认&#x3D;&#x3D;端口号,客户端端口号随意  网络应用模型客户&#x2F;服务器模型 工作流程:1.服务器处于接收请求的状态 2.客户机发出服务请求,等待接收结果 3.服务器收到请求后分析请求,进行必要的处理,返回给客户端 客户端必须事先直到服务端的IP地址,这通过DNS解析完成 服务端处于被动状态,">
+<meta property="og:type" content="article">
+<meta property="og:title" content="计算机网络-应用层">
+<meta property="og:url" content="http://example.com/2023/02/12/%E5%BA%94%E7%94%A8%E5%B1%82/index.html">
+<meta property="og:site_name" content="Hexo">
+<meta property="og:description" content="应用层[TOC] 应用层概览: 熟知端口号:应用层协议在服务端的&#x3D;&#x3D;默认&#x3D;&#x3D;端口号,客户端端口号随意  网络应用模型客户&#x2F;服务器模型 工作流程:1.服务器处于接收请求的状态 2.客户机发出服务请求,等待接收结果 3.服务器收到请求后分析请求,进行必要的处理,返回给客户端 客户端必须事先直到服务端的IP地址,这通过DNS解析完成 服务端处于被动状态,">
+<meta property="og:locale" content="en_US">
+<meta property="og:image" content="https://img-blog.csdnimg.cn/img_convert/3b83510e49c73908a1d9433b7e14bccc.png">
+<meta property="og:image" content="https://img-blog.csdnimg.cn/img_convert/8cbd969af94815b2a77969b48c049707.png">
+<meta property="og:image" content="https://img-blog.csdnimg.cn/img_convert/32549a6e2bec5e8e8adbb7c6c645d055.png">
+<meta property="og:image" content="https://img-blog.csdnimg.cn/img_convert/9781d4260d4e18bd79619b14134d7389.png">
+<meta property="og:image" content="https://img-blog.csdnimg.cn/img_convert/0523696b731624567596ee5ee0e43614.png">
+<meta property="og:image" content="https://img-blog.csdnimg.cn/img_convert/5c5251f0e93aaed372842f55a4ccd2ba.png">
+<meta property="og:image" content="https://img-blog.csdnimg.cn/img_convert/682ab6339aec5c26d7dff29abc2e0285.png">
+<meta property="og:image" content="https://img-blog.csdnimg.cn/img_convert/8c08cd3b1c1fbb14a0ab547cb765e8fb.png">
+<meta property="og:image" content="https://img-blog.csdnimg.cn/img_convert/8c026d23dfadc4803f73767aead7b400.png">
+<meta property="og:image" content="https://img-blog.csdnimg.cn/img_convert/ac055e43baff6eafbde1f574ff0b617f.png">
+<meta property="og:image" content="https://img-blog.csdnimg.cn/img_convert/082dfb6a4adc8633ff832af17b26042c.png">
+<meta property="og:image" content="https://img-blog.csdnimg.cn/img_convert/dbf93412a69704437e261e04cbc7f9e9.png">
+<meta property="og:image" content="https://img-blog.csdnimg.cn/img_convert/5e9e57fdd27d2dd2d0a8cb6820567b4c.png">
+<meta property="og:image" content="https://img-blog.csdnimg.cn/img_convert/82a80e4ad4965a681ce5d1f29bce204d.png">
+<meta property="og:image" content="https://img-blog.csdnimg.cn/img_convert/5b04141ab6b1e30c79cda318b2348026.png">
+<meta property="og:image" content="https://img-blog.csdnimg.cn/img_convert/d6672322cb5522779a9cadb20b0b726e.png">
+<meta property="og:image" content="https://img-blog.csdnimg.cn/img_convert/9402acb15d554bc0a90012bffb10fa56.png">
+<meta property="og:image" content="https://img-blog.csdnimg.cn/img_convert/85915b69c67049cf59593f06dc430591.png">
+<meta property="og:image" content="https://img-blog.csdnimg.cn/img_convert/72e019bbb1ce7edd8c5f7bc9d0eaf6c7.png">
+<meta property="article:published_time" content="2023-02-12T10:28:00.000Z">
+<meta property="article:modified_time" content="2023-02-12T10:29:11.058Z">
+<meta property="article:author" content="John Doe">
+<meta property="article:tag" content="计网">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://img-blog.csdnimg.cn/img_convert/3b83510e49c73908a1d9433b7e14bccc.png">
+
+<link rel="canonical" href="http://example.com/2023/02/12/%E5%BA%94%E7%94%A8%E5%B1%82/">
+
+
+<script id="page-configurations">
+  // https://hexo.io/docs/variables.html
+  CONFIG.page = {
+    sidebar: "",
+    isHome : false,
+    isPost : true,
+    lang   : 'en'
+  };
+</script>
+
+  <title>计算机网络-应用层 | Hexo</title>
+  
+
+
+
+
+
+
+  <noscript>
+  <style>
+  .use-motion .brand,
+  .use-motion .menu-item,
+  .sidebar-inner,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-header { opacity: initial; }
+
+  .use-motion .site-title,
+  .use-motion .site-subtitle {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line-before i { left: initial; }
+  .use-motion .logo-line-after i { right: initial; }
+  </style>
+</noscript>
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage">
+  <div class="container use-motion">
+    <div class="headband"></div>
+
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="Toggle navigation bar">
+      <span class="toggle-line toggle-line-first"></span>
+      <span class="toggle-line toggle-line-middle"></span>
+      <span class="toggle-line toggle-line-last"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <span class="logo-line-before"><i></i></span>
+      <h1 class="site-title">Hexo</h1>
+      <span class="logo-line-after"><i></i></span>
+    </a>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger">
+    </div>
+  </div>
+</div>
+
+
+
+
+<nav class="site-nav">
+  <ul id="menu" class="main-menu menu">
+        <li class="menu-item menu-item-home">
+
+    <a href="/" rel="section"><i class="fa fa-home fa-fw"></i>Home</a>
+
+  </li>
+        <li class="menu-item menu-item-archives">
+
+    <a href="/archives/" rel="section"><i class="fa fa-archive fa-fw"></i>Archives</a>
+
+  </li>
+  </ul>
+</nav>
+
+
+
+
+</div>
+    </header>
+
+    
+  <div class="back-to-top">
+    <i class="fa fa-arrow-up"></i>
+    <span>0%</span>
+  </div>
+
+
+    <main class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+
+          <div class="content post posts-expand">
+            
+
+    
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="en">
+    <link itemprop="mainEntityOfPage" href="http://example.com/2023/02/12/%E5%BA%94%E7%94%A8%E5%B1%82/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.gif">
+      <meta itemprop="name" content="John Doe">
+      <meta itemprop="description" content="">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Hexo">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          计算机网络-应用层
+        </h1>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-calendar"></i>
+              </span>
+              <span class="post-meta-item-text">Posted on</span>
+              
+
+              <time title="Created: 2023-02-12 18:28:00 / Modified: 18:29:11" itemprop="dateCreated datePublished" datetime="2023-02-12T18:28:00+08:00">2023-02-12</time>
+            </span>
+
+          
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+        <h1 id="应用层"><a href="#应用层" class="headerlink" title="应用层"></a>应用层</h1><p>[TOC]</p>
+<h2 id="应用层概览"><a href="#应用层概览" class="headerlink" title="应用层概览:"></a>应用层概览:</h2><p><img src="https://img-blog.csdnimg.cn/img_convert/3b83510e49c73908a1d9433b7e14bccc.png" alt="image-20220115220640203"></p>
+<p><strong>熟知端口号:应用层协议在服务端的&#x3D;&#x3D;默认&#x3D;&#x3D;端口号,客户端端口号随意</strong></p>
+<p><img src="https://img-blog.csdnimg.cn/img_convert/8cbd969af94815b2a77969b48c049707.png"></p>
+<h2 id="网络应用模型"><a href="#网络应用模型" class="headerlink" title="网络应用模型"></a>网络应用模型</h2><h3 id="客户-服务器模型"><a href="#客户-服务器模型" class="headerlink" title="客户&#x2F;服务器模型"></a>客户&#x2F;服务器模型</h3><p><img src="https://img-blog.csdnimg.cn/img_convert/32549a6e2bec5e8e8adbb7c6c645d055.png" alt="image-20220115215144534"></p>
+<h4 id="工作流程"><a href="#工作流程" class="headerlink" title="工作流程:"></a>工作流程:</h4><p>1.服务器处于接收请求的状态</p>
+<p>2.客户机发出服务请求,等待接收结果</p>
+<p>3.服务器收到请求后分析请求,进行必要的处理,返回给客户端</p>
+<p>客户端必须事先直到服务端的IP地址,这通过DNS解析完成</p>
+<p>服务端处于被动状态,谁来了给谁服务,不来的不管</p>
+<h4 id="特点"><a href="#特点" class="headerlink" title="特点:"></a>特点:</h4><p>1.计算机第位不对等,服务器可以限制用户权限,比如ftp协议中ftp服务器可以设置管理员Administrator拥有读写的权力,但是匿名用户只有读的权力</p>
+<p>2.客户机之间不直接通信</p>
+<p>3.可拓展性差,服务器性能决定一切,服务器能力有限,想要服务更多的用户需要更强的服务器</p>
+<h3 id="P2P模型"><a href="#P2P模型" class="headerlink" title="P2P模型"></a>P2P模型</h3><p>peer to peer </p>
+<p>这个2的英语是two与to同音</p>
+<p>(曾经)比较流行的p2p应用有 电驴 等等</p>
+<p><img src="https://img-blog.csdnimg.cn/img_convert/9781d4260d4e18bd79619b14134d7389.png" alt="image-20220115215157997"></p>
+<h4 id="特点-1"><a href="#特点-1" class="headerlink" title="特点"></a>特点</h4><p>1.计算机第位对等,任意一对计算机可以直接通信,减轻了服务器的压力,提高了效率和资源利用率</p>
+<blockquote>
+<p>P2P模型实质上依然是C&#x2F;S方式,A与B通信时A发送消息,B接收消息,A就是客户端,B就是服务端.</p>
+<p>只不过没有了专门的服务器一说</p>
+</blockquote>
+<p>2.可拓展性好</p>
+<p>3.网络健壮性强,单个节点失效一般不会影响其他部分</p>
+<p>4.拥塞网络等缺点导致目前ISP(Internet Server Provider互联网服务供应商)对P2P模式持反对态度</p>
+<h2 id="域名系统-DNS"><a href="#域名系统-DNS" class="headerlink" title="域名系统(DNS)"></a>域名系统(DNS)</h2><p>domain name system</p>
+<p>采用客户&#x2F;服务器模型,协议运行在UDP之上,采用53号端口</p>
+<h3 id="层次域名空间"><a href="#层次域名空间" class="headerlink" title="层次域名空间"></a>层次域名空间</h3><p><img src="https://img-blog.csdnimg.cn/img_convert/0523696b731624567596ee5ee0e43614.png"></p>
+<blockquote>
+<p>域名命名规则</p>
+<p><img src="https://img-blog.csdnimg.cn/img_convert/5c5251f0e93aaed372842f55a4ccd2ba.png"></p>
+</blockquote>
+<p><img src="https://img-blog.csdnimg.cn/img_convert/682ab6339aec5c26d7dff29abc2e0285.png"></p>
+<h3 id="域名服务器"><a href="#域名服务器" class="headerlink" title="域名服务器"></a>域名服务器</h3><p>域名系统实际上是一个联机分布的数据库系统,采用C&#x2F;S模型</p>
+<p>域名到IP地址的解析实在域名服务器完成的</p>
+<p>一个域名服务器所管辖的域名范围称为区,同一个区中的各个节点一定联通</p>
+<p>每个区设置相应的权限域名服务器,保存该区中所有计算机域名到IP地址的映射</p>
+<p>每个域名服务器还应当有连向其他域名服务器的信息,当某个域名不在自己的管辖范围内时本域名服务器应当知道去哪里解析</p>
+<h3 id="域名服务器的组织方式"><a href="#域名服务器的组织方式" class="headerlink" title="域名服务器的组织方式"></a>域名服务器的组织方式</h3><p>域名服务器以层次方式组织</p>
+<p><img src="https://img-blog.csdnimg.cn/img_convert/8c08cd3b1c1fbb14a0ab547cb765e8fb.png"></p>
+<h4 id="根域名服务器"><a href="#根域名服务器" class="headerlink" title="根域名服务器"></a>根域名服务器</h4><p>最高层次的域名服务器,根域名服务器知道所有顶级域名服务器的IP地址</p>
+<p>当本地域名服务器无法解析时首先询问根域名服务器</p>
+<p>根域名服务器告诉本地域名服务器下一步应当找哪一个顶级域名服务器进行查询</p>
+<h4 id="顶级域名服务器"><a href="#顶级域名服务器" class="headerlink" title="顶级域名服务器"></a>顶级域名服务器</h4><p>管辖在该顶级域名服务器下注册的所有二级域名</p>
+<p>当收到其他服务器的DNS查询请求时返回当前域名或者下一级域名服务器的IP地址</p>
+<h4 id="授权域名服务器"><a href="#授权域名服务器" class="headerlink" title="授权域名服务器"></a>授权域名服务器</h4><p>&#x3D;&#x3D;每台主机&#x3D;&#x3D;都必须在授权域名服务器处登记</p>
+<p>为了可靠性,一台主机最好有两个以上的授权域名服务器(类似于留多个联系方式,方便找你)</p>
+<p>许多域名服务器同时充当本地域名服务器和授权域名服务器</p>
+<blockquote>
+<p>这句话我的理解是&#x3D;&#x3D;路由器&#x3D;&#x3D;</p>
+<p>即充当本地主机向外网发起DNS查询请求的本地域名服务器的功能,</p>
+<p>又起到了外网查询本机IP的授权域名服务器的功能</p>
+</blockquote>
+<h4 id="本地域名服务器"><a href="#本地域名服务器" class="headerlink" title="本地域名服务器"></a>本地域名服务器</h4><blockquote>
+<p>个人感觉类似局域网的域名服务器</p>
+</blockquote>
+<p>任何主机发出DNS查询请求时都需要首先送到本地域名服务器</p>
+<p>本地链接填写的IP地址就是本地域名服务器地址</p>
+<p>本地域名服务器记录根域名服务器的地址</p>
+<h3 id="解析器"><a href="#解析器" class="headerlink" title="解析器"></a>解析器</h3><p>域名解析是把域名映射为IP地址或者把IP地址映射为域名的过程.</p>
+<p>当客户端需要域名解析时,本地DNS客户端构造一个DNS请求报文以UDP数据包方式发往本地域名服务器</p>
+<p>正向解析:域名映射为IP地址</p>
+<p>反向解析:IP地址映射为域名</p>
+<p>解析方式有两种:递归查询和递归与迭代相结合的查询</p>
+<p><img src="https://img-blog.csdnimg.cn/img_convert/8c026d23dfadc4803f73767aead7b400.png"></p>
+<h4 id="递归解析过程解析y-abc-com的IP地址"><a href="#递归解析过程解析y-abc-com的IP地址" class="headerlink" title="递归解析过程解析y.abc.com的IP地址"></a>递归解析过程解析y.abc.com的IP地址</h4><p>1.主机首先查询本机的高速缓存,没有找到y.abc.com的查询记录,于是将DNS解析请求报文发送给本地域名服务器.</p>
+<p>2.本地域名服务器首先检查高速缓存,没有找到y.abc.com的查询记录,于是将DNS解析请求报文发送给根域名服务器</p>
+<p>3.根域名服务器首先检查高速缓存,没有找到y.abc.com的查询记录,于是将DNS解析请求报文发送给.com顶级域名服务器</p>
+<p>4..com顶级域名服务器高速缓存也没有,于是将DNS解析请求报文发送给.abc.com权限域名服务器</p>
+<p>5..abc.com权限域名服务器下恰好有一个注册域名为y.abc.com的主机,于是返回该主机的IP地址给上级.com顶级域名服务器</p>
+<p>6..com顶级域名服务器收到.abc.com权限域名服务器的返回IP之后将该IP再返回给根域名服务器,同时在高速缓存中记录该查询记录,方便下次查询时避免递归</p>
+<p>7.根域名服务器将.com返回的IP地址再返回给本地域名服务器,同时在高速缓存中记录该查询</p>
+<p>8.本地域名服务器收到根域名服务器返回的IP地址,将该IP地址返回给发起请求的主机,并在高速缓存中记录该查询</p>
+<p>9.发起请求的主机最终得到了y.abc.com的IP地址,并在本机的高速缓存中记录该查询</p>
+<blockquote>
+<p>高速缓存的作用?</p>
+<p>如果主机刚才已经查询过y.abc.com的IP地址并且存储于高速缓存中,那么&#x3D;&#x3D;不久后&#x3D;&#x3D;的再次查询就可以直接从高速缓存中取记录,而不用再递归一大圈去找这个IP地址</p>
+<p>为什么每一级服务器都需要高速缓存?</p>
+<p>类似于记忆化搜索,本地域名服务器不一定只服务于一台主机,如果主机A,B都由本地域名服务器S提供服务,假设A解析了主机C,S会将C的IP地址存在高速缓存中,那么当B也需要查询C时本地域名服务器只需要返回刚才的记录</p>
+</blockquote>
+<p>缺点:</p>
+<p>不考虑高速缓存的作用,每一次跨本地域名服务器的DNS查询都需要根域名服务器的介入,而世界上只有13台根服务器,但是却要面对上亿的主机和查询,根服务器将会不堪重负</p>
+<p>改进方法:递归+迭代</p>
+<h4 id="递归与迭代相结合的解析过程解析y-abc-com的IP地址"><a href="#递归与迭代相结合的解析过程解析y-abc-com的IP地址" class="headerlink" title="递归与迭代相结合的解析过程解析y.abc.com的IP地址"></a>递归与迭代相结合的解析过程解析y.abc.com的IP地址</h4><p>本地主机还是以解析y.abc.com的IP地址为例子,假设路径上服务器的高速缓存都没有存储该查询记录</p>
+<p>1.本机向本地域名服务器发起DNS查询报文</p>
+<p>2.本地域名服务器发现该DNS不在局域网内,需要向外网寻找,于是直接向根域名服务器发出请求</p>
+<p>3.根服务器返回.com顶级服务器的IP地址</p>
+<p>4.本地域名服务器收到.com的IP地址后向该.com顶级域名服务器发送请求</p>
+<p>5..com顶级域名服务器返回.abc.com授权域名服务器地址</p>
+<p>6.本地域名服务器收到.abc.com的IP地址后向该授权域名服务器发送请求</p>
+<p>7..abc.com授权域名服务器返回y.abc.com的IP地址</p>
+<p>8.本地域名服务器已经获得了y.abc.com的IP地址”我滴任务完成辣!啊哈哈哈哈”,然后将该IP地址返回给发起请求的本机</p>
+<p>相对于递归方式,递归+迭代的方式中,根服务器,顶级域名服务器等被询问的服务器都没法在高速缓存上记录这次查询,因为他们都是的&#x3D;&#x3D;指路人&#x3D;&#x3D;而不是&#x3D;&#x3D;带路人&#x3D;&#x3D;的作用.</p>
+<h2 id="文本传输协议FTP"><a href="#文本传输协议FTP" class="headerlink" title="文本传输协议FTP"></a>文本传输协议FTP</h2><p>File Transfer Protocol,因特网上使用最广泛的文件传输协议</p>
+<p>功能:</p>
+<p>1.兼容:不同种类(包括硬件软件)主机系统之间传输文件</p>
+<p>2.权限:以用户权限管理的方式提供用户对远程FTP服务器上的文件管理能力</p>
+<p>3.匿名共享:匿名FTP方式提供公用文件共享的negligence</p>
+<h3 id="FTP工作原理"><a href="#FTP工作原理" class="headerlink" title="FTP工作原理"></a>FTP工作原理</h3><p>采用C&#x2F;S工作方式,使用TCP可靠的传输服务.</p>
+<p>一个FTP服务器进程可以同时为多个客户进程提供服务(分时系统?)</p>
+<p>FTP服务器进程分两大部分:</p>
+<p>主进程:接受新的请求,处于一直监听的状态,只要有新的进程就立刻开一个从属进程来啊处理该请求</p>
+<p>从属进程:处理单个请求</p>
+<p>以主机A下载<code>ftp://ftp.abc.edu.cn/file</code>为例子描述工作过程</p>
+<p>1.服务端开放21号端口,并监听这个端口,等待客户连接.</p>
+<p>2.客户端开放随意端口连接到服务端的21号端口,建立控制连接</p>
+<p>3.客户端通过控制连接发送下载文件的请求</p>
+<blockquote>
+<p>控制信息时7位ASCII码格式</p>
+<p>控制连接只用来控制,不用来传输</p>
+<p>数据连接和控制连接并行,即使是传输过程中也可以通过控制连接发送停止请求中止数据传输</p>
+</blockquote>
+<p>4.服务端接收到文件传输请求后,创建”数据传输进程”和”数据连接”,在20号端口与客户端的任意端口(区别于客户端刚才开放的控制连接端口)建立数据连接并且传输客户端请求的文件</p>
+<p>5.当客户端的一次数据传输请求被满足时,服务端立刻关闭20端口,断开数据连接.控制连接继续接收用户的传输请求</p>
+<h3 id="FTP服务特点"><a href="#FTP服务特点" class="headerlink" title="FTP服务特点:"></a>FTP服务特点:</h3><p>1.提供不同种类的主机系统之间的文件传输能力</p>
+<p>2.以用户权限管理的方式提供用户对远程FTP服务器上的文件的管理能力</p>
+<p>3.以匿名FTP方式提供公用文件共享的能力.匿名用户只能从FTP服务器拷贝文件,不能上传或者修改文件,即只读模式</p>
+<p>4.使用TCP协议.</p>
+<p>5.一个FTP服务器进程可以同时为多个客户进程提供服务</p>
+<p>6.带外传送,使用两种连接,控制连接和数据连接.分别占用21和20端口,其中数据连接传送完毕之后立刻断开,控制连接一直持续</p>
+<p>7.服务器必须追踪用户在远程目录树上的当前位置</p>
+<h2 id="电子邮件"><a href="#电子邮件" class="headerlink" title="电子邮件"></a>电子邮件</h2><h3 id="组成结构"><a href="#组成结构" class="headerlink" title="组成结构"></a>组成结构</h3><p><img src="https://img-blog.csdnimg.cn/img_convert/ac055e43baff6eafbde1f574ff0b617f.png"></p>
+<p>异步通信方式,通信时双方都不需要在场</p>
+<p>发送和接收实际是由邮件服务器完成的</p>
+<p>用户的工作是通过用户代理命令邮件服务器完成工作</p>
+<h4 id="用户代理"><a href="#用户代理" class="headerlink" title="用户代理:"></a>用户代理:</h4><p>User Agent</p>
+<p><strong>“用户与电子邮件系统的接口”</strong></p>
+<p>说人话就是电子邮箱,比如qq邮箱.</p>
+<blockquote>
+<p>用户发送邮件时在网络上的形象</p>
+<p>人类在工作时的形象是工人,人类在教书时的形象是老师,人类在发送邮件时的形象是邮箱</p>
+</blockquote>
+<p>显然这个用户代理能够实现人类希望的,最起码的写信,显示,处理信的功能</p>
+<h4 id="邮件服务器"><a href="#邮件服务器" class="headerlink" title="邮件服务器"></a>邮件服务器</h4><blockquote>
+<p>电子邮件系统中的工具人儿,是用户代理的奴仆</p>
+</blockquote>
+<p>作用是:</p>
+<p>1.收发邮件</p>
+<p>2.向用户代理报告邮件传送情况</p>
+<p>采用C&#x2F;S方式工作</p>
+<p>一个邮件服务器本身是双料高级特工,在它&#x3D;&#x3D;发送邮件时他是客户端C,&#x3D;&#x3D;在它&#x3D;&#x3D;接收邮件的时候,它是服务端S&#x3D;&#x3D;</p>
+<blockquote>
+<p>用实际生活中收发邮件做一个类比</p>
+<p><img src="https://img-blog.csdnimg.cn/img_convert/082dfb6a4adc8633ff832af17b26042c.png"></p>
+<p>实际生活中接收邮件是比较类似于网上这一套的,每天早上我们起床之后出门检查一下私人邮箱里面是否有东西,从家里走出来到邮箱取邮件这一段是我们亲历亲为的,没法生动地解释用户代理这个概念</p>
+<p>并且对于发送邮件,实际生活中我们需要跑好远到邮局或者偶遇邮递员送信,但是网络上我们却用的与收信相同的邮箱.这是天壤之别.</p>
+<p>为了方便理解这件事,我们虚构一个”现实”:</p>
+<p>1.我家有矿,收发邮件这种琐事怎么可能由我自己跑腿?雇一个管家专门代替我从屋门到邮箱这两三步的距离.</p>
+<p>并且我不识字儿,写信也是我口述,管家代笔,我说错了要改,管家也不会烦,无条件服从我的命令.</p>
+<p>收信我也不自己看,管家念给我听.</p>
+<p>附近邻居家的情况与我相同</p>
+<p>这个管家就比较类似与用户代理了</p>
+<p>2.邮箱是&#x3D;&#x3D;公共的&#x3D;&#x3D;,并且这个邮箱好大,为每个用户都留了存放信件的地方,周围的邻居收发信件都通过这个邮箱,</p>
+<p>每个邮箱都是邮局的功能,我发邮件不需要到邮局发,我只需要让管家写好信放在邮箱里.</p>
+<p>每隔一段时间邮箱就会自己检查有没有待发送的邮件,</p>
+<p>如果有,则召唤邮递员,让邮递员先不送信,屁颠屁颠地跑到目的地看看沿路能不能通,对方的邮箱能不能接收邮件</p>
+<p>邮递员逛一圈回来报告都没有问题,邮箱就让邮递员正式送信</p>
+<p>邮递员不管送信成功失败都会回来报告给邮箱,并且说明原因</p>
+<p>3.邮箱有关于我的消息,比如新的邮件到达或者我发送的邮件成功或者失败等,&#x3D;&#x3D;不会提醒我&#x3D;&#x3D;.</p>
+<p>只有当我想要了解邮箱有关我的状态时才会吩咐&#x3D;&#x3D;管家&#x3D;&#x3D;去邮箱看看&#x3D;&#x3D;我的那一部分&#x3D;&#x3D;,回来把消息说给我</p>
+<p>这个邮箱就比较类似于邮件服务器了</p>
+</blockquote>
+<p><strong>记发送端邮件服务器为”客户端”</strong></p>
+<p><strong>记接收端邮件服务器为”服务端”</strong></p>
+<p>&#x3D;&#x3D;这两句很重要&#x3D;&#x3D;</p>
+<h4 id="邮件发送协议SMTP"><a href="#邮件发送协议SMTP" class="headerlink" title="邮件发送协议SMTP"></a>邮件发送协议SMTP</h4><p>Simple Mail Transfer Protocol简单邮件传输协议</p>
+<p>使用C&#x2F;S方式,发送方为客户端,接收方为服务端.</p>
+<p>使用TCP连接,接收方服务器开放端口号25</p>
+<blockquote>
+<p>浏览器与基于万维网的邮件服务器(Gmail等)之间的邮件发送使用的是HTTP,相同的邮件服务器之间也是HTTP</p>
+<p>只有不同邮件服务器之间传送邮件的时候才使用SMTP协议</p>
+</blockquote>
+<h5 id="多用途国际邮件扩充-MIME"><a href="#多用途国际邮件扩充-MIME" class="headerlink" title="多用途国际邮件扩充(MIME)"></a>多用途国际邮件扩充(MIME)</h5><p>SMTP只能传送ASCII码,无法实现”添加附件”的功能,于是就有了MIME(Multipurpose Internet Mail Extensions)</p>
+<p>MIME是基于SMTP的,本质上是将用户要发送的”附件”转化为7位ASCII码然后套用SMTP协议,接收方再将ASCII码翻译过来</p>
+<p><img src="https://img-blog.csdnimg.cn/img_convert/dbf93412a69704437e261e04cbc7f9e9.png"></p>
+<p>MIME主要包括:</p>
+<p><img src="https://img-blog.csdnimg.cn/img_convert/5e9e57fdd27d2dd2d0a8cb6820567b4c.png"></p>
+<p><strong>“推”</strong></p>
+<p>推的意思是发送方主动,接收方被动</p>
+<p>用户代理向&#x3D;&#x3D;客户端&#x3D;&#x3D;发送邮件采用的是SMTP协议</p>
+<p>客户端向服务端发送邮件采用的也是SMTP协议</p>
+<h4 id="邮件读取协议POP3"><a href="#邮件读取协议POP3" class="headerlink" title="邮件读取协议POP3"></a>邮件读取协议POP3</h4><p>post office protocol邮局协议,邮件读取协议</p>
+<p>3是指第三个版本</p>
+<p>使用C&#x2F;S方式,使用TCP连接,端口号110</p>
+<p>拉的意思是发送方被动,接收方主动</p>
+<p><strong>“拉”</strong></p>
+<h3 id="邮件发送过程"><a href="#邮件发送过程" class="headerlink" title="邮件发送过程:"></a>邮件发送过程:</h3><p><img src="https://img-blog.csdnimg.cn/img_convert/82a80e4ad4965a681ce5d1f29bce204d.png"></p>
+<p>1.用户通过用户代理写好信之后使用SMTP协议将邮件发送给&#x3D;&#x3D;发送端邮件服务器&#x3D;&#x3D;(后面称为&#x3D;&#x3D;客户端&#x3D;&#x3D;),客户端将该邮件放入自己的邮件缓存队列中等待发送</p>
+<p>2.客户端定时检查邮件缓存队列,如果有邮件待发送,则向&#x3D;&#x3D;接收端邮件服务器&#x3D;&#x3D;(后面称&#x3D;&#x3D;服务端&#x3D;&#x3D;)发送TCP连接请求</p>
+<p>3.TCP连接建立后SMTP客户端向SMTP服务端发送邮件,当SMTP客户端邮件缓存队列清空时,SMTP关闭TCP连接</p>
+<p>4.服务端接收到邮件之后将邮件放入用户信箱</p>
+<p>5.收信用户打算收信时,让用户代理去邮件服务器的用户信箱拉取邮件</p>
+<h3 id="电子邮件格式"><a href="#电子邮件格式" class="headerlink" title="电子邮件格式"></a>电子邮件格式</h3><p>$$<br>电子邮件<br>    \begin{cases}<br>        信封\<br>        内容<br>            \begin{cases}<br>                首部\<br>                主体<br>            \end{cases}<br>    \end{cases}<br>$$</p>
+<p>信封完全不用用户操心,信封是从信的内容首部提取信息填写的</p>
+<h4 id="内容首部"><a href="#内容首部" class="headerlink" title="内容首部"></a>内容首部</h4><p>首部由首部行组成</p>
+<p>首部行的格式是:<code>键:值</code></p>
+<p><img src="https://img-blog.csdnimg.cn/img_convert/5b04141ab6b1e30c79cda318b2348026.png"></p>
+<p>发件人地址From,收件人地址To等是必须内容</p>
+<p>主题Subject等是非必须内容</p>
+<p>其中收件人地址,主题这种信息由用户手动填写,发件人地址和发件时间自动填写</p>
+<blockquote>
+<p>From和To都是用户地址</p>
+<p><a href="mailto:&#x68;&#x6f;&#x6f;&#112;&#100;&#111;&#x67;&#x40;&#104;&#117;&#115;&#116;&#46;&#x65;&#100;&#117;&#x2e;&#99;&#x6e;">&#x68;&#x6f;&#x6f;&#112;&#100;&#111;&#x67;&#x40;&#104;&#117;&#115;&#116;&#46;&#x65;&#100;&#117;&#x2e;&#99;&#x6e;</a></p>
+<p>即 hoopdog at hust.edu.cn</p>
+<p>即 位于hust.edu.cn的hoopdog </p>
+<p>其中@后面的是邮件服务器地址,@前面的是用户名</p>
+<p>需要确保的是,同一个邮件服务器管理的用户名不能有重名(这容易理解,班上有俩个张三的时候课代表也不知道把张三的作业本给哪个张三)</p>
+<p>由此可见<a href="mailto:&#x62;&#x61;&#x6c;&#97;&#x62;&#97;&#x6c;&#97;&#64;&#x71;&#x71;&#x2e;&#x63;&#x6f;&#x6d;">&#x62;&#x61;&#x6c;&#97;&#x62;&#97;&#x6c;&#97;&#64;&#x71;&#x71;&#x2e;&#x63;&#x6f;&#x6d;</a>这个地址就是qq.com邮件服务器管理的balabala用户</p>
+<p>&#x3D;&#x3D;qq.com是邮件服务器&#x3D;&#x3D;</p>
+</blockquote>
+<h2 id="万维网"><a href="#万维网" class="headerlink" title="万维网"></a>万维网</h2><p>万维网是无数网络站点和页面的集合,是因特网最主要的部分</p>
+<p>因特网还包括电子邮件等</p>
+<h3 id="万维网的组成"><a href="#万维网的组成" class="headerlink" title="万维网的组成"></a>万维网的组成</h3><p>world wide web:资料空间</p>
+<p>万维网中有用的事物称为”资源”<br>$$<br>万维网内核<br>\begin{cases}<br>同一资源定位符(URL)\<br>超文本传输协议(HTTP)\<br>超文本标记语言(HTML)<br>\end{cases}<br>$$<br>万维网以C&#x2F;S的方式工作,浏览器是万维网的客户端.万维网上资源文档所在的计算机时服务端</p>
+<p>两者通信的流程:</p>
+<p>1.万维网用户希望使用浏览器访问某个URL,与该URL所在的服务器建立连接,发送浏览请求</p>
+<p>2.服务器把URL转换为文件路径,返回信息给客户端</p>
+<p>3.通信完毕,关闭连接</p>
+<h3 id="统一资源定位符-URL"><a href="#统一资源定位符-URL" class="headerlink" title="统一资源定位符(URL)"></a>统一资源定位符(URL)</h3><p>负责标识万维网上的各种文档,使每个文档有唯一的标识符(链接地址)</p>
+<p>一般形式:</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">&lt;协议&gt;://&lt;主机&gt;:&lt;端口&gt;/&lt;路径&gt;</span><br></pre></td></tr></table></figure>
+
+<p>其中端口和路径可以略去不写,整个URL不区分大小写</p>
+<blockquote>
+<p>比如:</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">https://www.baidu.com/</span><br></pre></td></tr></table></figure>
+
+<p>https是协议</p>
+<p><a target="_blank" rel="noopener" href="http://www.baidu.com是主机的dns地址,实际上映射到220.181.38.251/">www.baidu.com是主机的DNS地址,实际上映射到220.181.38.251</a></p>
+</blockquote>
+<p>常见的协议有http,ftp,https等</p>
+<h3 id="超文本传输协议HTTP"><a href="#超文本传输协议HTTP" class="headerlink" title="超文本传输协议HTTP"></a>超文本传输协议HTTP</h3><p>协议规定了</p>
+<p>1.浏览器怎样想万维网服务器请求资源</p>
+<p>2.服务器怎样把文档传给浏览器</p>
+<p>即规定了怎么去和怎么回来</p>
+<h4 id="HTTP操作过程"><a href="#HTTP操作过程" class="headerlink" title="HTTP操作过程"></a>HTTP操作过程</h4><p>1.客户端(浏览器)对要访问的www服务器请求DNS域名解析,获得该服务器IP地址</p>
+<p>2.客户端通过TCP向服务器发起建立连接的请求,这是第一次握手</p>
+<p>3.服务器在TCP的80端口监听到客户端发出的请求,与客户端建立连接,这是第二次握手</p>
+<p>4.在客户端与服务器的第三次握手时客户端发送获取&#x3D;&#x3D;服务器拥有的某个文件&#x3D;&#x3D;的请求报文</p>
+<p>5.服务器返回&#x3D;&#x3D;该文件web页面的必须信息&#x3D;&#x3D;(注意此时还没有完全返回该页面,只是返回了基本的框架,很多元素比如jpeg图片等需要后续继续请求才能发送)</p>
+<p>6.客户端浏览器收到资源并解释,及时显示给用户</p>
+<p>7.客户端一直发送请求直到页面加载完成,此时TCP连接断开</p>
+<p>客户端向服务端发出的是请求,服务端向客户端发出的是响应</p>
+<p>没有请求就没有响应,请求时客户端主动发出的,服务端不会多管闲事</p>
+<p>请求和响应必须遵循规定的规则和格式,即HTTP</p>
+<h4 id="HTTP特点"><a href="#HTTP特点" class="headerlink" title="HTTP特点"></a>HTTP特点</h4><p>1.本身无状态</p>
+<p>服务器不会记录客户信息,任何客户不管第几次访问同一个页面时显示的内容都是相同的.这样设计的目的是减轻服务器的压力,使其支持大量并发的HTTP请求</p>
+<blockquote>
+<p>Cookie+数据库获取用户历史浏览信息</p>
+<p>后来引入Cookie技术之后,服务器只需要记录客户端的身份信息,客户自己的喜好,密码等等信息都存储在客户机器上,当客户端第一次访问某个服务器时,服务器在数据库中记录该客户端的身份信息.客户端自己记录自己的个人喜好和隐私信息.</p>
+<p>当客户端下一次访问这个服务器时,服务器就能从数据库记录中知道这个客户曾经来过,然后可以根据客户cookie获得客户喜好了</p>
+<p>这时状态是来自cookie的辅助,与http本身无状态不矛盾</p>
+</blockquote>
+<p>2.传输层协议使用TCP</p>
+<p><strong>3.既可以使用非持久连接,也可以使用持久连接</strong></p>
+<p>非持久连接:对于客户端的每一个请求,服务器返回响应后立刻断开TCP连接</p>
+<p>持久连接:服务器对于客户端的请求返回响应之后并不立刻断开TCP连接,而是等待下一次请求,直到客户端发出停止连接的要求或者连接失败</p>
+<blockquote>
+<p>持久连接的两种方式:</p>
+<p>流水线方式:请求是串行的,客户端发出A请求,必须收到服务端的响应之后才可以发出下一个B请求</p>
+<p>非流水线方式:请求是并行的,客户端一股脑发出多个请求,剩下的任务就是接收服务端的多个响应</p>
+<p><img src="https://img-blog.csdnimg.cn/img_convert/d6672322cb5522779a9cadb20b0b726e.png"></p>
+</blockquote>
+<h4 id="HTTP报文结构"><a href="#HTTP报文结构" class="headerlink" title="HTTP报文结构"></a>HTTP报文结构</h4><p>HTTP面向文本,报文由ASCII码字符串组成</p>
+<p>报文由两类:请求报文和响应报文</p>
+<p>两种报文都是由三部分组成:</p>
+<p>开始行,首部行,实体主题</p>
+<p>区别在于开始行不同</p>
+<p>请求报文的开始行是请求行</p>
+<p>响应报文的开始行是状态行</p>
+<h5 id="请求报文"><a href="#请求报文" class="headerlink" title="请求报文"></a>请求报文</h5><p><img src="https://img-blog.csdnimg.cn/img_convert/9402acb15d554bc0a90012bffb10fa56.png"></p>
+<p>请求行&#x3D;请求用到的方法+space+请求资源的URL+space+HTTP版本号+回车换行</p>
+<blockquote>
+<p>请求方法作用于请求对象</p>
+<p>请求常用方法:</p>
+<p><img src="https://img-blog.csdnimg.cn/img_convert/85915b69c67049cf59593f06dc430591.png"></p>
+</blockquote>
+<h5 id="响应报文"><a href="#响应报文" class="headerlink" title="响应报文"></a>响应报文</h5><p><img src="https://img-blog.csdnimg.cn/img_convert/72e019bbb1ce7edd8c5f7bc9d0eaf6c7.png"></p>
+
+    </div>
+
+    
+    
+    
+
+      <footer class="post-footer">
+          <div class="post-tags">
+              <a href="/tags/%E8%AE%A1%E7%BD%91/" rel="tag"># 计网</a>
+          </div>
+
+        
+
+
+        
+    <div class="post-nav">
+      <div class="post-nav-item">
+    <a href="/2023/02/12/%E7%89%A9%E7%90%86%E5%B1%82/" rel="prev" title="计算机网络-物理层">
+      <i class="fa fa-chevron-left"></i> 计算机网络-物理层
+    </a></div>
+      <div class="post-nav-item">
+    <a href="/2023/02/12/%E7%BD%91%E7%BB%9C%E5%B1%82/" rel="next" title="计算机网络-网络层">
+      计算机网络-网络层 <i class="fa fa-chevron-right"></i>
+    </a></div>
+    </div>
+      </footer>
+    
+  </article>
+  
+  
+  
+
+
+
+          </div>
+          
+
+<script>
+  window.addEventListener('tabs:register', () => {
+    let { activeClass } = CONFIG.comments;
+    if (CONFIG.comments.storage) {
+      activeClass = localStorage.getItem('comments_active') || activeClass;
+    }
+    if (activeClass) {
+      let activeTab = document.querySelector(`a[href="#comment-${activeClass}"]`);
+      if (activeTab) {
+        activeTab.click();
+      }
+    }
+  });
+  if (CONFIG.comments.storage) {
+    window.addEventListener('tabs:click', event => {
+      if (!event.target.matches('.tabs-comment .tab-content .tab-pane')) return;
+      let commentClass = event.target.classList[1];
+      localStorage.setItem('comments_active', commentClass);
+    });
+  }
+</script>
+
+        </div>
+          
+  
+  <div class="toggle sidebar-toggle">
+    <span class="toggle-line toggle-line-first"></span>
+    <span class="toggle-line toggle-line-middle"></span>
+    <span class="toggle-line toggle-line-last"></span>
+  </div>
+
+  <aside class="sidebar">
+    <div class="sidebar-inner">
+
+      <ul class="sidebar-nav motion-element">
+        <li class="sidebar-nav-toc">
+          Table of Contents
+        </li>
+        <li class="sidebar-nav-overview">
+          Overview
+        </li>
+      </ul>
+
+      <!--noindex-->
+      <div class="post-toc-wrap sidebar-panel">
+          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#%E5%BA%94%E7%94%A8%E5%B1%82"><span class="nav-number">1.</span> <span class="nav-text">应用层</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%BA%94%E7%94%A8%E5%B1%82%E6%A6%82%E8%A7%88"><span class="nav-number">1.1.</span> <span class="nav-text">应用层概览:</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E7%BD%91%E7%BB%9C%E5%BA%94%E7%94%A8%E6%A8%A1%E5%9E%8B"><span class="nav-number">1.2.</span> <span class="nav-text">网络应用模型</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%AE%A2%E6%88%B7-%E6%9C%8D%E5%8A%A1%E5%99%A8%E6%A8%A1%E5%9E%8B"><span class="nav-number">1.2.1.</span> <span class="nav-text">客户&#x2F;服务器模型</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#%E5%B7%A5%E4%BD%9C%E6%B5%81%E7%A8%8B"><span class="nav-number">1.2.1.1.</span> <span class="nav-text">工作流程:</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E7%89%B9%E7%82%B9"><span class="nav-number">1.2.1.2.</span> <span class="nav-text">特点:</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#P2P%E6%A8%A1%E5%9E%8B"><span class="nav-number">1.2.2.</span> <span class="nav-text">P2P模型</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#%E7%89%B9%E7%82%B9-1"><span class="nav-number">1.2.2.1.</span> <span class="nav-text">特点</span></a></li></ol></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%9F%9F%E5%90%8D%E7%B3%BB%E7%BB%9F-DNS"><span class="nav-number">1.3.</span> <span class="nav-text">域名系统(DNS)</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%B1%82%E6%AC%A1%E5%9F%9F%E5%90%8D%E7%A9%BA%E9%97%B4"><span class="nav-number">1.3.1.</span> <span class="nav-text">层次域名空间</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%9F%9F%E5%90%8D%E6%9C%8D%E5%8A%A1%E5%99%A8"><span class="nav-number">1.3.2.</span> <span class="nav-text">域名服务器</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%9F%9F%E5%90%8D%E6%9C%8D%E5%8A%A1%E5%99%A8%E7%9A%84%E7%BB%84%E7%BB%87%E6%96%B9%E5%BC%8F"><span class="nav-number">1.3.3.</span> <span class="nav-text">域名服务器的组织方式</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#%E6%A0%B9%E5%9F%9F%E5%90%8D%E6%9C%8D%E5%8A%A1%E5%99%A8"><span class="nav-number">1.3.3.1.</span> <span class="nav-text">根域名服务器</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E9%A1%B6%E7%BA%A7%E5%9F%9F%E5%90%8D%E6%9C%8D%E5%8A%A1%E5%99%A8"><span class="nav-number">1.3.3.2.</span> <span class="nav-text">顶级域名服务器</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E6%8E%88%E6%9D%83%E5%9F%9F%E5%90%8D%E6%9C%8D%E5%8A%A1%E5%99%A8"><span class="nav-number">1.3.3.3.</span> <span class="nav-text">授权域名服务器</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E6%9C%AC%E5%9C%B0%E5%9F%9F%E5%90%8D%E6%9C%8D%E5%8A%A1%E5%99%A8"><span class="nav-number">1.3.3.4.</span> <span class="nav-text">本地域名服务器</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E8%A7%A3%E6%9E%90%E5%99%A8"><span class="nav-number">1.3.4.</span> <span class="nav-text">解析器</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#%E9%80%92%E5%BD%92%E8%A7%A3%E6%9E%90%E8%BF%87%E7%A8%8B%E8%A7%A3%E6%9E%90y-abc-com%E7%9A%84IP%E5%9C%B0%E5%9D%80"><span class="nav-number">1.3.4.1.</span> <span class="nav-text">递归解析过程解析y.abc.com的IP地址</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E9%80%92%E5%BD%92%E4%B8%8E%E8%BF%AD%E4%BB%A3%E7%9B%B8%E7%BB%93%E5%90%88%E7%9A%84%E8%A7%A3%E6%9E%90%E8%BF%87%E7%A8%8B%E8%A7%A3%E6%9E%90y-abc-com%E7%9A%84IP%E5%9C%B0%E5%9D%80"><span class="nav-number">1.3.4.2.</span> <span class="nav-text">递归与迭代相结合的解析过程解析y.abc.com的IP地址</span></a></li></ol></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E6%96%87%E6%9C%AC%E4%BC%A0%E8%BE%93%E5%8D%8F%E8%AE%AEFTP"><span class="nav-number">1.4.</span> <span class="nav-text">文本传输协议FTP</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#FTP%E5%B7%A5%E4%BD%9C%E5%8E%9F%E7%90%86"><span class="nav-number">1.4.1.</span> <span class="nav-text">FTP工作原理</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#FTP%E6%9C%8D%E5%8A%A1%E7%89%B9%E7%82%B9"><span class="nav-number">1.4.2.</span> <span class="nav-text">FTP服务特点:</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E7%94%B5%E5%AD%90%E9%82%AE%E4%BB%B6"><span class="nav-number">1.5.</span> <span class="nav-text">电子邮件</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E7%BB%84%E6%88%90%E7%BB%93%E6%9E%84"><span class="nav-number">1.5.1.</span> <span class="nav-text">组成结构</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#%E7%94%A8%E6%88%B7%E4%BB%A3%E7%90%86"><span class="nav-number">1.5.1.1.</span> <span class="nav-text">用户代理:</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E9%82%AE%E4%BB%B6%E6%9C%8D%E5%8A%A1%E5%99%A8"><span class="nav-number">1.5.1.2.</span> <span class="nav-text">邮件服务器</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E9%82%AE%E4%BB%B6%E5%8F%91%E9%80%81%E5%8D%8F%E8%AE%AESMTP"><span class="nav-number">1.5.1.3.</span> <span class="nav-text">邮件发送协议SMTP</span></a><ol class="nav-child"><li class="nav-item nav-level-5"><a class="nav-link" href="#%E5%A4%9A%E7%94%A8%E9%80%94%E5%9B%BD%E9%99%85%E9%82%AE%E4%BB%B6%E6%89%A9%E5%85%85-MIME"><span class="nav-number">1.5.1.3.1.</span> <span class="nav-text">多用途国际邮件扩充(MIME)</span></a></li></ol></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E9%82%AE%E4%BB%B6%E8%AF%BB%E5%8F%96%E5%8D%8F%E8%AE%AEPOP3"><span class="nav-number">1.5.1.4.</span> <span class="nav-text">邮件读取协议POP3</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E9%82%AE%E4%BB%B6%E5%8F%91%E9%80%81%E8%BF%87%E7%A8%8B"><span class="nav-number">1.5.2.</span> <span class="nav-text">邮件发送过程:</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E7%94%B5%E5%AD%90%E9%82%AE%E4%BB%B6%E6%A0%BC%E5%BC%8F"><span class="nav-number">1.5.3.</span> <span class="nav-text">电子邮件格式</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#%E5%86%85%E5%AE%B9%E9%A6%96%E9%83%A8"><span class="nav-number">1.5.3.1.</span> <span class="nav-text">内容首部</span></a></li></ol></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E4%B8%87%E7%BB%B4%E7%BD%91"><span class="nav-number">1.6.</span> <span class="nav-text">万维网</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E4%B8%87%E7%BB%B4%E7%BD%91%E7%9A%84%E7%BB%84%E6%88%90"><span class="nav-number">1.6.1.</span> <span class="nav-text">万维网的组成</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E7%BB%9F%E4%B8%80%E8%B5%84%E6%BA%90%E5%AE%9A%E4%BD%8D%E7%AC%A6-URL"><span class="nav-number">1.6.2.</span> <span class="nav-text">统一资源定位符(URL)</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E8%B6%85%E6%96%87%E6%9C%AC%E4%BC%A0%E8%BE%93%E5%8D%8F%E8%AE%AEHTTP"><span class="nav-number">1.6.3.</span> <span class="nav-text">超文本传输协议HTTP</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#HTTP%E6%93%8D%E4%BD%9C%E8%BF%87%E7%A8%8B"><span class="nav-number">1.6.3.1.</span> <span class="nav-text">HTTP操作过程</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#HTTP%E7%89%B9%E7%82%B9"><span class="nav-number">1.6.3.2.</span> <span class="nav-text">HTTP特点</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#HTTP%E6%8A%A5%E6%96%87%E7%BB%93%E6%9E%84"><span class="nav-number">1.6.3.3.</span> <span class="nav-text">HTTP报文结构</span></a><ol class="nav-child"><li class="nav-item nav-level-5"><a class="nav-link" href="#%E8%AF%B7%E6%B1%82%E6%8A%A5%E6%96%87"><span class="nav-number">1.6.3.3.1.</span> <span class="nav-text">请求报文</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#%E5%93%8D%E5%BA%94%E6%8A%A5%E6%96%87"><span class="nav-number">1.6.3.3.2.</span> <span class="nav-text">响应报文</span></a></li></ol></li></ol></li></ol></li></ol></li></ol></div>
+      </div>
+      <!--/noindex-->
+
+      <div class="site-overview-wrap sidebar-panel">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+  <p class="site-author-name" itemprop="name">John Doe</p>
+  <div class="site-description" itemprop="description"></div>
+</div>
+<div class="site-state-wrap motion-element">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+          <a href="/archives/">
+        
+          <span class="site-state-item-count">78</span>
+          <span class="site-state-item-name">posts</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-tags">
+        <span class="site-state-item-count">30</span>
+        <span class="site-state-item-name">tags</span>
+      </div>
+  </nav>
+</div>
+
+
+
+      </div>
+
+    </div>
+  </aside>
+  <div id="sidebar-dimmer"></div>
+
+
+      </div>
+    </main>
+
+    <footer class="footer">
+      <div class="footer-inner">
+        
+
+        
+
+<div class="copyright">
+  
+  &copy; 
+  <span itemprop="copyrightYear">2024</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">John Doe</span>
+</div>
+  <div class="powered-by">Powered by <a href="https://hexo.io/" class="theme-link" rel="noopener" target="_blank">Hexo</a> & <a href="https://muse.theme-next.org/" class="theme-link" rel="noopener" target="_blank">NexT.Muse</a>
+  </div>
+
+        
+
+
+
+
+
+
+
+
+      </div>
+    </footer>
+  </div>
+
+  
+  <script src="/lib/anime.min.js"></script>
+  <script src="/lib/velocity/velocity.min.js"></script>
+  <script src="/lib/velocity/velocity.ui.min.js"></script>
+
+<script src="/js/utils.js"></script>
+
+<script src="/js/motion.js"></script>
+
+
+<script src="/js/schemes/muse.js"></script>
+
+
+<script src="/js/next-boot.js"></script>
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+  
+
+</body>
+</html>

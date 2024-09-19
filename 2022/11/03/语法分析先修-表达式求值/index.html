@@ -1,0 +1,586 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 7.3.0">
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png">
+  <link rel="mask-icon" href="/images/logo.svg" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+<link rel="stylesheet" href="/lib/font-awesome/css/all.min.css">
+
+<script id="hexo-configurations">
+    var NexT = window.NexT || {};
+    var CONFIG = {"hostname":"example.com","root":"/","scheme":"Muse","version":"7.8.0","exturl":false,"sidebar":{"position":"left","display":"post","padding":18,"offset":12,"onmobile":false},"copycode":{"enable":false,"show_result":false,"style":null},"back2top":{"enable":true,"sidebar":false,"scrollpercent":false},"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":false,"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"algolia":{"hits":{"per_page":10},"labels":{"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}},"localsearch":{"enable":false,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false},"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}}};
+  </script>
+
+  <meta name="description" content="语法分析算数表达式的上下文无关文法干什么用?教材中在语法分析一章首先提出的概念就是上下文无关语法CFG 语法分析器不能没有CFG,正如词法分析器不能没有正规式 也就是说,模式的形式化描述 正规式规定死了,一种语言可能使用的单词有什么 CFG就是规定死了,一种语言可能使用的语句有什么 CFG是一种语言的范式,而满足这个CFG的一句话是该种语言的实例 这就好比:规定汉语的语句是由主谓宾构成的,这相当于">
+<meta property="og:type" content="article">
+<meta property="og:title" content="语法分析先修-表达式求值">
+<meta property="og:url" content="http://example.com/2022/11/03/%E8%AF%AD%E6%B3%95%E5%88%86%E6%9E%90%E5%85%88%E4%BF%AE-%E8%A1%A8%E8%BE%BE%E5%BC%8F%E6%B1%82%E5%80%BC/index.html">
+<meta property="og:site_name" content="Hexo">
+<meta property="og:description" content="语法分析算数表达式的上下文无关文法干什么用?教材中在语法分析一章首先提出的概念就是上下文无关语法CFG 语法分析器不能没有CFG,正如词法分析器不能没有正规式 也就是说,模式的形式化描述 正规式规定死了,一种语言可能使用的单词有什么 CFG就是规定死了,一种语言可能使用的语句有什么 CFG是一种语言的范式,而满足这个CFG的一句话是该种语言的实例 这就好比:规定汉语的语句是由主谓宾构成的,这相当于">
+<meta property="og:locale" content="en_US">
+<meta property="og:image" content="https://raw.githubusercontent.com/DeutschBall/DeutschBall/main/image-20221103222106328.png">
+<meta property="og:image" content="https://raw.githubusercontent.com/DeutschBall/DeutschBall/main/image-20221105150413813.png">
+<meta property="og:image" content="https://raw.githubusercontent.com/DeutschBall/DeutschBall/main/image-20221105150714522.png">
+<meta property="og:image" content="https://raw.githubusercontent.com/DeutschBall/DeutschBall/main/image-20221109212543264.png">
+<meta property="og:image" content="https://raw.githubusercontent.com/DeutschBall/DeutschBall/main/image-20221109215743134.png">
+<meta property="article:published_time" content="2022-11-03T03:09:00.000Z">
+<meta property="article:modified_time" content="2023-02-07T14:52:18.034Z">
+<meta property="article:author" content="John Doe">
+<meta property="article:tag" content="编译原理">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://raw.githubusercontent.com/DeutschBall/DeutschBall/main/image-20221103222106328.png">
+
+<link rel="canonical" href="http://example.com/2022/11/03/%E8%AF%AD%E6%B3%95%E5%88%86%E6%9E%90%E5%85%88%E4%BF%AE-%E8%A1%A8%E8%BE%BE%E5%BC%8F%E6%B1%82%E5%80%BC/">
+
+
+<script id="page-configurations">
+  // https://hexo.io/docs/variables.html
+  CONFIG.page = {
+    sidebar: "",
+    isHome : false,
+    isPost : true,
+    lang   : 'en'
+  };
+</script>
+
+  <title>语法分析先修-表达式求值 | Hexo</title>
+  
+
+
+
+
+
+
+  <noscript>
+  <style>
+  .use-motion .brand,
+  .use-motion .menu-item,
+  .sidebar-inner,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-header { opacity: initial; }
+
+  .use-motion .site-title,
+  .use-motion .site-subtitle {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line-before i { left: initial; }
+  .use-motion .logo-line-after i { right: initial; }
+  </style>
+</noscript>
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage">
+  <div class="container use-motion">
+    <div class="headband"></div>
+
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="Toggle navigation bar">
+      <span class="toggle-line toggle-line-first"></span>
+      <span class="toggle-line toggle-line-middle"></span>
+      <span class="toggle-line toggle-line-last"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <span class="logo-line-before"><i></i></span>
+      <h1 class="site-title">Hexo</h1>
+      <span class="logo-line-after"><i></i></span>
+    </a>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger">
+    </div>
+  </div>
+</div>
+
+
+
+
+<nav class="site-nav">
+  <ul id="menu" class="main-menu menu">
+        <li class="menu-item menu-item-home">
+
+    <a href="/" rel="section"><i class="fa fa-home fa-fw"></i>Home</a>
+
+  </li>
+        <li class="menu-item menu-item-archives">
+
+    <a href="/archives/" rel="section"><i class="fa fa-archive fa-fw"></i>Archives</a>
+
+  </li>
+  </ul>
+</nav>
+
+
+
+
+</div>
+    </header>
+
+    
+  <div class="back-to-top">
+    <i class="fa fa-arrow-up"></i>
+    <span>0%</span>
+  </div>
+
+
+    <main class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+
+          <div class="content post posts-expand">
+            
+
+    
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="en">
+    <link itemprop="mainEntityOfPage" href="http://example.com/2022/11/03/%E8%AF%AD%E6%B3%95%E5%88%86%E6%9E%90%E5%85%88%E4%BF%AE-%E8%A1%A8%E8%BE%BE%E5%BC%8F%E6%B1%82%E5%80%BC/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.gif">
+      <meta itemprop="name" content="John Doe">
+      <meta itemprop="description" content="">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Hexo">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          语法分析先修-表达式求值
+        </h1>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-calendar"></i>
+              </span>
+              <span class="post-meta-item-text">Posted on</span>
+
+              <time title="Created: 2022-11-03 11:09:00" itemprop="dateCreated datePublished" datetime="2022-11-03T11:09:00+08:00">2022-11-03</time>
+            </span>
+              <span class="post-meta-item">
+                <span class="post-meta-item-icon">
+                  <i class="far fa-calendar-check"></i>
+                </span>
+                <span class="post-meta-item-text">Edited on</span>
+                <time title="Modified: 2023-02-07 22:52:18" itemprop="dateModified" datetime="2023-02-07T22:52:18+08:00">2023-02-07</time>
+              </span>
+
+          
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+        <h1 id="语法分析"><a href="#语法分析" class="headerlink" title="语法分析"></a>语法分析</h1><h2 id="算数表达式的上下文无关文法"><a href="#算数表达式的上下文无关文法" class="headerlink" title="算数表达式的上下文无关文法"></a>算数表达式的上下文无关文法</h2><h3 id="干什么用"><a href="#干什么用" class="headerlink" title="干什么用?"></a>干什么用?</h3><p>教材中在语法分析一章首先提出的概念就是上下文无关语法CFG</p>
+<p>语法分析器不能没有CFG,正如词法分析器不能没有正规式</p>
+<p>也就是说,模式的形式化描述</p>
+<p>正规式规定死了,一种语言可能使用的单词有什么</p>
+<p>CFG就是规定死了,一种语言可能使用的语句有什么</p>
+<p>CFG是一种语言的范式,而满足这个CFG的一句话是该种语言的实例</p>
+<p>这就好比:规定汉语的语句是由主谓宾构成的,这相当于立法,就是定义CFG</p>
+<p>“我吃饭”就是满足法律要求的:主(我) 谓(吃) 宾(饭),这就是汉语语句的一个实例</p>
+<p>判断”我吃饭”是否合法的过程,就是将一条语句展开成多个部分的过程,</p>
+<p>判断编程语言的一条语句是否合法,就尝试使用CFG规定的规则推导之</p>
+<h3 id="长什么样"><a href="#长什么样" class="headerlink" title="长什么样?"></a>长什么样?</h3><p>以基本算数运算为例子,分析一个含有加减乘除括号的表达式,其CFG如何定义</p>
+<p>CFG由一个状态四元组(非终结符集,终结符集,产生式集,开始符号)构成</p>
+<p>最初粗浅的考虑是这样的<br>$$<br>\begin{aligned}<br>Context Free Grammar&amp;&#x3D;(Nonterminals,Terminals,Productions,Start Symbol)\</p>
+<p>&amp;\begin{cases}<br>Nonterminals&#x3D;{Expression}\<br>Terminals&#x3D;{+,\times,(,),id}\<br>StartSymbol&#x3D;Expression\<br>\begin{aligned}<br>Production&amp;:Expression\rightarrow\begin{cases}<br>Expression+ Expression\<br>Expression\times Expression\<br>(Expression)\<br>-Expression\<br>id<br>\end{cases}<br>\end{aligned}<br>\end{cases}<br>\end{aligned}<br>$$<br>​	Nonterminals集合中只有Expression,意思是,只要是Expresion符号,都可以继续推导</p>
+<p>​	Terminals集合中有所有的运算符,还有一个字面量id,这意味着,推导到最具体的了,不能再具体了</p>
+<p>​	StartSymbol&#x3D;Expression,这意味着,最开始的时候将整个语句视为一个表达式</p>
+<h3 id="怎么干活"><a href="#怎么干活" class="headerlink" title="怎么干活?"></a>怎么干活?</h3><p>“通过推导的方法可以从CFG产生语言”</p>
+<p>实际上就是根据Production产生式集中的合法规则,将抽象的Expression全都替换成具体的id的过程</p>
+<p>啥意思呢?举个例子,比如对于1+2+3,一开始的时候StartSymbol&#x3D;”1+2+3”,这个整体是一个表达式Expression<br>$$<br>\begin{aligned}<br>exp(1+2+3)&amp;\rightarrow exp(1)+exp(2+3)\<br>&amp;\rightarrow id(1)+exp(2)+exp(4)\<br>&amp;\rightarrow id(1)+id(2)+id(3)<br>\end{aligned}<br>$$<br>这就是左推导的过程,也就是化抽象为具体的过程</p>
+<h3 id="严谨吗"><a href="#严谨吗" class="headerlink" title="严谨吗?"></a>严谨吗?</h3><p>前面这种定义CFG的方法是不严谨的,这么说的原因有两个,</p>
+<p>一是是没有体现运算符的优先级,二是没有体现运算符的结合性</p>
+<h4 id="优先级"><a href="#优先级" class="headerlink" title="优先级"></a>优先级</h4><p>举例<code>1+2*3</code></p>
+<p>按照原来的CFG定义,$exp(1+2)\times exp(3)$和$exp(1)+exp(2\times 3)$两种推导路线都是合法的,这就产生了二义性</p>
+<h4 id="结合性"><a href="#结合性" class="headerlink" title="结合性"></a>结合性</h4><p>举例<code>1+2+3</code></p>
+<p>按照原来的CFG定义,$exp(1+2+3)\rightarrow exp(1+2)+exp(3)$和$exp(1+2+3)\rightarrow exp(1)+exp(2+3)$都是合法的,这就产生了二义性</p>
+<h4 id="消除二义性"><a href="#消除二义性" class="headerlink" title="消除二义性"></a>消除二义性</h4><p>如何消除二义性?保证每个表达式后续的推导,<strong>只有唯一的路线</strong><br>$$<br>\begin{aligned}<br>Context Free Grammar&amp;&#x3D;(Nonterminals,Terminals,Productions,Start Symbol)\</p>
+<p>&amp;\begin{cases}<br>Nonterminals&#x3D;{Expression,Term,Factor}\<br>Terminals&#x3D;{+,\times,(,),id}\<br>StartSymbol&#x3D;Expression\<br>\begin{aligned}<br>Production\begin{cases}<br>    \begin{aligned}<br>    Expression&amp;\rightarrow Expression+Term\ |\ Term\<br>    Term&amp;\rightarrow Term\times Factor\ | \ Factor\<br>    Factor&amp;\rightarrow (Expression)\ |\ -Factor\ |\ id<br>    \end{aligned}<br>    \end{cases}<br>\end{aligned}<br>\end{cases}<br>\end{aligned}<br>$$<br>如何体现优先级?</p>
+<p>$Expression$全部展开之后得到的是$Term1+Term2+Term3+…$只有这一种情况,</p>
+<p>也就是说,将Expression视为若干乘式的和,每个乘式再各自计算自己的值后上报给加法.</p>
+<p>想要计算加法就必须等所有的乘式落实之后才可以进行.这就体现了先乘后加的优先级</p>
+<p>如何体现结合性?</p>
+<p>$Expression\rightarrow Expression+Term\ | \ Term$</p>
+<p>这意味着,要计算顶层的加法,首先需要计算子Expression的值,</p>
+<p>而子Expression相当于是,顶层Expression将最右侧的$+Term$给踢出去.</p>
+<p>这就体现了左结合</p>
+<blockquote>
+<p>教材上将上述两点归纳:</p>
+<p>1.引入新的非终结符,增加一个子结构并提高一级优先级</p>
+<p>2.递归非终结符在产生式中的位置,反应文法符号的结合性</p>
+<p>这个归纳纯粹属于是懂得一看就懂,不懂得看了也不懂的那种</p>
+<p>甚至”递归非终结符在产生式中的位置”啥意思我也不懂</p>
+</blockquote>
+<blockquote>
+<p>这是在算数表达式中消除二义性,</p>
+<p>实际上在编程语言中还要考虑一个分支结构的特殊性</p>
+<p>if-elif-else结构中的匹配原则,就近还是就远原则等等</p>
+<p>这是后话</p>
+</blockquote>
+<h2 id="自上而下语法分析"><a href="#自上而下语法分析" class="headerlink" title="自上而下语法分析"></a>自上而下语法分析</h2><h3 id="树形结构"><a href="#树形结构" class="headerlink" title="树形结构?"></a>树形结构?</h3><p>由CFG可以建立两种长得差不多的树形结构,</p>
+<p>分析树和语法树,</p>
+<p>或者说具体语法树和抽象语法树</p>
+<p>以<code>1+2*3</code>为例,推导该表达式的过程为<br>$$<br>\begin{aligned}<br>exp(1+2\times 3)&amp;\rightarrow exp(1)+term(2\times 3)\<br>&amp;\rightarrow term(1)+term(2)\times fact(3)\<br>&amp;\rightarrow fact(1)+fact(2)\times id(3)\<br>&amp;\rightarrow id(1)+id(3)\times id(3)<br>\end{aligned}<br>$$</p>
+<h4 id="分析树-具体语法树"><a href="#分析树-具体语法树" class="headerlink" title="分析树(具体语法树)"></a>分析树(具体语法树)</h4><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br></pre></td><td class="code"><pre><span class="line">flowchart</span><br><span class="line">PLUS1((+))</span><br><span class="line">MULT((*))</span><br><span class="line">EXP123((&quot;exp(1+2*3)&quot;))</span><br><span class="line">EXP1((&quot;exp(1)&quot;))</span><br><span class="line">TERM23((&quot;term(2*3)&quot;))</span><br><span class="line">TERM1((&quot;term(1)&quot;))</span><br><span class="line">TERM2((&quot;term(2)&quot;))</span><br><span class="line">FACT3((&quot;fact(3)&quot;))</span><br><span class="line">FACT1((&quot;fact(1)&quot;))</span><br><span class="line">FACT2((&quot;fact(2)&quot;))</span><br><span class="line">ID3((&quot;id(3)&quot;))</span><br><span class="line">ID1((&quot;id(1)&quot;))</span><br><span class="line">ID2((&quot;id(2)&quot;))</span><br><span class="line"></span><br><span class="line">EXP123----EXP1</span><br><span class="line">EXP123----PLUS1</span><br><span class="line">EXP123----TERM23</span><br><span class="line">EXP1----TERM1</span><br><span class="line">TERM1----FACT1</span><br><span class="line">FACT1----ID1</span><br><span class="line"></span><br><span class="line">TERM23----TERM2----FACT2----ID2</span><br><span class="line">TERM23----MULT</span><br><span class="line">TERM23----FACT3----ID3</span><br><span class="line"></span><br></pre></td></tr></table></figure>
+
+<h4 id="语法树-抽象语法树"><a href="#语法树-抽象语法树" class="headerlink" title="语法树(抽象语法树)"></a>语法树(抽象语法树)</h4><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line">graph</span><br><span class="line">1((1))</span><br><span class="line">	2((2))</span><br><span class="line">	3((3))</span><br><span class="line">	mul((*))</span><br><span class="line">	plus((+))</span><br><span class="line">	plus----1</span><br><span class="line">	plus----mul</span><br><span class="line">	mul----2</span><br><span class="line">	mul----3</span><br></pre></td></tr></table></figure>
+
+
+
+<h4 id="两种树的区别"><a href="#两种树的区别" class="headerlink" title="两种树的区别"></a>两种树的区别</h4><p>抽象语法树中,叶子节点都是字面量,不能再推导,内部节点肯定都是运算符.</p>
+<p>求值时当前节点只需要根据自己的运算规则,取出左右儿子递归运算值,算一下然后交给父节点</p>
+<p>咱也不知道这具体语法树有什么作用,明明抽象语法树简洁清晰并且也能完成功能</p>
+<h3 id="状态转移图和EBNF"><a href="#状态转移图和EBNF" class="headerlink" title="状态转移图和EBNF"></a>状态转移图和EBNF</h3><h4 id="一眼丁真"><a href="#一眼丁真" class="headerlink" title="一眼丁真"></a>一眼丁真</h4><p>状态转移图实际上就是为了形式化地得到EBNF,要是能够从本来的文法直接看出EBNF文法,则不需要状态转移图</p>
+<p>对于表达式这种简单的文法,直接就能看出EBNF来<br>$$<br>\begin{aligned}<br>Expression&amp;\rightarrow Term\ {(+|-)Term}\<br>Term&amp;\rightarrow Factor\ {(\times |&#x2F;) Factor}\<br>Factor&amp;\rightarrow (Expression)\ |\ id\ |num<br>\end{aligned}<br>$$<br>​	其中</p>
+<p>花括号{}中的内容可以重复0次或者若干次,相当于星闭包</p>
+<p>怎么理解文法的EBNF表示呢?<br>$$<br>\begin{aligned}<br>Expression &amp;\rightarrow Term\ {(+|-)Term}\<br>        &amp;\rightarrow Term±Term±Term±…±Term<br>        \end{aligned}<br>$$<br>也就是说Expression至少由一个Term组成,还可以是若干个Term的加减组成</p>
+<h4 id="一眼看不出来咋办"><a href="#一眼看不出来咋办" class="headerlink" title="一眼看不出来咋办?"></a>一眼看不出来咋办?</h4><p>现在已经知道的是文法规则<br>$$<br>\begin{aligned}<br>Language&amp;\rightarrow Expression;Language|\epsilon\<br>Expression&amp;\rightarrow Term\ Expression’\<br>Expression’&amp;\rightarrow +Term\ Expression’|\epsilon\<br>Term&amp;\rightarrow Factor \ Term’\<br>Term’&amp;\rightarrow \times Factor\ Term’|\epsilon\<br>Factor&amp;\rightarrow (Expression)|-Factor|id<br>\end{aligned}<br>$$</p>
+<p>要求出文法的EBNF表示.</p>
+<p>眼神不好,不能一眼丁真,就得借助状态转移图</p>
+<p>怎么由原来的文法翻译成状态转移图?</p>
+<p>以Language为例子:</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">flowchart LR</span><br><span class="line">0((0))</span><br><span class="line">1((1))</span><br><span class="line">2((2))</span><br><span class="line">3((3))</span><br><span class="line">Language ----&gt;0--Expression--&gt;1--&quot;;&quot;--&gt;2--Language--&gt;3</span><br><span class="line">0--ε--&gt;3</span><br><span class="line">style 3 fill:red</span><br></pre></td></tr></table></figure>
+
+<p>推导式中的所有符号,比如Language,Expression等,都作为有向图上的边,代表状态转移.状态作为节点</p>
+<p>显然目前建立的所有有向图都是没有圈的,因为目前的文法定义已经消除了所有直接或者间接的左递归,表现到图上就是没有强连通分量</p>
+<p>又如对于Expression和Expression’</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">flowchart LR</span><br><span class="line">4((4))</span><br><span class="line">5((5))</span><br><span class="line">6((6))</span><br><span class="line">Expression--&gt;4--Term--&gt;5--&quot;Expression&#x27;&quot;--&gt;6</span><br></pre></td></tr></table></figure>
+
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">flowchart LR</span><br><span class="line">7((7))</span><br><span class="line">8((8))</span><br><span class="line">9((9))</span><br><span class="line">10((10))</span><br><span class="line">Expression&#x27;--&gt;7--+--&gt;8--Term--&gt;9--Expression&#x27;--&gt;10</span><br><span class="line">7--ε--&gt;10</span><br></pre></td></tr></table></figure>
+
+<p>下面就是化简状态转移图,怎么化简?</p>
+<p>对于Expression’,有一个规则1:</p>
+<p>标记为A的边可等价为标记ε的边转向A转换图的初态；</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line">flowchart LR</span><br><span class="line">7((7))</span><br><span class="line">8((8))</span><br><span class="line">9((9))</span><br><span class="line">10((10))</span><br><span class="line">7--ε--&gt;10</span><br><span class="line">Expression&#x27;--&gt;7--+--&gt;8--Term--&gt;9</span><br><span class="line">9--ε--&gt;7</span><br><span class="line">style 10 fill:red</span><br></pre></td></tr></table></figure>
+
+<p>然后紧接着可以应用规则2:</p>
+<p>ε两头的节点可以合并,也就是说,epsilon闭包中的节点算成一个点</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">flowchart LR</span><br><span class="line">7((7))</span><br><span class="line">8((8))</span><br><span class="line"></span><br><span class="line">Expression&#x27;--&gt;7--+--&gt;8--Term--&gt;7</span><br><span class="line"></span><br><span class="line">style 7 fill:red</span><br></pre></td></tr></table></figure>
+
+<p>然后紧接着可以应用规则3:</p>
+<p>标记相同的路径可以合并</p>
+<p>啥意思呢?Expression’现在可以带入到Expression中了</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line">flowchart LR</span><br><span class="line">4((4))</span><br><span class="line"></span><br><span class="line">7((7))</span><br><span class="line">8((8))</span><br><span class="line"></span><br><span class="line">7--+--&gt;8--Term--&gt;7</span><br><span class="line">Expression--&gt;4--Term--&gt;7</span><br><span class="line">style 7 fill:red</span><br></pre></td></tr></table></figure>
+
+<p>还有一条规则可以继续化简:</p>
+<p>不可区分的状态可以合并</p>
+<p>这里4状态和8状态都是经过Term转移到7,不可区分,因此有</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line">flowchart LR</span><br><span class="line">4((4))</span><br><span class="line"></span><br><span class="line">7((7))</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">7--+--&gt;4</span><br><span class="line">Expression--&gt;4--Term--&gt;7</span><br><span class="line">style 7 fill:red</span><br></pre></td></tr></table></figure>
+
+<p>此时Expression’已经被扬了,Expression也是不能再简了,这就是最简结构了.根据这个结构,终于一眼丁真了<br>$$<br>Expression\rightarrow Term{+Term}<br>$$</p>
+<blockquote>
+<p>这里只考虑了加法,减法和加法同级,也容易扩充<br>$$<br>Expression\rightarrow Term{(+|-)Term}<br>$$</p>
+</blockquote>
+<p>以此类推,可以得到所有符号的EBNF文法<br>$$<br>\begin{aligned}<br>Language&amp;\rightarrow {Expression;}\<br>Expression&amp;\rightarrow Term{(+|-)Term}\<br>Term&amp;\rightarrow Factor{(\times |&#x2F;)Factor}\<br>Factor&amp;\rightarrow (Expression)|id|num<br>\end{aligned}<br>$$<br>得到该EBNF表示的文法之后,已经可以动手写程序了.</p>
+<h3 id="硬编码的代码实现"><a href="#硬编码的代码实现" class="headerlink" title="硬编码的代码实现"></a>硬编码的代码实现</h3><h4 id="表达式求值"><a href="#表达式求值" class="headerlink" title="表达式求值"></a>表达式求值</h4><p>贴出来又臭又长,不如放到pasbin了<a target="_blank" rel="noopener" href="https://pastebin.com/4KPSsPBb">递归下降求解表达式 - Pastebin.com</a></p>
+<h4 id="表达式建立语法树"><a href="#表达式建立语法树" class="headerlink" title="表达式建立语法树"></a>表达式建立语法树</h4><p>源代码中有反引号,并且博客渲染的时候代码块会匹配最近的反引号,<del>这应该是语法分析的错误罢</del></p>
+<p>发生代码块反引号匹配错误,只能放到pastbin里了<a target="_blank" rel="noopener" href="https://pastebin.com/xJuqQx3E">表达式树 - Pastebin.com</a></p>
+<p>将树的结构按照mermaid语法规则输出到tree.md文件,然后用typora打开就可以实现可视化</p>
+<p><img src="https://raw.githubusercontent.com/DeutschBall/DeutschBall/main/image-20221103222106328.png" alt="visiable"></p>
+<h2 id="预测分析"><a href="#预测分析" class="headerlink" title="预测分析"></a>预测分析</h2><h3 id="为啥还需要预测分析"><a href="#为啥还需要预测分析" class="headerlink" title="为啥还需要预测分析?"></a>为啥还需要预测分析?</h3><p>上面我们已经写出代码了,表达式的语法分析可以说已经竣工了,但是为啥本章后面教材还是不依不饶地给了60页?</p>
+<p>感觉教材也没有给预测分析器做一个铺垫,直接就抛出了这么一个概念干说.</p>
+<p>我觉得,这是因为从EBNF构建语法分析器有很大的局限性,类比一下</p>
+<p>根据EBNF写语法分析器,就类似于词法分析器用硬编码的DFA</p>
+<p>为什么这样说呢?或者说根据EBNF写代码有啥缺点呢?</p>
+<p>首先,EBNF中规定了死了,基本算数运算只有三种优先级,这对应到代码中的三个函数</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">evalExpression</span><br><span class="line">evalTerm</span><br><span class="line">evalFactor</span><br></pre></td></tr></table></figure>
+
+<p>试想,如果写完程序之后,又想加入新的优先级,比如规定乘方运算的优先级高于乘除低于括号.</p>
+<p>又如方括号优先级低于小括号但是高于其他表达式.</p>
+<p>这就意味着程序需要大改,新加入<code>evalPower</code>来处理乘方运算,并且函数的调用关系都得改</p>
+<p>这就是从EBNF直接写代码的局限性,也就是说可拓展性差</p>
+<p>怎么解决呢?还是回顾词法分析中的做法</p>
+<blockquote>
+<p>当时我们也是嫌硬编码的DFA不灵活,于是使用了表驱动或者有向图驱动的DFA.</p>
+<p>DFA对外提供三个接口,都屏蔽了自身实现的差异.</p>
+<p>表驱动的DFA想要拓展只需要新增表记录就可以了</p>
+</blockquote>
+<p>这就是<strong>预测分析器</strong>的<strong>预测分析表</strong>将要干的事情</p>
+<h3 id="预测分析器"><a href="#预测分析器" class="headerlink" title="预测分析器"></a>预测分析器</h3><h4 id="类比词法分析"><a href="#类比词法分析" class="headerlink" title="类比词法分析"></a>类比词法分析</h4><p>前面我们已经给预测分析器做好铺垫了</p>
+<p>预测分析器是词法分析器的一种实现方式,是下推自动机的一种实现</p>
+<p><img src="https://raw.githubusercontent.com/DeutschBall/DeutschBall/main/image-20221105150413813.png" alt="预测分析器是下推自动机的实例"></p>
+<blockquote>
+<p>ip指向当前输入</p>
+</blockquote>
+<p>这个预测分析器和使用表驱动DFA的词法分析器有一定的相似之处,可以类比理解一下</p>
+<p><img src="https://raw.githubusercontent.com/DeutschBall/DeutschBall/main/image-20221105150714522.png" alt="左表驱动DFA词法分析,右预测分析语法分析"></p>
+<p>词法分析器上的状态转移,只需要看一下输入序列,然后去分析表查一下下一个状态就可以了</p>
+<p>相比于词法分析器,语法分析器多一个符号栈,也就是说预测分析器上的状态转移,不仅要考虑当前记号流中的记号,还要考虑当前符号栈的状态</p>
+<h4 id="没有递归"><a href="#没有递归" class="headerlink" title="没有递归?"></a>没有递归?</h4><p>同时,从这个类比中,我们也可以隐约发现,<strong>预测分析器是没有递归的</strong></p>
+<p>之前根据EBNF写的代码,递归很明显,<code>evalExpression-&gt;evalTerm-&gt;evalFactor</code></p>
+<p>而现在只需要从预测分析表上进行状态转移.消除了递归</p>
+<p>这意味着,现在可以将递归的方法,从表达式推广到绘图语言,写”编译原理的实验二–语法分析器”了,</p>
+<p>实际上WXQ老师给出了2019C++实现版也就是基于递归下降方法实现的</p>
+<h4 id="预测分析表是干啥的"><a href="#预测分析表是干啥的" class="headerlink" title="预测分析表是干啥的?"></a>预测分析表是干啥的?</h4><p>首先考虑这么一个表达式$id+id\times id$,如果使用前面定义的文法进行匹配,手工做的话应该如何</p>
+<p>$$<br>\begin{aligned}<br>Language&amp;\rightarrow Expression;Language|\epsilon\<br>Expression&amp;\rightarrow Term\ Expression’\<br>Expression’&amp;\rightarrow +Term\ Expression’|\epsilon\<br>Term&amp;\rightarrow Factor \ Term’\<br>Term’&amp;\rightarrow \times Factor\ Term’|\epsilon\<br>Factor&amp;\rightarrow (Expression)|-Factor|id<br>\end{aligned}<br>$$</p>
+<p>$$<br>\begin{aligned}<br>L&amp;\rightarrow E\<br>&amp;\rightarrow TE’\<br>&amp;\rightarrow FT’E’\<br>&amp;\rightarrow idT’E’\<br>&amp;\rightarrow idE’\<br>&amp;\rightarrow id+TE’\<br>&amp;\rightarrow id+FT’E’\<br>&amp;\rightarrow id+idT’E’\<br>&amp;\rightarrow id+id\times FT’E’\<br>&amp;\rightarrow id+id\times idT’E’\<br>&amp;\rightarrow id+id\times id<br>\end{aligned}<br>$$</p>
+<p>我们这样做的依据就是文法规则中定义好的推导方式</p>
+<p>预测分析表就干了我们脑子干的事情—-匹配使用哪个推导规则</p>
+<p>先给出这么一个状态转移表,简单地用它分析一下id+id*id,<strong>后来再关心这个表是怎么建立的</strong></p>
+<h6 id=""><a href="#" class="headerlink" title=""></a><img src="https://raw.githubusercontent.com/DeutschBall/DeutschBall/main/image-20221109212543264.png" alt="image-20221109212543264"></h6><p>比如当前栈顶是L,输入符号是id,那么就应该首先L弹栈,然后把符号E压栈,转移到下一个<strong>格局</strong></p>
+<p>当前栈顶是E,输入符号id,就应该首先E弹栈,然后把TE’压栈,转移到下一个格局</p>
+<p>当前栈顶是T,输入id,就应该首先T弹栈,然后FT’压栈,转移到下一个格局</p>
+<p>当前栈顶是F,输入id,就应该首先F弹栈,然后id压栈,转移到下一个格局</p>
+<p>当前栈顶是id,输入id,匹配成功,都退栈</p>
+<p>整个过程中”输入id”一直没变,也就是说指向输入串的指针始终没有移动</p>
+<p>这里有一个新名词”格局”,实际上类似于状态,它受到当前栈顶,当前输入,预测分析表三者的影响</p>
+<blockquote>
+<p>实际上就是迪杰斯特拉双栈算法求解算数表达式的算法思想</p>
+<p>不断压栈直到栈顶和当前符号匹配实际上维护了一个单调栈,越靠近栈顶的符号优先级越高</p>
+</blockquote>
+<h4 id="如何定义格局"><a href="#如何定义格局" class="headerlink" title="如何定义格局?"></a>如何定义格局?</h4><p>表驱动的词法分析器中定义了一个状态,然后根据当前输入和状态转移表这里两个因素,从当前状态转移到下一个状态</p>
+<p>对于预测分析表驱动的语法分析器,定义了一个类似状态的东西叫做”格局”,</p>
+<p>区别于状态转移,格局转换时需要考虑当前栈顶,预测分析表,当前输入符号,共3个因素</p>
+<p>实际上格局变化是状态转移的推广</p>
+<p>状态转移时维护一个栈当摆设就成了格局变化</p>
+<h4 id="格局如何转移"><a href="#格局如何转移" class="headerlink" title="格局如何转移?"></a>格局如何转移?</h4><figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line">设置ip使它指向w的第一个符号，其中ip 是输入指针；</span><br><span class="line">令X=栈顶符号；</span><br><span class="line"><span class="keyword">while</span>  ( X ≠ ＄ )｛     /   *      栈非空 */ </span><br><span class="line">            <span class="keyword">if</span> ( X 等于ip所指向的符号a) 执行栈的弹出操作，将ip向前移动一个位置；</span><br><span class="line">            <span class="keyword">else</span>  <span class="keyword">if</span> ( X是一个终结符号)  error ( ) ;</span><br><span class="line">            <span class="keyword">else</span>  <span class="keyword">if</span> ( M[X，a]是一个报错条目)  error ( ) ;           </span><br><span class="line">            <span class="keyword">else</span>  <span class="keyword">if</span> ( M[X，a] = X →Y1Y2 … Yk  )｛ </span><br><span class="line">                         输出产生式 X →Y1Y2 … Yk  ；</span><br><span class="line">                         弹出栈顶符号；</span><br><span class="line">                        将Yk，Yk<span class="number">-1</span> …，Yi 压入栈中，其中Y1位于栈顶。</span><br><span class="line">            &#125;</span><br><span class="line">            令X=栈顶符号</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>这里面M[X,a]就是当前栈顶为X,当前符号为a时查表能够转移到的下一个格局</p>
+<p>匹配id+id*id的整个过程如图</p>
+<p><img src="https://raw.githubusercontent.com/DeutschBall/DeutschBall/main/image-20221109215743134.png" alt="image-20221109215743134"></p>
+<p>语法分析阶段不管是递归下降还是预测分析,其目的相同</p>
+<p>1.首先检查有没有语法错误.</p>
+<p>2.给出抽象语法树.</p>
+<p>递归下降法自顶向下建立抽象语法树是自然而然的</p>
+<p>预测分析法怎么建立抽象语法树呢?</p>
+<p>一时间竟想不到</p>
+<p>蚌埠住了</p>
+<h4 id="如何建立预测分析表"><a href="#如何建立预测分析表" class="headerlink" title="如何建立预测分析表?"></a>如何建立预测分析表?</h4><p>预测分析器算法和文法定义没有关系,文法定义体现在预测分析表上</p>
+<p>预测分析器的算法是写死的,但是预测分析表是活的</p>
+<h5 id="First集合"><a href="#First集合" class="headerlink" title="First集合"></a>First集合</h5><p>$First(\alpha)&#x3D;{a|\alpha\Rightarrow a,a\in T}$也就是$\alpha$可以推导出的一个非终结字符的集合,如果$\alpha\Rightarrow \epsilon$,则$\epsilon \in First(\alpha)$</p>
+<p>$First(E)&#x3D;{(,id,num}$</p>
+<h5 id="Follow集合"><a href="#Follow集合" class="headerlink" title="Follow集合"></a>Follow集合</h5><p>$$<br>Follow(A)&#x3D;{a|S\Rightarrow …Aa…,a\in T}<br>$$</p>
+<p>紧跟在非终结符A后面的终结符集合</p>
+<p>$Follow(E)&#x3D;{;,)}$</p>
+<h5 id="算法求解First集合"><a href="#算法求解First集合" class="headerlink" title="算法求解First集合"></a>算法求解First集合</h5><p>$$<br>X\rightarrow \alpha_1|\alpha_2|…|\alpha_m,m\ge1\First(X)&#x3D;\cup First(\alpha_i)<br>$$</p>
+<p>非终结符的First集合,等于其所有推导的First集合的并集</p>
+<p>对于$First(\alpha_i)$的求法:</p>
+<p>其中如果$\alpha_i&#x3D;\epsilon$,则$\epsilon\in First(\alpha_i)$</p>
+<p>否则,假设$\alpha_i\Rightarrow Y_1,Y_2,…,Y_n$</p>
+<p>如果$Y1$可以推导出$\epsilon$,则Y2就有可能成为最前面的,那么就得考虑$First(Y_2)$</p>
+<p>如果$Y_1$推导不出$\epsilon$,则Y2就肯定不可能成为最前面,因此不用考虑$First(Y_2)$<br>$$<br>First(\alpha_i)&#x3D;\cup _{j&#x3D;1}^k (First(Y_j)-\epsilon)<br>$$</p>
+<p>当$Y_k$推导不出$\epsilon$时,才会停止j往后遍历</p>
+<h5 id="求解Follow集合"><a href="#求解Follow集合" class="headerlink" title="求解Follow集合"></a>求解Follow集合</h5><h3 id="算数表达式的预测分析语法分析"><a href="#算数表达式的预测分析语法分析" class="headerlink" title="算数表达式的预测分析语法分析"></a>算数表达式的预测分析语法分析</h3><p>$$<br>\begin{aligned}<br>Language&amp;\rightarrow Expression;Language|\epsilon\<br>Expression&amp;\rightarrow Term\ Expression’\<br>Expression’&amp;\rightarrow +Term\ Expression’|\epsilon\<br>Term&amp;\rightarrow Factor \ Term’\<br>Term’&amp;\rightarrow \times Factor\ Term’|\epsilon\<br>Factor&amp;\rightarrow (Expression)|-Factor|id<br>\end{aligned}<br>$$</p>
+
+    </div>
+
+    
+    
+    
+
+      <footer class="post-footer">
+          <div class="post-tags">
+              <a href="/tags/%E7%BC%96%E8%AF%91%E5%8E%9F%E7%90%86/" rel="tag"># 编译原理</a>
+          </div>
+
+        
+
+
+        
+    <div class="post-nav">
+      <div class="post-nav-item">
+    <a href="/2022/10/17/%E8%AF%8D%E6%B3%95%E5%88%86%E6%9E%90/" rel="prev" title="词法分析">
+      <i class="fa fa-chevron-left"></i> 词法分析
+    </a></div>
+      <div class="post-nav-item">
+    <a href="/2022/11/11/moectf%E8%A1%A5%E9%A2%98/" rel="next" title="moectf补题">
+      moectf补题 <i class="fa fa-chevron-right"></i>
+    </a></div>
+    </div>
+      </footer>
+    
+  </article>
+  
+  
+  
+
+
+
+          </div>
+          
+
+<script>
+  window.addEventListener('tabs:register', () => {
+    let { activeClass } = CONFIG.comments;
+    if (CONFIG.comments.storage) {
+      activeClass = localStorage.getItem('comments_active') || activeClass;
+    }
+    if (activeClass) {
+      let activeTab = document.querySelector(`a[href="#comment-${activeClass}"]`);
+      if (activeTab) {
+        activeTab.click();
+      }
+    }
+  });
+  if (CONFIG.comments.storage) {
+    window.addEventListener('tabs:click', event => {
+      if (!event.target.matches('.tabs-comment .tab-content .tab-pane')) return;
+      let commentClass = event.target.classList[1];
+      localStorage.setItem('comments_active', commentClass);
+    });
+  }
+</script>
+
+        </div>
+          
+  
+  <div class="toggle sidebar-toggle">
+    <span class="toggle-line toggle-line-first"></span>
+    <span class="toggle-line toggle-line-middle"></span>
+    <span class="toggle-line toggle-line-last"></span>
+  </div>
+
+  <aside class="sidebar">
+    <div class="sidebar-inner">
+
+      <ul class="sidebar-nav motion-element">
+        <li class="sidebar-nav-toc">
+          Table of Contents
+        </li>
+        <li class="sidebar-nav-overview">
+          Overview
+        </li>
+      </ul>
+
+      <!--noindex-->
+      <div class="post-toc-wrap sidebar-panel">
+          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#%E8%AF%AD%E6%B3%95%E5%88%86%E6%9E%90"><span class="nav-number">1.</span> <span class="nav-text">语法分析</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#%E7%AE%97%E6%95%B0%E8%A1%A8%E8%BE%BE%E5%BC%8F%E7%9A%84%E4%B8%8A%E4%B8%8B%E6%96%87%E6%97%A0%E5%85%B3%E6%96%87%E6%B3%95"><span class="nav-number">1.1.</span> <span class="nav-text">算数表达式的上下文无关文法</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%B9%B2%E4%BB%80%E4%B9%88%E7%94%A8"><span class="nav-number">1.1.1.</span> <span class="nav-text">干什么用?</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E9%95%BF%E4%BB%80%E4%B9%88%E6%A0%B7"><span class="nav-number">1.1.2.</span> <span class="nav-text">长什么样?</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%80%8E%E4%B9%88%E5%B9%B2%E6%B4%BB"><span class="nav-number">1.1.3.</span> <span class="nav-text">怎么干活?</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E4%B8%A5%E8%B0%A8%E5%90%97"><span class="nav-number">1.1.4.</span> <span class="nav-text">严谨吗?</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#%E4%BC%98%E5%85%88%E7%BA%A7"><span class="nav-number">1.1.4.1.</span> <span class="nav-text">优先级</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E7%BB%93%E5%90%88%E6%80%A7"><span class="nav-number">1.1.4.2.</span> <span class="nav-text">结合性</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E6%B6%88%E9%99%A4%E4%BA%8C%E4%B9%89%E6%80%A7"><span class="nav-number">1.1.4.3.</span> <span class="nav-text">消除二义性</span></a></li></ol></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E8%87%AA%E4%B8%8A%E8%80%8C%E4%B8%8B%E8%AF%AD%E6%B3%95%E5%88%86%E6%9E%90"><span class="nav-number">1.2.</span> <span class="nav-text">自上而下语法分析</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%A0%91%E5%BD%A2%E7%BB%93%E6%9E%84"><span class="nav-number">1.2.1.</span> <span class="nav-text">树形结构?</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#%E5%88%86%E6%9E%90%E6%A0%91-%E5%85%B7%E4%BD%93%E8%AF%AD%E6%B3%95%E6%A0%91"><span class="nav-number">1.2.1.1.</span> <span class="nav-text">分析树(具体语法树)</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E8%AF%AD%E6%B3%95%E6%A0%91-%E6%8A%BD%E8%B1%A1%E8%AF%AD%E6%B3%95%E6%A0%91"><span class="nav-number">1.2.1.2.</span> <span class="nav-text">语法树(抽象语法树)</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E4%B8%A4%E7%A7%8D%E6%A0%91%E7%9A%84%E5%8C%BA%E5%88%AB"><span class="nav-number">1.2.1.3.</span> <span class="nav-text">两种树的区别</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E7%8A%B6%E6%80%81%E8%BD%AC%E7%A7%BB%E5%9B%BE%E5%92%8CEBNF"><span class="nav-number">1.2.2.</span> <span class="nav-text">状态转移图和EBNF</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#%E4%B8%80%E7%9C%BC%E4%B8%81%E7%9C%9F"><span class="nav-number">1.2.2.1.</span> <span class="nav-text">一眼丁真</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E4%B8%80%E7%9C%BC%E7%9C%8B%E4%B8%8D%E5%87%BA%E6%9D%A5%E5%92%8B%E5%8A%9E"><span class="nav-number">1.2.2.2.</span> <span class="nav-text">一眼看不出来咋办?</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E7%A1%AC%E7%BC%96%E7%A0%81%E7%9A%84%E4%BB%A3%E7%A0%81%E5%AE%9E%E7%8E%B0"><span class="nav-number">1.2.3.</span> <span class="nav-text">硬编码的代码实现</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#%E8%A1%A8%E8%BE%BE%E5%BC%8F%E6%B1%82%E5%80%BC"><span class="nav-number">1.2.3.1.</span> <span class="nav-text">表达式求值</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E8%A1%A8%E8%BE%BE%E5%BC%8F%E5%BB%BA%E7%AB%8B%E8%AF%AD%E6%B3%95%E6%A0%91"><span class="nav-number">1.2.3.2.</span> <span class="nav-text">表达式建立语法树</span></a></li></ol></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E9%A2%84%E6%B5%8B%E5%88%86%E6%9E%90"><span class="nav-number">1.3.</span> <span class="nav-text">预测分析</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E4%B8%BA%E5%95%A5%E8%BF%98%E9%9C%80%E8%A6%81%E9%A2%84%E6%B5%8B%E5%88%86%E6%9E%90"><span class="nav-number">1.3.1.</span> <span class="nav-text">为啥还需要预测分析?</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E9%A2%84%E6%B5%8B%E5%88%86%E6%9E%90%E5%99%A8"><span class="nav-number">1.3.2.</span> <span class="nav-text">预测分析器</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#%E7%B1%BB%E6%AF%94%E8%AF%8D%E6%B3%95%E5%88%86%E6%9E%90"><span class="nav-number">1.3.2.1.</span> <span class="nav-text">类比词法分析</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E6%B2%A1%E6%9C%89%E9%80%92%E5%BD%92"><span class="nav-number">1.3.2.2.</span> <span class="nav-text">没有递归?</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E9%A2%84%E6%B5%8B%E5%88%86%E6%9E%90%E8%A1%A8%E6%98%AF%E5%B9%B2%E5%95%A5%E7%9A%84"><span class="nav-number">1.3.2.3.</span> <span class="nav-text">预测分析表是干啥的?</span></a><ol class="nav-child"><li class="nav-item nav-level-6"><a class="nav-link"><span class="nav-number">1.3.2.3.0.1.</span> <span class="nav-text"></span></a></li></ol></li></ol></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E5%A6%82%E4%BD%95%E5%AE%9A%E4%B9%89%E6%A0%BC%E5%B1%80"><span class="nav-number">1.3.2.4.</span> <span class="nav-text">如何定义格局?</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E6%A0%BC%E5%B1%80%E5%A6%82%E4%BD%95%E8%BD%AC%E7%A7%BB"><span class="nav-number">1.3.2.5.</span> <span class="nav-text">格局如何转移?</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E5%A6%82%E4%BD%95%E5%BB%BA%E7%AB%8B%E9%A2%84%E6%B5%8B%E5%88%86%E6%9E%90%E8%A1%A8"><span class="nav-number">1.3.2.6.</span> <span class="nav-text">如何建立预测分析表?</span></a><ol class="nav-child"><li class="nav-item nav-level-5"><a class="nav-link" href="#First%E9%9B%86%E5%90%88"><span class="nav-number">1.3.2.6.1.</span> <span class="nav-text">First集合</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#Follow%E9%9B%86%E5%90%88"><span class="nav-number">1.3.2.6.2.</span> <span class="nav-text">Follow集合</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#%E7%AE%97%E6%B3%95%E6%B1%82%E8%A7%A3First%E9%9B%86%E5%90%88"><span class="nav-number">1.3.2.6.3.</span> <span class="nav-text">算法求解First集合</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#%E6%B1%82%E8%A7%A3Follow%E9%9B%86%E5%90%88"><span class="nav-number">1.3.2.6.4.</span> <span class="nav-text">求解Follow集合</span></a></li></ol></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E7%AE%97%E6%95%B0%E8%A1%A8%E8%BE%BE%E5%BC%8F%E7%9A%84%E9%A2%84%E6%B5%8B%E5%88%86%E6%9E%90%E8%AF%AD%E6%B3%95%E5%88%86%E6%9E%90"><span class="nav-number">1.3.3.</span> <span class="nav-text">算数表达式的预测分析语法分析</span></a></li></ol></li></ol></li></ol></div>
+      </div>
+      <!--/noindex-->
+
+      <div class="site-overview-wrap sidebar-panel">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+  <p class="site-author-name" itemprop="name">John Doe</p>
+  <div class="site-description" itemprop="description"></div>
+</div>
+<div class="site-state-wrap motion-element">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+          <a href="/archives/">
+        
+          <span class="site-state-item-count">78</span>
+          <span class="site-state-item-name">posts</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-tags">
+        <span class="site-state-item-count">30</span>
+        <span class="site-state-item-name">tags</span>
+      </div>
+  </nav>
+</div>
+
+
+
+      </div>
+
+    </div>
+  </aside>
+  <div id="sidebar-dimmer"></div>
+
+
+      </div>
+    </main>
+
+    <footer class="footer">
+      <div class="footer-inner">
+        
+
+        
+
+<div class="copyright">
+  
+  &copy; 
+  <span itemprop="copyrightYear">2024</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">John Doe</span>
+</div>
+  <div class="powered-by">Powered by <a href="https://hexo.io/" class="theme-link" rel="noopener" target="_blank">Hexo</a> & <a href="https://muse.theme-next.org/" class="theme-link" rel="noopener" target="_blank">NexT.Muse</a>
+  </div>
+
+        
+
+
+
+
+
+
+
+
+      </div>
+    </footer>
+  </div>
+
+  
+  <script src="/lib/anime.min.js"></script>
+  <script src="/lib/velocity/velocity.min.js"></script>
+  <script src="/lib/velocity/velocity.ui.min.js"></script>
+
+<script src="/js/utils.js"></script>
+
+<script src="/js/motion.js"></script>
+
+
+<script src="/js/schemes/muse.js"></script>
+
+
+<script src="/js/next-boot.js"></script>
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+  
+
+</body>
+</html>

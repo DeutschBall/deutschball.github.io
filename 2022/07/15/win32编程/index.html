@@ -1,0 +1,1271 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 7.3.0">
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png">
+  <link rel="mask-icon" href="/images/logo.svg" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+<link rel="stylesheet" href="/lib/font-awesome/css/all.min.css">
+
+<script id="hexo-configurations">
+    var NexT = window.NexT || {};
+    var CONFIG = {"hostname":"example.com","root":"/","scheme":"Muse","version":"7.8.0","exturl":false,"sidebar":{"position":"left","display":"post","padding":18,"offset":12,"onmobile":false},"copycode":{"enable":false,"show_result":false,"style":null},"back2top":{"enable":true,"sidebar":false,"scrollpercent":false},"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":false,"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"algolia":{"hits":{"per_page":10},"labels":{"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}},"localsearch":{"enable":false,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false},"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}}};
+  </script>
+
+  <meta name="description" content="windows SDK chapter 3 窗口与消息从例程开始圣经windows程序设计给出的例程: 1234567891011121314151617181920212223242526272829303132333435363738394041424344454647484950515253545556575859606162636465666768697071727374#include">
+<meta property="og:type" content="article">
+<meta property="og:title" content="win32程序设计-chapter3 窗口与消息">
+<meta property="og:url" content="http://example.com/2022/07/15/win32%E7%BC%96%E7%A8%8B/index.html">
+<meta property="og:site_name" content="Hexo">
+<meta property="og:description" content="windows SDK chapter 3 窗口与消息从例程开始圣经windows程序设计给出的例程: 1234567891011121314151617181920212223242526272829303132333435363738394041424344454647484950515253545556575859606162636465666768697071727374#include">
+<meta property="og:locale" content="en_US">
+<meta property="og:image" content="https://raw.githubusercontent.com/DeutschBall/test/master/image-20220713161727581.png">
+<meta property="og:image" content="https://raw.githubusercontent.com/DeutschBall/test/master/image-20220713162947891.png">
+<meta property="og:image" content="https://raw.githubusercontent.com/DeutschBall/test/master/image-20220713163735682.png">
+<meta property="og:image" content="https://raw.githubusercontent.com/DeutschBall/test/master/image-20220713173027546.png">
+<meta property="article:published_time" content="2022-07-14T16:38:00.000Z">
+<meta property="article:modified_time" content="2022-08-31T07:13:07.004Z">
+<meta property="article:author" content="John Doe">
+<meta property="article:tag" content="windows程序设计">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://raw.githubusercontent.com/DeutschBall/test/master/image-20220713161727581.png">
+
+<link rel="canonical" href="http://example.com/2022/07/15/win32%E7%BC%96%E7%A8%8B/">
+
+
+<script id="page-configurations">
+  // https://hexo.io/docs/variables.html
+  CONFIG.page = {
+    sidebar: "",
+    isHome : false,
+    isPost : true,
+    lang   : 'en'
+  };
+</script>
+
+  <title>win32程序设计-chapter3 窗口与消息 | Hexo</title>
+  
+
+
+
+
+
+
+  <noscript>
+  <style>
+  .use-motion .brand,
+  .use-motion .menu-item,
+  .sidebar-inner,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-header { opacity: initial; }
+
+  .use-motion .site-title,
+  .use-motion .site-subtitle {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line-before i { left: initial; }
+  .use-motion .logo-line-after i { right: initial; }
+  </style>
+</noscript>
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage">
+  <div class="container use-motion">
+    <div class="headband"></div>
+
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="Toggle navigation bar">
+      <span class="toggle-line toggle-line-first"></span>
+      <span class="toggle-line toggle-line-middle"></span>
+      <span class="toggle-line toggle-line-last"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <span class="logo-line-before"><i></i></span>
+      <h1 class="site-title">Hexo</h1>
+      <span class="logo-line-after"><i></i></span>
+    </a>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger">
+    </div>
+  </div>
+</div>
+
+
+
+
+<nav class="site-nav">
+  <ul id="menu" class="main-menu menu">
+        <li class="menu-item menu-item-home">
+
+    <a href="/" rel="section"><i class="fa fa-home fa-fw"></i>Home</a>
+
+  </li>
+        <li class="menu-item menu-item-archives">
+
+    <a href="/archives/" rel="section"><i class="fa fa-archive fa-fw"></i>Archives</a>
+
+  </li>
+  </ul>
+</nav>
+
+
+
+
+</div>
+    </header>
+
+    
+  <div class="back-to-top">
+    <i class="fa fa-arrow-up"></i>
+    <span>0%</span>
+  </div>
+
+
+    <main class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+
+          <div class="content post posts-expand">
+            
+
+    
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="en">
+    <link itemprop="mainEntityOfPage" href="http://example.com/2022/07/15/win32%E7%BC%96%E7%A8%8B/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.gif">
+      <meta itemprop="name" content="John Doe">
+      <meta itemprop="description" content="">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Hexo">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          win32程序设计-chapter3 窗口与消息
+        </h1>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-calendar"></i>
+              </span>
+              <span class="post-meta-item-text">Posted on</span>
+
+              <time title="Created: 2022-07-15 00:38:00" itemprop="dateCreated datePublished" datetime="2022-07-15T00:38:00+08:00">2022-07-15</time>
+            </span>
+              <span class="post-meta-item">
+                <span class="post-meta-item-icon">
+                  <i class="far fa-calendar-check"></i>
+                </span>
+                <span class="post-meta-item-text">Edited on</span>
+                <time title="Modified: 2022-08-31 15:13:07" itemprop="dateModified" datetime="2022-08-31T15:13:07+08:00">2022-08-31</time>
+              </span>
+
+          
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+        <h1 id="windows-SDK-chapter-3-窗口与消息"><a href="#windows-SDK-chapter-3-窗口与消息" class="headerlink" title="windows SDK chapter 3 窗口与消息"></a>windows SDK chapter 3 窗口与消息</h1><h2 id="从例程开始"><a href="#从例程开始" class="headerlink" title="从例程开始"></a>从例程开始</h2><p>圣经windows程序设计给出的例程:</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;windows.h&gt;</span></span></span><br><span class="line">LRESULT CALLBACK <span class="title function_">WndProc</span><span class="params">(HWND, UINT, WPARAM, LPARAM)</span>;</span><br><span class="line"><span class="type">int</span> WINAPI <span class="title function_">WinMain</span><span class="params">(HINSTANCE hInstance, HINSTANCE hPrevInstance,</span></span><br><span class="line"><span class="params">    PSTR szCmdLine, <span class="type">int</span> iCmdShow)</span></span><br><span class="line">&#123;</span><br><span class="line">    <span class="type">static</span> TCHAR szAppName[] = TEXT(<span class="string">&quot;HelloWin&quot;</span>);</span><br><span class="line">    HWND hwnd;</span><br><span class="line">    MSG msg;</span><br><span class="line">    WNDCLASS wndclass;</span><br><span class="line">    wndclass.style = CS_HREDRAW | CS_VREDRAW;</span><br><span class="line">    wndclass.lpfnWndProc = WndProc;</span><br><span class="line">    wndclass.cbClsExtra = <span class="number">0</span>;</span><br><span class="line">    wndclass.cbWndExtra = <span class="number">0</span>;</span><br><span class="line">    wndclass.hInstance = hInstance;</span><br><span class="line">    wndclass.hIcon = LoadIcon(<span class="literal">NULL</span>, IDI_APPLICATION);</span><br><span class="line">    wndclass.hCursor = LoadCursor(<span class="literal">NULL</span>, IDC_ARROW);</span><br><span class="line">    wndclass.hbrBackground = (HBRUSH)GetStockObject(WHITE_BRUSH);</span><br><span class="line">    wndclass.lpszMenuName = <span class="literal">NULL</span>;</span><br><span class="line">    wndclass.lpszClassName = szAppName;</span><br><span class="line">    <span class="keyword">if</span> (!RegisterClass(&amp;wndclass))</span><br><span class="line">    &#123;</span><br><span class="line">        MessageBox(<span class="literal">NULL</span>, TEXT(<span class="string">&quot;This program requires Windows NT!&quot;</span>),</span><br><span class="line">            szAppName, MB_ICONERROR);</span><br><span class="line">        <span class="keyword">return</span> <span class="number">0</span>;</span><br><span class="line">    &#125;</span><br><span class="line">    hwnd = CreateWindow(szAppName,                 <span class="comment">// window class name</span></span><br><span class="line">        TEXT(<span class="string">&quot;The Hello Program&quot;</span>), <span class="comment">// window caption</span></span><br><span class="line">        WS_OVERLAPPEDWINDOW,       <span class="comment">// window style</span></span><br><span class="line">        CW_USEDEFAULT,             <span class="comment">// initial x position</span></span><br><span class="line">        CW_USEDEFAULT,             <span class="comment">// initial y position</span></span><br><span class="line">        CW_USEDEFAULT,             <span class="comment">// initial x size</span></span><br><span class="line">        CW_USEDEFAULT,             <span class="comment">// initial y size</span></span><br><span class="line">        <span class="literal">NULL</span>,                      <span class="comment">// parent window handle</span></span><br><span class="line">        <span class="literal">NULL</span>,                      <span class="comment">// window menu handle</span></span><br><span class="line">        hInstance,                 <span class="comment">// program instance handle</span></span><br><span class="line">        <span class="literal">NULL</span>);                     <span class="comment">// creation parameters</span></span><br><span class="line"></span><br><span class="line">    ShowWindow(hwnd, iCmdShow);</span><br><span class="line">    UpdateWindow(hwnd);</span><br><span class="line"></span><br><span class="line">    <span class="keyword">while</span> (GetMessage(&amp;msg, <span class="literal">NULL</span>, <span class="number">0</span>, <span class="number">0</span>))</span><br><span class="line">    &#123;</span><br><span class="line">        TranslateMessage(&amp;msg);</span><br><span class="line">        DispatchMessage(&amp;msg);</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">return</span> msg.wParam;</span><br><span class="line">&#125;</span><br><span class="line">LRESULT CALLBACK <span class="title function_">WndProc</span><span class="params">(HWND hwnd, UINT message, WPARAM wParam, LPARAM lParam)</span></span><br><span class="line">&#123;</span><br><span class="line">    HDC hdc;</span><br><span class="line">    PAINTSTRUCT ps;</span><br><span class="line">    RECT rect;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">switch</span> (message)</span><br><span class="line">    &#123;</span><br><span class="line">    <span class="keyword">case</span> WM_CREATE:</span><br><span class="line">        PlaySound(TEXT(<span class="string">&quot;SenbonZakura.wav&quot;</span>), <span class="literal">NULL</span>, SND_FILENAME | SND_ASYNC);</span><br><span class="line">        <span class="keyword">return</span> <span class="number">0</span>;</span><br><span class="line">    <span class="keyword">case</span> WM_PAINT:</span><br><span class="line">        hdc = BeginPaint(hwnd, &amp;ps);</span><br><span class="line"></span><br><span class="line">        GetClientRect(hwnd, &amp;rect);</span><br><span class="line"></span><br><span class="line">        DrawText(hdc, TEXT(<span class="string">&quot;Hello, Windows 98!&quot;</span>), <span class="number">-1</span>, &amp;rect,</span><br><span class="line">            DT_SINGLELINE | DT_CENTER | DT_VCENTER);</span><br><span class="line">        EndPaint(hwnd, &amp;ps);</span><br><span class="line">        <span class="keyword">return</span> <span class="number">0</span>;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">case</span> WM_DESTROY:</span><br><span class="line">        PostQuitMessage(<span class="number">0</span>);</span><br><span class="line">        <span class="keyword">return</span> <span class="number">0</span>;</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">return</span> DefWindowProc(hwnd, message, wParam, lParam);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>要求:和exe文件同目录下有一个SenbonZakura.wav才能听歌.没有也不至于出错</p>
+<p>至于windows系统版本要求,win xp是可以的,再老一点的win2000应该也可以,但是win98不是狠支持unicode编码,不是很行了</p>
+<h3 id="主函数"><a href="#主函数" class="headerlink" title="主函数"></a>主函数</h3><h4 id="接口定义"><a href="#接口定义" class="headerlink" title="接口定义"></a>接口定义</h4><p>WinMain函数,其固定格式:</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">INT WINAPI <span class="title function_">WinMain</span><span class="params">(HINSTANCE hInstance, HINSTANCE hPrevInstance,</span></span><br><span class="line"><span class="params">    PSTR lpCmdLine, INT nCmdShow)</span></span><br><span class="line">&#123;</span><br><span class="line">    <span class="keyword">return</span> <span class="number">0</span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>返回值为<code>INT</code>,在<code>minwindef.h</code>中有<code>typedef int         INT;</code></p>
+<p>调用约定为<code>WINAPI</code>在<code>minwindef.h</code>中有:</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#<span class="keyword">define</span> CALLBACK    __stdcall</span></span><br><span class="line"><span class="meta">#<span class="keyword">define</span> WINAPI      __stdcall</span></span><br><span class="line"><span class="meta">#<span class="keyword">define</span> WINAPIV     __cdecl</span></span><br><span class="line"><span class="meta">#<span class="keyword">define</span> APIENTRY    WINAPI</span></span><br><span class="line"><span class="meta">#<span class="keyword">define</span> APIPRIVATE  __stdcall</span></span><br><span class="line"><span class="meta">#<span class="keyword">define</span> PASCAL      __stdcall</span></span><br></pre></td></tr></table></figure>
+
+<blockquote>
+<p>关于stdcall调用约定:</p>
+<table>
+<thead>
+<tr>
+<th align="left">Element</th>
+<th align="left">Implementation</th>
+</tr>
+</thead>
+<tbody><tr>
+<td align="left">参数传递顺序</td>
+<td align="left">从右向左压栈,不使用寄存器</td>
+</tr>
+<tr>
+<td align="left">参数传递规则(值传递&#x2F;引用传递)</td>
+<td align="left">除非参数是指针或者引用类型,否则采用值传递</td>
+</tr>
+<tr>
+<td align="left">栈维护</td>
+<td align="left">被调用者自己清理自己用到的栈</td>
+</tr>
+<tr>
+<td align="left">命名修饰规则</td>
+<td align="left">下划线开头,然后@,然后是十进制表示的参数表字节大小. 因此<code>int func(int a,double b)</code>将会被修饰为<code>_func@12</code>(int四个字节+double八个字节)</td>
+</tr>
+<tr>
+<td align="left">大小写转换规定</td>
+<td align="left">无</td>
+</tr>
+<tr>
+<td align="left">返回值位置</td>
+<td align="left">放在eax,rax寄存器中</td>
+</tr>
+</tbody></table>
+</blockquote>
+<p>四个参数:</p>
+<p><code>HINSTANCE hInstance</code>:句柄类型,实例句柄或者模块句柄.实际上是一个数,但是可以唯一地标识某些东西.例程中的hInstance就标识本程序自己.</p>
+<blockquote>
+<p>句柄类似于文件描述符,用一个数字对应一个打开的文件</p>
+</blockquote>
+<p><code>HINSTANCE hPrevInstance</code>:本程序前一个打开的实例的句柄.如果a.exe已经有一个实例在运行了,那么此时再打开a.exe,则hPrevInstance就是刚才实例的句柄.32位windows中该参数已经弃用</p>
+<p><code>PSTR lpCmdLine</code>:用来运行程序的命令行</p>
+<blockquote>
+<p>PSTR是个什么类型呢?</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">typedef</span> <span class="type">char</span> CHAR;</span><br><span class="line"><span class="keyword">typedef</span> _Null_terminated_ CHAR *NPSTR, *LPSTR, *PSTR;</span><br></pre></td></tr></table></figure>
+
+<p>原来是以NULL结尾的char*字符串</p>
+</blockquote>
+<p><code>INT nCmdShow</code>:指明程序最初如何显示,包括最大化,最小化,正常显示</p>
+<h4 id="调用链"><a href="#调用链" class="headerlink" title="调用链"></a>调用链</h4><p>关于入口点的问题还需要炎鸠,暂且这样认为</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">WinMainCRTStartup或mainCRTStartup</span><br><span class="line">	-&gt;__tmainCRTStartup</span><br><span class="line">		-&gt;main</span><br><span class="line">			-&gt;WinMai</span><br></pre></td></tr></table></figure>
+
+
+
+<p>用ida观察最开始貌似有两个入口,但是实际上是不同类型的exe的进入点不一样</p>
+<blockquote>
+<p>mainCRTStartup()  ANSI  +  控制台程序<br>wmainCRTStartup()  UNICODE  +  控制台程序<br>WinMainCRTStartup()  ANSI  +  GUI程序<br>wWinMainCRTStartup()  UNICODE  +  GUI程序</p>
+</blockquote>
+<p>然后<code>__tmainCRTStartup</code>这个函数,</p>
+<p>使用<code>GetStartupInfo</code>获取进程启动信息，</p>
+<p>然后使用<code>_inititem</code>初始化全局变量和对象，</p>
+<p>最后调用main、wmain、WinMain、wWinMain进入程序</p>
+<h3 id="注册窗口类"><a href="#注册窗口类" class="headerlink" title="注册窗口类"></a>注册窗口类</h3><figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br></pre></td><td class="code"><pre><span class="line">HWND hwnd;</span><br><span class="line">WNDCLASS wndclass;</span><br><span class="line">wndclass.style = CS_HREDRAW | CS_VREDRAW;</span><br><span class="line">wndclass.lpfnWndProc = WndProc;</span><br><span class="line">wndclass.cbClsExtra = <span class="number">0</span>;</span><br><span class="line">wndclass.cbWndExtra = <span class="number">0</span>;</span><br><span class="line">wndclass.hInstance = hInstance;</span><br><span class="line">wndclass.hIcon = LoadIcon(<span class="literal">NULL</span>, IDI_APPLICATION);</span><br><span class="line">wndclass.hCursor = LoadCursor(<span class="literal">NULL</span>, IDC_ARROW);</span><br><span class="line">wndclass.hbrBackground = (HBRUSH)GetStockObject(WHITE_BRUSH);</span><br><span class="line">wndclass.lpszMenuName = <span class="literal">NULL</span>;</span><br><span class="line">wndclass.lpszClassName = szAppName;</span><br><span class="line"><span class="keyword">if</span> (!RegisterClass(&amp;wndclass))</span><br><span class="line">&#123;</span><br><span class="line">    MessageBox(<span class="literal">NULL</span>, TEXT(<span class="string">&quot;This program requires Windows NT!&quot;</span>),</span><br><span class="line">        szAppName, MB_ICONERROR);</span><br><span class="line">    <span class="keyword">return</span> <span class="number">0</span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+
+
+
+
+<h4 id="WNDCLASS-wndclass"><a href="#WNDCLASS-wndclass" class="headerlink" title="WNDCLASS wndclass"></a>WNDCLASS wndclass</h4><p>窗口类(实际上是一个C结构体配合面向对象风格的函数使用罢了),创建应用程序窗口之前必须注册窗口类</p>
+<p>这个类的成员都有啥呢?</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">typedef</span> <span class="class"><span class="keyword">struct</span> <span class="title">tagWNDCLASSW</span> &#123;</span></span><br><span class="line">    UINT        style;</span><br><span class="line">    WNDPROC     lpfnWndProc;</span><br><span class="line">    <span class="type">int</span>         cbClsExtra;</span><br><span class="line">    <span class="type">int</span>         cbWndExtra;</span><br><span class="line">    HINSTANCE   hInstance;</span><br><span class="line">    HICON       hIcon;</span><br><span class="line">    HCURSOR     hCursor;</span><br><span class="line">    HBRUSH      hbrBackground;</span><br><span class="line">    LPCWSTR     lpszMenuName;</span><br><span class="line">    LPCWSTR     lpszClassName;</span><br><span class="line">&#125; WNDCLASSW, *PWNDCLASSW, NEAR *NPWNDCLASSW, FAR *LPWNDCLASSW;</span><br><span class="line"><span class="meta">#<span class="keyword">ifdef</span> UNICODE</span></span><br><span class="line"><span class="keyword">typedef</span> WNDCLASSW WNDCLASS;</span><br></pre></td></tr></table></figure>
+
+<p>其中最重要的是lpfnWndProc回调函数,lpszClassName窗口类名</p>
+<h5 id="style"><a href="#style" class="headerlink" title="style"></a>style</h5><p>UINT,unsigned int,无符号32位整型</p>
+<p>窗口类样式.枚举类型</p>
+<table>
+<thead>
+<tr>
+<th>取值</th>
+<th>说明</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>CS_BYTEALIGNCLIENT<br />0x1000</td>
+<td>窗口的客户区域以“字符边界”对齐，当系统调整窗口的水平位置时，客户区域的左边坐标是8的整数倍。</td>
+</tr>
+<tr>
+<td>CS_BYTEALIGNWINDOW<br />0x2000</td>
+<td>窗口以“字符边界”对齐，当系统调整窗口的水平位置时，客户区域的左边坐标是8的整数倍。</td>
+</tr>
+<tr>
+<td>CS_CLASSDC<br />0x0040</td>
+<td>分配一个设备环境并被类中的所有窗体共享。它是可以适用于一个应用程序的若干线程创建的一个相同类的窗体。当多个线程试图同时使用相同的设备环境时，系统只允许一个线程成功地进行绘图操作。</td>
+</tr>
+<tr>
+<td>CS_DBLCLKS<br />0x0008</td>
+<td>当用户双击窗口时，将向窗口函数发送鼠标双击消息。</td>
+</tr>
+<tr>
+<td>CS_GLOBALCLASS<br />0x4000</td>
+<td>指定此窗体类是一个应用程序全局类。应用程序全局类是由一个在进程中对所有模块有效的exe或dll注册的窗体类。</td>
+</tr>
+<tr>
+<td>CS_HREDRAW<br />0x0002</td>
+<td>如果窗口的位置或宽度发生改变，将重绘窗口。</td>
+</tr>
+<tr>
+<td>CS_NOCLOSE<br />0x0200</td>
+<td>窗口中的“关闭”按钮不可见。</td>
+</tr>
+<tr>
+<td>CS_OWNDC<br />0x0020</td>
+<td>为同一个窗口类中的每个窗口创建一个唯一的设备上下文。</td>
+</tr>
+<tr>
+<td>CS_PARENTDC<br />0x0080</td>
+<td>设置子窗口中剪下的矩形区域到父窗口中，以使子窗口可以在父窗口上绘图。指定该风格可以提高应用程序的性能</td>
+</tr>
+<tr>
+<td>CS_SAVEBITS<br />0x0800</td>
+<td>把被窗口遮掩的屏幕图像作为位图保存起来。当该窗口被移动时，Windows操作系统使用被保存的位图来重建屏幕图像。</td>
+</tr>
+<tr>
+<td>CS_VREDRAW<br />0x0001</td>
+<td>如果窗口的位置或高度改变，将重绘窗口。</td>
+</tr>
+</tbody></table>
+<p>多个样式时使用按位或</p>
+<h5 id="lpfnWndProc"><a href="#lpfnWndProc" class="headerlink" title="lpfnWndProc"></a>lpfnWndProc</h5><p>窗口信息的回调处理函数,窗口的灵魂</p>
+<p>其类型是一个函数指针</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">typedef</span> __int64 LONG_PTR, *PLONG_PTR;</span><br><span class="line"><span class="keyword">typedef</span> LONG_PTR            LRESULT;</span><br><span class="line"></span><br><span class="line"><span class="meta">#<span class="keyword">define</span> CALLBACK    __stdcall</span></span><br><span class="line"></span><br><span class="line"><span class="keyword">typedef</span> <span class="type">unsigned</span> __int64 UINT_PTR, *PUINT_PTR;</span><br><span class="line"><span class="keyword">typedef</span> UINT_PTR            WPARAM;</span><br><span class="line"></span><br><span class="line"><span class="keyword">typedef</span> __int64 LONG_PTR, *PLONG_PTR;</span><br><span class="line"><span class="keyword">typedef</span> LONG_PTR            LPARAM;</span><br><span class="line"></span><br><span class="line"><span class="keyword">typedef</span> <span class="title function_">LRESULT</span> <span class="params">(CALLBACK* WNDPROC)</span><span class="params">(HWND, UINT, WPARAM, LPARAM)</span>;</span><br></pre></td></tr></table></figure>
+
+<p>一个返回值为<code>LRESULT</code>(64位整数),调用约定位<code>CALLBACK(__stdcall)</code>,</p>
+<p>四个参数分别为句柄,无符号32位整型,无符号64位整型,带符号64位整型</p>
+<p>的函数指针<code>WNDPROC</code></p>
+<p>在例程中,它被注册为<code>wndclass.lpfnWndProc = WndProc;</code></p>
+<p>该函数就是过程函数,决定了收到特定消息时窗口的行为</p>
+<h5 id="cbClsExtra"><a href="#cbClsExtra" class="headerlink" title="cbClsExtra"></a>cbClsExtra</h5><p>根据匈牙利命名法,cb,count bytes,表示字节数前缀.</p>
+<blockquote>
+<p>windows程序为每一个窗口设计类管理一个WNDCLASS结构。在应用程序注册一个窗口类的时候，可以让windows分配一定字节空间的内存，这部分内存成为类的附件内存，有属于这个窗口类的所有窗口共享，类附件内存信息用于存储窗口类的附加信息。windows系统将这部分内存初始化为0，因此我们经常设置此参数为0.</p>
+</blockquote>
+<p>例程中该值设置为0,看来不是必要的</p>
+<h5 id="cbWndExtra"><a href="#cbWndExtra" class="headerlink" title="cbWndExtra"></a>cbWndExtra</h5><blockquote>
+<p>windows程序为每一个窗口管理一个内部数据结构，在注册窗口类的时候，系统可以为每一个窗口分配一定的字节数的附加内存空间，称为窗口附件内存。应用程序可使用这部分内存存储窗口特有的数据，windows系统把这部分内存初始化为0.</p>
+</blockquote>
+<p>例程中该值设置为0,看来不是必要的</p>
+<h5 id="hInstance"><a href="#hInstance" class="headerlink" title="hInstance"></a>hInstance</h5><p>窗体所在句柄</p>
+<p>在例程中是这样写的<code>wndclass.hInstance = hInstance;</code></p>
+<p>右值的hInstance来自WinMain的第一个参数hInstacne,也就是当前程序的句柄</p>
+<h5 id="hIcon"><a href="#hIcon" class="headerlink" title="hIcon"></a>hIcon</h5><p>窗体图标的句柄</p>
+<p>例程中<code>  wndclass.hIcon = LoadIcon(NULL, IDI_APPLICATION);</code></p>
+<p>调用了一个函数LoadIcon</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">WINUSERAPI HICON WINAPI <span class="title function_">LoadIconW</span></span><br><span class="line">    <span class="params">(_In_opt_ HINSTANCE hInstance,_In_ LPCWSTR lpIconName)</span>;</span><br><span class="line"><span class="meta">#<span class="keyword">define</span> LoadIcon  LoadIconW</span></span><br></pre></td></tr></table></figure>
+
+<p><code>hInstance</code>:模块实例句柄,该模块包含了将被加载的图标</p>
+<p><code>lpIconName:</code>被家长的图标资源的名称</p>
+<p>如果使用系统图标则<code>hInstance</code>为NULL,lpIconName为宏定义值</p>
+<table>
+<thead>
+<tr>
+<th>Value</th>
+<th>含义</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>IDI_APPLICATION MAKEINTRESOURCE(32512)</td>
+<td>默认程序图标</td>
+</tr>
+<tr>
+<td>IDI_ASTERISK MAKEINTRESOURCE(32516)</td>
+<td>Asterisk图标， 与IDI_INFORMATION相同</td>
+</tr>
+<tr>
+<td>IDI_ERROR MAKEINTRESOURCE(32513)</td>
+<td>Hand-shaped图标</td>
+</tr>
+<tr>
+<td>IDI_EXCLAMATION MAKEINTRESOURCE(32515)</td>
+<td>感叹号图标， 与IDI_WARNING相同</td>
+</tr>
+<tr>
+<td>IDI_HAND MAKEINTRESOURCE(32513)</td>
+<td>Hand-shaped图标， 与IDI_ERROR相同</td>
+</tr>
+<tr>
+<td>IDI_INFORMATION MAKEINTRESOURCE(32516)</td>
+<td>Asterisk图标</td>
+</tr>
+<tr>
+<td>IDI_QUESTION MAKEINTRESOURCE(32514)</td>
+<td>疑问号图标</td>
+</tr>
+<tr>
+<td>IDI_SHIELD MAKEINTRESOURCE(32518)</td>
+<td>安全盾图标</td>
+</tr>
+<tr>
+<td>IDI_WARNING MAKEINTRESOURCE(32515)</td>
+<td>感叹号图标</td>
+</tr>
+<tr>
+<td>IDI_WINLOGO MAKEINTRESOURCE(32517)</td>
+<td>默认程序图标， Win2000：Windows logo图标</td>
+</tr>
+</tbody></table>
+<p>例程中就使用了系统图标<code>IDI_APPLICATION </code>即默认图标(最丑的白板)</p>
+<p>给他改成安全盾</p>
+<p><img src="https://raw.githubusercontent.com/DeutschBall/test/master/image-20220713161727581.png" alt="image-20220713161727581"></p>
+<p>函数返回值为<code>HICON</code>即新加载的图标的句柄,如果加载失败则返回NULL</p>
+<h5 id="hCursor"><a href="#hCursor" class="headerlink" title="hCursor"></a>hCursor</h5><figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">HCURSOR</span><br><span class="line">WINAPI</span><br><span class="line"><span class="title function_">LoadCursorW</span><span class="params">(</span></span><br><span class="line"><span class="params">    _In_opt_ HINSTANCE hInstance,</span></span><br><span class="line"><span class="params">    _In_ LPCWSTR lpCursorName)</span>;</span><br><span class="line"><span class="meta">#<span class="keyword">ifdef</span> UNICODE</span></span><br><span class="line"><span class="meta">#<span class="keyword">define</span> LoadCursor  LoadCursorW</span></span><br></pre></td></tr></table></figure>
+
+<p>光标类句柄</p>
+<p>使用方法类似于hIcon,当hInstance&#x3D;NULL时通过lpCursorName指定一个枚举值,使用系统光标</p>
+<table>
+<thead>
+<tr>
+<th>宏名</th>
+<th>宏值</th>
+<th>意义</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>IDC_APPSTARTING</td>
+<td>MAKEINTRESOURCE(32650)</td>
+<td>标准箭头和沙漏</td>
+</tr>
+<tr>
+<td>IDC_ARROW</td>
+<td>MAKEINTRESOURCE(32512)</td>
+<td>标准箭头</td>
+</tr>
+<tr>
+<td>IDC_CROSS</td>
+<td>MAKEINTRESOURCE(32515)</td>
+<td>十字线</td>
+</tr>
+<tr>
+<td>IDC_HAND</td>
+<td>MAKEINTRESOURCE(32649)</td>
+<td>手掌</td>
+</tr>
+<tr>
+<td>IDC_HELP</td>
+<td>MAKEINTRESOURCE(32651)</td>
+<td>箭头和问号</td>
+</tr>
+<tr>
+<td>IDC_IBEAM</td>
+<td>MAKEINTRESOURCE(32513)</td>
+<td>I型</td>
+</tr>
+<tr>
+<td>IDC_ICON</td>
+<td>MAKEINTRESOURCE(32641)</td>
+<td>已过时</td>
+</tr>
+<tr>
+<td>IDC_NO</td>
+<td>MAKEINTRESOURCE(32648</td>
+<td>禁止圈</td>
+</tr>
+<tr>
+<td>IDC_SIZE</td>
+<td>MAKEINTRESOURCE(32640)</td>
+<td>已过时，应该用IDC_SIZEALL</td>
+</tr>
+<tr>
+<td>IDC_SIZEALL</td>
+<td>MAKEINTRESOURCE(32646)</td>
+<td>指向东、西、南、北的四方向箭头</td>
+</tr>
+<tr>
+<td>IDC_SIZENESW</td>
+<td>MAKEINTRESOURCE(32643)</td>
+<td>指向东南、西北的两方向箭头</td>
+</tr>
+<tr>
+<td>IDC_SIZENS</td>
+<td>MAKEINTRESOURCE(32645)</td>
+<td>指向南、北的两方向箭头</td>
+</tr>
+<tr>
+<td>IDC_SIZENWSE</td>
+<td>MAKEINTRESOURCE(32642)</td>
+<td>指向西北、东南的两方向箭头</td>
+</tr>
+<tr>
+<td>IDC_SIZEWE</td>
+<td>MAKEINTRESOURCE(32644)</td>
+<td>指向东西的两方向箭头</td>
+</tr>
+<tr>
+<td>IDC_UPARROW</td>
+<td>MAKEINTRESOURCE(32516)</td>
+<td>竖直箭头</td>
+</tr>
+<tr>
+<td>IDC_WAIT</td>
+<td>MAKEINTRESOURCE(32514)</td>
+<td>沙漏</td>
+</tr>
+</tbody></table>
+<p>返回值HCURSOR类型的句柄.如果成功，返回最近一次加载的光标句柄。如果失败，返回NULL。</p>
+<p>例程中使用的是<code>IDC_ARROW</code>标准箭头</p>
+<p><img src="https://raw.githubusercontent.com/DeutschBall/test/master/image-20220713162947891.png" alt="image-20220713162947891"></p>
+<h5 id="hbrBackground"><a href="#hbrBackground" class="headerlink" title="hbrBackground"></a>hbrBackground</h5><p>主窗口背景色,背景刷类的句柄</p>
+<p>该值可以是一个物理刷,也可以是纯颜色值</p>
+<blockquote>
+<ul>
+<li>COLOR_ACTIVEBORDER</li>
+<li>COLOR_ACTIVECAPTION</li>
+<li>COLOR_APPWORKSPACE</li>
+<li>COLOR_BACKGROUND</li>
+<li>COLOR_BTNFACE</li>
+<li>COLOR_BTNSHADOW</li>
+<li>COLOR_BTNTEXT</li>
+<li>COLOR_CAPTIONTEXT</li>
+<li>COLOR_GRAYTEXT</li>
+<li>COLOR_HIGHLIGHT</li>
+<li>COLOR_HIGHLIGHTTEXT</li>
+<li>COLOR_INACTIVEBORDER</li>
+<li>COLOR_INACTIVECAPTION</li>
+<li>COLOR_MENU</li>
+<li>COLOR_MENUTEXT</li>
+<li>COLOR_SCROLLBAR</li>
+<li>COLOR_WINDOW</li>
+<li>COLOR_WINDOWFRAME</li>
+<li>COLOR_WINDOWTEXT</li>
+</ul>
+</blockquote>
+<p><img src="https://raw.githubusercontent.com/DeutschBall/test/master/image-20220713163735682.png" alt="image-20220713163735682"></p>
+<p>例程中使用的是物理刷<code>(HBRUSH)GetStockObject(WHITE_BRUSH)</code></p>
+<p>其中GetStockObject函数原型:</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">HGDIOBJ <span class="title function_">GetStockObject</span><span class="params">(</span></span><br><span class="line"><span class="params">  [in] <span class="type">int</span> i</span></span><br><span class="line"><span class="params">)</span>;</span><br></pre></td></tr></table></figure>
+
+<p>参数i的取值有:</p>
+<table>
+<thead>
+<tr>
+<th><strong>值</strong></th>
+<th><strong>含义</strong></th>
+</tr>
+</thead>
+<tbody><tr>
+<td>BLACK_BRUSH</td>
+<td>黑色画刷</td>
+</tr>
+<tr>
+<td>DKGRAY_BRUSH</td>
+<td>暗灰色画刷</td>
+</tr>
+<tr>
+<td>DC_BRUSH</td>
+<td>1. 纯色画刷，默认颜色是白色的 2. 调用 <a target="_blank" rel="noopener" href="http://bbs.fishc.com/thread-54634-1-1.html">SetDCBrushColor</a> 函数可以修改该值的颜色</td>
+</tr>
+<tr>
+<td>GRAY_BRUSH</td>
+<td>灰色画刷</td>
+</tr>
+<tr>
+<td>HOLLOW_BRUSH</td>
+<td>空画刷（相当于 NULL_BRUSH）</td>
+</tr>
+<tr>
+<td>LTGRAY_BRUSH</td>
+<td>浅灰色画刷</td>
+</tr>
+<tr>
+<td>NULL_BRUSH</td>
+<td>空画刷（相当于 HOLLOW_BRUSH）</td>
+</tr>
+<tr>
+<td>WHITE_BRUSH</td>
+<td>白色画刷</td>
+</tr>
+<tr>
+<td>BLACK_PEN</td>
+<td>黑色画笔</td>
+</tr>
+<tr>
+<td>DC_PEN</td>
+<td>1. 纯色画笔，默认颜色是白色的 2. 调用 <a target="_blank" rel="noopener" href="http://bbs.fishc.com/thread-54635-1-1.html">SetDCPenColor</a> 函数可以修改该值的颜色</td>
+</tr>
+<tr>
+<td>NULL_PEN</td>
+<td>空画笔（空画笔不绘制任何东西）</td>
+</tr>
+<tr>
+<td>WHITE_PEN</td>
+<td>白色画笔</td>
+</tr>
+<tr>
+<td>ANSI_FIXED_FONT</td>
+<td>Windows 中的固定间距（等宽）系统字体</td>
+</tr>
+<tr>
+<td>ANSI_VAR_FONT</td>
+<td>Windows 中的可变间距（比例间距）系统字体</td>
+</tr>
+<tr>
+<td>DEVICE_DEFAULT_FONT</td>
+<td>设备相关字体</td>
+</tr>
+<tr>
+<td>DEFAULT_GUI_FONT</td>
+<td>1. 用户界面对象（如菜单、对话框）的默认字体 2. 不推荐使用 DEFAULT_GUI_FONT 或 SYSTEM_FONT 获得对话框或系统的字体 3. 该字体默认是 Tahoma</td>
+</tr>
+<tr>
+<td>OEM_FIXED_FONT</td>
+<td>原始设备制造商（OEM）相关固定间距（等宽）字体</td>
+</tr>
+<tr>
+<td>SYSTEM_FONT</td>
+<td>1. 系统字体 2. 默认情况下，Windows 使用系统字体绘制菜单，对话框和文本 3. 不推荐使用 DEFAULT_GUI_FONT 或 SYSTEM_FONT 获得对话框或系统的字体 4. 该字体默认是 Tahoma</td>
+</tr>
+<tr>
+<td>SYSTEM_FIXED_FONT</td>
+<td>1. 固定间距（等宽）系统字体 2. 该对象仅为兼容 16 位 Windows 版本提供</td>
+</tr>
+<tr>
+<td>DEFAULT_PALETTE</td>
+<td>默认调色板（该调色板由系统调色板中的静态色彩组成）</td>
+</tr>
+</tbody></table>
+<p>函数调用成功则返回所申请的逻辑对象的句柄</p>
+<p>失败则返回NULL</p>
+<h5 id="lpszMenuName"><a href="#lpszMenuName" class="headerlink" title="lpszMenuName"></a>lpszMenuName</h5><p>LPCWSTR类型长指针宽字节型字符串,菜单栏名</p>
+<h5 id="lpszClassName"><a href="#lpszClassName" class="headerlink" title="lpszClassName"></a>lpszClassName</h5><p>LPCWSTR类型长指针宽字节型字符串,描述<strong>窗口类名</strong></p>
+<p>例程使用的是</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="type">static</span> TCHAR szAppName[] = TEXT(<span class="string">&quot;HelloWin&quot;</span>);</span><br><span class="line">wndclass.lpszClassName = szAppName;</span><br></pre></td></tr></table></figure>
+
+
+
+<p>这个窗口类名将是一个<strong>窗口</strong>和该窗口类发生联系的唯一接口</p>
+<h4 id="RegisterClass"><a href="#RegisterClass" class="headerlink" title="RegisterClass"></a>RegisterClass</h4><figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">WINUSERAPI ATOM WINAPI <span class="title function_">RegisterClassW</span><span class="params">(_In_ CONST WNDCLASSW *lpWndClass)</span>;</span><br><span class="line"><span class="meta">#<span class="keyword">ifdef</span> UNICODE</span></span><br><span class="line"><span class="meta">#<span class="keyword">define</span> RegisterClass  RegisterClassW</span></span><br></pre></td></tr></table></figure>
+
+<p>参数是WNDCLASS类型,如果注册成功则返回ATOM,否则返回NULL</p>
+<blockquote>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">typedef unsigned short      WORD;</span><br><span class="line">typedef WORD                ATOM; </span><br></pre></td></tr></table></figure>
+
+<p>ATOM也是一个句柄</p>
+</blockquote>
+<p>例程中</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">if</span> (!RegisterClass(&amp;wndclass))</span><br><span class="line">&#123;</span><br><span class="line">    MessageBox(<span class="literal">NULL</span>, TEXT(<span class="string">&quot;This program requires Windows NT!&quot;</span>),szAppName, MB_ICONERROR);</span><br><span class="line">    <span class="keyword">return</span> <span class="number">0</span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>没有保存RegisterClass的值</p>
+<p>为啥这里要判断一下是否注册成功呢?</p>
+<p>因为RegisterClass有两个实现,RegisterClassA和RegisterClassW,分别使用ASCII或者Unicode决定传递给窗口的信息的类型</p>
+<p>但是WIN98系统上RegisterClassW并没有实现,只是一个桩函数,返回NULL,因此该程序在Win98上运行会寄</p>
+<p>然而MessageBoxW也需要宽字符支持啊?谁知Win98就挑了几个需要unicode的函数实现了,包括MessageBoxW</p>
+<h3 id="创建窗口类实例"><a href="#创建窗口类实例" class="headerlink" title="创建窗口类实例"></a>创建窗口类实例</h3><p>为啥要打印一个窗口到屏幕这么费劲啊,又是注册又是创建?</p>
+<p>刚才注册的是一个模子,这个模子可以有很多实例,模子作为实例的相同部分,每个实例还可以有自己的特点</p>
+<p>在CreateWindow函数中我们将会了解到CreateWindow和RegisterClass分别干了啥</p>
+<h4 id="HWND-hwnd"><a href="#HWND-hwnd" class="headerlink" title="HWND hwnd"></a>HWND hwnd</h4><p>句柄类型,hwnd将来要承载CreateWindow的返回值,用来标识唯一的窗口</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">winnt.h</span><br><span class="line">    <span class="meta">#<span class="keyword">define</span> DECLARE_HANDLE(name) struct name##__&#123;int unused;&#125;; typedef struct name##__ *name</span></span><br><span class="line">windef.h</span><br><span class="line">	<span class="title function_">DECLARE_HANDLE</span><span class="params">(HWND)</span>;</span><br></pre></td></tr></table></figure>
+
+<p>会发现这个<code>DECLARE_HANDLE(name)</code>的宏定义很奇怪,</p>
+<p>struct name##,这两个井号是干啥的</p>
+<blockquote>
+<p>一个井号的时候,其作用为自动添加双引号</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#<span class="keyword">define</span> ToString(x) #x</span></span><br><span class="line"><span class="type">char</span>* str = ToString(<span class="number">123132</span>);  <span class="comment">// 就成了str=&quot;123132&quot;;</span></span><br></pre></td></tr></table></figure>
+
+<p>两个井号的时候起拼接作用</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#<span class="keyword">define</span> Conn(x,y) x##y </span></span><br><span class="line"><span class="type">int</span>  n = Conn(<span class="number">123</span>,<span class="number">456</span>);   <span class="comment">// 结果就是n=123456;</span></span><br><span class="line"><span class="type">char</span>* str = Conn(<span class="string">&quot;asdf&quot;</span>, <span class="string">&quot;adf&quot;</span>)  <span class="comment">// 结果就是 str = &quot;asdfadf&quot;;</span></span><br><span class="line"></span><br></pre></td></tr></table></figure>
+</blockquote>
+<p>那么<code>#define DECLARE_HANDLE(name) struct name##__&#123;int unused;&#125;; typedef struct name##__ *name</code>宏定义展开就是</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="class"><span class="keyword">struct</span> <span class="title">HWND__</span>&#123;</span></span><br><span class="line">	<span class="type">int</span> unused;</span><br><span class="line">&#125;;</span><br><span class="line"><span class="keyword">typedef</span> <span class="class"><span class="keyword">struct</span> <span class="title">HWND__</span> *<span class="title">HWND</span></span></span><br></pre></td></tr></table></figure>
+
+<p>这里##的作用就是拼接HWND和下划线__,下划线的作用是避免命名冲突</p>
+<h4 id="CreateWindow"><a href="#CreateWindow" class="headerlink" title="CreateWindow"></a>CreateWindow</h4><figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br></pre></td><td class="code"><pre><span class="line">WINUSERAPI HWND WINAPI <span class="title function_">CreateWindowExW</span><span class="params">(</span></span><br><span class="line"><span class="params">    _In_ DWORD dwExStyle,</span></span><br><span class="line"><span class="params">    _In_opt_ LPCWSTR lpClassName,</span></span><br><span class="line"><span class="params">    _In_opt_ LPCWSTR lpWindowName,</span></span><br><span class="line"><span class="params">    _In_ DWORD dwStyle,</span></span><br><span class="line"><span class="params">    _In_ <span class="type">int</span> X,</span></span><br><span class="line"><span class="params">    _In_ <span class="type">int</span> Y,</span></span><br><span class="line"><span class="params">    _In_ <span class="type">int</span> nWidth,</span></span><br><span class="line"><span class="params">    _In_ <span class="type">int</span> nHeight,</span></span><br><span class="line"><span class="params">    _In_opt_ HWND hWndParent,</span></span><br><span class="line"><span class="params">    _In_opt_ HMENU hMenu,</span></span><br><span class="line"><span class="params">    _In_opt_ HINSTANCE hInstance,</span></span><br><span class="line"><span class="params">    _In_opt_ LPVOID lpParam)</span>;</span><br><span class="line"></span><br><span class="line"><span class="meta">#<span class="keyword">define</span> CreateWindowW(lpClassName, lpWindowName, dwStyle, x, y,\</span></span><br><span class="line"><span class="meta">nWidth, nHeight, hWndParent, hMenu, hInstance, lpParam)\</span></span><br><span class="line"><span class="meta"></span></span><br><span class="line">CreateWindowExW(<span class="number">0L</span>, lpClassName, lpWindowName, dwStyle, x, y,\</span><br><span class="line">nWidth, nHeight, hWndParent, hMenu, hInstance, lpParam)</span><br><span class="line"></span><br><span class="line"><span class="meta">#<span class="keyword">ifdef</span> UNICODE</span></span><br><span class="line"></span><br><span class="line"><span class="meta">#<span class="keyword">define</span> CreateWindow  CreateWindowW</span></span><br></pre></td></tr></table></figure>
+
+<p>这个皮球踢了三jio才能落实</p>
+<p><code>CreateWindow-&gt;CreateWindowW-&gt;CreateWindowExW</code></p>
+<p>从CreateWindowW到CreateWindowExW多了一个参数dwExStyle,并且该参数默认是0,没有其他区别了</p>
+<p>该函数的返回值为指向所创建窗口的句柄,历程中是这样写的<code>hwnd = CreateWindow...</code>,即该句柄保存在hwnd中.</p>
+<p>该函数执行完毕之后<strong>不会</strong>在屏幕上显示窗口,而是在内存中分配了一块,用来保存传递给CreateWindow函数的各种参数信息,以及一些其他信息.可以通过hwnd句柄调用这些信息</p>
+<h5 id="lpClassName"><a href="#lpClassName" class="headerlink" title="lpClassName"></a>lpClassName</h5><p>这就是刚才RegisterClass注册的窗口类,最后一个参数wnd.lpszClassName</p>
+<p>例程中该值为L”HelloWin”,因此在CreateWindow中才可以使用”HelloWin”作为窗口类名.意思是当前创建的窗口使用”HelloWin”类的设定</p>
+<h5 id="lpWindowName"><a href="#lpWindowName" class="headerlink" title="lpWindowName"></a>lpWindowName</h5><p>窗口标题</p>
+<p>例程中该值为<code> TEXT(&quot;The Hello Program&quot;), // window caption</code></p>
+<p>窗口运行时左上角的标题就是The Hello Program</p>
+<p><img src="https://raw.githubusercontent.com/DeutschBall/test/master/image-20220713173027546.png" alt="image-20220713173027546"></p>
+<h5 id="dwStyle"><a href="#dwStyle" class="headerlink" title="dwStyle"></a>dwStyle</h5><p>指定窗口的风格</p>
+<table>
+<thead>
+<tr>
+<th>窗口风格</th>
+<th>含义</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>WS_BORDER</td>
+<td>创建一个带边框的窗口</td>
+</tr>
+<tr>
+<td>WS_CAPTION</td>
+<td>创建一个有标题框的窗口（包含了 WS_BODER 风格）</td>
+</tr>
+<tr>
+<td>WS_CHILD</td>
+<td>创建一个子窗口，这个风格的窗口不能拥有菜单也不能与 WS_POPUP 风格合用</td>
+</tr>
+<tr>
+<td>WS_CHILDWINDOW</td>
+<td>与 WS_CHILD 相同</td>
+</tr>
+<tr>
+<td>WS_CLIPCHILDREN</td>
+<td>当在父窗口内绘图时，排除子窗口区域，在创建父窗口时使用这个风格</td>
+</tr>
+<tr>
+<td>WS_CLIPSIBLINGS</td>
+<td>1. 排除子窗口之间的相对区域，也就是，当一个特定的窗口接收到 WM_PAINT 消息时，WS_CLIPSIBLINGS 风格将所有层叠窗口排除在绘图之外，只重绘指定的子窗口 2. 如果未指定该风格，并且子窗口是层叠的，则在重绘子窗口的客户区时，就会重绘邻近的子窗口</td>
+</tr>
+<tr>
+<td>WS_DISABLED</td>
+<td>1. 创建一个初始状态为禁止的子窗口，一个禁止状态的窗口不能接受来自用户的输入信息 2. 在窗口创建之后，可以调用 EnableWindow 函数来启用该窗口</td>
+</tr>
+<tr>
+<td>WS_DLGFRAME</td>
+<td>创建一个带对话框边框风格的窗口，这种风格的窗口不能带标题条</td>
+</tr>
+<tr>
+<td>WS_GROUP</td>
+<td>1. 指定一组“控制窗口”的第一个“控制窗口” 2. 这个“控制窗口”组由第一个“控制窗口”和随后定义的“控制窗口”组成，自第二个“控制窗口”开始每个“控制窗口”具有 WS_GROUP 风格 3. 每个组的第一个“控制窗口”带有 WS_TABSTOP 风格，从而使用户可以在组间移动 4. 用户随后可以使用光标在组内的控制间改变键盘焦点</td>
+</tr>
+<tr>
+<td>WS_HSCROLL</td>
+<td>创建一个有水平滚动条的窗口</td>
+</tr>
+<tr>
+<td>WS_ICONIC</td>
+<td>创建一个初始状态为最小化状态的窗口，与 WS_MINIMIZE 风格相同</td>
+</tr>
+<tr>
+<td>WS_MAXIMIZE</td>
+<td>创建一个初始状态为最大化状态的窗口</td>
+</tr>
+<tr>
+<td>WS_MAXIMIZEBOX</td>
+<td>创建一个具有最大化按钮的窗口，该风格不能与 WS_EX_CONTEXTHELP 风格同时出现，同时必须指定 WS_SYSMENU 风格</td>
+</tr>
+<tr>
+<td>WS_MINIMIZE</td>
+<td>创建一个初始状态为最小化状态的窗口，与 WS_ICONIC 风格相同</td>
+</tr>
+<tr>
+<td>WS_MINIMIZEBOX</td>
+<td>创建一个具有最小化按钮的窗口，该风格不能与 WS_EX_CONTEXTHELP 风格同时出现，同时必须指定 WS_SYSMENU 风格</td>
+</tr>
+<tr>
+<td>WS_OVERLAPPED</td>
+<td>产生一个层叠的窗口，一个层叠的窗口有一个标题条和一个边框，与 WS_TILED 风格相同</td>
+</tr>
+<tr>
+<td>WS_OVERLAPPEDWINDOW</td>
+<td>相当于（WS_OVERLAPPED | WS_CAPTION | WS_SYSMENU | WS_THICKFRAME | WS_MINIMIZEBOX | WS_MAXIMIZEBOX），与 WS_TILEDWINDOW 风格相同</td>
+</tr>
+<tr>
+<td>WS_POPUP</td>
+<td>创建一个弹出式窗口，该风格不能与 WS_CHILD 风格同时使用。</td>
+</tr>
+<tr>
+<td>WS_POPUPWINDOW</td>
+<td>相当于（WS_POPUP | WS_BORDER | WS_SYSMENU），但 WS_CAPTION 和 WS_POPUPWINDOW 必须同时设定才能使窗口某单可见</td>
+</tr>
+<tr>
+<td>WS_SIZEBOX</td>
+<td>创建一个可调边框的窗口，与 WS_THICKFRAME 风格相同</td>
+</tr>
+<tr>
+<td>WS_SYSMENU</td>
+<td>创建一个在标题条上带有窗口菜单的窗口，必须同时设定 WS_CAPTION 风格</td>
+</tr>
+<tr>
+<td>WS_TABSTOP</td>
+<td>1. 创建一个“控制窗口”，在用户按下 Tab 键时可以获得键盘焦点。 2. 按下 Tab 键后使键盘焦点转移到下一具有 WS_TABSTOP 风格的“控制窗口”</td>
+</tr>
+<tr>
+<td>WS_THICKFRAME</td>
+<td>创建一个具有可调边框的窗口，与 WS_SIZEBOX 风格相同</td>
+</tr>
+<tr>
+<td>WS_TILED</td>
+<td>产生一个层叠的窗口，一个层叠的窗口有一个标题和一个边框，与 WS_OVERLAPPED 风格相同</td>
+</tr>
+<tr>
+<td>WS_TILEDWINDOW</td>
+<td>相当于（WS_OVERLAPPED | WS_CAPTION | WS_SYSMENU | WS_THICKFRAME | WS_MINIMIZEBOX | WS_MAXIMIZEBOX），与 WS_OVERLAPPEDWINDOW 风格相同</td>
+</tr>
+<tr>
+<td>WS_VISIBLE</td>
+<td>创建一个初始状态为可见的窗口</td>
+</tr>
+<tr>
+<td>WS_VSCROLL</td>
+<td>创建一个有垂直滚动条的窗口</td>
+</tr>
+</tbody></table>
+<p>例程中该值为<code>WS_OVERLAPPEDWINDOW</code>,</p>
+<p>相当于<code>WS_OVERLAPPED | WS_CAPTION | WS_SYSMENU | WS_THICKFRAME | WS_MINIMIZEBOX | WS_MAXIMIZEBOX</code></p>
+<p><code>层叠 | 有标题 | 标题条上有窗口菜单 | 可调边框 | 可最小化 | 可最大化</code></p>
+<h5 id="x"><a href="#x" class="headerlink" title="x"></a>x</h5><p>指定窗口初始水平位置对于层叠或者弹出式窗口,x是相对屏幕左上角的位移</p>
+<p>对于子窗口,x是相对于父窗口左上角的偏移</p>
+<p>如果该值为<code>CW_USEDEFAULT </code>则系统为窗口选择缺省的左上角左边并忽略y(该值只对层叠窗口有效)</p>
+<p><code>#define CW_USEDEFAULT    ((int)0x80000000)</code></p>
+<p>例程中就使用了<code>CW_USEDEFAULT</code></p>
+<h5 id="y"><a href="#y" class="headerlink" title="y"></a>y</h5><p>类似于<code>x</code></p>
+<h5 id="nWidth"><a href="#nWidth" class="headerlink" title="nWidth"></a>nWidth</h5><p>指定窗口宽度</p>
+<h5 id="nHeight"><a href="#nHeight" class="headerlink" title="nHeight"></a>nHeight</h5><p>指定窗口高度</p>
+<h5 id="hWndParent"><a href="#hWndParent" class="headerlink" title="hWndParent"></a>hWndParent</h5><p>父窗口的句柄</p>
+<p>例程中该值为<code>NULL</code>,即没有父窗口,显然这是第一个窗口,还没有第二个窗口,谈不上父子关系</p>
+<p>注册子窗口时这里要写父窗口的句柄</p>
+<h5 id="hMenu"><a href="#hMenu" class="headerlink" title="hMenu"></a>hMenu</h5><p>窗口菜单句柄</p>
+<p>例程中该值为<code>NULL</code>,看来不是必要的</p>
+<p>对于子窗口来说,父窗口过程在建立子窗口的时候需要维护一个子窗口ID,就是在hMenu上指定</p>
+<h5 id="hInstance-1"><a href="#hInstance-1" class="headerlink" title="hInstance"></a>hInstance</h5><p>与窗口相关联的模块实例的句柄</p>
+<p>例程中该值为<code>hInstance</code>,也就是<code>winmain</code>的第一个参数,目前阶段只要是<code>hInstance</code>基本都是来自<code>winmain</code>的参数.</p>
+<h5 id="lpParam"><a href="#lpParam" class="headerlink" title="lpParam"></a>lpParam</h5><p>创建窗口之后发送给该窗口过程的WM_CREATE消息的lParam参数</p>
+<p>例程中该值为<code>NULL</code>,目前阶段一般都是<code>NULL</code>,不管他了</p>
+<h3 id="显示窗口实例"><a href="#显示窗口实例" class="headerlink" title="显示窗口实例"></a>显示窗口实例</h3><h4 id="ShowWindow"><a href="#ShowWindow" class="headerlink" title="ShowWindow"></a>ShowWindow</h4><p>RegisterClass注册了窗口类,</p>
+<p>CreateWindow创建了窗口实例,</p>
+<p>下面就差一步就能将该实例显示出来了</p>
+<p>这就是<code>ShowWindow(hwnd,iCmdShow)</code>函数的作用</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">WINUSERAPI BOOL WINAPI <span class="title function_">ShowWindow</span><span class="params">(_In_ HWND hWnd,_In_ <span class="type">int</span> nCmdShow)</span>;</span><br></pre></td></tr></table></figure>
+
+
+
+<p><code>hwnd</code>是<code>CreateWindow</code>的返回值,也就是窗口实例的句柄</p>
+<p><code>iCmdShow</code>是<code>winmain</code>函数的第四个参数,即命令行参数,此参数决定窗口的显示方式,最大化最小化或者正常.</p>
+<p>如果显示成功则返回TRUE,否则返回FALSE</p>
+<h4 id="UpdateWindow"><a href="#UpdateWindow" class="headerlink" title="UpdateWindow"></a>UpdateWindow</h4><p>当客户区有改动时使用本函数重绘客户区</p>
+<p>实际上通过向窗口过程发送<code>WM_PAINT</code>消息完成</p>
+<p>参数是窗口实例句柄,意思是更新该句柄对应窗口实例</p>
+<h3 id="消息循环"><a href="#消息循环" class="headerlink" title="消息循环"></a>消息循环</h3><h4 id="消息"><a href="#消息" class="headerlink" title="消息"></a>消息</h4><p>举一个直观例子,键鼠动作就属于消息.</p>
+<p>操作系统负责用结构体记录消息,并发送给相应线程的消息队列,每个<strong>线程</strong>都有一个消息队列</p>
+<p>消息结构体:</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">typedef</span> <span class="class"><span class="keyword">struct</span> <span class="title">tagMSG</span> &#123;</span></span><br><span class="line">    HWND        hwnd;</span><br><span class="line">    UINT        message;</span><br><span class="line">    WPARAM      wParam;</span><br><span class="line">    LPARAM      lParam;</span><br><span class="line">    DWORD       time;</span><br><span class="line">    POINT       pt;</span><br><span class="line"><span class="meta">#<span class="keyword">ifdef</span> _MAC</span></span><br><span class="line">    DWORD       lPrivate;</span><br><span class="line"><span class="meta">#<span class="keyword">endif</span></span></span><br><span class="line">&#125; MSG, *PMSG, NEAR *NPMSG, FAR *LPMSG;</span><br></pre></td></tr></table></figure>
+
+<p>比如当点选窗口W的关闭按钮X时,操作系统会捕获该鼠标动作,封装成MSG结构体,</p>
+<p>然后操作系统将把该结构体塞到对应线程的消息队列中</p>
+<h5 id="hwnd"><a href="#hwnd" class="headerlink" title="hwnd"></a>hwnd</h5><p>但是塞给哪个线程的消息队列呢?通过该结构体的第一个参数hwnd窗口句柄.</p>
+<p>如果该值为NULL则是一个线程消息</p>
+<blockquote>
+<p>一个线程可以有多个窗口,一个进程可以有多个线程</p>
+</blockquote>
+<h5 id="message"><a href="#message" class="headerlink" title="message"></a>message</h5><p>发送啥消息呢?通过第二个参数<code>message</code>决定,该值是个枚举类型</p>
+<blockquote>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#<span class="keyword">define</span> WM_NULL                         0x0000</span></span><br><span class="line"><span class="meta">#<span class="keyword">define</span> WM_CREATE                       0x0001<span class="comment">//窗口创建伊始操作系统产生的消息</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">define</span> WM_DESTROY                      0x0002</span></span><br><span class="line"><span class="meta">#<span class="keyword">define</span> WM_MOVE                         0x0003</span></span><br><span class="line"><span class="meta">#<span class="keyword">define</span> WM_SIZE                         0x0005</span></span><br><span class="line"></span><br><span class="line"><span class="meta">#<span class="keyword">define</span> WM_ACTIVATE                     0x0006</span></span><br><span class="line">...</span><br></pre></td></tr></table></figure>
+
+
+</blockquote>
+<h5 id="wParam-lParam"><a href="#wParam-lParam" class="headerlink" title="wParam&#x2F;lParam"></a>wParam&#x2F;lParam</h5><p>额外信息,要和<code>message</code>配合使用,有些信息不需要额外描述,一个<code>message</code>就够了</p>
+<h5 id="time"><a href="#time" class="headerlink" title="time"></a>time</h5><p>消息进入线程消息队列的时间</p>
+<h5 id="pt"><a href="#pt" class="headerlink" title="pt"></a>pt</h5><p>指针类型,指向结构体<code>Point</code></p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">typedef</span> <span class="class"><span class="keyword">struct</span> <span class="title">tagPOINT</span></span></span><br><span class="line"><span class="class">&#123;</span></span><br><span class="line">    LONG  x;</span><br><span class="line">    LONG  y;</span><br><span class="line">&#125; POINT, *PPOINT, NEAR *NPPOINT, FAR *LPPOINT;</span><br></pre></td></tr></table></figure>
+
+<p>描述消息进入消息队列时,鼠标光标位置</p>
+<h4 id="GetMessageW"><a href="#GetMessageW" class="headerlink" title="GetMessageW"></a>GetMessageW</h4><figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">WINUSERAPI BOOL WINAPI <span class="title function_">GetMessageW</span><span class="params">(</span></span><br><span class="line"><span class="params">    _Out_ LPMSG lpMsg,</span></span><br><span class="line"><span class="params">    _In_opt_ HWND hWnd,</span></span><br><span class="line"><span class="params">    _In_ UINT wMsgFilterMin,</span></span><br><span class="line"><span class="params">    _In_ UINT wMsgFilterMax)</span>;</span><br><span class="line"><span class="meta">#<span class="keyword">ifdef</span> UNICODE</span></span><br><span class="line"><span class="meta">#<span class="keyword">define</span> GetMessage  GetMessageW</span></span><br></pre></td></tr></table></figure>
+
+<p>本函数的作用是从线程消息队列中取出一条消息,将该消息保存在第一个参数lpMsg中(目的地).</p>
+<blockquote>
+<p>因此例程中在<code>winmain</code>函数栈下开了一个<code>MSG msg;</code>用于存放<code>GetMessageW</code>获取到的信息</p>
+<p><code>GetMessageW</code>传递msg作为参数时使用的是引用传递<code>GetMessage(&amp;msg, NULL, 0, 0)</code></p>
+</blockquote>
+<p>第二个参数hWnd指定接收属于哪个窗口的消息,如果设置为NULL则表示接收属于调用线程的所有窗口的窗口消息.</p>
+<blockquote>
+<p>这是由于一个线程可以有多个窗口,关闭A窗口的消息要准确地发送给A窗口,不能把B窗口关喽</p>
+</blockquote>
+<p>第三个参数<code>wMsgFilterMin</code>指定要获取的消息的最小值,通常为0</p>
+<p>第四个参数<code>wMsgFilterMax</code>指定要获取消息的最大值,如果<code>wMsgFilterMin</code>和<code>wMsgFilterMax</code>都是0则接收所有消息</p>
+<p>例程中这两个值全是0,也就是接收所有消息</p>
+<h4 id="TranslateMessage-msg"><a href="#TranslateMessage-msg" class="headerlink" title="TranslateMessage(&amp;msg)"></a>TranslateMessage(&amp;msg)</h4><p>线程将msg消息还给操作系统,让操作系统进行键盘消息的转换,转换完后操作系统将结果还是放在msg中还给线程</p>
+<h4 id="DispatchMessage-msg"><a href="#DispatchMessage-msg" class="headerlink" title="DispatchMessage(&amp;msg)"></a>DispatchMessage(&amp;msg)</h4><p>线程收到操作系统返回的转换信息,又将msg还给操作系统.</p>
+<p>操作系统将该消息发送给相应<strong>窗口过程WndProc</strong>进行处理,即操作系统调用了<strong>窗口过程</strong></p>
+<blockquote>
+<p>这里的窗口过程也就是RegisterClass时lpfnWndProc指定的回调函数</p>
+</blockquote>
+<p>窗口过程仅针对当前消息做出相应<strong>处理</strong>,然后将控制还给操作系统.操作</p>
+<p>Dispatch,分发,这里的意思是操作系统根据消息msg的hwnd句柄,决定分发给回调函数进行处理还是返回内核进行处理</p>
+<p>细节是咋样的,在此不深究</p>
+<h4 id="循环处理"><a href="#循环处理" class="headerlink" title="循环处理"></a>循环处理</h4><figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">while</span> (GetMessage(&amp;msg, <span class="literal">NULL</span>, <span class="number">0</span>, <span class="number">0</span>))</span><br><span class="line">&#123;</span><br><span class="line">    TranslateMessage(&amp;msg);</span><br><span class="line">    DispatchMessage(&amp;msg);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>这是一个固定格式,当前线程不断检查其消息队列中是否有消息,如果有则msg是有效负载,否则msg空.</p>
+<p>msg不管是不是空,都会经历整个过程,空负载也就是蜻蜓点水地进入转换和分发函数立刻判断失效返回.</p>
+<h3 id="窗口过程"><a href="#窗口过程" class="headerlink" title="窗口过程"></a>窗口过程</h3><p>在消息循环中,我们直到窗口过程不是线程自己想要调用就调用的,需要操作系统来调用窗口过程</p>
+<p>所谓窗口过程,实际上就是注册窗口类时,<code>wndclass.lpfnWndProc</code>这个函数指针指向的函数</p>
+<p>前面消息经过一系列踢皮球,不管是os给线程啊,还是线程还给os啊,都只是传来传去,没有对窗口造成任何影响.</p>
+<p>最终这个皮球踢给了<code>WndProc</code>函数,他势必要做出某些改变</p>
+<p>例程中该函数是这样定义的:</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br></pre></td><td class="code"><pre><span class="line">LRESULT CALLBACK <span class="title function_">WndProc</span><span class="params">(HWND hwnd, UINT message, WPARAM wParam, LPARAM lParam)</span></span><br><span class="line">&#123;</span><br><span class="line">    HDC hdc;</span><br><span class="line">    PAINTSTRUCT ps;</span><br><span class="line">    RECT rect;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">switch</span> (message)</span><br><span class="line">    &#123;</span><br><span class="line">    <span class="keyword">case</span> WM_CREATE:</span><br><span class="line">       PlaySound(TEXT(<span class="string">&quot;SenbonZakura.wav&quot;</span>), <span class="literal">NULL</span>, SND_FILENAME | SND_ASYNC);</span><br><span class="line">        <span class="keyword">return</span> <span class="number">0</span>;</span><br><span class="line">    <span class="keyword">case</span> WM_PAINT:</span><br><span class="line">        hdc = BeginPaint(hwnd, &amp;ps);</span><br><span class="line"></span><br><span class="line">        GetClientRect(hwnd, &amp;rect);</span><br><span class="line"></span><br><span class="line">        DrawText(hdc, TEXT(<span class="string">&quot;Hello, Windows 98!&quot;</span>), <span class="number">-1</span>, &amp;rect,</span><br><span class="line">            DT_SINGLELINE | DT_CENTER | DT_VCENTER);</span><br><span class="line">        EndPaint(hwnd, &amp;ps);</span><br><span class="line">        <span class="keyword">return</span> <span class="number">0</span>;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">case</span> WM_DESTROY:</span><br><span class="line">        PostQuitMessage(<span class="number">0</span>);</span><br><span class="line">        <span class="keyword">return</span> <span class="number">0</span>;</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">return</span> DefWindowProc(hwnd, message, wParam, lParam);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>暂且先不管细节,但就从switch(message)-case可以看出,这是在对message参数传进来的消息进行分拣,例程中给出了三种分拣情况</p>
+<p><code> case WM_CREATE</code>,当窗口创建时,即CreateWindow返回前</p>
+<p><code>case WM_PAINT</code>当窗口绘制完毕时</p>
+<p><code>case WM_DESTROY</code>当窗口关闭时</p>
+<p>现在开始管细节</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">LRESULT CALLBACK WndProc(HWND hwnd, UINT message, WPARAM wParam, LPARAM lParam);</span><br></pre></td></tr></table></figure>
+
+<p>这四个参数正好是<code>MSG</code>结构体的前四个成员</p>
+<blockquote>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">typedef</span> <span class="class"><span class="keyword">struct</span> <span class="title">tagMSG</span> &#123;</span></span><br><span class="line">    HWND        hwnd;</span><br><span class="line">    UINT        message;</span><br><span class="line">    WPARAM      wParam;</span><br><span class="line">    LPARAM      lParam;</span><br><span class="line">    DWORD       time;</span><br><span class="line">    POINT       pt;</span><br><span class="line"><span class="meta">#<span class="keyword">ifdef</span> _MAC</span></span><br><span class="line">    DWORD       lPrivate;</span><br><span class="line"><span class="meta">#<span class="keyword">endif</span></span></span><br><span class="line">&#125; MSG, *PMSG, NEAR *NPMSG, FAR *LPMSG;</span><br></pre></td></tr></table></figure>
+</blockquote>
+<p>hwnd,窗口句柄,作用是告诉WndProc函数,将要根据函数进行的处理,要作用于哪一个窗口</p>
+<p>message,告诉WndProc函数,发生甚么事了,指导WndProc做出相应处理</p>
+<p>wParam,lParam,配合message,当message一句话说不清发生甚么事的时候,就需要 多说一句甚至两句描述清楚发生了甚么事</p>
+<blockquote>
+<p>这就好比病人去<strong>中医院</strong>已经看完了大夫,要去药房拿药</p>
+<p>病人看大夫,大夫一眼顶针,总结出病人得了什么病,</p>
+<p>但是为了挣钱,防止病人自己去其他平价药店买要,因此大夫将处方写的只能药房护士看得懂,病人你休想看懂</p>
+<p>病人没办法拿着处方去了药房,这个药房护士就是WndProc函数,他一看,</p>
+<p>第一行写了个”玛卡巴卡”,哦,皮燕子有毛病</p>
+<p>第二行写了个”妈了巴子”,哦,要吃人参,树皮,坷拉蛋子</p>
+<p>第三行写了个”古西迪西”,哦,人参两公斤,树皮两张,坷拉蛋子两公斤,吃不死你</p>
+<p>药房护士就开出了药,完成了其使命.</p>
+</blockquote>
+<p>对于例程中的唯一的窗口,hwnd显而易见的来自唯一一次调用的CreateWindow创建的窗口</p>
+<p>但是从DisPatchMessage(&amp;msg)到操作系统调用WndProc,中间出现了一个断层,看不到中间的过程心里总是发慌.</p>
+<p>并且TranslateMessage(&amp;msg)干了啥也不知道.</p>
+<p>调用WndProc有没有创建新进程呢?目前感觉没有,基于两点推测,</p>
+<p>一是两个进程的虚拟地址空间独立,不方便WndProc修改窗口参数.</p>
+<p>二是刚才已经了解到<code>DisPatchMessage-&gt;操作系统相关函数-&gt;WndProc-&gt;操作系统相关函数-&gt;DispatchMessage</code>这个过程只涉及到控制的转移,看来只是函数调用和返回,不涉及到开新进程</p>
+<p>怎么解决这些问题呢?动态调试or看源代码,但不是现在</p>
+<h4 id="消息分拣与处理"><a href="#消息分拣与处理" class="headerlink" title="消息分拣与处理"></a>消息分拣与处理</h4><p>消息处理的过程,就是switch-case分拣和就事论事的过程,其要求是:</p>
+<p>如果switch-case可以捕获该消息种类并进行处理,那么处理后返回0</p>
+<p>否则,即switch-case处理不了这种消息,则应该把处理消息的皮球踢给叫DefWindowProc的系统函数.然后WndProc返回DefWindowProc的返回值</p>
+<blockquote>
+<p>就好比要吃核桃的时候先用手拨,不行就用牙咬,再不行就用脚踩,要是还不行就只能把核桃交给核桃钳了.</p>
+<p>这就好比消息先让WndProc中的switch-case尝试处理,处理不动就交给DefWindowProc进行处理</p>
+<p>但是不管用什么方法,最终核桃都要进入人的嘴里</p>
+<p>就好比不管谁处理的消息,最终都要经过WndProc返回</p>
+</blockquote>
+<p>例程是严格遵守这个顺序的</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">switch</span> (message)</span><br><span class="line">    &#123;</span><br><span class="line">    <span class="keyword">case</span> WM_CREATE:<span class="comment">//第一次尝试</span></span><br><span class="line">       ...</span><br><span class="line">        <span class="keyword">return</span> <span class="number">0</span>;<span class="comment">//若能处理则返回0</span></span><br><span class="line">    <span class="keyword">case</span> WM_PAINT:<span class="comment">//第二次尝试</span></span><br><span class="line">       ...</span><br><span class="line">        <span class="keyword">return</span> <span class="number">0</span>;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">case</span> WM_DESTROY:<span class="comment">//第三次尝试</span></span><br><span class="line">       ...</span><br><span class="line">        <span class="keyword">return</span> <span class="number">0</span>;</span><br><span class="line">    &#125;</span><br><span class="line">	<span class="comment">//实在能力有限,处理不了,把瓷器活交给金刚钻</span></span><br><span class="line">    <span class="keyword">return</span> DefWindowProc(hwnd, message, wParam, lParam);<span class="comment">//返回DefWindowProc的返回值</span></span><br></pre></td></tr></table></figure>
+
+<blockquote>
+<p>这些消息处理感觉就类似于HTML中的onClick,onload等事件处理函数</p>
+<p>onload等事件处理函数一般会赋一个javascript脚本的函数,这个js函数负责修改HTML元素,给用户的感觉就是页面会动态改变</p>
+<p>类比到win32编程</p>
+<p>case WM_CREATE:这句话就相当于onLoad,</p>
+<p>case块里的内容就相当于onLoad&#x3D;等号后面挂钩的js函数</p>
+</blockquote>
+<h4 id="播放音频"><a href="#播放音频" class="headerlink" title="播放音频"></a>播放音频</h4><p>消息分拣的第一次尝试</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">case</span> WM_CREATE:</span><br><span class="line">       PlaySound(TEXT(<span class="string">&quot;SenbonZakura.wav&quot;</span>), <span class="literal">NULL</span>, SND_FILENAME | SND_ASYNC);</span><br><span class="line">        <span class="keyword">return</span> <span class="number">0</span>;</span><br></pre></td></tr></table></figure>
+
+<p>如果该消息是 窗口创建,则捕获该消息.</p>
+<p>怎么处理的呢?听首千本樱吧,当前exe文件同目录下找一个叫SenbonZakura.wav的音频文件.</p>
+<p><code>PlaySound</code>函数的实现在<code>winmm.lib</code>静态库中,因此在编译的时候要加上<code>-lwinmm</code>选项<code>gcc main.c -O0 -o main -m32 -mwindows -lwinmm</code></p>
+<p>单凭这个静态库就知道PlaySound是个很老狠不中用的函数了,甚至都没必要制作成动态库函数.</p>
+<p>上网一查API,果然,它只能播放.wav格式的音频文件.怪不得我一开始让他放<code>SenbonZakura.mp3</code>,他不吱声,真的太逊了</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">BOOL <span class="title function_">PlaySound</span><span class="params">(</span></span><br><span class="line"><span class="params">   LPCTSTR pszSound,</span></span><br><span class="line"><span class="params">   HMODULE hmod,</span></span><br><span class="line"><span class="params">   DWORD   fdwSound</span></span><br><span class="line"><span class="params">)</span>;</span><br></pre></td></tr></table></figure>
+
+
+
+<p>第一个参数是资源名,第二个参数目前认为NULL就可以</p>
+<p>还有一件事,听歌的时候程序是卡在这句话等着呢,还是立刻返回呢.</p>
+<p>如果一直卡着显然不能及时处理下一条消息.并且实际应用比如植物大战僵尸中,音乐都是当作bgm和战斗并行的.</p>
+<p>这玩意怎么实现的呢?通过第三个参数</p>
+<p>fdwSound枚举值</p>
+<blockquote>
+<p><strong>SND_ALIAS</strong><br>pszSound参数指定了注册表或WIN.INI中的系统事件的别名。</p>
+<p><strong>SND_ALIAS_ID</strong><br>pszSound参数指定了预定义的声音标识符。</p>
+<p><strong>SND_ASYNC</strong><br>用异步方式播放声音，PlaySound函数在开始播放后立即返回。</p>
+<p><strong>SND_FILENAME</strong><br>pszSound参数指定了WAVE文件名。</p>
+<p><strong>SND_LOOP</strong><br>重复播放声音，必须与SND_ASYNC标志一块使用。</p>
+<p><strong>SND_MEMORY</strong><br>播放载入到内存中的声音，此时pszSound是指向声音数据的指针。</p>
+<p><strong>SND_NODEFAULT</strong><br>不播放缺省声音，若无此标志，则PlaySound在没找到声音时会播放缺省声音。</p>
+<p><strong>SND_NOSTOP</strong><br>PlaySound不打断原来的声音播出并立即返回FALSE。</p>
+<p><strong>SND_NOWAIT</strong><br>如果驱动程序正忙则函数就不播放声音并立即返回。</p>
+<p><strong>SND_PURGE</strong><br>停止所有与调用任务有关的声音。若参数pszSound为NULL，就停止所有的声音，否则，停止pszSound指定的声音。</p>
+<p><strong>SND_RESOURCE</strong><br>pszSound参数是WAVE资源的标识符，这时要用到hmod参数。</p>
+<p><strong>SND_SYNC</strong><br>同步播放声音，在播放完后PlaySound函数才返回。</p>
+<p><strong>SND_SYSTEM</strong><br>如果是背景窗口,当这个标志被设置，声音是分配到音频会议系统通知的声音。系统音量控制程序(sndvol)显示音量滑块控制系统通知的声音。设置该标志将下控制音量滑块。如果没有设置该标志，声音是分配到默认的音频会议的应用进程。</p>
+</blockquote>
+<p>例程中这个参数为<code> SND_FILENAME | SND_ASYNC</code></p>
+<p>意思是第一个参数指定的是一个<code>wav</code>资源名,第二个参数意思是异步播放,即<code>PlaySound</code>执行后立刻返回,音乐异步播放</p>
+<h4 id="重绘客户区"><a href="#重绘客户区" class="headerlink" title="重绘客户区"></a>重绘客户区</h4><p><code>CreateWindow</code>之后,只是在内存中为窗口分配了空间,不能显示窗口</p>
+<p><code>ShowWindow</code>显示<code>CreateWindow</code>在内存中存好的窗口,此后的更新它不知道</p>
+<p>如果此后客户区有更新,需要更新客户区,否则还是显示之前的页面</p>
+<p>窗口的客户区是会经常发生变动的,比如缩放调整,最小化,最大化等变化.每次变化后都需要及时重绘客户区</p>
+<p>还是看看例程中的方法吧</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line">HDC hdc;</span><br><span class="line">PAINTSTRUCT ps;</span><br><span class="line">RECT rect;</span><br><span class="line"></span><br><span class="line"><span class="keyword">case</span> WM_PAINT:</span><br><span class="line">    hdc = BeginPaint(hwnd, &amp;ps);</span><br><span class="line"></span><br><span class="line">    GetClientRect(hwnd, &amp;rect);</span><br><span class="line"></span><br><span class="line">    DrawText(hdc, TEXT(<span class="string">&quot;Hello, Windows 98!&quot;</span>), <span class="number">-1</span>, &amp;rect,</span><br><span class="line">        DT_SINGLELINE | DT_CENTER | DT_VCENTER);</span><br><span class="line">    EndPaint(hwnd, &amp;ps);</span><br><span class="line">    <span class="keyword">return</span> <span class="number">0</span>;</span><br></pre></td></tr></table></figure>
+
+<p>起于BeginPaint,终于EndPaint,夹在中间的逻辑就是重绘</p>
+<h5 id="BeginPaint"><a href="#BeginPaint" class="headerlink" title="BeginPaint"></a>BeginPaint</h5><p>BeginPaint会将客户区的背景擦除,使用注册窗口类WNDCLASS时的hbrBackground画刷,当时我们是这样规定这个值的</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">wndclass.hbrBackground = (HBRUSH)GetStockObject(WHITE_BRUSH);</span><br></pre></td></tr></table></figure>
+
+<p>即一个库存的白色的画刷</p>
+<p>BeginPaint使能客户区,<strong>告诉操作系统</strong>,要向显卡输出了,把本次(其余BeginPaint终于EndPaint)的输出放在显示队列里</p>
+<p>返回一个设备环境句柄hdc,啥叫设备环境句柄呢?</p>
+<p>hdc就对应窗口客户区那块显示屏,对hdc瞎折腾都不会超过客户区的范围,不会说画出去</p>
+<h5 id="GetClientRect"><a href="#GetClientRect" class="headerlink" title="GetClientRect"></a>GetClientRect</h5><p>第一个参数,窗口句柄,例程中的hwnd来自WndProc函数,该函数由操作系统调用,hwnd就是消息发生所在的窗口</p>
+<p>第二个参数,RECT类型,矩形结构指针</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">typedef</span> <span class="class"><span class="keyword">struct</span> <span class="title">tagRECT</span></span></span><br><span class="line"><span class="class">&#123;</span></span><br><span class="line">    LONG    left;<span class="comment">//左边界</span></span><br><span class="line">    LONG    top;<span class="comment">//上边界</span></span><br><span class="line">    LONG    right;<span class="comment">//右边界</span></span><br><span class="line">    LONG    bottom;<span class="comment">//下边界</span></span><br><span class="line">&#125; RECT, *PRECT, NEAR *NPRECT, FAR *LPRECT;</span><br></pre></td></tr></table></figure>
+
+<p>其中left和top总是置0,此时right和bottom分别以像素为单位表示客户区高度和宽度</p>
+<p>注意到rect传递的是引用,也就是说GetClientRect将会改变这个值.</p>
+<p>该函数会获取客户区的大小,写道第二个参数指定的结构体中</p>
+<p>为啥要获取客户区大小呢?为下面重绘做准备.经过窗口缩放等改变,客户区显然会变,因此需要重新量身定做</p>
+<h5 id="DrawText"><a href="#DrawText" class="headerlink" title="DrawText"></a>DrawText</h5><figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="type">int</span> <span class="title function_">DrawText</span><span class="params">(</span></span><br><span class="line"><span class="params">  [in]      HDC     hdc,</span></span><br><span class="line"><span class="params">  [in, out] LPCTSTR lpchText,</span></span><br><span class="line"><span class="params">  [in]      <span class="type">int</span>     cchText,</span></span><br><span class="line"><span class="params">  [in, out] LPRECT  lprc,</span></span><br><span class="line"><span class="params">  [in]      UINT    format</span></span><br><span class="line"><span class="params">)</span>;</span><br></pre></td></tr></table></figure>
+
+
+
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">DrawText(hdc, TEXT(<span class="string">&quot;Hello, Windows 98!&quot;</span>), <span class="number">-1</span>, &amp;rect,</span><br><span class="line">    DT_SINGLELINE | DT_CENTER | DT_VCENTER);</span><br></pre></td></tr></table></figure>
+
+<p>绘制文本,向hdc句柄对应的区域,打印”Hello,Windows 98!”,-1表示该字符串以0结尾.</p>
+<p>第四个参数是刚从GetClientRect获得客户区信息的矩形结构体,要打印的字符串将放在啊矩形中</p>
+<p>至于是居中居左等样式信息,还要取决于第五个参数</p>
+<table>
+<thead>
+<tr>
+<th align="left">Value</th>
+<th align="left">Meaning</th>
+</tr>
+</thead>
+<tbody><tr>
+<td align="left"><strong>DT_BOTTOM</strong></td>
+<td align="left">Justifies the text to the bottom of the rectangle. This value is used only with the DT_SINGLELINE value.</td>
+</tr>
+<tr>
+<td align="left"><strong>DT_CALCRECT</strong></td>
+<td align="left">Determines the width and height of the rectangle. If there are multiple lines of text, <strong>DrawText</strong> uses the width of the rectangle pointed to by the <em>lpRect</em> parameter and extends the base of the rectangle to bound the last line of text. If the largest word is wider than the rectangle, the width is expanded. If the text is less than the width of the rectangle, the width is reduced. If there is only one line of text, <strong>DrawText</strong> modifies the right side of the rectangle so that it bounds the last character in the line. In either case, <strong>DrawText</strong> returns the height of the formatted text but does not draw the text.</td>
+</tr>
+<tr>
+<td align="left"><strong>DT_CENTER</strong></td>
+<td align="left">文字居中</td>
+</tr>
+<tr>
+<td align="left">…</td>
+<td align="left">…</td>
+</tr>
+</tbody></table>
+<p>例程中使用的是<code>DT_SINGLELINE | DT_CENTER | DT_VCENTER</code>,单行,水平居中,垂直居中</p>
+<h5 id="EndPaint"><a href="#EndPaint" class="headerlink" title="EndPaint"></a>EndPaint</h5><p>配合BeginPaint使用,这样一对函数的参数必须相同,夹紧一个窗口的变化</p>
+<h4 id="关闭窗口"><a href="#关闭窗口" class="headerlink" title="关闭窗口"></a>关闭窗口</h4><p>当点击窗口右上角的❌,企图关闭窗口时,该消息发出</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">case</span> WM_DESTROY:</span><br><span class="line">    PostQuitMessage(<span class="number">0</span>);</span><br><span class="line">    <span class="keyword">return</span> <span class="number">0</span>;</span><br></pre></td></tr></table></figure>
+
+<p>例程中的处理方法是调用函数<code>PostQuitMessage(0)</code></p>
+<p>其功能是将WM_QUIT消息插入线程的消息队列.</p>
+<p>而消息循环的判断函数GetMessage,唯独对于WM_QUIT返回0,</p>
+<p>当消息循环取出该消息时,GetMessage返回0,判断失败,不进入循环,WinMain结束.线程结束</p>
+<h3 id="程序返回"><a href="#程序返回" class="headerlink" title="程序返回"></a>程序返回</h3><p>只有当消息循环接收到WM_QUIT时,才会跳出循环,此时WinMain寿终正寝了</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">return</span> msg.wParam;</span><br></pre></td></tr></table></figure>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+    </div>
+
+    
+    
+    
+
+      <footer class="post-footer">
+          <div class="post-tags">
+              <a href="/tags/windows%E7%A8%8B%E5%BA%8F%E8%AE%BE%E8%AE%A1/" rel="tag"># windows程序设计</a>
+          </div>
+
+        
+
+
+        
+    <div class="post-nav">
+      <div class="post-nav-item">
+    <a href="/2022/07/14/PE%E7%A8%8B%E5%BA%8F/" rel="prev" title="程序员的自我修养 chapter 5 PE/COFF">
+      <i class="fa fa-chevron-left"></i> 程序员的自我修养 chapter 5 PE/COFF
+    </a></div>
+      <div class="post-nav-item">
+    <a href="/2022/07/21/php%E5%8F%8D%E5%BA%8F%E5%88%97%E5%8C%96/" rel="next" title="php反序列化漏洞">
+      php反序列化漏洞 <i class="fa fa-chevron-right"></i>
+    </a></div>
+    </div>
+      </footer>
+    
+  </article>
+  
+  
+  
+
+
+
+          </div>
+          
+
+<script>
+  window.addEventListener('tabs:register', () => {
+    let { activeClass } = CONFIG.comments;
+    if (CONFIG.comments.storage) {
+      activeClass = localStorage.getItem('comments_active') || activeClass;
+    }
+    if (activeClass) {
+      let activeTab = document.querySelector(`a[href="#comment-${activeClass}"]`);
+      if (activeTab) {
+        activeTab.click();
+      }
+    }
+  });
+  if (CONFIG.comments.storage) {
+    window.addEventListener('tabs:click', event => {
+      if (!event.target.matches('.tabs-comment .tab-content .tab-pane')) return;
+      let commentClass = event.target.classList[1];
+      localStorage.setItem('comments_active', commentClass);
+    });
+  }
+</script>
+
+        </div>
+          
+  
+  <div class="toggle sidebar-toggle">
+    <span class="toggle-line toggle-line-first"></span>
+    <span class="toggle-line toggle-line-middle"></span>
+    <span class="toggle-line toggle-line-last"></span>
+  </div>
+
+  <aside class="sidebar">
+    <div class="sidebar-inner">
+
+      <ul class="sidebar-nav motion-element">
+        <li class="sidebar-nav-toc">
+          Table of Contents
+        </li>
+        <li class="sidebar-nav-overview">
+          Overview
+        </li>
+      </ul>
+
+      <!--noindex-->
+      <div class="post-toc-wrap sidebar-panel">
+          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#windows-SDK-chapter-3-%E7%AA%97%E5%8F%A3%E4%B8%8E%E6%B6%88%E6%81%AF"><span class="nav-number">1.</span> <span class="nav-text">windows SDK chapter 3 窗口与消息</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#%E4%BB%8E%E4%BE%8B%E7%A8%8B%E5%BC%80%E5%A7%8B"><span class="nav-number">1.1.</span> <span class="nav-text">从例程开始</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E4%B8%BB%E5%87%BD%E6%95%B0"><span class="nav-number">1.1.1.</span> <span class="nav-text">主函数</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#%E6%8E%A5%E5%8F%A3%E5%AE%9A%E4%B9%89"><span class="nav-number">1.1.1.1.</span> <span class="nav-text">接口定义</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E8%B0%83%E7%94%A8%E9%93%BE"><span class="nav-number">1.1.1.2.</span> <span class="nav-text">调用链</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%B3%A8%E5%86%8C%E7%AA%97%E5%8F%A3%E7%B1%BB"><span class="nav-number">1.1.2.</span> <span class="nav-text">注册窗口类</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#WNDCLASS-wndclass"><span class="nav-number">1.1.2.1.</span> <span class="nav-text">WNDCLASS wndclass</span></a><ol class="nav-child"><li class="nav-item nav-level-5"><a class="nav-link" href="#style"><span class="nav-number">1.1.2.1.1.</span> <span class="nav-text">style</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#lpfnWndProc"><span class="nav-number">1.1.2.1.2.</span> <span class="nav-text">lpfnWndProc</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#cbClsExtra"><span class="nav-number">1.1.2.1.3.</span> <span class="nav-text">cbClsExtra</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#cbWndExtra"><span class="nav-number">1.1.2.1.4.</span> <span class="nav-text">cbWndExtra</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#hInstance"><span class="nav-number">1.1.2.1.5.</span> <span class="nav-text">hInstance</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#hIcon"><span class="nav-number">1.1.2.1.6.</span> <span class="nav-text">hIcon</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#hCursor"><span class="nav-number">1.1.2.1.7.</span> <span class="nav-text">hCursor</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#hbrBackground"><span class="nav-number">1.1.2.1.8.</span> <span class="nav-text">hbrBackground</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#lpszMenuName"><span class="nav-number">1.1.2.1.9.</span> <span class="nav-text">lpszMenuName</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#lpszClassName"><span class="nav-number">1.1.2.1.10.</span> <span class="nav-text">lpszClassName</span></a></li></ol></li><li class="nav-item nav-level-4"><a class="nav-link" href="#RegisterClass"><span class="nav-number">1.1.2.2.</span> <span class="nav-text">RegisterClass</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%88%9B%E5%BB%BA%E7%AA%97%E5%8F%A3%E7%B1%BB%E5%AE%9E%E4%BE%8B"><span class="nav-number">1.1.3.</span> <span class="nav-text">创建窗口类实例</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#HWND-hwnd"><span class="nav-number">1.1.3.1.</span> <span class="nav-text">HWND hwnd</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#CreateWindow"><span class="nav-number">1.1.3.2.</span> <span class="nav-text">CreateWindow</span></a><ol class="nav-child"><li class="nav-item nav-level-5"><a class="nav-link" href="#lpClassName"><span class="nav-number">1.1.3.2.1.</span> <span class="nav-text">lpClassName</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#lpWindowName"><span class="nav-number">1.1.3.2.2.</span> <span class="nav-text">lpWindowName</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#dwStyle"><span class="nav-number">1.1.3.2.3.</span> <span class="nav-text">dwStyle</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#x"><span class="nav-number">1.1.3.2.4.</span> <span class="nav-text">x</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#y"><span class="nav-number">1.1.3.2.5.</span> <span class="nav-text">y</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#nWidth"><span class="nav-number">1.1.3.2.6.</span> <span class="nav-text">nWidth</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#nHeight"><span class="nav-number">1.1.3.2.7.</span> <span class="nav-text">nHeight</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#hWndParent"><span class="nav-number">1.1.3.2.8.</span> <span class="nav-text">hWndParent</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#hMenu"><span class="nav-number">1.1.3.2.9.</span> <span class="nav-text">hMenu</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#hInstance-1"><span class="nav-number">1.1.3.2.10.</span> <span class="nav-text">hInstance</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#lpParam"><span class="nav-number">1.1.3.2.11.</span> <span class="nav-text">lpParam</span></a></li></ol></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%98%BE%E7%A4%BA%E7%AA%97%E5%8F%A3%E5%AE%9E%E4%BE%8B"><span class="nav-number">1.1.4.</span> <span class="nav-text">显示窗口实例</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#ShowWindow"><span class="nav-number">1.1.4.1.</span> <span class="nav-text">ShowWindow</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#UpdateWindow"><span class="nav-number">1.1.4.2.</span> <span class="nav-text">UpdateWindow</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%B6%88%E6%81%AF%E5%BE%AA%E7%8E%AF"><span class="nav-number">1.1.5.</span> <span class="nav-text">消息循环</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#%E6%B6%88%E6%81%AF"><span class="nav-number">1.1.5.1.</span> <span class="nav-text">消息</span></a><ol class="nav-child"><li class="nav-item nav-level-5"><a class="nav-link" href="#hwnd"><span class="nav-number">1.1.5.1.1.</span> <span class="nav-text">hwnd</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#message"><span class="nav-number">1.1.5.1.2.</span> <span class="nav-text">message</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#wParam-lParam"><span class="nav-number">1.1.5.1.3.</span> <span class="nav-text">wParam&#x2F;lParam</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#time"><span class="nav-number">1.1.5.1.4.</span> <span class="nav-text">time</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#pt"><span class="nav-number">1.1.5.1.5.</span> <span class="nav-text">pt</span></a></li></ol></li><li class="nav-item nav-level-4"><a class="nav-link" href="#GetMessageW"><span class="nav-number">1.1.5.2.</span> <span class="nav-text">GetMessageW</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#TranslateMessage-msg"><span class="nav-number">1.1.5.3.</span> <span class="nav-text">TranslateMessage(&amp;msg)</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#DispatchMessage-msg"><span class="nav-number">1.1.5.4.</span> <span class="nav-text">DispatchMessage(&amp;msg)</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E5%BE%AA%E7%8E%AF%E5%A4%84%E7%90%86"><span class="nav-number">1.1.5.5.</span> <span class="nav-text">循环处理</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E7%AA%97%E5%8F%A3%E8%BF%87%E7%A8%8B"><span class="nav-number">1.1.6.</span> <span class="nav-text">窗口过程</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#%E6%B6%88%E6%81%AF%E5%88%86%E6%8B%A3%E4%B8%8E%E5%A4%84%E7%90%86"><span class="nav-number">1.1.6.1.</span> <span class="nav-text">消息分拣与处理</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E6%92%AD%E6%94%BE%E9%9F%B3%E9%A2%91"><span class="nav-number">1.1.6.2.</span> <span class="nav-text">播放音频</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E9%87%8D%E7%BB%98%E5%AE%A2%E6%88%B7%E5%8C%BA"><span class="nav-number">1.1.6.3.</span> <span class="nav-text">重绘客户区</span></a><ol class="nav-child"><li class="nav-item nav-level-5"><a class="nav-link" href="#BeginPaint"><span class="nav-number">1.1.6.3.1.</span> <span class="nav-text">BeginPaint</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#GetClientRect"><span class="nav-number">1.1.6.3.2.</span> <span class="nav-text">GetClientRect</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#DrawText"><span class="nav-number">1.1.6.3.3.</span> <span class="nav-text">DrawText</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#EndPaint"><span class="nav-number">1.1.6.3.4.</span> <span class="nav-text">EndPaint</span></a></li></ol></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E5%85%B3%E9%97%AD%E7%AA%97%E5%8F%A3"><span class="nav-number">1.1.6.4.</span> <span class="nav-text">关闭窗口</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E7%A8%8B%E5%BA%8F%E8%BF%94%E5%9B%9E"><span class="nav-number">1.1.7.</span> <span class="nav-text">程序返回</span></a></li></ol></li></ol></li></ol></div>
+      </div>
+      <!--/noindex-->
+
+      <div class="site-overview-wrap sidebar-panel">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+  <p class="site-author-name" itemprop="name">John Doe</p>
+  <div class="site-description" itemprop="description"></div>
+</div>
+<div class="site-state-wrap motion-element">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+          <a href="/archives/">
+        
+          <span class="site-state-item-count">78</span>
+          <span class="site-state-item-name">posts</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-tags">
+        <span class="site-state-item-count">30</span>
+        <span class="site-state-item-name">tags</span>
+      </div>
+  </nav>
+</div>
+
+
+
+      </div>
+
+    </div>
+  </aside>
+  <div id="sidebar-dimmer"></div>
+
+
+      </div>
+    </main>
+
+    <footer class="footer">
+      <div class="footer-inner">
+        
+
+        
+
+<div class="copyright">
+  
+  &copy; 
+  <span itemprop="copyrightYear">2024</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">John Doe</span>
+</div>
+  <div class="powered-by">Powered by <a href="https://hexo.io/" class="theme-link" rel="noopener" target="_blank">Hexo</a> & <a href="https://muse.theme-next.org/" class="theme-link" rel="noopener" target="_blank">NexT.Muse</a>
+  </div>
+
+        
+
+
+
+
+
+
+
+
+      </div>
+    </footer>
+  </div>
+
+  
+  <script src="/lib/anime.min.js"></script>
+  <script src="/lib/velocity/velocity.min.js"></script>
+  <script src="/lib/velocity/velocity.ui.min.js"></script>
+
+<script src="/js/utils.js"></script>
+
+<script src="/js/motion.js"></script>
+
+
+<script src="/js/schemes/muse.js"></script>
+
+
+<script src="/js/next-boot.js"></script>
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+  
+
+</body>
+</html>

@@ -1,0 +1,909 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 7.3.0">
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png">
+  <link rel="mask-icon" href="/images/logo.svg" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+<link rel="stylesheet" href="/lib/font-awesome/css/all.min.css">
+
+<script id="hexo-configurations">
+    var NexT = window.NexT || {};
+    var CONFIG = {"hostname":"example.com","root":"/","scheme":"Muse","version":"7.8.0","exturl":false,"sidebar":{"position":"left","display":"post","padding":18,"offset":12,"onmobile":false},"copycode":{"enable":false,"show_result":false,"style":null},"back2top":{"enable":true,"sidebar":false,"scrollpercent":false},"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":false,"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"algolia":{"hits":{"per_page":10},"labels":{"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}},"localsearch":{"enable":false,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false},"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}}};
+  </script>
+
+  <meta name="description" content="binarybook-chapter1-调试原来我只会用devc++,调试只会用cout打印变量观察,我就是个傻懒子 调试原理以gdb调试器为例,参考原来gdb的底层调试原理这么简单 - 知乎 (zhihu.com) 大体意思是: gbd进程会调用fork函数创建一个子进程,该子进程会调用ptrace函数,让父进程gdb进程托管其所有的信号,然后子进程execv需要调试的程序,  如此该程序将完全">
+<meta property="og:type" content="article">
+<meta property="og:title" content="binarybook-chapter1-调试">
+<meta property="og:url" content="http://example.com/2022/07/07/%E8%B0%83%E8%AF%95/index.html">
+<meta property="og:site_name" content="Hexo">
+<meta property="og:description" content="binarybook-chapter1-调试原来我只会用devc++,调试只会用cout打印变量观察,我就是个傻懒子 调试原理以gdb调试器为例,参考原来gdb的底层调试原理这么简单 - 知乎 (zhihu.com) 大体意思是: gbd进程会调用fork函数创建一个子进程,该子进程会调用ptrace函数,让父进程gdb进程托管其所有的信号,然后子进程execv需要调试的程序,  如此该程序将完全">
+<meta property="og:locale" content="en_US">
+<meta property="og:image" content="https://pic1.zhimg.com/80/v2-e446d2632631895dc401d7899d7e7a24_1440w.jpg">
+<meta property="og:image" content="https://pic3.zhimg.com/80/v2-27b78b3fc43dda54599d0d116a0b5a86_1440w.jpg">
+<meta property="og:image" content="https://raw.githubusercontent.com/DeutschBall/test/master/image-20220707095841614.png">
+<meta property="og:image" content="https://raw.githubusercontent.com/DeutschBall/test/master/image-20220428155346372.png">
+<meta property="og:image" content="https://raw.githubusercontent.com/DeutschBall/test/master/image-20220707161255625.png">
+<meta property="og:image" content="https://raw.githubusercontent.com/DeutschBall/test/master/image-20220707160733203.png">
+<meta property="og:image" content="https://raw.githubusercontent.com/DeutschBall/test/master/image-20220707171515399.png">
+<meta property="og:image" content="https://raw.githubusercontent.com/DeutschBall/test/master/image-20220707165636208.png">
+<meta property="og:image" content="https://raw.githubusercontent.com/DeutschBall/test/master/image-20220707171131310.png">
+<meta property="og:image" content="https://raw.githubusercontent.com/DeutschBall/test/master/image-20220707161059609.png">
+<meta property="og:image" content="https://raw.githubusercontent.com/DeutschBall/test/master/image-20220707161215951.png">
+<meta property="og:image" content="https://raw.githubusercontent.com/DeutschBall/test/master/image-20220707161728342.png">
+<meta property="og:image" content="https://raw.githubusercontent.com/DeutschBall/test/master/image-20220707161815928.png">
+<meta property="og:image" content="https://raw.githubusercontent.com/DeutschBall/test/master/image-20220707162547049.png">
+<meta property="og:image" content="https://raw.githubusercontent.com/DeutschBall/test/master/image-20220707164553789.png">
+<meta property="og:image" content="https://raw.githubusercontent.com/DeutschBall/test/master/image-20220707165555280.png">
+<meta property="og:image" content="https://raw.githubusercontent.com/DeutschBall/test/master/image-20220707171738040.png">
+<meta property="og:image" content="https://raw.githubusercontent.com/DeutschBall/test/master/image-20220707172112679.png">
+<meta property="og:image" content="https://raw.githubusercontent.com/DeutschBall/test/master/image-20220707172151132.png">
+<meta property="og:image" content="https://raw.githubusercontent.com/DeutschBall/test/master/image-20220707172244773.png">
+<meta property="og:image" content="https://raw.githubusercontent.com/DeutschBall/test/master/image-20220707172412802.png">
+<meta property="og:image" content="https://raw.githubusercontent.com/DeutschBall/test/master/image-20220707172511015.png">
+<meta property="og:image" content="https://raw.githubusercontent.com/DeutschBall/test/master/image-20220707172623275.png">
+<meta property="og:image" content="https://raw.githubusercontent.com/DeutschBall/test/master/image-20220707171843420.png">
+<meta property="og:image" content="https://raw.githubusercontent.com/DeutschBall/test/master/image-20220707171936097.png">
+<meta property="og:image" content="https://raw.githubusercontent.com/DeutschBall/test/master/image-20220707172857063.png">
+<meta property="og:image" content="https://raw.githubusercontent.com/DeutschBall/test/master/image-20220707172950546.png">
+<meta property="og:image" content="https://raw.githubusercontent.com/DeutschBall/test/master/image-20220707173009685.png">
+<meta property="og:image" content="https://raw.githubusercontent.com/DeutschBall/test/master/image-20220707173038785.png">
+<meta property="og:image" content="https://raw.githubusercontent.com/DeutschBall/test/master/image-20220707173157070.png">
+<meta property="og:image" content="https://raw.githubusercontent.com/DeutschBall/test/master/image-20220707184836611.png">
+<meta property="og:image" content="https://raw.githubusercontent.com/DeutschBall/test/master/image-20220707185010444.png">
+<meta property="og:image" content="https://raw.githubusercontent.com/DeutschBall/test/master/image-20220707192428834.png">
+<meta property="og:image" content="https://raw.githubusercontent.com/DeutschBall/test/master/image-20220707185758156.png">
+<meta property="og:image" content="https://raw.githubusercontent.com/DeutschBall/test/master/image-20220707190703773.png">
+<meta property="og:image" content="https://raw.githubusercontent.com/DeutschBall/test/master/image-20220707191307452.png">
+<meta property="og:image" content="https://raw.githubusercontent.com/DeutschBall/test/master/image-20220707193913865.png">
+<meta property="og:image" content="https://raw.githubusercontent.com/DeutschBall/test/master/image-20220707194243839.png">
+<meta property="og:image" content="https://raw.githubusercontent.com/DeutschBall/test/master/image-20220707194718167.png">
+<meta property="og:image" content="https://raw.githubusercontent.com/DeutschBall/test/master/image-20220707195024065.png">
+<meta property="og:image" content="https://raw.githubusercontent.com/DeutschBall/test/master/image-20220707201135306.png">
+<meta property="og:image" content="https://raw.githubusercontent.com/DeutschBall/test/master/image-20220707201155743.png">
+<meta property="og:image" content="https://raw.githubusercontent.com/DeutschBall/test/master/image-20220707201428364.png">
+<meta property="og:image" content="https://raw.githubusercontent.com/DeutschBall/test/master/image-20220707201704143.png">
+<meta property="article:published_time" content="2022-07-07T12:19:00.000Z">
+<meta property="article:modified_time" content="2022-07-09T10:10:26.616Z">
+<meta property="article:author" content="John Doe">
+<meta property="article:tag" content="reverse">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://pic1.zhimg.com/80/v2-e446d2632631895dc401d7899d7e7a24_1440w.jpg">
+
+<link rel="canonical" href="http://example.com/2022/07/07/%E8%B0%83%E8%AF%95/">
+
+
+<script id="page-configurations">
+  // https://hexo.io/docs/variables.html
+  CONFIG.page = {
+    sidebar: "",
+    isHome : false,
+    isPost : true,
+    lang   : 'en'
+  };
+</script>
+
+  <title>binarybook-chapter1-调试 | Hexo</title>
+  
+
+
+
+
+
+
+  <noscript>
+  <style>
+  .use-motion .brand,
+  .use-motion .menu-item,
+  .sidebar-inner,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-header { opacity: initial; }
+
+  .use-motion .site-title,
+  .use-motion .site-subtitle {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line-before i { left: initial; }
+  .use-motion .logo-line-after i { right: initial; }
+  </style>
+</noscript>
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage">
+  <div class="container use-motion">
+    <div class="headband"></div>
+
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="Toggle navigation bar">
+      <span class="toggle-line toggle-line-first"></span>
+      <span class="toggle-line toggle-line-middle"></span>
+      <span class="toggle-line toggle-line-last"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <span class="logo-line-before"><i></i></span>
+      <h1 class="site-title">Hexo</h1>
+      <span class="logo-line-after"><i></i></span>
+    </a>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger">
+    </div>
+  </div>
+</div>
+
+
+
+
+<nav class="site-nav">
+  <ul id="menu" class="main-menu menu">
+        <li class="menu-item menu-item-home">
+
+    <a href="/" rel="section"><i class="fa fa-home fa-fw"></i>Home</a>
+
+  </li>
+        <li class="menu-item menu-item-archives">
+
+    <a href="/archives/" rel="section"><i class="fa fa-archive fa-fw"></i>Archives</a>
+
+  </li>
+  </ul>
+</nav>
+
+
+
+
+</div>
+    </header>
+
+    
+  <div class="back-to-top">
+    <i class="fa fa-arrow-up"></i>
+    <span>0%</span>
+  </div>
+
+
+    <main class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+
+          <div class="content post posts-expand">
+            
+
+    
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="en">
+    <link itemprop="mainEntityOfPage" href="http://example.com/2022/07/07/%E8%B0%83%E8%AF%95/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.gif">
+      <meta itemprop="name" content="John Doe">
+      <meta itemprop="description" content="">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Hexo">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          binarybook-chapter1-调试
+        </h1>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-calendar"></i>
+              </span>
+              <span class="post-meta-item-text">Posted on</span>
+
+              <time title="Created: 2022-07-07 20:19:00" itemprop="dateCreated datePublished" datetime="2022-07-07T20:19:00+08:00">2022-07-07</time>
+            </span>
+              <span class="post-meta-item">
+                <span class="post-meta-item-icon">
+                  <i class="far fa-calendar-check"></i>
+                </span>
+                <span class="post-meta-item-text">Edited on</span>
+                <time title="Modified: 2022-07-09 18:10:26" itemprop="dateModified" datetime="2022-07-09T18:10:26+08:00">2022-07-09</time>
+              </span>
+
+          
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+        <h1 id="binarybook-chapter1-调试"><a href="#binarybook-chapter1-调试" class="headerlink" title="binarybook-chapter1-调试"></a>binarybook-chapter1-调试</h1><p>原来我只会用devc++,调试只会用cout打印变量观察,我就是个傻懒子</p>
+<h2 id="调试原理"><a href="#调试原理" class="headerlink" title="调试原理"></a>调试原理</h2><p>以gdb调试器为例,参考<a target="_blank" rel="noopener" href="https://zhuanlan.zhihu.com/p/336922639">原来gdb的底层调试原理这么简单 - 知乎 (zhihu.com)</a></p>
+<p>大体意思是:</p>
+<p>gbd进程会调用fork函数创建一个子进程,该子进程会调用ptrace函数,让父进程gdb进程托管其所有的信号,然后子进程execv需要调试的程序,</p>
+<p><img src="https://pic1.zhimg.com/80/v2-e446d2632631895dc401d7899d7e7a24_1440w.jpg" alt="img"></p>
+<p>如此该程序将完全处在gdb父进程的掌控之下</p>
+<p><img src="https://pic3.zhimg.com/80/v2-27b78b3fc43dda54599d0d116a0b5a86_1440w.jpg" alt="img"></p>
+<p>断点的原理:</p>
+<p>gbd进程维护一个断点链表,</p>
+<p>gdb进程将我们要下断点的指定行保存在断点列表,然后用int 3中断指令替换断点行指令(字节不足则补nop)</p>
+<p>当子进程运行到断点处时执行一个int 3指令,操作系统原本应该向该子进程发送一个SIGTRAP指令让其陷入内核,但是这一信号被父进程gdb截胡了</p>
+<p>此时子进程中的int 3已经执行过了,eip指向了下一条指令</p>
+<p>现在轮到父进程登场了</p>
+<p>父进程gdb收到了SIGTRAP指令,发现是子进程的哪一行引起了中断指令,然后去断点链表找到对应行的记录,再给子进程该回去,然后将子进程的eip程序计数器退一步,让子进程重新执行</p>
+<p>这么麻烦实现了一个什么功能呢?</p>
+<p>子进程会在断点处int 3指令停下等待信号,这就给了父进程趁机读写子进程堆栈和寄存器的机会</p>
+<h2 id="IDA-pro静态观察wsample01b-exe"><a href="#IDA-pro静态观察wsample01b-exe" class="headerlink" title="IDA pro静态观察wsample01b.exe"></a>IDA pro静态观察wsample01b.exe</h2><p>例程来自有趣的二进制<a target="_blank" rel="noopener" href="https://github.com/kenjiaiko/binarybook">kenjiaiko&#x2F;binarybook (github.com)</a></p>
+<h3 id="winmain函数的行为"><a href="#winmain函数的行为" class="headerlink" title="winmain函数的行为"></a>winmain函数的行为</h3><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br></pre></td><td class="code"><pre><span class="line">.text:00401080 ; int __stdcall wWinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPWSTR lpCmdLine, int nShowCmd)</span><br><span class="line">.text:00401080 _wWinMain@16    proc near               ; CODE XREF: ___tmainCRTStartup+153↓p</span><br><span class="line">.text:00401080</span><br><span class="line">.text:00401080 hInstance       = dword ptr  4</span><br><span class="line">.text:00401080 hPrevInstance   = dword ptr  8</span><br><span class="line">.text:00401080 lpCmdLine       = dword ptr  0Ch</span><br><span class="line">.text:00401080 nShowCmd        = dword ptr  10h</span><br><span class="line">.text:00401080</span><br><span class="line">.text:00401080                 call    sub_401000      ; 上来西安调用函数</span><br><span class="line">.text:00401080                                         ;</span><br><span class="line">.text:00401085                 push    0               ; uType   </span><br><span class="line">.text:00401087                 push    offset Caption  ; &quot;MESSAGE&quot;		;Caption在rdata区,offset伪指令取了它的地址</span><br><span class="line">.text:0040108C                 push    offset Text     ; &quot;Copied!&quot;</span><br><span class="line">.text:00401091                 call    ds:GetActiveWindow</span><br><span class="line">.text:00401097                 push    eax             ; hWnd	;eax承载的是GetActiveWindow的返回值,一个窗口句柄,压栈做参数</span><br><span class="line">.text:00401098                 call    ds:MessageBoxW	;调用MessageBoxW,向屏幕显示对话框</span><br><span class="line">.text:0040109E                 xor     eax, eax		;eax置零</span><br><span class="line">.text:004010A0                 retn    10h			;winmain返回值10h</span><br><span class="line">.text:004010A0 _wWinMain@16    endp</span><br></pre></td></tr></table></figure>
+
+<p>暂且不管sub_401000函数干了啥,先看一下后面的win32API干了啥</p>
+<blockquote>
+<p>GetActiveWindow</p>
+<p>该函数可以获得与调用线程的消息队列相关的活动窗口的窗口句柄。</p>
+<p>函数原型:<code>HWND GetActiveWindow（VOID）</code></p>
+<p>参数：无</p>
+<p>返回值：返回值是与调用线程的消息队列相关的活动窗口的句柄。否则，返回值为NULL。</p>
+</blockquote>
+<p>既然GetActiveWindow不需要参数,那么前面三个push压栈是为谁准备的参数呢?</p>
+<p>GetActiveWindow调用前后,在主函数中看栈帧没有变化,从栈顶向栈底还是&amp;Text,&amp;Caption,0</p>
+<p>然后又将eax压栈,而eax存放的是GetActiveWindow的返回值,一个窗口句柄(如果失败则为NULL)</p>
+<p>现在栈上压了四个参数,下面要调用MessageBoxW了</p>
+<blockquote>
+<p>函数原型</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="type">int</span> <span class="title function_">MessageBoxW</span><span class="params">(</span></span><br><span class="line"><span class="params">  [in, optional] HWND    hWnd,</span></span><br><span class="line"><span class="params">  [in, optional] LPCWSTR lpText,</span></span><br><span class="line"><span class="params">  [in, optional] LPCWSTR lpCaption,</span></span><br><span class="line"><span class="params">  [in]           UINT    uType</span></span><br><span class="line"><span class="params">)</span>;</span><br></pre></td></tr></table></figure>
+
+<p>hWnd:一个窗口句柄</p>
+<p>lpText:要在窗口中打印展示的文本</p>
+<p>lpCaption:窗口标题</p>
+<p>uType:指定对话框的内容和行为</p>
+<table>
+<thead>
+<tr>
+<th>宏定义</th>
+<th>值</th>
+<th>意义</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><strong>MB_OK</strong></td>
+<td>0</td>
+<td>窗口只有一个OK按钮,默认模式</td>
+</tr>
+<tr>
+<td><strong>MB_OKCANCEL</strong></td>
+<td>1</td>
+<td>窗口有两个按钮,分别是OK和Cancel</td>
+</tr>
+<tr>
+<td><strong>MB_ABORTRETRYIGNORE</strong></td>
+<td>2</td>
+<td>窗口有三个按钮,分别是Abort,Retry,Ignore(放弃,重试,忽略)</td>
+</tr>
+<tr>
+<td><strong>MB_YESNOCANCEL</strong></td>
+<td>3</td>
+<td>窗口有三个按钮,分别是Yes,No,Cancle</td>
+</tr>
+<tr>
+<td><strong>MB_YESNO</strong></td>
+<td>4</td>
+<td>窗口有两个按钮,Yes,No</td>
+</tr>
+<tr>
+<td><strong>MB_RETRYCANCEL</strong></td>
+<td>5</td>
+<td>…</td>
+</tr>
+<tr>
+<td><strong>MB_CANCELTRYCONTINUE</strong></td>
+<td>6</td>
+<td>…</td>
+</tr>
+<tr>
+<td>…</td>
+<td>..</td>
+<td>…</td>
+</tr>
+</tbody></table>
+<p>还有很多定义好的窗口样式,现在不用管</p>
+<p>返回值:int,返回用户点击的按钮号</p>
+<table>
+<thead>
+<tr>
+<th>宏定义</th>
+<th>按钮号</th>
+<th>按钮</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><strong>IDOK</strong></td>
+<td>1</td>
+<td>OK</td>
+</tr>
+<tr>
+<td><strong>IDCANCEL</strong></td>
+<td>2</td>
+<td>Cancel</td>
+</tr>
+<tr>
+<td><strong>IDABORT</strong></td>
+<td>3</td>
+<td>Abort</td>
+</tr>
+<tr>
+<td>…</td>
+<td></td>
+<td></td>
+</tr>
+</tbody></table>
+<p>为啥要返回用户点选的按钮号呢?方便程序后续提供用户希望的服务,</p>
+<p>比如当用户点选了Ok则确认并提交了一些信息,点选了Cancel则关闭窗口或者取消了一些信息</p>
+</blockquote>
+<p>例程运行之后的窗口是这样的</p>
+<p><img src="https://raw.githubusercontent.com/DeutschBall/test/master/image-20220707095841614.png" alt="image-20220707095841614"></p>
+<p>可以说这个win32窗口啥正事也没干</p>
+<h3 id="sub-401000函数的行为"><a href="#sub-401000函数的行为" class="headerlink" title="sub_401000函数的行为"></a>sub_401000函数的行为</h3><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br></pre></td><td class="code"><pre><span class="line">.text:00401000 sub_401000      proc near               ; CODE XREF: wWinMain(x,x,x,x)↓p</span><br><span class="line">.text:00401000</span><br><span class="line">.text:00401000 Filename        = word ptr -2004h</span><br><span class="line">.text:00401000 pszPath         = word ptr -1004h</span><br><span class="line">.text:00401000 var_4           = dword ptr -4</span><br><span class="line">.text:00401000</span><br><span class="line">.text:00401000                 push    ebp</span><br><span class="line">.text:00401001                 mov     ebp, esp</span><br><span class="line">.text:00401003                 mov     eax, 2004h</span><br><span class="line">.text:00401008                 call    __alloca_probe</span><br><span class="line">.text:0040100D                 mov     eax, ___security_cookie</span><br><span class="line">.text:00401012                 xor     eax, ebp</span><br><span class="line">.text:00401014                 mov     [ebp+var_4], eax</span><br><span class="line">.text:00401017                 push    1000h           ; nSize</span><br><span class="line">.text:0040101C                 lea     eax, [ebp+Filename]</span><br><span class="line">.text:00401022                 push    eax             ; lpFilename</span><br><span class="line">.text:00401023                 push    0               ; hModule</span><br><span class="line">.text:00401025                 call    ds:GetModuleFileNameW</span><br><span class="line">.text:0040102B                 lea     ecx, [ebp+pszPath]</span><br><span class="line">.text:00401031                 push    ecx             ; pszPath</span><br><span class="line">.text:00401032                 push    0               ; dwFlags</span><br><span class="line">.text:00401034                 push    0               ; hToken</span><br><span class="line">.text:00401036                 push    7               ; csidl</span><br><span class="line">.text:00401038                 push    0               ; hwnd</span><br><span class="line">.text:0040103A                 call    ds:SHGetFolderPathW</span><br><span class="line">.text:00401040                 push    offset String2  ; &quot;\\wsample01b.exe&quot;</span><br><span class="line">.text:00401045                 lea     edx, [ebp+pszPath]</span><br><span class="line">.text:0040104B                 push    edx             ; lpString1</span><br><span class="line">.text:0040104C                 call    ds:lstrcatW</span><br><span class="line">.text:00401052                 push    0               ; bFailIfExists</span><br><span class="line">.text:00401054                 lea     eax, [ebp+pszPath]</span><br><span class="line">.text:0040105A                 push    eax             ; lpNewFileName</span><br><span class="line">.text:0040105B                 lea     ecx, [ebp+Filename]</span><br><span class="line">.text:00401061                 push    ecx             ; lpExistingFileName</span><br><span class="line">.text:00401062                 call    ds:CopyFileW</span><br><span class="line">.text:00401068                 mov     ecx, [ebp+var_4]</span><br><span class="line">.text:0040106B                 xor     ecx, ebp        ; StackCookie</span><br><span class="line">.text:0040106D                 xor     eax, eax</span><br><span class="line">.text:0040106F                 call    @__security_check_cookie@4 ; __security_check_cookie(x)</span><br><span class="line">.text:00401074                 mov     esp, ebp</span><br><span class="line">.text:00401076                 pop     ebp</span><br><span class="line">.text:00401077                 retn</span><br><span class="line">.text:00401077 sub_401000      endp</span><br></pre></td></tr></table></figure>
+
+<p>这个函数都干了啥呢?</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">.text:00401000                 push    ebp</span><br><span class="line">.text:00401001                 mov     ebp, esp</span><br></pre></td></tr></table></figure>
+
+<p>winmain函数开端,压栈保存调用者的ebp帧指针,ebp用于winmain函数的帧指针</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">.text:00401003                 mov     eax, 2004h</span><br><span class="line">.text:00401008                 call    __alloca_probe</span><br></pre></td></tr></table></figure>
+
+<p>这里调用了一个<code>__alloca_probe</code>函数,上一行往eax寄存器中存放的2004h是函数参数</p>
+<p>这个函数干了啥呢?</p>
+<h4 id="call-alloca-probe"><a href="#call-alloca-probe" class="headerlink" title="call    __alloca_probe"></a><code>call    __alloca_probe</code></h4><p>理论上函数开端在保存帧指针ebp之后接着就应该esp-xxx,为当前函数开辟栈帧,而在sub_401000中并没有这样的指令,或者说本应该开辟栈空间的指令的地方有一个<code> call    __alloca_probe</code>那么这个函数调用是否就起到了开辟栈空间的作用呢?</p>
+<blockquote>
+<p><code>__alloca_probe</code></p>
+<p>从名字上看,该函数有两部分,一个是allocate,分配,另一个是probe,探针,探针?这个函数上网搜吧,就是找不到一个详细解释</p>
+<p>在binary book上,该函数是<code>wsample0._chkstk</code>这个函数就有解释了</p>
+<blockquote>
+<p>MSDN:</p>
+<p>_chkstk Routine</p>
+<p>Called by the compiler when you have more than one page of local variables in your function.</p>
+<p>_chkstk Routine is a helper routine for the C compiler. For x86 compilers, _chkstk Routine is called when the local variables exceed 4K bytes; for x64 compilers it is 8K.</p>
+<p>_chkstk例程:</p>
+<p>当函数栈帧大小大于一个内存页时,编译器会调用该函数</p>
+<p>该例程是C编译器的补充.对于x86编译器,当局部变量超过4K时调用,对于x64编译器,局部变量超过8k时调用</p>
+<p>然而MSDN只是介绍了啥时候调用这个函数,并没有介绍为啥调用,和调用该函数的影响</p>
+<p>下面参考了stackoverflow</p>
+<blockquote>
+<p>Windows pages in extra stack for your thread as it is used. At the end of the stack, there is one guard page mapped as inaccessible memory – if the program accesses it (because it is trying to use more stack than is currently mapped), there’s an access violation. The OS catches the fault, maps in another page of stack at the same address as the old guard page, creates a new guard page just beyond the old one, and resumes from the instruction that caused the violation.</p>
+<p>为线程添加额外的windows页.在栈底有一个被操作系统监管的被映射为不可访问内存的页.如果程序视图访问该页(栈空间太小了)就会发生访问冲突.操作系统会捕获该错误,映射到与旧保护页位于同一地址的另一个堆栈页中，在旧保护页之后创建一个新的保护页，然后从导致冲突的指令恢复。</p>
+<p>If a function has more than one page of local variables, then the first address it accesses might be more than one page beyond the current end of the stack. Hence it would miss the guard page and trigger an access violation that the OS doesn’t realise is because more stack is needed. If the total stack required is particularly huge, it could perhaps even reach beyond the guard page, beyond the end of the virtual address space assigned to stack, and into memory that’s actually in use for something else.</p>
+<p>如果一个函数有多个本地变量页，那么它访问的第一个地址可能是堆栈当前端之外的多个页面。因此它会错过保护页面并触发一个操作系统没有意识到的访问冲突，因为需要更多的堆栈。如果所需的总堆栈特别巨大，它甚至可能超出保护页面，超出分配给堆栈的虚拟地址空间的末尾，进入实际用于其他用途的内存。</p>
+<p>So, <code>_chkstk</code> ensures that there is enough space for the local variables. You can imagine that it does this by touching the memory for the local variables at page-sized intervals, in increasing order, to ensure that it doesn’t miss the guard page (so-called “stack probes”). I don’t know whether it actually does that, though, possibly it takes a more direct route and instructs the OS to map in a certain amount of stack. Either way, if the total required is greater than the virtual address space available for stack, then the OS can complain about it instead of doing something undefined.</p>
+<p>因此，_ chkstk 确保局部变量有足够的空间。可以想象，它通过按页面大小的间隔访问本地变量的内存来实现这一点，以递增的顺序，确保它不会错过保护页(所谓的“堆栈探测”)。我不知道它是否真的这样做，但是，可能它采取了一个更直接的例程，并指示操作系统映射到一定数量的堆栈。无论哪种方式，如果所需的总空间大于可用于堆栈的虚拟地址空间，那么操作系统可以报告这件事，而不是执行未定义的操作。</p>
+</blockquote>
+</blockquote>
+<p>逆向__alloca_probe函数观察其行为</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br></pre></td><td class="code"><pre><span class="line">.text:004018E0 __alloca_probe  proc near               ; CODE XREF: sub_401000+8↑p</span><br><span class="line">.text:004018E0                 push    ecx		;压栈保存ecx</span><br><span class="line">.text:004018E1                 lea     ecx, [esp+4]	;ecx指向当前栈顶+4位置</span><br><span class="line">.text:004018E5                 sub     ecx, eax		;ecx-eax-&gt;ecx,显然ecx是一个内存地址,比eax要大,这里不会置CF</span><br><span class="line">.text:004018E7                 sbb     eax, eax		;eax-eax-CF-&gt;eax,由于上一步不需要置CF,因此这里eax=0</span><br><span class="line">.text:004018E9                 not     eax			;eax=反eax,即eax这个32位寄存器全置高</span><br><span class="line">.text:004018EB                 and     ecx, eax		;ecx和全1按位与还是ecx</span><br><span class="line">.text:004018ED                 mov     eax, esp		;esp-&gt;eax,eax获得栈顶指针快照</span><br><span class="line">.text:004018EF                 and     eax, 0FFFFF000h	;eax只保留高20位,低12位置0</span><br><span class="line">.text:004018F4</span><br><span class="line">.text:004018F4 cs10:                                   ; CODE XREF: __alloca_probe+29↓j</span><br><span class="line">.text:004018F4                 cmp     ecx, eax			;ecx-eax根据结果置flag</span><br><span class="line">.text:004018F6                 jb      short cs20		;如果ecx&lt;eax则跳转cs20</span><br><span class="line">.text:004018F8                 mov     eax, ecx			;如果ecx&gt;=eax,则eax=ecx</span><br><span class="line">.text:004018FA                 pop     ecx				;尾声,栈顶还给ecx</span><br><span class="line">.text:004018FB                 xchg    eax, esp			;eax和esp交换</span><br><span class="line">.text:004018FC                 mov     eax, [eax]		;</span><br><span class="line">.text:004018FE                 mov     [esp+0], eax</span><br><span class="line">.text:00401901                 retn						;唯一的函数出口</span><br><span class="line">.text:00401902 ; ---------------------------------------------------------------------------</span><br><span class="line">.text:00401902</span><br><span class="line">.text:00401902 cs20:                                   ; CODE XREF: __alloca_probe+16↑j</span><br><span class="line">;执行到此说明.text:004018F6 处有ecx&lt;eax,于是循环执行下面三行,直到ecx&gt;=eax</span><br><span class="line">.text:00401902                 sub     eax, 1000h		;eax-1000h-&gt;eax	,1000h就是4KB,32位win上一个页框的大小											;栈顶下移4K,eax待会要赋值给esp栈顶指针</span><br><span class="line">.text:00401907                 test    [eax], eax		;蜜汁操作,test运算了一下结果下一行是无条件跳转,运算个寂寞?</span><br><span class="line">.text:00401909                 jmp     short cs10</span><br><span class="line">.text:00401909 __alloca_probe  endp</span><br></pre></td></tr></table></figure>
+
+<blockquote>
+<p>该函数用到了很多寄存器,<code>ecx,eax,esp</code>,纯静态分析很容易分析中忘记寄存器中存放的是什么了,这时候可以使用动态调试按步就班地观察</p>
+</blockquote>
+<p><code>eax</code>在<code>sub_401000</code>中被赋值<code>2004h=8196d=2K</code>然后作为参数传递给<code>__alloca_probe</code>显然这个大小大于一个页框</p>
+<p>如果分配大小eax小于一个页框大小4k,则程序相当于</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line">;size in eax</span><br><span class="line">.text:004018E0                 push    ecx		</span><br><span class="line">.text:004018E1                 lea     ecx, [esp+4]	;ecx=esp+4</span><br><span class="line">.text:004018E5                 sub     ecx, eax		;ecx=esp+4-size</span><br><span class="line">.text:004018F8                 mov     eax, ecx		;eax=ecx=esp+4-size</span><br><span class="line">.text:004018FA                 pop     ecx			</span><br><span class="line">.text:004018FB                 xchg    eax, esp		;esp=eax=esp+4-size while eax=esp</span><br><span class="line">.text:004018FC                 mov     eax, [eax]	;eax指向老栈顶的元素</span><br><span class="line">.text:004018FE                 mov     [esp+0], eax	;老栈顶元素搬运到新栈顶位置</span><br><span class="line">.text:00401901                 retn	</span><br></pre></td></tr></table></figure>
+
+<p>实际上就是把当前栈扩大size,然后将原来栈顶上存放的内容搬到新的栈顶上</p>
+<p>当分配大小eax大于一个页框4K,则程序会有额外的循环步骤</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">.text:00401902 cs20:                                   ; CODE XREF: __alloca_probe+16↑j</span><br><span class="line">.text:00401902                 sub     eax, 1000h	;栈上开辟4k空间,eax待会要拷贝给esp</span><br><span class="line">.text:00401907                 test    [eax], eax	;触摸内存,触发缺页异常,让os将虚拟页载入物理页</span><br><span class="line">.text:00401909                 jmp     short cs10	;循环</span><br></pre></td></tr></table></figure>
+
+<p>循环啥时候停止呢?</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">.text:004018F4 cs10:                                   ; CODE XREF: __alloca_probe+29↓j</span><br><span class="line">.text:004018F4                 cmp     ecx, eax			</span><br><span class="line">.text:004018F6                 jb      short cs20		</span><br></pre></td></tr></table></figure>
+
+<p>ecx在最初的时候直接减去size,指向了希望的栈顶,这里就比较eax是否已经越过了希望的栈顶,</p>
+<p>当eax首次越过(eax&#x3D;ecx或者eax-ecx&lt;一个页框的大小4k)</p>
+<p>此时栈空间足够大了,满足我们的希望了,可以停止循环了</p>
+<p>在这里可以看出,x86windows的栈帧大小是<strong>以页框4K为单位进行分配</strong>的.</p>
+</blockquote>
+<h4 id="mov-eax-security-cookie"><a href="#mov-eax-security-cookie" class="headerlink" title="mov     eax, ___security_cookie"></a><code>mov     eax, ___security_cookie</code></h4><p>这个<code>__security_cookie</code>带着下划线前缀,一看就不是用户写的,这是个啥呢?</p>
+<p>从意义上看,安全cookie值,应该是和安全相关</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">.data:00403000 ; Segment permissions: Read/Write</span><br><span class="line">.data:00403000 _data           segment para public &#x27;DATA&#x27; use32</span><br><span class="line">.data:00403000                 assume cs:_data</span><br><span class="line">.data:00403000                 ;org 403000h</span><br><span class="line">.data:00403000 ; uintptr_t __security_cookie</span><br><span class="line">.data:00403000 ___security_cookie dd 0BB40E64Eh        ; DATA XREF: sub_401000+D↑r</span><br></pre></td></tr></table></figure>
+
+<p><code>___security_cookie</code>位于.data段,程序拥有读写该段的权限.该段的段寄存器是<code>cs</code>寄存器</p>
+<p><code>dword ___security_cookie=0BB40E64Eh</code>是一个双字类型,相当于一个int,32字节</p>
+<p>这就是一个常数啊,为啥要把一个八竿子打不着的常数压栈呢?</p>
+<p>在<code>sub_401000</code>尾声伊始,还有有一条涉及<code>security_cookie</code>指令</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">.text:0040106F                 call    @__security_check_cookie@4 ; __security_check_cookie(x)</span><br></pre></td></tr></table></figure>
+
+<p>该条指令调用了一个函数<code>@__security_check_cookie@4</code></p>
+<blockquote>
+<p><code>@__security_check_cookie@4</code></p>
+<p>从汇编符号上看,应该是fastcall调用约定</p>
+<p><img src="https://raw.githubusercontent.com/DeutschBall/test/master/image-20220428155346372.png"></p>
+<p>本函数只需要一个参数,使用ecx寄存器传递</p>
+<p>ecx寄存器传递了啥参数呢?在sub_40100中是这样写的:</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">.text:00401068                 mov     ecx, [ebp+var_4]	</span><br><span class="line">.text:0040106B                 xor     ecx, ebp        ; StackCookie</span><br></pre></td></tr></table></figure>
+
+<blockquote>
+<p><code>var_4</code>又是啥?</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">.text:0040100D                 mov     eax, ___security_cookie</span><br><span class="line">.text:00401012                 xor     eax, ebp</span><br><span class="line">.text:00401014                 mov     [ebp+var_4], eax</span><br></pre></td></tr></table></figure>
+
+<p>cookie放到eax里面然后和ebp异或一下再放到var_4,即<code>var_4=___security_cookie ^ ebp</code>,相当于一层加密</p>
+</blockquote>
+<p>因此在尾声的时候把<code>var_4</code>拿出来还要和<code>ebp</code>异或一下才能得到<code>___security_cookie</code>,相当于一层解密</p>
+<p>那么此时传递给<code>@__security_check_cookie@4 </code>函数的ecx里面,<strong>理论上</strong>就应该是纯纯的<del>闸总</del><code>___security_cookie</code></p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">.text:004010A3 @__security_check_cookie@4 proc near    ; CODE XREF: sub_401000+6F↑p</span><br><span class="line">.text:004010A3                                         ; DATA XREF: __except_handler4+11↓o</span><br><span class="line">.text:004010A3                 cmp     ecx, ___security_cookie</span><br><span class="line">.text:004010A9                 jnz     short $failure$26820</span><br><span class="line">.text:004010AB                 rep retn</span><br></pre></td></tr></table></figure>
+
+<p>该函数也确实将ecx和位于<code>.data</code>段的<code>___security_cookie</code>进行了比较,如果不一样则跳转<code>$failure$26820</code></p>
+<p>上述过程干了个什么事呢?防止栈缓冲区溢出</p>
+<p>下面是sub_401000函数的栈帧,var_4是在调用者ebp保存值s和本函数返回地址r之上的(var_4相对靠近栈顶,r在栈帧底部)</p>
+<p>栈倒着长但是栈内数据正着长,如果有一个缓冲区一直增长,把位于<code>ebp-0x4</code>的var_4覆盖了,甚至把位于<code>ebp+0</code>的s等等也覆盖了</p>
+<p>在函数尾声的时候,就会把var_4拿出来看看其中异或保存的<code>___security_cookie</code>是否发生了变化.</p>
+<p>一旦检查出var_4中异或保存的<code>___security_cookie</code>发生了变化,则<strong>至少</strong>表明栈缓冲区溢出已经到了<code>ebp-0x4</code>,</p>
+<p>至于后面的调用者ebp和本函数返回地址有没有被溢出呢?不知道,但是不能做出乐观的假设,</p>
+<p>为了防止返回地址被修改引起的攻击,此时应当立刻终止进程并报告错误</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">...</span><br><span class="line">-00000006                 db ? ; undefined</span><br><span class="line">-00000005                 db ? ; undefined</span><br><span class="line">-00000004 var_4           dd ?</span><br><span class="line">+00000000  s              db 4 dup(?)</span><br><span class="line">+00000004  r              db 4 dup(?)</span><br><span class="line">+00000008</span><br><span class="line">+00000008 ; end of stack variables</span><br></pre></td></tr></table></figure>
+
+
+
+<p><strong>为啥要把<code>___security_cookie</code>和ebp异或一下呢?</strong></p>
+<p><strong>为啥不直接把<code>___security_cookie</code>副本压栈最后再将该副本退栈和位于<code>.data</code>的<code>___security_cookie</code>比较呢?</strong></p>
+<p>这样相当于数据库保存了用户密码的明文,一旦脱库后果不堪设想.如果<code>___security_cookie</code>在栈上也是明文保存的,则可以利用printf格式化字符串漏洞尝试打印该值,在溢出的时候对于栈中<code>___security_cookie</code>副本位置,只需要装模做样的写上,后面继续溢出</p>
+<p>这样就可以绕过检查</p>
+<p><strong>为啥要和<code>ebp</code>异或一下呢?为啥不能是其他值?</strong></p>
+<p>考虑这个与<code>___security_cookie</code>异或的值应该有什么特性?函数开端和函数尾声的时候都要与他异或,这个值应该保持不变,</p>
+<p>满足这个特征的值可以想到的就是ebp了,对于当前函数,它永远指向栈帧底部不变.</p>
+<p>栈顶指针就不行,esp会随着局部变量的声明或者子函数的调用而改变</p>
+<p><strong>为啥使用异或运算加密呢?使用按位与,按位或不行吗?</strong></p>
+<p>异或运算有一个性质:如果$A\oplus B&#x3D;C$则$C\oplus A&#x3D;(A\oplus B)\oplus A&#x3D;B$</p>
+<p>显然按位与,按位或等运算没有这个性质</p>
+<p>而这个性质正是在函数开端时$var_4&#x3D;ebp\oplus security_cookie$,</p>
+<p>在函数尾声时能够$security_cookie&#x3D;var_4\oplus ebp$的原理</p>
+<p><strong>这样就绝对安全了吗?能够完全抵御栈缓冲区溢出修改函数返回地址了吗?</strong></p>
+<p>使用security_cookie只能一定程度上保护调用者ebp和返回地址不被修改,栈帧中,存放在var_4之后,缓冲区之前的局部变量不受保护</p>
+<p>并且<code>security_cookie</code>在编译之后就是一个定值了,运行时永远不变,使用ida就可以直接看到它多粗多长</p>
+<p>在运行时动态调试一下就可以看到ebp是多少,</p>
+<p>如果没有开启基址随机化,则每次ebp都是一个常数,</p>
+<p>那么<code>var_4=security_cookie ^ ebp</code>也是一个常数,这就异或加密了个寂寞</p>
+</blockquote>
+<h4 id="call-ds-GetModuleFileNameW"><a href="#call-ds-GetModuleFileNameW" class="headerlink" title="call    ds:GetModuleFileNameW"></a><code>call    ds:GetModuleFileNameW</code></h4><p>现在回到<code>sub_401000</code>函数中</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">push    1000h           ; nSize</span><br><span class="line">lea     eax, [ebp+Filename]</span><br><span class="line">push    eax             ; lpFilename</span><br><span class="line">push    0               ; hModule</span><br><span class="line">call    ds:GetModuleFileNameW</span><br></pre></td></tr></table></figure>
+
+<p>又调用了一个API函数GetModuleFileNameW,这个函数干了啥呢?</p>
+<blockquote>
+<p>GetModuleFileNameW函数原型</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">DWORD <span class="title function_">GetModuleFileNameW</span><span class="params">(</span></span><br><span class="line"><span class="params">  [in, optional] HMODULE hModule,</span></span><br><span class="line"><span class="params">  [out]          LPWSTR  lpFilename,</span></span><br><span class="line"><span class="params">  [in]           DWORD   nSize</span></span><br><span class="line"><span class="params">)</span>;</span><br></pre></td></tr></table></figure>
+
+<p>hModule:应用程序或者DLL实力句柄,如果为NULL则获取当前程序路径</p>
+<p>lpFilename:获取路径之后存放之的字符串缓冲区</p>
+<p>nSize:缓冲区大小,作用是防止缓冲区溢出</p>
+</blockquote>
+<p>在这里第一个参数hModule&#x3D;0,表明要获取当前应用程序的目录</p>
+<p>第二个参数lpFilename&#x3D;Filename是sub_401000函数栈中的一个缓冲区</p>
+<p>第三个参数nSize&#x3D;1000h,表明缓冲区大小为4KB</p>
+<blockquote>
+<p>关于LPWSTR类型,实际是<code>wchar_t*</code>类型,即宽字符unicode编码的字符串</p>
+<p>L长</p>
+<p>P指针</p>
+<p>W宽</p>
+<p>STR字符串</p>
+<p>宽字符的作用是支持包括英文,中文,日文等等各种花言鸟语的符号,ASCII码最多表示$2^8&#x3D;256$个字符,unicode最多表示$2^{16}&#x3D;65536$个字符,常用汉字就3000个,显然unicode有能力森罗万象</p>
+</blockquote>
+<h4 id="call-ds-SHGetFolderPathW"><a href="#call-ds-SHGetFolderPathW" class="headerlink" title="call    ds:SHGetFolderPathW"></a><code>call    ds:SHGetFolderPathW</code></h4><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">lea     ecx, [ebp+pszPath]</span><br><span class="line">push    ecx             ; pszPath</span><br><span class="line">push    0               ; dwFlags</span><br><span class="line">push    0               ; hToken</span><br><span class="line">push    7               ; csidl</span><br><span class="line">push    0               ; hwnd</span><br><span class="line">call    ds:SHGetFolderPathW</span><br></pre></td></tr></table></figure>
+
+<p>又是一个API函数</p>
+<blockquote>
+<p>它亲戚SHGetFolderPathA函数原型</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">SHFOLDERAPI <span class="title function_">SHGetFolderPathA</span><span class="params">(</span></span><br><span class="line"><span class="params">  [in]  HWND   hwnd,</span></span><br><span class="line"><span class="params">  [in]  <span class="type">int</span>    csidl,</span></span><br><span class="line"><span class="params">  [in]  HANDLE hToken,</span></span><br><span class="line"><span class="params">  [in]  DWORD  dwFlags,</span></span><br><span class="line"><span class="params">  [out] LPSTR  pszPath</span></span><br><span class="line"><span class="params">)</span>;</span><br></pre></td></tr></table></figure>
+
+<p>其中参数<code>csidl=7</code>是啥意思呢?表示”启动”文件夹</p>
+<blockquote>
+<p>在win10上这个文件夹在<code>C:\ProgramData\Microsoft\Windows\Start Menu\Programs\StartUp</code></p>
+</blockquote>
+<p>获取**”启动”文件夹**目录,字符串存放到pszPath指向的缓冲区</p>
+<blockquote>
+<p>csidl其他值的意义</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br></pre></td><td class="code"><pre><span class="line">CSIDL_DESKTOP = &amp;H0 &#x27;// The Desktop - virtual folder</span><br><span class="line">CSIDL_PROGRAMS = 2 &#x27;// Program Files</span><br><span class="line">CSIDL_CONTROLS = 3 &#x27;// Control Panel - virtual folder</span><br><span class="line">CSIDL_PRINTERS = 4 &#x27;// Printers - virtual folder</span><br><span class="line">CSIDL_DOCUMENTS = 5 &#x27;// My Documents</span><br><span class="line">CSIDL_FAVORITES = 6 &#x27;// Favourites</span><br><span class="line">CSIDL_STARTUP = 7 &#x27;// Startup Folder</span><br><span class="line">CSIDL_RECENT = 8 &#x27;// Recent Documents</span><br><span class="line">CSIDL_SENDTO = 9 &#x27;// Send To Folder</span><br><span class="line">CSIDL_BITBUCKET = 10 &#x27;// Recycle Bin - virtual folder</span><br><span class="line">CSIDL_STARTMENU = 11 &#x27;// Start Menu</span><br><span class="line">CSIDL_DESKTOPFOLDER = 16 &#x27;// Desktop folder</span><br><span class="line">CSIDL_DRIVES = 17 &#x27;// My Computer - virtual folder</span><br><span class="line">CSIDL_NETWORK = 18 &#x27;// Network Neighbourhood - virtual folder</span><br><span class="line">CSIDL_NETHOOD = 19 &#x27;// NetHood Folder</span><br><span class="line">CSIDL_FONTS = 20 &#x27;// Fonts folder</span><br><span class="line">CSIDL_SHELLNEW = 21 &#x27;// ShellNew folder</span><br></pre></td></tr></table></figure>
+
+
+</blockquote>
+</blockquote>
+<h4 id="call-ds-lstrcatW"><a href="#call-ds-lstrcatW" class="headerlink" title="call    ds:lstrcatW"></a><code>call    ds:lstrcatW</code></h4><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">push    offset String2  ; &quot;\\wsample01b.exe&quot;</span><br><span class="line">lea     edx, [ebp+pszPath]</span><br><span class="line">push    edx             ; lpString1</span><br><span class="line">call    ds:lstrcatW</span><br></pre></td></tr></table></figure>
+
+<p>String2是.rdata段的常量字符串</p>
+<p>pszPath存放了刚才调用函数SHGetFolderPathW获取的文件夹目录</p>
+<p>这里相当于调用了<code>lstrcatw(&amp;pszPath,&amp;pszPath)</code>,将后者拼接到前者上,得到<code>wsample01b.exe</code>的绝对地址</p>
+<p><code>C:\ProgramData\Microsoft\Windows\Start Menu\Programs\StartUp\wsample01b.exe</code></p>
+<h4 id="call-ds-CopyFileW"><a href="#call-ds-CopyFileW" class="headerlink" title="call    ds:CopyFileW"></a><code>call    ds:CopyFileW</code></h4><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">push    0               ; bFailIfExists</span><br><span class="line">lea     eax, [ebp+pszPath]</span><br><span class="line">push    eax             ; lpNewFileName</span><br><span class="line">lea     ecx, [ebp+Filename]</span><br><span class="line">push    ecx             ; lpExistingFileName</span><br><span class="line">call    ds:CopyFileW</span><br></pre></td></tr></table></figure>
+
+<p>即调用了<code>CopyFileW(&amp;Filename,&amp;pszPath,0)</code></p>
+<blockquote>
+<p>CopyFileW函数原型</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">BOOL <span class="title function_">CopyFileW</span><span class="params">(</span></span><br><span class="line"><span class="params">  [in] LPCWSTR lpExistingFileName,</span></span><br><span class="line"><span class="params">  [in] LPCWSTR lpNewFileName,</span></span><br><span class="line"><span class="params">  [in] BOOL    bFailIfExists</span></span><br><span class="line"><span class="params">)</span>;</span><br></pre></td></tr></table></figure>
+
+<p>将一个已经存在的文件<code>lpExistingFileName</code>拷贝到一个新的位置<code>lpNewFileName</code></p>
+<p>如果<code>bFailIfExists=1</code>并且新的位置已有同名文件,则函数执行失败,返回FALSE</p>
+<p>如果<code>bFailIfExists=0</code>并且新的位置已有同名文件,则覆盖该文件</p>
+</blockquote>
+<p>综上程序干了一个将自己复制到”启动”文件夹下的工作,意图让自己每次开机自启,有了病毒的勤快但是没有病毒的毒性</p>
+<h4 id="尾声"><a href="#尾声" class="headerlink" title="尾声"></a>尾声</h4><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">mov     ecx, [ebp+var_4]</span><br><span class="line">xor     ecx, ebp        ; StackCookie</span><br><span class="line">xor     eax, eax</span><br><span class="line">call    @__security_check_cookie@4 ; __security_check_cookie(x)</span><br><span class="line">mov     esp, ebp</span><br><span class="line">pop     ebp</span><br><span class="line">retn</span><br><span class="line">sub_401000 endp</span><br></pre></td></tr></table></figure>
+
+<p>首先检查金丝雀值是否被修改,这个前面已经分析过了</p>
+<p>然后退还调用者的ebp,函数返回</p>
+<h3 id="总结程序行为"><a href="#总结程序行为" class="headerlink" title="总结程序行为"></a>总结程序行为</h3><p>首先调用sub_401000函数,该函数将<code>wsample01b.exe</code>拷贝到”启动”文件夹,然后弹窗打印”copied”</p>
+<h2 id="ollydbg动态调试wsample01b-exe"><a href="#ollydbg动态调试wsample01b-exe" class="headerlink" title="ollydbg动态调试wsample01b.exe"></a>ollydbg动态调试wsample01b.exe</h2><p>x32dbg和ollydbg就像那黑牛和白牛,就是那海尔兄弟</p>
+<h3 id="打开"><a href="#打开" class="headerlink" title="打开"></a>打开</h3><p>例程来自有趣的二进制<a target="_blank" rel="noopener" href="https://github.com/kenjiaiko/binarybook">kenjiaiko&#x2F;binarybook (github.com)</a></p>
+<p>用ollydbg打开<code>wsample01b.exe</code>,可以在ollydbg中的菜单栏中文件-&gt;打开,也可以快捷键F3打开</p>
+<p><img src="https://raw.githubusercontent.com/DeutschBall/test/master/image-20220707161255625.png" alt="image-20220707161255625"></p>
+<p>还可以使用命令行参数打开<code>PS C:\Users\86135\Desktop\bin\binarybook\chap01\wsample01b\release&gt; od wsample01b.exe</code></p>
+<blockquote>
+<p>这里我把olly dbg.exe重命名为od方便使用</p>
+<p>需要将od的根目录添加到环境变量path,才能使用终端调用od</p>
+</blockquote>
+<p><img src="https://raw.githubusercontent.com/DeutschBall/test/master/image-20220707160733203.png" alt="image-20220707160733203"></p>
+<p>在反汇编窗口第一行即<code>0x401000</code>位置已经自动有一个断点,</p>
+<p>这个位置刚才我们已经经过ida静态分析过了,是sub_401000函数的起始地址,显然这个函数是根据地址起的哑名</p>
+<p>这四个区的视图结构也是可以更改的</p>
+<p><img src="https://raw.githubusercontent.com/DeutschBall/test/master/image-20220707171515399.png" alt="image-20220707171515399"></p>
+<p>但是一般都使用默认的视图模式,这个看的习惯</p>
+<h3 id="查看快捷键"><a href="#查看快捷键" class="headerlink" title="查看快捷键"></a>查看快捷键</h3><p><img src="https://raw.githubusercontent.com/DeutschBall/test/master/image-20220707165636208.png" alt="image-20220707165636208">‘</p>
+<p><img src="https://raw.githubusercontent.com/DeutschBall/test/master/image-20220707171131310.png" alt="image-20220707171131310"></p>
+<h4 id="ctrl-G跳转"><a href="#ctrl-G跳转" class="headerlink" title="ctrl+G跳转"></a>ctrl+G跳转</h4><p>用ida静态分析时,我们知道WinMain函数的起始地址在<code>0x00401080</code></p>
+<p>可以使用ctrl+G打开跟随窗口进行跳转</p>
+<p><img src="https://raw.githubusercontent.com/DeutschBall/test/master/image-20220707161059609.png" alt="image-20220707161059609"></p>
+<p>回车之后就跳转到该位置</p>
+<p><img src="https://raw.githubusercontent.com/DeutschBall/test/master/image-20220707161215951.png" alt="image-20220707161215951"></p>
+<p>还可以跟踪一个函数,比如API函数<code>MessageBoxA</code></p>
+<p><img src="https://raw.githubusercontent.com/DeutschBall/test/master/image-20220707161728342.png" alt="image-20220707161728342"></p>
+<p>双击右侧列表中的<code>MessageBoxA</code>之后,反汇编窗口自动跳转到该<strong>函数实现</strong>的入口</p>
+<p><img src="https://raw.githubusercontent.com/DeutschBall/test/master/image-20220707161815928.png" alt="image-20220707161815928"></p>
+<p>一看地址好家伙都到<code>0x75539096</code>了,</p>
+<p>而ida静态分析时的地址最大才到<code>.data:0040338C</code>,不用ctrl+G,只拖动od反汇编窗口的滑块,也是最大可以看到401FFF,后面就一片空白了,就好像od懒得干活了一样</p>
+<p><img src="https://raw.githubusercontent.com/DeutschBall/test/master/image-20220707162547049.png" alt="image-20220707162547049"></p>
+<p><code>0x75539096</code>这个地址是啥呢?为什么会这么大?</p>
+<p>一开始我还认为这是内核的地址空间,实际上不是,这个值还是在<code> 0 - 0x7FFFFFFF</code>范围内的,是用户地址空间</p>
+<blockquote>
+<p>   地址范围 0 - 0x7FFFFFFF（2G），运行</p>
+<p>   应用程序代码、数据等等。</p>
+<p>   2.2.1 空指针区(NULL区)</p>
+<p> 地址范围 0 - 0x0000FFFF</p>
+<p>   2.2.2 用户区</p>
+<p> 地址范围 0x00010000 - 0x7FFEFFFF</p>
+<p>   2.2.3 64K禁入区</p>
+<p> 地址范围 0x7FFEFFFF - 0x7FFFFFFF</p>
+<p>2.2 内核空间</p>
+<p>   地址范围 0x80000000 - 0xFFFFFFFF，被</p>
+<p>   系统使用，运行驱动、内核的数据和代码。</p>
+</blockquote>
+<p>猜测这是DLL库,但是具体是不是,需要学习了windows上的链接阶段再说</p>
+<h4 id="alt-e查看模块"><a href="#alt-e查看模块" class="headerlink" title="alt+e查看模块"></a>alt+e查看模块</h4><p><img src="https://raw.githubusercontent.com/DeutschBall/test/master/image-20220707164553789.png" alt="image-20220707164553789"></p>
+<p>刚才的问题<code>0x75539096</code>这个地址就属于user32.dll模块</p>
+<h3 id="调试快捷键"><a href="#调试快捷键" class="headerlink" title="调试快捷键"></a>调试快捷键</h3><p><img src="https://raw.githubusercontent.com/DeutschBall/test/master/image-20220707165555280.png" alt="image-20220707165555280"></p>
+<h4 id="运行"><a href="#运行" class="headerlink" title="运行"></a><strong>运行</strong></h4><p>按下F9之后,程序会在第一个断点处停下,如果没有任何断点,程序也没有错误则程序直接执行完毕</p>
+<h4 id="步入和步过的区别"><a href="#步入和步过的区别" class="headerlink" title="步入和步过的区别:"></a><strong>步入和步过的区别:</strong></h4><p>对于函数调用,步入则反汇编窗口会跳转跟随该函数,一行一行执行.</p>
+<p>而步过则是直接让函数执行完毕,反汇编窗口不会跟随函数,但是保留函数产生的影响,比如寄存器和一些全局变量等的值变化</p>
+<h4 id="执行到返回"><a href="#执行到返回" class="headerlink" title="执行到返回:"></a><strong>执行到返回:</strong></h4><p>本来步入了一个函数,后来看烦了想跳出这个函数,就用执行到结束</p>
+<p>或者一个需要114514次的大循环,已经循环到第10次了,后面还要循环114504次,烦死了,直接执行到结束跳出循环</p>
+<p>函数中的循环则只跳出一层,再按一次执行到返回才会跳出函数</p>
+<h4 id="单步和自动的区别"><a href="#单步和自动的区别" class="headerlink" title="单步和自动的区别:"></a><strong>单步和自动的区别:</strong></h4><p>单步是拨一拨转一转,按一下F7或者F8才会执行一行,</p>
+<p>自动是按下ctrl+F7或者ctrl+F8之后,od就会像过电影一样自动呼呼地执行,反汇编窗口等四个窗口都会实时跟随更新,相当于一直按着F7或者F8</p>
+<p>啥时候自动的能停下呢?</p>
+<blockquote>
+<p>- 按 Esc 键或发出任何单步命令</p>
+<p>- OllyDbg 遇到断点</p>
+<p>- 被调试程序发生异常</p>
+</blockquote>
+<h4 id="执行到用户代码"><a href="#执行到用户代码" class="headerlink" title="执行到用户代码:"></a><strong>执行到用户代码:</strong></h4><p>如果当前正在库函数中跑,按下Alt+F9之后,od会在第一条回归到用户自己写的函数中的位置停下</p>
+<h3 id="插件"><a href="#插件" class="headerlink" title="插件"></a>插件</h3><p><img src="https://raw.githubusercontent.com/DeutschBall/test/master/image-20220707171738040.png" alt="image-20220707171738040"></p>
+<p>我这个ollydbg是从吾爱破解论坛上下载的懒人包,里面已经集成了一些插件</p>
+<h4 id="BP-OLLY"><a href="#BP-OLLY" class="headerlink" title="+BP-OLLY"></a>+BP-OLLY</h4><p><img src="https://raw.githubusercontent.com/DeutschBall/test/master/image-20220707172112679.png" alt="image-20220707172112679"></p>
+<p>这是一个小工具栏</p>
+<p><img src="https://raw.githubusercontent.com/DeutschBall/test/master/image-20220707172151132.png" alt="image-20220707172151132"></p>
+<p>我的懒人包ollydbg启动时这个插件会自启动</p>
+<p><strong>其中BP是BreakPoint断点的缩写,作用是在API函数上下断点</strong></p>
+<p><img src="https://raw.githubusercontent.com/DeutschBall/test/master/image-20220707172244773.png" alt="image-20220707172244773"></p>
+<p><strong>P是编辑命令快捷键</strong></p>
+<p><img src="https://raw.githubusercontent.com/DeutschBall/test/master/image-20220707172412802.png" alt="image-20220707172412802"></p>
+<p>比如BP MessageBoxA就相当于保存了一条命令,下一次只需要点击一下就可以自动让od执行该命令</p>
+<p>实际作用和在ollydbg的底行输入命令回车执行相同</p>
+<p><img src="https://raw.githubusercontent.com/DeutschBall/test/master/image-20220707172511015.png" alt="image-20220707172511015"></p>
+<p>这里Command还能干啥呢?现在不想炎鸠</p>
+<p><strong>VB也是在一些库函数上下断点,但是这些库函数目前没有遭遇过</strong></p>
+<p><img src="https://raw.githubusercontent.com/DeutschBall/test/master/image-20220707172623275.png" alt="image-20220707172623275"></p>
+<p>NotePad,调用windows系统自带的记事本程序</p>
+<p>Calc,调用计算器</p>
+<p>Folder,打开exployer文件系统资源管理器</p>
+<p>CMD,打开命令提示符</p>
+<p>Exit,关闭该插件</p>
+<h4 id="API断点"><a href="#API断点" class="headerlink" title="API断点"></a>API断点</h4><p><img src="https://raw.githubusercontent.com/DeutschBall/test/master/image-20220707171843420.png" alt="image-20220707171843420"></p>
+<p>这两个插件的功能差不多,都是让od自动找到我们调用API函数的地方下断点</p>
+<p>比如<img src="https://raw.githubusercontent.com/DeutschBall/test/master/image-20220707171936097.png" alt="image-20220707171936097"></p>
+<p>在GetWindowTextA处下断点,这个API的作用是获取用户在窗口中的文本框输入.</p>
+<p>一些序列号注册验证逻辑往往就发生在获取用户输入之后,让od自动停在这种地方,方便我们单步调试后面的逻辑</p>
+<h4 id="花里胡哨的插件"><a href="#花里胡哨的插件" class="headerlink" title="花里胡哨的插件"></a>花里胡哨的插件</h4><p>这些插件我都没用到过,它们描述的功能,什么”花指令”,什么”反混淆”,看上去好高深,现在不想炎鸠</p>
+<p><img src="https://raw.githubusercontent.com/DeutschBall/test/master/image-20220707172857063.png" alt="image-20220707172857063"></p>
+<h4 id="中文搜索引擎"><a href="#中文搜索引擎" class="headerlink" title="中文搜索引擎"></a>中文搜索引擎</h4><p><img src="https://raw.githubusercontent.com/DeutschBall/test/master/image-20220707172950546.png" alt="image-20220707172950546"></p>
+<p>搜索UNICODE之后的结果</p>
+<p><img src="https://raw.githubusercontent.com/DeutschBall/test/master/image-20220707173009685.png" alt="image-20220707173009685"></p>
+<p>其作用相当于二进制工具Strings</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">PS C:\Users\86135\Desktop\bin\binarybook\chap01\wsample01b\release&gt; strings wsample01b.exe -d -eb</span><br><span class="line">\wsample01b.exe</span><br><span class="line">MESSAGE</span><br><span class="line">Copied!</span><br></pre></td></tr></table></figure>
+
+<p>-d选项只扫描.data区,</p>
+<p>-e选项指定字符宽度,b或者l表示16字节即一个宽字符unicode</p>
+<h4 id="自动注释"><a href="#自动注释" class="headerlink" title="自动注释"></a>自动注释</h4><p><img src="https://raw.githubusercontent.com/DeutschBall/test/master/image-20220707173038785.png" alt="image-20220707173038785"></p>
+<p>差评,<strong>这个插件根本跑不起来</strong>,现有的注释不是插件带来的,是od自带的</p>
+<p><img src="https://raw.githubusercontent.com/DeutschBall/test/master/image-20220707173157070.png" alt="image-20220707173157070"></p>
+<p>这些注释已经足够看懂程序了</p>
+<h3 id="动态调试"><a href="#动态调试" class="headerlink" title="动态调试"></a>动态调试</h3><p>正儿八经开始调试这个wsample01b.exe</p>
+<p>由于od自动在最顶上一行0x401000下了断点,此处正好是sub_401000函数入口,直接F9运行观察该函数的行为</p>
+<p><img src="https://raw.githubusercontent.com/DeutschBall/test/master/image-20220707184836611.png" alt="image-20220707184836611"></p>
+<p>开始运行时,程序会停止在第一个断点0x401000处,当前停止位置会有灰色高亮</p>
+<p>左上角”暂停”表明当前调试器的状态</p>
+<p>寄存器区的表现为:</p>
+<p><img src="https://raw.githubusercontent.com/DeutschBall/test/master/image-20220707185010444.png" alt="image-20220707185010444"></p>
+<p>其中红色的是有变化的寄存器,刚开始执行一个程序,各个通用目的寄存器还有栈顶指针,帧指针等等都认为有变化</p>
+<p>其中</p>
+<p>eip&#x3D;0x401000表明将要执行的指令地址</p>
+<p>esp&#x3D;0x0019FEE0表明当前栈顶指针位置</p>
+<p>由于还没有经历sub_401000的开端,<strong>ebp&#x3D;0x0019FF74这个值是谁的栈帧指针呢?</strong></p>
+<p><strong>啃腚不是winmain的!啃腚不是winmain的!啃腚不是winmain的!</strong></p>
+<p>说三遍是因为一开始瞎几把分析都认为是winmain的帧指针了</p>
+<p>winmain函数满足stdcall调用约定,不会使用栈帧指针ebp,那么此ebp<strong>有可能</strong>是winmain的调用者的帧指针,也不一定,要是调用者也是stdcall,则ebp还得往前找</p>
+<p>谁调用了winmain呢?这个问题可以在ida的function calls中观察</p>
+<p><img src="https://raw.githubusercontent.com/DeutschBall/test/master/image-20220707192428834.png" alt="image-20220707192428834"></p>
+<p>也可以在目前的栈帧中观察winmain的返回地址</p>
+<p>栈帧区的表现为</p>
+<p><img src="https://raw.githubusercontent.com/DeutschBall/test/master/image-20220707185758156.png" alt="image-20220707185758156"></p>
+<p>紫色高亮是手动选中的,栈顶指针在<code>0x19FEE0</code>,会有类似反汇编区中将要执行指令的灰色高亮</p>
+<p>由于控制已经转到sub_401000的第一条指令,这表明,winmain中的<code>call sub_401000</code>已经执行过了,</p>
+<p>因此sub_401000的返回地址<code>0x401085</code>已经压入栈中<code>0x19FEE0</code>位置</p>
+<blockquote>
+<p>ida观察这件事,确实call指令下面一条指令的地址就是0x401085</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">.text:00401080                 call    sub_401000</span><br><span class="line">.text:00401085                 push    0               ; uType</span><br></pre></td></tr></table></figure>
+</blockquote>
+<p>注意到还有另一个<code>返回到 wsample0.00401255 来自 wsample0.00401080</code>,这是啥呢?</p>
+<p>这个指令地址在<code>__tmainCRTStartup</code>函数中</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">.text:00401250                 call    _wWinMain@16    ; wWinMain(x,x,x,x)</span><br><span class="line">.text:00401255                 mov     dword_403038, eax</span><br></pre></td></tr></table></figure>
+
+<p>原来是<code>winmain</code>的返回地址,同时也知道了是<code>__tmainCRTStartup</code>这个函数调用了<code>_wWinMain@16 </code></p>
+<blockquote>
+<p>至于<code>__tmainCRTStartup</code>这个函数干了啥呢?我非常好奇,但是现在不是炎鸠它的时候,后面专门炎鸠win32程序调用的全过程</p>
+</blockquote>
+<p>下面接着两条指令都是mov指令,不涉及函数调用,因此单步步入和单步步过没有区别</p>
+<p><img src="https://raw.githubusercontent.com/DeutschBall/test/master/image-20220707190703773.png" alt="image-20220707190703773"></p>
+<p><img src="https://raw.githubusercontent.com/DeutschBall/test/master/image-20220707191307452.png" alt="image-20220707191307452"></p>
+<p>这大概就是调试过程</p>
+<h3 id="调试时修改"><a href="#调试时修改" class="headerlink" title="调试时修改"></a>调试时修改</h3><h4 id="改指令"><a href="#改指令" class="headerlink" title="改指令"></a>改指令</h4><p>反汇编区,任意一行汇编指令都是可以修改的,双击即可修改</p>
+<p><img src="https://raw.githubusercontent.com/DeutschBall/test/master/image-20220707193913865.png" alt="image-20220707193913865"></p>
+<p>一定要选择使用NOP填充,因为运行时各种寻址已经确定,如果我们修改的汇编指令比原指令短,则从该指令以后的所有指令地址都会移动,各种寻址方式就寄了</p>
+<p>这里修改指令带来的影响是永久的,即直接修改了可执行文件中的二进制代码,下一次运行本程序还会带着本次的修改</p>
+<p>破解序列号注册程序时往往把jnz改成jz就可以让序列号判断寄掉</p>
+<h4 id="改寄存器"><a href="#改寄存器" class="headerlink" title="改寄存器"></a>改寄存器</h4><p>比如修改状态寄存器ZF,双击其数值就可以从0改到1或者从1改到0,后续的计算都是基于修改后的值</p>
+<p><img src="https://raw.githubusercontent.com/DeutschBall/test/master/image-20220707194243839.png" alt="image-20220707194243839"></p>
+<p>也可以修改其他寄存器,比如程序计数器esp</p>
+<p><img src="https://raw.githubusercontent.com/DeutschBall/test/master/image-20220707194718167.png" alt="image-20220707194718167"></p>
+<p>修改之后堆栈区的当前栈顶指针也会跟着改</p>
+<blockquote>
+<p>有一个寄存器没法改,那就是eip程序计数器</p>
+</blockquote>
+<p>修改寄存器造成的影响是临时的,仅限于本次程序执行,当程序重新执行时没有影响</p>
+<h4 id="改堆栈"><a href="#改堆栈" class="headerlink" title="改堆栈"></a>改堆栈</h4><p>比如可以把sub_401000的返回地址改成sub_401000的入口地址,ret2text?</p>
+<p><img src="https://raw.githubusercontent.com/DeutschBall/test/master/image-20220707195024065.png" alt="image-20220707195024065"></p>
+<p>改堆栈也是临时的</p>
+<h2 id="IDA动态调试wsample01b-exe"><a href="#IDA动态调试wsample01b-exe" class="headerlink" title="IDA动态调试wsample01b.exe"></a>IDA动态调试wsample01b.exe</h2><p><img src="https://raw.githubusercontent.com/DeutschBall/test/master/image-20220707201135306.png" alt="image-20220707201135306"></p>
+<p>首先要选择调试器</p>
+<p><img src="https://raw.githubusercontent.com/DeutschBall/test/master/image-20220707201155743.png" alt="image-20220707201155743"></p>
+<p>说是选择,然而只有一个Local Windows debugger可以用,其他的都找不到,没安装</p>
+<p>选好之后下断点</p>
+<p>比如在winmain第一行下断点</p>
+<p><img src="https://raw.githubusercontent.com/DeutschBall/test/master/image-20220707201428364.png" alt="image-20220707201428364"></p>
+<p>此后按下F9就开始动态调试了</p>
+<p><img src="https://raw.githubusercontent.com/DeutschBall/test/master/image-20220707201704143.png" alt="image-20220707201704143"></p>
+<p>各种快捷键都与ollydbg相似,包括F7单步步入,F8单步步过等等</p>
+
+    </div>
+
+    
+    
+    
+
+      <footer class="post-footer">
+          <div class="post-tags">
+              <a href="/tags/reverse/" rel="tag"># reverse</a>
+          </div>
+
+        
+
+
+        
+    <div class="post-nav">
+      <div class="post-nav-item">
+    <a href="/2022/06/23/wsl/" rel="prev" title="WSL2">
+      <i class="fa fa-chevron-left"></i> WSL2
+    </a></div>
+      <div class="post-nav-item">
+    <a href="/2022/07/14/PE%E7%A8%8B%E5%BA%8F/" rel="next" title="程序员的自我修养 chapter 5 PE/COFF">
+      程序员的自我修养 chapter 5 PE/COFF <i class="fa fa-chevron-right"></i>
+    </a></div>
+    </div>
+      </footer>
+    
+  </article>
+  
+  
+  
+
+
+
+          </div>
+          
+
+<script>
+  window.addEventListener('tabs:register', () => {
+    let { activeClass } = CONFIG.comments;
+    if (CONFIG.comments.storage) {
+      activeClass = localStorage.getItem('comments_active') || activeClass;
+    }
+    if (activeClass) {
+      let activeTab = document.querySelector(`a[href="#comment-${activeClass}"]`);
+      if (activeTab) {
+        activeTab.click();
+      }
+    }
+  });
+  if (CONFIG.comments.storage) {
+    window.addEventListener('tabs:click', event => {
+      if (!event.target.matches('.tabs-comment .tab-content .tab-pane')) return;
+      let commentClass = event.target.classList[1];
+      localStorage.setItem('comments_active', commentClass);
+    });
+  }
+</script>
+
+        </div>
+          
+  
+  <div class="toggle sidebar-toggle">
+    <span class="toggle-line toggle-line-first"></span>
+    <span class="toggle-line toggle-line-middle"></span>
+    <span class="toggle-line toggle-line-last"></span>
+  </div>
+
+  <aside class="sidebar">
+    <div class="sidebar-inner">
+
+      <ul class="sidebar-nav motion-element">
+        <li class="sidebar-nav-toc">
+          Table of Contents
+        </li>
+        <li class="sidebar-nav-overview">
+          Overview
+        </li>
+      </ul>
+
+      <!--noindex-->
+      <div class="post-toc-wrap sidebar-panel">
+          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#binarybook-chapter1-%E8%B0%83%E8%AF%95"><span class="nav-number">1.</span> <span class="nav-text">binarybook-chapter1-调试</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#%E8%B0%83%E8%AF%95%E5%8E%9F%E7%90%86"><span class="nav-number">1.1.</span> <span class="nav-text">调试原理</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#IDA-pro%E9%9D%99%E6%80%81%E8%A7%82%E5%AF%9Fwsample01b-exe"><span class="nav-number">1.2.</span> <span class="nav-text">IDA pro静态观察wsample01b.exe</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#winmain%E5%87%BD%E6%95%B0%E7%9A%84%E8%A1%8C%E4%B8%BA"><span class="nav-number">1.2.1.</span> <span class="nav-text">winmain函数的行为</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#sub-401000%E5%87%BD%E6%95%B0%E7%9A%84%E8%A1%8C%E4%B8%BA"><span class="nav-number">1.2.2.</span> <span class="nav-text">sub_401000函数的行为</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#call-alloca-probe"><span class="nav-number">1.2.2.1.</span> <span class="nav-text">call    __alloca_probe</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#mov-eax-security-cookie"><span class="nav-number">1.2.2.2.</span> <span class="nav-text">mov     eax, ___security_cookie</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#call-ds-GetModuleFileNameW"><span class="nav-number">1.2.2.3.</span> <span class="nav-text">call    ds:GetModuleFileNameW</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#call-ds-SHGetFolderPathW"><span class="nav-number">1.2.2.4.</span> <span class="nav-text">call    ds:SHGetFolderPathW</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#call-ds-lstrcatW"><span class="nav-number">1.2.2.5.</span> <span class="nav-text">call    ds:lstrcatW</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#call-ds-CopyFileW"><span class="nav-number">1.2.2.6.</span> <span class="nav-text">call    ds:CopyFileW</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E5%B0%BE%E5%A3%B0"><span class="nav-number">1.2.2.7.</span> <span class="nav-text">尾声</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%80%BB%E7%BB%93%E7%A8%8B%E5%BA%8F%E8%A1%8C%E4%B8%BA"><span class="nav-number">1.2.3.</span> <span class="nav-text">总结程序行为</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#ollydbg%E5%8A%A8%E6%80%81%E8%B0%83%E8%AF%95wsample01b-exe"><span class="nav-number">1.3.</span> <span class="nav-text">ollydbg动态调试wsample01b.exe</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%89%93%E5%BC%80"><span class="nav-number">1.3.1.</span> <span class="nav-text">打开</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%9F%A5%E7%9C%8B%E5%BF%AB%E6%8D%B7%E9%94%AE"><span class="nav-number">1.3.2.</span> <span class="nav-text">查看快捷键</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#ctrl-G%E8%B7%B3%E8%BD%AC"><span class="nav-number">1.3.2.1.</span> <span class="nav-text">ctrl+G跳转</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#alt-e%E6%9F%A5%E7%9C%8B%E6%A8%A1%E5%9D%97"><span class="nav-number">1.3.2.2.</span> <span class="nav-text">alt+e查看模块</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E8%B0%83%E8%AF%95%E5%BF%AB%E6%8D%B7%E9%94%AE"><span class="nav-number">1.3.3.</span> <span class="nav-text">调试快捷键</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#%E8%BF%90%E8%A1%8C"><span class="nav-number">1.3.3.1.</span> <span class="nav-text">运行</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E6%AD%A5%E5%85%A5%E5%92%8C%E6%AD%A5%E8%BF%87%E7%9A%84%E5%8C%BA%E5%88%AB"><span class="nav-number">1.3.3.2.</span> <span class="nav-text">步入和步过的区别:</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E6%89%A7%E8%A1%8C%E5%88%B0%E8%BF%94%E5%9B%9E"><span class="nav-number">1.3.3.3.</span> <span class="nav-text">执行到返回:</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E5%8D%95%E6%AD%A5%E5%92%8C%E8%87%AA%E5%8A%A8%E7%9A%84%E5%8C%BA%E5%88%AB"><span class="nav-number">1.3.3.4.</span> <span class="nav-text">单步和自动的区别:</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E6%89%A7%E8%A1%8C%E5%88%B0%E7%94%A8%E6%88%B7%E4%BB%A3%E7%A0%81"><span class="nav-number">1.3.3.5.</span> <span class="nav-text">执行到用户代码:</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%8F%92%E4%BB%B6"><span class="nav-number">1.3.4.</span> <span class="nav-text">插件</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#BP-OLLY"><span class="nav-number">1.3.4.1.</span> <span class="nav-text">+BP-OLLY</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#API%E6%96%AD%E7%82%B9"><span class="nav-number">1.3.4.2.</span> <span class="nav-text">API断点</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E8%8A%B1%E9%87%8C%E8%83%A1%E5%93%A8%E7%9A%84%E6%8F%92%E4%BB%B6"><span class="nav-number">1.3.4.3.</span> <span class="nav-text">花里胡哨的插件</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E4%B8%AD%E6%96%87%E6%90%9C%E7%B4%A2%E5%BC%95%E6%93%8E"><span class="nav-number">1.3.4.4.</span> <span class="nav-text">中文搜索引擎</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E8%87%AA%E5%8A%A8%E6%B3%A8%E9%87%8A"><span class="nav-number">1.3.4.5.</span> <span class="nav-text">自动注释</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%8A%A8%E6%80%81%E8%B0%83%E8%AF%95"><span class="nav-number">1.3.5.</span> <span class="nav-text">动态调试</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E8%B0%83%E8%AF%95%E6%97%B6%E4%BF%AE%E6%94%B9"><span class="nav-number">1.3.6.</span> <span class="nav-text">调试时修改</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#%E6%94%B9%E6%8C%87%E4%BB%A4"><span class="nav-number">1.3.6.1.</span> <span class="nav-text">改指令</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E6%94%B9%E5%AF%84%E5%AD%98%E5%99%A8"><span class="nav-number">1.3.6.2.</span> <span class="nav-text">改寄存器</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E6%94%B9%E5%A0%86%E6%A0%88"><span class="nav-number">1.3.6.3.</span> <span class="nav-text">改堆栈</span></a></li></ol></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#IDA%E5%8A%A8%E6%80%81%E8%B0%83%E8%AF%95wsample01b-exe"><span class="nav-number">1.4.</span> <span class="nav-text">IDA动态调试wsample01b.exe</span></a></li></ol></li></ol></div>
+      </div>
+      <!--/noindex-->
+
+      <div class="site-overview-wrap sidebar-panel">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+  <p class="site-author-name" itemprop="name">John Doe</p>
+  <div class="site-description" itemprop="description"></div>
+</div>
+<div class="site-state-wrap motion-element">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+          <a href="/archives/">
+        
+          <span class="site-state-item-count">78</span>
+          <span class="site-state-item-name">posts</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-tags">
+        <span class="site-state-item-count">30</span>
+        <span class="site-state-item-name">tags</span>
+      </div>
+  </nav>
+</div>
+
+
+
+      </div>
+
+    </div>
+  </aside>
+  <div id="sidebar-dimmer"></div>
+
+
+      </div>
+    </main>
+
+    <footer class="footer">
+      <div class="footer-inner">
+        
+
+        
+
+<div class="copyright">
+  
+  &copy; 
+  <span itemprop="copyrightYear">2024</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">John Doe</span>
+</div>
+  <div class="powered-by">Powered by <a href="https://hexo.io/" class="theme-link" rel="noopener" target="_blank">Hexo</a> & <a href="https://muse.theme-next.org/" class="theme-link" rel="noopener" target="_blank">NexT.Muse</a>
+  </div>
+
+        
+
+
+
+
+
+
+
+
+      </div>
+    </footer>
+  </div>
+
+  
+  <script src="/lib/anime.min.js"></script>
+  <script src="/lib/velocity/velocity.min.js"></script>
+  <script src="/lib/velocity/velocity.ui.min.js"></script>
+
+<script src="/js/utils.js"></script>
+
+<script src="/js/motion.js"></script>
+
+
+<script src="/js/schemes/muse.js"></script>
+
+
+<script src="/js/next-boot.js"></script>
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+  
+
+</body>
+</html>

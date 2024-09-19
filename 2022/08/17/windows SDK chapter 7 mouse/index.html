@@ -1,0 +1,1006 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 7.3.0">
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png">
+  <link rel="mask-icon" href="/images/logo.svg" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+<link rel="stylesheet" href="/lib/font-awesome/css/all.min.css">
+
+<script id="hexo-configurations">
+    var NexT = window.NexT || {};
+    var CONFIG = {"hostname":"example.com","root":"/","scheme":"Muse","version":"7.8.0","exturl":false,"sidebar":{"position":"left","display":"post","padding":18,"offset":12,"onmobile":false},"copycode":{"enable":false,"show_result":false,"style":null},"back2top":{"enable":true,"sidebar":false,"scrollpercent":false},"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":false,"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"algolia":{"hits":{"per_page":10},"labels":{"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}},"localsearch":{"enable":false,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false},"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}}};
+  </script>
+
+  <meta name="description" content="windows SDK chapter 7 mouse鼠标的基本信息是否在线1fMouse&#x3D;GetSystemMetrics(SM_MOUSEPRESENT);  如果鼠标都不在线(和鼠标共用接口的输入设备也有可能被作为鼠标),则该函数返回0. 如果至少有一个鼠标在线则函数返回非零值 单键双键1cButtons &#x3D; GetSystemMetrics(SM_CMOUSEBUTTONS);  但是在我">
+<meta property="og:type" content="article">
+<meta property="og:title" content="win32程序设计-chapter7 鼠标">
+<meta property="og:url" content="http://example.com/2022/08/17/windows%20SDK%20chapter%207%20mouse/index.html">
+<meta property="og:site_name" content="Hexo">
+<meta property="og:description" content="windows SDK chapter 7 mouse鼠标的基本信息是否在线1fMouse&#x3D;GetSystemMetrics(SM_MOUSEPRESENT);  如果鼠标都不在线(和鼠标共用接口的输入设备也有可能被作为鼠标),则该函数返回0. 如果至少有一个鼠标在线则函数返回非零值 单键双键1cButtons &#x3D; GetSystemMetrics(SM_CMOUSEBUTTONS);  但是在我">
+<meta property="og:locale" content="en_US">
+<meta property="og:image" content="https://raw.githubusercontent.com/DeutschBall/DeutschBall/main/image-20220813092214535.png">
+<meta property="og:image" content="https://raw.githubusercontent.com/DeutschBall/DeutschBall/main/image-20220813102524348.png">
+<meta property="og:image" content="https://raw.githubusercontent.com/DeutschBall/DeutschBall/main/image-20220813105023942.png">
+<meta property="og:image" content="https://raw.githubusercontent.com/DeutschBall/DeutschBall/main/image-20220813105412718.png">
+<meta property="og:image" content="https://raw.githubusercontent.com/DeutschBall/DeutschBall/main/image-20220814083834575.png">
+<meta property="og:image" content="https://raw.githubusercontent.com/DeutschBall/DeutschBall/main/image-20220814172257251.png">
+<meta property="article:published_time" content="2022-08-17T02:19:00.000Z">
+<meta property="article:modified_time" content="2022-08-18T02:19:51.497Z">
+<meta property="article:author" content="John Doe">
+<meta property="article:tag" content="windows程序设计">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://raw.githubusercontent.com/DeutschBall/DeutschBall/main/image-20220813092214535.png">
+
+<link rel="canonical" href="http://example.com/2022/08/17/windows%20SDK%20chapter%207%20mouse/">
+
+
+<script id="page-configurations">
+  // https://hexo.io/docs/variables.html
+  CONFIG.page = {
+    sidebar: "",
+    isHome : false,
+    isPost : true,
+    lang   : 'en'
+  };
+</script>
+
+  <title>win32程序设计-chapter7 鼠标 | Hexo</title>
+  
+
+
+
+
+
+
+  <noscript>
+  <style>
+  .use-motion .brand,
+  .use-motion .menu-item,
+  .sidebar-inner,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-header { opacity: initial; }
+
+  .use-motion .site-title,
+  .use-motion .site-subtitle {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line-before i { left: initial; }
+  .use-motion .logo-line-after i { right: initial; }
+  </style>
+</noscript>
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage">
+  <div class="container use-motion">
+    <div class="headband"></div>
+
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="Toggle navigation bar">
+      <span class="toggle-line toggle-line-first"></span>
+      <span class="toggle-line toggle-line-middle"></span>
+      <span class="toggle-line toggle-line-last"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <span class="logo-line-before"><i></i></span>
+      <h1 class="site-title">Hexo</h1>
+      <span class="logo-line-after"><i></i></span>
+    </a>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger">
+    </div>
+  </div>
+</div>
+
+
+
+
+<nav class="site-nav">
+  <ul id="menu" class="main-menu menu">
+        <li class="menu-item menu-item-home">
+
+    <a href="/" rel="section"><i class="fa fa-home fa-fw"></i>Home</a>
+
+  </li>
+        <li class="menu-item menu-item-archives">
+
+    <a href="/archives/" rel="section"><i class="fa fa-archive fa-fw"></i>Archives</a>
+
+  </li>
+  </ul>
+</nav>
+
+
+
+
+</div>
+    </header>
+
+    
+  <div class="back-to-top">
+    <i class="fa fa-arrow-up"></i>
+    <span>0%</span>
+  </div>
+
+
+    <main class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+
+          <div class="content post posts-expand">
+            
+
+    
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="en">
+    <link itemprop="mainEntityOfPage" href="http://example.com/2022/08/17/windows%20SDK%20chapter%207%20mouse/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.gif">
+      <meta itemprop="name" content="John Doe">
+      <meta itemprop="description" content="">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Hexo">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          win32程序设计-chapter7 鼠标
+        </h1>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-calendar"></i>
+              </span>
+              <span class="post-meta-item-text">Posted on</span>
+
+              <time title="Created: 2022-08-17 10:19:00" itemprop="dateCreated datePublished" datetime="2022-08-17T10:19:00+08:00">2022-08-17</time>
+            </span>
+              <span class="post-meta-item">
+                <span class="post-meta-item-icon">
+                  <i class="far fa-calendar-check"></i>
+                </span>
+                <span class="post-meta-item-text">Edited on</span>
+                <time title="Modified: 2022-08-18 10:19:51" itemprop="dateModified" datetime="2022-08-18T10:19:51+08:00">2022-08-18</time>
+              </span>
+
+          
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+        <h1 id="windows-SDK-chapter-7-mouse"><a href="#windows-SDK-chapter-7-mouse" class="headerlink" title="windows SDK chapter 7 mouse"></a>windows SDK chapter 7 mouse</h1><h2 id="鼠标的基本信息"><a href="#鼠标的基本信息" class="headerlink" title="鼠标的基本信息"></a>鼠标的基本信息</h2><h3 id="是否在线"><a href="#是否在线" class="headerlink" title="是否在线"></a>是否在线</h3><figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">fMouse=GetSystemMetrics(SM_MOUSEPRESENT);</span><br></pre></td></tr></table></figure>
+
+<p>如果鼠标都不在线(和鼠标共用接口的输入设备也有可能被作为鼠标),则该函数返回0.</p>
+<p>如果至少有一个鼠标在线则函数返回非零值</p>
+<h3 id="单键双键"><a href="#单键双键" class="headerlink" title="单键双键"></a>单键双键</h3><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">cButtons = GetSystemMetrics(SM_CMOUSEBUTTONS);</span><br></pre></td></tr></table></figure>
+
+<p>但是在我的笔记本电脑上,这个值是8,而我的鼠标就四个键</p>
+<p>可能是触摸板加上了两指三指四指动作,等等各种使用方法?</p>
+<h3 id="鼠标样式"><a href="#鼠标样式" class="headerlink" title="鼠标样式"></a>鼠标样式</h3><p>鼠标样式最常见的就是斜向箭头,当程序忙的时候可能变成沙漏或者左箭头右沙漏</p>
+<p>当绘图的时候鼠标可能会变成十字</p>
+<p>实际上这个图标就是一个小的位图结构,点击鼠标时有效的位置只有一个像素点,叫做”焦点”</p>
+<p>斜向箭头的焦点在顶点上.十字的焦点在十字路口</p>
+<p>设置鼠标样式</p>
+<p>在实例化窗口对象的时候就指定过一次鼠标样式了</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">wndclass.hCursor  = LoadCursor(<span class="literal">NULL</span>, IDC_ARROW);</span><br></pre></td></tr></table></figure>
+
+<p>IDC_ARROW就是最常见的斜向箭头样式</p>
+<table>
+<thead>
+<tr>
+<th align="left">Value</th>
+<th align="left">Meaning</th>
+</tr>
+</thead>
+<tbody><tr>
+<td align="left"><strong>IDC_APPSTARTING</strong>MAKEINTRESOURCE(32650)</td>
+<td align="left">Standard arrow and small hourglass</td>
+</tr>
+<tr>
+<td align="left"><strong>IDC_ARROW</strong>MAKEINTRESOURCE(32512)</td>
+<td align="left">Standard arrow</td>
+</tr>
+<tr>
+<td align="left"><strong>IDC_CROSS</strong>MAKEINTRESOURCE(32515)</td>
+<td align="left">Crosshair</td>
+</tr>
+<tr>
+<td align="left"><strong>IDC_HAND</strong>MAKEINTRESOURCE(32649)</td>
+<td align="left">Hand</td>
+</tr>
+<tr>
+<td align="left"><strong>IDC_HELP</strong>MAKEINTRESOURCE(32651)</td>
+<td align="left">Arrow and question mark</td>
+</tr>
+<tr>
+<td align="left"><strong>IDC_IBEAM</strong>MAKEINTRESOURCE(32513)</td>
+<td align="left">I-beam</td>
+</tr>
+<tr>
+<td align="left"><strong>IDC_ICON</strong>MAKEINTRESOURCE(32641)</td>
+<td align="left">Obsolete for applications marked version 4.0 or later.</td>
+</tr>
+<tr>
+<td align="left"><strong>IDC_NO</strong>MAKEINTRESOURCE(32648)</td>
+<td align="left">Slashed circle</td>
+</tr>
+<tr>
+<td align="left"><strong>IDC_SIZE</strong>MAKEINTRESOURCE(32640)</td>
+<td align="left">Obsolete for applications marked version 4.0 or later. Use <strong>IDC_SIZEALL</strong>.</td>
+</tr>
+<tr>
+<td align="left"><strong>IDC_SIZEALL</strong>MAKEINTRESOURCE(32646)</td>
+<td align="left">Four-pointed arrow pointing north, south, east, and west</td>
+</tr>
+<tr>
+<td align="left"><strong>IDC_SIZENESW</strong>MAKEINTRESOURCE(32643)</td>
+<td align="left">Double-pointed arrow pointing northeast and southwest</td>
+</tr>
+<tr>
+<td align="left"><strong>IDC_SIZENS</strong>MAKEINTRESOURCE(32645)</td>
+<td align="left">Double-pointed arrow pointing north and south</td>
+</tr>
+<tr>
+<td align="left"><strong>IDC_SIZENWSE</strong>MAKEINTRESOURCE(32642)</td>
+<td align="left">Double-pointed arrow pointing northwest and southeast</td>
+</tr>
+<tr>
+<td align="left"><strong>IDC_SIZEWE</strong>MAKEINTRESOURCE(32644)</td>
+<td align="left">Double-pointed arrow pointing west and east</td>
+</tr>
+<tr>
+<td align="left"><strong>IDC_UPARROW</strong>MAKEINTRESOURCE(32516)</td>
+<td align="left">Vertical arrow</td>
+</tr>
+<tr>
+<td align="left"><strong>IDC_WAIT</strong>MAKEINTRESOURCE(32514)</td>
+<td align="left">Hourglass</td>
+</tr>
+</tbody></table>
+<p>然而在我的win11笔记本上,除了斜向箭头和转圈,其他鼠标样式都加载不出来,或者都加载成转圈或者斜向箭头</p>
+<h2 id="客户区鼠标消息"><a href="#客户区鼠标消息" class="headerlink" title="客户区鼠标消息"></a>客户区鼠标消息</h2><p>windows只把键盘消息发往具有输入焦点的窗口,但是鼠标不同</p>
+<p>只要鼠标经过某个窗口,windows就会对齐发送一个WM_MOUSEMOVE的消息</p>
+<p><img src="https://raw.githubusercontent.com/DeutschBall/DeutschBall/main/image-20220813092214535.png" alt="image-20220813092214535"></p>
+<p>其中双击信息许哟啊在创建窗口实例的时候指明风格使用</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">wndclass.style=CS_DBLCLKS | ...</span><br></pre></td></tr></table></figure>
+
+<p>带有CS_DBLCLKS风格的窗口才可以接收WM_LBUTTONDBLCLK这种双击消息</p>
+<p>对于鼠标消息(hwnd,message,wParam,lParam)</p>
+<h3 id="lParam"><a href="#lParam" class="headerlink" title="lParam"></a>lParam</h3><p>包含鼠标的位置信息,低字表示x坐标,高字表示y坐标</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">x=LOWORD(lParam);</span><br><span class="line">y=HIWORD(lParam);</span><br></pre></td></tr></table></figure>
+
+<h3 id="wParam"><a href="#wParam" class="headerlink" title="wParam"></a>wParam</h3><h3 id="包含了鼠标哪个键-还有此时Ctrl和Shift的状态"><a href="#包含了鼠标哪个键-还有此时Ctrl和Shift的状态" class="headerlink" title="包含了鼠标哪个键,还有此时Ctrl和Shift的状态."></a>包含了鼠标哪个键,还有此时Ctrl和Shift的状态.</h3><p>令wParam和宏定义按位与即可测试相应状态</p>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#<span class="keyword">ifndef</span> NOKEYSTATES</span></span><br><span class="line"><span class="meta">#<span class="keyword">define</span> MK_LBUTTON 0x0001</span></span><br><span class="line"><span class="meta">#<span class="keyword">define</span> MK_RBUTTON 0x0002</span></span><br><span class="line"><span class="meta">#<span class="keyword">define</span> MK_SHIFT 0x0004</span></span><br><span class="line"><span class="meta">#<span class="keyword">define</span> MK_CONTROL 0x0008</span></span><br><span class="line"><span class="meta">#<span class="keyword">define</span> MK_MBUTTON 0x0010</span></span><br><span class="line"><span class="meta">#<span class="keyword">define</span> MK_XBUTTON1 0x0020</span></span><br><span class="line"><span class="meta">#<span class="keyword">define</span> MK_XBUTTON2 0x0040</span></span><br><span class="line"><span class="meta">#<span class="keyword">endif</span></span></span><br></pre></td></tr></table></figure>
+
+
+
+<h2 id="MOUSEMOVE的速度"><a href="#MOUSEMOVE的速度" class="headerlink" title="MOUSEMOVE的速度"></a>MOUSEMOVE的速度</h2><p>windows不会给鼠标经过的每个像素点都产生一个WM_MOUSEMOVE消息,这取决于应用程序处理WM_MOUSEMOVE的速度,当应用程序的消息队列中还有WM_MOUSEMOVE的消息时就不能接收第二个WM_MOUSEMOVE消息</p>
+<p>书上在此给出了一个例子.</p>
+<p>凡是WM_MOUSEMOVE捕获的点都会被计入点集,点集中任意两个点连一条线</p>
+<p>分析一下其过程函数WndProc</p>
+<h3 id="变量定义"><a href="#变量定义" class="headerlink" title="变量定义"></a>变量定义</h3><figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="type">static</span> POINT pt[MAXPOINTS];<span class="comment">//存储已经捕获的点集</span></span><br><span class="line"><span class="type">static</span> <span class="type">int</span> iCount;<span class="comment">//记录已经捕获的点数量</span></span><br><span class="line">HDC hdc;<span class="comment">//设备环境句柄</span></span><br><span class="line"><span class="type">int</span> i, j;<span class="comment">//循环变量</span></span><br><span class="line">PAINTSTRUCT ps;<span class="comment">//绘图结构</span></span><br></pre></td></tr></table></figure>
+
+<h3 id="鼠标信息处理"><a href="#鼠标信息处理" class="headerlink" title="鼠标信息处理"></a>鼠标信息处理</h3><figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">case</span> WM_LBUTTONDOWN:</span><br><span class="line">	iCount = <span class="number">0</span>;<span class="comment">//左键按下时清零重新记录</span></span><br><span class="line">	InvalidateRect(hwnd, <span class="literal">NULL</span>, TRUE);<span class="comment">//清零后重绘</span></span><br><span class="line">	<span class="keyword">return</span> <span class="number">0</span>;</span><br><span class="line"></span><br><span class="line"><span class="keyword">case</span> WM_MOUSEMOVE:</span><br><span class="line">	<span class="keyword">if</span> (wParam &amp; MK_LBUTTON &amp;&amp; iCount &lt; MAXPOINTS)<span class="comment">//如果是左键按下的移动状态并且目前点集未满则捕获新点</span></span><br><span class="line">	&#123;</span><br><span class="line">		pt[iCount].x = LOWORD(lParam);<span class="comment">//捕获新点</span></span><br><span class="line">		pt[iCount++].y = HIWORD(lParam);</span><br><span class="line"></span><br><span class="line">		hdc = GetDC(hwnd);</span><br><span class="line">		SetPixel(hdc, LOWORD(lParam), HIWORD(lParam), <span class="number">0</span>);<span class="comment">//将该新点的位置打印成一个黑点</span></span><br><span class="line">		ReleaseDC(hwnd, hdc);</span><br><span class="line">	&#125;</span><br><span class="line">	<span class="keyword">return</span> <span class="number">0</span>;</span><br><span class="line"></span><br><span class="line"><span class="keyword">case</span> WM_LBUTTONUP:</span><br><span class="line">	InvalidateRect(hwnd, <span class="literal">NULL</span>, FALSE);<span class="comment">//左键松开,立刻通知处理WM_PAINT函数,重绘点集</span></span><br><span class="line">	<span class="keyword">return</span> <span class="number">0</span>;</span><br></pre></td></tr></table></figure>
+
+<h3 id="绘图消息"><a href="#绘图消息" class="headerlink" title="绘图消息"></a>绘图消息</h3><figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">case</span> WM_PAINT:</span><br><span class="line">	hdc = BeginPaint(hwnd, &amp;ps);</span><br><span class="line"></span><br><span class="line">	SetCursor(LoadCursor(<span class="literal">NULL</span>, IDC_WAIT));<span class="comment">//由于绘图可能时间较长,因此此时将光标样式换成等待</span></span><br><span class="line">	ShowCursor(TRUE);<span class="comment">//显示光标</span></span><br><span class="line"></span><br><span class="line">	<span class="keyword">for</span> (i = <span class="number">0</span>; i &lt; iCount - <span class="number">1</span>; i++)<span class="comment">//每两个点之间握手一次</span></span><br><span class="line">		<span class="keyword">for</span> (j = i + <span class="number">1</span>; j &lt; iCount; j++)</span><br><span class="line">		&#123;</span><br><span class="line">			MoveToEx(hdc, pt[i].x, pt[i].y, <span class="literal">NULL</span>);<span class="comment">//从pt[i]到pt[j]连线</span></span><br><span class="line">			LineTo(hdc, pt[j].x, pt[j].y);</span><br><span class="line">		&#125;</span><br><span class="line">	ShowCursor(FALSE);</span><br><span class="line">	SetCursor(LoadCursor(<span class="literal">NULL</span>, IDC_ARROW));<span class="comment">//绘图完毕,光标从忙状态换成指针状态</span></span><br><span class="line">	EndPaint(hwnd, &amp;ps);</span><br><span class="line">	<span class="keyword">return</span> <span class="number">0</span>;</span><br></pre></td></tr></table></figure>
+
+
+
+<h3 id="窗口销毁消息"><a href="#窗口销毁消息" class="headerlink" title="窗口销毁消息"></a>窗口销毁消息</h3><figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">case</span> WM_DESTROY:</span><br><span class="line">	PostQuitMessage(<span class="number">0</span>);</span><br><span class="line">	<span class="keyword">return</span> <span class="number">0</span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+
+
+<h3 id="效果"><a href="#效果" class="headerlink" title="效果"></a>效果</h3><p><img src="https://raw.githubusercontent.com/DeutschBall/DeutschBall/main/image-20220813102524348.png" alt="左鼠标移速快,右鼠标移速慢"></p>
+<h2 id="双击"><a href="#双击" class="headerlink" title="双击"></a>双击</h2><p>只有创建窗口实例时,风格上允许双击的窗口才可以接受双击信息</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">wndclass.style = CS_HREDRAW | CS_VREDRAW | CS_DBLCLKS;</span><br></pre></td></tr></table></figure>
+
+<blockquote>
+<p>对于没有双击风格的窗口,双击动作造成的消息:</p>
+<p>WM_LBUTTONDOWN 左键第一次按下</p>
+<p> WM_LBUTTONUP 左键第一次起来</p>
+<p> WM_LBUTTONDOWN 左键第二次按下</p>
+<p> WM_LBUTTONUP  左键起来</p>
+<p>对于有双击风格的窗口,双击造成的信息:</p>
+<p> WM_LBUTTONDOWN </p>
+<p> WM_LBUTTONUP </p>
+<p> WM_LBUTTONDBLCLK 第二次按下被替换为WM_LBUTTONDBLCLK</p>
+<p> WM_LBUTTONUP </p>
+</blockquote>
+<h2 id="非客户区鼠标消息"><a href="#非客户区鼠标消息" class="headerlink" title="非客户区鼠标消息"></a>非客户区鼠标消息</h2><p><img src="https://raw.githubusercontent.com/DeutschBall/DeutschBall/main/image-20220813105023942.png" alt="image-20220813105023942"></p>
+<p>非客户区的消息在WM_前缀之后又加了一个NC前缀(not client)</p>
+<h3 id="参数意义"><a href="#参数意义" class="headerlink" title="参数意义"></a>参数意义</h3><h4 id="lParam-1"><a href="#lParam-1" class="headerlink" title="lParam"></a>lParam</h4><p>低字为x坐标,高字为y坐标,此处的坐标是相对于整个屏幕的坐标</p>
+<p>而客户区的鼠标信息中lParam携带的坐标是相对于客户区左上角的坐标</p>
+<p><img src="https://raw.githubusercontent.com/DeutschBall/DeutschBall/main/image-20220813105412718.png" alt="image-20220813105412718"></p>
+<p>屏幕坐标和客户区坐标的互换:</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">BOOL <span class="title function_">ScreenToClient</span><span class="params">(</span></span><br><span class="line"><span class="params">  [in] HWND    hWnd,</span></span><br><span class="line"><span class="params">       LPPOINT lpPoint</span></span><br><span class="line"><span class="params">)</span>;</span><br><span class="line">BOOL <span class="title function_">ClientToScreen</span><span class="params">(</span></span><br><span class="line"><span class="params">  [in]      HWND    hWnd,</span></span><br><span class="line"><span class="params">  [in, out] LPPOINT lpPoint</span></span><br><span class="line"><span class="params">)</span>;</span><br></pre></td></tr></table></figure>
+
+<blockquote>
+<p>白刀子进,红刀子出</p>
+</blockquote>
+<p>使用pt带着原坐标进去,带着转换坐标出来</p>
+<h4 id="wParam-1"><a href="#wParam-1" class="headerlink" title="wParam"></a>wParam</h4><p>非客户区鼠标移动或者单击的位置(不是坐标),一个标识符</p>
+<h2 id="击中测试"><a href="#击中测试" class="headerlink" title="击中测试"></a>击中测试</h2><h3 id="WM-NCHITTEST"><a href="#WM-NCHITTEST" class="headerlink" title="WM_NCHITTEST"></a>WM_NCHITTEST</h3><p>关于鼠标的最后一个消息类型</p>
+<p>这个消息优先级高于所有客户区和非客户区的鼠标消息</p>
+<h4 id="lParam-2"><a href="#lParam-2" class="headerlink" title="lParam"></a>lParam</h4><p>鼠标位置的屏幕坐标</p>
+<h4 id="wParam-2"><a href="#wParam-2" class="headerlink" title="wParam"></a>wParam</h4><p>没有用到</p>
+<p>这条消息应该被直接传递给DefWindowProc,操作系统负责将屏幕坐标翻译为客户区坐标之后,产生一个客户区鼠标消息发送给应用程序</p>
+<p>那么如果捕获该消息并且不让他传递给DefWindowProc,就阻断了所有鼠标消息.所有本窗口的鼠标动作将失效</p>
+<h3 id="什么是击中测试"><a href="#什么是击中测试" class="headerlink" title="什么是击中测试"></a>什么是击中测试</h3><p>在文件浏览器中双击某个文件时,文件浏览器会进入该目录或者打开该文件.</p>
+<p>可是文件浏览器是怎么知道应该打开哪个文件的呢?</p>
+<p>他需要获取鼠标位置然后判断这个位置落在哪里</p>
+<p><img src="https://raw.githubusercontent.com/DeutschBall/DeutschBall/main/image-20220814083834575.png" alt="image-20220814083834575"></p>
+<p>考虑实现一个简单的文件浏览器,以列表形式列出当前目录下的所有文件和子文件夹</p>
+<p>每个文件占一行,放不下就用滚动条</p>
+<p>客户区的点击动作就需要将纵坐标换算为行数,再根据卷动情况判断是指向的哪一行</p>
+<p>根据确定的行号作为下标查文件名表,查到之后打开该文件,如果是文件夹则打开该文件夹</p>
+<h3 id="击中测试例程"><a href="#击中测试例程" class="headerlink" title="击中测试例程"></a>击中测试例程</h3><p>书上在此给出了一个击中测试的例程,分析其过程函数WndProc</p>
+<h4 id="变量定义-1"><a href="#变量定义-1" class="headerlink" title="变量定义"></a>变量定义</h4><figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#<span class="keyword">define</span> DIVISIONS 5<span class="comment">//整个客户区分成5*5=25个矩形区域</span></span></span><br><span class="line">...</span><br><span class="line">	<span class="type">static</span> BOOL fState[DIVISIONS][DIVISIONS];<span class="comment">//状态数组,fState[x][y]记录第x行低y列的格子状态</span></span><br><span class="line">    <span class="type">static</span> <span class="type">int</span> cxBlock, cyBlock;<span class="comment">//一个格子的宽度和高度</span></span><br><span class="line">    HDC hdc;</span><br><span class="line">    <span class="type">int</span> x, y;<span class="comment">//临时变量,作为下标遍历每个格子</span></span><br><span class="line">    PAINTSTRUCT ps;</span><br></pre></td></tr></table></figure>
+
+
+
+<h4 id="尺寸变化消息"><a href="#尺寸变化消息" class="headerlink" title="尺寸变化消息"></a>尺寸变化消息</h4><figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">case</span> WM_SIZE:</span><br><span class="line">    cxBlock = LOWORD(lParam) / DIVISIONS;<span class="comment">//lParam携带的是当前客户区大小,cxBlocks计算的是平均每个矩形的宽度</span></span><br><span class="line">    cyBlock = HIWORD(lParam) / DIVISIONS;<span class="comment">//平均每个矩形的高度</span></span><br><span class="line">    <span class="keyword">return</span> <span class="number">0</span>;</span><br></pre></td></tr></table></figure>
+
+<p>尽量用整个客户区打印所有方格</p>
+<h4 id="左键单击消息"><a href="#左键单击消息" class="headerlink" title="左键单击消息"></a>左键单击消息</h4><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br></pre></td><td class="code"><pre><span class="line">case WM_LBUTTONDOWN:</span><br><span class="line">    x = LOWORD(lParam) / cxBlock;//鼠标的横坐标落在哪一列</span><br><span class="line">    y = HIWORD(lParam) / cyBlock;//鼠标的纵坐标落在哪一行</span><br><span class="line">    if (x &lt; DIVISIONS &amp;&amp; y &lt; DIVISIONS) &#123;//x,y都在合法范围之内</span><br><span class="line">        fState[x][y] ^= 1;//修改fState[x][y]的状态,1变0,0变1</span><br><span class="line">        rect.left = x * cxBlock;</span><br><span class="line">        rect.top = y * cyBlock;</span><br><span class="line">        rect.right = (x + 1) * cxBlock;</span><br><span class="line">        rect.bottom = (y + 1) * cyBlock;</span><br><span class="line">        //InvalidateRect(hwnd, &amp;rect, TRUE);//rect对应区域失效</span><br><span class="line">        InvalidateRect(hwnd, NULL, TRUE);//全区域失效重绘</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    else &#123;</span><br><span class="line">        MessageBeep(0);</span><br><span class="line">    &#125;</span><br><span class="line">    return 0;</span><br></pre></td></tr></table></figure>
+
+<h4 id="绘图消息-1"><a href="#绘图消息-1" class="headerlink" title="绘图消息"></a>绘图消息</h4><figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">case</span> WM_PAINT:</span><br><span class="line">    hdc = BeginPaint(hwnd, &amp;ps);</span><br><span class="line">    <span class="comment">//HBRUSH hBrushBlack=(HBRUSH)</span></span><br><span class="line">    <span class="keyword">for</span> (x = <span class="number">0</span>; x &lt; DIVISIONS; ++x) &#123;<span class="comment">//遍历每个矩形区域</span></span><br><span class="line">        <span class="keyword">for</span> (y = <span class="number">0</span>; y &lt; DIVISIONS; ++y) &#123;</span><br><span class="line">            <span class="keyword">if</span> (fState[x][y]) &#123;<span class="comment">//1则表示这个格子是按下的状态,刷成灰色</span></span><br><span class="line">                SelectObject(hdc, (HBRUSH)GetStockObject(LTGRAY_BRUSH));</span><br><span class="line">            &#125;</span><br><span class="line">            <span class="keyword">else</span> &#123;<span class="comment">//0则表示这个格子没有按下,刷成白色</span></span><br><span class="line">                SelectObject(hdc, (HBRUSH)GetStockObject(WHITE_BRUSH));</span><br><span class="line">            &#125;</span><br><span class="line">            Rectangle(hdc, x * cxBlock, y * cyBlock, (x + <span class="number">1</span>) * cxBlock, (y + <span class="number">1</span>) * cyBlock);<span class="comment">//每个区域绘制矩形</span></span><br><span class="line"></span><br><span class="line">        &#125;</span><br><span class="line"></span><br><span class="line">    &#125;</span><br><span class="line">    EndPaint(hwnd, &amp;ps);</span><br><span class="line">    <span class="keyword">return</span> <span class="number">0</span>;</span><br></pre></td></tr></table></figure>
+
+<h2 id="键盘模仿鼠标"><a href="#键盘模仿鼠标" class="headerlink" title="键盘模仿鼠标"></a>键盘模仿鼠标</h2><p>使用方向键移动鼠标光标.使用Enter确认按下</p>
+<p>这样即使计算机没有连接鼠标也能使用键盘模拟鼠标动作</p>
+<p>比如windows桌面上如果有一个图标是高亮的,那么右方向键会使同行右侧的图标高亮,可以用隐藏光标,然后捕获位置进行击中测试,决定高亮哪个图标.</p>
+<h3 id="显示计数"><a href="#显示计数" class="headerlink" title="显示计数"></a>显示计数</h3><p>书上扯了大半天,实际上就说了一个有用的东西</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="type">int</span> <span class="title function_">ShowCursor</span><span class="params">(</span></span><br><span class="line"><span class="params">  [in] BOOL bShow</span></span><br><span class="line"><span class="params">)</span>;</span><br></pre></td></tr></table></figure>
+
+<p>当bShow为False则不显示鼠标光标</p>
+<p>当bShow为True则显示鼠标光标</p>
+<h3 id="指针位置"><a href="#指针位置" class="headerlink" title="指针位置"></a>指针位置</h3><p>不管有没有接鼠标,鼠标指针都是存在的,一般开机时位于屏幕正中间.即使不使用鼠标移动指针位置,也可以使用键盘做到</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">BOOL <span class="title function_">GetCursorPos</span><span class="params">(</span></span><br><span class="line"><span class="params">  [out] LPPOINT lpPoint<span class="comment">//lpPoint承接返回值,指针位置的坐标结构体</span></span></span><br><span class="line"><span class="params">)</span>;</span><br><span class="line">BOOL <span class="title function_">SetCursorPos</span><span class="params">(</span></span><br><span class="line"><span class="params">  [in] <span class="type">int</span> X,<span class="comment">//设置指针位置(X,Y)</span></span></span><br><span class="line"><span class="params">  [in] <span class="type">int</span> Y</span></span><br><span class="line"><span class="params">)</span>;</span><br></pre></td></tr></table></figure>
+
+<p>两个函数中涉及到的坐标都是屏幕坐标,如果需要客户区坐标,可以使用坐标转换函数</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">BOOL <span class="title function_">ScreenToClient</span><span class="params">(</span></span><br><span class="line"><span class="params">  [in] HWND    hWnd,</span></span><br><span class="line"><span class="params">       LPPOINT lpPoint</span></span><br><span class="line"><span class="params">)</span>;</span><br><span class="line">BOOL <span class="title function_">ClientToScreen</span><span class="params">(</span></span><br><span class="line"><span class="params">  [in]      HWND    hWnd,</span></span><br><span class="line"><span class="params">  [in, out] LPPOINT lpPoint</span></span><br><span class="line"><span class="params">)</span>;</span><br></pre></td></tr></table></figure>
+
+
+
+<p>使用GetCursorPos并且用ScreenToClient转换得到的指针位置和鼠标消息中的指针位置不同</p>
+<p>前者是啥时候调用函数啥时候取得指针位置,后者指针位置是产生该条消息时指针的位置</p>
+<h3 id="击中测试-1"><a href="#击中测试-1" class="headerlink" title="击中测试"></a>击中测试</h3><h4 id="变量定义-2"><a href="#变量定义-2" class="headerlink" title="变量定义"></a>变量定义</h4><figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#<span class="keyword">define</span> DIVISIONS 5<span class="comment">//客户区划分为5*5=25个区域</span></span></span><br><span class="line">...</span><br><span class="line">	<span class="type">static</span> <span class="type">int</span> fState[DIVISIONS][DIVISIONS];<span class="comment">//记录每个格子的状态</span></span><br><span class="line">    <span class="type">static</span> <span class="type">int</span> cxBlock, cyBlock;<span class="comment">//每个格子的宽度和高度</span></span><br><span class="line">    HDC hdc;</span><br><span class="line">    <span class="type">int</span> x, y;<span class="comment">//临时变量,用来遍历fState</span></span><br><span class="line">    PAINTSTRUCT ps;<span class="comment">//BeginPaint和EndPaint需要使用</span></span><br><span class="line">    POINT point;记录鼠标位置</span><br><span class="line"></span><br></pre></td></tr></table></figure>
+
+<h4 id="窗口焦点信息"><a href="#窗口焦点信息" class="headerlink" title="窗口焦点信息"></a>窗口焦点信息</h4><figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">case</span> WM_SETFOCUS:<span class="comment">//获得焦点</span></span><br><span class="line">    ShowCursor(TRUE);</span><br><span class="line">    <span class="keyword">return</span> <span class="number">0</span>;</span><br><span class="line"><span class="keyword">case</span> WM_KILLFOCUS:<span class="comment">//失去焦点</span></span><br><span class="line">    ShowCursor(FALSE);</span><br><span class="line">    <span class="keyword">return</span> <span class="number">0</span>;</span><br></pre></td></tr></table></figure>
+
+<p>当窗口获得焦点的时候显示光标,失去焦点的时候隐藏光标</p>
+<h4 id="尺寸调整信息"><a href="#尺寸调整信息" class="headerlink" title="尺寸调整信息"></a>尺寸调整信息</h4><figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">case</span> WM_SIZE:<span class="comment">//客户区重新计算块大小</span></span><br><span class="line">    cxBlock = LOWORD(lParam) / DIVISIONS;</span><br><span class="line">    cyBlock = HIWORD(lParam) / DIVISIONS;</span><br><span class="line">    <span class="keyword">return</span> <span class="number">0</span>;</span><br></pre></td></tr></table></figure>
+
+<p>当客户区尺寸发生变化的时候调整区块的大小</p>
+<p>使得5*5个区块尽量占满整个客户区</p>
+<h4 id="虚拟键信息"><a href="#虚拟键信息" class="headerlink" title="虚拟键信息"></a>虚拟键信息</h4><figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">case</span> WM_KEYDOWN:<span class="comment">//虚拟键按下</span></span><br><span class="line">    GetCursorPos(&amp;point);<span class="comment">//获取当前鼠标位置</span></span><br><span class="line">    ScreenToClient(hWnd, &amp;point);<span class="comment">//转换屏幕坐标为客户区坐标</span></span><br><span class="line">    x = max(<span class="number">0</span>, min(DIVISIONS - <span class="number">1</span>, point.x / cxBlock));<span class="comment">//计算当前光标所在行</span></span><br><span class="line">    y = max(<span class="number">0</span>, min(DIVISIONS - <span class="number">1</span>, point.y / cyBlock));<span class="comment">//计算当前光标所在列</span></span><br><span class="line">    <span class="keyword">switch</span> (wParam) &#123;</span><br><span class="line">    <span class="keyword">case</span> VK_UP:<span class="comment">//方向键上键</span></span><br><span class="line">        --y;<span class="comment">//y的单位是列,上键按下之后纵坐标应该上移一个格子的高度</span></span><br><span class="line">        <span class="keyword">break</span>;</span><br><span class="line">    <span class="keyword">case</span> VK_DOWN:</span><br><span class="line">        ++y;</span><br><span class="line">        <span class="keyword">break</span>;</span><br><span class="line">    <span class="keyword">case</span> VK_LEFT:</span><br><span class="line">        --x;</span><br><span class="line">        <span class="keyword">break</span>;</span><br><span class="line">    <span class="keyword">case</span> VK_HOME:<span class="comment">//Home键,光标回到左上角</span></span><br><span class="line">        x = y = <span class="number">0</span>;</span><br><span class="line">        <span class="keyword">break</span>;</span><br><span class="line">    <span class="keyword">case</span> VK_RIGHT:</span><br><span class="line">        ++x;</span><br><span class="line">        <span class="keyword">break</span>;</span><br><span class="line">    <span class="keyword">case</span> VK_END:</span><br><span class="line">        x = y = DIVISIONS - <span class="number">1</span>;<span class="comment">//End键,光标跳到右下格</span></span><br><span class="line">        <span class="keyword">break</span>;</span><br><span class="line">    <span class="keyword">case</span> VK_RETURN:<span class="comment">//回车和空格的作用相同,都相当于在当前格的左上角按下鼠标左键</span></span><br><span class="line">    <span class="keyword">case</span> VK_SPACE:</span><br><span class="line">        SendMessage(hWnd, WM_LBUTTONDOWN, MK_LBUTTON, MAKELONG(x * cxBlock, y * cyBlock));<span class="comment">//通知</span></span><br><span class="line">        <span class="keyword">break</span>;</span><br><span class="line">    &#125;</span><br><span class="line">    x = (x + DIVISIONS) % DIVISIONS;<span class="comment">//计算当前指向方格</span></span><br><span class="line">    y = (y + DIVISIONS) % DIVISIONS;</span><br><span class="line">    point.x = x * cxBlock + cxBlock / <span class="number">2</span>;<span class="comment">//光标放在这个格的正中间位置</span></span><br><span class="line">    point.y = y * cyBlock + cyBlock / <span class="number">2</span>;</span><br><span class="line">    ClientToScreen(hWnd, &amp;point);<span class="comment">//转换坐标</span></span><br><span class="line">    SetCursorPos(point.x, point.y);<span class="comment">//设置新光标位置</span></span><br><span class="line">    <span class="keyword">return</span> <span class="number">0</span>;</span><br></pre></td></tr></table></figure>
+
+
+
+<h2 id="使用子窗口"><a href="#使用子窗口" class="headerlink" title="使用子窗口"></a>使用子窗口</h2><p>每个子窗口都有自己的句柄,客户区,窗口过程函数.</p>
+<p>多个子窗口将整个客户区划分成几个小的矩形区域</p>
+<p>对于子窗口的鼠标消息,lParam参数包含相对于该子窗口左上角的坐标</p>
+<p>本来我们的程序中使用了一个<code>fState[DIVISIONS][DIVISIONS]</code>二维数组保存每个区块的状态,整个程序就一个窗口过程,它遍历打印每个窗口的状态.</p>
+<p>现在使用子窗口,使得每个区块成为一个子窗口,每个子窗口自己处理发生在自己身上的鼠标键盘动作</p>
+<h3 id="注册父窗口类"><a href="#注册父窗口类" class="headerlink" title="注册父窗口类"></a>注册父窗口类</h3><figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br></pre></td><td class="code"><pre><span class="line"><span class="type">static</span> TCHAR szAppName[] = TEXT(<span class="string">&quot;Checker4&quot;</span>);<span class="comment">//将要作为父窗口类名</span></span><br><span class="line">HWND hwnd;</span><br><span class="line">MSG msg;</span><br><span class="line">WNDCLASS wndclass;</span><br><span class="line"></span><br><span class="line">wndclass.style = CS_HREDRAW | CS_VREDRAW;<span class="comment">//填写父窗口类信息</span></span><br><span class="line">wndclass.lpfnWndProc = WndProc;</span><br><span class="line">wndclass.cbClsExtra = <span class="number">0</span>;</span><br><span class="line">wndclass.cbWndExtra = <span class="number">0</span>;</span><br><span class="line">wndclass.hInstance = hInstance;</span><br><span class="line">wndclass.hIcon = LoadIcon(<span class="literal">NULL</span>,</span><br><span class="line">	IDI_APPLICATION);</span><br><span class="line">wndclass.hCursor = LoadCursor(<span class="literal">NULL</span>,</span><br><span class="line">	IDC_ARROW);</span><br><span class="line">wndclass.hbrBackground = (HBRUSH)GetStockObject(WHITE_BRUSH);</span><br><span class="line">wndclass.lpszMenuName = <span class="literal">NULL</span>;</span><br><span class="line">wndclass.lpszClassName = szAppName;</span><br><span class="line"></span><br><span class="line"><span class="keyword">if</span> (!RegisterClass(&amp;wndclass))<span class="comment">//注册父窗口类</span></span><br><span class="line">&#123;</span><br><span class="line">	MessageBox(<span class="literal">NULL</span>, TEXT(<span class="string">&quot;Program requires Windows NT!&quot;</span>),</span><br><span class="line">		szAppName,</span><br><span class="line">		MB_ICONERROR);</span><br><span class="line">	<span class="keyword">return</span> <span class="number">0</span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+
+
+<h3 id="注册子窗口类"><a href="#注册子窗口类" class="headerlink" title="注册子窗口类"></a>注册子窗口类</h3><figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">wndclass.lpfnWndProc = ChildWndProc;<span class="comment">//修改一下wndclass的部分信息,填写子窗口类信息</span></span><br><span class="line">wndclass.cbWndExtra = <span class="keyword">sizeof</span>(<span class="type">long</span>);</span><br><span class="line">wndclass.hIcon = <span class="literal">NULL</span>;</span><br><span class="line">wndclass.lpszClassName = szChildClass;<span class="comment">//此处绑定了szChildClass字符串作为子窗口类的索引值</span></span><br><span class="line"></span><br><span class="line">RegisterClass(&amp;wndclass);<span class="comment">//注册子窗口类</span></span><br></pre></td></tr></table></figure>
+
+<p>此处注册子窗口类,但是并不在winmain函数中创建实例,而是当父窗口起来之后,在其WM_CREATE消息处理中创建25个szChildClass指向的子窗口实例</p>
+<h3 id="创建父窗口实例-显示父窗口消息循环"><a href="#创建父窗口实例-显示父窗口消息循环" class="headerlink" title="创建父窗口实例,显示父窗口消息循环"></a>创建父窗口实例,显示父窗口消息循环</h3><figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line">hwnd = CreateWindow(szAppName, TEXT(<span class="string">&quot;Checker4 Mouse Hit-Test Demo&quot;</span>),</span><br><span class="line">	WS_OVERLAPPEDWINDOW,</span><br><span class="line">	CW_USEDEFAULT, CW_USEDEFAULT,</span><br><span class="line">	CW_USEDEFAULT, CW_USEDEFAULT,</span><br><span class="line">	<span class="literal">NULL</span>, <span class="literal">NULL</span>, hInstance, <span class="literal">NULL</span>);</span><br><span class="line">ShowWindow(hwnd, iCmdShow);</span><br><span class="line">UpdateWindow(hwnd);</span><br><span class="line"></span><br><span class="line"><span class="keyword">while</span> (GetMessage(&amp;msg, <span class="literal">NULL</span>, <span class="number">0</span>, <span class="number">0</span>))</span><br><span class="line">&#123;</span><br><span class="line">	TranslateMessage(&amp;msg);</span><br><span class="line">	DispatchMessage(&amp;msg);</span><br><span class="line">&#125;</span><br><span class="line"><span class="keyword">return</span> msg.wParam;</span><br></pre></td></tr></table></figure>
+
+
+
+
+
+
+
+
+
+<h3 id="父窗口过程WndProc"><a href="#父窗口过程WndProc" class="headerlink" title="父窗口过程WndProc"></a>父窗口过程WndProc</h3><h4 id="变量定义-3"><a href="#变量定义-3" class="headerlink" title="变量定义"></a>变量定义</h4><figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="type">static</span> HWND hwndChild[DIVISIONS][DIVISIONS];<span class="comment">//子窗口句柄数组,hwndChild[x][y]为第x行第y列子窗口的句柄</span></span><br><span class="line"><span class="type">int</span> cxBlock, cyBlock, x, y;<span class="comment">//cxBlock每个子窗口的尺寸,x遍历子窗口数组使用的下标</span></span><br></pre></td></tr></table></figure>
+
+<blockquote>
+<p>区分HWND句柄和HINSTANCE句柄</p>
+<p>整个win32程序只有一个引用程序句柄HINSTANCE,</p>
+<p>着一个程序可以有很多个窗口,每个窗口都有一个独一无二的窗口句柄HWND</p>
+</blockquote>
+<h4 id="窗口创建消息"><a href="#窗口创建消息" class="headerlink" title="窗口创建消息"></a>窗口创建消息</h4><figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">case</span> WM_CREATE:<span class="comment">//主窗口创建消息,此时为创建子窗口的最佳时机</span></span><br><span class="line">	<span class="keyword">for</span> (x = <span class="number">0</span>; x &lt; DIVISIONS; x++)<span class="comment">//遍历创建每一个子窗口</span></span><br><span class="line">		<span class="keyword">for</span> (y = <span class="number">0</span>; y &lt; DIVISIONS; y++)</span><br><span class="line">			hwndChild[x][y] = </span><br><span class="line">			CreateWindow(</span><br><span class="line">				szChildClass, <span class="comment">//子窗口名</span></span><br><span class="line">				<span class="literal">NULL</span>,<span class="comment">//子窗口标题为空</span></span><br><span class="line">				WS_CHILDWINDOW | WS_VISIBLE,<span class="comment">//子窗口风格</span></span><br><span class="line">				<span class="number">0</span>, <span class="number">0</span>, <span class="number">0</span>, <span class="number">0</span>,<span class="comment">//子窗口坐标(相对于父窗口客户区左上角),初始位置</span></span><br><span class="line">				hwnd, <span class="comment">//父窗口句柄</span></span><br><span class="line">				(HMENU)(y &lt;&lt; <span class="number">8</span> | x),<span class="comment">//子窗口的菜单句柄,作用是给父窗口提供索引,在GetDlgItem 获取子窗口句柄时有重要作用</span></span><br><span class="line">				(HINSTANCE) GetWindowLong(hwnd, GWL_HINSTANCE),<span class="comment">//从windows那里获取一个应用此程序实例句柄</span></span><br><span class="line">				<span class="literal">NULL</span><span class="comment">//通过WM_CREATE的lParam参数传递给子窗口的值的指针</span></span><br><span class="line">			);</span><br><span class="line"><span class="keyword">return</span> <span class="number">0</span>;</span><br></pre></td></tr></table></figure>
+
+<h5 id="CreateWindow"><a href="#CreateWindow" class="headerlink" title="CreateWindow"></a>CreateWindow</h5><p>创建父窗口实例时也使用了该函数,返回值是一个窗口实例的句柄</p>
+<blockquote>
+<p>创建并显示窗口三个过程:</p>
+<p>RegisterClass注册窗口类,该窗口类的类名作为句柄</p>
+<p>CreateWindow创建窗口实例,可以使用刚才的窗口类名填充窗口的基本信息</p>
+<p>ShowWindow显示窗口类</p>
+</blockquote>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line">HWND <span class="title function_">CreateWindowA</span><span class="params">(</span></span><br><span class="line"><span class="params">  [in, optional]  lpClassName,<span class="comment">//子窗口使用的类名</span></span></span><br><span class="line"><span class="params">  [in, optional]  lpWindowName,<span class="comment">//子窗口名</span></span></span><br><span class="line"><span class="params">  [in]            dwStyle,<span class="comment">//子窗口风格</span></span></span><br><span class="line"><span class="params">  [in]            x,<span class="comment">//子窗口位置(相对于父窗口的客户区)</span></span></span><br><span class="line"><span class="params">  [in]            y,</span></span><br><span class="line"><span class="params">  [in]            nWidth,<span class="comment">//子窗口的尺寸</span></span></span><br><span class="line"><span class="params">  [in]            nHeight,</span></span><br><span class="line"><span class="params">  [in, optional]  hWndParent,<span class="comment">//父窗口的句柄</span></span></span><br><span class="line"><span class="params">  [in, optional]  hMenu,<span class="comment">//子窗口标识符</span></span></span><br><span class="line"><span class="params">  [in, optional]  hInstance,<span class="comment">//程序实例的句柄</span></span></span><br><span class="line"><span class="params">  [in, optional]  lpParam<span class="comment">//父窗口要传递给子窗口WM_CREATE消息,lParam参数的信息</span></span></span><br><span class="line"><span class="params">)</span>;</span><br></pre></td></tr></table></figure>
+
+
+
+
+
+<h4 id="调整尺寸消息"><a href="#调整尺寸消息" class="headerlink" title="调整尺寸消息"></a>调整尺寸消息</h4><figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">case</span> WM_SIZE:</span><br><span class="line">	cxBlock = LOWORD(lParam) / DIVISIONS;<span class="comment">//重新计算区块大小</span></span><br><span class="line">	cyBlock = HIWORD(lParam) / DIVISIONS;</span><br><span class="line"></span><br><span class="line">	<span class="keyword">for</span> (x = <span class="number">0</span>; x &lt; DIVISIONS; x++)</span><br><span class="line">		<span class="keyword">for</span> (y = <span class="number">0</span>; y &lt; DIVISIONS; y++)</span><br><span class="line">			MoveWindow(hwndChild[x][y],<span class="comment">//调整子窗口的位置和大小</span></span><br><span class="line">				x * cxBlock, y * cyBlock,</span><br><span class="line">				cxBlock, cyBlock, TRUE);<span class="comment">//大小是cxBlock宽,cyBlock高</span></span><br><span class="line">	<span class="keyword">return</span> <span class="number">0</span>;</span><br><span class="line"></span><br></pre></td></tr></table></figure>
+
+<h5 id="MoveWindow"><a href="#MoveWindow" class="headerlink" title="MoveWindow"></a>MoveWindow</h5><p>对于子窗口来说,该函数中指定的坐标都是相对于父窗口客户区左上角的</p>
+<p>对于非子窗口来说,该函数中的坐标是屏幕坐标</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">BOOL <span class="title function_">MoveWindow</span><span class="params">(</span></span><br><span class="line"><span class="params">  [in] HWND hWnd,<span class="comment">//需要移动位置的窗口句柄,一般用于父窗口过程移动子窗口</span></span></span><br><span class="line"><span class="params">  [in] <span class="type">int</span>  X,</span></span><br><span class="line"><span class="params">  [in] <span class="type">int</span>  Y,</span></span><br><span class="line"><span class="params">  [in] <span class="type">int</span>  nWidth,<span class="comment">//移动顺便设置尺寸</span></span></span><br><span class="line"><span class="params">  [in] <span class="type">int</span>  nHeight,</span></span><br><span class="line"><span class="params">  [in] BOOL bRepaint<span class="comment">//是否重绘,TRUE则hWnd指向的窗口收到WM_PAINT消息</span></span></span><br><span class="line"><span class="params">)</span>;</span><br></pre></td></tr></table></figure>
+
+
+
+<h4 id="左键按下消息"><a href="#左键按下消息" class="headerlink" title="左键按下消息"></a>左键按下消息</h4><figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">case</span> WM_LBUTTONDOWN:</span><br><span class="line">	MessageBeep(<span class="number">0</span>);</span><br><span class="line">	<span class="keyword">return</span> <span class="number">0</span>;</span><br></pre></td></tr></table></figure>
+
+<p>理论上25个子窗口尽量铺满父窗口的客户区,但是父窗口客户区的最右边和最下边可能有留白,因此当鼠标点击到这些地方的时候父窗口就会接到WM_LBUTTONDOWN消息</p>
+<p>父窗口对这种消息的处理是发出一条蜂鸣声实际上是一个wav波形文件,还有一些系统定义好了的蜂鸣声,作用不大不展开了</p>
+<h4 id="获得焦点消息"><a href="#获得焦点消息" class="headerlink" title="获得焦点消息"></a>获得焦点消息</h4><figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">case</span> WM_SETFOCUS:<span class="comment">//父窗口获取焦点之后通知它上次获得焦点的子窗口继续获得焦点</span></span><br><span class="line">	SetFocus(GetDlgItem(hwnd, idFocus));<span class="comment">//通知哪一个子窗口获得焦点,全局变量idFocus在WM_KEYDOWN被设置</span></span><br><span class="line">	<span class="keyword">return</span> <span class="number">0</span>;</span><br></pre></td></tr></table></figure>
+
+<p>父窗口获得焦点之后,应该把最后一次获得焦点的子窗口作为焦点窗口</p>
+<p>但是处理本消息时并没有体现获得idFocus,原因是该全局变量idFocus在WM_KEYDOWN中更新,显然没有按下键盘,通过鼠标点选也可以获得焦点,获得焦点的时候就需要指定让子窗口获得焦点</p>
+<p>而现在父窗口掌握着25个子窗口句柄,应该怎么把焦点交给其中之一的子窗口呢?</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">HWND <span class="title function_">GetDlgItem</span><span class="params">(</span></span><br><span class="line"><span class="params">  [in, optional] HWND hDlg,<span class="comment">//父窗口句柄</span></span></span><br><span class="line"><span class="params">  [in]           <span class="type">int</span>  nIDDlgItem<span class="comment">//子窗口的索引值</span></span></span><br><span class="line"><span class="params">)</span>;</span><br></pre></td></tr></table></figure>
+
+<p>这个函数的作用是,返回父窗口的一个子窗口的句柄</p>
+<p>这里nIDDlgItem这个值是父窗口注册子窗口是在CreateWindow函数的hMenu上指定的,其中第x行第y列的子窗口是这样索引的</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">(HMENU)(y &lt;&lt; <span class="number">8</span> | x)</span><br></pre></td></tr></table></figure>
+
+<p>既然要获取子窗口的句柄,父窗口不是实例化子窗口时就维护了一个子窗口句柄数组吗?</p>
+<p>为啥还要额外维护一个值托管这个句柄呢?</p>
+<p>只有一个子窗口句柄数组不能知道最近获得焦点的子窗口是谁,因此idFocus就起到了一个寄存器的作用</p>
+<h4 id="虚拟键消息"><a href="#虚拟键消息" class="headerlink" title="虚拟键消息"></a>虚拟键消息</h4><figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">case</span> WM_KEYDOWN:</span><br><span class="line">	x = idFocus &amp; <span class="number">0xFF</span>;<span class="comment">//x保存原来的焦点位置(子窗口下标)</span></span><br><span class="line">	y = idFocus &gt;&gt; <span class="number">8</span>;<span class="comment">//y保存原来的焦点位置</span></span><br><span class="line">	<span class="keyword">switch</span> (wParam)</span><br><span class="line">	&#123;</span><br><span class="line">	<span class="keyword">case</span> VK_UP: </span><br><span class="line">		y--;<span class="comment">//焦点上移</span></span><br><span class="line">		<span class="keyword">break</span>;</span><br><span class="line">	<span class="keyword">case</span> VK_DOWN: </span><br><span class="line">		y++;</span><br><span class="line">		<span class="keyword">break</span>;</span><br><span class="line">	<span class="keyword">case</span> VK_LEFT: </span><br><span class="line">		x--;</span><br><span class="line">		<span class="keyword">break</span>;</span><br><span class="line">	<span class="keyword">case</span> VK_RIGHT: </span><br><span class="line">		x++; </span><br><span class="line">		<span class="keyword">break</span>;</span><br><span class="line">	<span class="keyword">case</span> VK_HOME: </span><br><span class="line">		x = y = <span class="number">0</span>; </span><br><span class="line">		<span class="keyword">break</span>;</span><br><span class="line">	<span class="keyword">case</span> VK_END: </span><br><span class="line">		x = y = DIVISIONS - <span class="number">1</span>; </span><br><span class="line">		<span class="keyword">break</span>;</span><br><span class="line">       x = (x + DIVISIONS) % DIVISIONS;</span><br><span class="line">	y = (y + DIVISIONS) % DIVISIONS;</span><br><span class="line">	idFocus = y &lt;&lt; <span class="number">8</span> | x;<span class="comment">//调整新焦点</span></span><br><span class="line">	SetFocus(GetDlgItem(hwnd, idFocus));<span class="comment">//设置新焦点</span></span><br><span class="line">	<span class="keyword">return</span> <span class="number">0</span>;</span><br></pre></td></tr></table></figure>
+
+<p>这里计算x,y坐标的方式根HMENU参数的定义方式相反,互为逆运算</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">		x = idFocus &amp; <span class="number">0xFF</span>;<span class="comment">//x保存原来的焦点位置</span></span><br><span class="line">		y = idFocus &gt;&gt; <span class="number">8</span>;<span class="comment">//y保存原来的焦点位置</span></span><br><span class="line">...</span><br><span class="line">    </span><br><span class="line">    	idFocus = y &lt;&lt; <span class="number">8</span> | x;<span class="comment">//调整新焦点</span></span><br></pre></td></tr></table></figure>
+
+<p><code>WM_KEYDOWN</code>消息执行完毕后立刻设置当前子窗口为焦点窗口</p>
+<h4 id="窗口销毁消息-1"><a href="#窗口销毁消息-1" class="headerlink" title="窗口销毁消息"></a>窗口销毁消息</h4><figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">case</span> WM_DESTROY:</span><br><span class="line">	PostQuitMessage(<span class="number">0</span>);</span><br><span class="line">	<span class="keyword">return</span> <span class="number">0</span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+
+
+<h3 id="子窗口过程ChildWndProc"><a href="#子窗口过程ChildWndProc" class="headerlink" title="子窗口过程ChildWndProc"></a>子窗口过程ChildWndProc</h3><h4 id="子窗口创建消息"><a href="#子窗口创建消息" class="headerlink" title="子窗口创建消息"></a>子窗口创建消息</h4><figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">case</span> WM_CREATE:</span><br><span class="line">	SetWindowLong(hwnd, <span class="number">0</span>, <span class="number">0</span>); <span class="comment">// on/off flag ,刚创建时本窗口的开关状态置0</span></span><br><span class="line">	<span class="keyword">return</span> <span class="number">0</span>;</span><br></pre></td></tr></table></figure>
+
+<p>修改窗口的一个属性</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">LONG <span class="title function_">SetWindowLongA</span><span class="params">(</span></span><br><span class="line"><span class="params">  [in] HWND hWnd,<span class="comment">//窗口句柄</span></span></span><br><span class="line"><span class="params">  [in] <span class="type">int</span>  nIndex,<span class="comment">//指定要修改的窗口属性</span></span></span><br><span class="line"><span class="params">  [in] LONG dwNewLong<span class="comment">//该窗口属性的新值</span></span></span><br><span class="line"><span class="params">)</span>;</span><br></pre></td></tr></table></figure>
+
+<p>例子中修改的是下标为0的属性,对应的宏定义是DWL_MSGRESULT(0)</p>
+<p>设置对话框过程的返回值,设置成了0.</p>
+<p>实际上子窗口也不需要把这个值返回给父窗口看,它自己就可以决定把自己绘制成什么颜色</p>
+<p>因此只是借用了一个线程的窗口属性来放置自己应该是按下还是起来的状态</p>
+<h4 id="子窗口键鼠消息"><a href="#子窗口键鼠消息" class="headerlink" title="子窗口键鼠消息"></a>子窗口键鼠消息</h4><p>由于父窗口中会主动将焦点下放到子窗口,因此焦点子窗口可获取键鼠的输入.</p>
+<p>父窗口只能等子窗口吃完了然后吃剩下的</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">case</span> WM_KEYDOWN:</span><br><span class="line">	<span class="comment">// Send most key presses to the parent window </span></span><br><span class="line"></span><br><span class="line">	<span class="keyword">if</span> (wParam != VK_RETURN &amp;&amp; wParam != VK_SPACE)<span class="comment">//子窗口只负责拦截并处理空格回车消息,其他键盘消息丢给父窗口</span></span><br><span class="line">	&#123;</span><br><span class="line">		SendMessage(GetParent(hwnd), message, wParam, lParam);<span class="comment">//其他键盘消息传递给父窗口</span></span><br><span class="line">		<span class="keyword">return</span> <span class="number">0</span>;</span><br><span class="line">	&#125;</span><br><span class="line">	<span class="comment">// For Return and Space, fall through to toggle the square</span></span><br><span class="line">	<span class="comment">//如果是空格和回车则相当于鼠标左键按下,一起处理</span></span><br><span class="line"><span class="keyword">case</span> WM_LBUTTONDOWN:<span class="comment">//左键单击按下</span></span><br><span class="line">	SetWindowLong(hwnd, <span class="number">0</span>, <span class="number">1</span> ^ GetWindowLong(hwnd, <span class="number">0</span>));<span class="comment">//子窗口开关状态置反</span></span><br><span class="line">	SetFocus(hwnd);<span class="comment">//本子窗口获取焦点</span></span><br><span class="line">	InvalidateRect(hwnd, <span class="literal">NULL</span>, FALSE);<span class="comment">//立刻重绘</span></span><br><span class="line">	<span class="keyword">return</span> <span class="number">0</span>;</span><br><span class="line">	<span class="comment">// For focus messages, invalidate the window for repaint </span></span><br><span class="line"></span><br></pre></td></tr></table></figure>
+
+<p>这里子窗口就处理里两个虚拟键消息,空格和回车,其他的消息通过</p>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="built_in">SendMessage</span>(<span class="built_in">GetParent</span>(hwnd), message, wParam, lParam);</span><br></pre></td></tr></table></figure>
+
+<p>转发给父窗口</p>
+<p>空格,回车,左键单击一视同仁,首先本子窗口的属性置反</p>
+<p>然后设置本窗口为焦点窗口</p>
+<p>然后使窗口无效,导致重绘</p>
+<h4 id="子窗口获取-失去焦点消息"><a href="#子窗口获取-失去焦点消息" class="headerlink" title="子窗口获取&#x2F;失去焦点消息"></a>子窗口获取&#x2F;失去焦点消息</h4><figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">case</span> WM_SETFOCUS:</span><br><span class="line">	idFocus = GetWindowLong(hwnd, GWL_ID);</span><br><span class="line">	<span class="comment">// Fall through </span></span><br><span class="line"><span class="keyword">case</span> WM_KILLFOCUS:</span><br><span class="line">	InvalidateRect(hwnd, <span class="literal">NULL</span>, TRUE);<span class="comment">//失效重绘,因为子窗口获得焦点的时候会有绘制方框提示,因此失去焦点时应当不再提示</span></span><br><span class="line">	<span class="keyword">return</span> <span class="number">0</span>;</span><br><span class="line"></span><br></pre></td></tr></table></figure>
+
+<h5 id="GetWindowLong-获取窗口属性"><a href="#GetWindowLong-获取窗口属性" class="headerlink" title="GetWindowLong 获取窗口属性"></a>GetWindowLong 获取窗口属性</h5><p>由于窗口属性都是LONG类型的值,因此该函数取名”GetWindowLong”</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">LONG <span class="title function_">GetWindowLongA</span><span class="params">(</span></span><br><span class="line"><span class="params">  [in] HWND hWnd,<span class="comment">//指定要获取信息的窗口句柄</span></span></span><br><span class="line"><span class="params">  [in] <span class="type">int</span>  nIndex<span class="comment">//指定要获取该窗口的哪个属性</span></span></span><br><span class="line"><span class="params">)</span>;</span><br></pre></td></tr></table></figure>
+
+<blockquote>
+<table>
+<thead>
+<tr>
+<th align="left">Value</th>
+<th align="left">Meaning</th>
+</tr>
+</thead>
+<tbody><tr>
+<td align="left"><strong>GWL_EXSTYLE</strong>-20</td>
+<td align="left">获取窗口实例的拓展风格,即CreateWindow函数指定的dwExStyle</td>
+</tr>
+<tr>
+<td align="left"><strong>GWL_HINSTANCE</strong>-6</td>
+<td align="left">获取应用程序句柄</td>
+</tr>
+<tr>
+<td align="left"><strong>GWL_HWNDPARENT</strong>-8</td>
+<td align="left">获取父窗口句柄</td>
+</tr>
+<tr>
+<td align="left"><strong>GWL_ID</strong>-12</td>
+<td align="left">获取本窗口的索引值,即CreateWindow函数指定的HMENU值</td>
+</tr>
+<tr>
+<td align="left"><strong>GWL_STYLE</strong>-16</td>
+<td align="left">获取窗口实例的风格,这个风格就是CreateWindow指定的dwStyle</td>
+</tr>
+<tr>
+<td align="left"><strong>GWL_USERDATA</strong>-21</td>
+<td align="left">Retrieves the user data associated with the window. This data is intended for use by the application that created the window. Its value is initially zero.</td>
+</tr>
+<tr>
+<td align="left"><strong>GWL_WNDPROC</strong>-4</td>
+<td align="left">Retrieves the address of the window procedure, or a handle representing the address of the window procedure. You must use the <a target="_blank" rel="noopener" href="https://docs.microsoft.com/en-us/windows/desktop/api/winuser/nf-winuser-callwindowproca">CallWindowProc</a> function to call the window procedure.</td>
+</tr>
+</tbody></table>
+<p>The following values are also available when the <em>hWnd</em> parameter identifies a dialog box.</p>
+<table>
+<thead>
+<tr>
+<th align="left">Value</th>
+<th align="left">Meaning</th>
+</tr>
+</thead>
+<tbody><tr>
+<td align="left"><strong>DWL_DLGPROC</strong>DWLP_MSGRESULT + sizeof(LRESULT)</td>
+<td align="left">Retrieves the address of the dialog box procedure, or a handle representing the address of the dialog box procedure. You must use the <a target="_blank" rel="noopener" href="https://docs.microsoft.com/en-us/windows/desktop/api/winuser/nf-winuser-callwindowproca">CallWindowProc</a> function to call the dialog box procedure.</td>
+</tr>
+<tr>
+<td align="left"><strong>DWL_MSGRESULT</strong>0</td>
+<td align="left">Retrieves the return value of a message processed in the dialog box procedure.</td>
+</tr>
+<tr>
+<td align="left"><strong>DWL_USER</strong>DWLP_DLGPROC + sizeof(DLGPROC)</td>
+<td align="left">Retrieves extra information private to the application, such as handles or pointers.</td>
+</tr>
+</tbody></table>
+</blockquote>
+<p>例子中获取的是子窗口的HMENU索引值</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">idFocus = GetWindowLong(hwnd, GWL_ID);</span><br></pre></td></tr></table></figure>
+
+<p>这句的意思就是子窗口将idFocus当前焦点窗口寄存器设置为子窗口自己</p>
+<p>当子窗口失去焦点的时候需要通知失效重绘,其原因是WM_PAINT中获得焦点的子窗口会多绘制一些提示信息,那么当它失去焦点的时候就得擦除提示信息了</p>
+<p><img src="https://raw.githubusercontent.com/DeutschBall/DeutschBall/main/image-20220814172257251.png" alt="image-20220814172257251"></p>
+<h4 id="子窗口绘图消息"><a href="#子窗口绘图消息" class="headerlink" title="子窗口绘图消息"></a>子窗口绘图消息</h4><figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">case</span> WM_PAINT:</span><br><span class="line">	hdc = BeginPaint(hwnd, &amp;ps);</span><br><span class="line"></span><br><span class="line">	GetClientRect(hwnd, &amp;rect);</span><br><span class="line">	Rectangle(hdc, <span class="number">0</span>, <span class="number">0</span>, rect.right, rect.bottom);<span class="comment">//绘制边框</span></span><br><span class="line">	<span class="comment">// Draw the &quot;x&quot; mark</span></span><br><span class="line">	<span class="keyword">if</span> (GetWindowLong(hwnd, <span class="number">0</span>))<span class="comment">//通过0号属性观察本窗口应该是按下还是起来的状态,</span></span><br><span class="line">	&#123;<span class="comment">//如果应该按下则本子窗口画出对角线</span></span><br><span class="line">		MoveToEx(hdc, <span class="number">0</span>, <span class="number">0</span>, <span class="literal">NULL</span>);</span><br><span class="line">		LineTo(hdc, rect.right, rect.bottom);</span><br><span class="line">		MoveToEx(hdc, <span class="number">0</span>, rect.bottom, <span class="literal">NULL</span>);</span><br><span class="line">		LineTo(hdc, rect.right, <span class="number">0</span>);</span><br><span class="line">	&#125;</span><br><span class="line">	<span class="comment">// Draw the &quot;focus&quot; rectangle </span></span><br><span class="line"></span><br><span class="line">	<span class="keyword">if</span> (hwnd == GetFocus())<span class="comment">//如果当前子窗口正在获得焦点,那么额外画出提示信息</span></span><br><span class="line">	&#123;</span><br><span class="line">		rect.left += rect.right / <span class="number">10</span>;<span class="comment">//设置内方框信息</span></span><br><span class="line">		rect.right -= rect.left;</span><br><span class="line">		rect.top += rect.bottom / <span class="number">10</span>;</span><br><span class="line">		rect.bottom -= rect.top;</span><br><span class="line">		SelectObject(hdc, GetStockObject(NULL_BRUSH));<span class="comment">//不使用画刷</span></span><br><span class="line">		SelectObject(hdc, CreatePen(PS_DASH, <span class="number">0</span>, <span class="number">0</span>));<span class="comment">//画笔改成虚线模式</span></span><br><span class="line">		Rectangle(hdc, rect.left, rect.top, rect.right,rect.bottom);</span><br><span class="line">		DeleteObject(SelectObject(hdc, GetStockObject(BLACK_PEN)));<span class="comment">//删除刚才创建的逻辑画笔实例</span></span><br><span class="line">	&#125;</span><br><span class="line">	EndPaint(hwnd, &amp;ps);</span><br><span class="line">	<span class="keyword">return</span> <span class="number">0</span>;</span><br></pre></td></tr></table></figure>
+
+
+
+
+
+<h2 id="捕获鼠标"><a href="#捕获鼠标" class="headerlink" title="捕获鼠标"></a>捕获鼠标</h2><p>书上举了一个例子,一个绘图程序,假如要绘制一个矩形,鼠标左键按下之后确定矩形一个点,不松开拖着鼠标移动则实时绘制矩形边框,(好像这个边框叫做橡皮线)</p>
+<p>当鼠标左键松开时确定整个矩形,此时填充矩形表明完成绘制</p>
+<h3 id="例程"><a href="#例程" class="headerlink" title="例程"></a>例程</h3><h4 id="绘制边框橡皮线函数"><a href="#绘制边框橡皮线函数" class="headerlink" title="绘制边框橡皮线函数"></a>绘制边框橡皮线函数</h4><figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line"><span class="type">void</span> <span class="title function_">DrawBoxOutline</span><span class="params">(HWND hwnd, POINT ptBeg, POINT ptEnd)</span><span class="comment">//正常情况下客户区内松开左键时调用,填充矩形</span></span><br><span class="line">&#123;</span><br><span class="line">	HDC hdc;</span><br><span class="line">	hdc = GetDC(hwnd);</span><br><span class="line">	SetROP2(hdc, R2_NOT);<span class="comment">//该函数的作用是,只要是绘图,当前背景色取反,原来是白板,取反得黑,交替使用绘图函数会呈现一白一黑</span></span><br><span class="line">	SelectObject(hdc, GetStockObject(NULL_BRUSH));<span class="comment">//设置画笔无色,用ROP2反色下一次画出黑色</span></span><br><span class="line">	Rectangle(hdc, ptBeg.x, ptBeg.y, ptEnd.x, ptEnd.y);</span><br><span class="line">	ReleaseDC(hwnd, hdc);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>ptBeg和ptEnd都是相对于hwnd的客户区而言的,意思是在hwnd中绘制一个左上角ptBeg到右下角的ptEnd矩形边框</p>
+<h4 id="SetROP2"><a href="#SetROP2" class="headerlink" title="SetROP2"></a>SetROP2</h4><figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="type">int</span> <span class="title function_">SetROP2</span><span class="params">(</span></span><br><span class="line"><span class="params">  [in] HDC hdc,</span></span><br><span class="line"><span class="params">  [in] <span class="type">int</span> rop2<span class="comment">//样式</span></span></span><br><span class="line"><span class="params">)</span>;</span><br></pre></td></tr></table></figure>
+
+<blockquote>
+<p>The <strong>SetROP2</strong> function sets the current foreground mix mode. GDI uses the foreground mix mode to combine pens and interiors of filled objects with the colors already on the screen. The foreground mix mode defines how colors from the brush or pen and the colors in the existing image are to be combined.</p>
+</blockquote>
+<p>SetROP2函数设置当前前景的混合模式.</p>
+<p>GDI使用前景混合模式,作用是将画笔画刷的行为和先前已有的颜色结合起来.也就是说本次绘画会影响之前的绘画,rop2参数指定怎么个影响方法,是将像素点的颜色异或还是按位与还是直接擦除先前颜色等等</p>
+<blockquote>
+<p>前景和背景是相反的,背景在正文图层的下面,前景在正文图层的上面</p>
+</blockquote>
+<p>rop2的可选值:</p>
+<table>
+<thead>
+<tr>
+<th align="left">Mix mode</th>
+<th align="left">Meaning</th>
+</tr>
+</thead>
+<tbody><tr>
+<td align="left"><strong>R2_BLACK</strong></td>
+<td align="left">直接画黑,不考虑很多,不使用画笔颜色,相当于设置了一个寂寞</td>
+</tr>
+<tr>
+<td align="left"><strong>R2_COPYPEN</strong></td>
+<td align="left">继续使用画笔颜色,相当于设置了一个寂寞</td>
+</tr>
+<tr>
+<td align="left"><strong>R2_MASKNOTPEN</strong></td>
+<td align="left">原屏幕颜色和画笔反色的结合</td>
+</tr>
+<tr>
+<td align="left"><strong>R2_MASKPEN</strong></td>
+<td align="left">Pixel is a combination of the colors common to both the pen and the screen.</td>
+</tr>
+<tr>
+<td align="left"><strong>R2_MASKPENNOT</strong></td>
+<td align="left">Pixel is a combination of the colors common to both the pen and the inverse of the screen.</td>
+</tr>
+<tr>
+<td align="left"><strong>R2_MERGENOTPEN</strong></td>
+<td align="left">Pixel is a combination of the screen color and the inverse of the pen color.</td>
+</tr>
+<tr>
+<td align="left"><strong>R2_MERGEPEN</strong></td>
+<td align="left">Pixel is a combination of the pen color and the screen color.</td>
+</tr>
+<tr>
+<td align="left"><strong>R2_MERGEPENNOT</strong></td>
+<td align="left">Pixel is a combination of the pen color and the inverse of the screen color.</td>
+</tr>
+<tr>
+<td align="left"><strong>R2_NOP</strong></td>
+<td align="left">啥也不改变,更是个寂寞</td>
+</tr>
+<tr>
+<td align="left"><strong>R2_NOT</strong></td>
+<td align="left">和原屏幕颜色相反</td>
+</tr>
+<tr>
+<td align="left"><strong>R2_NOTCOPYPEN</strong></td>
+<td align="left">笔的反色</td>
+</tr>
+<tr>
+<td align="left"><strong>R2_NOTMASKPEN</strong></td>
+<td align="left">Pixel is the inverse of the R2_MASKPEN color.</td>
+</tr>
+<tr>
+<td align="left"><strong>R2_NOTMERGEPEN</strong></td>
+<td align="left">Pixel is the inverse of the R2_MERGEPEN color.</td>
+</tr>
+<tr>
+<td align="left"><strong>R2_NOTXORPEN</strong></td>
+<td align="left">Pixel is the inverse of the R2_XORPEN color.</td>
+</tr>
+<tr>
+<td align="left"><strong>R2_WHITE</strong></td>
+<td align="left">Pixel is always 1.</td>
+</tr>
+<tr>
+<td align="left"><strong>R2_XORPEN</strong></td>
+<td align="left">Pixel is a combination of the colors in the pen and in the screen, but not in both.</td>
+</tr>
+</tbody></table>
+<h4 id="左键按下消息-1"><a href="#左键按下消息-1" class="headerlink" title="左键按下消息"></a>左键按下消息</h4><figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">case</span> WM_LBUTTONDOWN:</span><br><span class="line">	ptBeg.x = ptEnd.x = LOWORD(lParam);<span class="comment">//ptBeg获取当前鼠标位置</span></span><br><span class="line">	ptBeg.y = ptEnd.y = HIWORD(lParam);</span><br><span class="line"></span><br><span class="line">	DrawBoxOutline(hwnd, ptBeg, ptEnd);<span class="comment">//描矩形边.使用ptBeg,ptEnd指定主对角线的矩形</span></span><br><span class="line"></span><br><span class="line">	SetCursor(LoadCursor(<span class="literal">NULL</span>, IDC_CROSS));<span class="comment">//左键按下后进入绘制状态,鼠标变成十字提示绘图</span></span><br><span class="line"></span><br><span class="line">	fBlocking = TRUE;<span class="comment">//一个flag,表征鼠标是否一直按下,这个状态会被Esc键修改,表示终止绘图</span></span><br><span class="line">	SetCapture(hwnd);</span><br><span class="line"></span><br><span class="line">	<span class="keyword">return</span> <span class="number">0</span>;</span><br></pre></td></tr></table></figure>
+
+<p>左键按下时就已经开始绘图了,首先绘制一个点,即左键按下时的鼠标位置,</p>
+<p>fBlocking变量用来记录绘图过程中有没有被Esc打断过.</p>
+<p>SetCapture(hwnd)意思是从调用该函数开始,所有鼠标动作,包括不在本客户区的鼠标动作,全都被本程序捕获.这种状态需要到ReleaseCapture解出</p>
+<h5 id="Set-ReleaseCapture"><a href="#Set-ReleaseCapture" class="headerlink" title="Set&#x2F;ReleaseCapture"></a>Set&#x2F;ReleaseCapture</h5><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">SetCapture(hwnd);//此函数执行之后所有的鼠标动作将被hwnd指向的窗口捕获</span><br><span class="line">ReleaseCapture();//直到本函数执行之后鼠标动作才会恢复正常</span><br></pre></td></tr></table></figure>
+
+
+
+
+
+<h4 id="鼠标移动消息"><a href="#鼠标移动消息" class="headerlink" title="鼠标移动消息"></a>鼠标移动消息</h4><figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">case</span> WM_MOUSEMOVE:</span><br><span class="line">	<span class="keyword">if</span> (fBlocking)</span><br><span class="line">	&#123;</span><br><span class="line">		SetCursor(LoadCursor(<span class="literal">NULL</span>, IDC_CROSS));</span><br><span class="line"></span><br><span class="line">		DrawBoxOutline(hwnd, ptBeg, ptEnd);</span><br><span class="line"></span><br><span class="line">		ptEnd.x = LOWORD(lParam);</span><br><span class="line">		ptEnd.y = HIWORD(lParam);</span><br><span class="line"></span><br><span class="line">		DrawBoxOutline(hwnd, ptBeg, ptEnd);<span class="comment">//这里矩形边框画了两次,是因为后来这一次会更新前面那一次,由于SetROP2已经设置了黑白交替绘画,</span></span><br><span class="line">		<span class="comment">//当前一次是黑笔是,后一次是白笔就擦除了前面的绘制</span></span><br><span class="line">		<span class="comment">//如此做到只能看到一个实时边框,否则只绘制一次会导致很多重影</span></span><br><span class="line">	&#125;</span><br><span class="line">	<span class="keyword">return</span> <span class="number">0</span>;</span><br></pre></td></tr></table></figure>
+
+<p>由于左键起来之后会进行结算,因此绘图时的鼠标移动是压着左键移动的</p>
+<p>首先判断了fBlocking的状态,如果被Esc打断则直接退出,不做处理</p>
+<p>这里调用了两次<code>DrawBoxOutline</code>,其作用是:</p>
+<p>由于<code>SetROP2(hdc, R2_NOT)</code>这个设置,会导致相邻两次绘图使用的颜色相反</p>
+<p>如果本次使用黑色,那么下一次就使用白色</p>
+<p>这样交替绘制的意义是:刚用黑色绘制出边框,接着逻辑上擦除它,但是在屏幕上不显示擦除,这就是压着黑笔停下时仍然能看到过期的客户区上有边框线.当画笔再次移动时,先前的边框已经被逻辑擦除,此时再画新线保证只有新线,不会有重影.这就实现了橡皮线的效果</p>
+<p>这里两次调用<code>DrawBoxOutline</code>,头一次的ptEnd没有被修改,也就是上一次绘图使用的ptEnd,那么重绘这个矩形,相当于擦除了上一次的绘制</p>
+<h4 id="左键起来消息"><a href="#左键起来消息" class="headerlink" title="左键起来消息"></a>左键起来消息</h4><figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">case</span> WM_LBUTTONUP:</span><br><span class="line">	<span class="keyword">if</span> (fBlocking)<span class="comment">//如果fBlocking==1说明左键按下没有起来过并且没有被Esc中断过</span></span><br><span class="line">	&#123;</span><br><span class="line">		DrawBoxOutline(hwnd, ptBeg, ptEnd);<span class="comment">//这里只调用了一次,是因为这一次要固定边框位置了,直接描黑</span></span><br><span class="line"></span><br><span class="line">		ptBoxBeg = ptBeg;</span><br><span class="line">		ptBoxEnd.x = LOWORD(lParam);<span class="comment">//准备好需要填充的矩形范围</span></span><br><span class="line">		ptBoxEnd.y = HIWORD(lParam);</span><br><span class="line">		</span><br><span class="line">		ReleaseCapture();</span><br><span class="line">		SetCursor(LoadCursor(<span class="literal">NULL</span>, IDC_ARROW));<span class="comment">//放下屠刀之后,鼠标变成了斜向箭头样式</span></span><br><span class="line">		fBlocking = FALSE;<span class="comment">//关闭中断标志,为下一次绘图做准备</span></span><br><span class="line">		fValidBox = TRUE;<span class="comment">//设置填充区域有效,可以填充,为WM_PAINT做准备</span></span><br><span class="line"></span><br><span class="line">		InvalidateRect(hwnd, <span class="literal">NULL</span>, TRUE);</span><br><span class="line">	&#125;</span><br><span class="line">	<span class="keyword">return</span> <span class="number">0</span>;</span><br></pre></td></tr></table></figure>
+
+<p>首先判断fBlocking状态,如果中途被Esc打断过则不做处理</p>
+<p>调用一次<code>DrawBoxOutline</code>擦除最后一次<code>WM_MOUSEMOVE</code>留下的边框.但是最后一次WM_MOUSEMOVE和WM_LBUTTONUP的到达时间非常接近,拉不开差距,因此这个函数调用与否意义不大,除非电脑很卡</p>
+<p>释放对鼠标的捕获状态,程序对于客户区以外的鼠标动作不再处理</p>
+<p>鼠标样式还原为斜向箭头</p>
+<p>重置中断标志,设置绘图标志有效,提醒WM_PAINT应该绘制填充矩形了</p>
+<h4 id="Esc中断消息"><a href="#Esc中断消息" class="headerlink" title="Esc中断消息"></a>Esc中断消息</h4><figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">case</span> WM_CHAR:</span><br><span class="line">	<span class="keyword">if</span> (fBlocking &amp; wParam == <span class="string">&#x27;\x1B&#x27;</span>) <span class="comment">// i.e., Escape //按下Esc终止绘制矩形,即使左键正在按下</span></span><br><span class="line">	&#123;</span><br><span class="line">		DrawBoxOutline(hwnd, ptBeg, ptEnd);</span><br><span class="line"></span><br><span class="line">		SetCursor(LoadCursor(<span class="literal">NULL</span>, IDC_ARROW));</span><br><span class="line"></span><br><span class="line">		fBlocking = FALSE;<span class="comment">//Esc中止逻辑修改了一个fBlocking,就可以让程序知道左键按下起来之间有没有被中断过</span></span><br><span class="line">	&#125;</span><br><span class="line">	<span class="keyword">return</span> <span class="number">0</span>;</span><br></pre></td></tr></table></figure>
+
+<p>对于该消息,例子采用的是处理字符消息,而不是处理虚拟键消息</p>
+<p>如果出现Esc消息并且fBlocking表明正在绘图,那么设置fBlocking绘图无效</p>
+<p>此后由于WM_MOUSEMOVE需要判断fBlocking正在绘图才继续绘制边框,因此Esc出现之后矩形边框橡皮线立刻消失</p>
+<p>然而这种绘制失效的状态需要等到<strong>左键起来</strong>才能完全恢复</p>
+<p>WM_LBUTTONUP也会先判断fBlocking是否还有效.无效则啥也不处理</p>
+<p>此时所有标志都恢复原状(fValidBox压根没有被改变过,fBlocking被Esc重置为假)</p>
+<h4 id="绘图消息-2"><a href="#绘图消息-2" class="headerlink" title="绘图消息"></a>绘图消息</h4><figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">case</span> WM_PAINT:</span><br><span class="line">	hdc = BeginPaint(hwnd, &amp;ps);</span><br><span class="line">	<span class="keyword">if</span> (fValidBox)<span class="comment">//这个值只能通过鼠标左键起来修改,表明确实有过画图</span></span><br><span class="line">	&#123;</span><br><span class="line">		SelectObject(hdc, GetStockObject(BLACK_BRUSH));</span><br><span class="line">		Rectangle(hdc, ptBoxBeg.x, ptBoxBeg.y,ptBoxEnd.x, ptBoxEnd.y);<span class="comment">//填充</span></span><br><span class="line">	&#125;</span><br><span class="line"></span><br><span class="line">	<span class="keyword">if</span> (fBlocking)<span class="comment">//fBlocking=1表明正在绘图,应当打印边框</span></span><br><span class="line">	&#123;</span><br><span class="line">		SetROP2(hdc, R2_NOT);</span><br><span class="line">		SelectObject(hdc, GetStockObject(NULL_BRUSH));</span><br><span class="line">		Rectangle(hdc, ptBeg.x, ptBeg.y, ptEnd.x,ptEnd.y);</span><br><span class="line">	&#125;</span><br><span class="line"></span><br><span class="line">	EndPaint(hwnd, &amp;ps);</span><br><span class="line">	<span class="keyword">return</span> <span class="number">0</span>;</span><br></pre></td></tr></table></figure>
+
+<p>fValidBox是LBUTTONUP准备好的绘制标志,如果绘画中途没有Esc中断则LBUTTONUP消息处理中,会把fValidBox置有效,提醒WM_PAINT应该画图了</p>
+<p>修改画刷为黑色画刷然后填充最后确定的矩形</p>
+<p>如果fBlocking为有效说明仍然没有确定矩形的另一个点,此时WM_PAINT也打印矩形边框橡皮线,然而是多次一句,因为WM_MOUSEMOVE已经把这件事干了.</p>
+<h4 id="窗口销毁消息-2"><a href="#窗口销毁消息-2" class="headerlink" title="窗口销毁消息"></a>窗口销毁消息</h4><figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">case</span> WM_DESTROY:</span><br><span class="line">	PostQuitMessage(<span class="number">0</span>);</span><br><span class="line">	<span class="keyword">return</span> <span class="number">0</span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+
+
+<h2 id="鼠标滚动"><a href="#鼠标滚动" class="headerlink" title="鼠标滚动"></a>鼠标滚动</h2><h3 id="鼠标滚动消息WM-MOUSEWHEEL"><a href="#鼠标滚动消息WM-MOUSEWHEEL" class="headerlink" title="鼠标滚动消息WM_MOUSEWHEEL"></a>鼠标滚动消息WM_MOUSEWHEEL</h3><p>当鼠标滚轮滚动时,该消息将被发往<strong>焦点窗口</strong>,</p>
+<p>参数意义:</p>
+<h4 id="wParam-3"><a href="#wParam-3" class="headerlink" title="wParam"></a>wParam</h4><p>高字表明滚动增量</p>
+<p>低字表明同时按下的虚拟键</p>
+<table>
+<thead>
+<tr>
+<th align="left">Value</th>
+<th align="left">Meaning</th>
+</tr>
+</thead>
+<tbody><tr>
+<td align="left"><strong>MK_CONTROL</strong>0x0008</td>
+<td align="left">The CTRL key is down.</td>
+</tr>
+<tr>
+<td align="left"><strong>MK_LBUTTON</strong>0x0001</td>
+<td align="left">The left mouse button is down.</td>
+</tr>
+<tr>
+<td align="left"><strong>MK_MBUTTON</strong>0x0010</td>
+<td align="left">The middle mouse button is down.</td>
+</tr>
+<tr>
+<td align="left"><strong>MK_RBUTTON</strong>0x0002</td>
+<td align="left">The right mouse button is down.</td>
+</tr>
+<tr>
+<td align="left"><strong>MK_SHIFT</strong>0x0004</td>
+<td align="left">The SHIFT key is down.</td>
+</tr>
+<tr>
+<td align="left"><strong>MK_XBUTTON1</strong>0x0020</td>
+<td align="left">The first X button is down.</td>
+</tr>
+<tr>
+<td align="left"><strong>MK_XBUTTON2</strong>0x0040</td>
+<td align="left">The second X button is down.</td>
+</tr>
+</tbody></table>
+<h4 id="lParam-3"><a href="#lParam-3" class="headerlink" title="lParam"></a>lParam</h4><p>低字表明此时鼠标位置横坐标,屏幕坐标</p>
+<p>高字表明纵坐标</p>
+<h3 id="滚动增量"><a href="#滚动增量" class="headerlink" title="滚动增量"></a>滚动增量</h3><p>衡量滚得狠不狠的参数,如果一下子转了好几圈显然增量很大,如果只发生了很少的转动,那么这点增量几乎不能导致程序卷动</p>
+<p>在控制面板中我们可以设置滚动灵敏度,相同的滚动增量,假设都转一圈,可能灵敏度高的可以滚动一整页,灵敏度低的滚了三行,这是怎么实现的呢?</p>
+<p>用滚动增量除以一个灵敏度系数,不妨给这个量起名<strong>灵敏后增量</strong>(我乱起的)</p>
+<p>比如滚动增量为120,除以3得到40就是灵敏后增量.</p>
+<p>在程序中我们可以设置一个<strong>单位行增量</strong>,意思是多少滚动增量可以导致程序卷动一个行,比如说设置为40</p>
+<p>那么当灵敏度系数为3,那么初始时的120滚动增量就可以得到40 的灵敏后增量,刚好可以卷动一行</p>
+<p>如果灵敏度系数为1,则灵敏后增量就是120.可以卷动三行</p>
+<p>这就体现出不同灵敏度的区别了</p>
+<h3 id="加装滚动动作的Sysmets程序"><a href="#加装滚动动作的Sysmets程序" class="headerlink" title="加装滚动动作的Sysmets程序"></a>加装滚动动作的Sysmets程序</h3><h4 id="滚动相关变量"><a href="#滚动相关变量" class="headerlink" title="滚动相关变量"></a>滚动相关变量</h4><figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="type">static</span> <span class="type">int</span> iDeltaPerLine, iAccumDelta;</span><br><span class="line">ULONG ulScrollLines;</span><br></pre></td></tr></table></figure>
+
+<p>iDeltaPerLine即单位行增量</p>
+<p>iAccumDelta表示先前的滚动效果的累加,可以理解为初始滚动量</p>
+<p>ulScrollLines存放灵敏度系数</p>
+<h4 id="滚动消息"><a href="#滚动消息" class="headerlink" title="滚动消息"></a>滚动消息</h4><figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">case</span> WM_MOUSEWHEEL:</span><br><span class="line">	<span class="keyword">if</span> (iDeltaPerLine == <span class="number">0</span>)<span class="keyword">break</span>;</span><br><span class="line">	iAccumDelta += (<span class="type">short</span>)HIWORD(wParam);<span class="comment">//累计滚动量</span></span><br><span class="line">	<span class="keyword">while</span> (iAccumDelta &gt;= iDeltaPerLine) &#123;<span class="comment">//能滚就滚</span></span><br><span class="line">		SendMessage(hwnd, WM_VSCROLL, SB_LINEUP, <span class="number">0</span>);<span class="comment">//滚一行</span></span><br><span class="line">		iAccumDelta -= iDeltaPerLine;</span><br><span class="line">	&#125;</span><br><span class="line">	<span class="keyword">while</span> (iAccumDelta &lt;= -iDeltaPerLine) &#123;<span class="comment">//倒着能滚就滚</span></span><br><span class="line">		SendMessage(hwnd, WM_VSCROLL, SB_LINEDOWN, <span class="number">0</span>);</span><br><span class="line">		iAccumDelta += iDeltaPerLine;</span><br><span class="line">	&#125;</span><br><span class="line">	<span class="keyword">return</span> <span class="number">0</span>;</span><br></pre></td></tr></table></figure>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+    </div>
+
+    
+    
+    
+
+      <footer class="post-footer">
+          <div class="post-tags">
+              <a href="/tags/windows%E7%A8%8B%E5%BA%8F%E8%AE%BE%E8%AE%A1/" rel="tag"># windows程序设计</a>
+          </div>
+
+        
+
+
+        
+    <div class="post-nav">
+      <div class="post-nav-item">
+    <a href="/2022/08/12/windows%20SDK%20chapter%206%20keyboard/" rel="prev" title="win32程序设计-chapter6 键盘">
+      <i class="fa fa-chevron-left"></i> win32程序设计-chapter6 键盘
+    </a></div>
+      <div class="post-nav-item">
+    <a href="/2022/08/18/DLL%E4%B8%8E%E5%8A%A8%E6%80%81%E9%93%BE%E6%8E%A5/" rel="next" title="程序员的自我修养 chapter 9 DLL">
+      程序员的自我修养 chapter 9 DLL <i class="fa fa-chevron-right"></i>
+    </a></div>
+    </div>
+      </footer>
+    
+  </article>
+  
+  
+  
+
+
+
+          </div>
+          
+
+<script>
+  window.addEventListener('tabs:register', () => {
+    let { activeClass } = CONFIG.comments;
+    if (CONFIG.comments.storage) {
+      activeClass = localStorage.getItem('comments_active') || activeClass;
+    }
+    if (activeClass) {
+      let activeTab = document.querySelector(`a[href="#comment-${activeClass}"]`);
+      if (activeTab) {
+        activeTab.click();
+      }
+    }
+  });
+  if (CONFIG.comments.storage) {
+    window.addEventListener('tabs:click', event => {
+      if (!event.target.matches('.tabs-comment .tab-content .tab-pane')) return;
+      let commentClass = event.target.classList[1];
+      localStorage.setItem('comments_active', commentClass);
+    });
+  }
+</script>
+
+        </div>
+          
+  
+  <div class="toggle sidebar-toggle">
+    <span class="toggle-line toggle-line-first"></span>
+    <span class="toggle-line toggle-line-middle"></span>
+    <span class="toggle-line toggle-line-last"></span>
+  </div>
+
+  <aside class="sidebar">
+    <div class="sidebar-inner">
+
+      <ul class="sidebar-nav motion-element">
+        <li class="sidebar-nav-toc">
+          Table of Contents
+        </li>
+        <li class="sidebar-nav-overview">
+          Overview
+        </li>
+      </ul>
+
+      <!--noindex-->
+      <div class="post-toc-wrap sidebar-panel">
+          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#windows-SDK-chapter-7-mouse"><span class="nav-number">1.</span> <span class="nav-text">windows SDK chapter 7 mouse</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#%E9%BC%A0%E6%A0%87%E7%9A%84%E5%9F%BA%E6%9C%AC%E4%BF%A1%E6%81%AF"><span class="nav-number">1.1.</span> <span class="nav-text">鼠标的基本信息</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%98%AF%E5%90%A6%E5%9C%A8%E7%BA%BF"><span class="nav-number">1.1.1.</span> <span class="nav-text">是否在线</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%8D%95%E9%94%AE%E5%8F%8C%E9%94%AE"><span class="nav-number">1.1.2.</span> <span class="nav-text">单键双键</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E9%BC%A0%E6%A0%87%E6%A0%B7%E5%BC%8F"><span class="nav-number">1.1.3.</span> <span class="nav-text">鼠标样式</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%AE%A2%E6%88%B7%E5%8C%BA%E9%BC%A0%E6%A0%87%E6%B6%88%E6%81%AF"><span class="nav-number">1.2.</span> <span class="nav-text">客户区鼠标消息</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#lParam"><span class="nav-number">1.2.1.</span> <span class="nav-text">lParam</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#wParam"><span class="nav-number">1.2.2.</span> <span class="nav-text">wParam</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%8C%85%E5%90%AB%E4%BA%86%E9%BC%A0%E6%A0%87%E5%93%AA%E4%B8%AA%E9%94%AE-%E8%BF%98%E6%9C%89%E6%AD%A4%E6%97%B6Ctrl%E5%92%8CShift%E7%9A%84%E7%8A%B6%E6%80%81"><span class="nav-number">1.2.3.</span> <span class="nav-text">包含了鼠标哪个键,还有此时Ctrl和Shift的状态.</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#MOUSEMOVE%E7%9A%84%E9%80%9F%E5%BA%A6"><span class="nav-number">1.3.</span> <span class="nav-text">MOUSEMOVE的速度</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%8F%98%E9%87%8F%E5%AE%9A%E4%B9%89"><span class="nav-number">1.3.1.</span> <span class="nav-text">变量定义</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E9%BC%A0%E6%A0%87%E4%BF%A1%E6%81%AF%E5%A4%84%E7%90%86"><span class="nav-number">1.3.2.</span> <span class="nav-text">鼠标信息处理</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E7%BB%98%E5%9B%BE%E6%B6%88%E6%81%AF"><span class="nav-number">1.3.3.</span> <span class="nav-text">绘图消息</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E7%AA%97%E5%8F%A3%E9%94%80%E6%AF%81%E6%B6%88%E6%81%AF"><span class="nav-number">1.3.4.</span> <span class="nav-text">窗口销毁消息</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%95%88%E6%9E%9C"><span class="nav-number">1.3.5.</span> <span class="nav-text">效果</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%8F%8C%E5%87%BB"><span class="nav-number">1.4.</span> <span class="nav-text">双击</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E9%9D%9E%E5%AE%A2%E6%88%B7%E5%8C%BA%E9%BC%A0%E6%A0%87%E6%B6%88%E6%81%AF"><span class="nav-number">1.5.</span> <span class="nav-text">非客户区鼠标消息</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%8F%82%E6%95%B0%E6%84%8F%E4%B9%89"><span class="nav-number">1.5.1.</span> <span class="nav-text">参数意义</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#lParam-1"><span class="nav-number">1.5.1.1.</span> <span class="nav-text">lParam</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#wParam-1"><span class="nav-number">1.5.1.2.</span> <span class="nav-text">wParam</span></a></li></ol></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%87%BB%E4%B8%AD%E6%B5%8B%E8%AF%95"><span class="nav-number">1.6.</span> <span class="nav-text">击中测试</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#WM-NCHITTEST"><span class="nav-number">1.6.1.</span> <span class="nav-text">WM_NCHITTEST</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#lParam-2"><span class="nav-number">1.6.1.1.</span> <span class="nav-text">lParam</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#wParam-2"><span class="nav-number">1.6.1.2.</span> <span class="nav-text">wParam</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E4%BB%80%E4%B9%88%E6%98%AF%E5%87%BB%E4%B8%AD%E6%B5%8B%E8%AF%95"><span class="nav-number">1.6.2.</span> <span class="nav-text">什么是击中测试</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%87%BB%E4%B8%AD%E6%B5%8B%E8%AF%95%E4%BE%8B%E7%A8%8B"><span class="nav-number">1.6.3.</span> <span class="nav-text">击中测试例程</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#%E5%8F%98%E9%87%8F%E5%AE%9A%E4%B9%89-1"><span class="nav-number">1.6.3.1.</span> <span class="nav-text">变量定义</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E5%B0%BA%E5%AF%B8%E5%8F%98%E5%8C%96%E6%B6%88%E6%81%AF"><span class="nav-number">1.6.3.2.</span> <span class="nav-text">尺寸变化消息</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E5%B7%A6%E9%94%AE%E5%8D%95%E5%87%BB%E6%B6%88%E6%81%AF"><span class="nav-number">1.6.3.3.</span> <span class="nav-text">左键单击消息</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E7%BB%98%E5%9B%BE%E6%B6%88%E6%81%AF-1"><span class="nav-number">1.6.3.4.</span> <span class="nav-text">绘图消息</span></a></li></ol></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E9%94%AE%E7%9B%98%E6%A8%A1%E4%BB%BF%E9%BC%A0%E6%A0%87"><span class="nav-number">1.7.</span> <span class="nav-text">键盘模仿鼠标</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%98%BE%E7%A4%BA%E8%AE%A1%E6%95%B0"><span class="nav-number">1.7.1.</span> <span class="nav-text">显示计数</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%8C%87%E9%92%88%E4%BD%8D%E7%BD%AE"><span class="nav-number">1.7.2.</span> <span class="nav-text">指针位置</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%87%BB%E4%B8%AD%E6%B5%8B%E8%AF%95-1"><span class="nav-number">1.7.3.</span> <span class="nav-text">击中测试</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#%E5%8F%98%E9%87%8F%E5%AE%9A%E4%B9%89-2"><span class="nav-number">1.7.3.1.</span> <span class="nav-text">变量定义</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E7%AA%97%E5%8F%A3%E7%84%A6%E7%82%B9%E4%BF%A1%E6%81%AF"><span class="nav-number">1.7.3.2.</span> <span class="nav-text">窗口焦点信息</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E5%B0%BA%E5%AF%B8%E8%B0%83%E6%95%B4%E4%BF%A1%E6%81%AF"><span class="nav-number">1.7.3.3.</span> <span class="nav-text">尺寸调整信息</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E8%99%9A%E6%8B%9F%E9%94%AE%E4%BF%A1%E6%81%AF"><span class="nav-number">1.7.3.4.</span> <span class="nav-text">虚拟键信息</span></a></li></ol></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E4%BD%BF%E7%94%A8%E5%AD%90%E7%AA%97%E5%8F%A3"><span class="nav-number">1.8.</span> <span class="nav-text">使用子窗口</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%B3%A8%E5%86%8C%E7%88%B6%E7%AA%97%E5%8F%A3%E7%B1%BB"><span class="nav-number">1.8.1.</span> <span class="nav-text">注册父窗口类</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%B3%A8%E5%86%8C%E5%AD%90%E7%AA%97%E5%8F%A3%E7%B1%BB"><span class="nav-number">1.8.2.</span> <span class="nav-text">注册子窗口类</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%88%9B%E5%BB%BA%E7%88%B6%E7%AA%97%E5%8F%A3%E5%AE%9E%E4%BE%8B-%E6%98%BE%E7%A4%BA%E7%88%B6%E7%AA%97%E5%8F%A3%E6%B6%88%E6%81%AF%E5%BE%AA%E7%8E%AF"><span class="nav-number">1.8.3.</span> <span class="nav-text">创建父窗口实例,显示父窗口消息循环</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E7%88%B6%E7%AA%97%E5%8F%A3%E8%BF%87%E7%A8%8BWndProc"><span class="nav-number">1.8.4.</span> <span class="nav-text">父窗口过程WndProc</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#%E5%8F%98%E9%87%8F%E5%AE%9A%E4%B9%89-3"><span class="nav-number">1.8.4.1.</span> <span class="nav-text">变量定义</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E7%AA%97%E5%8F%A3%E5%88%9B%E5%BB%BA%E6%B6%88%E6%81%AF"><span class="nav-number">1.8.4.2.</span> <span class="nav-text">窗口创建消息</span></a><ol class="nav-child"><li class="nav-item nav-level-5"><a class="nav-link" href="#CreateWindow"><span class="nav-number">1.8.4.2.1.</span> <span class="nav-text">CreateWindow</span></a></li></ol></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E8%B0%83%E6%95%B4%E5%B0%BA%E5%AF%B8%E6%B6%88%E6%81%AF"><span class="nav-number">1.8.4.3.</span> <span class="nav-text">调整尺寸消息</span></a><ol class="nav-child"><li class="nav-item nav-level-5"><a class="nav-link" href="#MoveWindow"><span class="nav-number">1.8.4.3.1.</span> <span class="nav-text">MoveWindow</span></a></li></ol></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E5%B7%A6%E9%94%AE%E6%8C%89%E4%B8%8B%E6%B6%88%E6%81%AF"><span class="nav-number">1.8.4.4.</span> <span class="nav-text">左键按下消息</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E8%8E%B7%E5%BE%97%E7%84%A6%E7%82%B9%E6%B6%88%E6%81%AF"><span class="nav-number">1.8.4.5.</span> <span class="nav-text">获得焦点消息</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E8%99%9A%E6%8B%9F%E9%94%AE%E6%B6%88%E6%81%AF"><span class="nav-number">1.8.4.6.</span> <span class="nav-text">虚拟键消息</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E7%AA%97%E5%8F%A3%E9%94%80%E6%AF%81%E6%B6%88%E6%81%AF-1"><span class="nav-number">1.8.4.7.</span> <span class="nav-text">窗口销毁消息</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%AD%90%E7%AA%97%E5%8F%A3%E8%BF%87%E7%A8%8BChildWndProc"><span class="nav-number">1.8.5.</span> <span class="nav-text">子窗口过程ChildWndProc</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#%E5%AD%90%E7%AA%97%E5%8F%A3%E5%88%9B%E5%BB%BA%E6%B6%88%E6%81%AF"><span class="nav-number">1.8.5.1.</span> <span class="nav-text">子窗口创建消息</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E5%AD%90%E7%AA%97%E5%8F%A3%E9%94%AE%E9%BC%A0%E6%B6%88%E6%81%AF"><span class="nav-number">1.8.5.2.</span> <span class="nav-text">子窗口键鼠消息</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E5%AD%90%E7%AA%97%E5%8F%A3%E8%8E%B7%E5%8F%96-%E5%A4%B1%E5%8E%BB%E7%84%A6%E7%82%B9%E6%B6%88%E6%81%AF"><span class="nav-number">1.8.5.3.</span> <span class="nav-text">子窗口获取&#x2F;失去焦点消息</span></a><ol class="nav-child"><li class="nav-item nav-level-5"><a class="nav-link" href="#GetWindowLong-%E8%8E%B7%E5%8F%96%E7%AA%97%E5%8F%A3%E5%B1%9E%E6%80%A7"><span class="nav-number">1.8.5.3.1.</span> <span class="nav-text">GetWindowLong 获取窗口属性</span></a></li></ol></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E5%AD%90%E7%AA%97%E5%8F%A3%E7%BB%98%E5%9B%BE%E6%B6%88%E6%81%AF"><span class="nav-number">1.8.5.4.</span> <span class="nav-text">子窗口绘图消息</span></a></li></ol></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E6%8D%95%E8%8E%B7%E9%BC%A0%E6%A0%87"><span class="nav-number">1.9.</span> <span class="nav-text">捕获鼠标</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E4%BE%8B%E7%A8%8B"><span class="nav-number">1.9.1.</span> <span class="nav-text">例程</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#%E7%BB%98%E5%88%B6%E8%BE%B9%E6%A1%86%E6%A9%A1%E7%9A%AE%E7%BA%BF%E5%87%BD%E6%95%B0"><span class="nav-number">1.9.1.1.</span> <span class="nav-text">绘制边框橡皮线函数</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#SetROP2"><span class="nav-number">1.9.1.2.</span> <span class="nav-text">SetROP2</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E5%B7%A6%E9%94%AE%E6%8C%89%E4%B8%8B%E6%B6%88%E6%81%AF-1"><span class="nav-number">1.9.1.3.</span> <span class="nav-text">左键按下消息</span></a><ol class="nav-child"><li class="nav-item nav-level-5"><a class="nav-link" href="#Set-ReleaseCapture"><span class="nav-number">1.9.1.3.1.</span> <span class="nav-text">Set&#x2F;ReleaseCapture</span></a></li></ol></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E9%BC%A0%E6%A0%87%E7%A7%BB%E5%8A%A8%E6%B6%88%E6%81%AF"><span class="nav-number">1.9.1.4.</span> <span class="nav-text">鼠标移动消息</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E5%B7%A6%E9%94%AE%E8%B5%B7%E6%9D%A5%E6%B6%88%E6%81%AF"><span class="nav-number">1.9.1.5.</span> <span class="nav-text">左键起来消息</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#Esc%E4%B8%AD%E6%96%AD%E6%B6%88%E6%81%AF"><span class="nav-number">1.9.1.6.</span> <span class="nav-text">Esc中断消息</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E7%BB%98%E5%9B%BE%E6%B6%88%E6%81%AF-2"><span class="nav-number">1.9.1.7.</span> <span class="nav-text">绘图消息</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E7%AA%97%E5%8F%A3%E9%94%80%E6%AF%81%E6%B6%88%E6%81%AF-2"><span class="nav-number">1.9.1.8.</span> <span class="nav-text">窗口销毁消息</span></a></li></ol></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E9%BC%A0%E6%A0%87%E6%BB%9A%E5%8A%A8"><span class="nav-number">1.10.</span> <span class="nav-text">鼠标滚动</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E9%BC%A0%E6%A0%87%E6%BB%9A%E5%8A%A8%E6%B6%88%E6%81%AFWM-MOUSEWHEEL"><span class="nav-number">1.10.1.</span> <span class="nav-text">鼠标滚动消息WM_MOUSEWHEEL</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#wParam-3"><span class="nav-number">1.10.1.1.</span> <span class="nav-text">wParam</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#lParam-3"><span class="nav-number">1.10.1.2.</span> <span class="nav-text">lParam</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%BB%9A%E5%8A%A8%E5%A2%9E%E9%87%8F"><span class="nav-number">1.10.2.</span> <span class="nav-text">滚动增量</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%8A%A0%E8%A3%85%E6%BB%9A%E5%8A%A8%E5%8A%A8%E4%BD%9C%E7%9A%84Sysmets%E7%A8%8B%E5%BA%8F"><span class="nav-number">1.10.3.</span> <span class="nav-text">加装滚动动作的Sysmets程序</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#%E6%BB%9A%E5%8A%A8%E7%9B%B8%E5%85%B3%E5%8F%98%E9%87%8F"><span class="nav-number">1.10.3.1.</span> <span class="nav-text">滚动相关变量</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E6%BB%9A%E5%8A%A8%E6%B6%88%E6%81%AF"><span class="nav-number">1.10.3.2.</span> <span class="nav-text">滚动消息</span></a></li></ol></li></ol></li></ol></li></ol></div>
+      </div>
+      <!--/noindex-->
+
+      <div class="site-overview-wrap sidebar-panel">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+  <p class="site-author-name" itemprop="name">John Doe</p>
+  <div class="site-description" itemprop="description"></div>
+</div>
+<div class="site-state-wrap motion-element">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+          <a href="/archives/">
+        
+          <span class="site-state-item-count">78</span>
+          <span class="site-state-item-name">posts</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-tags">
+        <span class="site-state-item-count">30</span>
+        <span class="site-state-item-name">tags</span>
+      </div>
+  </nav>
+</div>
+
+
+
+      </div>
+
+    </div>
+  </aside>
+  <div id="sidebar-dimmer"></div>
+
+
+      </div>
+    </main>
+
+    <footer class="footer">
+      <div class="footer-inner">
+        
+
+        
+
+<div class="copyright">
+  
+  &copy; 
+  <span itemprop="copyrightYear">2024</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">John Doe</span>
+</div>
+  <div class="powered-by">Powered by <a href="https://hexo.io/" class="theme-link" rel="noopener" target="_blank">Hexo</a> & <a href="https://muse.theme-next.org/" class="theme-link" rel="noopener" target="_blank">NexT.Muse</a>
+  </div>
+
+        
+
+
+
+
+
+
+
+
+      </div>
+    </footer>
+  </div>
+
+  
+  <script src="/lib/anime.min.js"></script>
+  <script src="/lib/velocity/velocity.min.js"></script>
+  <script src="/lib/velocity/velocity.ui.min.js"></script>
+
+<script src="/js/utils.js"></script>
+
+<script src="/js/motion.js"></script>
+
+
+<script src="/js/schemes/muse.js"></script>
+
+
+<script src="/js/next-boot.js"></script>
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+  
+
+</body>
+</html>

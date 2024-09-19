@@ -1,0 +1,585 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 7.3.0">
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png">
+  <link rel="mask-icon" href="/images/logo.svg" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+<link rel="stylesheet" href="/lib/font-awesome/css/all.min.css">
+
+<script id="hexo-configurations">
+    var NexT = window.NexT || {};
+    var CONFIG = {"hostname":"example.com","root":"/","scheme":"Muse","version":"7.8.0","exturl":false,"sidebar":{"position":"left","display":"post","padding":18,"offset":12,"onmobile":false},"copycode":{"enable":false,"show_result":false,"style":null},"back2top":{"enable":true,"sidebar":false,"scrollpercent":false},"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":false,"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"algolia":{"hits":{"per_page":10},"labels":{"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}},"localsearch":{"enable":false,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false},"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}}};
+  </script>
+
+  <meta name="description" content="动态规划-区间DP模板题一般长这样: 给一个区间[1,n] 给定一种操作:合并子区间,两个相邻子区间[i,j],[j+1,k]合并,得到一定的收益或者付出一些代价.这个收益或者代价必然是和两个子区间相关的函数,比如sum[i,j]+sum[j+1,k] 求将整个区间合并为一个数,获得的最大收益或者付出的最小代价 P1880 合并环状石子一圈石子有n组,其中第i组有a[i]个,合并两组石子的代价是两">
+<meta property="og:type" content="article">
+<meta property="og:title" content="动态规划-区间DP">
+<meta property="og:url" content="http://example.com/2022/12/23/%E5%8A%A8%E6%80%81%E8%A7%84%E5%88%92-%E5%8C%BA%E9%97%B4DP/index.html">
+<meta property="og:site_name" content="Hexo">
+<meta property="og:description" content="动态规划-区间DP模板题一般长这样: 给一个区间[1,n] 给定一种操作:合并子区间,两个相邻子区间[i,j],[j+1,k]合并,得到一定的收益或者付出一些代价.这个收益或者代价必然是和两个子区间相关的函数,比如sum[i,j]+sum[j+1,k] 求将整个区间合并为一个数,获得的最大收益或者付出的最小代价 P1880 合并环状石子一圈石子有n组,其中第i组有a[i]个,合并两组石子的代价是两">
+<meta property="og:locale" content="en_US">
+<meta property="og:image" content="https://raw.githubusercontent.com/DeutschBall/VideoBed/main/image-20221223163332854.png">
+<meta property="og:image" content="https://raw.githubusercontent.com/DeutschBall/VideoBed/main/image-20221223163546294.png">
+<meta property="article:published_time" content="2022-12-23T13:30:00.000Z">
+<meta property="article:modified_time" content="2023-01-04T13:11:32.043Z">
+<meta property="article:author" content="John Doe">
+<meta property="article:tag" content="算法导论">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://raw.githubusercontent.com/DeutschBall/VideoBed/main/image-20221223163332854.png">
+
+<link rel="canonical" href="http://example.com/2022/12/23/%E5%8A%A8%E6%80%81%E8%A7%84%E5%88%92-%E5%8C%BA%E9%97%B4DP/">
+
+
+<script id="page-configurations">
+  // https://hexo.io/docs/variables.html
+  CONFIG.page = {
+    sidebar: "",
+    isHome : false,
+    isPost : true,
+    lang   : 'en'
+  };
+</script>
+
+  <title>动态规划-区间DP | Hexo</title>
+  
+
+
+
+
+
+
+  <noscript>
+  <style>
+  .use-motion .brand,
+  .use-motion .menu-item,
+  .sidebar-inner,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-header { opacity: initial; }
+
+  .use-motion .site-title,
+  .use-motion .site-subtitle {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line-before i { left: initial; }
+  .use-motion .logo-line-after i { right: initial; }
+  </style>
+</noscript>
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage">
+  <div class="container use-motion">
+    <div class="headband"></div>
+
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="Toggle navigation bar">
+      <span class="toggle-line toggle-line-first"></span>
+      <span class="toggle-line toggle-line-middle"></span>
+      <span class="toggle-line toggle-line-last"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <span class="logo-line-before"><i></i></span>
+      <h1 class="site-title">Hexo</h1>
+      <span class="logo-line-after"><i></i></span>
+    </a>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger">
+    </div>
+  </div>
+</div>
+
+
+
+
+<nav class="site-nav">
+  <ul id="menu" class="main-menu menu">
+        <li class="menu-item menu-item-home">
+
+    <a href="/" rel="section"><i class="fa fa-home fa-fw"></i>Home</a>
+
+  </li>
+        <li class="menu-item menu-item-archives">
+
+    <a href="/archives/" rel="section"><i class="fa fa-archive fa-fw"></i>Archives</a>
+
+  </li>
+  </ul>
+</nav>
+
+
+
+
+</div>
+    </header>
+
+    
+  <div class="back-to-top">
+    <i class="fa fa-arrow-up"></i>
+    <span>0%</span>
+  </div>
+
+
+    <main class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+
+          <div class="content post posts-expand">
+            
+
+    
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="en">
+    <link itemprop="mainEntityOfPage" href="http://example.com/2022/12/23/%E5%8A%A8%E6%80%81%E8%A7%84%E5%88%92-%E5%8C%BA%E9%97%B4DP/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.gif">
+      <meta itemprop="name" content="John Doe">
+      <meta itemprop="description" content="">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Hexo">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          动态规划-区间DP
+        </h1>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-calendar"></i>
+              </span>
+              <span class="post-meta-item-text">Posted on</span>
+
+              <time title="Created: 2022-12-23 21:30:00" itemprop="dateCreated datePublished" datetime="2022-12-23T21:30:00+08:00">2022-12-23</time>
+            </span>
+              <span class="post-meta-item">
+                <span class="post-meta-item-icon">
+                  <i class="far fa-calendar-check"></i>
+                </span>
+                <span class="post-meta-item-text">Edited on</span>
+                <time title="Modified: 2023-01-04 21:11:32" itemprop="dateModified" datetime="2023-01-04T21:11:32+08:00">2023-01-04</time>
+              </span>
+
+          
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+        <h1 id="动态规划-区间DP"><a href="#动态规划-区间DP" class="headerlink" title="动态规划-区间DP"></a>动态规划-区间DP</h1><p>模板题一般长这样:</p>
+<p>给一个区间[1,n]</p>
+<p>给定一种操作:合并子区间,两个相邻子区间[i,j],[j+1,k]合并,得到一定的收益或者付出一些代价.这个收益或者代价必然是和两个子区间相关的函数,比如sum[i,j]+sum[j+1,k]</p>
+<p>求将整个区间合并为一个数,获得的最大收益或者付出的最小代价</p>
+<h2 id="P1880-合并环状石子"><a href="#P1880-合并环状石子" class="headerlink" title="P1880 合并环状石子"></a><a target="_blank" rel="noopener" href="https://www.luogu.com.cn/problem/P1880">P1880 合并环状石子</a></h2><p>一圈石子有n组,其中第i组有a[i]个,合并两组石子的代价是两组石子个数和,求将所有石子合并成一组需要的最大代价和最小代价</p>
+<blockquote>
+<p>本题需要先把环拆成线,其弱化版也就是无环版本<a target="_blank" rel="noopener" href="https://www.luogu.com.cn/problem/P1775">P1775 石子合并（弱化版</a></p>
+</blockquote>
+<p>首先需要把这个圈解开,比较好的方法是将[1,n]展开成线性,然后复制一遍接到后面,就是</p>
+<table>
+<thead>
+<tr>
+<th>总下标</th>
+<th>1</th>
+<th>2</th>
+<th>3</th>
+<th>…</th>
+<th>n-1</th>
+<th>n</th>
+<th>n+1</th>
+<th>n+2</th>
+<th>n+3</th>
+<th>…</th>
+<th>2n-1</th>
+<th>2n</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>原下标</td>
+<td>1</td>
+<td>2</td>
+<td>3</td>
+<td>…</td>
+<td>n-1</td>
+<td>n</td>
+<td>1</td>
+<td>2</td>
+<td>3</td>
+<td>…</td>
+<td>n-1</td>
+<td>n</td>
+</tr>
+<tr>
+<td>石子个数</td>
+<td>a[1]</td>
+<td>a[2]</td>
+<td>a[3]</td>
+<td>..</td>
+<td>a[n-1]</td>
+<td>a[n]</td>
+<td>a[1]</td>
+<td>a[2]</td>
+<td>a[3]</td>
+<td>…</td>
+<td>a[n-1]</td>
+<td>a[n]</td>
+</tr>
+</tbody></table>
+<h3 id="设计状态"><a href="#设计状态" class="headerlink" title="设计状态"></a>设计状态</h3><p>$$<br>max_dp[i][j]&#x3D;将[i,j]区间合并成一组的最大代价\<br>min_dp[i][j]&#x3D;将[i,j]区间合并 成一组的最小代价<br>$$</p>
+<p>显然边界条件是:<br>$$<br>\forall _{1\le i\le 2n}max_dp[i][i]&#x3D;0\<br>\forall _{1\le i\le 2n}min_dp[i][i]&#x3D;0\<br>$$<br>意思是将一组石子和自己合并(合并个寂寞),其代价为0,因为不需要合并</p>
+<p>$$<br>max_dp[i][j]&#x3D;\max_{i\leq k&lt;j}(max_dp[i][k]+max_dp[k+1][j])+\sum_{i\leq l\leq j}a[l]\<br>min_dp[i][j]&#x3D;\max_{i\leq k&lt;j}(min_dp[i][k]+min_dp[k+1][j])+\sum_{i\leq l\leq j}a[l]<br>$$</p>
+<p>其中$\sum_{i\leq l\leq j}a[l]$也就是从i到j的石子总个数,可以维护前缀和降低复杂度<br>$$<br>\sum_{i\leq l\leq j}a[l]&#x3D;prefix[j]-prefix[i-1]<br>$$</p>
+<h3 id="完整代码"><a href="#完整代码" class="headerlink" title="完整代码"></a>完整代码</h3><figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;iostream&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;algorithm&gt;</span></span></span><br><span class="line"><span class="keyword">using</span> <span class="keyword">namespace</span> std;</span><br><span class="line"><span class="type">int</span> n;</span><br><span class="line"><span class="type">const</span> <span class="type">int</span> INF=<span class="number">1e9</span>;</span><br><span class="line"><span class="type">const</span> <span class="type">int</span> maxn=<span class="number">210</span>;</span><br><span class="line"><span class="type">int</span> value[maxn];</span><br><span class="line"><span class="type">int</span> max_dp[maxn][maxn];<span class="comment">//max_dp[i][j]为合并闭区间[i,j]所需要的最大代价</span></span><br><span class="line"><span class="type">int</span> min_dp[maxn][maxn];</span><br><span class="line"><span class="type">int</span> prefix[maxn];</span><br><span class="line"><span class="function"><span class="type">int</span> <span class="title">main</span><span class="params">()</span></span>&#123;</span><br><span class="line">    cin&gt;&gt;n;</span><br><span class="line">    </span><br><span class="line">    <span class="type">int</span> v;</span><br><span class="line">    prefix[<span class="number">0</span>]=<span class="number">0</span>;</span><br><span class="line">    <span class="keyword">for</span>(<span class="type">int</span> i=<span class="number">1</span>;i&lt;=n;i++)&#123;</span><br><span class="line">        cin&gt;&gt;v;</span><br><span class="line">        value[i]=value[i+n]=v;</span><br><span class="line">        prefix[i]=prefix[i<span class="number">-1</span>]+value[i];</span><br><span class="line">        max_dp[i][i]=max_dp[i+n][i+n]=<span class="number">0</span>;<span class="comment">//初始化边界条件,只有一堆时不需要合并,因此无代价</span></span><br><span class="line">        min_dp[i][i]=min_dp[i+n][i+n]=<span class="number">0</span>;</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">for</span>(<span class="type">int</span> i=<span class="number">1</span>+n;i&lt;=n*<span class="number">2</span>;i++)&#123;</span><br><span class="line">        prefix[i]=prefix[i<span class="number">-1</span>]+value[i];</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">for</span>(<span class="keyword">auto</span> delta=<span class="number">1</span>;delta&lt;n;delta++)&#123;<span class="comment">//delta,步长,确定区间左端点i之后,右端点j=i+delta,显然delta初始值应该是1</span></span><br><span class="line">        <span class="keyword">for</span>(<span class="keyword">auto</span> i=<span class="number">1</span>;i+delta&lt;=<span class="number">2</span>*n;i++)&#123;</span><br><span class="line">            <span class="keyword">auto</span> j=i+delta;</span><br><span class="line">            <span class="keyword">auto</span> temp_max=<span class="number">0</span>;</span><br><span class="line">            <span class="keyword">auto</span> temp_min=INF;<span class="comment">//临时变量,用于计算最值</span></span><br><span class="line">            <span class="keyword">for</span>(<span class="keyword">auto</span> k=i;k&lt;j;++k)&#123;</span><br><span class="line">                temp_max=<span class="built_in">max</span>(temp_max,max_dp[i][k]+max_dp[k<span class="number">+1</span>][j]+prefix[j]-prefix[i<span class="number">-1</span>]);<span class="comment">//状态转移</span></span><br><span class="line">                temp_min=<span class="built_in">min</span>(temp_min,min_dp[i][k]+min_dp[k<span class="number">+1</span>][j]+prefix[j]-prefix[i<span class="number">-1</span>]);</span><br><span class="line">            &#125;</span><br><span class="line">            max_dp[i][j]=temp_max;</span><br><span class="line">            min_dp[i][j]=temp_min;</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="type">int</span> max_value=<span class="number">0</span>;</span><br><span class="line">    <span class="type">int</span> min_value=<span class="number">1e9</span>;</span><br><span class="line">    <span class="keyword">for</span>(<span class="type">int</span> i=<span class="number">1</span>;i&lt;=n;i++)&#123;</span><br><span class="line">        max_value=<span class="built_in">max</span>(max_value,max_dp[i][i+n<span class="number">-1</span>]);</span><br><span class="line">        min_value=<span class="built_in">min</span>(min_value,min_dp[i][i+n<span class="number">-1</span>]);</span><br><span class="line">    &#125;</span><br><span class="line">    cout&lt;&lt;min_value&lt;&lt;endl&lt;&lt;max_value&lt;&lt;endl;</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">    <span class="keyword">return</span> <span class="number">0</span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+
+
+
+
+
+
+<h2 id="P1063-合并能量珠子"><a href="#P1063-合并能量珠子" class="headerlink" title="P1063 合并能量珠子"></a><a target="_blank" rel="noopener" href="https://www.luogu.com.cn/problem/P1063">P1063 合并能量珠子</a></h2><p>每个珠子有两头,记作(l,r),相邻两个珠子的相向两头数值相同,比如<br>$$<br>(a,b)(b,c)(c,d)(d,a)<br>$$<br>合并两个相邻珠子$(a,b)(b,c)$得到的能量是$a\times b\times c$,合并之后形成新珠子$(a,c)$</p>
+<p>将整个项链合并,求得到的最大能量值</p>
+<p>还是将整个环拆成[1,n]然后拷贝一份接到后面</p>
+<p>$dp[i][j]$表示合并区间[i,j]能够得到的最大能量,其中i表示第i个珠子,j表示第j个珠子</p>
+<p>边界条件仍然是$dp[i][i]&#x3D;0$,只有一个珠子不需要合并</p>
+<p>状态转移:<br>$$<br>dp[i][j]&#x3D;\max_{i\le k&lt; j}(dp[i][k]+dp[k+1][j]+node[k].l\times node[k].r\times node[k+1].r)<br>$$</p>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br><span class="line">75</span><br><span class="line">76</span><br><span class="line">77</span><br><span class="line">78</span><br><span class="line">79</span><br><span class="line">80</span><br><span class="line">81</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;iostream&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;algorithm&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;vector&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;string&gt;</span></span></span><br><span class="line"><span class="keyword">using</span> <span class="keyword">namespace</span> std;</span><br><span class="line"><span class="type">const</span> <span class="type">int</span> maxn=<span class="number">210</span>;</span><br><span class="line"><span class="type">int</span> n;</span><br><span class="line"><span class="keyword">struct</span> <span class="title class_">Bead</span>&#123;</span><br><span class="line">    <span class="type">int</span> __energy;<span class="comment">//合并成当前珠子时能够获得的最大能量</span></span><br><span class="line">    <span class="type">int</span> __l;<span class="comment">//左标记</span></span><br><span class="line">    <span class="type">int</span> __r;<span class="comment">//右标记</span></span><br><span class="line">    <span class="built_in">Bead</span>(<span class="type">int</span> _l=<span class="number">0</span>,<span class="type">int</span> _r=<span class="number">0</span>,<span class="type">int</span> _e=<span class="number">0</span>):__l(_l),__r(_r),__energy(_e)&#123;&#125;</span><br><span class="line">    <span class="function"><span class="type">int</span> <span class="title">l</span><span class="params">()</span><span class="type">const</span></span>&#123;</span><br><span class="line">        <span class="keyword">return</span> __l;</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="function"><span class="type">int</span> <span class="title">r</span><span class="params">()</span><span class="type">const</span></span>&#123;</span><br><span class="line">        <span class="keyword">return</span> __r;</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="function"><span class="type">void</span> <span class="title">setL</span><span class="params">(<span class="type">int</span> _l)</span></span>&#123;</span><br><span class="line">        __l=_l;</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="function"><span class="type">void</span> <span class="title">setR</span><span class="params">(<span class="type">int</span> _r)</span></span>&#123;</span><br><span class="line">        __r=_r;</span><br><span class="line">    &#125;  </span><br><span class="line">    <span class="function"><span class="type">void</span> <span class="title">setEnergy</span><span class="params">(<span class="type">int</span> _e)</span></span>&#123;</span><br><span class="line">        __energy=_e;</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="function"><span class="type">int</span> <span class="title">energy</span><span class="params">()</span></span>&#123;</span><br><span class="line">        <span class="keyword">return</span> __energy;</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="function">string <span class="title">toString</span><span class="params">()</span><span class="type">const</span></span>&#123;</span><br><span class="line">        <span class="keyword">return</span> <span class="string">&quot;(&quot;</span>+<span class="built_in">to_string</span>(__l)+<span class="string">&quot;,&quot;</span>+<span class="built_in">to_string</span>(__r)+<span class="string">&quot;)&quot;</span>;</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">friend</span> ostream &amp;<span class="keyword">operator</span>&lt;&lt;(ostream &amp;os,<span class="type">const</span> Bead &amp;bead)&#123;</span><br><span class="line">        os&lt;&lt;bead.<span class="built_in">toString</span>();</span><br><span class="line">        <span class="keyword">return</span> os;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;bead[maxn][maxn];</span><br><span class="line"><span class="type">int</span> dp[maxn][maxn];</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="function"><span class="type">int</span> <span class="title">main</span><span class="params">()</span></span>&#123;</span><br><span class="line">    cin&gt;&gt;n;</span><br><span class="line">    <span class="type">int</span> l;</span><br><span class="line">    <span class="type">int</span> r;</span><br><span class="line">    <span class="keyword">for</span>(<span class="type">int</span> i=<span class="number">1</span>;i&lt;=n;i++)&#123;</span><br><span class="line">        cin&gt;&gt;l;</span><br><span class="line">        bead[i][i].<span class="built_in">setL</span>(l);</span><br><span class="line">        bead[i+n][i+n].<span class="built_in">setL</span>(l);</span><br><span class="line">        bead[i+n<span class="number">-1</span>][i+n<span class="number">-1</span>].<span class="built_in">setR</span>(l);</span><br><span class="line">        bead[i<span class="number">-1</span>][i<span class="number">-1</span>].<span class="built_in">setR</span>(l);</span><br><span class="line">    &#125;</span><br><span class="line">    bead[<span class="number">2</span>*n][<span class="number">2</span>*n].<span class="built_in">setR</span>(bead[<span class="number">0</span>][<span class="number">0</span>].<span class="built_in">r</span>());</span><br><span class="line">    <span class="keyword">for</span>(<span class="keyword">auto</span> delta=<span class="number">1</span>;delta&lt;n;++delta)&#123;</span><br><span class="line">        <span class="keyword">for</span>(<span class="keyword">auto</span> i=<span class="number">1</span>;i+delta&lt;=<span class="number">2</span>*n;++i)&#123;</span><br><span class="line">            <span class="keyword">auto</span> j=i+delta;</span><br><span class="line">            <span class="type">int</span> max_energy=<span class="number">0</span>;</span><br><span class="line">            <span class="type">int</span> temp_energy=<span class="number">0</span>;</span><br><span class="line">            <span class="type">int</span> max_k=<span class="number">0</span>;</span><br><span class="line">            <span class="keyword">for</span>(<span class="keyword">auto</span> k=i;k&lt;j;++k)&#123;</span><br><span class="line">                </span><br><span class="line">                temp_energy=<span class="built_in">max</span>(max_energy,bead[i][k].<span class="built_in">energy</span>()+bead[k<span class="number">+1</span>][j].<span class="built_in">energy</span>()+bead[i][k].<span class="built_in">l</span>() * bead[i][k].<span class="built_in">r</span>() * bead[k<span class="number">+1</span>][j].<span class="built_in">r</span>());</span><br><span class="line">                <span class="keyword">if</span>(temp_energy&gt;max_energy)&#123;</span><br><span class="line">                    max_energy=temp_energy;</span><br><span class="line">                    max_k=k;</span><br><span class="line">                &#125;</span><br><span class="line">            &#125;</span><br><span class="line">            bead[i][j].<span class="built_in">setEnergy</span>(max_energy);</span><br><span class="line">            bead[i][j].<span class="built_in">setL</span>(bead[i][max_k].<span class="built_in">l</span>());</span><br><span class="line">            bead[i][j].<span class="built_in">setR</span>(bead[max_k<span class="number">+1</span>][j].<span class="built_in">r</span>());</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="type">int</span> result=<span class="number">0</span>;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">for</span>(<span class="type">int</span> i=<span class="number">1</span>;i&lt;=n;i++)&#123;</span><br><span class="line">        <span class="type">int</span> j=i+n<span class="number">-1</span>;</span><br><span class="line">        result=<span class="built_in">max</span>(result,bead[i][j].<span class="built_in">energy</span>());</span><br><span class="line">    &#125;</span><br><span class="line">    cout&lt;&lt;result&lt;&lt;endl;</span><br><span class="line">    <span class="keyword">return</span> <span class="number">0</span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+
+
+
+
+
+
+<h2 id="P1005-矩阵取数"><a href="#P1005-矩阵取数" class="headerlink" title="P1005 矩阵取数"></a><a target="_blank" rel="noopener" href="https://www.luogu.com.cn/problem/P1005">P1005 矩阵取数</a></h2><p>对于一个给定的 $n \times m$ 的矩阵，矩阵中的每个元素 $a_{i,j}$ 均为非负整数。游戏规则如下：</p>
+<ol>
+<li>每次取数时须从每行各取走一个元素，共 $n$ 个。经过 $m$ 次后取完矩阵内所有元素；</li>
+<li>每次取走的各个元素只能是该元素所在行的行首或行尾；</li>
+<li>每次取数都有一个得分值，为每行取数的得分之和，每行取数的得分 &#x3D; 被取走的元素值 $\times 2^i$，其中 $i$ 表示第 $i$ 次取数（从 $1$ 开始编号）；</li>
+<li>游戏结束总得分为 $m$ 次取数得分之和。</li>
+</ol>
+<p>对于任意矩阵，可以求出取数后的最大得分。</p>
+<p>由于第i次取数的权重为$2^i$,显然应尽量保留大数放到最后取</p>
+<p>并且取第一行和第二行的数没有影响</p>
+<p>因此实际上可以先解决一行内的取数问题,问题转化为:</p>
+<p>m个数,第i个数是a[i],每次取数只能从头或者尾取数,第j次取数x的得分是$2^j\times x$,求m次取数最高得分</p>
+<p>如果没有只能头尾取数的限制,显然直接m个数排序后按照从小到达的顺序取数,现在有一个只能从头或者尾取数的限制</p>
+<p>暴力搜索的算法容易想到dfs(deque,level)表示当前双端队列deque,当前要取第level个数</p>
+<p>但是m最大为80,这就意味着dfs的时间复杂度是$O(2^{80})$显然超时</p>
+<p>显然要使用更吊的方法</p>
+<p>设计状态:<br>$$<br>dp[i][j]\leftarrow要在闭区间[i,j]中取数,全部取完后最终能够得到的最大值<br>$$</p>
+<p>状态转移:<br>$$<br>dp[i][j]&#x3D;max(dp[i][j-1]+a[j][j]\times 2^k,dp[i+1][j]+a[i][i]\times 2^k)<br>$$<br>其中k是第k次取数,k&#x3D;n-i-j+2</p>
+<p><code>dp[1][n]</code>是第1次取数</p>
+<p>屑题害得考尼玛的高精度,有个🔨意思啊,没活可以咬打火机</p>
+<h2 id="P4767-邮局"><a href="#P4767-邮局" class="headerlink" title="P4767 邮局"></a><a target="_blank" rel="noopener" href="https://www.luogu.com.cn/problem/P4767">P4767 邮局</a></h2><p>v个村庄,p个邮局</p>
+<p>第i个村庄在a[i]位置</p>
+<p>邮局都要建在村庄里,要求所有村庄到最近邮局的距离和最小</p>
+<p>求这个最小距离和是多少</p>
+<p>设计状态:<br>$$<br>dp[i][j]表示前i个村庄放了j个邮局,最小距离和<br>$$</p>
+<p>状态转移<br>$$<br>dp[i][j]&#x3D;\min_{1\le k\le i}(dp[k][j-1]+w(k+1,i))<br>$$<br>其中$w(l,r)$表示,在第l个和第r个(包括两头)村庄之间放一个邮局时,这一段上的村庄的最短距离和</p>
+<p>这个玩意儿怎么求呢?</p>
+<p>设$[l,r]$区间上的村庄坐标为$x[l],x[l+1],x[l+2],…,x[r-1],x[r]$</p>
+<p>假设放这个邮局的坐标为$x$,则问题相当于<br>$$<br>w(l,r)&#x3D;min(|x-x[l]|+|x-x[l+1]|+|x-x[l+2]|+…+|x-x[r-1]|+|x-x[r]|)<br>$$<br>令$f(x)&#x3D;|x-x[l]|+|x-x[l+1]|+|x-x[l+2]|+…+|x-x[r-1]|+|x-x[r]|$</p>
+<p>也就是求该函数在$[l,r]$上的最小值点</p>
+<p>怎么求呢?画图观察一下,</p>
+<p>如果有奇数项,比如$y&#x3D;|x-x_1|+|x-x_2|+|x-x_3|$,这个函数必然有一个尖儿,也就是我们需要的最小值,并且这个极小值点等于 $中位数(x_1,x_2,x_3)$</p>
+<p><img src="https://raw.githubusercontent.com/DeutschBall/VideoBed/main/image-20221223163332854.png" alt="image-20221223163332854"></p>
+<p>如果有偶数项,比如$y&#x3D;|x-x_1|+|x-x_2|+|x-x_3|+|x-x_4|$,就没有这个尖儿,但是有一个水平的最低谷,这个最低谷介于两个中位数之间</p>
+<p><img src="https://raw.githubusercontent.com/DeutschBall/VideoBed/main/image-20221223163546294.png" alt="image-20221223163546294"></p>
+<p>这就有$w(l,r)$的求解方法了:</p>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="built_in">w</span>(l,r):</span><br><span class="line">	mid=向下取整((l+r)/<span class="number">2</span>)</span><br><span class="line">	dist_sum=<span class="number">0</span>;</span><br><span class="line">	<span class="keyword">for</span> all k among [l,r]:</span><br><span class="line">		dist_sum+=<span class="built_in">abs</span>(x[k]-x[mid])</span><br><span class="line">		</span><br><span class="line">	<span class="keyword">return</span> dist_sum;</span><br></pre></td></tr></table></figure>
+
+<p>每次调用$w(l,r)$,时间复杂度都是$T(r-l+1)&#x3D;O(n)$</p>
+<p>可以预处理所有的$w(l,r)$</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">for(int l=1;l&lt;=n;++l)&#123;</span><br><span class="line">	for(int r=l;r&lt;=n;++r)&#123;</span><br><span class="line">		W[l][r]=w(l,r);</span><br><span class="line">	&#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>外面又套了$O(n^2)$的循环</p>
+<p>总复杂度是$O(n^3)$,然而n最大是3000,显然$O(n^3)$会超时</p>
+<p>如果能给他降为$O(n^2)$就可以了</p>
+<p>这个$w[l,r]$的求法可以继续优化</p>
+<p>假设已经知道了$w[l,r-1]$,现在要求$w[l,r]$<br>$$<br>w[l,r]&#x3D;w[l,r-1]+x[r]-x[mid(l,r)]\<br>mid(l,r)&#x3D;\lfloor\frac{l+r}{2}\rfloor<br>$$<br>这条结论看上去很诡异,太简洁了,并且好像中位数的变动只会影响到新加入的第r个村庄,前面的[l,r-1]村庄到邮局的最近距离和仍然是使用的原来的中位数,我自己推导的式子中是有中位数的变化的</p>
+<blockquote>
+<p>如果$r-l+1$是一个奇数,那么最右边再加一个,下标中位数不变,相当于邮局位置不用改动,那么[l,r]所有的村庄到这个邮局的距离和不变,$w[l,r+1]&#x3D;w[l,r]+|x[r+1]-x[mid]|$</p>
+<p>如果$r-l+1$是一个偶数,那么最右边再加一个,下标中位数得往右移动一个,新mid&#x3D;老mid+1,那么</p>
+<p>$w[l,r+1]&#x3D;w[l,r]+|x[新mid]-x[老mid]|\times (l-r+1)+|x[r+1]-x[新mid]|$</p>
+<p>再考虑$r-l+1$是奇数的情况,如果保持下标中位数不变,实际上对于[l,r+1]时,这个中位数是左中位数</p>
+<p>完全可以+1使用右中位数</p>
+<p>因此两种情况统一了,即<br>$$<br>w[l,r+1]&#x3D;w[l,r]+(x[mid+1]-x[mid])\times (r-l+1)+x[r+1]-x[mid+1]<br>$$</p>
+</blockquote>
+<p>然而仔细一想确实可以忽略中位数的变化.怎么想呢?</p>
+<p>$$<br>\begin{aligned}<br>w[l,r-1]&amp;&#x3D;\sum_{l\le k\le r-1}|x[k]-x[mid(l,r-1)]|\<br>w[l,r]&amp;&#x3D;\sum_{l\le k\le r}|x[k]-x[mid(l,r)]|\<br>\end{aligned}<br>$$<br>如果[l,r-1]之间有偶数个村庄,那么选取邮局建立在左中位数村庄或者右中位数村庄,甚至两者直接的地方(虽然只允许建立在村庄里),[l,r-1]所有的村庄到这个邮局的距离和都是最短的,这在图上对应水平谷底那一段</p>
+<p>不妨让邮局建立在右中位数村庄,也就是$\lfloor\frac{l+r-1}{2}\rfloor+1$</p>
+<p>那么[l,r]有奇数个村庄,其中位数唯一,也就是$\lfloor \frac{l+r}{2}\rfloor$</p>
+<p>由于[l,r-1]之间有偶数个村庄,因此可以设$r-1-l+1&#x3D;r-l&#x3D;2k$带入上两式<br>$$<br>\begin{aligned}<br>\lfloor\frac{l+r-1}{2}\rfloor+1&amp;&#x3D;\lfloor k+l-\frac{1}{2}\rfloor+1&#x3D;k+l-1+1&#x3D;k+l\<br>\lfloor \frac{l+r}{2}\rfloor&amp;&#x3D;\lfloor k+l\rfloor&#x3D;k+l<br>\end{aligned}<br>$$<br>这就证明了[l,r]的中位数恰好是[l,r-1]的右中位数,因此两种情况可以选择同一个中位数,因此新加入r村庄的时候w[l,r]直接加上w[l,r-1],无需进行中位数的校正</p>
+<p>如果[l,r-1]之间有奇数个村庄,那么只需要让[l,r]选取左中位数和[l,r-1]的中位数是一个点,同理可证</p>
+<p>证毕</p>
+<p>实际上证完了看这个结论很容易想,但是之前思维就太僵化了,以后记住这个结论吧</p>
+<p>加上w计算的优化,加上四边形不懂事的优化</p>
+<p>okk,现在dp的时间复杂度成功降到了$O(n^2)$</p>
+<p>优化后的w,其计算的时间复杂度也是$O(n^2)$</p>
+<p>总时间复杂度就是$O(n^2)$</p>
+<p>应该可以通过了吧</p>
+<p><del>不想写了,开摆,明天写了题解然后再看看四边形不懂事优化</del></p>
+<p>阳了四天,摆了四天…</p>
+<p>首先是不加四边形不等式优化的代码</p>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br><span class="line">75</span><br><span class="line">76</span><br><span class="line">77</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;iostream&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;algorithm&gt;</span></span></span><br><span class="line"><span class="keyword">using</span> <span class="keyword">namespace</span> std;</span><br><span class="line"><span class="type">int</span> v, p;</span><br><span class="line"><span class="type">const</span> <span class="type">int</span> INF = <span class="number">1e9</span>;</span><br><span class="line"><span class="type">const</span> <span class="type">int</span> maxv = <span class="number">3010</span>;</span><br><span class="line"><span class="type">const</span> <span class="type">int</span> maxp = <span class="number">310</span>;</span><br><span class="line"><span class="type">int</span> x[maxv];</span><br><span class="line"><span class="type">int</span> w[maxv][maxv];</span><br><span class="line"><span class="type">int</span> dp[maxv][maxp];</span><br><span class="line"><span class="comment">// int s[maxv][maxp];</span></span><br><span class="line"><span class="type">int</span> s[maxv];</span><br><span class="line"><span class="function"><span class="type">int</span> <span class="title">main</span><span class="params">()</span></span></span><br><span class="line"><span class="function"></span>&#123;</span><br><span class="line">    <span class="comment">// cin.tie(0);</span></span><br><span class="line">    cin &gt;&gt; v &gt;&gt; p;</span><br><span class="line">    <span class="keyword">for</span> (<span class="type">int</span> i = <span class="number">1</span>; i &lt;= v; ++i)</span><br><span class="line">    &#123;</span><br><span class="line">        cin &gt;&gt; x[i];</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="built_in">sort</span>(x + <span class="number">1</span>, x + v + <span class="number">1</span>);<span class="comment">//使村庄的坐标升序排列</span></span><br><span class="line"></span><br><span class="line">    <span class="comment">//初始化w数组</span></span><br><span class="line">    <span class="keyword">for</span> (<span class="type">int</span> l = <span class="number">1</span>; l &lt;= v; ++l)</span><br><span class="line">    &#123;</span><br><span class="line">        w[l][l] = <span class="number">0</span>; <span class="comment">// 从l号村庄上建立邮局,到该村庄的最短邮局距离就是0</span></span><br><span class="line">        <span class="keyword">for</span> (<span class="type">int</span> r = l + <span class="number">1</span>; r &lt;= v; ++r)</span><br><span class="line">        &#123;</span><br><span class="line">            w[l][r] = w[l][r - <span class="number">1</span>] + x[r] - x[(l + r) &gt;&gt; <span class="number">1</span>];</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">    <span class="comment">//初始化dp数组</span></span><br><span class="line">    <span class="keyword">for</span> (<span class="type">int</span> i = <span class="number">0</span>; i &lt;= v; i++)</span><br><span class="line">    &#123;</span><br><span class="line">        s[i]=i;</span><br><span class="line">        <span class="keyword">for</span> (<span class="type">int</span> j = <span class="number">0</span>; j &lt;= p; ++j)</span><br><span class="line">        &#123;</span><br><span class="line">            dp[i][j] = INF;</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">    dp[<span class="number">0</span>][<span class="number">0</span>] = <span class="number">0</span>;</span><br><span class="line"></span><br><span class="line">    </span><br><span class="line">    <span class="keyword">for</span> (<span class="keyword">auto</span> j = <span class="number">1</span>; j &lt;= p; ++j)</span><br><span class="line">    &#123;</span><br><span class="line">        <span class="keyword">for</span> (<span class="keyword">auto</span> i = <span class="number">1</span>; i &lt;= v; ++i)</span><br><span class="line">        &#123;</span><br><span class="line">            <span class="type">int</span> temp_min = INF;</span><br><span class="line">            <span class="keyword">for</span> (<span class="keyword">auto</span> k = s[i<span class="number">-1</span>]; k &lt; i; ++k)</span><br><span class="line">            &#123;</span><br><span class="line">                <span class="keyword">if</span>(temp_min&gt;dp[k][j - <span class="number">1</span>] + w[k + <span class="number">1</span>][i])&#123;</span><br><span class="line">                    temp_min=dp[k][j - <span class="number">1</span>] + w[k + <span class="number">1</span>][i];</span><br><span class="line">                    s[i]=k;<span class="comment">//四边形不等式优化</span></span><br><span class="line">                &#125;</span><br><span class="line">                <span class="comment">// temp_min = min(temp_min, dp[k][j - 1] + w[k + 1][i]);</span></span><br><span class="line">            &#125;</span><br><span class="line">            dp[i][j] = temp_min;</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="comment">// i,j遍历顺序反了,导致计算dp[i][j]时,dp[k][j-1]可能还没有经过计算</span></span><br><span class="line">    <span class="comment">//  for(auto i=1;i&lt;=v;++i)&#123;</span></span><br><span class="line">    <span class="comment">//      for(auto j=1;j&lt;=p;++j)&#123;</span></span><br><span class="line">    <span class="comment">//          int temp_min=INF;</span></span><br><span class="line">    <span class="comment">//          for(auto k=1;k&lt;i;++k)&#123;</span></span><br><span class="line">    <span class="comment">//              temp_min=min(temp_min,dp[k][j-1]+w[k+1][i]);</span></span><br><span class="line">    <span class="comment">//          &#125;</span></span><br><span class="line">    <span class="comment">//          dp[i][j]=temp_min;</span></span><br><span class="line">    <span class="comment">//      &#125;</span></span><br><span class="line">    <span class="comment">//  &#125;</span></span><br><span class="line">    cout &lt;&lt; dp[v][p];</span><br><span class="line"></span><br><span class="line">    <span class="keyword">return</span> <span class="number">0</span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+
+
+
+
+<h2 id="动态规划-四边形不等式优化"><a href="#动态规划-四边形不等式优化" class="headerlink" title="动态规划-四边形不等式优化"></a>动态规划-四边形不等式优化</h2><p>证明及其他详细资料见<a target="_blank" rel="noopener" href="https://github.com/luoyongjun999/code">luoyongjun999&#x2F;code: code (github.com)</a></p>
+<p>区间dp的状态转移,一般长这样(以P1775石子合并为例):</p>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">for</span>(<span class="type">int</span> delta=<span class="number">1</span>;delta&lt;=n;++delta)&#123;</span><br><span class="line">    <span class="keyword">for</span>(<span class="keyword">auto</span> i=<span class="number">1</span>;i+delta&lt;=n;++i)&#123;</span><br><span class="line">        <span class="keyword">auto</span> j=i+delta;</span><br><span class="line">        <span class="type">int</span> temp_min=INF;</span><br><span class="line">        <span class="keyword">for</span>(<span class="keyword">auto</span> k=i;k&lt;j;++k)&#123;</span><br><span class="line">            <span class="keyword">if</span>(dp[i][k]+dp[k<span class="number">+1</span>][j]&lt;temp_min)&#123;</span><br><span class="line">                temp_min=dp[i][k]+dp[k<span class="number">+1</span>][j];</span><br><span class="line">                s[i][j]=k;</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;</span><br><span class="line">        dp[i][j]=temp_min+prefix[j]-prefix[i<span class="number">-1</span>];</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>三层循环,复杂度$O(n^3)$</p>
+<p>使用四边形不等式优化(能够证明成立的前提下),可以将最里圈k的遍历范围从$[i,j)$,缩减到$[s[i][j-1],s[i+1][j]$,这个范围结合上i和j的范围能够证明,三层循环的时间复杂度实际上是$O(n^2)$</p>
+<blockquote>
+<p>这里$s[i][j]$的实际意义是,当$dp[i][j]&#x3D;\min_{i\leq k&lt;j}(dp[i][k]+dp[k+1][j])+\sum_{i\leq k\leq j}a[k]$在k处取得最小值时,此时的k就作为$s[i][j]$</p>
+<p>边界条件是$s[i][i]&#x3D;i$</p>
+</blockquote>
+<p>用法见P1775</p>
+<h2 id="P1775-石子合并（弱化版"><a href="#P1775-石子合并（弱化版" class="headerlink" title="P1775 石子合并（弱化版)"></a><a target="_blank" rel="noopener" href="https://www.luogu.com.cn/problem/P1775">P1775 石子合并（弱化版)</a></h2><p>一排N堆石头第i堆石头有a[i]个,合并两堆石头的得分是两堆石头的数量和</p>
+<p>求最后合并只剩一堆时取得的最小得分,其中$N\le 300,a[i]\leq 1000$</p>
+<p>P1880那个题是环状的,这个是线性的</p>
+<p>设计状态:<br>$$<br>dp[i][j]表示合并[i,j]所有的石子,获得的最小得分<br>$$<br>边界条件:<br>$$<br>dp[i][i]&#x3D;0,即合并一堆时合并个寂寞<br>$$<br>状态转移:<br>$$<br>dp[i][j]&#x3D;\min_{i\leq k&lt;j}(dp[i][k]+dp[k+1][j])+\sum_{i\leq k\leq j}a[k]<br>$$<br>前缀和优化:<br>$$<br>\sum_{i\leq k\leq j}a[k]&#x3D;prefix[j]-prefix[i-1]\<br>dp[i][j]&#x3D;\min_{i\leq k&lt;j}(dp[i][k]+dp[k+1][j])+prefix[j]-prefix[i-1]<br>$$<br>四边形不等式优化:</p>
+<blockquote>
+<p>实际上需要证明$dp[i][j]$,但是可以证明只要是$w[i][j]$满足四边形不等式,$dp[i][j]$也自动满足四边形不等式,</p>
+<p>因此首先证明$w[i][j]&#x3D;\sum_{i\leq k\leq j}a[k]&#x3D;prefix[j]-prefix[i-1]$满足应用四边形不等式的条件,即证:</p>
+<p>1.定义:对于任意$i&lt;i+1\leq j&lt;j+1$,都有<br>$$<br>w[i][j]+w[i+1][j+1]\leq w[i][j+1]+w[i+1][j]<br>$$<br>2.单调性:对于任意$i\le i’\le j\le j’$,都有<br>$$<br>w[i][j’]\ge w[i’][j]<br>$$<br>证明如下:</p>
+<p>对于定义:<br>$$<br>w[i][j]+w[i+1][j+1]&#x3D;prefix[j]-prefix[i-1]+prefix[j+1]-prefix[i]<br>$$</p>
+<p>$$<br> w[i][j+1]+w[i+1][j]&#x3D;prefix[j+1]-prefix[i-1]+prefix[j]-prefix[i]<br>$$</p>
+<p>左&#x3D;右,定义成立</p>
+<p>对于单调性:<br>$$<br>w[i][j’]-w[i’][j]&#x3D;prefix[j’]-prefix[i-1]-prefix[j]+prefix[i’-1]\<br>&#x3D;(prefix[j’]-prefix[j])+(prefix[i’-1]-preifx[i-1])<br>$$<br>由于$i\le i’\le j\le j’$,并且前缀函数$prefix[i]$单调不减,因此上式非负,即<br>$$<br>w[i][j’]\ge w[i’][j]<br>$$<br>证毕</p>
+<p>下面就可以使用四边形不等式的性质定理优化了</p>
+</blockquote>
+<p>$$<br>dp[i][j]&#x3D;\min_{s[i-1][j]\leq k&lt;s[i][j+1]}(dp[i][k]+dp[k+1][j])+prefix[j]-prefix[i-1]<br>$$<br>这里$s[i][j]$的实际意义是,当$dp[i][j]&#x3D;\min_{i\leq k&lt;j}(dp[i][k]+dp[k+1][j])+\sum_{i\leq k\leq j}a[k]$在k处取得最小值时,此时的k就作为$s[i][j]$</p>
+<p>边界条件是$s[i][i]&#x3D;i$</p>
+<p>$s[i][j]$的计算并不是头铁地从i到j遍历k先求$s[i][j]$,而是跟随dp一起求</p>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;iostream&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;algorithm&gt;</span></span></span><br><span class="line"><span class="keyword">using</span> <span class="keyword">namespace</span> std;</span><br><span class="line"><span class="type">const</span> <span class="type">int</span> maxn=<span class="number">310</span>;</span><br><span class="line"><span class="type">const</span> <span class="type">int</span> INF=<span class="number">1e9</span>;</span><br><span class="line"><span class="type">int</span> n;</span><br><span class="line"><span class="type">int</span> a[maxn];</span><br><span class="line"><span class="type">int</span> dp[maxn][maxn];</span><br><span class="line"><span class="type">int</span> s[maxn][maxn];</span><br><span class="line"><span class="type">int</span> prefix[maxn];</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="function"><span class="type">int</span> <span class="title">main</span><span class="params">()</span></span>&#123;</span><br><span class="line">    cin&gt;&gt;n;</span><br><span class="line">    <span class="keyword">for</span>(<span class="type">int</span> i=<span class="number">1</span>;i&lt;=n;++i)&#123;</span><br><span class="line">        cin&gt;&gt;a[i];</span><br><span class="line">        s[i][i]=i;</span><br><span class="line">        dp[i][i]=<span class="number">0</span>;</span><br><span class="line">        prefix[i]=prefix[i<span class="number">-1</span>]+a[i];</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">for</span>(<span class="type">int</span> delta=<span class="number">1</span>;delta&lt;=n;++delta)&#123;</span><br><span class="line">        <span class="keyword">for</span>(<span class="keyword">auto</span> i=<span class="number">1</span>;i+delta&lt;=n;++i)&#123;</span><br><span class="line">            <span class="keyword">auto</span> j=i+delta;</span><br><span class="line">            <span class="type">int</span> temp_min=INF;</span><br><span class="line">            <span class="keyword">for</span>(<span class="keyword">auto</span> k=i;k&lt;j;++k)&#123;</span><br><span class="line">                <span class="keyword">if</span>(dp[i][k]+dp[k<span class="number">+1</span>][j]&lt;temp_min)&#123;</span><br><span class="line">                    temp_min=dp[i][k]+dp[k<span class="number">+1</span>][j];</span><br><span class="line">                    s[i][j]=k;</span><br><span class="line">                &#125;</span><br><span class="line">            &#125;</span><br><span class="line">            dp[i][j]=temp_min+prefix[j]-prefix[i<span class="number">-1</span>];</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">    cout&lt;&lt;dp[<span class="number">1</span>][n]&lt;&lt;endl;</span><br><span class="line">    <span class="keyword">return</span> <span class="number">0</span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+
+
+<p>至于四边形不等式的正确性,现在还没有完全转阴,啥时候脑子不浑了再看吧…</p>
+
+    </div>
+
+    
+    
+    
+
+      <footer class="post-footer">
+          <div class="post-tags">
+              <a href="/tags/%E7%AE%97%E6%B3%95%E5%AF%BC%E8%AE%BA/" rel="tag"># 算法导论</a>
+          </div>
+
+        
+
+
+        
+    <div class="post-nav">
+      <div class="post-nav-item">
+    <a href="/2022/12/22/%E7%8A%B6%E5%8E%8BDP/" rel="prev" title="动态规划-状压DP">
+      <i class="fa fa-chevron-left"></i> 动态规划-状压DP
+    </a></div>
+      <div class="post-nav-item">
+    <a href="/2023/01/04/MVC%E6%A1%86%E6%9E%B6/" rel="next" title="后端MVC框架">
+      后端MVC框架 <i class="fa fa-chevron-right"></i>
+    </a></div>
+    </div>
+      </footer>
+    
+  </article>
+  
+  
+  
+
+
+
+          </div>
+          
+
+<script>
+  window.addEventListener('tabs:register', () => {
+    let { activeClass } = CONFIG.comments;
+    if (CONFIG.comments.storage) {
+      activeClass = localStorage.getItem('comments_active') || activeClass;
+    }
+    if (activeClass) {
+      let activeTab = document.querySelector(`a[href="#comment-${activeClass}"]`);
+      if (activeTab) {
+        activeTab.click();
+      }
+    }
+  });
+  if (CONFIG.comments.storage) {
+    window.addEventListener('tabs:click', event => {
+      if (!event.target.matches('.tabs-comment .tab-content .tab-pane')) return;
+      let commentClass = event.target.classList[1];
+      localStorage.setItem('comments_active', commentClass);
+    });
+  }
+</script>
+
+        </div>
+          
+  
+  <div class="toggle sidebar-toggle">
+    <span class="toggle-line toggle-line-first"></span>
+    <span class="toggle-line toggle-line-middle"></span>
+    <span class="toggle-line toggle-line-last"></span>
+  </div>
+
+  <aside class="sidebar">
+    <div class="sidebar-inner">
+
+      <ul class="sidebar-nav motion-element">
+        <li class="sidebar-nav-toc">
+          Table of Contents
+        </li>
+        <li class="sidebar-nav-overview">
+          Overview
+        </li>
+      </ul>
+
+      <!--noindex-->
+      <div class="post-toc-wrap sidebar-panel">
+          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#%E5%8A%A8%E6%80%81%E8%A7%84%E5%88%92-%E5%8C%BA%E9%97%B4DP"><span class="nav-number">1.</span> <span class="nav-text">动态规划-区间DP</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#P1880-%E5%90%88%E5%B9%B6%E7%8E%AF%E7%8A%B6%E7%9F%B3%E5%AD%90"><span class="nav-number">1.1.</span> <span class="nav-text">P1880 合并环状石子</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E8%AE%BE%E8%AE%A1%E7%8A%B6%E6%80%81"><span class="nav-number">1.1.1.</span> <span class="nav-text">设计状态</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%AE%8C%E6%95%B4%E4%BB%A3%E7%A0%81"><span class="nav-number">1.1.2.</span> <span class="nav-text">完整代码</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#P1063-%E5%90%88%E5%B9%B6%E8%83%BD%E9%87%8F%E7%8F%A0%E5%AD%90"><span class="nav-number">1.2.</span> <span class="nav-text">P1063 合并能量珠子</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#P1005-%E7%9F%A9%E9%98%B5%E5%8F%96%E6%95%B0"><span class="nav-number">1.3.</span> <span class="nav-text">P1005 矩阵取数</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#P4767-%E9%82%AE%E5%B1%80"><span class="nav-number">1.4.</span> <span class="nav-text">P4767 邮局</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%8A%A8%E6%80%81%E8%A7%84%E5%88%92-%E5%9B%9B%E8%BE%B9%E5%BD%A2%E4%B8%8D%E7%AD%89%E5%BC%8F%E4%BC%98%E5%8C%96"><span class="nav-number">1.5.</span> <span class="nav-text">动态规划-四边形不等式优化</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#P1775-%E7%9F%B3%E5%AD%90%E5%90%88%E5%B9%B6%EF%BC%88%E5%BC%B1%E5%8C%96%E7%89%88"><span class="nav-number">1.6.</span> <span class="nav-text">P1775 石子合并（弱化版)</span></a></li></ol></li></ol></div>
+      </div>
+      <!--/noindex-->
+
+      <div class="site-overview-wrap sidebar-panel">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+  <p class="site-author-name" itemprop="name">John Doe</p>
+  <div class="site-description" itemprop="description"></div>
+</div>
+<div class="site-state-wrap motion-element">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+          <a href="/archives/">
+        
+          <span class="site-state-item-count">78</span>
+          <span class="site-state-item-name">posts</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-tags">
+        <span class="site-state-item-count">30</span>
+        <span class="site-state-item-name">tags</span>
+      </div>
+  </nav>
+</div>
+
+
+
+      </div>
+
+    </div>
+  </aside>
+  <div id="sidebar-dimmer"></div>
+
+
+      </div>
+    </main>
+
+    <footer class="footer">
+      <div class="footer-inner">
+        
+
+        
+
+<div class="copyright">
+  
+  &copy; 
+  <span itemprop="copyrightYear">2024</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">John Doe</span>
+</div>
+  <div class="powered-by">Powered by <a href="https://hexo.io/" class="theme-link" rel="noopener" target="_blank">Hexo</a> & <a href="https://muse.theme-next.org/" class="theme-link" rel="noopener" target="_blank">NexT.Muse</a>
+  </div>
+
+        
+
+
+
+
+
+
+
+
+      </div>
+    </footer>
+  </div>
+
+  
+  <script src="/lib/anime.min.js"></script>
+  <script src="/lib/velocity/velocity.min.js"></script>
+  <script src="/lib/velocity/velocity.ui.min.js"></script>
+
+<script src="/js/utils.js"></script>
+
+<script src="/js/motion.js"></script>
+
+
+<script src="/js/schemes/muse.js"></script>
+
+
+<script src="/js/next-boot.js"></script>
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+  
+
+</body>
+</html>
