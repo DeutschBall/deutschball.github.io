@@ -20,29 +20,18 @@
     var CONFIG = {"hostname":"dustball.top","root":"/","scheme":"Muse","version":"7.8.0","exturl":false,"sidebar":{"position":"left","display":"post","padding":18,"offset":12,"onmobile":false},"copycode":{"enable":false,"show_result":false,"style":null},"back2top":{"enable":true,"sidebar":false,"scrollpercent":false},"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":false,"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"algolia":{"hits":{"per_page":10},"labels":{"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}},"localsearch":{"enable":false,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false},"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}}};
   </script>
 
-  <meta name="description" content="windows LIB文件格式静态库以Math.c为例,将其分别编译静态库文件libMath.lib Math.c 123456789__declspec(dllexport) double Add(double a,double b)&#123;    return a+b;&#125;__declspec(dllexport) double Sub(double a,double b)&amp;#12">
+  <meta name="description" content="windows LIB文件格式 静态库 以Math.c为例,将其分别编译静态库文件libMath.lib Math.c 123456789__declspec(dllexport) double Add(double a,double b)&#123;    return a+b;&#125;__declspec(dllexport) double Sub(double a,double">
 <meta property="og:type" content="article">
 <meta property="og:title" content="程序员的自我修养 chapter 9 LIB">
 <meta property="og:url" content="http://dustball.top/2022/08/19/lib%E6%96%87%E4%BB%B6%E6%A0%BC%E5%BC%8F%E8%A7%A3%E6%9E%90/index.html">
 <meta property="og:site_name" content="dustland">
-<meta property="og:description" content="windows LIB文件格式静态库以Math.c为例,将其分别编译静态库文件libMath.lib Math.c 123456789__declspec(dllexport) double Add(double a,double b)&#123;    return a+b;&#125;__declspec(dllexport) double Sub(double a,double b)&amp;#12">
+<meta property="og:description" content="windows LIB文件格式 静态库 以Math.c为例,将其分别编译静态库文件libMath.lib Math.c 123456789__declspec(dllexport) double Add(double a,double b)&#123;    return a+b;&#125;__declspec(dllexport) double Sub(double a,double">
 <meta property="og:locale" content="en_US">
-<meta property="og:image" content="https://raw.githubusercontent.com/DeutschBall/DeutschBall/main/image-20220818165031140.png">
-<meta property="og:image" content="https://raw.githubusercontent.com/DeutschBall/DeutschBall/main/image-20220818144331204.png">
-<meta property="og:image" content="https://raw.githubusercontent.com/DeutschBall/DeutschBall/main/image-20220818164735293.png">
-<meta property="og:image" content="https://raw.githubusercontent.com/DeutschBall/DeutschBall/main/image-20220818152323244.png">
-<meta property="og:image" content="https://raw.githubusercontent.com/DeutschBall/DeutschBall/main/image-20220818154931447.png">
-<meta property="og:image" content="https://raw.githubusercontent.com/DeutschBall/DeutschBall/main/image-20220818154534122.png">
-<meta property="og:image" content="https://raw.githubusercontent.com/DeutschBall/DeutschBall/main/image-20220818155306689.png">
-<meta property="og:image" content="https://raw.githubusercontent.com/DeutschBall/DeutschBall/main/image-20220818155335088.png">
-<meta property="og:image" content="https://raw.githubusercontent.com/DeutschBall/DeutschBall/main/image-20220818165520115.png">
-<meta property="og:image" content="https://raw.githubusercontent.com/DeutschBall/DeutschBall/main/image-20220819104759118.png">
 <meta property="article:published_time" content="2022-08-19T03:13:00.000Z">
 <meta property="article:modified_time" content="2022-08-19T03:13:36.956Z">
 <meta property="article:author" content="dustball">
 <meta property="article:tag" content="程序员的自我修养">
 <meta name="twitter:card" content="summary">
-<meta name="twitter:image" content="https://raw.githubusercontent.com/DeutschBall/DeutschBall/main/image-20220818165031140.png">
 
 <link rel="canonical" href="http://dustball.top/2022/08/19/lib%E6%96%87%E4%BB%B6%E6%A0%BC%E5%BC%8F%E8%A7%A3%E6%9E%90/">
 
@@ -203,62 +192,92 @@
     <div class="post-body" itemprop="articleBody">
 
       
-        <h1 id="windows-LIB文件格式"><a href="#windows-LIB文件格式" class="headerlink" title="windows LIB文件格式"></a>windows LIB文件格式</h1><h2 id="静态库"><a href="#静态库" class="headerlink" title="静态库"></a>静态库</h2><p>以Math.c为例,将其分别编译静态库文件libMath.lib</p>
+        <h1 id="windows-lib文件格式">windows LIB文件格式</h1>
+<h2 id="静态库">静态库</h2>
+<p>以Math.c为例,将其分别编译静态库文件libMath.lib</p>
 <p>Math.c</p>
 <figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line">__declspec(dllexport) <span class="type">double</span> <span class="title function_">Add</span><span class="params">(<span class="type">double</span> a,<span class="type">double</span> b)</span>&#123;</span><br><span class="line">    <span class="keyword">return</span> a+b;</span><br><span class="line">&#125;</span><br><span class="line">__declspec(dllexport) <span class="type">double</span> <span class="title function_">Sub</span><span class="params">(<span class="type">double</span> a,<span class="type">double</span> b)</span>&#123;</span><br><span class="line">    <span class="keyword">return</span> a-b;</span><br><span class="line">&#125;</span><br><span class="line">__declspec(dllexport) <span class="type">double</span> <span class="title function_">Mul</span><span class="params">(<span class="type">double</span> a,<span class="type">double</span> b)</span>&#123;</span><br><span class="line">    <span class="keyword">return</span> a*b;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-
 <p>制作静态库</p>
 <figure class="highlight powershell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">lib Math.c /NAME:libMath.lib</span><br></pre></td></tr></table></figure>
-
 <p>lib以一个文件魔数<code>!&lt;arch&gt;\n</code>开头,</p>
-<p>接下来顺次是First Section,Second Section,Long Section,Obj Section.</p>
+<p>接下来顺次是First Section,Second Section,Long Section,Obj
+Section.</p>
 <p>如果本lib文件中包括了多个obj文件则ObjSection可以有多个.</p>
-<p>Long Section用来存放太长的obj名称,如果没有超过16个字节的obj名则该节不存在</p>
-<p><img src="https://raw.githubusercontent.com/DeutschBall/DeutschBall/main/image-20220818165031140.png" alt="libMath.lib的结构"></p>
-<h3 id="文件头魔数"><a href="#文件头魔数" class="headerlink" title="文件头魔数"></a>文件头魔数</h3><p>不管是静态库还是导入库, 只要是lib文件,开头八个字节都得是文件魔数,</p>
+<p>Long
+Section用来存放太长的obj名称,如果没有超过16个字节的obj名则该节不存在</p>
+<figure>
+<img
+src="https://raw.githubusercontent.com/DeutschBall/DeutschBall/main/image-20220818165031140.png"
+alt="libMath.lib的结构" />
+<figcaption aria-hidden="true">libMath.lib的结构</figcaption>
+</figure>
+<h3 id="文件头魔数">文件头魔数</h3>
+<p>不管是静态库还是导入库, 只要是lib文件,开头八个字节都得是文件魔数,</p>
 <p>arch,archieve,归档</p>
-<p><img src="https://raw.githubusercontent.com/DeutschBall/DeutschBall/main/image-20220818144331204.png" alt="image-20220818144331204"></p>
-<h3 id="节区"><a href="#节区" class="headerlink" title="节区"></a>节区</h3><p>每个节区都是以一个结构体开始,可以认为是”节区头”</p>
+<figure>
+<img
+src="https://raw.githubusercontent.com/DeutschBall/DeutschBall/main/image-20220818144331204.png"
+alt="image-20220818144331204" />
+<figcaption aria-hidden="true">image-20220818144331204</figcaption>
+</figure>
+<h3 id="节区">节区</h3>
+<p>每个节区都是以一个结构体开始,可以认为是"节区头"</p>
 <figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line"><span class="class"><span class="keyword">struct</span> <span class="title">SectionHeader</span>&#123;</span></span><br><span class="line">        <span class="type">char</span> Name[<span class="number">16</span>];      <span class="comment">// 节名称,即obj文件名</span></span><br><span class="line">        <span class="type">char</span> Time[<span class="number">12</span>];      <span class="comment">// 时间</span></span><br><span class="line">        <span class="type">char</span> UserID[<span class="number">6</span>];     <span class="comment">// 用户ID</span></span><br><span class="line">        <span class="type">char</span> GroupID[<span class="number">6</span>];    <span class="comment">// 组ID</span></span><br><span class="line">        <span class="type">char</span> Mode[<span class="number">8</span>];       <span class="comment">// 模式</span></span><br><span class="line">        <span class="type">char</span> Size[<span class="number">10</span>];      <span class="comment">// 节区正文长度</span></span><br><span class="line">        <span class="type">char</span> EndOfHeader[<span class="number">2</span>];<span class="comment">// 节头结束符</span></span><br><span class="line">&#125; ;</span><br></pre></td></tr></table></figure>
-
 <p>全都是字符串格式用字节存储,其好处是不管大小端机器,都可以兼容</p>
 <p>很奇怪的是FirstSection采用大端模式,到了SecondSection就又成了小端存储了</p>
 <p>节区头后面紧跟着是该节的节区正文</p>
 <p>即每个节区都是节区头+节区正文格式</p>
 <p>相邻两个节区之间可能存在<del>胸垫</del>填充,比如FirstSection的节区正文结束和SecondSection的节头开始之间就存在一个字节的填充</p>
-<p><img src="https://raw.githubusercontent.com/DeutschBall/DeutschBall/main/image-20220818164735293.png" alt="image-20220818164735293"></p>
+<figure>
+<img
+src="https://raw.githubusercontent.com/DeutschBall/DeutschBall/main/image-20220818164735293.png"
+alt="image-20220818164735293" />
+<figcaption aria-hidden="true">image-20220818164735293</figcaption>
+</figure>
 <p>怎么判断有没有填充呢?怎么寻找下一个节的开始位置呢?</p>
-<p>每个节头大小是固定的60字节,最后两个字节一定是endMarker[2]&#x3D;”\60 \0A”</p>
-<h4 id="First-Section"><a href="#First-Section" class="headerlink" title="First Section"></a>First Section</h4><p><strong>大端模式</strong></p>
+<p>每个节头大小是固定的60字节,最后两个字节一定是endMarker[2]="\60
+\0A"</p>
+<h4 id="first-section">First Section</h4>
+<p><strong>大端模式</strong></p>
 <p>包含库中<strong>所有</strong>符号名以及这些符号所在目标文件在本lib库文件中的偏移量</p>
 <blockquote>
-<p>此处”所有”是指参与组成本lib文件的所有目标文件中的所有符号,不只是一个目标文件中的所有符号</p>
+<p>此处"所有"是指参与组成本lib文件的所有目标文件中的所有符号,不只是一个目标文件中的所有符号</p>
 </blockquote>
-<p>其节名就用了一个字符”&#x2F;“</p>
+<p>其节名就用了一个字符"/"</p>
 <p>Size指明了本节正文占用了多少个字节</p>
 <p>节正文结构:</p>
 <figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">struct</span> <span class="title class_">FirstSection</span>&#123;</span><br><span class="line">	<span class="type">unsigned</span> <span class="type">long</span> SymbolNum;<span class="comment">//大端存储的符号数量</span></span><br><span class="line">	<span class="type">unsigned</span> <span class="type">long</span> SymbolOffset[SymbolNum];<span class="comment">//符号所在目标节的偏移</span></span><br><span class="line">    <span class="type">char</span> StrTable[m];<span class="comment">//符号名称字符串表,m取决于所有符号的长度</span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-
 <p>对于libMath.lib的第FirstSection,其节区正文的16进制表示为:</p>
 <figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line">SymbolNum = 00 00 00 03 </span><br><span class="line"></span><br><span class="line">SymbolOffset[SymbolNum] = </span><br><span class="line">	00 00 00 C2 </span><br><span class="line">	00 00 00 C2 </span><br><span class="line">	00 00 00 C2</span><br><span class="line"></span><br><span class="line">StrTable[m] = </span><br><span class="line">	5F 41 64 64 00 </span><br><span class="line">	5F 4D 75 6C 00 </span><br><span class="line">	5F 53 75 62 00</span><br></pre></td></tr></table></figure>
-
-<p>在32位机器上long和int一样长都是32位,因此unsigned long占用了前4个字节</p>
+<p>在32位机器上long和int一样长都是32位,因此unsigned
+long占用了前4个字节</p>
 <p>由于大端存储因此03在最高位(最右侧)</p>
 <p><code>SymbolNum=3</code>,这与Math.c中正好有三个函数符号相吻合</p>
 <p><code>SymbolOffset[3]=&#123;C2,C2,C2&#125;</code>这表明三个符号同属于一个目标模块,这个目标模块在本lib文件中的偏移量是C2</p>
-<p><img src="https://raw.githubusercontent.com/DeutschBall/DeutschBall/main/image-20220818152323244.png" alt="image-20220818152323244"></p>
+<figure>
+<img
+src="https://raw.githubusercontent.com/DeutschBall/DeutschBall/main/image-20220818152323244.png"
+alt="image-20220818152323244" />
+<figcaption aria-hidden="true">image-20220818152323244</figcaption>
+</figure>
 <p>C2位置确实是第一个也是唯一一个ObjSection的偏移量,这个ObjSection就是Math.obj</p>
 <p><code>StrTable[m]=_Add._Mul._Sub.</code>即所有符号名,每个符号名都以00结尾</p>
-<h4 id="Second-Section"><a href="#Second-Section" class="headerlink" title="Second Section"></a>Second Section</h4><p><strong>小端模式</strong></p>
-<p>内容和FirstSection相同,但是是一个有序表,查这个比查First Section来的快</p>
-<p>名字也和FirstSection相同,都是”&#x2F;“</p>
+<h4 id="second-section">Second Section</h4>
+<p><strong>小端模式</strong></p>
+<p>内容和FirstSection相同,但是是一个有序表,查这个比查First
+Section来的快</p>
+<p>名字也和FirstSection相同,都是"/"</p>
 <p>正文结构:</p>
 <figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="class"><span class="keyword">struct</span> <span class="title">SecondSection</span>&#123;</span></span><br><span class="line">	<span class="type">unsigned</span> <span class="type">long</span> ObjNum;<span class="comment">//本库文件中的Obj节数量</span></span><br><span class="line">	<span class="type">unsigned</span> <span class="type">long</span> ObjOffset[ObjNum];<span class="comment">//每个Obj节分别的偏移量,</span></span><br><span class="line">	<span class="type">unsigned</span> <span class="type">long</span> SymbolNum;<span class="comment">//所有符号数量,作用和FirstSection.SymbolNum相同</span></span><br><span class="line">	<span class="type">unsigned</span> <span class="type">short</span> SymbolIdx[SymbolNum];<span class="comment">//第i个符号所在的Obj节下标</span></span><br><span class="line">	<span class="type">char</span> StrTable[m];<span class="comment">//符号名表,同FirstSection.StrTable,第i个符号的符号名</span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-
 <figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line">ObjNum= 01 00 00 00 </span><br><span class="line">ObjOffset[ObjNum] = C2 00 00 00 </span><br><span class="line">SymbolNum = 03 00 00 00 </span><br><span class="line">SymbolIdx[SymbolNum] = </span><br><span class="line">	01 00 </span><br><span class="line">	01 00</span><br><span class="line">	01 00 </span><br><span class="line">StrTable[SymbolNum] = </span><br><span class="line">	5F 41 64 64 00 		_Add\0</span><br><span class="line">	5F 4D 75 6C 00 		_Mul\0</span><br><span class="line">	5F 53 75 62 00		_Sum\0</span><br></pre></td></tr></table></figure>
-
 <p>比较FirstSection和SecondSection</p>
 <table>
+<colgroup>
+<col style="width: 17%" />
+<col style="width: 34%" />
+<col style="width: 37%" />
+<col style="width: 10%" />
+</colgroup>
 <thead>
 <tr>
 <th></th>
@@ -267,7 +286,8 @@
 <th>意义是否相同</th>
 </tr>
 </thead>
-<tbody><tr>
+<tbody>
+<tr>
 <td>存储方式</td>
 <td>大端</td>
 <td>小端</td>
@@ -303,66 +323,104 @@
 <td>ObjOffset[ObjNum]</td>
 <td></td>
 </tr>
-</tbody></table>
-<h4 id="Long-Section"><a href="#Long-Section" class="headerlink" title="Long Section"></a>Long Section</h4><p>长名称节,存放太长的obj名</p>
-<p>每个节开始时的SectionHeader会记录该节的信息,但是SectionHeader.Name只有16字节,如果一个obj文件名比如”LinkedDoubleList.obj”长度就超过了16字节,用Name[16]显然放不下,就得放到Long section节里,Name[16]存放的是”<code>/&lt;LongSection中的偏移量&gt;</code>“表明该节名需要去Long Section找,并且给出了相对于该节的位置</p>
-<p><img src="https://raw.githubusercontent.com/DeutschBall/DeutschBall/main/image-20220818154931447.png" alt="image-20220818154931447"></p>
+</tbody>
+</table>
+<h4 id="long-section">Long Section</h4>
+<p>长名称节,存放太长的obj名</p>
+<p>每个节开始时的SectionHeader会记录该节的信息,但是SectionHeader.Name只有16字节,如果一个obj文件名比如"LinkedDoubleList.obj"长度就超过了16字节,用Name[16]显然放不下,就得放到Long
+section节里,Name[16]存放的是"<code>/&lt;LongSection中的偏移量&gt;</code>"表明该节名需要去Long
+Section找,并且给出了相对于该节的位置</p>
+<figure>
+<img
+src="https://raw.githubusercontent.com/DeutschBall/DeutschBall/main/image-20220818154931447.png"
+alt="image-20220818154931447" />
+<figcaption aria-hidden="true">image-20220818154931447</figcaption>
+</figure>
 <p>Math.obj显然不够16个字节,本lib文件中没有该节</p>
-<h4 id="Obj-Section"><a href="#Obj-Section" class="headerlink" title="Obj Section"></a>Obj Section</h4><p>目标文件节,存放不同的目标文件的原始数据.</p>
+<h4 id="obj-section">Obj Section</h4>
+<p>目标文件节,存放不同的目标文件的原始数据.</p>
 <p>本节的节区正文相当于把COFF文件直接乎过来了</p>
 <p>节头:</p>
-<p><img src="https://raw.githubusercontent.com/DeutschBall/DeutschBall/main/image-20220818154534122.png" alt="image-20220818154534122"></p>
-<p>从名称上可以看出Math.obj&#x2F;</p>
-<p>Size&#x3D;794本节正文长794个字节</p>
+<figure>
+<img
+src="https://raw.githubusercontent.com/DeutschBall/DeutschBall/main/image-20220818154534122.png"
+alt="image-20220818154534122" />
+<figcaption aria-hidden="true">image-20220818154534122</figcaption>
+</figure>
+<p>从名称上可以看出Math.obj/</p>
+<p>Size=794本节正文长794个字节</p>
 <p>节区正文是直接抄的obj文件</p>
-<p><img src="https://raw.githubusercontent.com/DeutschBall/DeutschBall/main/image-20220818155306689.png" alt="节区正文"></p>
-<p><img src="https://raw.githubusercontent.com/DeutschBall/DeutschBall/main/image-20220818155335088.png" alt="Math.obj"></p>
+<figure>
+<img
+src="https://raw.githubusercontent.com/DeutschBall/DeutschBall/main/image-20220818155306689.png"
+alt="节区正文" />
+<figcaption aria-hidden="true">节区正文</figcaption>
+</figure>
+<figure>
+<img
+src="https://raw.githubusercontent.com/DeutschBall/DeutschBall/main/image-20220818155335088.png"
+alt="Math.obj" />
+<figcaption aria-hidden="true">Math.obj</figcaption>
+</figure>
 <p>节区正文和Math.obj完全相同</p>
-<h2 id="导入库"><a href="#导入库" class="headerlink" title="导入库"></a>导入库</h2><p>还是以Math.c制作动态库时形成的导入库Math.lib为例</p>
+<h2 id="导入库">导入库</h2>
+<p>还是以Math.c制作动态库时形成的导入库Math.lib为例</p>
 <figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line">__declspec(dllexport) <span class="type">double</span> <span class="title function_">Add</span><span class="params">(<span class="type">double</span> a,<span class="type">double</span> b)</span>&#123;</span><br><span class="line">    <span class="keyword">return</span> a+b;</span><br><span class="line">&#125;</span><br><span class="line">__declspec(dllexport) <span class="type">double</span> <span class="title function_">Sub</span><span class="params">(<span class="type">double</span> a,<span class="type">double</span> b)</span>&#123;</span><br><span class="line">    <span class="keyword">return</span> a-b;</span><br><span class="line">&#125;</span><br><span class="line">__declspec(dllexport) <span class="type">double</span> <span class="title function_">Mul</span><span class="params">(<span class="type">double</span> a,<span class="type">double</span> b)</span>&#123;</span><br><span class="line">    <span class="keyword">return</span> a*b;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-
 <figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">cl Math.c /c</span><br><span class="line">link /dll Math.obj</span><br></pre></td></tr></table></figure>
-
 <p>编译链接完成后同一目录下面形成Math.lib和Math.dll</p>
 <p>此Math.lib就是导入库</p>
-<p><img src="https://raw.githubusercontent.com/DeutschBall/DeutschBall/main/image-20220818165520115.png" alt="image-20220818165520115"></p>
+<figure>
+<img
+src="https://raw.githubusercontent.com/DeutschBall/DeutschBall/main/image-20220818165520115.png"
+alt="image-20220818165520115" />
+<figcaption aria-hidden="true">image-20220818165520115</figcaption>
+</figure>
 <p>从节头名看,前两个节分别是FirstSection和SecondSection,后面就都是目标文件了</p>
-<h3 id="文件头魔数-1"><a href="#文件头魔数-1" class="headerlink" title="文件头魔数"></a>文件头魔数</h3><p>所有lib文件不管是静态库还是导入库都一样<code>!&lt;arch&gt;</code></p>
-<h3 id="节区-1"><a href="#节区-1" class="headerlink" title="节区"></a>节区</h3><h4 id="First-Section-1"><a href="#First-Section-1" class="headerlink" title="First Section"></a>First Section</h4><p>节头除了本节正文大小之外就没有什么有效信息了主要是看节区:</p>
+<h3 id="文件头魔数-1">文件头魔数</h3>
+<p>所有lib文件不管是静态库还是导入库都一样<code>!&lt;arch&gt;</code></p>
+<h3 id="节区-1">节区</h3>
+<h4 id="first-section-1">First Section</h4>
+<p>节头除了本节正文大小之外就没有什么有效信息了主要是看节区:</p>
 <figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="class"><span class="keyword">struct</span> <span class="title">FirstSection</span>&#123;</span></span><br><span class="line">	<span class="type">unsigned</span> <span class="type">long</span> SymbolNum;<span class="comment">//大端存储的符号数量</span></span><br><span class="line">	<span class="type">unsigned</span> <span class="type">long</span> SymbolOffset[SymbolNum];<span class="comment">//符号所在目标节的偏移</span></span><br><span class="line">    <span class="type">char</span> StrTable[m];<span class="comment">//符号名称字符串表,m取决于所有符号的长度</span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-
 <figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br></pre></td><td class="code"><pre><span class="line">SymbolNum = 00 00 00 09 </span><br><span class="line">SymbolOffset[SymbolNum] = </span><br><span class="line">00 00 01 CA </span><br><span class="line">00 00 03 E8 </span><br><span class="line">00 00 05 1C</span><br><span class="line">00 00 06 68 </span><br><span class="line">00 00 06 68 </span><br><span class="line">00 00 07 24 </span><br><span class="line">00 00 07 24</span><br><span class="line">00 00 06 C6 </span><br><span class="line">00 00 06 C6 </span><br><span class="line">StrTable[m] = </span><br><span class="line">__IMPORT_DESCRIPTOR_Math: 5F 5F 49 4D 50 4F 52 54 5F 44 45 53 43 52 49 50 54 4F 52 5F 4D 61 74 68 00 </span><br><span class="line">__NULL_IMPORT_DESCRIPTOR: 5F 5F 4E 55 4C 4C 5F 49 4D 50 4F 52 54 5F 44 45 53 43 52 49 50 54 4F 52 00 </span><br><span class="line">Math_NULL_THUNK_DATA: 7F 4D 61 74 68 5F 4E 55 4C 4C 5F 54 48 55 4E 4B 5F 44 41 54 41 00</span><br><span class="line">_Add: 5F 41 64 64 00 </span><br><span class="line">__imp__Add: 5F 5F 69 6D 70 5F 5F 41 64 64 00</span><br><span class="line">_Sub: 5F 53 75 62 00 </span><br><span class="line">__imp__Sub: 5F 5F 69 6D 70 5F 5F 53 75 62 00</span><br><span class="line">_Mul: 5F 4D 75 6C 00 </span><br><span class="line">__imp__Mul: 5F 5F 69 6D 70 5F 5F 4D 75 6C 00</span><br></pre></td></tr></table></figure>
-
 <p>可以看出本导入库中有9个符号,前三个符号</p>
 <figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">__IMPORT_DESCRIPTOR_Math</span><br><span class="line">__NULL_IMPORT_DESCRIPTOR </span><br><span class="line">Math_NULL_THUNK_DATA</span><br></pre></td></tr></table></figure>
-
 <p>是预定义的,就算我们啥也不写,照样有这三个符号</p>
 <p>然后每个我们自己写的函数都有两个名字,比如</p>
 <figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">_Add</span><br><span class="line">__imp__Add</span><br></pre></td></tr></table></figure>
-
 <p>这是x64符号名修饰造成的,实际上两个符号指向同一函数</p>
-<h4 id="Second-Section-1"><a href="#Second-Section-1" class="headerlink" title="Second Section"></a>Second Section</h4><figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="class"><span class="keyword">struct</span> <span class="title">SecondSection</span>&#123;</span></span><br><span class="line">	<span class="type">unsigned</span> <span class="type">long</span> ObjNum;<span class="comment">//本库文件中的Obj节数量</span></span><br><span class="line">	<span class="type">unsigned</span> <span class="type">long</span> ObjOffset[ObjNum];<span class="comment">//每个Obj节分别的偏移量,</span></span><br><span class="line">	<span class="type">unsigned</span> <span class="type">long</span> SymbolNum;<span class="comment">//所有符号数量,作用和FirstSection.SymbolNum相同</span></span><br><span class="line">	<span class="type">unsigned</span> <span class="type">short</span> SymbolIdx[SymbolNum];<span class="comment">//第i个符号所在的Obj节下标</span></span><br><span class="line">	<span class="type">char</span> StrTable[m];<span class="comment">//符号名表,同FirstSection.StrTable,第i个符号的符号名</span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-
-
-
+<h4 id="second-section-1">Second Section</h4>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="class"><span class="keyword">struct</span> <span class="title">SecondSection</span>&#123;</span></span><br><span class="line">	<span class="type">unsigned</span> <span class="type">long</span> ObjNum;<span class="comment">//本库文件中的Obj节数量</span></span><br><span class="line">	<span class="type">unsigned</span> <span class="type">long</span> ObjOffset[ObjNum];<span class="comment">//每个Obj节分别的偏移量,</span></span><br><span class="line">	<span class="type">unsigned</span> <span class="type">long</span> SymbolNum;<span class="comment">//所有符号数量,作用和FirstSection.SymbolNum相同</span></span><br><span class="line">	<span class="type">unsigned</span> <span class="type">short</span> SymbolIdx[SymbolNum];<span class="comment">//第i个符号所在的Obj节下标</span></span><br><span class="line">	<span class="type">char</span> StrTable[m];<span class="comment">//符号名表,同FirstSection.StrTable,第i个符号的符号名</span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
 <figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br></pre></td><td class="code"><pre><span class="line">ObjNum = 06 00 00 00 </span><br><span class="line">ObjOffset[ObjNum]=</span><br><span class="line">	CA 01 00 00 </span><br><span class="line">	E8 03 00 00 </span><br><span class="line">	1C 05 00 00</span><br><span class="line">	68 06 00 00 </span><br><span class="line">	24 07 00 00 </span><br><span class="line">	C6 06 00 00 </span><br><span class="line">SymbolNum=09 00 00 00</span><br><span class="line">SymbolIdx[SymbolNum]=</span><br><span class="line">	04 00 </span><br><span class="line">	06 00 </span><br><span class="line">	05 00 </span><br><span class="line">	01 00 </span><br><span class="line">	02 00 </span><br><span class="line">	04 00 </span><br><span class="line">	06 00 </span><br><span class="line">	05 00</span><br><span class="line">	03 00 </span><br><span class="line">StrTable[m]=</span><br><span class="line">5F 41 64 64 00 </span><br><span class="line">5F 4D 75 6C 00 </span><br><span class="line">5F 53 75 62 00 </span><br><span class="line">5F 5F 49 4D 50 4F 52 54 5F 44 45 53 43 52 49 50 54 4F 52 5F 4D 61 74 68 00 </span><br><span class="line">5F 5F 4E 55 4C 4C 5F 49 4D 50 4F 52 54 5F 44 45 53 43 52 49 50 54 4F 52 00 </span><br><span class="line">5F 5F 69 6D 70 5F 5F 41 64 64 00 </span><br><span class="line">5F 5F 69 6D 70 5F 5F 4D 75 6C 00 </span><br><span class="line">5F 5F 69 6D 70 5F 5F 53 75 62 00 </span><br><span class="line">7F 4D 61 74 68 5F 4E 55 4C 4C 5F 54 48 55 4E 4B 5F 44 41 54 41 00</span><br></pre></td></tr></table></figure>
-
 <p>共有6个ObjSection段</p>
-<p>每个ObjSection的节头中的名字都叫”Math.dll”</p>
-<h4 id="Obj-Section-1"><a href="#Obj-Section-1" class="headerlink" title="Obj Section"></a>Obj Section</h4><p>前三个Obj节都是关于三个预定义符号的,所有的导入库中他仨基本相同</p>
+<p>每个ObjSection的节头中的名字都叫"Math.dll"</p>
+<h4 id="obj-section-1">Obj Section</h4>
+<p>前三个Obj节都是关于三个预定义符号的,所有的导入库中他仨基本相同</p>
 <p>后面三个Obj节是关于我们自定义的函数的,每个自定义函数自成一节,这也就解释了为啥默认状态下动态库的链接是以函数为单位,而静态库的链接是以模块为单位的了.导入库中每个函数自成一个模块</p>
-<p>下面炎鸠后三节的结构,参考<a target="_blank" rel="noopener" href="https://www.codeproject.com/Articles/1253835/The-Structure-of-import-Library-File-lib">The Structure of import Library File (.lib) - CodeProject</a></p>
+<p>下面炎鸠后三节的结构,参考<a
+target="_blank" rel="noopener" href="https://www.codeproject.com/Articles/1253835/The-Structure-of-import-Library-File-lib">The
+Structure of import Library File (.lib) - CodeProject</a></p>
 <p>以Add函数所在节为例</p>
-<p><img src="https://raw.githubusercontent.com/DeutschBall/DeutschBall/main/image-20220819104759118.png" alt="image-20220819104759118"></p>
+<figure>
+<img
+src="https://raw.githubusercontent.com/DeutschBall/DeutschBall/main/image-20220819104759118.png"
+alt="image-20220819104759118" />
+<figcaption aria-hidden="true">image-20220819104759118</figcaption>
+</figure>
 <p>节头表明正文部分有34字节</p>
 <p>描述正文的结构体:</p>
 <figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br></pre></td><td class="code"><pre><span class="line"><span class="class"><span class="keyword">struct</span> <span class="title">SYMBOL_DESCRIPTOR</span>          // <span class="title">size</span> =</span> <span class="number">0x14</span></span><br><span class="line">&#123;</span><br><span class="line">    WORD a;</span><br><span class="line">    WORD b;</span><br><span class="line">    WORD c;</span><br><span class="line">    WORD Architecture;<span class="comment">//程序可以运行的体系结构,比如x86,x86_64</span></span><br><span class="line">    DWORD Id;<span class="comment">//随机生成的ID</span></span><br><span class="line">    DWORD Length;<span class="comment">//符号名和库名 字符串总长度</span></span><br><span class="line">    <span class="class"><span class="keyword">union</span></span></span><br><span class="line"><span class="class">    &#123;</span></span><br><span class="line">        WORD Hint;<span class="comment">//最有可能的序号</span></span><br><span class="line">        WORD Ordinal;</span><br><span class="line">        WORD Value;</span><br><span class="line">    &#125;</span><br><span class="line">    WORD Type;</span><br><span class="line">&#125;;</span><br></pre></td></tr></table></figure>
-
 <figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line">00 00 </span><br><span class="line">FF FF </span><br><span class="line">00 00 </span><br><span class="line">4C 01 //Architecture,x86</span><br><span class="line">F2 29 95 FA //随机数</span><br><span class="line">0E 00 00 00 //_Add\0Math.dll\0 两个字符串的总长度(包括00)</span><br><span class="line">00 00 //Hint=0,表示AddressOfNames中的下标</span><br><span class="line">08 00 //Type=8,表示x86 __cdecl调用约定</span><br><span class="line"></span><br><span class="line">5F 41 64 64 00 //_Add </span><br><span class="line">4D 61 74 68 2E 64 6C 6C 00 //Math.dll </span><br></pre></td></tr></table></figure>
+<h2 id="工具">工具</h2>
+<h3 id="msvc">MSVC</h3>
+<h4 id="cl-c-只编译不链接生成目标模块">cl /c
+只编译,不链接,生成目标模块</h4>
+<h4 id="lib-extract-out-从lib文件中提取obj文件">lib /EXTRACT:<目标文件>
+/OUT:<目标文件> 从lib文件中提取obj文件</h4>
+<h4 id="lib-math.c-namelibmath.lib-制作静态库">lib Math.c
+/NAME:libMath.lib 制作静态库</h4>
+<h4 id="link-dll-math.obj-制作动态库">link /dll Math.obj 制作动态库</h4>
 
-
-
-<h2 id="工具"><a href="#工具" class="headerlink" title="工具"></a>工具</h2><h3 id="MSVC"><a href="#MSVC" class="headerlink" title="MSVC"></a>MSVC</h3><h4 id="cl-c-只编译-不链接-生成目标模块"><a href="#cl-c-只编译-不链接-生成目标模块" class="headerlink" title="cl &#x2F;c 只编译,不链接,生成目标模块"></a>cl &#x2F;c 只编译,不链接,生成目标模块</h4><h4 id="lib-EXTRACT-OUT-从lib文件中提取obj文件"><a href="#lib-EXTRACT-OUT-从lib文件中提取obj文件" class="headerlink" title="lib &#x2F;EXTRACT:&lt;目标文件&gt; &#x2F;OUT:&lt;目标文件&gt; 从lib文件中提取obj文件"></a>lib &#x2F;EXTRACT:&lt;目标文件&gt; &#x2F;OUT:&lt;目标文件&gt; 从lib文件中提取obj文件</h4><h4 id="lib-Math-c-NAME-libMath-lib-制作静态库"><a href="#lib-Math-c-NAME-libMath-lib-制作静态库" class="headerlink" title="lib Math.c &#x2F;NAME:libMath.lib 制作静态库"></a>lib Math.c &#x2F;NAME:libMath.lib 制作静态库</h4><h4 id="link-dll-Math-obj-制作动态库"><a href="#link-dll-Math-obj-制作动态库" class="headerlink" title="link &#x2F;dll Math.obj 制作动态库"></a>link &#x2F;dll Math.obj 制作动态库</h4>
     </div>
 
     
@@ -445,7 +503,10 @@
 
       <!--noindex-->
       <div class="post-toc-wrap sidebar-panel">
-          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#windows-LIB%E6%96%87%E4%BB%B6%E6%A0%BC%E5%BC%8F"><span class="nav-number">1.</span> <span class="nav-text">windows LIB文件格式</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#%E9%9D%99%E6%80%81%E5%BA%93"><span class="nav-number">1.1.</span> <span class="nav-text">静态库</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%96%87%E4%BB%B6%E5%A4%B4%E9%AD%94%E6%95%B0"><span class="nav-number">1.1.1.</span> <span class="nav-text">文件头魔数</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E8%8A%82%E5%8C%BA"><span class="nav-number">1.1.2.</span> <span class="nav-text">节区</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#First-Section"><span class="nav-number">1.1.2.1.</span> <span class="nav-text">First Section</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#Second-Section"><span class="nav-number">1.1.2.2.</span> <span class="nav-text">Second Section</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#Long-Section"><span class="nav-number">1.1.2.3.</span> <span class="nav-text">Long Section</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#Obj-Section"><span class="nav-number">1.1.2.4.</span> <span class="nav-text">Obj Section</span></a></li></ol></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%AF%BC%E5%85%A5%E5%BA%93"><span class="nav-number">1.2.</span> <span class="nav-text">导入库</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%96%87%E4%BB%B6%E5%A4%B4%E9%AD%94%E6%95%B0-1"><span class="nav-number">1.2.1.</span> <span class="nav-text">文件头魔数</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E8%8A%82%E5%8C%BA-1"><span class="nav-number">1.2.2.</span> <span class="nav-text">节区</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#First-Section-1"><span class="nav-number">1.2.2.1.</span> <span class="nav-text">First Section</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#Second-Section-1"><span class="nav-number">1.2.2.2.</span> <span class="nav-text">Second Section</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#Obj-Section-1"><span class="nav-number">1.2.2.3.</span> <span class="nav-text">Obj Section</span></a></li></ol></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%B7%A5%E5%85%B7"><span class="nav-number">1.3.</span> <span class="nav-text">工具</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#MSVC"><span class="nav-number">1.3.1.</span> <span class="nav-text">MSVC</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#cl-c-%E5%8F%AA%E7%BC%96%E8%AF%91-%E4%B8%8D%E9%93%BE%E6%8E%A5-%E7%94%9F%E6%88%90%E7%9B%AE%E6%A0%87%E6%A8%A1%E5%9D%97"><span class="nav-number">1.3.1.1.</span> <span class="nav-text">cl &#x2F;c 只编译,不链接,生成目标模块</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#lib-EXTRACT-OUT-%E4%BB%8Elib%E6%96%87%E4%BB%B6%E4%B8%AD%E6%8F%90%E5%8F%96obj%E6%96%87%E4%BB%B6"><span class="nav-number">1.3.1.2.</span> <span class="nav-text">lib &#x2F;EXTRACT:&lt;目标文件&gt; &#x2F;OUT:&lt;目标文件&gt; 从lib文件中提取obj文件</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#lib-Math-c-NAME-libMath-lib-%E5%88%B6%E4%BD%9C%E9%9D%99%E6%80%81%E5%BA%93"><span class="nav-number">1.3.1.3.</span> <span class="nav-text">lib Math.c &#x2F;NAME:libMath.lib 制作静态库</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#link-dll-Math-obj-%E5%88%B6%E4%BD%9C%E5%8A%A8%E6%80%81%E5%BA%93"><span class="nav-number">1.3.1.4.</span> <span class="nav-text">link &#x2F;dll Math.obj 制作动态库</span></a></li></ol></li></ol></li></ol></li></ol></div>
+          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#windows-lib%E6%96%87%E4%BB%B6%E6%A0%BC%E5%BC%8F"><span class="nav-number">1.</span> <span class="nav-text">windows LIB文件格式</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#%E9%9D%99%E6%80%81%E5%BA%93"><span class="nav-number">1.1.</span> <span class="nav-text">静态库</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%96%87%E4%BB%B6%E5%A4%B4%E9%AD%94%E6%95%B0"><span class="nav-number">1.1.1.</span> <span class="nav-text">文件头魔数</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E8%8A%82%E5%8C%BA"><span class="nav-number">1.1.2.</span> <span class="nav-text">节区</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#first-section"><span class="nav-number">1.1.2.1.</span> <span class="nav-text">First Section</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#second-section"><span class="nav-number">1.1.2.2.</span> <span class="nav-text">Second Section</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#long-section"><span class="nav-number">1.1.2.3.</span> <span class="nav-text">Long Section</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#obj-section"><span class="nav-number">1.1.2.4.</span> <span class="nav-text">Obj Section</span></a></li></ol></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%AF%BC%E5%85%A5%E5%BA%93"><span class="nav-number">1.2.</span> <span class="nav-text">导入库</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%96%87%E4%BB%B6%E5%A4%B4%E9%AD%94%E6%95%B0-1"><span class="nav-number">1.2.1.</span> <span class="nav-text">文件头魔数</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E8%8A%82%E5%8C%BA-1"><span class="nav-number">1.2.2.</span> <span class="nav-text">节区</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#first-section-1"><span class="nav-number">1.2.2.1.</span> <span class="nav-text">First Section</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#second-section-1"><span class="nav-number">1.2.2.2.</span> <span class="nav-text">Second Section</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#obj-section-1"><span class="nav-number">1.2.2.3.</span> <span class="nav-text">Obj Section</span></a></li></ol></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%B7%A5%E5%85%B7"><span class="nav-number">1.3.</span> <span class="nav-text">工具</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#msvc"><span class="nav-number">1.3.1.</span> <span class="nav-text">MSVC</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#cl-c-%E5%8F%AA%E7%BC%96%E8%AF%91%E4%B8%8D%E9%93%BE%E6%8E%A5%E7%94%9F%E6%88%90%E7%9B%AE%E6%A0%87%E6%A8%A1%E5%9D%97"><span class="nav-number">1.3.1.1.</span> <span class="nav-text">cl &#x2F;c
+只编译,不链接,生成目标模块</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#lib-extract-out-%E4%BB%8Elib%E6%96%87%E4%BB%B6%E4%B8%AD%E6%8F%90%E5%8F%96obj%E6%96%87%E4%BB%B6"><span class="nav-number">1.3.1.2.</span> <span class="nav-text">lib &#x2F;EXTRACT:&lt;目标文件&gt;
+&#x2F;OUT:&lt;目标文件&gt; 从lib文件中提取obj文件</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#lib-math.c-namelibmath.lib-%E5%88%B6%E4%BD%9C%E9%9D%99%E6%80%81%E5%BA%93"><span class="nav-number">1.3.1.3.</span> <span class="nav-text">lib Math.c
+&#x2F;NAME:libMath.lib 制作静态库</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#link-dll-math.obj-%E5%88%B6%E4%BD%9C%E5%8A%A8%E6%80%81%E5%BA%93"><span class="nav-number">1.3.1.4.</span> <span class="nav-text">link &#x2F;dll Math.obj 制作动态库</span></a></li></ol></li></ol></li></ol></li></ol></div>
       </div>
       <!--/noindex-->
 

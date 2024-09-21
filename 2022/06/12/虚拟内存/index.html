@@ -20,89 +20,18 @@
     var CONFIG = {"hostname":"dustball.top","root":"/","scheme":"Muse","version":"7.8.0","exturl":false,"sidebar":{"position":"left","display":"post","padding":18,"offset":12,"onmobile":false},"copycode":{"enable":false,"show_result":false,"style":null},"back2top":{"enable":true,"sidebar":false,"scrollpercent":false},"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":false,"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"algolia":{"hits":{"per_page":10},"labels":{"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}},"localsearch":{"enable":false,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false},"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}}};
   </script>
 
-  <meta name="description" content="内存管理 纯分段最初分段的目的是实现各段可以随意增长  啥意思呢?在既没有分段也没有分页的年代,程序装载进入内存是紧挨着放的,一条指令或数据紧挨着一条指令或数据.这就导致一个啥后果呢? 我想使用malloc获取一些堆空间,但是堆已经被左右两个块夹住了,大小固定了,找不到想要的空闲空间 分段之后,各段在内存中任意位置存放,一个程序在内存中可能被分割成几块,不必连续存放,两个程序可能交叉着在内存中存放">
+  <meta name="description" content="内存管理   image-20220612081358649  纯分段 最初分段的目的是实现各段可以随意增长  啥意思呢?在既没有分段也没有分页的年代,程序装载进入内存是紧挨着放的,一条指令或数据紧挨着一条指令或数据.这就导致一个啥后果呢? 我想使用malloc获取一些堆空间,但是堆已经被左右两个块夹住了,大小固定了,找不到想要的空闲空间 分段之后,各段在内存中任意位置存放,一">
 <meta property="og:type" content="article">
 <meta property="og:title" content="CSAPP-chapter9 内存管理">
 <meta property="og:url" content="http://dustball.top/2022/06/12/%E8%99%9A%E6%8B%9F%E5%86%85%E5%AD%98/index.html">
 <meta property="og:site_name" content="dustland">
-<meta property="og:description" content="内存管理 纯分段最初分段的目的是实现各段可以随意增长  啥意思呢?在既没有分段也没有分页的年代,程序装载进入内存是紧挨着放的,一条指令或数据紧挨着一条指令或数据.这就导致一个啥后果呢? 我想使用malloc获取一些堆空间,但是堆已经被左右两个块夹住了,大小固定了,找不到想要的空闲空间 分段之后,各段在内存中任意位置存放,一个程序在内存中可能被分割成几块,不必连续存放,两个程序可能交叉着在内存中存放">
+<meta property="og:description" content="内存管理   image-20220612081358649  纯分段 最初分段的目的是实现各段可以随意增长  啥意思呢?在既没有分段也没有分页的年代,程序装载进入内存是紧挨着放的,一条指令或数据紧挨着一条指令或数据.这就导致一个啥后果呢? 我想使用malloc获取一些堆空间,但是堆已经被左右两个块夹住了,大小固定了,找不到想要的空闲空间 分段之后,各段在内存中任意位置存放,一">
 <meta property="og:locale" content="en_US">
-<meta property="og:image" content="https://raw.githubusercontent.com/DeutschBall/test/master/image-20220612081358649.png">
-<meta property="og:image" content="https://raw.githubusercontent.com/DeutschBall/test/master/image-20220612074034741.png">
-<meta property="og:image" content="https://raw.githubusercontent.com/DeutschBall/test/master/image-20220612074118371.png">
-<meta property="og:image" content="https://raw.githubusercontent.com/DeutschBall/test/master/image-20220611090810424.png">
-<meta property="og:image" content="https://raw.githubusercontent.com/DeutschBall/test/master/image-20220611091807512.png">
-<meta property="og:image" content="https://raw.githubusercontent.com/DeutschBall/test/master/image-20220611092650927.png">
-<meta property="og:image" content="https://raw.githubusercontent.com/DeutschBall/test/master/image-20220612080803151.png">
-<meta property="og:image" content="https://raw.githubusercontent.com/DeutschBall/test/master/image-20220612081026860.png">
-<meta property="og:image" content="https://raw.githubusercontent.com/DeutschBall/test/master/image-20220612083115693.png">
-<meta property="og:image" content="https://raw.githubusercontent.com/DeutschBall/test/master/image-20220612083039864.png">
-<meta property="og:image" content="https://raw.githubusercontent.com/DeutschBall/test/master/image-20220612083740271.png">
-<meta property="og:image" content="https://raw.githubusercontent.com/DeutschBall/test/master/image-20220516182449307.png">
-<meta property="og:image" content="https://raw.githubusercontent.com/DeutschBall/test/master/image-20220516182852208.png">
-<meta property="og:image" content="https://raw.githubusercontent.com/DeutschBall/test/master/image-20220516204149979.png">
-<meta property="og:image" content="https://raw.githubusercontent.com/DeutschBall/test/master/image-20220516193505725.png">
-<meta property="og:image" content="https://raw.githubusercontent.com/DeutschBall/test/master/image-20220516193749579.png">
-<meta property="og:image" content="https://raw.githubusercontent.com/DeutschBall/test/master/image-20220516194906654.png">
-<meta property="og:image" content="https://raw.githubusercontent.com/DeutschBall/test/master/image-20220516200840582.png">
-<meta property="og:image" content="https://raw.githubusercontent.com/DeutschBall/test/master/image-20220516201903715.png">
-<meta property="og:image" content="https://raw.githubusercontent.com/DeutschBall/test/master/image-20220516202424662.png">
-<meta property="og:image" content="https://raw.githubusercontent.com/DeutschBall/test/master/image-20220516205620915.png">
-<meta property="og:image" content="https://raw.githubusercontent.com/DeutschBall/test/master/image-20220516210523521.png">
-<meta property="og:image" content="https://raw.githubusercontent.com/DeutschBall/test/master/image-20220516225933019.png">
-<meta property="og:image" content="https://raw.githubusercontent.com/DeutschBall/test/master/image-20220516214911937.png">
-<meta property="og:image" content="https://raw.githubusercontent.com/DeutschBall/test/master/image-20220516220103992.png">
-<meta property="og:image" content="https://raw.githubusercontent.com/DeutschBall/test/master/image-20220516221624510.png">
-<meta property="og:image" content="https://raw.githubusercontent.com/DeutschBall/test/master/image-20220516224400351.png">
-<meta property="og:image" content="https://raw.githubusercontent.com/DeutschBall/test/master/image-20220516232636330.png">
-<meta property="og:image" content="https://raw.githubusercontent.com/DeutschBall/test/master/image-20220516232919987.png">
-<meta property="og:image" content="https://raw.githubusercontent.com/DeutschBall/test/master/image-20220516233348777.png">
-<meta property="og:image" content="https://raw.githubusercontent.com/DeutschBall/test/master/image-20220516233340796.png">
-<meta property="og:image" content="https://raw.githubusercontent.com/DeutschBall/test/master/image-20220516233523416.png">
-<meta property="og:image" content="https://raw.githubusercontent.com/DeutschBall/test/master/image-20220516235021410.png">
-<meta property="og:image" content="https://raw.githubusercontent.com/DeutschBall/test/master/image-20220516235143678.png">
-<meta property="og:image" content="https://raw.githubusercontent.com/DeutschBall/test/master/image-20220516235504854.png">
-<meta property="og:image" content="https://raw.githubusercontent.com/DeutschBall/test/master/image-20220517000150935.png">
-<meta property="og:image" content="https://raw.githubusercontent.com/DeutschBall/test/master/image-20220517000501697.png">
-<meta property="og:image" content="https://raw.githubusercontent.com/DeutschBall/test/master/image-20220516231018326.png">
-<meta property="og:image" content="https://raw.githubusercontent.com/DeutschBall/test/master/image-20220516231949258.png">
-<meta property="og:image" content="https://raw.githubusercontent.com/DeutschBall/test/master/image-20220517073701065.png">
-<meta property="og:image" content="https://raw.githubusercontent.com/DeutschBall/test/master/image-20220517073820824.png">
-<meta property="og:image" content="https://raw.githubusercontent.com/DeutschBall/test/master/image-20220517073849861.png">
-<meta property="og:image" content="https://raw.githubusercontent.com/DeutschBall/test/master/image-20220517074643634.png">
-<meta property="og:image" content="https://raw.githubusercontent.com/DeutschBall/test/master/image-20220517080056415.png">
-<meta property="og:image" content="https://raw.githubusercontent.com/DeutschBall/test/master/image-20220517081116670.png">
-<meta property="og:image" content="https://raw.githubusercontent.com/DeutschBall/test/master/image-20220517083739843.png">
-<meta property="og:image" content="https://raw.githubusercontent.com/DeutschBall/test/master/image-20220517084031704.png">
-<meta property="og:image" content="https://raw.githubusercontent.com/DeutschBall/test/master/image-20220517084442357.png">
-<meta property="og:image" content="https://raw.githubusercontent.com/DeutschBall/test/master/image-20220517084658157.png">
-<meta property="og:image" content="https://raw.githubusercontent.com/DeutschBall/test/master/image-20220517091716338.png">
-<meta property="og:image" content="https://raw.githubusercontent.com/DeutschBall/test/master/image-20220517093706745.png">
-<meta property="og:image" content="https://raw.githubusercontent.com/DeutschBall/test/master/image-20220612094124007.png">
-<meta property="og:image" content="https://raw.githubusercontent.com/DeutschBall/test/master/image-20220612095053544.png">
-<meta property="og:image" content="https://raw.githubusercontent.com/DeutschBall/test/master/image-20220612095244447.png">
-<meta property="og:image" content="https://raw.githubusercontent.com/DeutschBall/test/master/image-20220612095647336.png">
-<meta property="og:image" content="https://raw.githubusercontent.com/DeutschBall/test/master/image-20220612095842607.png">
-<meta property="og:image" content="https://raw.githubusercontent.com/DeutschBall/test/master/image-20220612100250957.png">
-<meta property="og:image" content="https://raw.githubusercontent.com/DeutschBall/test/master/image-20220612100928491.png">
-<meta property="og:image" content="https://raw.githubusercontent.com/DeutschBall/test/master/image-20220612101143722.png">
-<meta property="og:image" content="https://raw.githubusercontent.com/DeutschBall/test/master/image-20220612102551429.png">
-<meta property="og:image" content="https://raw.githubusercontent.com/DeutschBall/test/master/image-20220612103002978.png">
-<meta property="og:image" content="https://raw.githubusercontent.com/DeutschBall/test/master/image-20220612103815223.png">
-<meta property="og:image" content="https://raw.githubusercontent.com/DeutschBall/test/master/image-20220612104001176.png">
-<meta property="og:image" content="https://raw.githubusercontent.com/DeutschBall/test/master/image-20220612104157764.png">
-<meta property="og:image" content="https://raw.githubusercontent.com/DeutschBall/test/master/image-20220612104605803.png">
-<meta property="og:image" content="https://raw.githubusercontent.com/DeutschBall/test/master/image-20220612104843836.png">
-<meta property="og:image" content="https://raw.githubusercontent.com/DeutschBall/test/master/image-20220612105228600.png">
-<meta property="og:image" content="https://raw.githubusercontent.com/DeutschBall/test/master/image-20220612105424208.png">
-<meta property="og:image" content="https://raw.githubusercontent.com/DeutschBall/test/master/image-20220612110227309.png">
-<meta property="og:image" content="https://raw.githubusercontent.com/DeutschBall/test/master/image-20220612110742608.png">
 <meta property="article:published_time" content="2022-06-12T03:18:00.000Z">
 <meta property="article:modified_time" content="2023-09-25T11:38:13.531Z">
 <meta property="article:author" content="dustball">
 <meta property="article:tag" content="CSAPP">
 <meta name="twitter:card" content="summary">
-<meta name="twitter:image" content="https://raw.githubusercontent.com/DeutschBall/test/master/image-20220612081358649.png">
 
 <link rel="canonical" href="http://dustball.top/2022/06/12/%E8%99%9A%E6%8B%9F%E5%86%85%E5%AD%98/">
 
@@ -269,8 +198,15 @@
     <div class="post-body" itemprop="articleBody">
 
       
-        <h1 id="内存管理"><a href="#内存管理" class="headerlink" title="内存管理"></a>内存管理</h1><p><img src="https://raw.githubusercontent.com/DeutschBall/test/master/image-20220612081358649.png" alt="image-20220612081358649"></p>
-<h2 id="纯分段"><a href="#纯分段" class="headerlink" title="纯分段"></a>纯分段</h2><p>最初分段的目的是实现各段可以随意增长</p>
+        <h1 id="内存管理">内存管理</h1>
+<figure>
+<img
+src="https://raw.githubusercontent.com/DeutschBall/test/master/image-20220612081358649.png"
+alt="image-20220612081358649" />
+<figcaption aria-hidden="true">image-20220612081358649</figcaption>
+</figure>
+<h2 id="纯分段">纯分段</h2>
+<p>最初分段的目的是实现各段可以随意增长</p>
 <blockquote>
 <p>啥意思呢?在既没有分段也没有分页的年代,程序装载进入内存是紧挨着放的,一条指令或数据紧挨着一条指令或数据.这就导致一个啥后果呢?</p>
 <p>我想使用malloc获取一些堆空间,但是堆已经被左右两个块夹住了,大小固定了,找不到想要的空闲空间</p>
@@ -281,18 +217,33 @@
 <blockquote>
 <p>可以简单意淫一下分段是啥样的:</p>
 <figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">segment Code:</span><br><span class="line">	<span class="type">int</span> <span class="title function_">main</span><span class="params">()</span>&#123;</span><br><span class="line">		<span class="built_in">printf</span>(<span class="string">&quot;%s&quot;</span>,Data:buffer);</span><br><span class="line">		<span class="keyword">return</span> <span class="number">0</span>;</span><br><span class="line">	&#125;</span><br><span class="line">segment Data:</span><br><span class="line">	<span class="type">char</span> buffer[]=<span class="string">&quot;helloworld&quot;</span></span><br></pre></td></tr></table></figure>
-
 <p>只是意淫,因为x86-64上已经废除分段了,我也不知道真的分段程序怎么写</p>
 <p>但是计组书上讲的老古董8086上的汇编语言是有明确的分段的</p>
-<p><img src="https://raw.githubusercontent.com/DeutschBall/test/master/image-20220612074034741.png" alt="image-20220612074034741"></p>
-<p><img src="https://raw.githubusercontent.com/DeutschBall/test/master/image-20220612074118371.png" alt="image-20220612074118371"></p>
+<figure>
+<img
+src="https://raw.githubusercontent.com/DeutschBall/test/master/image-20220612074034741.png"
+alt="image-20220612074034741" />
+<figcaption aria-hidden="true">image-20220612074034741</figcaption>
+</figure>
+<figure>
+<img
+src="https://raw.githubusercontent.com/DeutschBall/test/master/image-20220612074118371.png"
+alt="image-20220612074118371" />
+<figcaption aria-hidden="true">image-20220612074118371</figcaption>
+</figure>
 </blockquote>
 <p>分段使得段权限管理很方便</p>
 <p>段的功能是由程序员指定的,程序员可以把只读代码都放一个Code段,可读写数据都放在Data段,只读数据都放在Rodata段等等,每个段都指定一下访问权限rwx就可以限定怎么访问它了,违反了指定好的权限的访问,操作系统会报告段错误</p>
-<p>纯分段中是没有甚么”虚拟内存”概念的,因为虚拟内存的实现要分页,那么内存条子多大,地址空间就有多大,即物理内存</p>
+<p>纯分段中是没有甚么"虚拟内存"概念的,因为虚拟内存的实现要分页,那么内存条子多大,地址空间就有多大,即物理内存</p>
 <p>画个图意思意思纯分段系统上程序在内存中的存储状态:</p>
-<p><img src="https://raw.githubusercontent.com/DeutschBall/test/master/image-20220611090810424.png" alt="image-20220611090810424"></p>
-<h3 id="段表"><a href="#段表" class="headerlink" title="段表"></a>段表</h3><p>作战时一个师下辖三个团,那么师部就得维护这三个团的信息,包括:</p>
+<figure>
+<img
+src="https://raw.githubusercontent.com/DeutschBall/test/master/image-20220611090810424.png"
+alt="image-20220611090810424" />
+<figcaption aria-hidden="true">image-20220611090810424</figcaption>
+</figure>
+<h3 id="段表">段表</h3>
+<p>作战时一个师下辖三个团,那么师部就得维护这三个团的信息,包括:</p>
 <p>1.团部人员信息,这方便师部联系团指挥员,这可能在师部里有一个电话本本</p>
 <p>2.该团当前所在位置,这方便师部部署战术任务<del>(注意战术动作)</del>,这可能在师部里有一个沙盘</p>
 <p>3.该团当前人员数量,这方便师部进行伤亡统计和兵员补给,这可能师部里有一个专门记录的本本</p>
@@ -302,14 +253,21 @@
 <p>2.段大小,检查访问越界错误必须</p>
 <p>3.段访问权限,段保护必须</p>
 <p>想不出还需要维护段的啥信息了,是时候看看权威怎么想这个事情的了</p>
-<p><img src="https://raw.githubusercontent.com/DeutschBall/test/master/image-20220611091807512.png" alt="image-20220611091807512"></p>
+<figure>
+<img
+src="https://raw.githubusercontent.com/DeutschBall/test/master/image-20220611091807512.png"
+alt="image-20220611091807512" />
+<figcaption aria-hidden="true">image-20220611091807512</figcaption>
+</figure>
 <p>他的段表包括了三个项目:段号,段长,基址</p>
-<p>段号是啥呢?程序员编程的时候会指定段名,比如Code,Data等,但是计算机并不喜欢这么长的信息,一个英文字母用ASCII编码都需要一个字节,那么一个”Code”就得编4字节,32位</p>
+<p>段号是啥呢?程序员编程的时候会指定段名,比如Code,Data等,但是计算机并不喜欢这么长的信息,一个英文字母用ASCII编码都需要一个字节,那么一个"Code"就得编4字节,32位</p>
 <p>如果程序员的程序就分了两个段,Data和Code,那么只用一个符号位就可以表示两种状态,分三段则需要2位</p>
-<p>编译器会无视所有段名,将所有段从上到下顺次编号,这应该可以说是离散化的思想<a target="_blank" rel="noopener" href="https://www.luogu.com.cn/problem/P1496">P1496 火烧赤壁 - 洛谷 | 计算机科学教育新生态 (luogu.com.cn)</a></p>
+<p>编译器会无视所有段名,将所有段从上到下顺次编号,这应该可以说是离散化的思想<a
+target="_blank" rel="noopener" href="https://www.luogu.com.cn/problem/P1496">P1496 火烧赤壁 - 洛谷 |
+计算机科学教育新生态 (luogu.com.cn)</a></p>
 <p>把名字都映射成顺次增加的整数还有一个好处就是,段号还需要存储在段表中吗?</p>
-<p>段表第一项存第一段,段表第二项存第二段…</p>
-<p>段表也只需要把编译器翻译成的0,1,2,…n号段按顺序存起来</p>
+<p>段表第一项存第一段,段表第二项存第二段...</p>
+<p>段表也只需要把编译器翻译成的0,1,2,...n号段按顺序存起来</p>
 <p>那么实际上段表项只有段长和基址两个信息,而这些我们都想到了,我们甚至想到了保护措施</p>
 <p><strong>在纯分段的系统上,段表被放在哪里呢?</strong></p>
 <p>操作系统是常驻内存的,进程控制块PCB由操作系统维护,每个进程又只有一个段表,</p>
@@ -318,37 +276,78 @@
 <p>非也,诚如是则PCB过于臃肿,操作系统占用的内存空间会因为段表变的非常大</p>
 <p>实际上PCB只需要维护一个指向段表内存地址的指针和段表的长度</p>
 <p>在进程被调度运行时,段表地址和段表长度会被放到硬件段表寄存器中</p>
-<h3 id="地址翻译"><a href="#地址翻译" class="headerlink" title="地址翻译"></a>地址翻译</h3><p><img src="https://raw.githubusercontent.com/DeutschBall/test/master/image-20220611092650927.png" alt="image-20220611092650927"></p>
+<h3 id="地址翻译">地址翻译</h3>
+<figure>
+<img
+src="https://raw.githubusercontent.com/DeutschBall/test/master/image-20220611092650927.png"
+alt="image-20220611092650927" />
+<figcaption aria-hidden="true">image-20220611092650927</figcaption>
+</figure>
 <p>加入纯分段系统上,给出一个32位的内存地址,</p>
 <p>高16位为段号,低16位为段内偏移</p>
 <p>高位地址为<code>0x0002h</code>,即段号,首先要和段表长度进行比较,如果段号大于等于段表长度则产生越界中断</p>
 <p>如果段号小于段表长度,那么用段表地址+段号相当于一个基址变址寻址,去查2号段即段表里面从上往下数第三条记录,发现基址为<code>40K</code>,段长6K</p>
 <p>低16位为<code>0x0100h=0.25K&lt;6K</code>因此该段内偏移量是合法的,不会发生越界中断</p>
-<p>最终基址+段内偏移&#x3D;<code>1010 0000 0000 0000+1 0000 0000=1010 0001 0000 0000=0xA100</code>即物理地址</p>
-<h3 id="地址空间维度"><a href="#地址空间维度" class="headerlink" title="地址空间维度"></a>地址空间维度</h3><p>纯分页系统中用户进程地址空间是一维的,直接给出一个物理地址就可以寻址</p>
+<p>最终基址+段内偏移=<code>1010 0000 0000 0000+1 0000 0000=1010 0001 0000 0000=0xA100</code>即物理地址</p>
+<h3 id="地址空间维度">地址空间维度</h3>
+<p>纯分页系统中用户进程地址空间是一维的,直接给出一个物理地址就可以寻址</p>
 <p>纯分段系统中用户进程地址空间是二维的,需要通过<code>段:段内偏移</code>指定一个物理地址</p>
-<p><img src="https://raw.githubusercontent.com/DeutschBall/test/master/image-20220612080803151.png" alt="image-20220612080803151"></p>
+<figure>
+<img
+src="https://raw.githubusercontent.com/DeutschBall/test/master/image-20220612080803151.png"
+alt="image-20220612080803151" />
+<figcaption aria-hidden="true">image-20220612080803151</figcaption>
+</figure>
 <p>每个段内都是从0开始开始编址</p>
-<h3 id="分段的好处"><a href="#分段的好处" class="headerlink" title="分段的好处"></a>分段的好处</h3><p>1.方便共享</p>
-<p><img src="https://raw.githubusercontent.com/DeutschBall/test/master/image-20220612081026860.png" alt="image-20220612081026860"></p>
+<h3 id="分段的好处">分段的好处</h3>
+<p>1.方便共享</p>
+<figure>
+<img
+src="https://raw.githubusercontent.com/DeutschBall/test/master/image-20220612081026860.png"
+alt="image-20220612081026860" />
+<figcaption aria-hidden="true">image-20220612081026860</figcaption>
+</figure>
 <p>代码和只读数据可以在物理内存中只有一个段,但被多个进程的段表项目指向</p>
 <p>实际上后来的段页式中,共享库就是这样用的</p>
-<h3 id="碎片"><a href="#碎片" class="headerlink" title="碎片"></a>碎片</h3><p>外部碎片:</p>
+<h3 id="碎片">碎片</h3>
+<p>外部碎片:</p>
 <p>画个图立刻清楚</p>
-<p><img src="https://raw.githubusercontent.com/DeutschBall/test/master/image-20220612083115693.png" alt="image-20220612083115693"></p>
-<p><img src="https://raw.githubusercontent.com/DeutschBall/test/master/image-20220612083039864.png" alt="image-20220612083039864"></p>
+<figure>
+<img
+src="https://raw.githubusercontent.com/DeutschBall/test/master/image-20220612083115693.png"
+alt="image-20220612083115693" />
+<figcaption aria-hidden="true">image-20220612083115693</figcaption>
+</figure>
+<figure>
+<img
+src="https://raw.githubusercontent.com/DeutschBall/test/master/image-20220612083039864.png"
+alt="image-20220612083039864" />
+<figcaption aria-hidden="true">image-20220612083039864</figcaption>
+</figure>
 <p>内部碎片:</p>
 <p>在内存分段系统上没有内部碎片问题</p>
 <p>在分页系统上,假设一个页是4KB,一个进程的地址空间要33KB,那么前32K正好8页,第九页上只用了1KB,剩下这3KB就是内部碎片</p>
-<h2 id="段页式"><a href="#段页式" class="headerlink" title="段页式"></a>段页式</h2><p><img src="https://raw.githubusercontent.com/DeutschBall/test/master/image-20220612083740271.png" alt="image-20220612083740271"></p>
+<h2 id="段页式">段页式</h2>
+<figure>
+<img
+src="https://raw.githubusercontent.com/DeutschBall/test/master/image-20220612083740271.png"
+alt="image-20220612083740271" />
+<figcaption aria-hidden="true">image-20220612083740271</figcaption>
+</figure>
 <p>段页式结构,对用户来说,可以感受到的是分段,实际使用的时候和纯分段几乎相同</p>
 <p>操作系统负责分页工作,对用户不可见</p>
 <p>一个段可能由多个页组成,比如一个8K的段就有可能由两个4k的页组成,这个段就管理两个页</p>
 <p>一个进程对应一个段表,每个段维护一个表,因此一个有多个段的进程对应多个页表</p>
 <p>纯分段结构中,段表存放的是段基址和段长度,而段页式结构中,段表中存放的是页表长度,页表存放块号,页表存放的是内存块号</p>
-<h2 id="从物理寻址到虚拟寻址"><a href="#从物理寻址到虚拟寻址" class="headerlink" title="从物理寻址到虚拟寻址"></a>从物理寻址到虚拟寻址</h2><p>虚拟内存是一伙子异想天开的人造出来的巧夺天工,在虚拟内存之前,是符合普通人认知的物理内存</p>
+<h2 id="从物理寻址到虚拟寻址">从物理寻址到虚拟寻址</h2>
+<p>虚拟内存是一伙子异想天开的人造出来的巧夺天工,在虚拟内存之前,是符合普通人认知的物理内存</p>
 <p>计算机主存(目前可以直接认为成内存条)可以看成是一个巨大的数组,他有M个连续的单元,每个单元大小是一个字节,各个单元线性分布</p>
-<p><img src="https://raw.githubusercontent.com/DeutschBall/test/master/image-20220516182449307.png" alt="image-20220516182449307"></p>
+<figure>
+<img
+src="https://raw.githubusercontent.com/DeutschBall/test/master/image-20220516182449307.png"
+alt="image-20220516182449307" />
+<figcaption aria-hidden="true">image-20220516182449307</figcaption>
+</figure>
 <p>物理寻址就是直接在内存条上寻址,CPU想要读写哪个单元的内容,只需要指定该单元的编号,或者说下标</p>
 <blockquote>
 <p>物理寻址的一个相对完整的过程:</p>
@@ -361,9 +360,9 @@
 <p>还有更高级的原因,比如更方便地管理内存</p>
 <p>虚拟空间是对上层而言的概念,而物理空间是对下层而言的,</p>
 <p>用户感到的是虚拟空间,有限的内存上似乎可以运行无限多的进程,开无限多的进程独立地址空间,</p>
-<p>而对操作系统来说,实际上的”资源”就只有内存条那固定死的地址空间.</p>
+<p>而对操作系统来说,实际上的"资源"就只有内存条那固定死的地址空间.</p>
 <p>操作系统通过及时地将用户暂时不用的进程的物理空间换给其他进程的虚拟空间使用,让用户产生错觉认为内存很大.</p>
-<p>当用户又要继续使用刚才暂时不用的进程时,此时该进程占用的”资源”刚才被操作系统从内存中搬到磁盘中,然后交给了别的进程.</p>
+<p>当用户又要继续使用刚才暂时不用的进程时,此时该进程占用的"资源"刚才被操作系统从内存中搬到磁盘中,然后交给了别的进程.</p>
 <p>因此操作系统又会启动缺页处理,把磁盘中该进程的信息重新搬回来放到内存中使用.</p>
 <p>这就好比用工荒,又好比小学时做过的一道数学题</p>
 <blockquote>
@@ -376,7 +375,12 @@
 <p>虚拟寻址相对于物理寻址多了一个硬件MMU(内存管理单元)和一个步骤即地址翻译.</p>
 <p>并且CPU指定的虚拟地址有可能并不放在主存中,而是放在磁盘中,这就发生了缺页,操作系统会一系列操作给他整的不缺喽然后继续执行,这都是后话了</p>
 <p>最简化的虚拟寻址模型:</p>
-<p><img src="https://raw.githubusercontent.com/DeutschBall/test/master/image-20220516182852208.png" alt="image-20220516182852208"></p>
+<figure>
+<img
+src="https://raw.githubusercontent.com/DeutschBall/test/master/image-20220516182852208.png"
+alt="image-20220516182852208" />
+<figcaption aria-hidden="true">image-20220516182852208</figcaption>
+</figure>
 <blockquote>
 <p>一个相对完整的虚拟寻址过程:</p>
 <p>1.CPU指定一个虚拟地址,发往MMU内存管理单元(MMU也是CPU中集成的一部分)</p>
@@ -384,8 +388,12 @@
 <p>3.CPU指定对该物理地址的读或者写操作,将控制信息送往控制总线</p>
 <p>4.CPU通过数据总线对该内存单元进行读或者写操作</p>
 </blockquote>
-<h2 id="地址空间"><a href="#地址空间" class="headerlink" title="地址空间"></a>地址空间</h2><h3 id="物理地址空间和虚拟地址空间"><a href="#物理地址空间和虚拟地址空间" class="headerlink" title="物理地址空间和虚拟地址空间"></a>物理地址空间和虚拟地址空间</h3><p>一个512MB的内存条上的地址空间即物理地址空间是多大?</p>
-<p>一个单元一个字节,$512MB&#x3D;512<em>2^{10}KB&#x3D;512</em>2^{20}B&#x3D;2^{29}B$即物理地址空间编号范围为:$[0,2^{29})$</p>
+<h2 id="地址空间">地址空间</h2>
+<h3 id="物理地址空间和虚拟地址空间">物理地址空间和虚拟地址空间</h3>
+<p>一个512MB的内存条上的地址空间即物理地址空间是多大?</p>
+<p>一个单元一个字节,<span
+class="math inline">\(512MB=512*2^{10}KB=512*2^{20}B=2^{29}B\)</span>即物理地址空间编号范围为:<span
+class="math inline">\([0,2^{29})\)</span></p>
 <p>物理地址空间就是内存条上的地址空间数</p>
 <p>虚拟地址空间是指想要给用户造成的假象中,让用户感觉出来的内存大小,实际上是磁盘上的一个连续巨大数组</p>
 <blockquote>
@@ -395,14 +403,18 @@
 <p>通常虚拟地址空间会比物理空间大,否则虚拟空间没有存在的意义</p>
 <blockquote>
 <p>绷不住了</p>
-<p><img src="https://raw.githubusercontent.com/DeutschBall/test/master/image-20220516204149979.png"></p>
+<p><img
+src="https://raw.githubusercontent.com/DeutschBall/test/master/image-20220516204149979.png" /></p>
 </blockquote>
 <p>为什么不直接把物理空间做大?物理空间即内存条,相对磁盘贵得多.如果有钱自然可以整一个不用磁盘,只用内存(还涉及到断点是否能保存的问题)的计算机,现在对于私人电脑而言,比如联想拯救者y9000p2021h,显然不现实</p>
-<h3 id="数据对象和地址空间的关系"><a href="#数据对象和地址空间的关系" class="headerlink" title="数据对象和地址空间的关系"></a>数据对象和地址空间的关系</h3><p>数据对象就是存放在地址空间上的数据,其在地址空间中的位置或者说下标就是其属性</p>
+<h3 id="数据对象和地址空间的关系">数据对象和地址空间的关系</h3>
+<p>数据对象就是存放在地址空间上的数据,其在地址空间中的位置或者说下标就是其属性</p>
 <p>比如一个char一个字节,存放在一个内存单元中,</p>
 <p>一个int四个i直接,存放在四个连续的内存单元中,</p>
 <p>每个数据对象都会有一个虚拟地址空间地址,当其所在进程被实际运行时,它有可能在物理空间中有一个物理空间地址</p>
-<h2 id="虚拟内存作为缓存工具"><a href="#虚拟内存作为缓存工具" class="headerlink" title="虚拟内存作为缓存工具"></a>虚拟内存作为缓存工具</h2><h3 id="分页"><a href="#分页" class="headerlink" title="分页"></a>分页</h3><p>虚拟空间比物理空间大,自然不能一股脑塞进物理空间里.</p>
+<h2 id="虚拟内存作为缓存工具">虚拟内存作为缓存工具</h2>
+<h3 id="分页">分页</h3>
+<p>虚拟空间比物理空间大,自然不能一股脑塞进物理空间里.</p>
 <p>应该是用到虚拟空间的某一块就从虚拟空间中把这一块搬到物理空间中</p>
 <blockquote>
 <p>这就好比一个有5个坑的厕所但是有20个人要扔炸弹,自然要挑最急或者最先排队的5个人去扔炸弹,20个人一起扔炸弹有很大可能把炸弹扔别人身上或者扔外边</p>
@@ -413,7 +425,8 @@
 <p>这从量上举例</p>
 <p>就好比中国有13亿人口就要挖13个上厕所的坑,</p>
 <p>其一正常人不是每时每刻都在扔炸弹,就好比磁盘中的数据不是每时每刻都要被CPU访问</p>
-<p>其二建13亿个厕所走到路上得随处可见的坑(我密恐犯了),类比计算机中就需要从CPU到磁盘之间部署总线,磁盘一般比较大,比如1个T,那么地址总线宽度就得$log_2 1T$</p>
+<p>其二建13亿个厕所走到路上得随处可见的坑(我密恐犯了),类比计算机中就需要从CPU到磁盘之间部署总线,磁盘一般比较大,比如1个T,那么地址总线宽度就得<span
+class="math inline">\(log_2 1T\)</span></p>
 <p>从质上举例子,内存速度远快于磁盘,</p>
 <p>CPU去访问内存,然后内存去访问磁盘,就好比师长向团长下达命令,团长去团里下命令,要找士兵许三多,</p>
 <p>但是CPU去访问磁盘就好比师长直接向师广大士兵下达命令,找许三多这个人.</p>
@@ -432,25 +445,39 @@
 <p>用不到的虚拟页其对应的物理页有可能就被让给其他虚拟页使用</p>
 <p>可以说某一时刻一个正在被使用的物理页是一个虚拟页的快照,</p>
 <p>当然物理页可以修改,这会导致物理页和其对应的虚拟页内容有差异,这种情况下应该怎么办呢?当该物理页将要被让给其他虚拟页时需要将改动写回其对应的虚拟页</p>
-<h3 id="页属性"><a href="#页属性" class="headerlink" title="页属性"></a>页属性</h3><p>页属性:物理页和虚拟页有相同的大小$P&#x3D;2^p$字节</p>
+<h3 id="页属性">页属性</h3>
+<p>页属性:物理页和虚拟页有相同的大小<span
+class="math inline">\(P=2^p\)</span>字节</p>
 <p>由于物理地址空间比虚拟地址空间小,因此显然物理页数量比虚拟页数量少</p>
 <p>根据虚拟页是否被使用以及是否正在被使用,虚拟页可以分成三种</p>
-<p><img src="https://raw.githubusercontent.com/DeutschBall/test/master/image-20220516193505725.png" alt="image-20220516193505725"></p>
+<figure>
+<img
+src="https://raw.githubusercontent.com/DeutschBall/test/master/image-20220516193505725.png"
+alt="image-20220516193505725" />
+<figcaption aria-hidden="true">image-20220516193505725</figcaption>
+</figure>
 <p>分配与否就是指该虚拟页是否存储了信息</p>
 <p>缓存与否就是该虚拟页是否被复制到物理页供CPU访问</p>
-<p><img src="https://raw.githubusercontent.com/DeutschBall/test/master/image-20220516193749579.png" alt="image-20220516193749579"></p>
+<figure>
+<img
+src="https://raw.githubusercontent.com/DeutschBall/test/master/image-20220516193749579.png"
+alt="image-20220516193749579" />
+<figcaption aria-hidden="true">image-20220516193749579</figcaption>
+</figure>
 <blockquote>
 <p>什么是缓存?</p>
-<p>看电影的时候也会遇到”缓存”这个概念,缓存有点一劳永逸的概念,第一次加载需要花费一些时间,但是以后对相同内容的重复访问就快得多了</p>
-<p>什么叫”缓存在DRAM中”,就是指虚拟页已经拷贝到内存上建立了物理页,方便CPU直接访问内存而不用与磁盘打交道</p>
+<p>看电影的时候也会遇到"缓存"这个概念,缓存有点一劳永逸的概念,第一次加载需要花费一些时间,但是以后对相同内容的重复访问就快得多了</p>
+<p>什么叫"缓存在DRAM中",就是指虚拟页已经拷贝到内存上建立了物理页,方便CPU直接访问内存而不用与磁盘打交道</p>
 <p>因此内存条在存储系统中可以看成是CPU和磁盘之间的缓存器,就好比cache是CPU和磁盘之间的缓存器,只不过内存比cache大得多慢得多</p>
 </blockquote>
 <p>显然VP数量多与PP,VP的二进制地址编号更长</p>
-<h3 id="幼年的页表"><a href="#幼年的页表" class="headerlink" title="幼年的页表"></a>幼年的页表</h3><p>CPU或者说虚拟内存系统怎么知道它想要访问的虚拟页是否已经被拷贝到内存条上成为物理页了呢?</p>
+<h3 id="幼年的页表">幼年的页表</h3>
+<p>CPU或者说虚拟内存系统怎么知道它想要访问的虚拟页是否已经被拷贝到内存条上成为物理页了呢?</p>
 <blockquote>
 <p>这就好比班主任要约谈某个倒霉蛋,但是班主任怎么知道这个倒霉蛋有没有来学校呢?班主任会先看一下签到表判断一下倒霉蛋来没来,来了则直接约谈,没来则先从家里叫到学校然后再约谈</p>
 </blockquote>
-<p>让虚拟内存系统掌握目前有哪些虚拟页拷贝成了物理页,要在&#x3D;&#x3D;主存上&#x3D;&#x3D;放一个页表(Page Table,PT)</p>
+<p>让虚拟内存系统掌握目前有哪些虚拟页拷贝成了物理页,要在==主存上==放一个页表(Page
+Table,PT)</p>
 <blockquote>
 <p>为什么要放到主存上?</p>
 <p>还能放到哪里呢?CPU的寄存器里?磁盘里?</p>
@@ -459,7 +486,12 @@
 <p>也只能放在内存里了</p>
 </blockquote>
 <p>页表项(PTE)数是根据虚拟内存确定的,虚拟页有几个,就有多少个页表项</p>
-<p><img src="https://raw.githubusercontent.com/DeutschBall/test/master/image-20220516194906654.png" alt="image-20220516194906654"></p>
+<figure>
+<img
+src="https://raw.githubusercontent.com/DeutschBall/test/master/image-20220516194906654.png"
+alt="image-20220516194906654" />
+<figcaption aria-hidden="true">image-20220516194906654</figcaption>
+</figure>
 <p>页表项按照顺序表方式排列,下标从0到<code>虚拟页数-1</code>,与虚拟页一一对应</p>
 <p>有效位表明该虚拟页是否已经在物理内存中创建了物理页,</p>
 <p>页表项剩下的部分是物理页号,光知道一个虚拟页创建了一个物理页还不够,还得知道这个物理页在哪里</p>
@@ -469,16 +501,22 @@
 <p>如果1号坑的爷们占着坑不扔炸弹,所长就则给外面的人说1号坑闲置,来个爷们把上一个爷们给挤掉</p>
 <p>如果1号坑的爷们快速地扔完炸弹走了,所长就把1号坑标记为闲置状态</p>
 </blockquote>
-<p>之所以说”幼年的页表”,是因为实际上的页表项目还要记录很多信息,这里只是最简化的页表</p>
-<h3 id="页命中"><a href="#页命中" class="headerlink" title="页命中"></a>页命中</h3><p>CPU想要访问某个虚拟地址,但是这个虚拟地址对应的页是否已经被缓存到内存中了呢?</p>
-<p>如果是则”命中”</p>
+<p>之所以说"幼年的页表",是因为实际上的页表项目还要记录很多信息,这里只是最简化的页表</p>
+<h3 id="页命中">页命中</h3>
+<p>CPU想要访问某个虚拟地址,但是这个虚拟地址对应的页是否已经被缓存到内存中了呢?</p>
+<p>如果是则"命中"</p>
 <blockquote>
 <p>这就好比20个爷们去一个5坑男厕,一个找茬想让老八表演绝活,但是绝活只能靠在厕所中食用炸弹完成,于是找茬的去问所长,老八是否正在坑上,</p>
 <p>所长也挺好奇的,查了一下如厕表,发现<code>坑[0]=老八</code>,老八确实正在扔炸弹,这就命中了</p>
 <p>否则所长就要让外面的老八挤掉一个站着茅坑不扔炸弹的张三然后表演绝活</p>
 </blockquote>
 <p>在计算机上怎么判定是不是呢?</p>
-<p><img src="https://raw.githubusercontent.com/DeutschBall/test/master/image-20220516200840582.png" alt="image-20220516200840582"></p>
+<figure>
+<img
+src="https://raw.githubusercontent.com/DeutschBall/test/master/image-20220516200840582.png"
+alt="image-20220516200840582" />
+<figcaption aria-hidden="true">image-20220516200840582</figcaption>
+</figure>
 <p>根据CPU给出的虚拟地址首先查虚拟页表,先看有效位,如果为1则命中,根据页表项后面的物理页号去物理内存中去访问物理页</p>
 <p>如果有效位为0则表明该虚拟地址对应的页还没有拷贝到物理内存里,触发缺页异常,这都是后话了</p>
 <blockquote>
@@ -487,22 +525,34 @@
 <p>虚拟页的地址就是第一个虚拟单元的虚拟地址</p>
 <p>因此给定一个虚拟地址查页表的时候应该是查询该虚拟地址是否属于某个虚拟页的<strong>辖区</strong></p>
 </blockquote>
-<h3 id="缺页"><a href="#缺页" class="headerlink" title="缺页"></a>缺页</h3><p>没有命中的情况就是缺页</p>
+<h3 id="缺页">缺页</h3>
+<p>没有命中的情况就是缺页</p>
 <p><strong>什么情况下判定为缺页?</strong></p>
-<p><img src="https://raw.githubusercontent.com/DeutschBall/test/master/image-20220516201903715.png" alt="image-20220516201903715"></p>
+<figure>
+<img
+src="https://raw.githubusercontent.com/DeutschBall/test/master/image-20220516201903715.png"
+alt="image-20220516201903715" />
+<figcaption aria-hidden="true">image-20220516201903715</figcaption>
+</figure>
 <p>cpu指定的虚拟地址查页表后发现有效位为0,立刻引发缺页中断</p>
 <p><strong>缺页了怎么整才能让它不缺?</strong></p>
 <p>我原来认为缺页了CPU就直接越俎代庖地去访问磁盘了,这经过前文的学习显然是想当然</p>
-<p>缺页之后选择一个”不是很重要”的物理页(比如PP3)给他扬了,修改指向该物理页PP3的页表项PTE4,有效位置0,</p>
+<p>缺页之后选择一个"不是很重要"的物理页(比如PP3)给他扬了,修改指向该物理页PP3的页表项PTE4,有效位置0,</p>
 <blockquote>
 <p>此举的目的是当先前的虚拟页VP4再次使用时,需要重新拷贝到物理页.如果此时不即使修改PTE4的有效位则再次使用VP4时一查表,发现已经缓存好了,直接访问PP3了,可是PP3实际上是VP3的拷贝</p>
 </blockquote>
 <blockquote>
-<p>这里”选择一个不是很重要的物理页”涉及到页面调度算法,这是另一本黑叔叔,&lt;&lt;现代操作系统&gt;&gt;中的内容</p>
+<p>这里"选择一个不是很重要的物理页"涉及到页面调度算法,这是另一本黑叔叔,&lt;<现代操作系统>&gt;中的内容</p>
 </blockquote>
 <p>然后用需要用到的虚拟页VP3拷贝到该物理页PP3位置,挤掉VP4,</p>
-<p>修改对应的页表项PP4,有效位 置1然后物理页表地址写上刚才拷贝到的物理页的地址PP3</p>
-<p><img src="https://raw.githubusercontent.com/DeutschBall/test/master/image-20220516202424662.png" alt="image-20220516202424662"></p>
+<p>修改对应的页表项PP4,有效位
+置1然后物理页表地址写上刚才拷贝到的物理页的地址PP3</p>
+<figure>
+<img
+src="https://raw.githubusercontent.com/DeutschBall/test/master/image-20220516202424662.png"
+alt="image-20220516202424662" />
+<figcaption aria-hidden="true">image-20220516202424662</figcaption>
+</figure>
 <p>都改完之后,重新执行刚才的指令,此时虚拟地址就已经被缓存了,不会再发生缺页了</p>
 <p>一些规范术语:</p>
 <p>交换或者页面调度:再内存和磁盘之间传送页</p>
@@ -514,21 +564,28 @@
 <blockquote>
 <p>现代操作系统一般使用按需页面调度</p>
 </blockquote>
-<h2 id="虚拟内存作为内存管理工具"><a href="#虚拟内存作为内存管理工具" class="headerlink" title="虚拟内存作为内存管理工具"></a>虚拟内存作为内存管理工具</h2><p>每个进程都有自己独立的&#x3D;&#x3D;虚拟&#x3D;&#x3D;地址空间,注意不是物理地址空间</p>
+<h2 id="虚拟内存作为内存管理工具">虚拟内存作为内存管理工具</h2>
+<p>每个进程都有自己独立的==虚拟==地址空间,注意不是物理地址空间</p>
 <p>这就要求每个进程都有独立的页表</p>
 <p>物理空间只有一个,就是内存条,或者说主存</p>
 <p>进程的虚拟地址空间看似是连续地开了一大片,实际上有可能在物理内存上东一块西一块.</p>
 <p>不同的进程可以有共享的物理页,这时动态库的物质基础</p>
-<p><img src="https://raw.githubusercontent.com/DeutschBall/test/master/image-20220516205620915.png" alt="image-20220516205620915"></p>
+<figure>
+<img
+src="https://raw.githubusercontent.com/DeutschBall/test/master/image-20220516205620915.png"
+alt="image-20220516205620915" />
+<figcaption aria-hidden="true">image-20220516205620915</figcaption>
+</figure>
 <blockquote>
 <p>这里有一个问题,如果两个进程的代码段都是从虚拟地址的<code>0x400000</code>开始,岂不是对应了磁盘上的同一虚拟页?</p>
-<p>&#x3D;&#x3D;可以提出一种猜想&#x3D;&#x3D;</p>
+<p>==可以提出一种猜想==</p>
 <p>进程的虚拟地址空间是要小于磁盘上全部的虚拟地址空间的</p>
 <p>进程的虚拟地址并不是磁盘上的虚拟地址空间的下标,</p>
 <p>而是相对于磁盘上几个连续的页面组成的一个子虚拟地址空间而言的</p>
 <p>该子虚拟空间从0开始重新编号</p>
 </blockquote>
-<h2 id="虚拟内存作为内存保护工具"><a href="#虚拟内存作为内存保护工具" class="headerlink" title="虚拟内存作为内存保护工具"></a>虚拟内存作为内存保护工具</h2><p>啥是内存保护?</p>
+<h2 id="虚拟内存作为内存保护工具">虚拟内存作为内存保护工具</h2>
+<p>啥是内存保护?</p>
 <p>比如用户不允许修改内核的数据</p>
 <p>只读数据无法被修改,代码段也不许被修改</p>
 <p>不允许修改其他内存的虚拟地址空间</p>
@@ -537,36 +594,69 @@
 <p>这就好比让两个在水上步行球中的人打架,两个球距离最近也就是相切,不会相互嵌入</p>
 <p>这个球就好比进程独立的虚拟地址空间</p>
 </blockquote>
-<p>…</p>
+<p>...</p>
 <p>幼年的页表成熟了一些,成了带许可位的页表</p>
-<p><img src="https://raw.githubusercontent.com/DeutschBall/test/master/image-20220516210523521.png" alt="image-20220516210523521"></p>
+<figure>
+<img
+src="https://raw.githubusercontent.com/DeutschBall/test/master/image-20220516210523521.png"
+alt="image-20220516210523521" />
+<figcaption aria-hidden="true">image-20220516210523521</figcaption>
+</figure>
 <p>在页表项中加上许可位,就可以限制进程对该页读写访问,</p>
 <p>sup许可位限制普通用户和管理员的区别</p>
 <p>违反这些许可条件的指令将会导致段错误</p>
-<h2 id="地址翻译-1"><a href="#地址翻译-1" class="headerlink" title="地址翻译"></a>地址翻译</h2><p>符号约定</p>
-<p><img src="https://raw.githubusercontent.com/DeutschBall/test/master/image-20220516225933019.png" alt="image-20220516225933019"></p>
+<h2 id="地址翻译-1">地址翻译</h2>
+<p>符号约定</p>
+<figure>
+<img
+src="https://raw.githubusercontent.com/DeutschBall/test/master/image-20220516225933019.png"
+alt="image-20220516225933019" />
+<figcaption aria-hidden="true">image-20220516225933019</figcaption>
+</figure>
 <p>地址翻译就是从虚拟地址计算出物理地址的过程</p>
-<p><img src="https://raw.githubusercontent.com/DeutschBall/test/master/image-20220516214911937.png" alt="image-20220516214911937"></p>
+<figure>
+<img
+src="https://raw.githubusercontent.com/DeutschBall/test/master/image-20220516214911937.png"
+alt="image-20220516214911937" />
+<figcaption aria-hidden="true">image-20220516214911937</figcaption>
+</figure>
 <blockquote>
-<p> 咱就是说这个MAP函数这么抽象有必要这样写一下吗</p>
+<p>咱就是说这个MAP函数这么抽象有必要这样写一下吗</p>
 </blockquote>
 <p>这个映射是在MMU中完成的</p>
-<h3 id="最简单的地址翻译"><a href="#最简单的地址翻译" class="headerlink" title="最简单的地址翻译"></a>最简单的地址翻译</h3><p><img src="https://raw.githubusercontent.com/DeutschBall/test/master/image-20220516220103992.png" alt="image-20220516220103992"></p>
+<h3 id="最简单的地址翻译">最简单的地址翻译</h3>
+<figure>
+<img
+src="https://raw.githubusercontent.com/DeutschBall/test/master/image-20220516220103992.png"
+alt="image-20220516220103992" />
+<figcaption aria-hidden="true">image-20220516220103992</figcaption>
+</figure>
 <p>每个进程可以有自己的独立页表,需要一个页表基址寄存器指向页表基地址,作用类似于段寄存器</p>
 <blockquote>
 <p>一个精确到存储单元的虚拟地址分成虚拟页号和虚拟页偏移量两部分</p>
 <p>确定到页用到页号,确定到页上的一个单元需要页偏移量</p>
 <p>由于物理页大小和虚拟页大小相同,因此物理页偏移量和虚拟页偏移量是相同的</p>
-<p>虚拟页数量一般会大于物理页数量,因此虚拟页号长度一般长于物理页号,即$n&gt;m$</p>
+<p>虚拟页数量一般会大于物理页数量,因此虚拟页号长度一般长于物理页号,即<span
+class="math inline">\(n&gt;m\)</span></p>
 </blockquote>
 <p>翻译过程:</p>
 <p>1.CPU指定一个虚拟地址给MMU</p>
-<p>2.MMU将该虚拟地址的$[p,n-1]$位作为虚拟页号去查页表,剩下$[0,p-1]$位作为页偏移量</p>
+<p>2.MMU将该虚拟地址的<span
+class="math inline">\([p,n-1]\)</span>位作为虚拟页号去查页表,剩下<span
+class="math inline">\([0,p-1]\)</span>位作为页偏移量</p>
 <p>3.虚拟页号查页表对应项,如果有效位是0则缺页中断,否则命中,如果命中则:</p>
-<p>4.从页表中读取物理页号$[p,m-1]$,和页偏移量$[0,p-1]$拼成物理地址</p>
+<p>4.从页表中读取物理页号<span
+class="math inline">\([p,m-1]\)</span>,和页偏移量<span
+class="math inline">\([0,p-1]\)</span>拼成物理地址</p>
 <p>5.CPU将该物理地址放到地址总线上,准备访问内存</p>
-<h3 id="考虑高速缓存的地址翻译"><a href="#考虑高速缓存的地址翻译" class="headerlink" title="考虑高速缓存的地址翻译"></a>考虑高速缓存的地址翻译</h3><p>原来的地址翻译,CPU直接访问内存,现在在CPU和内存之间再加一级缓存,L1高速缓存</p>
-<p><img src="https://raw.githubusercontent.com/DeutschBall/test/master/image-20220516221624510.png" alt="image-20220516221624510"></p>
+<h3 id="考虑高速缓存的地址翻译">考虑高速缓存的地址翻译</h3>
+<p>原来的地址翻译,CPU直接访问内存,现在在CPU和内存之间再加一级缓存,L1高速缓存</p>
+<figure>
+<img
+src="https://raw.githubusercontent.com/DeutschBall/test/master/image-20220516221624510.png"
+alt="image-20220516221624510" />
+<figcaption aria-hidden="true">image-20220516221624510</figcaption>
+</figure>
 <p>处理器只能发出虚拟地址,MMU翻译成物理地址,处理器不能直接发出物理地址</p>
 <p>页表还是存放在内存中,高速缓存存放的是很少一部分的<strong>页表项目</strong>还有<strong>数据</strong></p>
 <p>1.处理器发出虚拟地址VA之后进入MMU进行翻译,得到一个虚拟页号</p>
@@ -579,45 +669,100 @@
 <p><strong>然后CPU访问物理地址也因L1有所变化</strong></p>
 <p>在没有L1时,MMU拿到物理地址之后会加到地址总线上,但是现在MMU拿到物理地址后还是会先查L1,如果L1命中,则直接取出数据通过内部总线传递给CPU,免去了访问内存和外总线的过程</p>
 <p>当L1不命中时才会查内存上的物理地址,然后取出其上的地址,然后在L1中挤掉一个相对不重要的记录,存入该物理地址及其数据的键值对</p>
-<h3 id="TLB加速翻译的地址翻译"><a href="#TLB加速翻译的地址翻译" class="headerlink" title="TLB加速翻译的地址翻译"></a>TLB加速翻译的地址翻译</h3><p>TLB:翻译后备缓冲器(Translation Lookaside Buffer)</p>
+<h3 id="tlb加速翻译的地址翻译">TLB加速翻译的地址翻译</h3>
+<p>TLB:翻译后备缓冲器(Translation Lookaside Buffer)</p>
 <p>这个玩意儿是加速翻译的,啥意思呢.</p>
 <blockquote>
-<p>如果五秒前我问了别人,”你好”用英语怎么说并获得了回答,</p>
+<p>如果五秒前我问了别人,"你好"用英语怎么说并获得了回答,</p>
 <p>五秒后我要对一个米国人打招呼,这时需要翻译</p>
-<p>但凡比鱼聪明点的人都还记得”你好”用英语怎么说,这就是TLB命中</p>
-<p>但是如果五秒前我尝试寄了十个甚至更多的英语单词,其中即使包括”你好”,五秒后我也不一定能想起来,这就是后来的翻译挤掉了前面翻译的缓存,然后TLB不命中</p>
-<p>此时想不起来就应该再问懂哥儿,”你好”用英语怎么说,然后记住,方便奉承下一个米国人用,这就是TLB不命中之后干的事</p>
+<p>但凡比鱼聪明点的人都还记得"你好"用英语怎么说,这就是TLB命中</p>
+<p>但是如果五秒前我尝试寄了十个甚至更多的英语单词,其中即使包括"你好",五秒后我也不一定能想起来,这就是后来的翻译挤掉了前面翻译的缓存,然后TLB不命中</p>
+<p>此时想不起来就应该再问懂哥儿,"你好"用英语怎么说,然后记住,方便奉承下一个米国人用,这就是TLB不命中之后干的事</p>
 </blockquote>
-<p><img src="https://raw.githubusercontent.com/DeutschBall/test/master/image-20220516224400351.png" alt="image-20220516224400351"></p>
+<figure>
+<img
+src="https://raw.githubusercontent.com/DeutschBall/test/master/image-20220516224400351.png"
+alt="image-20220516224400351" />
+<figcaption aria-hidden="true">image-20220516224400351</figcaption>
+</figure>
 <p>处理器指定一个虚拟地址交给MMU,MMU首先不会尝试查L1或者内存中的页表进行翻译,而是首先访问TLB,看看刚才是不是已经翻译过并且还记得,如果命中则直接用刚才记住的翻译得到物理地址</p>
 <p>如果TLB没有命中则老老实实去查高速缓存页表项,要是再不命中则老老实实去查内存页表,要是还不命中则缺页</p>
 <p>可气的是,总有一伙子人能设计地这些缓冲几乎百发百中</p>
-<h3 id="手工模拟地址翻译"><a href="#手工模拟地址翻译" class="headerlink" title="手工模拟地址翻译"></a>手工模拟地址翻译</h3><h4 id="题目环境"><a href="#题目环境" class="headerlink" title="题目环境"></a>题目环境</h4><p>考虑上TLB,L1缓存,手工模拟一个地址翻译过程</p>
+<h3 id="手工模拟地址翻译">手工模拟地址翻译</h3>
+<h4 id="题目环境">题目环境</h4>
+<p>考虑上TLB,L1缓存,手工模拟一个地址翻译过程</p>
 <p>系统参数:</p>
-<p><img src="https://raw.githubusercontent.com/DeutschBall/test/master/image-20220516232636330.png" alt="image-20220516232636330"></p>
+<figure>
+<img
+src="https://raw.githubusercontent.com/DeutschBall/test/master/image-20220516232636330.png"
+alt="image-20220516232636330" />
+<figcaption aria-hidden="true">image-20220516232636330</figcaption>
+</figure>
 <p>这里几路相联,几个组实际上就是将线性的缓存器改成了阵列,按照行列存储</p>
 <blockquote>
-<p>每个页面大小$64Bytes&#x3D;2^6Bytes$,一个内存单元$1Bytes$,因此一个页管理$2^6$个地址,页内偏移量就得是一个6位二进制数,剩下的高位才是页号</p>
-<p><img src="https://raw.githubusercontent.com/DeutschBall/test/master/image-20220516232919987.png" alt="image-20220516232919987"></p>
+<p>每个页面大小<span
+class="math inline">\(64Bytes=2^6Bytes\)</span>,一个内存单元<span
+class="math inline">\(1Bytes\)</span>,因此一个页管理<span
+class="math inline">\(2^6\)</span>个地址,页内偏移量就得是一个6位二进制数,剩下的高位才是页号</p>
+<figure>
+<img
+src="https://raw.githubusercontent.com/DeutschBall/test/master/image-20220516232919987.png"
+alt="image-20220516232919987" />
+<figcaption aria-hidden="true">image-20220516232919987</figcaption>
+</figure>
 </blockquote>
 <blockquote>
 <p>TLB中缓存的是刚才查过的翻译,可以认为是<code>[VPN,PPN]</code>键值对,MMU给出一个VPN,如果TLB中有键为该VPN的键值对,则TLB给出PPN值,此时TLB命中,</p>
 <p>否则TLB不命中则需要查L1或者内存页表进行地址翻译</p>
 <p>这里给出了一个假定的TLB缓存情况</p>
-<p><img src="https://raw.githubusercontent.com/DeutschBall/test/master/image-20220516233348777.png" alt="image-20220516233348777"></p>
+<figure>
+<img
+src="https://raw.githubusercontent.com/DeutschBall/test/master/image-20220516233348777.png"
+alt="image-20220516233348777" />
+<figcaption aria-hidden="true">image-20220516233348777</figcaption>
+</figure>
 </blockquote>
 <blockquote>
 <p>页表是单级结构,这里给出了假定的页表的情况</p>
-<p><img src="https://raw.githubusercontent.com/DeutschBall/test/master/image-20220516233340796.png" alt="image-20220516233340796"></p>
+<figure>
+<img
+src="https://raw.githubusercontent.com/DeutschBall/test/master/image-20220516233340796.png"
+alt="image-20220516233340796" />
+<figcaption aria-hidden="true">image-20220516233340796</figcaption>
+</figure>
 </blockquote>
 <blockquote>
 <p>高速缓存L1通过物理地址字段进行寻址,这里给出了假定的缓存情况</p>
-<p><img src="https://raw.githubusercontent.com/DeutschBall/test/master/image-20220516233523416.png" alt="image-20220516233523416"></p>
+<figure>
+<img
+src="https://raw.githubusercontent.com/DeutschBall/test/master/image-20220516233523416.png"
+alt="image-20220516233523416" />
+<figcaption aria-hidden="true">image-20220516233523416</figcaption>
+</figure>
 </blockquote>
-<h4 id="将虚拟地址0x03d7翻译成物理地址"><a href="#将虚拟地址0x03d7翻译成物理地址" class="headerlink" title="将虚拟地址0x03d7翻译成物理地址"></a>将虚拟地址<code>0x03d7</code>翻译成物理地址</h4><h5 id="0xA虚拟地址格式"><a href="#0xA虚拟地址格式" class="headerlink" title="0xA虚拟地址格式"></a>0xA虚拟地址格式</h5><p><img src="https://raw.githubusercontent.com/DeutschBall/test/master/image-20220516235021410.png" alt="image-20220516235021410"></p>
-<h5 id="0xB地址翻译"><a href="#0xB地址翻译" class="headerlink" title="0xB地址翻译"></a>0xB地址翻译</h5><p><img src="https://raw.githubusercontent.com/DeutschBall/test/master/image-20220516235143678.png" alt="image-20220516235143678"></p>
+<h4
+id="将虚拟地址0x03d7翻译成物理地址">将虚拟地址<code>0x03d7</code>翻译成物理地址</h4>
+<h5 id="xa虚拟地址格式">0xA虚拟地址格式</h5>
+<figure>
+<img
+src="https://raw.githubusercontent.com/DeutschBall/test/master/image-20220516235021410.png"
+alt="image-20220516235021410" />
+<figcaption aria-hidden="true">image-20220516235021410</figcaption>
+</figure>
+<h5 id="xb地址翻译">0xB地址翻译</h5>
+<figure>
+<img
+src="https://raw.githubusercontent.com/DeutschBall/test/master/image-20220516235143678.png"
+alt="image-20220516235143678" />
+<figcaption aria-hidden="true">image-20220516235143678</figcaption>
+</figure>
 <p>TLB命中,物理页号<code>0x0D</code>拼接页偏移得到物理地址</p>
-<p><img src="https://raw.githubusercontent.com/DeutschBall/test/master/image-20220516235504854.png" alt="image-20220516235504854"></p>
+<figure>
+<img
+src="https://raw.githubusercontent.com/DeutschBall/test/master/image-20220516235504854.png"
+alt="image-20220516235504854" />
+<figcaption aria-hidden="true">image-20220516235504854</figcaption>
+</figure>
 <p>只要是TLB中能找到的记录,都不会缺页,这是因为,最近的记忆会挤掉老的记忆,TLB中只要能找到,说明最近被翻译过</p>
 <table>
 <thead>
@@ -626,7 +771,8 @@
 <th>值</th>
 </tr>
 </thead>
-<tbody><tr>
+<tbody>
+<tr>
 <td>VPN</td>
 <td><code>0xf</code></td>
 </tr>
@@ -650,8 +796,24 @@
 <td>PPN</td>
 <td><code>0xd</code></td>
 </tr>
-</tbody></table>
-<h5 id="0xC物理地址格式"><a href="#0xC物理地址格式" class="headerlink" title="0xC物理地址格式"></a>0xC物理地址格式</h5><table>
+</tbody>
+</table>
+<h5 id="xc物理地址格式">0xC物理地址格式</h5>
+<table>
+<colgroup>
+<col style="width: 8%" />
+<col style="width: 8%" />
+<col style="width: 8%" />
+<col style="width: 8%" />
+<col style="width: 8%" />
+<col style="width: 8%" />
+<col style="width: 8%" />
+<col style="width: 8%" />
+<col style="width: 8%" />
+<col style="width: 8%" />
+<col style="width: 8%" />
+<col style="width: 8%" />
+</colgroup>
 <thead>
 <tr>
 <th>0</th>
@@ -668,9 +830,22 @@
 <th>1</th>
 </tr>
 </thead>
+<tbody>
+</tbody>
 </table>
-<h5 id="0xD物理内存引用"><a href="#0xD物理内存引用" class="headerlink" title="0xD物理内存引用"></a>0xD物理内存引用</h5><p><img src="https://raw.githubusercontent.com/DeutschBall/test/master/image-20220517000150935.png" alt="image-20220517000150935"></p>
-<p><img src="https://raw.githubusercontent.com/DeutschBall/test/master/image-20220517000501697.png" alt="image-20220517000501697"></p>
+<h5 id="xd物理内存引用">0xD物理内存引用</h5>
+<figure>
+<img
+src="https://raw.githubusercontent.com/DeutschBall/test/master/image-20220517000150935.png"
+alt="image-20220517000150935" />
+<figcaption aria-hidden="true">image-20220517000150935</figcaption>
+</figure>
+<figure>
+<img
+src="https://raw.githubusercontent.com/DeutschBall/test/master/image-20220517000501697.png"
+alt="image-20220517000501697" />
+<figcaption aria-hidden="true">image-20220517000501697</figcaption>
+</figure>
 <p>缓存命中</p>
 <table>
 <thead>
@@ -679,7 +854,8 @@
 <th>值</th>
 </tr>
 </thead>
-<tbody><tr>
+<tbody>
+<tr>
 <td>字节偏移CO</td>
 <td><code>0x3</code></td>
 </tr>
@@ -699,8 +875,12 @@
 <td>返回的缓存字节</td>
 <td><code>0x1D</code></td>
 </tr>
-</tbody></table>
-<h3 id="多级页表的地址翻译"><a href="#多级页表的地址翻译" class="headerlink" title="多级页表的地址翻译"></a>多级页表的地址翻译</h3><h4 id="以两级页表为例"><a href="#以两级页表为例" class="headerlink" title="以两级页表为例"></a>以两级页表为例</h4><p>单级页表 的时候,一条页表项对应一个虚拟页,一张页表就可以管理整个虚拟内存的页</p>
+</tbody>
+</table>
+<h3 id="多级页表的地址翻译">多级页表的地址翻译</h3>
+<h4 id="以两级页表为例">以两级页表为例</h4>
+<p>单级页表
+的时候,一条页表项对应一个虚拟页,一张页表就可以管理整个虚拟内存的页</p>
 <p>如果虚拟地址空间更大,页更多,则页表项目更多,而页表也是存放在内存中的,如果页表也大到内存装不下该当如何?</p>
 <blockquote>
 <p>这就好比刚上大学的时候所有的<strong>学习资料</strong>都可以放在一个文件夹里</p>
@@ -709,7 +889,12 @@
 <p>时间长了每个子文件夹又会臃肿,又可以根据时间或者难易程度建立子子文件夹</p>
 </blockquote>
 <p>高级页表的表项是低级页表的索引</p>
-<p><img src="https://raw.githubusercontent.com/DeutschBall/test/master/image-20220516231018326.png" alt="image-20220516231018326"></p>
+<figure>
+<img
+src="https://raw.githubusercontent.com/DeutschBall/test/master/image-20220516231018326.png"
+alt="image-20220516231018326" />
+<figcaption aria-hidden="true">image-20220516231018326</figcaption>
+</figure>
 <p>这里二级页表和前面的单级页表作用类似,直接索引虚拟页,但是也有些许区别</p>
 <blockquote>
 <p>单级页表结构中只有一个页表,第i个页表项就指向第i个虚拟页</p>
@@ -721,33 +906,68 @@
 <p>但凡这1024个虚拟页中有一个被缓存,其在二级页表中的表项的有效位为1,则该二级页表对应一级页表中的表项有效位就得是1</p>
 </blockquote>
 <p>只有一级页表是常驻内存的,只有有效位为1表项对应的二级页表才会被搬进内存,不用的时候还得被挤出去</p>
-<h4 id="k级页表的地址翻译"><a href="#k级页表的地址翻译" class="headerlink" title="k级页表的地址翻译"></a>k级页表的地址翻译</h4><p><img src="https://raw.githubusercontent.com/DeutschBall/test/master/image-20220516231949258.png" alt="image-20220516231949258"></p>
+<h4 id="k级页表的地址翻译">k级页表的地址翻译</h4>
+<figure>
+<img
+src="https://raw.githubusercontent.com/DeutschBall/test/master/image-20220516231949258.png"
+alt="image-20220516231949258" />
+<figcaption aria-hidden="true">image-20220516231949258</figcaption>
+</figure>
 <p>一级页表表项中存放的是二级页表的索引,二级页表表项中存放的是三级页表的索引,以此类推,直到最低级页表,其表项才是物理地址,</p>
 <p>从高级页表一直索引到低级页表的过程中,但凡有一个页表项的有效位为0则引发缺页</p>
 <p>缺页也是逐级修复的,</p>
 <p>只有最低级页表项才存放实际的物理页号,然后物理页号和页偏移拼起来组成物理地址</p>
 <p>可气的是,虽然有这么多级,但是总有人能设计得它的速度能和单级页表媲美</p>
-<h3 id="英特尔酷睿i7-Linux内存系统地址翻译"><a href="#英特尔酷睿i7-Linux内存系统地址翻译" class="headerlink" title="英特尔酷睿i7&#x2F;Linux内存系统地址翻译"></a>英特尔酷睿i7&#x2F;Linux内存系统地址翻译</h3><p>多级页表结构,每个进程允许有自己私有的页表层次结构</p>
+<h3
+id="英特尔酷睿i7linux内存系统地址翻译">英特尔酷睿i7/Linux内存系统地址翻译</h3>
+<p>多级页表结构,每个进程允许有自己私有的页表层次结构</p>
 <p>页大小采用4KB,四级页表结构</p>
-<p>这里第一次见到”CR3控制寄存器”,其作用是指向一级页表的起始位置,CR3是每个进程上下文的一部分,每个进程都有自己独立的页表结构,执行A进程时CR3就应该指向A进程的一级页表起始位置</p>
+<p>这里第一次见到"CR3控制寄存器",其作用是指向一级页表的起始位置,CR3是每个进程上下文的一部分,每个进程都有自己独立的页表结构,执行A进程时CR3就应该指向A进程的一级页表起始位置</p>
 <blockquote>
 <p>一级页表可以有多个吗?</p>
 <p>还是说只有一个一级页表,管理所有的二级页表,然后进程从二级页表开始有自己的独立地址空间</p>
 </blockquote>
-<p><img src="https://raw.githubusercontent.com/DeutschBall/test/master/image-20220517073701065.png" alt="image-20220517073701065"></p>
+<figure>
+<img
+src="https://raw.githubusercontent.com/DeutschBall/test/master/image-20220517073701065.png"
+alt="image-20220517073701065" />
+<figcaption aria-hidden="true">image-20220517073701065</figcaption>
+</figure>
 <p>高级页表(除了直接管理虚拟内存的最低级页表),其结构如下:</p>
-<p><img src="https://raw.githubusercontent.com/DeutschBall/test/master/image-20220517073820824.png" alt="image-20220517073820824"></p>
+<figure>
+<img
+src="https://raw.githubusercontent.com/DeutschBall/test/master/image-20220517073820824.png"
+alt="image-20220517073820824" />
+<figcaption aria-hidden="true">image-20220517073820824</figcaption>
+</figure>
 <p>最低级页表结构如下</p>
-<p><img src="https://raw.githubusercontent.com/DeutschBall/test/master/image-20220517073849861.png" alt="image-20220517073849861"></p>
-<h2 id="Linux虚拟内存系统"><a href="#Linux虚拟内存系统" class="headerlink" title="Linux虚拟内存系统"></a>Linux虚拟内存系统</h2><p>进程的虚拟内存</p>
-<p><img src="https://raw.githubusercontent.com/DeutschBall/test/master/image-20220517074643634.png" alt="image-20220517074643634"></p>
+<figure>
+<img
+src="https://raw.githubusercontent.com/DeutschBall/test/master/image-20220517073849861.png"
+alt="image-20220517073849861" />
+<figcaption aria-hidden="true">image-20220517073849861</figcaption>
+</figure>
+<h2 id="linux虚拟内存系统">Linux虚拟内存系统</h2>
+<p>进程的虚拟内存</p>
+<figure>
+<img
+src="https://raw.githubusercontent.com/DeutschBall/test/master/image-20220517074643634.png"
+alt="image-20220517074643634" />
+<figcaption aria-hidden="true">image-20220517074643634</figcaption>
+</figure>
 <p>进程虚拟内存部分(用户栈向下)是进程的独立的虚拟地址空间,</p>
 <p>内核虚拟空间被所有进程共享,共享的实现是通过页表的一些表项指向相同的物理地址,然后页表项上标明内核虚拟内存只读</p>
 <p>共享库等技术的实现也是基于虚拟内存的,但都是后话了</p>
-<h3 id="Linux虚拟内存区域组成"><a href="#Linux虚拟内存区域组成" class="headerlink" title="Linux虚拟内存区域组成"></a>Linux虚拟内存区域组成</h3><p>虚拟内存分段,被分段的虚拟内存区域就一定已经被分配了</p>
+<h3 id="linux虚拟内存区域组成">Linux虚拟内存区域组成</h3>
+<p>虚拟内存分段,被分段的虚拟内存区域就一定已经被分配了</p>
 <p>只要是存在的虚拟页就一定属于某个段,</p>
 <p>未使用的虚拟页不会被记录,没有页表指向该位置</p>
-<p><img src="https://raw.githubusercontent.com/DeutschBall/test/master/image-20220517080056415.png" alt="image-20220517080056415"></p>
+<figure>
+<img
+src="https://raw.githubusercontent.com/DeutschBall/test/master/image-20220517080056415.png"
+alt="image-20220517080056415" />
+<figcaption aria-hidden="true">image-20220517080056415</figcaption>
+</figure>
 <p><code>task_struct</code>指向内核运行该进程的所有信息</p>
 <blockquote>
 <p>PID,指向用户栈的指针rsp,可执行目标文件名字,程序计数器rip</p>
@@ -760,29 +980,58 @@
 <figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">vm_start:段起始地址</span><br><span class="line">vm_end:段结束地址</span><br><span class="line">vm_prot:段的读写权限</span><br><span class="line">vm_flags:段共享或者进程私有标志等信息</span><br><span class="line">vm_next:指向下一个段</span><br></pre></td></tr></table></figure>
 </blockquote>
 <p>当该进程被执行的时候,pgd会被放到<code>CR3</code>寄存器中</p>
-<h3 id="Linux缺页异常处理"><a href="#Linux缺页异常处理" class="headerlink" title="Linux缺页异常处理"></a>Linux缺页异常处理</h3><p><img src="https://raw.githubusercontent.com/DeutschBall/test/master/image-20220517081116670.png" alt="image-20220517081116670"></p>
-<p>CPU指定一个虚拟地址,然后去<code>vm_area_struct</code>各个表项去查该虚拟地址是否属于$[vm_{start},vm_{end}]$之间,如果各个链表项都不包含该地址则说明该地址没有被分配,发生段错误</p>
+<h3 id="linux缺页异常处理">Linux缺页异常处理</h3>
+<figure>
+<img
+src="https://raw.githubusercontent.com/DeutschBall/test/master/image-20220517081116670.png"
+alt="image-20220517081116670" />
+<figcaption aria-hidden="true">image-20220517081116670</figcaption>
+</figure>
+<p>CPU指定一个虚拟地址,然后去<code>vm_area_struct</code>各个表项去查该虚拟地址是否属于<span
+class="math inline">\([vm_{start},vm_{end}]\)</span>之间,如果各个链表项都不包含该地址则说明该地址没有被分配,发生段错误</p>
 <p>如果没有发生段错误则检查该内存访问的性质,是读还是写,如果对只读区域进行写入则报告保护异常</p>
 <p>上述两种情况都通过了则表明这是真的缺页了,使用某种页调度算法牺牲一个物理页,用这个缺页挤掉</p>
-<h2 id="内存映射"><a href="#内存映射" class="headerlink" title="内存映射"></a>内存映射</h2><p>啥是内存映射呢?</p>
+<h2 id="内存映射">内存映射</h2>
+<p>啥是内存映射呢?</p>
 <p>以共享虚拟内存举例</p>
 <p>两个进程的页表相互独立,但是可以指向物理内存中的同一区域,比如共享库</p>
 <p><strong>通过将一个虚拟内存区与磁盘上一个对象关联起来,以初始化这个虚拟内存区域的内容,这个过程称为内存映射</strong></p>
-<h3 id="共享对象"><a href="#共享对象" class="headerlink" title="共享对象"></a>共享对象</h3><p>如果同时打开多个终端bash,它们会共享同一块只读代码区.多个程序调用库函数printf,但是实际最后调用到的printf只在物理内存中唯一存在</p>
+<h3 id="共享对象">共享对象</h3>
+<p>如果同时打开多个终端bash,它们会共享同一块只读代码区.多个程序调用库函数printf,但是实际最后调用到的printf只在物理内存中唯一存在</p>
 <p>通过一个例子说明共享对象的过程</p>
 <p>一开始时共享对象也只是虚拟内存上的一些页或者说段,尚未被任何进程映射.</p>
 <p>现在进程1将共享对象映射到自己虚拟内存中的某个位置,并在物理内存中建立了物理页</p>
-<p><img src="https://raw.githubusercontent.com/DeutschBall/test/master/image-20220517083739843.png" alt="image-20220517083739843"></p>
+<figure>
+<img
+src="https://raw.githubusercontent.com/DeutschBall/test/master/image-20220517083739843.png"
+alt="image-20220517083739843" />
+<figcaption aria-hidden="true">image-20220517083739843</figcaption>
+</figure>
 <p>现在进程2也想映射共享对象,内核判断进程1已经映射过该共享对象,即共享对象已经存在于物理内存中,那么只需让进程2的相关页表项指向该共享对象在内存中快照的物理页</p>
-<p><img src="https://raw.githubusercontent.com/DeutschBall/test/master/image-20220517084031704.png" alt="image-20220517084031704"></p>
+<figure>
+<img
+src="https://raw.githubusercontent.com/DeutschBall/test/master/image-20220517084031704.png"
+alt="image-20220517084031704" />
+<figcaption aria-hidden="true">image-20220517084031704</figcaption>
+</figure>
 <p><strong>私有写时复制对象</strong></p>
 <p>什么时候一个对象不得不每个进程分别映射到不同的物理内存了,什么时候才会真的在物理内存上开两个对象的空间</p>
 <p>在两个进程都没有尝试向私有对象写东西时,私有对象表现得和共享对象没有区别,物理内存中也只存在一份拷贝,因为这足以满足读的要求</p>
-<p><img src="https://raw.githubusercontent.com/DeutschBall/test/master/image-20220517084442357.png" alt="image-20220517084442357"></p>
+<figure>
+<img
+src="https://raw.githubusercontent.com/DeutschBall/test/master/image-20220517084442357.png"
+alt="image-20220517084442357" />
+<figcaption aria-hidden="true">image-20220517084442357</figcaption>
+</figure>
 <p>当其中一个进程试图写私有对象时,由于要保证进程的虚拟地址空间独立,因此不得不将该私有对象做一个拷贝,在内存中存放两个私有对象,两个进程的页表项目各自挑一个指向</p>
-<p><img src="https://raw.githubusercontent.com/DeutschBall/test/master/image-20220517084658157.png" alt="image-20220517084658157"></p>
-<h3 id="fork函数"><a href="#fork函数" class="headerlink" title="fork函数"></a>fork函数</h3><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">pid_t fork(void);//子进程返回0,父进程返回子进程的pid,出错返回-1</span><br></pre></td></tr></table></figure>
-
+<figure>
+<img
+src="https://raw.githubusercontent.com/DeutschBall/test/master/image-20220517084658157.png"
+alt="image-20220517084658157" />
+<figcaption aria-hidden="true">image-20220517084658157</figcaption>
+</figure>
+<h3 id="fork函数">fork函数</h3>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">pid_t fork(void);//子进程返回0,父进程返回子进程的pid,出错返回-1</span><br></pre></td></tr></table></figure>
 <blockquote>
 <p>1.子进程获得一个pid</p>
 <p>2.子进程得到与父进程<strong>一模一样</strong>的<strong>用户级</strong>虚拟地址空间<strong>拷贝</strong></p>
@@ -797,14 +1046,23 @@
 <p>3.子进程获得与父进程任何打开的文件描述符的副本</p>
 </blockquote>
 <figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;unistd.h&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;stdio.h&gt;</span></span></span><br><span class="line"><span class="type">int</span> global=<span class="number">10</span>;<span class="comment">//观察父子进程是否有相同的.data节拷贝</span></span><br><span class="line"><span class="type">int</span> <span class="title function_">main</span><span class="params">()</span>&#123;</span><br><span class="line">    <span class="type">int</span> local=<span class="number">20</span>;<span class="comment">//观察父子进程是否有相同的栈区拷贝</span></span><br><span class="line">    <span class="built_in">printf</span>(<span class="string">&quot;actived\n&quot;</span>);<span class="comment">//观察fork前的部分是否会被子进程执行</span></span><br><span class="line">    <span class="type">pid_t</span> pid=fork();</span><br><span class="line">    </span><br><span class="line">    <span class="keyword">if</span>(pid==<span class="number">0</span>)&#123;<span class="comment">//根据pid判断是父进程还是子进程,fork对父进程返回子进程的pid,不为0,如果为0则说明当前进程为子进程</span></span><br><span class="line">        <span class="built_in">printf</span>(<span class="string">&quot;child process,%d,%d\n&quot;</span>,global++,local++);<span class="comment">//打印后自增的目的是观察父子进程是否有独立的虚拟地址空间</span></span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">else</span>&#123;</span><br><span class="line">        <span class="built_in">printf</span>(<span class="string">&quot;father process,%d,%d\n&quot;</span>,global++,local++);</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">return</span> <span class="number">0</span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-
 <p>运行结果:</p>
 <figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">actived					<span class="comment">#fork函数前只有父进程,fork之后才会两个进程都执行</span></span><br><span class="line">father process,10,20	 </span><br><span class="line">child process,10,20		<span class="comment">#子进程获得父进程虚拟地址空间的拷贝,但是两者独立,父进程地址空间内的变量自增不会影响子进程的地址空间</span></span><br></pre></td></tr></table></figure>
-
 <p>子进程和父进程都打印到控制台表明两者共享文件描述符1(标准输出)</p>
-<p><img src="https://raw.githubusercontent.com/DeutschBall/test/master/image-20220517091716338.png" alt="image-20220517091716338"></p>
-<h2 id="内存动态分配"><a href="#内存动态分配" class="headerlink" title="内存动态分配"></a>内存动态分配</h2><p>动态内存分配器(dynamic memory allocator),维护进程的堆区</p>
-<p><img src="https://raw.githubusercontent.com/DeutschBall/test/master/image-20220517093706745.png" alt="image-20220517093706745"></p>
+<figure>
+<img
+src="https://raw.githubusercontent.com/DeutschBall/test/master/image-20220517091716338.png"
+alt="image-20220517091716338" />
+<figcaption aria-hidden="true">image-20220517091716338</figcaption>
+</figure>
+<h2 id="内存动态分配">内存动态分配</h2>
+<p>动态内存分配器(dynamic memory allocator),维护进程的堆区</p>
+<figure>
+<img
+src="https://raw.githubusercontent.com/DeutschBall/test/master/image-20220517093706745.png"
+alt="image-20220517093706745" />
+<figcaption aria-hidden="true">image-20220517093706745</figcaption>
+</figure>
 <p>堆顶指针为brk,堆的生长方向与栈相反,堆从低地址向高地址生长,栈从高地址向低地址生长</p>
 <p>都是小端模式</p>
 <p>分配器将堆看成一组大小不同的块集合,每个块是一个连续的虚拟内存片</p>
@@ -813,119 +1071,234 @@
 <p><strong>显式分配器</strong>:比如C语言的malloc和free,C++的new和delete,要求程序员手动释放分配块</p>
 <p><strong>隐式分配器</strong>:分配器自动回收不再使用的分配块,因此隐式分配器又叫垃圾收集器,比如Java中的分配器</p>
 <p>关于分配器的实现,这个实验是一定要做到的,但不是现在</p>
-<h2 id="习题订正"><a href="#习题订正" class="headerlink" title="习题订正"></a>习题订正</h2><h3 id="1"><a href="#1" class="headerlink" title="1."></a>1.</h3><p><img src="https://raw.githubusercontent.com/DeutschBall/test/master/image-20220612094124007.png" alt="image-20220612094124007"></p>
+<h2 id="习题订正">习题订正</h2>
+<h3 id="section">1.</h3>
+<figure>
+<img
+src="https://raw.githubusercontent.com/DeutschBall/test/master/image-20220612094124007.png"
+alt="image-20220612094124007" />
+<figcaption aria-hidden="true">image-20220612094124007</figcaption>
+</figure>
 <p>这个题的问法太屑了,相当于给你说已知a是b他老子,问a他爹是谁</p>
 <p>需要注意的是逻辑地址和物理地址是啥</p>
 <p>逻辑地址就是磁盘交换分区,虚拟地址空间中的一个地址,</p>
 <p>物理地址就是内存条子,物理地址空间中的一个地址</p>
 <p>每个.c源程序编译成.o可重定位目标文件之后,其虚拟地址空间都是从0开始编址</p>
-<p>然后多个.o(也有可能有.a静态库文件)链接成.out可执行目标文件,其虚拟地址空间还是从0开始编址的,比如$[0,0x100)$</p>
-<p>在装载时(shell调用execve函数将进程加载进入物理地址空间),有可能将该.out虚拟地址空间的0号字节装载进入内存条子这个物理地址空间的0x100处,那么该进程对应的物理地址空间就可能是$[0x100,0x200)$(不考虑分页),如果考虑分页,那么虚拟地址空间可能被划分成多个虚拟页,在用到时被拷贝到一个物理页.</p>
+<p>然后多个.o(也有可能有.a静态库文件)链接成.out可执行目标文件,其虚拟地址空间还是从0开始编址的,比如<span
+class="math inline">\([0,0x100)\)</span></p>
+<p>在装载时(shell调用execve函数将进程加载进入物理地址空间),有可能将该.out虚拟地址空间的0号字节装载进入内存条子这个物理地址空间的0x100处,那么该进程对应的物理地址空间就可能是<span
+class="math inline">\([0x100,0x200)\)</span>(不考虑分页),如果考虑分页,那么虚拟地址空间可能被划分成多个虚拟页,在用到时被拷贝到一个物理页.</p>
 <p>综上,形成逻辑地址的阶段是链接阶段</p>
 <p>翻译成物理地址的阶段是装载</p>
-<h3 id="4"><a href="#4" class="headerlink" title="4."></a>4.</h3><p><img src="https://raw.githubusercontent.com/DeutschBall/test/master/image-20220612095053544.png" alt="image-20220612095053544"></p>
+<h3 id="section-1">4.</h3>
+<figure>
+<img
+src="https://raw.githubusercontent.com/DeutschBall/test/master/image-20220612095053544.png"
+alt="image-20220612095053544" />
+<figcaption aria-hidden="true">image-20220612095053544</figcaption>
+</figure>
 <p>本题我选的B,纯粹是瞎选,选的时候就知道必定不对</p>
 <p>出错是因为没有重视覆盖与交换技术,在此做一个复习</p>
 <p>覆盖:</p>
-<p><img src="https://raw.githubusercontent.com/DeutschBall/test/master/image-20220612095244447.png" alt="image-20220612095244447"></p>
+<figure>
+<img
+src="https://raw.githubusercontent.com/DeutschBall/test/master/image-20220612095244447.png"
+alt="image-20220612095244447" />
+<figcaption aria-hidden="true">image-20220612095244447</figcaption>
+</figure>
 <p>铁打的固定区,流水的覆盖区,用到谁就先把覆盖区存一下,然后把需要的从外存中拎出来,直接盖在先前的覆盖区上</p>
 <p>算法竞赛中使用滚动数组,感觉也是覆盖的思想</p>
 <p>交换:</p>
-<p><img src="https://raw.githubusercontent.com/DeutschBall/test/master/image-20220612095647336.png" alt="image-20220612095647336"></p>
+<figure>
+<img
+src="https://raw.githubusercontent.com/DeutschBall/test/master/image-20220612095647336.png"
+alt="image-20220612095647336" />
+<figcaption aria-hidden="true">image-20220612095647336</figcaption>
+</figure>
 <p>在CSAPP上我们学过虚拟内存,缺页时发生替换的思想就是交换思想</p>
 <p>这样看覆盖和交换都是新的替换旧的,好像说的是一个事情,但是区别:</p>
-<p><img src="https://raw.githubusercontent.com/DeutschBall/test/master/image-20220612095842607.png" alt="image-20220612095842607"></p>
+<figure>
+<img
+src="https://raw.githubusercontent.com/DeutschBall/test/master/image-20220612095842607.png"
+alt="image-20220612095842607" />
+<figcaption aria-hidden="true">image-20220612095842607</figcaption>
+</figure>
 <p>只有虚拟内存技术可以物理上拓展主存容量,而覆盖和交换技术在虚存之前就存在了</p>
 <p>覆盖和交换还是在有限大的内存条子上做文章,只能通过扔掉当前用不到的,实现节省主存空间的作用</p>
-<h3 id="9"><a href="#9" class="headerlink" title="9."></a>9.</h3><p><img src="https://raw.githubusercontent.com/DeutschBall/test/master/image-20220612100250957.png" alt="image-20220612100250957"></p>
+<h3 id="section-2">9.</h3>
+<figure>
+<img
+src="https://raw.githubusercontent.com/DeutschBall/test/master/image-20220612100250957.png"
+alt="image-20220612100250957" />
+<figcaption aria-hidden="true">image-20220612100250957</figcaption>
+</figure>
 <p>这个题A,B选项都不太熟悉,借机了解一下存储管理方式吧</p>
 <p>存储管理方式从进程地址空间的连续性上分为连续方式和非连续方式</p>
 <p><strong>连续方式,不行</strong></p>
-<p>​	连续方式包括单一连续分配(单道连续分配),固定分区分配(多道固定连续分配),连续动态分配(多道可变连续分配)</p>
+<p>​
+连续方式包括单一连续分配(单道连续分配),固定分区分配(多道固定连续分配),连续动态分配(多道可变连续分配)</p>
 <p>单道连续分配是最早最low逼的方式,整个内存条子上最多允许一个进程独占</p>
 <p>多道固定连续分配意思是内存条子上划出几个块,每个块让一个进程独占,各个进程老死不相往来</p>
-<p><img src="https://raw.githubusercontent.com/DeutschBall/test/master/image-20220612100928491.png" alt="image-20220612100928491"></p>
+<figure>
+<img
+src="https://raw.githubusercontent.com/DeutschBall/test/master/image-20220612100928491.png"
+alt="image-20220612100928491" />
+<figcaption aria-hidden="true">image-20220612100928491</figcaption>
+</figure>
 <p><strong>非连续方式,行</strong></p>
-<p>​	非连续方式包括分段,分页,段页,都是比较近或者最近的操作系统正在使用的技术,比较熟悉</p>
-<p>​	比如x86上使用段页式结构,x86-64上使用分页结构</p>
-<h3 id="14"><a href="#14" class="headerlink" title="14."></a>14.</h3><p><img src="https://raw.githubusercontent.com/DeutschBall/test/master/image-20220612101143722.png" alt="image-20220612101143722"></p>
+<p>​
+非连续方式包括分段,分页,段页,都是比较近或者最近的操作系统正在使用的技术,比较熟悉</p>
+<p>​ 比如x86上使用段页式结构,x86-64上使用分页结构</p>
+<h3 id="section-3">14.</h3>
+<figure>
+<img
+src="https://raw.githubusercontent.com/DeutschBall/test/master/image-20220612101143722.png"
+alt="image-20220612101143722" />
+<figcaption aria-hidden="true">image-20220612101143722</figcaption>
+</figure>
 <p>这个题要清晰重定位的各种类型,谁来负责重定位,什么时候重定位</p>
 <p>什么是重定位?<strong>装入时</strong>对目标程序中指令和数据的修改过程</p>
 <p>一定要重定位吗?不一定,早期low逼程序和low逼内存系统上,程序编译完成之后一个各个变量指令的物理地址就知道了,不存在逻辑地址一说,比如在单道连续分配的内存系统上,一共就只有一个进程执行,整什么逻辑地址真是多次一举</p>
 <p>凡是需要重定位的,一定有逻辑地址和物理地址的区分,重定位的过程就是将逻辑地址翻译成物理地址这个地址变换的过程</p>
 <p>本题中A和B,都是连续存储方式,只要确定好程序在物理内存中的基地址,那么程序所有指令数据的地址就都确定了,根本不需要重定位,编译时决定物理地址即可</p>
 <p>重定位的类型?静态重定位和动态重定位</p>
-<p>​	静态重定位指地址变换在<strong>装载时</strong>一次完成</p>
-<p>​	本题中D,段式结构就是静态重定位</p>
-<p>​	动态重定位指地址变换在<strong>运行时</strong>才会进行</p>
-<p>​	用于分页系统,因为虚拟页实际加载进入哪一个物理页,这由操作系统页面置换算法决定,不到运行时,是不知道虚拟页到底被加载到哪里的,该虚拟页上的数据和指令自然无法被重定位</p>
-<h3 id="18"><a href="#18" class="headerlink" title="18."></a>18.</h3><p><img src="https://raw.githubusercontent.com/DeutschBall/test/master/image-20220612102551429.png" alt="image-20220612102551429"></p>
+<p>​ 静态重定位指地址变换在<strong>装载时</strong>一次完成</p>
+<p>​ 本题中D,段式结构就是静态重定位</p>
+<p>​ 动态重定位指地址变换在<strong>运行时</strong>才会进行</p>
+<p>​
+用于分页系统,因为虚拟页实际加载进入哪一个物理页,这由操作系统页面置换算法决定,不到运行时,是不知道虚拟页到底被加载到哪里的,该虚拟页上的数据和指令自然无法被重定位</p>
+<h3 id="section-4">18.</h3>
+<figure>
+<img
+src="https://raw.githubusercontent.com/DeutschBall/test/master/image-20220612102551429.png"
+alt="image-20220612102551429" />
+<figcaption aria-hidden="true">image-20220612102551429</figcaption>
+</figure>
 <p>我一开始选的是地址映射,我是这样考虑的</p>
 <p>x86-64上任何进程都是从<code>0x400000</code>这个地址开始的,通过地址映射,该虚拟地址被翻译成不同的物理地址,因此不会出现两个进程虚拟地址空间指向同一块物理地址空间的情况,即避免了进程的相互干扰</p>
 <p>我选的D,但是答案是B</p>
 <p>意思是一个进程有一个基址寄存器和边界寄存器,该进程内任意内存访问不得超过两个寄存器规定的范围,因此由内存保护实现</p>
-<h3 id="21"><a href="#21" class="headerlink" title="21."></a>21.</h3><p><img src="https://raw.githubusercontent.com/DeutschBall/test/master/image-20220612103002978.png" alt="image-20220612103002978"></p>
+<h3 id="section-5">21.</h3>
+<figure>
+<img
+src="https://raw.githubusercontent.com/DeutschBall/test/master/image-20220612103002978.png"
+alt="image-20220612103002978" />
+<figcaption aria-hidden="true">image-20220612103002978</figcaption>
+</figure>
 <p>感觉这种题没有什么意义,让学生考虑段表和页表的大小,</p>
-<p>用户物理地址空间&#x3D;总空间-页表或段表表占的空间</p>
+<p>用户物理地址空间=总空间-页表或段表表占的空间</p>
 <p>你直接问页表大还是段表大不就行了?</p>
 <p>你直接问页和段谁大小可变不就行了?</p>
 <p>非得绕着弯说,根考察三年级学生两年后你和你老子谁年龄大一样.</p>
 <p>你不就是想考察段大小可变,页大小固定这个事儿吗</p>
-<h3 id="24"><a href="#24" class="headerlink" title="24."></a>24.</h3><p><img src="https://raw.githubusercontent.com/DeutschBall/test/master/image-20220612103815223.png" alt="image-20220612103815223"></p>
+<h3 id="section-6">24.</h3>
+<figure>
+<img
+src="https://raw.githubusercontent.com/DeutschBall/test/master/image-20220612103815223.png"
+alt="image-20220612103815223" />
+<figcaption aria-hidden="true">image-20220612103815223</figcaption>
+</figure>
 <p>单道系统上某一时刻只有一个程序在运行,只需要维护一个重定位寄存器,谁在执行就把谁的基地址放到重定位寄存器上</p>
-<h3 id="26"><a href="#26" class="headerlink" title="26."></a>26.</h3><p><img src="https://raw.githubusercontent.com/DeutschBall/test/master/image-20220612104001176.png" alt="image-20220612104001176"></p>
+<h3 id="section-7">26.</h3>
+<figure>
+<img
+src="https://raw.githubusercontent.com/DeutschBall/test/master/image-20220612104001176.png"
+alt="image-20220612104001176" />
+<figcaption aria-hidden="true">image-20220612104001176</figcaption>
+</figure>
 <p>还是考察对四个选项概念是不是认识</p>
-<p>“可变分区”实际上还是连续内存的low逼方法</p>
+<p>"可变分区"实际上还是连续内存的low逼方法</p>
 <p>前面14题已经分析过了,分页存储管理是动态链接的</p>
-<p>“有利于动态链接”不如说”必须动态链接”</p>
-<h3 id="28"><a href="#28" class="headerlink" title="28."></a>28.</h3><p><img src="https://raw.githubusercontent.com/DeutschBall/test/master/image-20220612104157764.png" alt="image-20220612104157764"></p>
-<p>考察对”可重入”的理解</p>
-<p>CSAPP上我们学过”可重入”函数,就是不访问临界区的线程安全函数</p>
+<p>"有利于动态链接"不如说"必须动态链接"</p>
+<h3 id="section-8">28.</h3>
+<figure>
+<img
+src="https://raw.githubusercontent.com/DeutschBall/test/master/image-20220612104157764.png"
+alt="image-20220612104157764" />
+<figcaption aria-hidden="true">image-20220612104157764</figcaption>
+</figure>
+<p>考察对"可重入"的理解</p>
+<p>CSAPP上我们学过"可重入"函数,就是不访问临界区的线程安全函数</p>
 <p>既然不访问临界区,那么多个进程共享这一块也是没问题的,</p>
 <p>只需要将共享区放在内存上,让有需要的进程引用本共享区,不需要每个进程分别拷贝一份</p>
 <p>怎么就减少对换数量了呢?</p>
-<p>啥叫”兑换”?不是缺页置换</p>
+<p>啥叫"兑换"?不是缺页置换</p>
 <p>不需要每个进程都加载共享区,一共加载一次就可以</p>
-<h3 id="29"><a href="#29" class="headerlink" title="29."></a>29.</h3><p><img src="https://raw.githubusercontent.com/DeutschBall/test/master/image-20220612104605803.png" alt="image-20220612104605803"></p>
-<p>这里”代价”是啥呢?</p>
+<h3 id="section-9">29.</h3>
+<figure>
+<img
+src="https://raw.githubusercontent.com/DeutschBall/test/master/image-20220612104605803.png"
+alt="image-20220612104605803" />
+<figcaption aria-hidden="true">image-20220612104605803</figcaption>
+</figure>
+<p>这里"代价"是啥呢?</p>
 <p>分段时需要操作系统维护段表,分页时需要维护页表</p>
 <p>段表和页表也要占用内存,这就是代价</p>
 <p>知道的越少,人越觉得自己厉害,叫什么穷开心不是吗?</p>
 <p>分区是最早的内存管理方式,只需要维护有几个区,每个区放了啥.并且区相对于页和段大得多,操作系统维护的区表相对于页表段表会小很多,因此代价少</p>
-<h3 id="34"><a href="#34" class="headerlink" title="34."></a>34.</h3><p><img src="https://raw.githubusercontent.com/DeutschBall/test/master/image-20220612104843836.png" alt="image-20220612104843836"></p>
+<h3 id="section-10">34.</h3>
+<figure>
+<img
+src="https://raw.githubusercontent.com/DeutschBall/test/master/image-20220612104843836.png"
+alt="image-20220612104843836" />
+<figcaption aria-hidden="true">image-20220612104843836</figcaption>
+</figure>
 <p>前两条说的是真对,需要注意的是内碎片和外碎片是啥</p>
-<p>第三条,影响磁盘访问时间的主要因素是啥呢?页面多大则需要从磁盘中拷贝出相应大小的页面,拷贝的越多用时越长,怎么就”主要因素通常不是页面大小了”,III项纯粹故意说很长的假话吓唬人</p>
+<p>第三条,影响磁盘访问时间的主要因素是啥呢?页面多大则需要从磁盘中拷贝出相应大小的页面,拷贝的越多用时越长,怎么就"主要因素通常不是页面大小了",III项纯粹故意说很长的假话吓唬人</p>
 <p>那么影响磁盘访问时间的主要因素是啥呢?</p>
 <p>寻道时间、旋转延迟、数据传输时间</p>
 <p>页面大小会影响数据传输时间,当然是主要因素</p>
-<h3 id="35"><a href="#35" class="headerlink" title="35."></a>35.</h3><p><img src="https://raw.githubusercontent.com/DeutschBall/test/master/image-20220612105228600.png" alt="image-20220612105228600"></p>
+<h3 id="section-11">35.</h3>
+<figure>
+<img
+src="https://raw.githubusercontent.com/DeutschBall/test/master/image-20220612105228600.png"
+alt="image-20220612105228600" />
+<figcaption aria-hidden="true">image-20220612105228600</figcaption>
+</figure>
 <p>这个题的ACD三要都是白给</p>
 <p>这让我想到高三做过的一道化学题</p>
-<p><img src="https://raw.githubusercontent.com/DeutschBall/test/master/image-20220612105424208.png" alt="image-20220612105424208"></p>
-<p>“取10.00ml稀释液的过程中,酸式滴定管的初始页面为0.20ml,左手控制活塞向锥形瓶中加稀释液,此时眼睛应该<code>____</code>“</p>
-<p>你说写”睁着”吧,理论上也对,闭着眼儿万一倒手上把手烧个窝儿,还必须得睁着眼儿</p>
-<p>那为啥不能写”睁着”呢?这睁着不是废话吗.这个题就想考察会不会说滴定流程的套话</p>
+<figure>
+<img
+src="https://raw.githubusercontent.com/DeutschBall/test/master/image-20220612105424208.png"
+alt="image-20220612105424208" />
+<figcaption aria-hidden="true">image-20220612105424208</figcaption>
+</figure>
+<p>"取10.00ml稀释液的过程中,酸式滴定管的初始页面为0.20ml,左手控制活塞向锥形瓶中加稀释液,此时眼睛应该<code>____</code>"</p>
+<p>你说写"睁着"吧,理论上也对,闭着眼儿万一倒手上把手烧个窝儿,还必须得睁着眼儿</p>
+<p>那为啥不能写"睁着"呢?这睁着不是废话吗.这个题就想考察会不会说滴定流程的套话</p>
 <p>在本题中我一开始选的A,这也是废话,页面大小一定得依据内存大小确定啊,要是内存4G,你整一个8G大小的页面有个锤子用呢?</p>
-<p>本题就想考察”页面大小固定”这个事儿</p>
+<p>本题就想考察"页面大小固定"这个事儿</p>
 <p>但是D一定是不对的,外存就是一群乌合之众没有排面,内存少而精,外存一定是为内存服务的</p>
 <p>C对不对呢?也有道理,比如如果数据总线宽度为64位,那么页面大小就1Byte占8位,都不够cpu拿来塞牙缝的.但是出题的认为这都不用说,是废话</p>
-<h3 id="36"><a href="#36" class="headerlink" title="36."></a>36.</h3><p><img src="https://raw.githubusercontent.com/DeutschBall/test/master/image-20220612110227309.png" alt="image-20220612110227309"></p>
+<h3 id="section-12">36.</h3>
+<figure>
+<img
+src="https://raw.githubusercontent.com/DeutschBall/test/master/image-20220612110227309.png"
+alt="image-20220612110227309" />
+<figcaption aria-hidden="true">image-20220612110227309</figcaption>
+</figure>
 <p>什么叫不懂装懂啊?</p>
-<p>“方便操作”,怎么操作,什么操作?你把”操作”去掉也是一个意思</p>
-<p>就说”A.方便”</p>
+<p>"方便操作",怎么操作,什么操作?你把"操作"去掉也是一个意思</p>
+<p>就说"A.方便"</p>
 <p>不妨把话说的更明白一点</p>
-<p>“A.好”</p>
+<p>"A.好"</p>
 <p>好个球子啊</p>
-<p>因为BCD这些优点显而易见,出题的实在想不到说个啥缺点,就整了一个”A.方便操作”</p>
-<p>实际上这个答案啥也没说,就好比让你评价一下学校对卢雷事件的处理,你说了个”好!”,怎么好了?给校风学风带来啥影响?给其他学生有啥影响?给外界啥影响?你是一个字不说,因为现在的处理方式吐不出象牙来</p>
-<h3 id="39"><a href="#39" class="headerlink" title="39."></a>39.</h3><p><img src="https://raw.githubusercontent.com/DeutschBall/test/master/image-20220612110742608.png" alt="image-20220612110742608"></p>
+<p>因为BCD这些优点显而易见,出题的实在想不到说个啥缺点,就整了一个"A.方便操作"</p>
+<p>实际上这个答案啥也没说,就好比让你评价一下学校对卢雷事件的处理,你说了个"好!",怎么好了?给校风学风带来啥影响?给其他学生有啥影响?给外界啥影响?你是一个字不说,因为现在的处理方式吐不出象牙来</p>
+<h3 id="section-13">39.</h3>
+<figure>
+<img
+src="https://raw.githubusercontent.com/DeutschBall/test/master/image-20220612110742608.png"
+alt="image-20220612110742608" />
+<figcaption aria-hidden="true">image-20220612110742608</figcaption>
+</figure>
 <p>14题复习了重定位之后显然这个题选B,但是C和D我怎么没在教材上见到过</p>
 <p>因为压根就没这两个概念.</p>
 <p>这不就是某些政治家某些上级以及某些令人恶心的文科学科的口头禅吗</p>
 <blockquote>
 <p>正确的，直接的，中肯的，雅致的，客观的，完整的，立体的，全面的，辩证的，形而上学的，雅俗共赏的，一针见血的，直击要害的，错误的，间接的，虚假的，庸俗的，主观的，残缺的，平面的，片面的，孤立的，辩证法的..</p>
-<p>落实,夯实,搞好,坚持,推进,改善,提高….</p>
-<p>美国化,本土化,最大化,冲国化…</p>
+<p>落实,夯实,搞好,坚持,推进,改善,提高....</p>
+<p>美国化,本土化,最大化,冲国化...</p>
 </blockquote>
 <p>政治跨考计算机的是不是就要选C了</p>
 
@@ -1011,7 +1384,7 @@
 
       <!--noindex-->
       <div class="post-toc-wrap sidebar-panel">
-          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#%E5%86%85%E5%AD%98%E7%AE%A1%E7%90%86"><span class="nav-number">1.</span> <span class="nav-text">内存管理</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#%E7%BA%AF%E5%88%86%E6%AE%B5"><span class="nav-number">1.1.</span> <span class="nav-text">纯分段</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%AE%B5%E8%A1%A8"><span class="nav-number">1.1.1.</span> <span class="nav-text">段表</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%9C%B0%E5%9D%80%E7%BF%BB%E8%AF%91"><span class="nav-number">1.1.2.</span> <span class="nav-text">地址翻译</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%9C%B0%E5%9D%80%E7%A9%BA%E9%97%B4%E7%BB%B4%E5%BA%A6"><span class="nav-number">1.1.3.</span> <span class="nav-text">地址空间维度</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%88%86%E6%AE%B5%E7%9A%84%E5%A5%BD%E5%A4%84"><span class="nav-number">1.1.4.</span> <span class="nav-text">分段的好处</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E7%A2%8E%E7%89%87"><span class="nav-number">1.1.5.</span> <span class="nav-text">碎片</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E6%AE%B5%E9%A1%B5%E5%BC%8F"><span class="nav-number">1.2.</span> <span class="nav-text">段页式</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E4%BB%8E%E7%89%A9%E7%90%86%E5%AF%BB%E5%9D%80%E5%88%B0%E8%99%9A%E6%8B%9F%E5%AF%BB%E5%9D%80"><span class="nav-number">1.3.</span> <span class="nav-text">从物理寻址到虚拟寻址</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%9C%B0%E5%9D%80%E7%A9%BA%E9%97%B4"><span class="nav-number">1.4.</span> <span class="nav-text">地址空间</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E7%89%A9%E7%90%86%E5%9C%B0%E5%9D%80%E7%A9%BA%E9%97%B4%E5%92%8C%E8%99%9A%E6%8B%9F%E5%9C%B0%E5%9D%80%E7%A9%BA%E9%97%B4"><span class="nav-number">1.4.1.</span> <span class="nav-text">物理地址空间和虚拟地址空间</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%95%B0%E6%8D%AE%E5%AF%B9%E8%B1%A1%E5%92%8C%E5%9C%B0%E5%9D%80%E7%A9%BA%E9%97%B4%E7%9A%84%E5%85%B3%E7%B3%BB"><span class="nav-number">1.4.2.</span> <span class="nav-text">数据对象和地址空间的关系</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E8%99%9A%E6%8B%9F%E5%86%85%E5%AD%98%E4%BD%9C%E4%B8%BA%E7%BC%93%E5%AD%98%E5%B7%A5%E5%85%B7"><span class="nav-number">1.5.</span> <span class="nav-text">虚拟内存作为缓存工具</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%88%86%E9%A1%B5"><span class="nav-number">1.5.1.</span> <span class="nav-text">分页</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E9%A1%B5%E5%B1%9E%E6%80%A7"><span class="nav-number">1.5.2.</span> <span class="nav-text">页属性</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%B9%BC%E5%B9%B4%E7%9A%84%E9%A1%B5%E8%A1%A8"><span class="nav-number">1.5.3.</span> <span class="nav-text">幼年的页表</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E9%A1%B5%E5%91%BD%E4%B8%AD"><span class="nav-number">1.5.4.</span> <span class="nav-text">页命中</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E7%BC%BA%E9%A1%B5"><span class="nav-number">1.5.5.</span> <span class="nav-text">缺页</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E8%99%9A%E6%8B%9F%E5%86%85%E5%AD%98%E4%BD%9C%E4%B8%BA%E5%86%85%E5%AD%98%E7%AE%A1%E7%90%86%E5%B7%A5%E5%85%B7"><span class="nav-number">1.6.</span> <span class="nav-text">虚拟内存作为内存管理工具</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E8%99%9A%E6%8B%9F%E5%86%85%E5%AD%98%E4%BD%9C%E4%B8%BA%E5%86%85%E5%AD%98%E4%BF%9D%E6%8A%A4%E5%B7%A5%E5%85%B7"><span class="nav-number">1.7.</span> <span class="nav-text">虚拟内存作为内存保护工具</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%9C%B0%E5%9D%80%E7%BF%BB%E8%AF%91-1"><span class="nav-number">1.8.</span> <span class="nav-text">地址翻译</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%9C%80%E7%AE%80%E5%8D%95%E7%9A%84%E5%9C%B0%E5%9D%80%E7%BF%BB%E8%AF%91"><span class="nav-number">1.8.1.</span> <span class="nav-text">最简单的地址翻译</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E8%80%83%E8%99%91%E9%AB%98%E9%80%9F%E7%BC%93%E5%AD%98%E7%9A%84%E5%9C%B0%E5%9D%80%E7%BF%BB%E8%AF%91"><span class="nav-number">1.8.2.</span> <span class="nav-text">考虑高速缓存的地址翻译</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#TLB%E5%8A%A0%E9%80%9F%E7%BF%BB%E8%AF%91%E7%9A%84%E5%9C%B0%E5%9D%80%E7%BF%BB%E8%AF%91"><span class="nav-number">1.8.3.</span> <span class="nav-text">TLB加速翻译的地址翻译</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%89%8B%E5%B7%A5%E6%A8%A1%E6%8B%9F%E5%9C%B0%E5%9D%80%E7%BF%BB%E8%AF%91"><span class="nav-number">1.8.4.</span> <span class="nav-text">手工模拟地址翻译</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#%E9%A2%98%E7%9B%AE%E7%8E%AF%E5%A2%83"><span class="nav-number">1.8.4.1.</span> <span class="nav-text">题目环境</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E5%B0%86%E8%99%9A%E6%8B%9F%E5%9C%B0%E5%9D%800x03d7%E7%BF%BB%E8%AF%91%E6%88%90%E7%89%A9%E7%90%86%E5%9C%B0%E5%9D%80"><span class="nav-number">1.8.4.2.</span> <span class="nav-text">将虚拟地址0x03d7翻译成物理地址</span></a><ol class="nav-child"><li class="nav-item nav-level-5"><a class="nav-link" href="#0xA%E8%99%9A%E6%8B%9F%E5%9C%B0%E5%9D%80%E6%A0%BC%E5%BC%8F"><span class="nav-number">1.8.4.2.1.</span> <span class="nav-text">0xA虚拟地址格式</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#0xB%E5%9C%B0%E5%9D%80%E7%BF%BB%E8%AF%91"><span class="nav-number">1.8.4.2.2.</span> <span class="nav-text">0xB地址翻译</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#0xC%E7%89%A9%E7%90%86%E5%9C%B0%E5%9D%80%E6%A0%BC%E5%BC%8F"><span class="nav-number">1.8.4.2.3.</span> <span class="nav-text">0xC物理地址格式</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#0xD%E7%89%A9%E7%90%86%E5%86%85%E5%AD%98%E5%BC%95%E7%94%A8"><span class="nav-number">1.8.4.2.4.</span> <span class="nav-text">0xD物理内存引用</span></a></li></ol></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%A4%9A%E7%BA%A7%E9%A1%B5%E8%A1%A8%E7%9A%84%E5%9C%B0%E5%9D%80%E7%BF%BB%E8%AF%91"><span class="nav-number">1.8.5.</span> <span class="nav-text">多级页表的地址翻译</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#%E4%BB%A5%E4%B8%A4%E7%BA%A7%E9%A1%B5%E8%A1%A8%E4%B8%BA%E4%BE%8B"><span class="nav-number">1.8.5.1.</span> <span class="nav-text">以两级页表为例</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#k%E7%BA%A7%E9%A1%B5%E8%A1%A8%E7%9A%84%E5%9C%B0%E5%9D%80%E7%BF%BB%E8%AF%91"><span class="nav-number">1.8.5.2.</span> <span class="nav-text">k级页表的地址翻译</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E8%8B%B1%E7%89%B9%E5%B0%94%E9%85%B7%E7%9D%BFi7-Linux%E5%86%85%E5%AD%98%E7%B3%BB%E7%BB%9F%E5%9C%B0%E5%9D%80%E7%BF%BB%E8%AF%91"><span class="nav-number">1.8.6.</span> <span class="nav-text">英特尔酷睿i7&#x2F;Linux内存系统地址翻译</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Linux%E8%99%9A%E6%8B%9F%E5%86%85%E5%AD%98%E7%B3%BB%E7%BB%9F"><span class="nav-number">1.9.</span> <span class="nav-text">Linux虚拟内存系统</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#Linux%E8%99%9A%E6%8B%9F%E5%86%85%E5%AD%98%E5%8C%BA%E5%9F%9F%E7%BB%84%E6%88%90"><span class="nav-number">1.9.1.</span> <span class="nav-text">Linux虚拟内存区域组成</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Linux%E7%BC%BA%E9%A1%B5%E5%BC%82%E5%B8%B8%E5%A4%84%E7%90%86"><span class="nav-number">1.9.2.</span> <span class="nav-text">Linux缺页异常处理</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%86%85%E5%AD%98%E6%98%A0%E5%B0%84"><span class="nav-number">1.10.</span> <span class="nav-text">内存映射</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%85%B1%E4%BA%AB%E5%AF%B9%E8%B1%A1"><span class="nav-number">1.10.1.</span> <span class="nav-text">共享对象</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#fork%E5%87%BD%E6%95%B0"><span class="nav-number">1.10.2.</span> <span class="nav-text">fork函数</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%86%85%E5%AD%98%E5%8A%A8%E6%80%81%E5%88%86%E9%85%8D"><span class="nav-number">1.11.</span> <span class="nav-text">内存动态分配</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E4%B9%A0%E9%A2%98%E8%AE%A2%E6%AD%A3"><span class="nav-number">1.12.</span> <span class="nav-text">习题订正</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#1"><span class="nav-number">1.12.1.</span> <span class="nav-text">1.</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#4"><span class="nav-number">1.12.2.</span> <span class="nav-text">4.</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#9"><span class="nav-number">1.12.3.</span> <span class="nav-text">9.</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#14"><span class="nav-number">1.12.4.</span> <span class="nav-text">14.</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#18"><span class="nav-number">1.12.5.</span> <span class="nav-text">18.</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#21"><span class="nav-number">1.12.6.</span> <span class="nav-text">21.</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#24"><span class="nav-number">1.12.7.</span> <span class="nav-text">24.</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#26"><span class="nav-number">1.12.8.</span> <span class="nav-text">26.</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#28"><span class="nav-number">1.12.9.</span> <span class="nav-text">28.</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#29"><span class="nav-number">1.12.10.</span> <span class="nav-text">29.</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#34"><span class="nav-number">1.12.11.</span> <span class="nav-text">34.</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#35"><span class="nav-number">1.12.12.</span> <span class="nav-text">35.</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#36"><span class="nav-number">1.12.13.</span> <span class="nav-text">36.</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#39"><span class="nav-number">1.12.14.</span> <span class="nav-text">39.</span></a></li></ol></li></ol></li></ol></div>
+          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#%E5%86%85%E5%AD%98%E7%AE%A1%E7%90%86"><span class="nav-number">1.</span> <span class="nav-text">内存管理</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#%E7%BA%AF%E5%88%86%E6%AE%B5"><span class="nav-number">1.1.</span> <span class="nav-text">纯分段</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%AE%B5%E8%A1%A8"><span class="nav-number">1.1.1.</span> <span class="nav-text">段表</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%9C%B0%E5%9D%80%E7%BF%BB%E8%AF%91"><span class="nav-number">1.1.2.</span> <span class="nav-text">地址翻译</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%9C%B0%E5%9D%80%E7%A9%BA%E9%97%B4%E7%BB%B4%E5%BA%A6"><span class="nav-number">1.1.3.</span> <span class="nav-text">地址空间维度</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%88%86%E6%AE%B5%E7%9A%84%E5%A5%BD%E5%A4%84"><span class="nav-number">1.1.4.</span> <span class="nav-text">分段的好处</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E7%A2%8E%E7%89%87"><span class="nav-number">1.1.5.</span> <span class="nav-text">碎片</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E6%AE%B5%E9%A1%B5%E5%BC%8F"><span class="nav-number">1.2.</span> <span class="nav-text">段页式</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E4%BB%8E%E7%89%A9%E7%90%86%E5%AF%BB%E5%9D%80%E5%88%B0%E8%99%9A%E6%8B%9F%E5%AF%BB%E5%9D%80"><span class="nav-number">1.3.</span> <span class="nav-text">从物理寻址到虚拟寻址</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%9C%B0%E5%9D%80%E7%A9%BA%E9%97%B4"><span class="nav-number">1.4.</span> <span class="nav-text">地址空间</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E7%89%A9%E7%90%86%E5%9C%B0%E5%9D%80%E7%A9%BA%E9%97%B4%E5%92%8C%E8%99%9A%E6%8B%9F%E5%9C%B0%E5%9D%80%E7%A9%BA%E9%97%B4"><span class="nav-number">1.4.1.</span> <span class="nav-text">物理地址空间和虚拟地址空间</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%95%B0%E6%8D%AE%E5%AF%B9%E8%B1%A1%E5%92%8C%E5%9C%B0%E5%9D%80%E7%A9%BA%E9%97%B4%E7%9A%84%E5%85%B3%E7%B3%BB"><span class="nav-number">1.4.2.</span> <span class="nav-text">数据对象和地址空间的关系</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E8%99%9A%E6%8B%9F%E5%86%85%E5%AD%98%E4%BD%9C%E4%B8%BA%E7%BC%93%E5%AD%98%E5%B7%A5%E5%85%B7"><span class="nav-number">1.5.</span> <span class="nav-text">虚拟内存作为缓存工具</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%88%86%E9%A1%B5"><span class="nav-number">1.5.1.</span> <span class="nav-text">分页</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E9%A1%B5%E5%B1%9E%E6%80%A7"><span class="nav-number">1.5.2.</span> <span class="nav-text">页属性</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%B9%BC%E5%B9%B4%E7%9A%84%E9%A1%B5%E8%A1%A8"><span class="nav-number">1.5.3.</span> <span class="nav-text">幼年的页表</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E9%A1%B5%E5%91%BD%E4%B8%AD"><span class="nav-number">1.5.4.</span> <span class="nav-text">页命中</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E7%BC%BA%E9%A1%B5"><span class="nav-number">1.5.5.</span> <span class="nav-text">缺页</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E8%99%9A%E6%8B%9F%E5%86%85%E5%AD%98%E4%BD%9C%E4%B8%BA%E5%86%85%E5%AD%98%E7%AE%A1%E7%90%86%E5%B7%A5%E5%85%B7"><span class="nav-number">1.6.</span> <span class="nav-text">虚拟内存作为内存管理工具</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E8%99%9A%E6%8B%9F%E5%86%85%E5%AD%98%E4%BD%9C%E4%B8%BA%E5%86%85%E5%AD%98%E4%BF%9D%E6%8A%A4%E5%B7%A5%E5%85%B7"><span class="nav-number">1.7.</span> <span class="nav-text">虚拟内存作为内存保护工具</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%9C%B0%E5%9D%80%E7%BF%BB%E8%AF%91-1"><span class="nav-number">1.8.</span> <span class="nav-text">地址翻译</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%9C%80%E7%AE%80%E5%8D%95%E7%9A%84%E5%9C%B0%E5%9D%80%E7%BF%BB%E8%AF%91"><span class="nav-number">1.8.1.</span> <span class="nav-text">最简单的地址翻译</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E8%80%83%E8%99%91%E9%AB%98%E9%80%9F%E7%BC%93%E5%AD%98%E7%9A%84%E5%9C%B0%E5%9D%80%E7%BF%BB%E8%AF%91"><span class="nav-number">1.8.2.</span> <span class="nav-text">考虑高速缓存的地址翻译</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#tlb%E5%8A%A0%E9%80%9F%E7%BF%BB%E8%AF%91%E7%9A%84%E5%9C%B0%E5%9D%80%E7%BF%BB%E8%AF%91"><span class="nav-number">1.8.3.</span> <span class="nav-text">TLB加速翻译的地址翻译</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%89%8B%E5%B7%A5%E6%A8%A1%E6%8B%9F%E5%9C%B0%E5%9D%80%E7%BF%BB%E8%AF%91"><span class="nav-number">1.8.4.</span> <span class="nav-text">手工模拟地址翻译</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#%E9%A2%98%E7%9B%AE%E7%8E%AF%E5%A2%83"><span class="nav-number">1.8.4.1.</span> <span class="nav-text">题目环境</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E5%B0%86%E8%99%9A%E6%8B%9F%E5%9C%B0%E5%9D%800x03d7%E7%BF%BB%E8%AF%91%E6%88%90%E7%89%A9%E7%90%86%E5%9C%B0%E5%9D%80"><span class="nav-number">1.8.4.2.</span> <span class="nav-text">将虚拟地址0x03d7翻译成物理地址</span></a><ol class="nav-child"><li class="nav-item nav-level-5"><a class="nav-link" href="#xa%E8%99%9A%E6%8B%9F%E5%9C%B0%E5%9D%80%E6%A0%BC%E5%BC%8F"><span class="nav-number">1.8.4.2.1.</span> <span class="nav-text">0xA虚拟地址格式</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#xb%E5%9C%B0%E5%9D%80%E7%BF%BB%E8%AF%91"><span class="nav-number">1.8.4.2.2.</span> <span class="nav-text">0xB地址翻译</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#xc%E7%89%A9%E7%90%86%E5%9C%B0%E5%9D%80%E6%A0%BC%E5%BC%8F"><span class="nav-number">1.8.4.2.3.</span> <span class="nav-text">0xC物理地址格式</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#xd%E7%89%A9%E7%90%86%E5%86%85%E5%AD%98%E5%BC%95%E7%94%A8"><span class="nav-number">1.8.4.2.4.</span> <span class="nav-text">0xD物理内存引用</span></a></li></ol></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%A4%9A%E7%BA%A7%E9%A1%B5%E8%A1%A8%E7%9A%84%E5%9C%B0%E5%9D%80%E7%BF%BB%E8%AF%91"><span class="nav-number">1.8.5.</span> <span class="nav-text">多级页表的地址翻译</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#%E4%BB%A5%E4%B8%A4%E7%BA%A7%E9%A1%B5%E8%A1%A8%E4%B8%BA%E4%BE%8B"><span class="nav-number">1.8.5.1.</span> <span class="nav-text">以两级页表为例</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#k%E7%BA%A7%E9%A1%B5%E8%A1%A8%E7%9A%84%E5%9C%B0%E5%9D%80%E7%BF%BB%E8%AF%91"><span class="nav-number">1.8.5.2.</span> <span class="nav-text">k级页表的地址翻译</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E8%8B%B1%E7%89%B9%E5%B0%94%E9%85%B7%E7%9D%BFi7linux%E5%86%85%E5%AD%98%E7%B3%BB%E7%BB%9F%E5%9C%B0%E5%9D%80%E7%BF%BB%E8%AF%91"><span class="nav-number">1.8.6.</span> <span class="nav-text">英特尔酷睿i7&#x2F;Linux内存系统地址翻译</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#linux%E8%99%9A%E6%8B%9F%E5%86%85%E5%AD%98%E7%B3%BB%E7%BB%9F"><span class="nav-number">1.9.</span> <span class="nav-text">Linux虚拟内存系统</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#linux%E8%99%9A%E6%8B%9F%E5%86%85%E5%AD%98%E5%8C%BA%E5%9F%9F%E7%BB%84%E6%88%90"><span class="nav-number">1.9.1.</span> <span class="nav-text">Linux虚拟内存区域组成</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#linux%E7%BC%BA%E9%A1%B5%E5%BC%82%E5%B8%B8%E5%A4%84%E7%90%86"><span class="nav-number">1.9.2.</span> <span class="nav-text">Linux缺页异常处理</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%86%85%E5%AD%98%E6%98%A0%E5%B0%84"><span class="nav-number">1.10.</span> <span class="nav-text">内存映射</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%85%B1%E4%BA%AB%E5%AF%B9%E8%B1%A1"><span class="nav-number">1.10.1.</span> <span class="nav-text">共享对象</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#fork%E5%87%BD%E6%95%B0"><span class="nav-number">1.10.2.</span> <span class="nav-text">fork函数</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%86%85%E5%AD%98%E5%8A%A8%E6%80%81%E5%88%86%E9%85%8D"><span class="nav-number">1.11.</span> <span class="nav-text">内存动态分配</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E4%B9%A0%E9%A2%98%E8%AE%A2%E6%AD%A3"><span class="nav-number">1.12.</span> <span class="nav-text">习题订正</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#section"><span class="nav-number">1.12.1.</span> <span class="nav-text">1.</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#section-1"><span class="nav-number">1.12.2.</span> <span class="nav-text">4.</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#section-2"><span class="nav-number">1.12.3.</span> <span class="nav-text">9.</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#section-3"><span class="nav-number">1.12.4.</span> <span class="nav-text">14.</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#section-4"><span class="nav-number">1.12.5.</span> <span class="nav-text">18.</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#section-5"><span class="nav-number">1.12.6.</span> <span class="nav-text">21.</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#section-6"><span class="nav-number">1.12.7.</span> <span class="nav-text">24.</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#section-7"><span class="nav-number">1.12.8.</span> <span class="nav-text">26.</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#section-8"><span class="nav-number">1.12.9.</span> <span class="nav-text">28.</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#section-9"><span class="nav-number">1.12.10.</span> <span class="nav-text">29.</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#section-10"><span class="nav-number">1.12.11.</span> <span class="nav-text">34.</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#section-11"><span class="nav-number">1.12.12.</span> <span class="nav-text">35.</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#section-12"><span class="nav-number">1.12.13.</span> <span class="nav-text">36.</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#section-13"><span class="nav-number">1.12.14.</span> <span class="nav-text">39.</span></a></li></ol></li></ol></li></ol></div>
       </div>
       <!--/noindex-->
 

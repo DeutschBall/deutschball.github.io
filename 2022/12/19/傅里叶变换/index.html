@@ -20,23 +20,18 @@
     var CONFIG = {"hostname":"dustball.top","root":"/","scheme":"Muse","version":"7.8.0","exturl":false,"sidebar":{"position":"left","display":"post","padding":18,"offset":12,"onmobile":false},"copycode":{"enable":false,"show_result":false,"style":null},"back2top":{"enable":true,"sidebar":false,"scrollpercent":false},"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":false,"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"algolia":{"hits":{"per_page":10},"labels":{"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}},"localsearch":{"enable":false,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false},"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}}};
   </script>
 
-  <meta name="description" content="傅里叶变换一个欠了一年的帐,今天终于还上了 我根本不知道录音的基本原理 $O(n\lg n)$内求解多项式乘法算法导论上的傅里叶变换,是为了在$O(n\lg n)$时间内,解决多项式乘法 如果直接让两个多项式卷积,那么朴素方法复杂度显然是$O(n^2)$ 如何降复杂度呢?使用点值计算 线性代数上可以证明,一个n-1次多项式,可以在其图像上使用n个点唯一确定(插值方法) 也就是说,一个多项式$A(x">
+  <meta name="description" content="傅里叶变换 一个欠了一年的帐,今天终于还上了 我根本不知道录音的基本原理 \(O(n\lg n)\)内求解多项式乘法 算法导论上的傅里叶变换,是为了在\(O(n\lg n)\)时间内,解决多项式乘法 如果直接让两个多项式卷积,那么朴素方法复杂度显然是\(O(n^2)\) 如何降复杂度呢?使用点值计算 线性代数上可以证明,一个n-1次多项式,可以在其图像上使用n个点唯一确定(插值方">
 <meta property="og:type" content="article">
 <meta property="og:title" content="傅里叶变换">
 <meta property="og:url" content="http://dustball.top/2022/12/19/%E5%82%85%E9%87%8C%E5%8F%B6%E5%8F%98%E6%8D%A2/index.html">
 <meta property="og:site_name" content="dustland">
-<meta property="og:description" content="傅里叶变换一个欠了一年的帐,今天终于还上了 我根本不知道录音的基本原理 $O(n\lg n)$内求解多项式乘法算法导论上的傅里叶变换,是为了在$O(n\lg n)$时间内,解决多项式乘法 如果直接让两个多项式卷积,那么朴素方法复杂度显然是$O(n^2)$ 如何降复杂度呢?使用点值计算 线性代数上可以证明,一个n-1次多项式,可以在其图像上使用n个点唯一确定(插值方法) 也就是说,一个多项式$A(x">
+<meta property="og:description" content="傅里叶变换 一个欠了一年的帐,今天终于还上了 我根本不知道录音的基本原理 \(O(n\lg n)\)内求解多项式乘法 算法导论上的傅里叶变换,是为了在\(O(n\lg n)\)时间内,解决多项式乘法 如果直接让两个多项式卷积,那么朴素方法复杂度显然是\(O(n^2)\) 如何降复杂度呢?使用点值计算 线性代数上可以证明,一个n-1次多项式,可以在其图像上使用n个点唯一确定(插值方">
 <meta property="og:locale" content="en_US">
-<meta property="og:image" content="https://raw.githubusercontent.com/DeutschBall/VideoBed/main/image-20221219191232000.png">
-<meta property="og:image" content="https://raw.githubusercontent.com/DeutschBall/VideoBed/main/image-20221219193558548.png">
-<meta property="og:image" content="https://raw.githubusercontent.com/DeutschBall/VideoBed/main/image-20221219195023551.png">
-<meta property="og:image" content="https://raw.githubusercontent.com/DeutschBall/VideoBed/main/image-20221219211357315.png">
 <meta property="article:published_time" content="2022-12-19T13:52:00.000Z">
-<meta property="article:modified_time" content="2022-12-21T14:47:59.092Z">
+<meta property="article:modified_time" content="2024-09-21T17:59:33.616Z">
 <meta property="article:author" content="dustball">
 <meta property="article:tag" content="算法导论">
 <meta name="twitter:card" content="summary">
-<meta name="twitter:image" content="https://raw.githubusercontent.com/DeutschBall/VideoBed/main/image-20221219191232000.png">
 
 <link rel="canonical" href="http://dustball.top/2022/12/19/%E5%82%85%E9%87%8C%E5%8F%B6%E5%8F%98%E6%8D%A2/">
 
@@ -189,7 +184,7 @@
                   <i class="far fa-calendar-check"></i>
                 </span>
                 <span class="post-meta-item-text">Edited on</span>
-                <time title="Modified: 2022-12-21 22:47:59" itemprop="dateModified" datetime="2022-12-21T22:47:59+08:00">2022-12-21</time>
+                <time title="Modified: 2024-09-22 01:59:33" itemprop="dateModified" datetime="2024-09-22T01:59:33+08:00">2024-09-22</time>
               </span>
 
           
@@ -203,116 +198,264 @@
     <div class="post-body" itemprop="articleBody">
 
       
-        <h1 id="傅里叶变换"><a href="#傅里叶变换" class="headerlink" title="傅里叶变换"></a>傅里叶变换</h1><p>一个欠了一年的帐,今天终于还上了</p>
+        <h1 id="傅里叶变换">傅里叶变换</h1>
+<p>一个欠了一年的帐,今天终于还上了</p>
 <p><del>我根本不知道录音的基本原理</del></p>
-<h2 id="O-n-lg-n-内求解多项式乘法"><a href="#O-n-lg-n-内求解多项式乘法" class="headerlink" title="$O(n\lg n)$内求解多项式乘法"></a>$O(n\lg n)$内求解多项式乘法</h2><p>算法导论上的傅里叶变换,是为了在$O(n\lg n)$时间内,解决多项式乘法</p>
-<p>如果直接让两个多项式卷积,那么朴素方法复杂度显然是$O(n^2)$</p>
+<h2 id="onlg-n内求解多项式乘法"><span class="math inline">\(O(n\lg
+n)\)</span>内求解多项式乘法</h2>
+<p>算法导论上的傅里叶变换,是为了在<span class="math inline">\(O(n\lg
+n)\)</span>时间内,解决多项式乘法</p>
+<p>如果直接让两个多项式卷积,那么朴素方法复杂度显然是<span
+class="math inline">\(O(n^2)\)</span></p>
 <p>如何降复杂度呢?使用点值计算</p>
 <p>线性代数上可以证明,一个n-1次多项式,可以在其图像上使用n个点唯一确定(插值方法)</p>
-<p>也就是说,一个多项式$A(x)&#x3D;\sum_{j&#x3D;0}^{n-1}a_jx^j$可以用n个点表示</p>
-<p>那么两个均为$n-1$次的多项式$A(x),B(x)$,其乘积多项式就得是一个$2n-2$次多项式,需要$2n-2$个点唯一确定</p>
-<p>显然从一个$n-1$次多项式上取n-1个点已经足够唯一确定这个多项式了,再取其他点就是冗余信息,对确定表达式没有影响,因此可以在$A(x),B(x)$上各取2n-2个点,计算这2n-2个点的积,这就得出了积多项式的点值表示</p>
-<p>其中第i个点$C(x_i,A(x_i)\times B(x_i))$纵坐标为两个多项式在$x_0$处函数值的乘积</p>
+<p>也就是说,一个多项式<span
+class="math inline">\(A(x)=\sum_{j=0}^{n-1}a_jx^j\)</span>可以用n个点表示</p>
+<p>那么两个均为<span class="math inline">\(n-1\)</span>次的多项式<span
+class="math inline">\(A(x),B(x)\)</span>,其乘积多项式就得是一个<span
+class="math inline">\(2n-2\)</span>次多项式,需要<span
+class="math inline">\(2n-2\)</span>个点唯一确定</p>
+<p>显然从一个<span
+class="math inline">\(n-1\)</span>次多项式上取n-1个点已经足够唯一确定这个多项式了,再取其他点就是冗余信息,对确定表达式没有影响,因此可以在<span
+class="math inline">\(A(x),B(x)\)</span>上各取2n-2个点,计算这2n-2个点的积,这就得出了积多项式的点值表示</p>
+<p>其中第i个点<span class="math inline">\(C(x_i,A(x_i)\times
+B(x_i))\)</span>纵坐标为两个多项式在<span
+class="math inline">\(x_0\)</span>处函数值的乘积</p>
 <p>画在图上也就是:</p>
-<p>普通乘法是我们之前使用的lowB方法,下面曲线救国nb,就求值和插值这两步是真nb,求值和插值为何是$O(n\lg n)$呢?</p>
-<p><img src="https://raw.githubusercontent.com/DeutschBall/VideoBed/main/image-20221219191232000.png" alt="image-20221219191232000"></p>
-<p>使用之前学过的方法,这两步都是$O(n^2)$的,</p>
-<p>求值时需要将$x_0,x_1…$以此带入$A(x)$一共n个自变量,每个自变量求值都是$O(n)$,因此总共$O(n^2)$</p>
-<p>插值时需要使用拉格朗日插值法,也是$O(n^2)$</p>
+<p>普通乘法是我们之前使用的lowB方法,下面曲线救国nb,就求值和插值这两步是真nb,求值和插值为何是<span
+class="math inline">\(O(n\lg n)\)</span>呢?</p>
+<figure>
+<img
+src="https://raw.githubusercontent.com/DeutschBall/VideoBed/main/image-20221219191232000.png"
+alt="image-20221219191232000" />
+<figcaption aria-hidden="true">image-20221219191232000</figcaption>
+</figure>
+<p>使用之前学过的方法,这两步都是<span
+class="math inline">\(O(n^2)\)</span>的,</p>
+<p>求值时需要将<span
+class="math inline">\(x_0,x_1...\)</span>以此带入<span
+class="math inline">\(A(x)\)</span>一共n个自变量,每个自变量求值都是<span
+class="math inline">\(O(n)\)</span>,因此总共<span
+class="math inline">\(O(n^2)\)</span></p>
+<p>插值时需要使用拉格朗日插值法,也是<span
+class="math inline">\(O(n^2)\)</span></p>
 <blockquote>
-<p>拉格朗日插值公式:<br>$$<br>A(x)&#x3D;\sum_{k&#x3D;0}^{n-1}y_k\frac{\Pi_{j\neq k }(x-x_j)}{\Pi_{j\neq k}(x_k-x_j)}<br>$$<br>其中$(x_0,y_0),(x_1,y_1),…,(x_n-1,y_n-1)$是多项式$A(x)$的点值表示</p>
-<p>最外层这个求和已经是$O(n)$</p>
-<p>用二维数组$M[k][j]&#x3D;x_k-x_j$预处理分母,</p>
-<p>分子预先先直接求出$F(x)&#x3D;\Pi(x-x_j)$</p>
-<p>那么对于一个给定的k,分母就是n个数的积,$O(n)$</p>
-<p>分子就是$F(x)&#x2F;(x-x_j)$,$O(n)$</p>
-<p>乘上最外圈的$O(n)$得到$O(n^2)$</p>
-<p>也就是说,之前使用的方法是$O(n^2)$的</p>
+<p>拉格朗日插值公式: <span class="math display">\[
+A(x)=\sum_{k=0}^{n-1}y_k\frac{\Pi_{j\neq k }(x-x_j)}{\Pi_{j\neq
+k}(x_k-x_j)}
+\]</span> 其中<span
+class="math inline">\((x_0,y_0),(x_1,y_1),...,(x_n-1,y_n-1)\)</span>是多项式<span
+class="math inline">\(A(x)\)</span>的点值表示</p>
+<p>最外层这个求和已经是<span class="math inline">\(O(n)\)</span></p>
+<p>用二维数组<span
+class="math inline">\(M[k][j]=x_k-x_j\)</span>预处理分母,</p>
+<p>分子预先先直接求出<span
+class="math inline">\(F(x)=\Pi(x-x_j)\)</span></p>
+<p>那么对于一个给定的k,分母就是n个数的积,<span
+class="math inline">\(O(n)\)</span></p>
+<p>分子就是<span class="math inline">\(F(x)/(x-x_j)\)</span>,<span
+class="math inline">\(O(n)\)</span></p>
+<p>乘上最外圈的<span class="math inline">\(O(n)\)</span>得到<span
+class="math inline">\(O(n^2)\)</span></p>
+<p>也就是说,之前使用的方法是<span
+class="math inline">\(O(n^2)\)</span>的</p>
 </blockquote>
-<p>但是使用快速傅里叶变换这种吊法,就能给他降到$O(n\lg n)$</p>
+<p>但是使用快速傅里叶变换这种吊法,就能给他降到<span
+class="math inline">\(O(n\lg n)\)</span></p>
 <p>怎么降的?选点值的时候有讲究</p>
 <p>任意n个不同的点就可以确定一个n-1次表达式.</p>
-<p>如果选n个单位复根,然后对系数向量$(a_0,a_1,…,a_{n-1})$应用离散傅里叶变换DFT,就可以在$O(n\lg n)$内完成求值,使用逆DFT变换就可以在$O(n\lg n)$完成插值</p>
-<h2 id="单位复根儿"><a href="#单位复根儿" class="headerlink" title="单位复根儿"></a>单位复根儿</h2><p>“n次单位复根”就是指满足$\omega^n&#x3D;1$的负数$\omega$,注意是这个$\omega$,不带那个n次方,一定要注意上下角标</p>
-<p>欧拉公式<br>$$<br>e^{i\pi}+1&#x3D;0<br>$$<br>第k个n次单位复根是$\omega_k&#x3D;e^{\frac{2\pi ik}{n}}$</p>
-<p>显然$\omega_k^n&#x3D;(e^{\frac{2\pi ik}{n}})^n&#x3D;e^{2\pi ik}&#x3D;((e^{i\pi})^2)^k&#x3D;((-1)^2)^k&#x3D;1^k&#x3D;1$</p>
-<p>n次单位复根儿恰好有n个,也就是$k&#x3D;0,1,2,…,n-1$</p>
+<p>如果选n个单位复根,然后对系数向量<span
+class="math inline">\((a_0,a_1,...,a_{n-1})\)</span>应用离散傅里叶变换DFT,就可以在<span
+class="math inline">\(O(n\lg
+n)\)</span>内完成求值,使用逆DFT变换就可以在<span
+class="math inline">\(O(n\lg n)\)</span>完成插值</p>
+<h2 id="单位复根儿">单位复根儿</h2>
+<p>"n次单位复根"就是指满足<span
+class="math inline">\(\omega^n=1\)</span>的负数<span
+class="math inline">\(\omega\)</span>,注意是这个<span
+class="math inline">\(\omega\)</span>,不带那个n次方,一定要注意上下角标</p>
+<p>欧拉公式 <span class="math display">\[
+e^{i\pi}+1=0
+\]</span> 第k个n次单位复根是<span
+class="math inline">\(\omega_k=e^{\frac{2\pi ik}{n}}\)</span></p>
+<p>显然<span class="math inline">\(\omega_k^n=(e^{\frac{2\pi
+ik}{n}})^n=e^{2\pi ik}=((e^{i\pi})^2)^k=((-1)^2)^k=1^k=1\)</span></p>
+<p>n次单位复根儿恰好有n个,也就是<span
+class="math inline">\(k=0,1,2,...,n-1\)</span></p>
 <p>这n个画在复平面儿上是很整齐的,比如8次复根就长这样:</p>
-<p>任何两个相邻的单位复根之间的角度都是固定的,$360&#x2F;n&#x3D;360&#x2F;8$</p>
-<p><img src="https://raw.githubusercontent.com/DeutschBall/VideoBed/main/image-20221219193558548.png" alt="image-20221219193558548"></p>
+<p>任何两个相邻的单位复根之间的角度都是固定的,<span
+class="math inline">\(360/n=360/8\)</span></p>
+<figure>
+<img
+src="https://raw.githubusercontent.com/DeutschBall/VideoBed/main/image-20221219193558548.png"
+alt="image-20221219193558548" />
+<figcaption aria-hidden="true">image-20221219193558548</figcaption>
+</figure>
 <p>都落在复平面单位元上</p>
-<p>显然8次复根只有8个,如果非要写第九个$\omega_8^9$,就和$\omega_8^0$重合了,</p>
-<p>然后书上就说这是加法群$(Z_8,+)$,确实是,除了装了个B对于解决问题没有帮助,甚至没有学过抽代的就蒙蔽了</p>
-<h2 id="DFT"><a href="#DFT" class="headerlink" title="DFT"></a>DFT</h2><p>求n-1次多项式的点值表示时,就需要选取n个点$(x_0,x_1,x,…,x_{n-1})$,然后求出各自的函数值$(y_0,y_1,…,y_{n-1})$</p>
-<p>如果选取的n个点是n个富哥儿,那么此时有<br>$$<br>y_k&#x3D;A(\omega_n^k)&#x3D;\sum_{j&#x3D;0}^{n-1}a_j\omega <em>n^{jk}<br>$$<br>以此得到的$\vec{y}&#x3D;(y_0,y_1,…,y</em>{n-1})$叫做系数向量$\vec{a}&#x3D;(a_0,a_1,…,a_{n-1})$的离散傅里叶变换,</p>
-<p>记作$\vec{y}&#x3D;DFT_n(\vec{a})$</p>
+<p>显然8次复根只有8个,如果非要写第九个<span
+class="math inline">\(\omega_8^9\)</span>,就和<span
+class="math inline">\(\omega_8^0\)</span>重合了,</p>
+<p>然后书上就说这是加法群<span
+class="math inline">\((Z_8,+)\)</span>,确实是,除了装了个B对于解决问题没有帮助,甚至没有学过抽代的就蒙蔽了</p>
+<h2 id="dft">DFT</h2>
+<p>求n-1次多项式的点值表示时,就需要选取n个点<span
+class="math inline">\((x_0,x_1,x,...,x_{n-1})\)</span>,然后求出各自的函数值<span
+class="math inline">\((y_0,y_1,...,y_{n-1})\)</span></p>
+<p>如果选取的n个点是n个富哥儿,那么此时有 <span class="math display">\[
+y_k=A(\omega_n^k)=\sum_{j=0}^{n-1}a_j\omega _n^{jk}
+\]</span> 以此得到的<span
+class="math inline">\(\vec{y}=(y_0,y_1,...,y_{n-1})\)</span>叫做系数向量<span
+class="math inline">\(\vec{a}=(a_0,a_1,...,a_{n-1})\)</span>的离散傅里叶变换,</p>
+<p>记作<span class="math inline">\(\vec{y}=DFT_n(\vec{a})\)</span></p>
 <p>笑死,这看上去不就是带入求值吗,选n个富哥有屁用啊?</p>
 <p>如果用普通的带入求值,找n个富哥儿和找n个普通人儿没有区别.</p>
 <p>富哥儿的作用不能浪费喽,他们和普通值又有啥区别呢?</p>
 <p>这就是单位复根儿的几个性质</p>
 <p>这几个性质在计算时会体现群论的对称性,这意味着,这n个富哥确实能够比n个普通值携带更多的信息</p>
 <blockquote>
-<p><img src="https://raw.githubusercontent.com/DeutschBall/VideoBed/main/image-20221219195023551.png" alt="image-20221219195023551"></p>
+<figure>
+<img
+src="https://raw.githubusercontent.com/DeutschBall/VideoBed/main/image-20221219195023551.png"
+alt="image-20221219195023551" />
+<figcaption aria-hidden="true">image-20221219195023551</figcaption>
+</figure>
 </blockquote>
-<h2 id="FFT"><a href="#FFT" class="headerlink" title="FFT"></a>FFT</h2><p>fast Fourier transform,快速傅里叶变换</p>
-<p>在$O(n\lg n)$内求解DFT的算法</p>
+<h2 id="fft">FFT</h2>
+<p>fast Fourier transform,快速傅里叶变换</p>
+<p>在<span class="math inline">\(O(n\lg n)\)</span>内求解DFT的算法</p>
 <p>也就是说,DFT并不是一个求解方法,只是娶了n个富哥作为点值表示</p>
-<p>仍然可以使用带入求值这种$O(n^2)$的lowB算法求解</p>
+<p>仍然可以使用带入求值这种<span
+class="math inline">\(O(n^2)\)</span>的lowB算法求解</p>
 <p>而FFT就是一种吊法</p>
 <p>他这样变形:</p>
 <p>首先n向上取整到最近的2的幂次,这样做是为了保证能够一直二分直到剩1项,反正多取点不会降低精度</p>
-<p>后面的n默认就认为是2的幂次了<br>$$<br>\begin{aligned}<br>A(x)&amp;&#x3D;a_0+a_1x+a_2x^2+…+a_{n-1}x^{n-1}\<br>&amp;&#x3D;(a_0+a_2x^2+a_4x^4+…+a_{n-2}x^{n-2})+(a_1x+a_3x^3+a_5x^{5}+…+a_{n-1}x^{n-1})\<br>&amp;&#x3D;A^{[0]}(x^2)+xA^{[1]}(x^2)<br>\end{aligned}<br>$$<br>也就是说将$A(x)$按照偶数项和奇数项分开,其中奇数项都提出一个x来,这样子多项式中的x都是偶数,可以提取$x^2$作为自变量,于是得到<br>$$<br>\begin{cases}<br>A^{[0]}(x)&#x3D;a_0+a_2x+a_4x^2+…+a_{n-2}x^{\frac{n}{2}-1}\<br>A^{[1]}(x)&#x3D;a_1+a_3x+a_5x^2+…+a_{n-1}x^{\frac{n}{2}-1}<br>\end{cases}<br>$$<br>时刻不要忘记在求什么,</p>
-<p>我们现在已知的是$\vec{a}&#x3D;(a_0,a_1,a_2,…,a_{n-1})$,$\vec{x}&#x3D;(\omega_n^0,\omega_n^1,…,\omega_n^{n-1})$</p>
-<p>要求的是$\vec {y}&#x3D;DFT_n(\vec{a})$</p>
-<p>现在可以这样算了:<br>$$<br>A(x_k)&#x3D;A(\omega_{n}^k)&#x3D;A^{[0]}(\omega^{2k}_n)+\omega^k_nA^{[1]}(\omega^{2k}_n)<br>$$<br>注意到我们不容易计算$A(x)$是因为,它的项太多了,0次项,1次项等等一直到n-1次项,共n项</p>
-<p>而现在对于一个$A^{[0]}(x)$他只有$\frac{n}{2}$项了,工作量直接下降到一半</p>
-<p>以此递归,总会有个时候,$A(x)$只有一项,也就是0次项,也就是那个常数项,算也不用算直接返回了,和x没有关系了,和富哥没关系了</p>
+<p>后面的n默认就认为是2的幂次了 <span class="math display">\[
+\begin{aligned}
+A(x)&amp;=a_0+a_1x+a_2x^2+...+a_{n-1}x^{n-1}\\
+&amp;=(a_0+a_2x^2+a_4x^4+...+a_{n-2}x^{n-2})+(a_1x+a_3x^3+a_5x^{5}+...+a_{n-1}x^{n-1})\\
+&amp;=A^{[0]}(x^2)+xA^{[1]}(x^2)
+\end{aligned}
+\]</span> 也就是说将<span
+class="math inline">\(A(x)\)</span>按照偶数项和奇数项分开,其中奇数项都提出一个x来,这样子多项式中的x都是偶数,可以提取<span
+class="math inline">\(x^2\)</span>作为自变量,于是得到 <span
+class="math display">\[
+\begin{cases}
+A^{[0]}(x)=a_0+a_2x+a_4x^2+...+a_{n-2}x^{\frac{n}{2}-1}\\
+A^{[1]}(x)=a_1+a_3x+a_5x^2+...+a_{n-1}x^{\frac{n}{2}-1}
+\end{cases}
+\]</span> 时刻不要忘记在求什么,</p>
+<p>我们现在已知的是<span
+class="math inline">\(\vec{a}=(a_0,a_1,a_2,...,a_{n-1})\)</span>,<span
+class="math inline">\(\vec{x}=(\omega_n^0,\omega_n^1,...,\omega_n^{n-1})\)</span></p>
+<p>要求的是<span class="math inline">\(\vec
+{y}=DFT_n(\vec{a})\)</span></p>
+<p>现在可以这样算了: <span class="math display">\[
+A(x_k)=A(\omega_{n}^k)=A^{[0]}(\omega^{2k}_n)+\omega^k_nA^{[1]}(\omega^{2k}_n)
+\]</span> 注意到我们不容易计算<span
+class="math inline">\(A(x)\)</span>是因为,它的项太多了,0次项,1次项等等一直到n-1次项,共n项</p>
+<p>而现在对于一个<span
+class="math inline">\(A^{[0]}(x)\)</span>他只有<span
+class="math inline">\(\frac{n}{2}\)</span>项了,工作量直接下降到一半</p>
+<p>以此递归,总会有个时候,<span
+class="math inline">\(A(x)\)</span>只有一项,也就是0次项,也就是那个常数项,算也不用算直接返回了,和x没有关系了,和富哥没关系了</p>
 <p>写出伪代码:</p>
 <p>注意FFT函数的输入是目标多项式的系数向量,不是富哥,因为富哥是作为常数使用的,不需要参数传递</p>
-<p>FFT函数输出的是$\vec{y}&#x3D;DFT(\vec{a})$也就是和将n个富哥直接带入多项式求值得到的n个值相同,但是算法更好</p>
+<p>FFT函数输出的是<span
+class="math inline">\(\vec{y}=DFT(\vec{a})\)</span>也就是和将n个富哥直接带入多项式求值得到的n个值相同,但是算法更好</p>
 <blockquote>
-<p>一定注意函数不是y&#x3D;A(x),而是y&#x3D;FFT(a)</p>
+<p>一定注意函数不是y=A(x),而是y=FFT(a)</p>
 <p>一定要清楚函数在干什么</p>
 </blockquote>
 <figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br></pre></td><td class="code"><pre><span class="line"><span class="function">vector&lt;<span class="type">int</span>&gt; <span class="title">FFT</span><span class="params">(vector&lt;<span class="type">int</span>&gt; a)</span></span>&#123;<span class="comment">//a是系数,返回y向量</span></span><br><span class="line">	n=a.<span class="built_in">length</span>();</span><br><span class="line">    <span class="keyword">if</span>(<span class="number">1</span>==n)&#123;<span class="comment">//递归出口条件,只剩一项时,也就是那个常数项,直接返回此时的a,实际上是a[0]作为y[0]返回了y</span></span><br><span class="line">        <span class="keyword">return</span> a;</span><br><span class="line">    &#125;;</span><br><span class="line">    Complex omega_n=e^(<span class="number">2</span>*pi*i/n);</span><br><span class="line">    vector&lt;<span class="type">int</span>&gt; a0,a1;</span><br><span class="line">    <span class="keyword">for</span>(<span class="type">int</span> i=<span class="number">0</span>;i&lt;n;++i)&#123;</span><br><span class="line">        <span class="keyword">if</span>(i%<span class="number">2</span>==<span class="number">0</span>)a<span class="number">0.</span><span class="built_in">push_back</span>(a[i]);</span><br><span class="line">        <span class="keyword">else</span> a<span class="number">1.</span><span class="built_in">push_back</span>(a[i]);</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="type">int</span> y0=<span class="built_in">FFT</span>(a0);</span><br><span class="line">    <span class="type">int</span> y1=<span class="built_in">FFT</span>(a1);</span><br><span class="line">    <span class="function">vector&lt;<span class="type">int</span>&gt; <span class="title">y</span><span class="params">(n)</span></span>;</span><br><span class="line">    <span class="keyword">for</span>(<span class="type">int</span> i=<span class="number">0</span>;i&lt;n/<span class="number">2</span>;i++)&#123;<span class="comment">//一定注意此处上界是n/2</span></span><br><span class="line">        y[i]	=y0[i]+<span class="built_in">pow</span>(omega_n,i)*y1[i];<span class="comment">//容易理解</span></span><br><span class="line">       	y[n/<span class="number">2</span>+i]=y0[i]-<span class="built_in">pow</span>(omega_n,i)*y1[i];<span class="comment">//想对困难</span></span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">return</span> y;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-
-<p>这里面有一个<code>y[n/2+i]=y0[i]-pow(omega_n,i)*y1[i]</code>,怎么得到的呢?<br>$$<br>\begin{aligned}<br>y[\frac{n}{2}+i]&amp;&#x3D;A(\omega_n^{\frac{n}{2}+i})\<br>&amp;&#x3D;A^{[0]}(\omega_n^{n+2i})+\omega_n^{\frac{n}{2}+i}A^{[1]}(\omega_n^{n+2i})\<br>&amp;&#x3D;A^{[0]}(\omega_n^{2i})+\omega_n^{\frac{n}{2}+i}A^{[1]}(\omega_n^{2i})\<br>&amp;&#x3D;A^{[0]}(\omega_{\frac{n}{2}}^i)-\omega_n^{i}A^{[1]}(\omega_{\frac{n}{2}}^i)\<br>&amp;&#x3D;y_0[i]-\omega_{n}^i y_1[i]<br>\end{aligned}<br>$$<br><strong>这就体现出富哥和普通点的区别了</strong>,富哥的变换很灵活</p>
+<p>这里面有一个<code>y[n/2+i]=y0[i]-pow(omega_n,i)*y1[i]</code>,怎么得到的呢?
+<span class="math display">\[
+\begin{aligned}
+y[\frac{n}{2}+i]&amp;=A(\omega_n^{\frac{n}{2}+i})\\
+&amp;=A^{[0]}(\omega_n^{n+2i})+\omega_n^{\frac{n}{2}+i}A^{[1]}(\omega_n^{n+2i})\\
+&amp;=A^{[0]}(\omega_n^{2i})+\omega_n^{\frac{n}{2}+i}A^{[1]}(\omega_n^{2i})\\
+&amp;=A^{[0]}(\omega_{\frac{n}{2}}^i)-\omega_n^{i}A^{[1]}(\omega_{\frac{n}{2}}^i)\\
+&amp;=y_0[i]-\omega_{n}^i y_1[i]
+\end{aligned}
+\]</span>
+<strong>这就体现出富哥和普通点的区别了</strong>,富哥的变换很灵活</p>
 <p>从上面的伪代码可以看出,最底层的递归和自变量无关.</p>
 <p>加速发生在这里,将工程量直接缩减到一半</p>
 <figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">for</span>(<span class="type">int</span> i=<span class="number">0</span>;i&lt;n/<span class="number">2</span>;i++)&#123;<span class="comment">//一定注意此处上界是n/2</span></span><br><span class="line">    y[i]	=y0[i]+<span class="built_in">pow</span>(omega_n,i)*y1[i];<span class="comment">//容易理解</span></span><br><span class="line">   	y[n/<span class="number">2</span>+i]=y0[i]-<span class="built_in">pow</span>(omega_n,i)*y1[i];<span class="comment">//想对困难</span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-
-<p>每次递归都将工程量缩减一半,因此总工程量直接对n取对数<br>$$<br>T(n)&#x3D;2T(\frac{n}{2})+\Theta(n)&#x3D;\Theta(n\lg n)<br>$$</p>
-<p>好了到此FFT的思路有了,求值结束,也就是我们求得了$y&#x3D;DFT(a)$</p>
+<p>每次递归都将工程量缩减一半,因此总工程量直接对n取对数 <span
+class="math display">\[
+T(n)=2T(\frac{n}{2})+\Theta(n)=\Theta(n\lg n)
+\]</span></p>
+<p>好了到此FFT的思路有了,求值结束,也就是我们求得了<span
+class="math inline">\(y=DFT(a)\)</span></p>
 <blockquote>
-<p>举个例子,$A(x)&#x3D;1+2x+x^2+x^3$,正好有$2^2&#x3D;4$项,n&#x3D;4</p>
-<p>4次单位复根$\omega_4^k&#x3D;e^{\frac{2\pi ik}{4}}$</p>
+<p>举个例子,<span
+class="math inline">\(A(x)=1+2x+x^2+x^3\)</span>,正好有<span
+class="math inline">\(2^2=4\)</span>项,n=4</p>
+<p>4次单位复根<span class="math inline">\(\omega_4^k=e^{\frac{2\pi
+ik}{4}}\)</span></p>
 <figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line">FFT(&lt;1,2,1,1&gt;)&#123;</span><br><span class="line">	n=&lt;1,2,1,1&gt;.length()=4;</span><br><span class="line">	a0=&lt;1,1&gt;;</span><br><span class="line">	a1=&lt;2,1&gt;;</span><br><span class="line">	w1;</span><br><span class="line">	y0=FFT(&lt;1,1&gt;)&#123;</span><br><span class="line">		n=&lt;1,1&gt;.length()=2;</span><br><span class="line">		a0=&lt;1&gt;;</span><br><span class="line">		a1=&lt;1&gt;;</span><br><span class="line">		y0=FFT(&lt;1&gt;)=&lt;1&gt;;</span><br><span class="line">		y1=FFT(&lt;1&gt;)=&lt;1&gt;;</span><br><span class="line">		y[0]=y[0]+w1</span><br><span class="line">	&#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-
-
 </blockquote>
-<p>下面考虑如何从点值形式倒回去,也就是如何在$O(n\lg n)$实现插值</p>
-<p>现在已知的是$\vec{y}$和$\vec{x}&#x3D;{\omega_{n}^0,\omega_n^1,…,\omega_n^{n-1}}$,求系数向量$\vec{a}$</p>
+<p>下面考虑如何从点值形式倒回去,也就是如何在<span
+class="math inline">\(O(n\lg n)\)</span>实现插值</p>
+<p>现在已知的是<span class="math inline">\(\vec{y}\)</span>和<span
+class="math inline">\(\vec{x}=\{\omega_{n}^0,\omega_n^1,...,\omega_n^{n-1}\}\)</span>,求系数向量<span
+class="math inline">\(\vec{a}\)</span></p>
 <p>显然可以待定系数法设n个系数,然后带入自变量和因变量,解一元n次方程组.</p>
-<p>高斯消元法是$O(n^2)$的lowB算法,要用吊算法</p>
+<p>高斯消元法是<span
+class="math inline">\(O(n^2)\)</span>的lowB算法,要用吊算法</p>
 <p>写成矩阵形式</p>
-<p><img src="https://raw.githubusercontent.com/DeutschBall/VideoBed/main/image-20221219211357315.png" alt="image-20221219211357315"></p>
+<figure>
+<img
+src="https://raw.githubusercontent.com/DeutschBall/VideoBed/main/image-20221219211357315.png"
+alt="image-20221219211357315" />
+<figcaption aria-hidden="true">image-20221219211357315</figcaption>
+</figure>
 <p>也就是说,一眼顶针,鉴定为范德蒙矩阵,必然可逆且逆矩阵唯一</p>
-<p>现在要用尽可能快的方法求解这个范德蒙矩阵$V$的逆矩阵,这个求解方法就是算法关键</p>
-<p>这有个定理$V^{-1}_n[j,k]&#x3D;\frac{\omega_n^{-kj}}{n}$</p>
-<p>怎么得出来的,我线性代数忘了,不会解,但是$VV^{-1}$算一下确实得到$E$,满足互逆矩阵的定义</p>
-<p>由于$\vec{a}&#x3D;\vec V^{-1}\vec{y}$</p>
-<p>$a_j$就等于$\vec V^{-1}$的第j行与$\vec y$的乘积,也就是说<br>$$<br>a_j&#x3D;\sum_{k&#x3D;0}^{n-1}V_n^{-1}[j,k]\times y_k\<br>&#x3D;\sum_{k&#x3D;0}^{n-1}\frac{\omega^{-kj}<em>n}{n}\times y_k\<br>&#x3D;\frac{1}{n}\sum</em>{k&#x3D;0}^{n-1}\omega_n^{-kj}\times y_k<br>$$<br>求解一个$a_j$,是$O(n)$复杂度的,</p>
-<p>共有n个$a_j$,总共就是$O(n^2)$复杂度的,怎么降到$O(n\lg n)$呢?</p>
+<p>现在要用尽可能快的方法求解这个范德蒙矩阵<span
+class="math inline">\(V\)</span>的逆矩阵,这个求解方法就是算法关键</p>
+<p>这有个定理<span
+class="math inline">\(V^{-1}_n[j,k]=\frac{\omega_n^{-kj}}{n}\)</span></p>
+<p>怎么得出来的,我线性代数忘了,不会解,但是<span
+class="math inline">\(VV^{-1}\)</span>算一下确实得到<span
+class="math inline">\(E\)</span>,满足互逆矩阵的定义</p>
+<p>由于<span class="math inline">\(\vec{a}=\vec
+V^{-1}\vec{y}\)</span></p>
+<p><span class="math inline">\(a_j\)</span>就等于<span
+class="math inline">\(\vec V^{-1}\)</span>的第j行与<span
+class="math inline">\(\vec y\)</span>的乘积,也就是说 <span
+class="math display">\[
+a_j=\sum_{k=0}^{n-1}V_n^{-1}[j,k]\times y_k\\
+=\sum_{k=0}^{n-1}\frac{\omega^{-kj}_n}{n}\times y_k\\
+=\frac{1}{n}\sum_{k=0}^{n-1}\omega_n^{-kj}\times y_k
+\]</span> 求解一个<span class="math inline">\(a_j\)</span>,是<span
+class="math inline">\(O(n)\)</span>复杂度的,</p>
+<p>共有n个<span class="math inline">\(a_j\)</span>,总共就是<span
+class="math inline">\(O(n^2)\)</span>复杂度的,怎么降到<span
+class="math inline">\(O(n\lg n)\)</span>呢?</p>
 <p>回忆正向的FFT是干啥的来着</p>
-<p>是求解$\vec{y}&#x3D;DFT_n(\vec {a})$问题的</p>
-<p>其中$y_j&#x3D;\sum_{k&#x3D;0}^{n-1}a_j\omega_n^{jk}$</p>
-<p>类比一下<br>$$<br>\begin{aligned}<br>n a_j&amp;&#x3D;\sum_{k&#x3D;0}^{n-1} y_k\omega_n^{-jk}\<br>y_j&amp;&#x3D;\sum_{k&#x3D;0}^{n-1}a_k\omega_n^{jk}<br>\end{aligned}<br>$$<br>令$\vec{y’}&#x3D;n\vec{a},$</p>
-<p>$\vec{a’}&#x3D;\vec{y}$</p>
-<p>令单位富哥变成单位负哥,就可以直接带入FFT函数求解了$\vec{y’}$了</p>
-<p>解出来都除以n就得到了$\vec{a}$</p>
-<p>因此又在$O(n\lg n)$内解决了</p>
-<h2 id="回到多项式求积"><a href="#回到多项式求积" class="headerlink" title="回到多项式求积"></a>回到多项式求积</h2><p>卷积定理:</p>
-<p>对于两个长度为n的向量$\vec a,\vec b$<br>$$<br>a\otimes b&#x3D;DFT^{-1}<em>{2n}(DFT</em>{2n}(a)·DFT_{2n}(b))<br>$$<br>将多项式A,B只保留系数看成向量a,b,此时$a\otimes b$就是积多项式AB的系数向量</p>
+<p>是求解<span class="math inline">\(\vec{y}=DFT_n(\vec
+{a})\)</span>问题的</p>
+<p>其中<span
+class="math inline">\(y_j=\sum_{k=0}^{n-1}a_j\omega_n^{jk}\)</span></p>
+<p>类比一下 <span class="math display">\[
+\begin{aligned}
+n a_j&amp;=\sum_{k=0}^{n-1} y_k\omega_n^{-jk}\\
+y_j&amp;=\sum_{k=0}^{n-1}a_k\omega_n^{jk}
+\end{aligned}
+\]</span> 令<span
+class="math inline">\(\vec{y&#39;}=n\vec{a},\)</span></p>
+<p><span class="math inline">\(\vec{a&#39;}=\vec{y}\)</span></p>
+<p>令单位富哥变成单位负哥,就可以直接带入FFT函数求解了<span
+class="math inline">\(\vec{y&#39;}\)</span>了</p>
+<p>解出来都除以n就得到了<span class="math inline">\(\vec{a}\)</span></p>
+<p>因此又在<span class="math inline">\(O(n\lg n)\)</span>内解决了</p>
+<h2 id="回到多项式求积">回到多项式求积</h2>
+<p>卷积定理:</p>
+<p>对于两个长度为n的向量<span class="math inline">\(\vec a,\vec
+b\)</span> <span class="math display">\[
+a\otimes b=DFT^{-1}_{2n}(DFT_{2n}(a)·DFT_{2n}(b))
+\]</span> 将多项式A,B只保留系数看成向量a,b,此时<span
+class="math inline">\(a\otimes b\)</span>就是积多项式AB的系数向量</p>
 
     </div>
 
@@ -396,7 +539,8 @@
 
       <!--noindex-->
       <div class="post-toc-wrap sidebar-panel">
-          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#%E5%82%85%E9%87%8C%E5%8F%B6%E5%8F%98%E6%8D%A2"><span class="nav-number">1.</span> <span class="nav-text">傅里叶变换</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#O-n-lg-n-%E5%86%85%E6%B1%82%E8%A7%A3%E5%A4%9A%E9%A1%B9%E5%BC%8F%E4%B9%98%E6%B3%95"><span class="nav-number">1.1.</span> <span class="nav-text">$O(n\lg n)$内求解多项式乘法</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%8D%95%E4%BD%8D%E5%A4%8D%E6%A0%B9%E5%84%BF"><span class="nav-number">1.2.</span> <span class="nav-text">单位复根儿</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#DFT"><span class="nav-number">1.3.</span> <span class="nav-text">DFT</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#FFT"><span class="nav-number">1.4.</span> <span class="nav-text">FFT</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%9B%9E%E5%88%B0%E5%A4%9A%E9%A1%B9%E5%BC%8F%E6%B1%82%E7%A7%AF"><span class="nav-number">1.5.</span> <span class="nav-text">回到多项式求积</span></a></li></ol></li></ol></div>
+          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#%E5%82%85%E9%87%8C%E5%8F%B6%E5%8F%98%E6%8D%A2"><span class="nav-number">1.</span> <span class="nav-text">傅里叶变换</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#onlg-n%E5%86%85%E6%B1%82%E8%A7%A3%E5%A4%9A%E9%A1%B9%E5%BC%8F%E4%B9%98%E6%B3%95"><span class="nav-number">1.1.</span> <span class="nav-text">\(O(n\lg
+n)\)内求解多项式乘法</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%8D%95%E4%BD%8D%E5%A4%8D%E6%A0%B9%E5%84%BF"><span class="nav-number">1.2.</span> <span class="nav-text">单位复根儿</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#dft"><span class="nav-number">1.3.</span> <span class="nav-text">DFT</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#fft"><span class="nav-number">1.4.</span> <span class="nav-text">FFT</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%9B%9E%E5%88%B0%E5%A4%9A%E9%A1%B9%E5%BC%8F%E6%B1%82%E7%A7%AF"><span class="nav-number">1.5.</span> <span class="nav-text">回到多项式求积</span></a></li></ol></li></ol></div>
       </div>
       <!--/noindex-->
 

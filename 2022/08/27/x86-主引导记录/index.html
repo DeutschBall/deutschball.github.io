@@ -20,34 +20,18 @@
     var CONFIG = {"hostname":"dustball.top","root":"/","scheme":"Muse","version":"7.8.0","exturl":false,"sidebar":{"position":"left","display":"post","padding":18,"offset":12,"onmobile":false},"copycode":{"enable":false,"show_result":false,"style":null},"back2top":{"enable":true,"sidebar":false,"scrollpercent":false},"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":false,"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"algolia":{"hits":{"per_page":10},"labels":{"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}},"localsearch":{"enable":false,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false},"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}}};
   </script>
 
-  <meta name="description" content="主引导记录书上借助主引导扇区的例子,讲解了实模式下分段机制,显存的使用等等基本原理 为啥要借助主引导扇区呢? 因为虚拟机开机之后BIOS自动将磁盘的前512字节作为主引导记录装载进入内存的0x7c00位置并从0x7c00处开始执行. 我们的代码直接写到主引导记录中就可以顺理成章地执行了 自举过程计算机上电之后,如果设置硬盘位首选的启动设备,则ROM-BIOS将视图读取硬盘的逻辑0号扇区,即物理上的">
+  <meta name="description" content="主引导记录 书上借助主引导扇区的例子,讲解了实模式下分段机制,显存的使用等等基本原理 为啥要借助主引导扇区呢? 因为虚拟机开机之后BIOS自动将磁盘的前512字节作为主引导记录装载进入内存的0x7c00位置并从0x7c00处开始执行. 我们的代码直接写到主引导记录中就可以顺理成章地执行了 自举过程 计算机上电之后,如果设置硬盘位首选的启动设备,则ROM-BIOS将视图读取硬盘的逻辑0号">
 <meta property="og:type" content="article">
 <meta property="og:title" content="x86汇编语言 chapter 5 主引导记录">
 <meta property="og:url" content="http://dustball.top/2022/08/27/x86-%E4%B8%BB%E5%BC%95%E5%AF%BC%E8%AE%B0%E5%BD%95/index.html">
 <meta property="og:site_name" content="dustland">
-<meta property="og:description" content="主引导记录书上借助主引导扇区的例子,讲解了实模式下分段机制,显存的使用等等基本原理 为啥要借助主引导扇区呢? 因为虚拟机开机之后BIOS自动将磁盘的前512字节作为主引导记录装载进入内存的0x7c00位置并从0x7c00处开始执行. 我们的代码直接写到主引导记录中就可以顺理成章地执行了 自举过程计算机上电之后,如果设置硬盘位首选的启动设备,则ROM-BIOS将视图读取硬盘的逻辑0号扇区,即物理上的">
+<meta property="og:description" content="主引导记录 书上借助主引导扇区的例子,讲解了实模式下分段机制,显存的使用等等基本原理 为啥要借助主引导扇区呢? 因为虚拟机开机之后BIOS自动将磁盘的前512字节作为主引导记录装载进入内存的0x7c00位置并从0x7c00处开始执行. 我们的代码直接写到主引导记录中就可以顺理成章地执行了 自举过程 计算机上电之后,如果设置硬盘位首选的启动设备,则ROM-BIOS将视图读取硬盘的逻辑0号">
 <meta property="og:locale" content="en_US">
-<meta property="og:image" content="https://raw.githubusercontent.com/DeutschBall/DeutschBall/main/image-20220825153008702.png">
-<meta property="og:image" content="https://raw.githubusercontent.com/DeutschBall/DeutschBall/main/image-20220825162813158.png">
-<meta property="og:image" content="https://raw.githubusercontent.com/DeutschBall/DeutschBall/main/image-20220827151725554.png">
-<meta property="og:image" content="https://raw.githubusercontent.com/DeutschBall/DeutschBall/main/image-20220825162813158.png">
-<meta property="og:image" content="https://raw.githubusercontent.com/DeutschBall/DeutschBall/main/image-20220827154928612.png">
-<meta property="og:image" content="https://raw.githubusercontent.com/DeutschBall/DeutschBall/main/image-20220827161343625.png">
-<meta property="og:image" content="https://raw.githubusercontent.com/DeutschBall/DeutschBall/main/image-20220827161537279.png">
-<meta property="og:image" content="https://raw.githubusercontent.com/DeutschBall/DeutschBall/main/image-20220827162047232.png">
-<meta property="og:image" content="https://raw.githubusercontent.com/DeutschBall/DeutschBall/main/image-20220827162545217.png">
-<meta property="og:image" content="https://raw.githubusercontent.com/DeutschBall/DeutschBall/main/image-20220827162429565.png">
-<meta property="og:image" content="https://raw.githubusercontent.com/DeutschBall/DeutschBall/main/image-20220827162851643.png">
-<meta property="og:image" content="https://raw.githubusercontent.com/DeutschBall/DeutschBall/main/image-20220827162908917.png">
-<meta property="og:image" content="https://raw.githubusercontent.com/DeutschBall/DeutschBall/main/image-20220827163212152.png">
-<meta property="og:image" content="https://raw.githubusercontent.com/DeutschBall/DeutschBall/main/image-20220827163659611.png">
-<meta property="og:image" content="https://raw.githubusercontent.com/DeutschBall/DeutschBall/main/image-20220829151300719.png">
 <meta property="article:published_time" content="2022-08-27T09:23:00.000Z">
 <meta property="article:modified_time" content="2022-08-29T16:31:02.778Z">
 <meta property="article:author" content="dustball">
 <meta property="article:tag" content="x86汇编语言从实模式到保护模式">
 <meta name="twitter:card" content="summary">
-<meta name="twitter:image" content="https://raw.githubusercontent.com/DeutschBall/DeutschBall/main/image-20220825153008702.png">
 
 <link rel="canonical" href="http://dustball.top/2022/08/27/x86-%E4%B8%BB%E5%BC%95%E5%AF%BC%E8%AE%B0%E5%BD%95/">
 
@@ -214,66 +198,82 @@
     <div class="post-body" itemprop="articleBody">
 
       
-        <h1 id="主引导记录"><a href="#主引导记录" class="headerlink" title="主引导记录"></a>主引导记录</h1><p>书上借助主引导扇区的例子,讲解了实模式下分段机制,显存的使用等等基本原理</p>
+        <h1 id="主引导记录">主引导记录</h1>
+<p>书上借助主引导扇区的例子,讲解了实模式下分段机制,显存的使用等等基本原理</p>
 <p>为啥要借助主引导扇区呢?</p>
 <p>因为虚拟机开机之后BIOS自动将磁盘的前512字节作为主引导记录装载进入内存的0x7c00位置并从0x7c00处开始执行.</p>
 <p>我们的代码直接写到主引导记录中就可以顺理成章地执行了</p>
-<h2 id="自举过程"><a href="#自举过程" class="headerlink" title="自举过程"></a>自举过程</h2><p>计算机上电之后,如果设置硬盘位首选的启动设备,则ROM-BIOS将视图读取硬盘的逻辑0号扇区,即物理上的0面0道1扇区.这里就是主引导扇区的位置</p>
+<h2 id="自举过程">自举过程</h2>
+<p>计算机上电之后,如果设置硬盘位首选的启动设备,则ROM-BIOS将视图读取硬盘的逻辑0号扇区,即物理上的0面0道1扇区.这里就是主引导扇区的位置</p>
 <p>ROM-BIOS会把这个扇区的512字节搬到内存的0x7c00处,后面就是对内存中的拷贝进行的一系列操作</p>
 <p>ROM-BIOS检查这512字节的最后两个字节是否是0x55,0xAA,这是主引导扇区魔数</p>
 <p>如果主引导扇区有效则跳转打0x7c00继续执行</p>
 <p>主引导扇区的内容一般是检测操作系统在硬盘上的位置,把grub代码加载道内存,跳转grub举起操作系统来</p>
-<h2 id="显示"><a href="#显示" class="headerlink" title="显示"></a>显示</h2><h3 id="显卡与显示器"><a href="#显卡与显示器" class="headerlink" title="显卡与显示器"></a>显卡与显示器</h3><p>显卡负责给显示器提供内容</p>
+<h2 id="显示">显示</h2>
+<h3 id="显卡与显示器">显卡与显示器</h3>
+<p>显卡负责给显示器提供内容</p>
 <p>显示器负责显式</p>
 <p>显示器接到显卡上,显卡接到主板上</p>
-<p>显卡控制显示器的最小单位是像素,每个像素点需要24比特存储颜色(RGB各8比特).显卡使用字节的显式存储器(显存,video RAM,VRAM)存放像素点的颜色.要显式啥就把啥信息放到显存里.</p>
+<p>显卡控制显示器的最小单位是像素,每个像素点需要24比特存储颜色(RGB各8比特).显卡使用字节的显式存储器(显存,video
+RAM,VRAM)存放像素点的颜色.要显式啥就把啥信息放到显存里.</p>
 <p>显示器是一个二维平面,儿显存就是一个内存条子的存储器,它是线性的,这就涉及到一维数组到二维数组的映射关系了</p>
 <p>显存相当于一个缓冲区,CPU把想要输出到屏幕的东西放到显存里.显卡周期性地从显存拿出来按顺序显式到屏幕上.</p>
-<h3 id="显卡工作模式"><a href="#显卡工作模式" class="headerlink" title="显卡工作模式"></a>显卡工作模式</h3><p>显卡的工作模式分为文本模式和图形模式</p>
+<h3 id="显卡工作模式">显卡工作模式</h3>
+<p>显卡的工作模式分为文本模式和图形模式</p>
 <p>图形模式下操作的确实是像素点</p>
 <p>文本模式下只需要在显存中写入指定的字符的ASCII码,显卡内部经过字符发生器,就可以翻译成一些像素点的组合输出到屏幕上,也就是代替人干了计算每个像素点位置的事,人只需要指定第几行第几列写哪个字符就可以了</p>
 <p>一般个人电脑显卡加电自检之后都会把自己初始化为80×25的文本模式</p>
 <p>每行可以显示80个字符,一共可以显示25行.满屏是2000个字符</p>
-<h3 id="端口映射内存"><a href="#端口映射内存" class="headerlink" title="端口映射内存"></a>端口映射内存</h3><p>如果正儿八经地论起来,除了内存条子,其他的设备都是IO外设,CPU和内存条子打交道的速度得是外设的成千上万倍,如果想要实现细致流畅的游戏画面体验,经过IO访问显存是办不到的.于是把显存也和内存统一编址,这就绕开了IO直接让CPU像访问内存一样访问显存.</p>
+<h3 id="端口映射内存">端口映射内存</h3>
+<p>如果正儿八经地论起来,除了内存条子,其他的设备都是IO外设,CPU和内存条子打交道的速度得是外设的成千上万倍,如果想要实现细致流畅的游戏画面体验,经过IO访问显存是办不到的.于是把显存也和内存统一编址,这就绕开了IO直接让CPU像访问内存一样访问显存.</p>
 <p>对于8086来说,其CPU宽20位,可以寻址1M的内存空间0x0到0x9FFFF,</p>
 <p>那从0xA0000到0xFFFFF就不是内存条子的事了,比如</p>
 <p>0xB8000到0xBFFFF这32KB的地址空间映射给显存</p>
 <p>0xF0000到0xFFFFF这64K的地址空间映射给ROM-BIOS</p>
-<p><img src="https://raw.githubusercontent.com/DeutschBall/DeutschBall/main/image-20220825153008702.png" alt="image-20220825153008702"></p>
-<h3 id="段寄存器"><a href="#段寄存器" class="headerlink" title="段寄存器"></a>段寄存器</h3><p>显存入乡随俗,怎么访问内存就得怎么访问显存</p>
+<figure>
+<img
+src="https://raw.githubusercontent.com/DeutschBall/DeutschBall/main/image-20220825153008702.png"
+alt="image-20220825153008702" />
+<figcaption aria-hidden="true">image-20220825153008702</figcaption>
+</figure>
+<h3 id="段寄存器">段寄存器</h3>
+<p>显存入乡随俗,怎么访问内存就得怎么访问显存</p>
 <p>访问内存使用段地址:偏移量,</p>
-<p>物理地址&#x3D;段地址×16+偏移量</p>
+<p>物理地址=段地址×16+偏移量</p>
 <p>那么如果要访问显存,就得根据显存的起始地址设置段地址,由于显存起始地址是0xB8000,因此段地址就是0xB800,寻址的时候CPU会自动把0xB800乘16的</p>
 <p>怎样让段寄存器等于0xB800呢?</p>
 <p><code>mov es,0xB800</code>这样写吗?不可以,Intel的处理器规定不允许将立即数传递给段寄存器,必须使用通用寄存器或者内存单元中转一下,也就是说</p>
 <figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">mov ax,<span class="number">0xb800</span>                 ;指向文本模式的显示缓冲区</span><br><span class="line">mov es,ax</span><br></pre></td></tr></table></figure>
-
-
-
-<h3 id="字符模式下一个表示字符"><a href="#字符模式下一个表示字符" class="headerlink" title="字符模式下一个表示字符"></a>字符模式下一个表示字符</h3><p>字符模式下每个字符需要占据连续的两个字节,低字节是该字符的ASCII代码,高字节是该字符的颜色特征</p>
-<p><img src="https://raw.githubusercontent.com/DeutschBall/DeutschBall/main/image-20220825162813158.png" alt="image-20220825162813158"></p>
+<h3 id="字符模式下一个表示字符">字符模式下一个表示字符</h3>
+<p>字符模式下每个字符需要占据连续的两个字节,低字节是该字符的ASCII代码,高字节是该字符的颜色特征</p>
+<figure>
+<img
+src="https://raw.githubusercontent.com/DeutschBall/DeutschBall/main/image-20220825162813158.png"
+alt="image-20220825162813158" />
+<figcaption aria-hidden="true">image-20220825162813158</figcaption>
+</figure>
 <p>比如这里0xB8000开始的连续两个字节,</p>
-<p>低字节0x48是’H’的ASCII码,</p>
-<p>高字节0x07&#x3D;00000111B表示黑背景色不闪烁,白前景色</p>
-<h3 id="显示字符"><a href="#显示字符" class="headerlink" title="显示字符"></a>显示字符</h3><p>例子中想要显示一串字符串”Label offset:”</p>
+<p>低字节0x48是'H'的ASCII码,</p>
+<p>高字节0x07=00000111B表示黑背景色不闪烁,白前景色</p>
+<h3 id="显示字符">显示字符</h3>
+<p>例子中想要显示一串字符串"Label offset:"</p>
 <figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br></pre></td><td class="code"><pre><span class="line">      mov ax,<span class="number">0xb800</span>                 <span class="comment">//es段设置为显存地址起始位置</span></span><br><span class="line">      mov es,ax	</span><br><span class="line">mov byte [es:<span class="number">0x00</span>],<span class="string">&#x27;L&#x27;</span></span><br><span class="line">      mov byte [es:<span class="number">0x01</span>],<span class="number">0x07</span></span><br><span class="line">      mov byte [es:<span class="number">0x02</span>],<span class="string">&#x27;a&#x27;</span></span><br><span class="line">      mov byte [es:<span class="number">0x03</span>],<span class="number">0x07</span></span><br><span class="line">      mov byte [es:<span class="number">0x04</span>],<span class="string">&#x27;b&#x27;</span></span><br><span class="line">      mov byte [es:<span class="number">0x05</span>],<span class="number">0x07</span></span><br><span class="line">      mov byte [es:<span class="number">0x06</span>],<span class="string">&#x27;e&#x27;</span></span><br><span class="line">      mov byte [es:<span class="number">0x07</span>],<span class="number">0x07</span></span><br><span class="line">      mov byte [es:<span class="number">0x08</span>],<span class="string">&#x27;l&#x27;</span></span><br><span class="line">      mov byte [es:<span class="number">0x09</span>],<span class="number">0x07</span></span><br><span class="line">      mov byte [es:<span class="number">0x0a</span>],<span class="string">&#x27; &#x27;</span></span><br><span class="line">      mov byte [es:<span class="number">0x0b</span>],<span class="number">0x07</span></span><br><span class="line">      mov byte [es:<span class="number">0x0c</span>],<span class="string">&quot;o&quot;</span></span><br><span class="line">      mov byte [es:<span class="number">0x0d</span>],<span class="number">0x07</span></span><br><span class="line">      mov byte [es:<span class="number">0x0e</span>],<span class="string">&#x27;f&#x27;</span></span><br><span class="line">      mov byte [es:<span class="number">0x0f</span>],<span class="number">0x07</span></span><br><span class="line">      mov byte [es:<span class="number">0x10</span>],<span class="string">&#x27;f&#x27;</span></span><br><span class="line">      mov byte [es:<span class="number">0x11</span>],<span class="number">0x07</span></span><br><span class="line">      mov byte [es:<span class="number">0x12</span>],<span class="string">&#x27;s&#x27;</span></span><br><span class="line">      mov byte [es:<span class="number">0x13</span>],<span class="number">0x07</span></span><br><span class="line">      mov byte [es:<span class="number">0x14</span>],<span class="string">&#x27;e&#x27;</span></span><br><span class="line">      mov byte [es:<span class="number">0x15</span>],<span class="number">0x07</span></span><br><span class="line">      mov byte [es:<span class="number">0x16</span>],<span class="string">&#x27;t&#x27;</span></span><br><span class="line">      mov byte [es:<span class="number">0x17</span>],<span class="number">0x07</span></span><br><span class="line">      mov byte [es:<span class="number">0x18</span>],<span class="string">&#x27;:&#x27;</span></span><br><span class="line">      mov byte [es:<span class="number">0x19</span>],<span class="number">0x07</span></span><br></pre></td></tr></table></figure>
-
 <p>每两个相邻字节的低字节放字符ASCII代码,高字节调制颜色,都是不闪烁的黑背景,白前景</p>
 <p>寻址的时候使用的是<code>[es:0x00]</code>,转换成物理地址就是</p>
 <p><code>es*16+0x00</code>,为啥要写es呢?因为段寄存器默认是ds,这里需要段超越前缀指定使用es段</p>
-<p>而es&#x3D;0x8b00,乘以16之后恰好就是显存映射地址的起始位置</p>
+<p>而es=0x8b00,乘以16之后恰好就是显存映射地址的起始位置</p>
 <p>用byte关键字来修饰操作数的范围</p>
 <figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">mov byte [es:<span class="number">0x00</span>],<span class="string">&#x27;L&#x27;</span></span><br></pre></td></tr></table></figure>
-
-<p>意思是’L’顶多占用一个字节,不能再多了,这条指令只会把0x4C放到es:00上</p>
+<p>意思是'L'顶多占用一个字节,不能再多了,这条指令只会把0x4C放到es:00上</p>
 <blockquote>
 <p>如果这样写</p>
 <figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">mov word [es:0x00],&#x27;L&#x27;</span><br></pre></td></tr></table></figure>
-
 <p>则把0x4C放到es:0x00,把0x00放到es:0x01</p>
 </blockquote>
 <p>如果是把寄存器的值放到内存上则不用byte或者word修饰操作数的范围,因为寄存器已经自带宽度了</p>
-<h2 id="指令地址"><a href="#指令地址" class="headerlink" title="指令地址"></a>指令地址</h2><h3 id="汇编地址"><a href="#汇编地址" class="headerlink" title="汇编地址"></a>汇编地址</h3><p>前面字句过程中也已经提到过,BIOS会把MBR这个512个字节放到内存条的0x7c00上.也就是说代码是从0x7c00开始的</p>
+<h2 id="指令地址">指令地址</h2>
+<h3 id="汇编地址">汇编地址</h3>
+<p>前面字句过程中也已经提到过,BIOS会把MBR这个512个字节放到内存条的0x7c00上.也就是说代码是从0x7c00开始的</p>
 <blockquote>
 <p>刚才显存扯了一大堆,但是都是相当于往数据段放东西,这个数据段位于0xB8000</p>
 </blockquote>
@@ -281,23 +281,22 @@
 <p>编译器会把0x7c00开始的MBR代码作为一个独立的段处理</p>
 <p>这样每条指令相对于段地址都有一个汇编地址(段内),在lst文件中可以看到这个汇编地址</p>
 <figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"> 行号 段内偏移 指令								汇编                                    </span><br><span class="line"> <span class="number">6</span> <span class="number">00000000</span> B800B8                           mov ax,<span class="number">0xb800</span>                 ;指向文本模式的显示缓冲区</span><br><span class="line"> <span class="number">7</span> <span class="number">00000003</span> <span class="number">8</span>EC0                             mov es,ax</span><br><span class="line"> <span class="number">8</span>                                  </span><br><span class="line"> <span class="number">9</span>                                           ;以下显示字符串<span class="string">&quot;Label offset:&quot;</span></span><br><span class="line"><span class="number">10</span> <span class="number">00000005</span> <span class="number">26</span>C60600004C                     mov byte [es:<span class="number">0x00</span>],<span class="string">&#x27;L&#x27;</span></span><br><span class="line"><span class="number">11</span> <span class="number">0000000B</span> <span class="number">26</span>C606010007                     mov byte [es:<span class="number">0x01</span>],<span class="number">0x07</span></span><br><span class="line"><span class="number">12</span> <span class="number">00000011</span> <span class="number">26</span>C606020061                     mov byte [es:<span class="number">0x02</span>],<span class="string">&#x27;a&#x27;</span></span><br></pre></td></tr></table></figure>
-
 <p>第一条有意义的指令是在第6行,段内偏移量为0,指令内容是0xB800B8,翻译成汇编语言就是<code>mov ax,0xb800</code>,由于这条指令长3字节,因此可以计算得到下一条指令的段内偏移量就是3</p>
 <p>第七行指令的段内偏移量就是3</p>
-<h3 id="标号"><a href="#标号" class="headerlink" title="标号"></a>标号</h3><p>如果要在汇编语言中写出跳转功能,就得从一个地址转到另一个地址.</p>
+<h3 id="标号">标号</h3>
+<p>如果要在汇编语言中写出跳转功能,就得从一个地址转到另一个地址.</p>
 <p>怎么指定目标地址呢?让人手工计算目标地址然后写到jmp后面吗?显然人工计算指令地址不显示,比如一段千八行的汇编语言,有好多指令都是跳转或者调用指令,现在第一行的指令发现错了要改,假设原来两个字节的指令改成了一个字节,那么后面的所有指令地址就都减1,这就需要所有的跳转和调用指令重定位.让人手工一行一行改太慢了</p>
 <p>于是就发明了标号这种东西,类似于一个变量符号,作用是记录一个地址,编译器会自动计算该标号的地址,在生成二进制码的时候自动把标号翻译成地址,根宏定义展开一样</p>
 <p>比如主引导记录中有这么一句:</p>
 <figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">infi: jmp near infi                 ;无限循环</span><br></pre></td></tr></table></figure>
-
 <p>infi标号的这条指令要跳转到infi标号处的指令,也就是自己跳转到自己的开始,这就形成了无线循环</p>
 <p>标号还可以直接写到汇编指令里:</p>
 <figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">dividnd dw 0x3f0</span><br><span class="line">divisor db 0x3f</span><br><span class="line">mov ax,[dividnd]</span><br><span class="line">div byte [divisor]</span><br></pre></td></tr></table></figure>
-
 <p>这里dividnd标号是0x3f0的地址,divisor是0x3f的地址</p>
-<p>在编译时就像宏定义展开一样,mov ax,[dividnd]这里的标号就会自动转化成地址</p>
-<h2 id="声明并初始化数据"><a href="#声明并初始化数据" class="headerlink" title="声明并初始化数据"></a>声明并初始化数据</h2><figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">number db <span class="number">0</span>,<span class="number">0</span>,<span class="number">0</span>,<span class="number">0</span>,<span class="number">0</span></span><br></pre></td></tr></table></figure>
-
+<p>在编译时就像宏定义展开一样,mov
+ax,[dividnd]这里的标号就会自动转化成地址</p>
+<h2 id="声明并初始化数据">声明并初始化数据</h2>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">number db <span class="number">0</span>,<span class="number">0</span>,<span class="number">0</span>,<span class="number">0</span>,<span class="number">0</span></span><br></pre></td></tr></table></figure>
 <p>这里number是标号,db是定义字节的伪指令,后面定义了五个字节,都初始化为0,相邻两个字节之间用逗号隔开.6</p>
 <blockquote>
 <p>这里定义的五个字节就在当前代码段中</p>
@@ -313,208 +312,264 @@
 </blockquote>
 <p>用db声明的变量就必须在字节大小范围内,最小是0x00,最大是0xFF,如果比这还大就会截断高位</p>
 <p>比如db 0xFF00,编译之后保留低字节0x00</p>
-<h2 id="段超越前缀"><a href="#段超越前缀" class="headerlink" title="段超越前缀"></a>段超越前缀</h2><p>如果这样写mov al,[0x00]</p>
+<h2 id="段超越前缀">段超越前缀</h2>
+<p>如果这样写mov al,[0x00]</p>
 <p>意思是把内存中0x00位置的数据搬到al寄存器中,问题是,这个0x00是相对于哪个段的偏移量呢?</p>
 <p>DS?CS?</p>
 <p>默认的数据段是DS,因此如果不指明段超越前缀,就是访问的数据段</p>
 <p>但是如果要访问ES段寄存器指向的段,应该怎么写呢?</p>
 <p>mov al,[es:0x00]</p>
 <p>这里es:就是段超越前缀</p>
-<h2 id="除法指令"><a href="#除法指令" class="headerlink" title="除法指令"></a>除法指令</h2><p>除法指令div只有一个操作数作为除数</p>
+<h2 id="除法指令">除法指令</h2>
+<p>除法指令div只有一个操作数作为除数</p>
 <p>被除数默认是AX寄存器</p>
 <p>8086允许两种类型的整数除法,</p>
 <p>其一是16位被除数除以8位除数由于8086的寄存器宽度为8,因此一个AX就可以放开被除数.除完了商放到AL,余数放到AH</p>
 <p>其二是32位被除数除以16位除数</p>
 <p>此时除数刚好占用一个寄存器,但是被除数就需要放到两个寄存器中了,即DX放高16位,AX放低16位,除完了商放在AX,余数放在DX</p>
-<p>处理器怎么区分两种除法应该用哪种呢?看除数的格式,如果除数是一个字寄存器,比如div cx,就得是32位除被数除以16位除数.如果是div cl,就是16位被除数除以8位除数</p>
+<p>处理器怎么区分两种除法应该用哪种呢?看除数的格式,如果除数是一个字寄存器,比如div
+cx,就得是32位除被数除以16位除数.如果是div
+cl,就是16位被除数除以8位除数</p>
 <p>在主引导扇区代码的第37到47行是这样写的</p>
 <figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line">mov ax,number ;这里number是一个地址标号</span><br><span class="line">mov bx,10	;被除数置为10</span><br><span class="line"></span><br><span class="line">mov cx,cs		</span><br><span class="line">mov ds,cx		;ds寄存器指向当前cx寄存器的段地址</span><br><span class="line"></span><br><span class="line">mov dx,0	;被除数高位置0</span><br><span class="line">div bx	;DX:AX/BX</span><br><span class="line">       </span><br><span class="line">mov [0x7c00+number+0x00],dl		;dl放的是余数的低字节,也就是number这个地址的个位数字,放到0x7c00+number+0x00这个位置上</span><br></pre></td></tr></table></figure>
-
-
-
-
-
 <p>主引导记录中一直重复该过程,意思是十进制分解被除数number标号地址的各位,放到0x7c00+number开始的五个字节上</p>
 <figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br></pre></td><td class="code"><pre><span class="line">mov ax,number                 ;?????number???????</span><br><span class="line">mov bx,<span class="number">10</span></span><br><span class="line"></span><br><span class="line"></span><br><span class="line">mov cx,cs</span><br><span class="line">mov ds,cx</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">mov dx,<span class="number">0</span></span><br><span class="line">div bx</span><br><span class="line">mov [<span class="number">0x7c00</span>+number+<span class="number">0x00</span>],dl   </span><br><span class="line"></span><br><span class="line"></span><br><span class="line">xor dx,dx</span><br><span class="line">div bx</span><br><span class="line">mov [<span class="number">0x7c00</span>+number+<span class="number">0x01</span>],dl  </span><br><span class="line"></span><br><span class="line"></span><br><span class="line">xor dx,dx</span><br><span class="line">div bx</span><br><span class="line">mov [<span class="number">0x7c00</span>+number+<span class="number">0x02</span>],dl   </span><br><span class="line"></span><br><span class="line"></span><br><span class="line">xor dx,dx</span><br><span class="line">div bx</span><br><span class="line">mov [<span class="number">0x7c00</span>+number+<span class="number">0x03</span>],dl   </span><br><span class="line"></span><br><span class="line">;????位??????? </span><br><span class="line">xor dx,dx</span><br><span class="line">div bx</span><br><span class="line">mov [<span class="number">0x7c00</span>+number+<span class="number">0x04</span>],dl  </span><br><span class="line"></span><br></pre></td></tr></table></figure>
-
-
-
 <p><code>mov [0x7c00+number+0x00],dl</code>这就很诡异了,0x7c00是怎么来的?</p>
-<h3 id="偏移量换算"><a href="#偏移量换算" class="headerlink" title="偏移量换算"></a>偏移量换算</h3><figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">mov [<span class="number">0x7c00</span>+number+<span class="number">0x00</span>],dl</span><br></pre></td></tr></table></figure>
-
+<h3 id="偏移量换算">偏移量换算</h3>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">mov [<span class="number">0x7c00</span>+number+<span class="number">0x00</span>],dl</span><br></pre></td></tr></table></figure>
 <p>这里多了一个0x7c00,而不是直接mov [number+0x00],dl</p>
 <p>这是因为,主引导扇区会被bios装载到内存的0x7c00处</p>
-<p>此时CS&#x3D;0x0000,IP&#x3D;0x7c00</p>
+<p>此时CS=0x0000,IP=0x7c00</p>
 <p>number是相对于mbr.asm这个文件的偏移量12E.</p>
 <p>如果写mov [number+0x00],dl.实际上就是mov [0x12E],dl</p>
 <p>放到了内存条上的0x12E位置,直接出了主引导区了</p>
-<p><img src="https://raw.githubusercontent.com/DeutschBall/DeutschBall/main/image-20220827151725554.png" alt="image-20220827151725554"></p>
+<figure>
+<img
+src="https://raw.githubusercontent.com/DeutschBall/DeutschBall/main/image-20220827151725554.png"
+alt="image-20220827151725554" />
+<figcaption aria-hidden="true">image-20220827151725554</figcaption>
+</figure>
 <p>mbr.asm程序自始至终没有修改过cs的值,那么这个值就是BIOS设置的,一直是0x0000不变</p>
-<h2 id="显示分解出来的各个数位"><a href="#显示分解出来的各个数位" class="headerlink" title="显示分解出来的各个数位"></a>显示分解出来的各个数位</h2><p>分解的各个数位按照个十百千万的顺序放到0x7c00+number+0x00到0x7c00+number+0x04的五个字节中</p>
+<h2 id="显示分解出来的各个数位">显示分解出来的各个数位</h2>
+<p>分解的各个数位按照个十百千万的顺序放到0x7c00+number+0x00到0x7c00+number+0x04的五个字节中</p>
 <p>对于万位上的数字,mbr程序是这样写的:</p>
 <figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">mov al,[<span class="number">0x7c00</span>+number+<span class="number">0x04</span>]</span><br><span class="line">add al,<span class="number">0x30</span></span><br><span class="line">mov [es:<span class="number">0x1a</span>],al</span><br><span class="line">mov byte [es:<span class="number">0x1b</span>],<span class="number">0x04</span></span><br></pre></td></tr></table></figure>
-
 <p>把万位数字拿出来放到al里,加上0x30转化成这个数字的ASCII码,然后放到es:0x1a位置,由于es早已设置为0xb800,即显存的起始位置,因此es:0x1a就是第一行的第1a个字符</p>
 <p>在es:0x1b位置设置的是该字符的显示样式,设置为0x04意思是无背景不闪烁,红色前景</p>
-<p><img src="https://raw.githubusercontent.com/DeutschBall/DeutschBall/main/image-20220825162813158.png"></p>
+<p><img
+src="https://raw.githubusercontent.com/DeutschBall/DeutschBall/main/image-20220825162813158.png" /></p>
 <figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br></pre></td><td class="code"><pre><span class="line">mov al,[0x7c00+number+0x04]</span><br><span class="line">add al,0x30</span><br><span class="line">mov [es:0x1a],al</span><br><span class="line">mov byte [es:0x1b],0x04</span><br><span class="line"></span><br><span class="line">mov al,[0x7c00+number+0x03]</span><br><span class="line">add al,0x30</span><br><span class="line">mov [es:0x1c],al</span><br><span class="line">mov byte [es:0x1d],0x04</span><br><span class="line"></span><br><span class="line">mov al,[0x7c00+number+0x02]</span><br><span class="line">add al,0x30</span><br><span class="line">mov [es:0x1e],al</span><br><span class="line">mov byte [es:0x1f],0x04</span><br><span class="line"></span><br><span class="line">mov al,[0x7c00+number+0x01]</span><br><span class="line">add al,0x30</span><br><span class="line">mov [es:0x20],al</span><br><span class="line">mov byte [es:0x21],0x04</span><br><span class="line"></span><br><span class="line">mov al,[0x7c00+number+0x00]</span><br><span class="line">add al,0x30</span><br><span class="line">mov [es:0x22],al</span><br><span class="line">mov byte [es:0x23],0x04</span><br><span class="line"></span><br><span class="line">mov byte [es:0x24],&#x27;D&#x27;</span><br><span class="line">mov byte [es:0x25],0x07</span><br></pre></td></tr></table></figure>
-
-<p>最后另外放了一个黑底不闪烁白字’D’,意思是十进制的缩写(Decimal)</p>
+<p>最后另外放了一个黑底不闪烁白字'D',意思是十进制的缩写(Decimal)</p>
 <p>因此打印效果为</p>
-<p><img src="https://raw.githubusercontent.com/DeutschBall/DeutschBall/main/image-20220827154928612.png" alt="image-20220827154928612"></p>
-<h2 id="无限循环"><a href="#无限循环" class="headerlink" title="无限循环"></a>无限循环</h2><p>在主引导记录中打印了number的数位分解之后,立刻进入无线循环</p>
+<figure>
+<img
+src="https://raw.githubusercontent.com/DeutschBall/DeutschBall/main/image-20220827154928612.png"
+alt="image-20220827154928612" />
+<figcaption aria-hidden="true">image-20220827154928612</figcaption>
+</figure>
+<h2 id="无限循环">无限循环</h2>
+<p>在主引导记录中打印了number的数位分解之后,立刻进入无线循环</p>
 <figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">infi: jmp near infi  </span><br></pre></td></tr></table></figure>
-
 <p>为啥要这样写呢?</p>
 <p>因为如果不写无线循环,那么虚拟机就直接寄了,主引导记录并没有抛砖引玉地加载操作系统,这512个字节跑完之后,后面就全是0了,不存在指令了</p>
-<h3 id="段内跳转near"><a href="#段内跳转near" class="headerlink" title="段内跳转near"></a>段内跳转near</h3><p>jmp near意思是跳转到当前段内的一个地址,也就是不改变CS段寄存器地址,只改变ip的地址,因此操作数只是infi这个标号,不需要cs:infi指定跳转到哪个段的infi</p>
-<h2 id="填充与魔数"><a href="#填充与魔数" class="headerlink" title="填充与魔数"></a>填充与魔数</h2><p>前面的代码和数据都写完了也远远达不到512个字节,主引导记录需要最后两个字符是0xAA55才有效.因此中间的字节需要说一些废话填充</p>
+<h3 id="段内跳转near">段内跳转near</h3>
+<p>jmp
+near意思是跳转到当前段内的一个地址,也就是不改变CS段寄存器地址,只改变ip的地址,因此操作数只是infi这个标号,不需要cs:infi指定跳转到哪个段的infi</p>
+<h2 id="填充与魔数">填充与魔数</h2>
+<p>前面的代码和数据都写完了也远远达不到512个字节,主引导记录需要最后两个字符是0xAA55才有效.因此中间的字节需要说一些废话填充</p>
 <figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">times <span class="number">203</span> db <span class="number">0</span></span><br><span class="line">          db <span class="number">0x55</span>,<span class="number">0xaa</span></span><br></pre></td></tr></table></figure>
-
 <p>连着定义了203个字节都置0,最后两个字节是0xAA55魔数</p>
 <p>到此主引导记录才有效</p>
-<h2 id="Bochs调试"><a href="#Bochs调试" class="headerlink" title="Bochs调试"></a>Bochs调试</h2><p>之前我们一直使用的都是virtualBox虚拟机,只能运行不能调试,唯一能够调试运行的虚拟机就是Bochs</p>
-<h3 id="bochs配置"><a href="#bochs配置" class="headerlink" title="bochs配置"></a>bochs配置</h3><p>将主引导记录写入虚拟磁盘vhd文件之后启动bochs,需要在开始菜单上进行一些设置</p>
-<p><img src="https://raw.githubusercontent.com/DeutschBall/DeutschBall/main/image-20220827161343625.png" alt="image-20220827161343625"></p>
-<h4 id="Disk-Boot"><a href="#Disk-Boot" class="headerlink" title="Disk&amp;Boot"></a>Disk&amp;Boot</h4><p><img src="https://raw.githubusercontent.com/DeutschBall/DeutschBall/main/image-20220827161537279.png" alt="image-20220827161537279"></p>
+<h2 id="bochs调试">Bochs调试</h2>
+<p>之前我们一直使用的都是virtualBox虚拟机,只能运行不能调试,唯一能够调试运行的虚拟机就是Bochs</p>
+<h3 id="bochs配置">bochs配置</h3>
+<p>将主引导记录写入虚拟磁盘vhd文件之后启动bochs,需要在开始菜单上进行一些设置</p>
+<figure>
+<img
+src="https://raw.githubusercontent.com/DeutschBall/DeutschBall/main/image-20220827161343625.png"
+alt="image-20220827161343625" />
+<figcaption aria-hidden="true">image-20220827161343625</figcaption>
+</figure>
+<h4 id="diskboot">Disk&amp;Boot</h4>
+<figure>
+<img
+src="https://raw.githubusercontent.com/DeutschBall/DeutschBall/main/image-20220827161537279.png"
+alt="image-20220827161537279" />
+<figcaption aria-hidden="true">image-20220827161537279</figcaption>
+</figure>
 <p>都2202年了,不会还有人用软盘吧</p>
 <p>ATA,硬盘接口标准,PATA是以前的IDE接口,SATA是当前使用的接口标准</p>
 <p>每个计算机有多个ATA通道,允许加多块磁盘</p>
 <p>ATA channel 0 是必须的,将nobody.vhd挂到ATA channel0上即可</p>
-<h4 id="ATA-channel-0"><a href="#ATA-channel-0" class="headerlink" title="ATA channel 0"></a>ATA channel 0</h4><p><img src="https://raw.githubusercontent.com/DeutschBall/DeutschBall/main/image-20220827162047232.png" alt="image-20220827162047232"></p>
-<p><img src="https://raw.githubusercontent.com/DeutschBall/DeutschBall/main/image-20220827162545217.png" alt="image-20220827162545217"></p>
+<h4 id="ata-channel-0">ATA channel 0</h4>
+<figure>
+<img
+src="https://raw.githubusercontent.com/DeutschBall/DeutschBall/main/image-20220827162047232.png"
+alt="image-20220827162047232" />
+<figcaption aria-hidden="true">image-20220827162047232</figcaption>
+</figure>
+<figure>
+<img
+src="https://raw.githubusercontent.com/DeutschBall/DeutschBall/main/image-20220827162545217.png"
+alt="image-20220827162545217" />
+<figcaption aria-hidden="true">image-20220827162545217</figcaption>
+</figure>
 <p>这里Cylinders,Heads等参数不是乱写的,需要填虚拟磁盘的实际情况,可以手工分析最后512个字节的几何参数,也可以使用教材配套软件fixvhdwr.exe</p>
-<p><img src="https://raw.githubusercontent.com/DeutschBall/DeutschBall/main/image-20220827162429565.png" alt="image-20220827162429565"></p>
-<h4 id="Boot-Options"><a href="#Boot-Options" class="headerlink" title="Boot Options"></a>Boot Options</h4><p><img src="https://raw.githubusercontent.com/DeutschBall/DeutschBall/main/image-20220827162851643.png" alt="image-20220827162851643"></p>
-<h4 id="保存"><a href="#保存" class="headerlink" title="保存"></a>保存</h4><p><img src="https://raw.githubusercontent.com/DeutschBall/DeutschBall/main/image-20220827162908917.png" alt="image-20220827162908917"></p>
+<figure>
+<img
+src="https://raw.githubusercontent.com/DeutschBall/DeutschBall/main/image-20220827162429565.png"
+alt="image-20220827162429565" />
+<figcaption aria-hidden="true">image-20220827162429565</figcaption>
+</figure>
+<h4 id="boot-options">Boot Options</h4>
+<figure>
+<img
+src="https://raw.githubusercontent.com/DeutschBall/DeutschBall/main/image-20220827162851643.png"
+alt="image-20220827162851643" />
+<figcaption aria-hidden="true">image-20220827162851643</figcaption>
+</figure>
+<h4 id="保存">保存</h4>
+<figure>
+<img
+src="https://raw.githubusercontent.com/DeutschBall/DeutschBall/main/image-20220827162908917.png"
+alt="image-20220827162908917" />
+<figcaption aria-hidden="true">image-20220827162908917</figcaption>
+</figure>
 <p>前面两个设置完毕之后Save保存设置,下一次开Bochs的时候就不用重新设置了</p>
 <p>保存一个bochsrc.bxrc文件,找一个牢稳的地方保存,比如bochs的根目录,或者虚拟机根目录,反正就是下一次启动bochs需要手动load该文件,能找到就行</p>
-<h3 id="bochs运行主引导记录"><a href="#bochs运行主引导记录" class="headerlink" title="bochs运行主引导记录"></a>bochs运行主引导记录</h3><p>设置好之后就可以从bochs启动了</p>
-<p>可以看到第一行打印出了”Label offset:00302D”</p>
-<p><img src="https://raw.githubusercontent.com/DeutschBall/DeutschBall/main/image-20220827163212152.png" alt="image-20220827163212152"></p>
-<h3 id="bochs调试"><a href="#bochs调试" class="headerlink" title="bochs调试"></a>bochs调试</h3><p>使用bochsdbg启动虚拟机,此时除了模拟虚拟机屏幕窗口之外,还有一个终端窗口用于调试</p>
-<p><img src="https://raw.githubusercontent.com/DeutschBall/DeutschBall/main/image-20220827163659611.png" alt="image-20220827163659611"></p>
+<h3 id="bochs运行主引导记录">bochs运行主引导记录</h3>
+<p>设置好之后就可以从bochs启动了</p>
+<p>可以看到第一行打印出了"Label offset:00302D"</p>
+<figure>
+<img
+src="https://raw.githubusercontent.com/DeutschBall/DeutschBall/main/image-20220827163212152.png"
+alt="image-20220827163212152" />
+<figcaption aria-hidden="true">image-20220827163212152</figcaption>
+</figure>
+<h3 id="bochs调试-1">bochs调试</h3>
+<p>使用bochsdbg启动虚拟机,此时除了模拟虚拟机屏幕窗口之外,还有一个终端窗口用于调试</p>
+<figure>
+<img
+src="https://raw.githubusercontent.com/DeutschBall/DeutschBall/main/image-20220827163659611.png"
+alt="image-20220827163659611" />
+<figcaption aria-hidden="true">image-20220827163659611</figcaption>
+</figure>
 <p>bochs在执行第一条指令前停下来等待调试命令</p>
 <p>此时第一条指令位于f000:fff0,指令内容是</p>
 <figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">jmp far 0xf000:e05b</span><br></pre></td></tr></table></figure>
-
 <p>这个cs:ip指向的地址翻译成物理地址就是0xfe05b</p>
 <p>而BIOS映射到内存的地址是[0xF0000,0xFFFFF],显然第一条指令跳转到了BIOS中</p>
 <p>此后在这个调试终端中就可以输入命令进行调试了</p>
-<h4 id="断点"><a href="#断点" class="headerlink" title="断点"></a>断点</h4><p>如果想在主引导记录开始下断点,由于主引导记录将被bios装载进入内存的0x7c00位置,</p>
+<h4 id="断点">断点</h4>
+<p>如果想在主引导记录开始下断点,由于主引导记录将被bios装载进入内存的0x7c00位置,</p>
 <p>因此可以在调试终端中这样写</p>
 <figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">b 0x7c00</span><br></pre></td></tr></table></figure>
-
 <p>这样就在0x7c00出下拉一个断点,处理器将在执行0x7c00的指令之前停下</p>
-<h4 id="执行到断点"><a href="#执行到断点" class="headerlink" title="执行到断点"></a>执行到断点</h4><p>在0x7c00下断点后,命令c,一直执行直到遇到断点</p>
+<h4 id="执行到断点">执行到断点</h4>
+<p>在0x7c00下断点后,命令c,一直执行直到遇到断点</p>
 <figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">(<span class="number">0</span>) [<span class="number">0x000000007c00</span>] <span class="number">0000</span>:<span class="number">7</span>c00 (unk. ctxt): mov ax, <span class="number">0xb800</span>            ; b800b8</span><br></pre></td></tr></table></figure>
-
 <p>确实是主引导记录的第一条指令,将要通过ax中转设置es为显存基地址</p>
 <p>分号后面的十六进制数是该条指令的机器码</p>
-<h4 id="查看寄存器"><a href="#查看寄存器" class="headerlink" title="查看寄存器"></a>查看寄存器</h4><p>使用r命令查看所有通用寄存器内容</p>
+<h4 id="查看寄存器">查看寄存器</h4>
+<p>使用r命令查看所有通用寄存器内容</p>
 <figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br></pre></td><td class="code"><pre><span class="line">&lt;bochs:<span class="number">5</span>&gt; r</span><br><span class="line">rax: <span class="number">00000000</span>_0000aa55</span><br><span class="line">rbx: <span class="number">00000000</span>_00000000</span><br><span class="line">rcx: <span class="number">00000000</span>_00090000</span><br><span class="line">rdx: <span class="number">00000000</span>_00000080</span><br><span class="line">rsp: <span class="number">00000000</span>_0000ffd6</span><br><span class="line">rbp: <span class="number">00000000</span>_00000000</span><br><span class="line">rsi: <span class="number">00000000</span>_000e0000</span><br><span class="line">rdi: <span class="number">00000000</span>_0000ffac</span><br><span class="line">r8 : <span class="number">00000000</span>_00000000</span><br><span class="line">r9 : <span class="number">00000000</span>_00000000</span><br><span class="line">r10: <span class="number">00000000</span>_00000000</span><br><span class="line">r11: <span class="number">00000000</span>_00000000</span><br><span class="line">r12: <span class="number">00000000</span>_00000000</span><br><span class="line">r13: <span class="number">00000000</span>_00000000</span><br><span class="line">r14: <span class="number">00000000</span>_00000000</span><br><span class="line">r15: <span class="number">00000000</span>_00000000</span><br><span class="line">rip: <span class="number">00000000</span>_00007c00</span><br><span class="line">eflags <span class="number">0x00000082</span>: id vip vif ac vm rf nt IOPL=<span class="number">0</span> of df <span class="keyword">if</span> tf SF zf af pf cf</span><br></pre></td></tr></table></figure>
-
 <p>此时rax存放的是0xAA55,估计是BIOS检查主引导记录有效性时留下的</p>
 <p>rip程序计数器此时指向0x7c00</p>
-<h4 id="单步执行"><a href="#单步执行" class="headerlink" title="单步执行"></a>单步执行</h4><p>单步执行之后,程序停在0x7c03位置,此处的指令是mov es,ax.</p>
+<h4 id="单步执行">单步执行</h4>
+<p>单步执行之后,程序停在0x7c03位置,此处的指令是mov es,ax.</p>
 <figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">&lt;bochs:<span class="number">6</span>&gt; s</span><br><span class="line">Next at t=<span class="number">17178999</span></span><br><span class="line">(<span class="number">0</span>) [<span class="number">0x000000007c03</span>] <span class="number">0000</span>:<span class="number">7</span>c03 (unk. ctxt): mov es, ax                ; <span class="number">8</span>ec0</span><br></pre></td></tr></table></figure>
-
 <p>那么此时第一条指令已经执行完毕了,ax的值应该是0xb800,r打印一下</p>
 <figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">&lt;bochs:<span class="number">7</span>&gt; r</span><br><span class="line">rax: <span class="number">00000000</span>_0000b800</span><br></pre></td></tr></table></figure>
-
 <p>确实如此</p>
-<h4 id="查看段寄存器"><a href="#查看段寄存器" class="headerlink" title="查看段寄存器"></a>查看段寄存器</h4><p>单步执行第二条指令mov es,ax.</p>
+<h4 id="查看段寄存器">查看段寄存器</h4>
+<p>单步执行第二条指令mov es,ax.</p>
 <p>之后es应该被赋值为0xb800</p>
 <p>使用sreg打印所有段寄存器</p>
 <figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br></pre></td><td class="code"><pre><span class="line">&lt;bochs:<span class="number">17</span>&gt; sreg</span><br><span class="line">es:<span class="number">0xb800</span>, dh=<span class="number">0x0000930b</span>, dl=<span class="number">0x8000ffff</span>, valid=<span class="number">1</span></span><br><span class="line">        Data segment, base=<span class="number">0x000b8000</span>, limit=<span class="number">0x0000ffff</span>, Read/Write, Accessed</span><br><span class="line">cs:<span class="number">0x0000</span>, dh=<span class="number">0x00009300</span>, dl=<span class="number">0x0000ffff</span>, valid=<span class="number">1</span></span><br><span class="line">        Data segment, base=<span class="number">0x00000000</span>, limit=<span class="number">0x0000ffff</span>, Read/Write, Accessed</span><br><span class="line">ss:<span class="number">0x0000</span>, dh=<span class="number">0x00009300</span>, dl=<span class="number">0x0000ffff</span>, valid=<span class="number">7</span></span><br><span class="line">        Data segment, base=<span class="number">0x00000000</span>, limit=<span class="number">0x0000ffff</span>, Read/Write, Accessed</span><br><span class="line">ds:<span class="number">0x0000</span>, dh=<span class="number">0x00009300</span>, dl=<span class="number">0x0000ffff</span>, valid=<span class="number">1</span></span><br><span class="line">        Data segment, base=<span class="number">0x00000000</span>, limit=<span class="number">0x0000ffff</span>, Read/Write, Accessed</span><br><span class="line">fs:<span class="number">0x0000</span>, dh=<span class="number">0x00009300</span>, dl=<span class="number">0x0000ffff</span>, valid=<span class="number">1</span></span><br><span class="line">        Data segment, base=<span class="number">0x00000000</span>, limit=<span class="number">0x0000ffff</span>, Read/Write, Accessed</span><br><span class="line">gs:<span class="number">0x0000</span>, dh=<span class="number">0x00009300</span>, dl=<span class="number">0x0000ffff</span>, valid=<span class="number">1</span></span><br><span class="line">        Data segment, base=<span class="number">0x00000000</span>, limit=<span class="number">0x0000ffff</span>, Read/Write, Accessed</span><br><span class="line">ldtr:<span class="number">0x0000</span>, dh=<span class="number">0x00008200</span>, dl=<span class="number">0x0000ffff</span>, valid=<span class="number">1</span></span><br><span class="line">tr:<span class="number">0x0000</span>, dh=<span class="number">0x00008b00</span>, dl=<span class="number">0x0000ffff</span>, valid=<span class="number">1</span></span><br><span class="line">gdtr:base=<span class="number">0x00000000000f9ad7</span>, limit=<span class="number">0x30</span></span><br><span class="line">idtr:base=<span class="number">0x0000000000000000</span>, limit=<span class="number">0x3ff</span></span><br></pre></td></tr></table></figure>
-
 <p>sreg不但打印了段寄存器内容,还打印了段寄存器隐藏的高速缓存器的内容,这是ollydbg做不到的</p>
 <p>高速缓存器还有ldtr,gdtr等寄存器都是在保护模式才会用到,现在不管</p>
-<h4 id="查看内存"><a href="#查看内存" class="headerlink" title="查看内存"></a>查看内存</h4><p>再连续执行两步,写入显存映射区域</p>
+<h4 id="查看内存">查看内存</h4>
+<p>再连续执行两步,写入显存映射区域</p>
 <figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">(<span class="number">0</span>) [<span class="number">0x000000007c05</span>] <span class="number">0000</span>:<span class="number">7</span>c05 (unk. ctxt): mov byte ptr es:<span class="number">0x0000</span>, <span class="number">0x4c</span> ; <span class="number">26</span>c60600004c</span><br><span class="line">&lt;bochs:<span class="number">18</span>&gt; s</span><br><span class="line">Next at t=<span class="number">17179001</span></span><br><span class="line">(<span class="number">0</span>) [<span class="number">0x000000007c0b</span>] <span class="number">0000</span>:<span class="number">7</span>c0b (unk. ctxt): mov byte ptr es:<span class="number">0x0001</span>, <span class="number">0x07</span> ; <span class="number">26</span>c606010007</span><br><span class="line">&lt;bochs:<span class="number">19</span>&gt; s</span><br><span class="line">Next at t=<span class="number">17179002</span></span><br><span class="line">(<span class="number">0</span>) [<span class="number">0x000000007c11</span>] <span class="number">0000</span>:<span class="number">7</span>c11 (unk. ctxt): mov byte ptr es:<span class="number">0x0002</span>, <span class="number">0x61</span> ; <span class="number">26</span>c606020061</span><br></pre></td></tr></table></figure>
-
 <p>使用xp(examine memory at physical address),显示指定物理内存处内容</p>
 <figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">xp (/数量) &lt;物理地址&gt;</span><br></pre></td></tr></table></figure>
-
-<p>xp默认情况下一次显示一个双字,xp &#x2F;n就是显示n个双字</p>
+<p>xp默认情况下一次显示一个双字,xp /n就是显示n个双字</p>
 <p>使用xp命令观察0xb8000开始的第一个双字</p>
 <figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">&lt;bochs:24&gt; xp 0xb8000</span><br><span class="line">[bochs]:</span><br><span class="line">0x00000000000b8000 &lt;bogus+       0&gt;:    0x0b6f074c</span><br></pre></td></tr></table></figure>
-
 <p>低两个字节是0x074c,正好对应</p>
 <figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">mov byte ptr es:0x0000, 0x4c</span><br><span class="line">mov byte ptr es:0x0001, 0x07</span><br></pre></td></tr></table></figure>
-
-
-
-<h4 id="退出调试"><a href="#退出调试" class="headerlink" title="退出调试"></a>退出调试</h4><p>命令q退出</p>
-<h2 id="初始化段地址"><a href="#初始化段地址" class="headerlink" title="初始化段地址"></a>初始化段地址</h2><p>汇编地址和物理地址</p>
+<h4 id="退出调试">退出调试</h4>
+<p>命令q退出</p>
+<h2 id="初始化段地址">初始化段地址</h2>
+<p>汇编地址和物理地址</p>
 <p>汇编地址就是文件偏移量</p>
 <p>实际加载到内存中时的地址不一定是汇编地址,有可能需要重定位基地址</p>
 <p>mbr.asm被BIOS加载到内存的0x7c00处时,所有的汇编地址都需要再加上0x7c00才是其准确的物理地址,这是因为,此时的段寄存器是0,</p>
 <p>如果想要在寻址的时候不写这个看上去很奇怪的0x7c00,可以将段寄存器改成0x7c0</p>
 <figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">mov ax,<span class="number">0x7c0</span>                  ;设置数据段基地址 </span><br><span class="line">mov ds,ax</span><br></pre></td></tr></table></figure>
-
 <p>此后任何汇编地址A就代表了物理地址<code>A+0x7c0*16</code>也就是准确的物理地址</p>
 <p>实际上就是从0000:A+0x7c00转变成0x7c00:A</p>
-<p><img src="https://raw.githubusercontent.com/DeutschBall/DeutschBall/main/image-20220829151300719.png" alt="image-20220829151300719"></p>
-<h2 id="段间数据传送"><a href="#段间数据传送" class="headerlink" title="段间数据传送"></a>段间数据传送</h2><p>在机组课本上这叫做”串操作指令”</p>
-<p>movs&#x2F;movsb&#x2F;movsw</p>
+<figure>
+<img
+src="https://raw.githubusercontent.com/DeutschBall/DeutschBall/main/image-20220829151300719.png"
+alt="image-20220829151300719" />
+<figcaption aria-hidden="true">image-20220829151300719</figcaption>
+</figure>
+<h2 id="段间数据传送">段间数据传送</h2>
+<p>在机组课本上这叫做"串操作指令"</p>
+<p>movs/movsb/movsw</p>
 <p>数据流DS:SI-&gt;ES:DI</p>
 <p>由cld和std两条指令置正方向还是反方向</p>
-<p>cld之后DF&#x3D;0,正向拷贝,movsb每次si和di加一,movsw每次si和di加二</p>
-<p>std之后DF&#x3D;1,反向拷贝,movsw每次si和di减一,movsw每次si和di减二</p>
+<p>cld之后DF=0,正向拷贝,movsb每次si和di加一,movsw每次si和di加二</p>
+<p>std之后DF=1,反向拷贝,movsw每次si和di减一,movsw每次si和di减二</p>
 <p>rep 重复执行,每次cx-1直到cx减为0,cx相当于循环变量</p>
 <figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br></pre></td><td class="code"><pre><span class="line">       jmp near start;跳过数据区</span><br><span class="line">       </span><br><span class="line">mytext db &#x27;L&#x27;,0x07,&#x27;a&#x27;,0x07,&#x27;b&#x27;,0x07,&#x27;e&#x27;,0x07,&#x27;l&#x27;,0x07,&#x27; &#x27;,0x07,&#x27;o&#x27;,0x07,\</span><br><span class="line">          &#x27;f&#x27;,0x07,&#x27;f&#x27;,0x07,&#x27;s&#x27;,0x07,&#x27;e&#x27;,0x07,&#x27;t&#x27;,0x07,&#x27;:&#x27;,0x07</span><br><span class="line">number db 0,0,0,0,0</span><br><span class="line"></span><br><span class="line">start:</span><br><span class="line">       mov ax,0x7c0                  ;设置数据段基地址 </span><br><span class="line">       mov ds,ax</span><br><span class="line">       </span><br><span class="line">       </span><br><span class="line">       mov ax,0xb800                 ;设置附加段基地址 </span><br><span class="line">       mov es,ax</span><br><span class="line">       </span><br><span class="line">       cld  ;拷贝方向标志清零,正向传送</span><br><span class="line">       mov si,mytext                 </span><br><span class="line">       mov di,0</span><br><span class="line">       mov cx,(number-mytext)/2      ;实际上等于 13</span><br><span class="line">       rep movsw   ;重复cx次,每次重复cx-1,直到为0</span><br></pre></td></tr></table></figure>
-
-<p>将当前数据段的mytext标号开始处的(number-mytext)&#x2F;2个字,正方向拷贝到0xb800:0000开始的内存区域中,</p>
+<p>将当前数据段的mytext标号开始处的(number-mytext)/2个字,正方向拷贝到0xb800:0000开始的内存区域中,</p>
 <p>这恰好把mytext完全拷贝到显存区域</p>
-<h2 id="使用循环"><a href="#使用循环" class="headerlink" title="使用循环"></a>使用循环</h2><h3 id="loop循环"><a href="#loop循环" class="headerlink" title="loop循环"></a>loop循环</h3><p>loop 标号,重复执行标号开始的代码,每次cx-1,如果cx降为0则跳出循环</p>
+<h2 id="使用循环">使用循环</h2>
+<h3 id="loop循环">loop循环</h3>
+<p>loop 标号,重复执行标号开始的代码,每次cx-1,如果cx降为0则跳出循环</p>
 <p>由于loop指令位于循环的末尾,标号开始的代码无论如何和都要执行至少一次,因此实际上相当于do-while循环</p>
 <figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line">       ;得到标号所代表的偏移地址</span><br><span class="line">       mov ax,number</span><br><span class="line">       </span><br><span class="line">       ;计算各个数位</span><br><span class="line">       mov bx,ax				</span><br><span class="line">       mov cx,5                      ;循环次数5次 </span><br><span class="line">       mov si,10                     ;除数 </span><br><span class="line">digit: </span><br><span class="line">       xor dx,dx</span><br><span class="line">       div si						;dx:ax/si</span><br><span class="line">       mov [bx],dl                ;保存数位,就写入number标号的内存区域</span><br><span class="line">       inc bx 					;下一次要写入的位置</span><br><span class="line">       loop digit</span><br></pre></td></tr></table></figure>
-
-
-
-<h3 id="条件跳转循环"><a href="#条件跳转循环" class="headerlink" title="条件跳转循环"></a>条件跳转循环</h3><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line">      ;显示各个数位</span><br><span class="line">      mov bx,number </span><br><span class="line">      mov si,4                      </span><br><span class="line">show:</span><br><span class="line">      mov al,[bx+si]</span><br><span class="line">      add al,0x30</span><br><span class="line">      mov ah,0x04</span><br><span class="line">      mov [es:di],ax</span><br><span class="line">      add di,2</span><br><span class="line">      dec si</span><br><span class="line">      jns show</span><br><span class="line">      </span><br><span class="line">     mov word [es:di],0x0744</span><br></pre></td></tr></table></figure>
-
+<h3 id="条件跳转循环">条件跳转循环</h3>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line">      ;显示各个数位</span><br><span class="line">      mov bx,number </span><br><span class="line">      mov si,4                      </span><br><span class="line">show:</span><br><span class="line">      mov al,[bx+si]</span><br><span class="line">      add al,0x30</span><br><span class="line">      mov ah,0x04</span><br><span class="line">      mov [es:di],ax</span><br><span class="line">      add di,2</span><br><span class="line">      dec si</span><br><span class="line">      jns show</span><br><span class="line">      </span><br><span class="line">     mov word [es:di],0x0744</span><br></pre></td></tr></table></figure>
 <p>把number标号地址放到bx上,也就是分解number地址的十位得到的数字的地址</p>
 <p>si作为偏移量,实际上bx[si]就构成了一个数组,si每次减1,直到0.</p>
 <p>每次将[bx+si]放到al再加上0x30成为该数字的ASCII码,ah放上0x04即显示样式</p>
 <p>然后ax整个两个字节被放到es:di上,就放到了显存中</p>
 <p>然后di-2给下一个字符腾地方</p>
 <p>每次si-1,直到减为-1是jns不满足跳转条件,跳出循环,执行下一条,即mov指令</p>
-<p>跳出循环后的第一条指令是把0x0744这个字放到es:di上,即把’D’及其显示样式放到显存上</p>
-<h2 id="美元标记"><a href="#美元标记" class="headerlink" title="美元标记"></a>美元标记</h2><p>NASM提供两个想美元符号的标记</p>
+<p>跳出循环后的第一条指令是把0x0744这个字放到es:di上,即把'D'及其显示样式放到显存上</p>
+<h2 id="美元标记">美元标记</h2>
+<p>NASM提供两个想美元符号的标记</p>
 <p><code>$</code>:单个美元符号,表示当前行的行首汇编地址</p>
 <p><code>$$</code>:双美元符号,表示当前段的起始汇编地址</p>
 <figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">       jmp near $;当前行首隐藏标号</span><br><span class="line"></span><br><span class="line">times 510-($-$$) db 0;当前行首隐藏标号减去从头到次的字节数,</span><br><span class="line">;510是去掉0xAA55之后的字节数</span><br><span class="line">;再去掉前面已经占用的字节数,就是还需要填充的字节数</span><br><span class="line">                 db 0x55,0xaa</span><br></pre></td></tr></table></figure>
-
 <p><code>jmp near $</code>就是跳转到本行行首,陷入死循环</p>
 <p><code>times 510-($-$$) db 0</code>重复db 0这条指令若干次,</p>
 <p>具体次数是510-程序到本指令之前已经有的字节数</p>
 <p>也就是空闲的地方填满0</p>
 <p>最后两个字节放0x55,0xaa,有效魔数</p>
-<h2 id="调试运行"><a href="#调试运行" class="headerlink" title="调试运行"></a>调试运行</h2><p>还是在0x7c00下断点,然后c一直运行到该断点处停下</p>
+<h2 id="调试运行">调试运行</h2>
+<p>还是在0x7c00下断点,然后c一直运行到该断点处停下</p>
 <p>然后一直s单步执行到rep movsw指令</p>
 <figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">&lt;bochs:<span class="number">11</span>&gt; s</span><br><span class="line">Next at t=<span class="number">17179007</span></span><br><span class="line">(<span class="number">0</span>) [<span class="number">0x000000007c36</span>] <span class="number">0000</span>:<span class="number">7</span>c36 (unk. ctxt): rep movsw word ptr es:[di], word ptr ds:[si] ; f3a5</span><br></pre></td></tr></table></figure>
-
 <p>此时用r命令观察一下各个寄存器的情况</p>
 <figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br></pre></td><td class="code"><pre><span class="line">&lt;bochs:12&gt; r</span><br><span class="line">rax: 00000000_0000b800</span><br><span class="line">rbx: 00000000_00000000</span><br><span class="line">rcx: 00000000_0009000d</span><br><span class="line">rdx: 00000000_00000080</span><br><span class="line">rsp: 00000000_0000ffd6</span><br><span class="line">rbp: 00000000_00000000</span><br><span class="line">rsi: 00000000_000e0003</span><br><span class="line">rdi: 00000000_00000000</span><br><span class="line">r8 : 00000000_00000000</span><br><span class="line">r9 : 00000000_00000000</span><br><span class="line">r10: 00000000_00000000</span><br><span class="line">r11: 00000000_00000000</span><br><span class="line">r12: 00000000_00000000</span><br><span class="line">r13: 00000000_00000000</span><br><span class="line">r14: 00000000_00000000</span><br><span class="line">r15: 00000000_00000000</span><br><span class="line">rip: 00000000_00007c36</span><br><span class="line">eflags 0x00000082: id vip vif ac vm rf nt IOPL=0 of df if tf SF zf af pf cf</span><br></pre></td></tr></table></figure>
-
-<p>rcx&#x3D;0x9000d,cx&#x3D;0x000d,实模式下只用到cx寄存器,高位这个9没有作用</p>
+<p>rcx=0x9000d,cx=0x000d,实模式下只用到cx寄存器,高位这个9没有作用</p>
 <p>用sreg观察一下段寄存器</p>
 <figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br></pre></td><td class="code"><pre><span class="line">&lt;bochs:13&gt; sreg</span><br><span class="line">es:0xb800, dh=0x0000930b, dl=0x8000ffff, valid=1</span><br><span class="line">        Data segment, base=0x000b8000, limit=0x0000ffff, Read/Write, Accessed</span><br><span class="line">cs:0x0000, dh=0x00009300, dl=0x0000ffff, valid=1</span><br><span class="line">        Data segment, base=0x00000000, limit=0x0000ffff, Read/Write, Accessed</span><br><span class="line">ss:0x0000, dh=0x00009300, dl=0x0000ffff, valid=7</span><br><span class="line">        Data segment, base=0x00000000, limit=0x0000ffff, Read/Write, Accessed</span><br><span class="line">ds:0x07c0, dh=0x00009300, dl=0x7c00ffff, valid=1</span><br><span class="line">        Data segment, base=0x00007c00, limit=0x0000ffff, Read/Write, Accessed</span><br><span class="line">fs:0x0000, dh=0x00009300, dl=0x0000ffff, valid=1</span><br><span class="line">        Data segment, base=0x00000000, limit=0x0000ffff, Read/Write, Accessed</span><br><span class="line">gs:0x0000, dh=0x00009300, dl=0x0000ffff, valid=1</span><br><span class="line">        Data segment, base=0x00000000, limit=0x0000ffff, Read/Write, Accessed</span><br><span class="line">ldtr:0x0000, dh=0x00008200, dl=0x0000ffff, valid=1</span><br><span class="line">tr:0x0000, dh=0x00008b00, dl=0x0000ffff, valid=1</span><br><span class="line">gdtr:base=0x00000000000f9ad7, limit=0x30</span><br><span class="line">idtr:base=0x0000000000000000, limit=0x3ff</span><br></pre></td></tr></table></figure>
-
 <p>es和ds已经设置好了</p>
-<h3 id="跳出rep-loop循环n"><a href="#跳出rep-loop循环n" class="headerlink" title="跳出rep,loop循环n"></a>跳出rep,loop循环n</h3><p>现在马上要执行rep movsw指令了</p>
+<h3 id="跳出reploop循环n">跳出rep,loop循环n</h3>
+<p>现在马上要执行rep movsw指令了</p>
 <p>如果使用s则会进入循环,如果想步过循环到循环外面的第一条指令,使用n指令</p>
 <figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">&lt;bochs:14&gt; n</span><br><span class="line">Next at t=17179020</span><br><span class="line">(0) [0x000000007c38] 0000:7c38 (unk. ctxt): mov ax, 0x001d            ; b81d00</span><br></pre></td></tr></table></figure>
-
 <p>此时使用xp指令观察显存区域是否已经获得拷贝</p>
 <figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">&lt;bochs:15&gt; xp /4 0xb8000</span><br><span class="line">[bochs]:</span><br><span class="line">0x00000000000b8000 &lt;bogus+       0&gt;:    0x0761074c      0x07650762      0x0720076c    0x0766076f</span><br></pre></td></tr></table></figure>
-
 <p>能够使用n跳出的循环有个特点,就是cx作为循环变量,啥时候跳出循环是很清晰的</p>
 <p>如果是跳出循环的条件判断在循环体中,比如一个if条件判断,则n指令就行不通了,此时可以使用u+b+c三种指令实现</p>
-<h3 id="反汇编u"><a href="#反汇编u" class="headerlink" title="反汇编u"></a>反汇编u</h3><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">u/&lt;行数&gt;</span><br></pre></td></tr></table></figure>
-
+<h3 id="反汇编u">反汇编u</h3>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">u/&lt;行数&gt;</span><br></pre></td></tr></table></figure>
 <p>从当前行开始反汇编若干行指令</p>
 <p>在需要跳出条件循环时,可以反汇编若干行,然后在循环外面设置一个断点,然后使用c一直执行到断点停下</p>
 
@@ -600,7 +655,7 @@
 
       <!--noindex-->
       <div class="post-toc-wrap sidebar-panel">
-          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#%E4%B8%BB%E5%BC%95%E5%AF%BC%E8%AE%B0%E5%BD%95"><span class="nav-number">1.</span> <span class="nav-text">主引导记录</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#%E8%87%AA%E4%B8%BE%E8%BF%87%E7%A8%8B"><span class="nav-number">1.1.</span> <span class="nav-text">自举过程</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E6%98%BE%E7%A4%BA"><span class="nav-number">1.2.</span> <span class="nav-text">显示</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%98%BE%E5%8D%A1%E4%B8%8E%E6%98%BE%E7%A4%BA%E5%99%A8"><span class="nav-number">1.2.1.</span> <span class="nav-text">显卡与显示器</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%98%BE%E5%8D%A1%E5%B7%A5%E4%BD%9C%E6%A8%A1%E5%BC%8F"><span class="nav-number">1.2.2.</span> <span class="nav-text">显卡工作模式</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E7%AB%AF%E5%8F%A3%E6%98%A0%E5%B0%84%E5%86%85%E5%AD%98"><span class="nav-number">1.2.3.</span> <span class="nav-text">端口映射内存</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%AE%B5%E5%AF%84%E5%AD%98%E5%99%A8"><span class="nav-number">1.2.4.</span> <span class="nav-text">段寄存器</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%AD%97%E7%AC%A6%E6%A8%A1%E5%BC%8F%E4%B8%8B%E4%B8%80%E4%B8%AA%E8%A1%A8%E7%A4%BA%E5%AD%97%E7%AC%A6"><span class="nav-number">1.2.5.</span> <span class="nav-text">字符模式下一个表示字符</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%98%BE%E7%A4%BA%E5%AD%97%E7%AC%A6"><span class="nav-number">1.2.6.</span> <span class="nav-text">显示字符</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E6%8C%87%E4%BB%A4%E5%9C%B0%E5%9D%80"><span class="nav-number">1.3.</span> <span class="nav-text">指令地址</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%B1%87%E7%BC%96%E5%9C%B0%E5%9D%80"><span class="nav-number">1.3.1.</span> <span class="nav-text">汇编地址</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%A0%87%E5%8F%B7"><span class="nav-number">1.3.2.</span> <span class="nav-text">标号</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%A3%B0%E6%98%8E%E5%B9%B6%E5%88%9D%E5%A7%8B%E5%8C%96%E6%95%B0%E6%8D%AE"><span class="nav-number">1.4.</span> <span class="nav-text">声明并初始化数据</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E6%AE%B5%E8%B6%85%E8%B6%8A%E5%89%8D%E7%BC%80"><span class="nav-number">1.5.</span> <span class="nav-text">段超越前缀</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E9%99%A4%E6%B3%95%E6%8C%87%E4%BB%A4"><span class="nav-number">1.6.</span> <span class="nav-text">除法指令</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%81%8F%E7%A7%BB%E9%87%8F%E6%8D%A2%E7%AE%97"><span class="nav-number">1.6.1.</span> <span class="nav-text">偏移量换算</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E6%98%BE%E7%A4%BA%E5%88%86%E8%A7%A3%E5%87%BA%E6%9D%A5%E7%9A%84%E5%90%84%E4%B8%AA%E6%95%B0%E4%BD%8D"><span class="nav-number">1.7.</span> <span class="nav-text">显示分解出来的各个数位</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E6%97%A0%E9%99%90%E5%BE%AA%E7%8E%AF"><span class="nav-number">1.8.</span> <span class="nav-text">无限循环</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%AE%B5%E5%86%85%E8%B7%B3%E8%BD%ACnear"><span class="nav-number">1.8.1.</span> <span class="nav-text">段内跳转near</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%A1%AB%E5%85%85%E4%B8%8E%E9%AD%94%E6%95%B0"><span class="nav-number">1.9.</span> <span class="nav-text">填充与魔数</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Bochs%E8%B0%83%E8%AF%95"><span class="nav-number">1.10.</span> <span class="nav-text">Bochs调试</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#bochs%E9%85%8D%E7%BD%AE"><span class="nav-number">1.10.1.</span> <span class="nav-text">bochs配置</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#Disk-Boot"><span class="nav-number">1.10.1.1.</span> <span class="nav-text">Disk&amp;Boot</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#ATA-channel-0"><span class="nav-number">1.10.1.2.</span> <span class="nav-text">ATA channel 0</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#Boot-Options"><span class="nav-number">1.10.1.3.</span> <span class="nav-text">Boot Options</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E4%BF%9D%E5%AD%98"><span class="nav-number">1.10.1.4.</span> <span class="nav-text">保存</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#bochs%E8%BF%90%E8%A1%8C%E4%B8%BB%E5%BC%95%E5%AF%BC%E8%AE%B0%E5%BD%95"><span class="nav-number">1.10.2.</span> <span class="nav-text">bochs运行主引导记录</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#bochs%E8%B0%83%E8%AF%95"><span class="nav-number">1.10.3.</span> <span class="nav-text">bochs调试</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#%E6%96%AD%E7%82%B9"><span class="nav-number">1.10.3.1.</span> <span class="nav-text">断点</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E6%89%A7%E8%A1%8C%E5%88%B0%E6%96%AD%E7%82%B9"><span class="nav-number">1.10.3.2.</span> <span class="nav-text">执行到断点</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E6%9F%A5%E7%9C%8B%E5%AF%84%E5%AD%98%E5%99%A8"><span class="nav-number">1.10.3.3.</span> <span class="nav-text">查看寄存器</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E5%8D%95%E6%AD%A5%E6%89%A7%E8%A1%8C"><span class="nav-number">1.10.3.4.</span> <span class="nav-text">单步执行</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E6%9F%A5%E7%9C%8B%E6%AE%B5%E5%AF%84%E5%AD%98%E5%99%A8"><span class="nav-number">1.10.3.5.</span> <span class="nav-text">查看段寄存器</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E6%9F%A5%E7%9C%8B%E5%86%85%E5%AD%98"><span class="nav-number">1.10.3.6.</span> <span class="nav-text">查看内存</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E9%80%80%E5%87%BA%E8%B0%83%E8%AF%95"><span class="nav-number">1.10.3.7.</span> <span class="nav-text">退出调试</span></a></li></ol></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%88%9D%E5%A7%8B%E5%8C%96%E6%AE%B5%E5%9C%B0%E5%9D%80"><span class="nav-number">1.11.</span> <span class="nav-text">初始化段地址</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E6%AE%B5%E9%97%B4%E6%95%B0%E6%8D%AE%E4%BC%A0%E9%80%81"><span class="nav-number">1.12.</span> <span class="nav-text">段间数据传送</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E4%BD%BF%E7%94%A8%E5%BE%AA%E7%8E%AF"><span class="nav-number">1.13.</span> <span class="nav-text">使用循环</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#loop%E5%BE%AA%E7%8E%AF"><span class="nav-number">1.13.1.</span> <span class="nav-text">loop循环</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%9D%A1%E4%BB%B6%E8%B7%B3%E8%BD%AC%E5%BE%AA%E7%8E%AF"><span class="nav-number">1.13.2.</span> <span class="nav-text">条件跳转循环</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E7%BE%8E%E5%85%83%E6%A0%87%E8%AE%B0"><span class="nav-number">1.14.</span> <span class="nav-text">美元标记</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E8%B0%83%E8%AF%95%E8%BF%90%E8%A1%8C"><span class="nav-number">1.15.</span> <span class="nav-text">调试运行</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E8%B7%B3%E5%87%BArep-loop%E5%BE%AA%E7%8E%AFn"><span class="nav-number">1.15.1.</span> <span class="nav-text">跳出rep,loop循环n</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%8F%8D%E6%B1%87%E7%BC%96u"><span class="nav-number">1.15.2.</span> <span class="nav-text">反汇编u</span></a></li></ol></li></ol></li></ol></div>
+          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#%E4%B8%BB%E5%BC%95%E5%AF%BC%E8%AE%B0%E5%BD%95"><span class="nav-number">1.</span> <span class="nav-text">主引导记录</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#%E8%87%AA%E4%B8%BE%E8%BF%87%E7%A8%8B"><span class="nav-number">1.1.</span> <span class="nav-text">自举过程</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E6%98%BE%E7%A4%BA"><span class="nav-number">1.2.</span> <span class="nav-text">显示</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%98%BE%E5%8D%A1%E4%B8%8E%E6%98%BE%E7%A4%BA%E5%99%A8"><span class="nav-number">1.2.1.</span> <span class="nav-text">显卡与显示器</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%98%BE%E5%8D%A1%E5%B7%A5%E4%BD%9C%E6%A8%A1%E5%BC%8F"><span class="nav-number">1.2.2.</span> <span class="nav-text">显卡工作模式</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E7%AB%AF%E5%8F%A3%E6%98%A0%E5%B0%84%E5%86%85%E5%AD%98"><span class="nav-number">1.2.3.</span> <span class="nav-text">端口映射内存</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%AE%B5%E5%AF%84%E5%AD%98%E5%99%A8"><span class="nav-number">1.2.4.</span> <span class="nav-text">段寄存器</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%AD%97%E7%AC%A6%E6%A8%A1%E5%BC%8F%E4%B8%8B%E4%B8%80%E4%B8%AA%E8%A1%A8%E7%A4%BA%E5%AD%97%E7%AC%A6"><span class="nav-number">1.2.5.</span> <span class="nav-text">字符模式下一个表示字符</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%98%BE%E7%A4%BA%E5%AD%97%E7%AC%A6"><span class="nav-number">1.2.6.</span> <span class="nav-text">显示字符</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E6%8C%87%E4%BB%A4%E5%9C%B0%E5%9D%80"><span class="nav-number">1.3.</span> <span class="nav-text">指令地址</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%B1%87%E7%BC%96%E5%9C%B0%E5%9D%80"><span class="nav-number">1.3.1.</span> <span class="nav-text">汇编地址</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%A0%87%E5%8F%B7"><span class="nav-number">1.3.2.</span> <span class="nav-text">标号</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%A3%B0%E6%98%8E%E5%B9%B6%E5%88%9D%E5%A7%8B%E5%8C%96%E6%95%B0%E6%8D%AE"><span class="nav-number">1.4.</span> <span class="nav-text">声明并初始化数据</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E6%AE%B5%E8%B6%85%E8%B6%8A%E5%89%8D%E7%BC%80"><span class="nav-number">1.5.</span> <span class="nav-text">段超越前缀</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E9%99%A4%E6%B3%95%E6%8C%87%E4%BB%A4"><span class="nav-number">1.6.</span> <span class="nav-text">除法指令</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%81%8F%E7%A7%BB%E9%87%8F%E6%8D%A2%E7%AE%97"><span class="nav-number">1.6.1.</span> <span class="nav-text">偏移量换算</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E6%98%BE%E7%A4%BA%E5%88%86%E8%A7%A3%E5%87%BA%E6%9D%A5%E7%9A%84%E5%90%84%E4%B8%AA%E6%95%B0%E4%BD%8D"><span class="nav-number">1.7.</span> <span class="nav-text">显示分解出来的各个数位</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E6%97%A0%E9%99%90%E5%BE%AA%E7%8E%AF"><span class="nav-number">1.8.</span> <span class="nav-text">无限循环</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%AE%B5%E5%86%85%E8%B7%B3%E8%BD%ACnear"><span class="nav-number">1.8.1.</span> <span class="nav-text">段内跳转near</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%A1%AB%E5%85%85%E4%B8%8E%E9%AD%94%E6%95%B0"><span class="nav-number">1.9.</span> <span class="nav-text">填充与魔数</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#bochs%E8%B0%83%E8%AF%95"><span class="nav-number">1.10.</span> <span class="nav-text">Bochs调试</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#bochs%E9%85%8D%E7%BD%AE"><span class="nav-number">1.10.1.</span> <span class="nav-text">bochs配置</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#diskboot"><span class="nav-number">1.10.1.1.</span> <span class="nav-text">Disk&amp;Boot</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#ata-channel-0"><span class="nav-number">1.10.1.2.</span> <span class="nav-text">ATA channel 0</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#boot-options"><span class="nav-number">1.10.1.3.</span> <span class="nav-text">Boot Options</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E4%BF%9D%E5%AD%98"><span class="nav-number">1.10.1.4.</span> <span class="nav-text">保存</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#bochs%E8%BF%90%E8%A1%8C%E4%B8%BB%E5%BC%95%E5%AF%BC%E8%AE%B0%E5%BD%95"><span class="nav-number">1.10.2.</span> <span class="nav-text">bochs运行主引导记录</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#bochs%E8%B0%83%E8%AF%95-1"><span class="nav-number">1.10.3.</span> <span class="nav-text">bochs调试</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#%E6%96%AD%E7%82%B9"><span class="nav-number">1.10.3.1.</span> <span class="nav-text">断点</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E6%89%A7%E8%A1%8C%E5%88%B0%E6%96%AD%E7%82%B9"><span class="nav-number">1.10.3.2.</span> <span class="nav-text">执行到断点</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E6%9F%A5%E7%9C%8B%E5%AF%84%E5%AD%98%E5%99%A8"><span class="nav-number">1.10.3.3.</span> <span class="nav-text">查看寄存器</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E5%8D%95%E6%AD%A5%E6%89%A7%E8%A1%8C"><span class="nav-number">1.10.3.4.</span> <span class="nav-text">单步执行</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E6%9F%A5%E7%9C%8B%E6%AE%B5%E5%AF%84%E5%AD%98%E5%99%A8"><span class="nav-number">1.10.3.5.</span> <span class="nav-text">查看段寄存器</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E6%9F%A5%E7%9C%8B%E5%86%85%E5%AD%98"><span class="nav-number">1.10.3.6.</span> <span class="nav-text">查看内存</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E9%80%80%E5%87%BA%E8%B0%83%E8%AF%95"><span class="nav-number">1.10.3.7.</span> <span class="nav-text">退出调试</span></a></li></ol></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%88%9D%E5%A7%8B%E5%8C%96%E6%AE%B5%E5%9C%B0%E5%9D%80"><span class="nav-number">1.11.</span> <span class="nav-text">初始化段地址</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E6%AE%B5%E9%97%B4%E6%95%B0%E6%8D%AE%E4%BC%A0%E9%80%81"><span class="nav-number">1.12.</span> <span class="nav-text">段间数据传送</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E4%BD%BF%E7%94%A8%E5%BE%AA%E7%8E%AF"><span class="nav-number">1.13.</span> <span class="nav-text">使用循环</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#loop%E5%BE%AA%E7%8E%AF"><span class="nav-number">1.13.1.</span> <span class="nav-text">loop循环</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%9D%A1%E4%BB%B6%E8%B7%B3%E8%BD%AC%E5%BE%AA%E7%8E%AF"><span class="nav-number">1.13.2.</span> <span class="nav-text">条件跳转循环</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E7%BE%8E%E5%85%83%E6%A0%87%E8%AE%B0"><span class="nav-number">1.14.</span> <span class="nav-text">美元标记</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E8%B0%83%E8%AF%95%E8%BF%90%E8%A1%8C"><span class="nav-number">1.15.</span> <span class="nav-text">调试运行</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E8%B7%B3%E5%87%BAreploop%E5%BE%AA%E7%8E%AFn"><span class="nav-number">1.15.1.</span> <span class="nav-text">跳出rep,loop循环n</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%8F%8D%E6%B1%87%E7%BC%96u"><span class="nav-number">1.15.2.</span> <span class="nav-text">反汇编u</span></a></li></ol></li></ol></li></ol></div>
       </div>
       <!--/noindex-->
 

@@ -20,31 +20,18 @@
     var CONFIG = {"hostname":"dustball.top","root":"/","scheme":"Muse","version":"7.8.0","exturl":false,"sidebar":{"position":"left","display":"post","padding":18,"offset":12,"onmobile":false},"copycode":{"enable":false,"show_result":false,"style":null},"back2top":{"enable":true,"sidebar":false,"scrollpercent":false},"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":false,"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"algolia":{"hits":{"per_page":10},"labels":{"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}},"localsearch":{"enable":false,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false},"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}}};
   </script>
 
-  <meta name="description" content="浮点数的机器级表示师出有名 1.补上计组网课上摆烂留下的历史问题 2.将浮点数的表示和程序中的行为联系起来,完成CSAPP第二章和第三章最后剩下的浮点数部分 药引子和命根子从十进制科学计数法说起一个很长十进制数,成万上亿,在小学的时候我们就知道,可以用科学计数法表示 假设该十进制数按位展开表示成$$d&#x3D;d_{m}d_{m-1},,,d_{1}d_{0}.d_{-1}d_{-2},,,d_">
+  <meta name="description" content="浮点数的机器级表示 师出有名 1.补上计组网课上摆烂留下的历史问题 2.将浮点数的表示和程序中的行为联系起来,完成CSAPP第二章和第三章最后剩下的浮点数部分 药引子和命根子 从十进制科学计数法说起 一个很长十进制数,成万上亿,在小学的时候我们就知道,可以用科学计数法表示 假设该十进制数按位展开表示成 \[ d&#x3D;d_{m}d_{m-1},,,d_{1}d_{0}.d_{-1}d_{">
 <meta property="og:type" content="article">
 <meta property="og:title" content="CSAPP-chapter2&amp;3 浮点数的机器级表示">
 <meta property="og:url" content="http://dustball.top/2022/06/06/%E6%B5%AE%E7%82%B9%E6%95%B0/index.html">
 <meta property="og:site_name" content="dustland">
-<meta property="og:description" content="浮点数的机器级表示师出有名 1.补上计组网课上摆烂留下的历史问题 2.将浮点数的表示和程序中的行为联系起来,完成CSAPP第二章和第三章最后剩下的浮点数部分 药引子和命根子从十进制科学计数法说起一个很长十进制数,成万上亿,在小学的时候我们就知道,可以用科学计数法表示 假设该十进制数按位展开表示成$$d&#x3D;d_{m}d_{m-1},,,d_{1}d_{0}.d_{-1}d_{-2},,,d_">
+<meta property="og:description" content="浮点数的机器级表示 师出有名 1.补上计组网课上摆烂留下的历史问题 2.将浮点数的表示和程序中的行为联系起来,完成CSAPP第二章和第三章最后剩下的浮点数部分 药引子和命根子 从十进制科学计数法说起 一个很长十进制数,成万上亿,在小学的时候我们就知道,可以用科学计数法表示 假设该十进制数按位展开表示成 \[ d&#x3D;d_{m}d_{m-1},,,d_{1}d_{0}.d_{-1}d_{">
 <meta property="og:locale" content="en_US">
-<meta property="og:image" content="https://raw.githubusercontent.com/DeutschBall/test/master/image-20220605185246553.png">
-<meta property="og:image" content="https://raw.githubusercontent.com/DeutschBall/test/master/image-20220605190631176.png">
-<meta property="og:image" content="https://raw.githubusercontent.com/DeutschBall/test/master/image-20220605192623246.png">
-<meta property="og:image" content="https://raw.githubusercontent.com/DeutschBall/test/master/image-20220605193811879.png">
-<meta property="og:image" content="https://raw.githubusercontent.com/DeutschBall/test/master/image-20220605194513398.png">
-<meta property="og:image" content="https://raw.githubusercontent.com/DeutschBall/test/master/image-20220605210411034.png">
-<meta property="og:image" content="https://raw.githubusercontent.com/DeutschBall/test/master/image-20220605210629786.png">
-<meta property="og:image" content="https://raw.githubusercontent.com/DeutschBall/test/master/image-20220605212121233.png">
-<meta property="og:image" content="https://raw.githubusercontent.com/DeutschBall/test/master/image-20220605213150852.png">
-<meta property="og:image" content="https://raw.githubusercontent.com/DeutschBall/test/master/image-20220605215315252.png">
-<meta property="og:image" content="https://raw.githubusercontent.com/DeutschBall/test/master/image-20220606145220374.png">
-<meta property="og:image" content="https://raw.githubusercontent.com/DeutschBall/test/master/image-20220606152907983.png">
 <meta property="article:published_time" content="2022-06-06T10:55:00.000Z">
 <meta property="article:modified_time" content="2022-06-06T11:08:55.806Z">
 <meta property="article:author" content="dustball">
 <meta property="article:tag" content="CSAPP">
 <meta name="twitter:card" content="summary">
-<meta name="twitter:image" content="https://raw.githubusercontent.com/DeutschBall/test/master/image-20220605185246553.png">
 
 <link rel="canonical" href="http://dustball.top/2022/06/06/%E6%B5%AE%E7%82%B9%E6%95%B0/">
 
@@ -205,28 +192,57 @@
     <div class="post-body" itemprop="articleBody">
 
       
-        <h1 id="浮点数的机器级表示"><a href="#浮点数的机器级表示" class="headerlink" title="浮点数的机器级表示"></a>浮点数的机器级表示</h1><p>师出有名</p>
+        <h1 id="浮点数的机器级表示">浮点数的机器级表示</h1>
+<p>师出有名</p>
 <p>1.补上计组网课上摆烂留下的历史问题</p>
 <p>2.将浮点数的表示和程序中的行为联系起来,完成CSAPP第二章和第三章最后剩下的浮点数部分</p>
-<h2 id="药引子和命根子"><a href="#药引子和命根子" class="headerlink" title="药引子和命根子"></a>药引子和命根子</h2><h3 id="从十进制科学计数法说起"><a href="#从十进制科学计数法说起" class="headerlink" title="从十进制科学计数法说起"></a>从十进制科学计数法说起</h3><p>一个很长十进制数,成万上亿,在小学的时候我们就知道,可以用科学计数法表示</p>
-<p>假设该十进制数按位展开表示成<br>$$<br>d&#x3D;d_{m}d_{m-1},,,d_{1}d_{0}.d_{-1}d_{-2},,,d_{-n}d&#x3D;\sum_{i&#x3D;-n}^{m}10^i\times d_i\<br>m,n\ge 0<br>$$</p>
+<h2 id="药引子和命根子">药引子和命根子</h2>
+<h3 id="从十进制科学计数法说起">从十进制科学计数法说起</h3>
+<p>一个很长十进制数,成万上亿,在小学的时候我们就知道,可以用科学计数法表示</p>
+<p>假设该十进制数按位展开表示成 <span class="math display">\[
+d=d_{m}d_{m-1},,,d_{1}d_{0}.d_{-1}d_{-2},,,d_{-n}d=\sum_{i=-n}^{m}10^i\times
+d_i\\
+m,n\ge 0
+\]</span></p>
 <blockquote>
-<p>注意$d_0.d_{-1}$中间是小数点</p>
+<p>注意<span class="math inline">\(d_0.d_{-1}\)</span>中间是小数点</p>
 </blockquote>
-<p>用科学计数法表示<br>$$<br>d&#x3D;d_m.d_{m-1}d_{m-2},,,d_{0}d_{-1},,,d_{-n}\times 10^m\<br>&#x3D;0.d_md_{m-1}d_{m-2},,,d_{0}d_{-1},,,d_{-n}\times 10^{m+1}\<br>&#x3D;d_md_{m-1}.d_{m-2},,,d_{0}d_{-1},,,d_{-n}\times 10^{m-1}<br>$$<br>小数点每左移一位,$10$的指数就得增加1.</p>
-<p>小学时学的科技法的规范形式,小数点左侧只能留下一个非零位,就比如:<br>$$<br>123.456&#x3D;1.23456\times 10^2<br>$$</p>
-<p>**为啥要发明科学计数法呢?**举个例子</p>
-<p>如果要表示两个整亿,不用科计法为$2’000’000’000$,表示这个数就用了10个十进制位,而其中后面9位都是0,包含了重复信息.</p>
-<p>而如果用科技法表示为$2\times 10^9$</p>
-<p>此时我们只需要保留两个信息,底数$2$和指数$9$,只用了两位</p>
-<p>要是不是两个整亿呢?要是$2’987’654’321$呢?</p>
-<p>此时如果要求保留全精度,科技法表示为$2.987654321\times 10^9$,相对于普通表示,需要多保存一个9</p>
-<p>但是如果要求保留一位有效数字,科技法就可以表示为$3\times 10^9$,普通方法还得带着一伙子0</p>
+<p>用科学计数法表示 <span class="math display">\[
+d=d_m.d_{m-1}d_{m-2},,,d_{0}d_{-1},,,d_{-n}\times 10^m\\
+=0.d_md_{m-1}d_{m-2},,,d_{0}d_{-1},,,d_{-n}\times 10^{m+1}\\
+=d_md_{m-1}.d_{m-2},,,d_{0}d_{-1},,,d_{-n}\times 10^{m-1}
+\]</span> 小数点每左移一位,<span
+class="math inline">\(10\)</span>的指数就得增加1.</p>
+<p>小学时学的科技法的规范形式,小数点左侧只能留下一个非零位,就比如: <span
+class="math display">\[
+123.456=1.23456\times 10^2
+\]</span></p>
+<p><strong>为啥要发明科学计数法呢?</strong>举个例子</p>
+<p>如果要表示两个整亿,不用科计法为<span
+class="math inline">\(2&#39;000&#39;000&#39;000\)</span>,表示这个数就用了10个十进制位,而其中后面9位都是0,包含了重复信息.</p>
+<p>而如果用科技法表示为<span class="math inline">\(2\times
+10^9\)</span></p>
+<p>此时我们只需要保留两个信息,底数<span
+class="math inline">\(2\)</span>和指数<span
+class="math inline">\(9\)</span>,只用了两位</p>
+<p>要是不是两个整亿呢?要是<span
+class="math inline">\(2&#39;987&#39;654&#39;321\)</span>呢?</p>
+<p>此时如果要求保留全精度,科技法表示为<span
+class="math inline">\(2.987654321\times
+10^9\)</span>,相对于普通表示,需要多保存一个9</p>
+<p>但是如果要求保留一位有效数字,科技法就可以表示为<span
+class="math inline">\(3\times 10^9\)</span>,普通方法还得带着一伙子0</p>
 <p>在数字很大的时候,我们往往更加关心量级和最高位,低位的数字相对欠重要,很多情况下要舍入</p>
-<h3 id="从科计法到二进制"><a href="#从科计法到二进制" class="headerlink" title="从科计法到二进制"></a>从科计法到二进制</h3><p>不管是普通表示还是科技表示,二进制和10进制只有一个区别,即每一位的权重,</p>
+<h3 id="从科计法到二进制">从科计法到二进制</h3>
+<p>不管是普通表示还是科技表示,二进制和10进制只有一个区别,即每一位的权重,</p>
 <p>位权从10改成2就是二进制了</p>
-<p><img src="https://raw.githubusercontent.com/DeutschBall/test/master/image-20220605185246553.png" alt="image-20220605185246553"><br>$$<br>b&#x3D;\sum_{i&#x3D;-n}^m 2^{i}\times b_i<br>$$<br>二进制的”科技法”也有一个规范形式,即小数点左侧只能留一个1</p>
-<p>比如$5.125(10)&#x3D;101.001(2)&#x3D;1.01001\times 2^2(2科技)$</p>
+<p><img
+src="https://raw.githubusercontent.com/DeutschBall/test/master/image-20220605185246553.png"
+alt="image-20220605185246553" /> <span class="math display">\[
+b=\sum_{i=-n}^m 2^{i}\times b_i
+\]</span> 二进制的"科技法"也有一个规范形式,即小数点左侧只能留一个1</p>
+<p>比如<span class="math inline">\(5.125(10)=101.001(2)=1.01001\times
+2^2(2科技)\)</span></p>
 <blockquote>
 <p>十进制科技法的规范形式,小数点左侧只能留下一个非0数</p>
 <p>为啥二进制不能说留下一个非零数?</p>
@@ -234,29 +250,44 @@
 <p>并且二进制科技法中,小数点左侧只留下一个1,那么这个1就可以省去不表示,只要是所有人都知道这个协议,他们使用这个科技法的二进制数的时候就会自己添上最前面的1.这样又可以腾出一位来用于精度信息</p>
 <p>为什么十进制不能省去小数点左侧的数?因为这个数可能是1~9这9个数任意一个.省去就丢失了信息.二进制科技法中可以省去,是因为小数点左侧一定是1</p>
 </blockquote>
-<h2 id="IEEE754标准"><a href="#IEEE754标准" class="headerlink" title="IEEE754标准"></a>IEEE754标准</h2><h3 id="浮点数的手写表示法"><a href="#浮点数的手写表示法" class="headerlink" title="浮点数的手写表示法"></a>浮点数的手写表示法</h3><p>IEEE754标准中将一个浮点数表示成这样<br>$$<br>V&#x3D;(-1)^s\times M\times 2^E<br>$$</p>
+<h2 id="ieee754标准">IEEE754标准</h2>
+<h3 id="浮点数的手写表示法">浮点数的手写表示法</h3>
+<p>IEEE754标准中将一个浮点数表示成这样 <span class="math display">\[
+V=(-1)^s\times M\times 2^E
+\]</span></p>
 <blockquote>
-<p>s,符号.s&#x3D;1则系数-1;s&#x3D;0则系数1</p>
+<p>s,符号.s=1则系数-1;s=0则系数1</p>
 <p>M,尾数,一个二进制小数,其取值范围有两种</p>
-<p>$M\in[1,2)$,规格化数</p>
-<p>$M\in [0,1)$,非规格化数</p>
+<p><span class="math inline">\(M\in[1,2)\)</span>,规格化数</p>
+<p><span class="math inline">\(M\in [0,1)\)</span>,非规格化数</p>
 <p>E,指数</p>
 </blockquote>
-<p>注意这里只是说”表示”,真的在计算机中编码实现时不是这样的</p>
+<p>注意这里只是说"表示",真的在计算机中编码实现时不是这样的</p>
 <p>真到编码的时候咋编的呢?</p>
-<p><img src="https://raw.githubusercontent.com/DeutschBall/test/master/image-20220605190631176.png" alt="image-20220605190631176"></p>
+<figure>
+<img
+src="https://raw.githubusercontent.com/DeutschBall/test/master/image-20220605190631176.png"
+alt="image-20220605190631176" />
+<figcaption aria-hidden="true">image-20220605190631176</figcaption>
+</figure>
 <p>左边是高位,右边是低位</p>
 <p>最高位是符号位,这和刚才的表示是相同的</p>
-<p>然后<code>exp</code>是”阶码”.对于32位的float类型,<code>exp</code>占用8位,对于64位的double类型,<code>exp</code>占用11位.</p>
-<p>用k表示exp的位数,对于float来说,k&#x3D;11</p>
+<p>然后<code>exp</code>是"阶码".对于32位的float类型,<code>exp</code>占用8位,对于64位的double类型,<code>exp</code>占用11位.</p>
+<p>用k表示exp的位数,对于float来说,k=11</p>
 <blockquote>
-<p>注意这里”阶码”是加了引号的,因为实际存储的时候,这里面存放的不是刚才的表示中的$E$,但是$E$是经过一些手续从$exp$换算得到的.这个换算过程是有固定套路的,这是后话</p>
+<p>注意这里"阶码"是加了引号的,因为实际存储的时候,这里面存放的不是刚才的表示中的<span
+class="math inline">\(E\)</span>,但是<span
+class="math inline">\(E\)</span>是经过一些手续从<span
+class="math inline">\(exp\)</span>换算得到的.这个换算过程是有固定套路的,这是后话</p>
 </blockquote>
-<p>然后是<code>frac</code>尾数M,占用了23位.这尾数和刚才的”表示”中也是不一样的,也需要分类讨论办点手续</p>
-<p>用n表示frac的位数,对于float来说n&#x3D;23</p>
+<p>然后是<code>frac</code>尾数M,占用了23位.这尾数和刚才的"表示"中也是不一样的,也需要分类讨论办点手续</p>
+<p>用n表示frac的位数,对于float来说n=23</p>
 <blockquote>
 <p>啥意思呢?举个例子</p>
-<p>比如假设一个单精度浮点数float在计算机中的编码为:<br>$$<br>0’0000\ 0001’0000\ 0000\ 0000\ 0000\ 0000\ 001<br>$$</p>
+<p>比如假设一个单精度浮点数float在计算机中的编码为: <span
+class="math display">\[
+0&#39;0000\ 0001&#39;0000\ 0000\ 0000\ 0000\ 0000\ 001
+\]</span></p>
 <table>
 <thead>
 <tr>
@@ -265,21 +296,31 @@
 <th>frac</th>
 </tr>
 </thead>
-<tbody><tr>
+<tbody>
+<tr>
 <td>0</td>
 <td>0000 0001</td>
 <td>0000 0000 0000 0000 0000 001</td>
 </tr>
-</tbody></table>
-<p>如果认为$E&#x3D;0000\ 0001,M&#x3D;1$去算这个数得到<br>$$<br>b&#x3D;1\times 2^1&#x3D;10(2)&#x3D;2(10)<br>$$<br>这就错了,实际上这个数是<br>$$<br>1\frac{1}{2^{23}}\times 2^{-126}<br>$$</p>
+</tbody>
+</table>
+<p>如果认为<span class="math inline">\(E=0000\
+0001,M=1\)</span>去算这个数得到 <span class="math display">\[
+b=1\times 2^1=10(2)=2(10)
+\]</span> 这就错了,实际上这个数是 <span class="math display">\[
+1\frac{1}{2^{23}}\times 2^{-126}
+\]</span></p>
 <blockquote>
-<p>这里$1\frac{1}{2^{23}}$是带分数</p>
+<p>这里<span
+class="math inline">\(1\frac{1}{2^{23}}\)</span>是带分数</p>
 </blockquote>
 <p>为啥会这样呢?为啥不能直来直去,exp就表示E,frac就表示M?</p>
 <p>这涉及到排序方便的问题,这是后话.</p>
 <p>总之计算机中存储的浮点数直接拿出来并不是s,E,M这样排好的,需要办手续</p>
 </blockquote>
-<h3 id="浮点数的实际存储状态"><a href="#浮点数的实际存储状态" class="headerlink" title="浮点数的实际存储状态"></a>浮点数的实际存储状态</h3><h4 id="状态设计"><a href="#状态设计" class="headerlink" title="状态设计"></a>状态设计</h4><p>在设计浮点数的存储状态时,鳎们首先规定了几个特殊的状态:</p>
+<h3 id="浮点数的实际存储状态">浮点数的实际存储状态</h3>
+<h4 id="状态设计">状态设计</h4>
+<p>在设计浮点数的存储状态时,鳎们首先规定了几个特殊的状态:</p>
 <p>1.正负无限大</p>
 <p>2.不是数NAN</p>
 <blockquote>
@@ -289,7 +330,12 @@
 <p>一个数要是无限大或者根本不是数,那么后面30位不都没有意义了吗?这在数电上就是无关项了.</p>
 <p>看看人家IEEE754怎么规定的吧</p>
 </blockquote>
-<p><img src="https://raw.githubusercontent.com/DeutschBall/test/master/image-20220605192623246.png" alt="image-20220605192623246"></p>
+<figure>
+<img
+src="https://raw.githubusercontent.com/DeutschBall/test/master/image-20220605192623246.png"
+alt="image-20220605192623246" />
+<figcaption aria-hidden="true">image-20220605192623246</figcaption>
+</figure>
 <blockquote>
 <p>只能说这种规定不流失不蒸发零浪费,把牙膏挤的一滴都不剩了.当看不明白这种定义的蜜汁操作时,使劲往空间利用效率上想就对了</p>
 </blockquote>
@@ -298,8 +344,10 @@
 <p>2.无穷大,不管是正负,其exp全是1,frac全是0.</p>
 <blockquote>
 <p>为啥要用exp全1,frac全0表示无穷大?这样表示岂不是会占用正常数的地址空间?</p>
-<p>确实会占用,但是只占用了一种状态,exp还剩下$2^8-1&#x3D;255$种状态</p>
-<p>像比于专门用两个状态位,这样exp还剩下6位,可以表示$2^6&#x3D;64$种状态</p>
+<p>确实会占用,但是只占用了一种状态,exp还剩下<span
+class="math inline">\(2^8-1=255\)</span>种状态</p>
+<p>像比于专门用两个状态位,这样exp还剩下6位,可以表示<span
+class="math inline">\(2^6=64\)</span>种状态</p>
 <p>显然人家的规定更会挤牙膏</p>
 </blockquote>
 <blockquote>
@@ -317,52 +365,99 @@
 <p>正常数分为规格化数和非规格化数</p>
 <p>区分两者是通过exp是否全0</p>
 <p>至于啥是规格啥是非规格,这是后话,反正实际使用的时候都能用到并且没有显式的开关</p>
-<h4 id="规格化数"><a href="#规格化数" class="headerlink" title="规格化数"></a>规格化数</h4><p><img src="https://raw.githubusercontent.com/DeutschBall/test/master/image-20220605193811879.png" alt="image-20220605193811879"></p>
-<h4 id="exp"><a href="#exp" class="headerlink" title="exp"></a>exp</h4><p>心里应该时刻悬着一个疑问,exp经过什么手续得到E阶码?</p>
-<p>现在给你说这个手续是什么<br>$$<br>E&#x3D;exp-Bias\<br>$$<br>$$<br>exp&#x3D;e_{k-1}e_{k-2}…e_{1}e_{0}\<br>$$</p>
-<p>$$<br>Bias&#x3D;2^{k-1}-1<br>$$</p>
+<h4 id="规格化数">规格化数</h4>
+<figure>
+<img
+src="https://raw.githubusercontent.com/DeutschBall/test/master/image-20220605193811879.png"
+alt="image-20220605193811879" />
+<figcaption aria-hidden="true">image-20220605193811879</figcaption>
+</figure>
+<h4 id="exp">exp</h4>
+<p>心里应该时刻悬着一个疑问,exp经过什么手续得到E阶码?</p>
+<p>现在给你说这个手续是什么 <span class="math display">\[
+E=exp-Bias\\
+\]</span> <span class="math display">\[
+exp=e_{k-1}e_{k-2}...e_{1}e_{0}\\
+\]</span></p>
+<p><span class="math display">\[
+Bias=2^{k-1}-1
+\]</span></p>
 <p>其中k是exp占用的二进制位数,</p>
-<p>对于float来说,$k&#x3D;11,Bias&#x3D;2^{11-1}-1&#x3D;1023$</p>
+<p>对于float来说,<span
+class="math inline">\(k=11,Bias=2^{11-1}-1=1023\)</span></p>
 <blockquote>
 <p>懵逼了吧,Bias是个銱啊?</p>
-<p>给一个定义$Bias&#x3D;2^{k-1}-1$,跟那该死的谜语人儿似的,不给说为啥这样整.</p>
+<p>给一个定义<span
+class="math inline">\(Bias=2^{k-1}-1\)</span>,跟那该死的谜语人儿似的,不给说为啥这样整.</p>
 <p>CSAPP上也是春秋笔法,留个后话,和某些人一样吊人胃口</p>
-<p><img src="https://raw.githubusercontent.com/DeutschBall/test/master/image-20220605194513398.png" alt="image-20220605194513398"></p>
+<figure>
+<img
+src="https://raw.githubusercontent.com/DeutschBall/test/master/image-20220605194513398.png"
+alt="image-20220605194513398" />
+<figcaption aria-hidden="true">image-20220605194513398</figcaption>
+</figure>
 <p>如果想要保持这层神秘感,那就继续看书,总会有一瞬间恍然大悟</p>
 <p>如果急于知道原因,可以这样想:</p>
-<p>1.我这样算出来的$E$,怎么表示正负呢?</p>
-<p>虽然我整个数有一个符号s,但是阶码也应该有一个符号啊,$-1.01\times 2^2$和$-1.01\times 2^{-2}$这两个可不一样啊</p>
+<p>1.我这样算出来的<span
+class="math inline">\(E\)</span>,怎么表示正负呢?</p>
+<p>虽然我整个数有一个符号s,但是阶码也应该有一个符号啊,<span
+class="math inline">\(-1.01\times 2^2\)</span>和<span
+class="math inline">\(-1.01\times 2^{-2}\)</span>这两个可不一样啊</p>
 <p>按理说E的开头一位应该是符号啊,这样规定,没写符号位啊?</p>
-<p>2.$Bias&#x3D;2^{k-1}-1$好大啊,用exp去减Bias不是以卵击石吗?剪完了十有八九是个负数啊?</p>
+<p>2.<span
+class="math inline">\(Bias=2^{k-1}-1\)</span>好大啊,用exp去减Bias不是以卵击石吗?剪完了十有八九是个负数啊?</p>
 <p>这样想就在向Bias的设计目的靠拢了</p>
 <p>先解决2.</p>
-<p>对于float,k&#x3D;11<br>$$<br>Bias&#x3D;2^{11-1}-1&#x3D;2^{10}-1&#x3D;0111\ 1111\ 111\<br>$$<br>最高位竟然是0,剩下低位全是1</p>
-<p>也就是说当$exp&#x3D;1XXX\ XXXX\ XXX$,这时候$exp-Bias$得到的是正数</p>
-<p>而$exp$要么表示是$1XXX\ XXXX\ XXX$,要么是$0XXX\ XXXX\ XXX$</p>
+<p>对于float,k=11 <span class="math display">\[
+Bias=2^{11-1}-1=2^{10}-1=0111\ 1111\ 111\
+\]</span> 最高位竟然是0,剩下低位全是1</p>
+<p>也就是说当<span class="math inline">\(exp=1XXX\ XXXX\
+XXX\)</span>,这时候<span
+class="math inline">\(exp-Bias\)</span>得到的是正数</p>
+<p>而<span class="math inline">\(exp\)</span>要么表示是<span
+class="math inline">\(1XXX\ XXXX\ XXX\)</span>,要么是<span
+class="math inline">\(0XXX\ XXXX\ XXX\)</span></p>
 <p>这两种情况平分秋色,就算是摇色子也是对半的几率落在两个范围内.</p>
 <p>而我们希望阶码的正负数范围也是平分秋色,势均力敌的(差一两个无所谓)</p>
 <p>现在就有雏形了</p>
-<p>当$exp&#x3D;1XXX\ XXXX\ XXX$,$E&#x3D;exp-Bias$得到的就是正数</p>
-<p>当$exp&#x3D;0XXX\ XXXX\ XXX$,$E&#x3D;exp-Bias$得到的就是负数</p>
+<p>当<span class="math inline">\(exp=1XXX\ XXXX\ XXX\)</span>,<span
+class="math inline">\(E=exp-Bias\)</span>得到的就是正数</p>
+<p>当<span class="math inline">\(exp=0XXX\ XXXX\ XXX\)</span>,<span
+class="math inline">\(E=exp-Bias\)</span>得到的就是负数</p>
 <p>这好像和我们平常定义的正负数有出入啊?</p>
 <p>通常都是0表示正数,1表示负数啊?这里为啥要倒过来exp最高位为1时表示正数,exp最高位为0时表示负数</p>
 <p>这时候就要考虑方便排序比大小了</p>
-<p>两个阶码$E1,E2$都是经过$exp1,exp2$减同一个数得到的,那么$E1&gt;E2$则$exp1&gt;exp2$</p>
-<p>反过来也是这样,如果$exp1&gt;exp2$则$E1&gt;E2$</p>
-<p>如果正数最高位为1负数最高位为0,那么很自然的$1&gt;0$,正数大于负数.</p>
+<p>两个阶码<span class="math inline">\(E1,E2\)</span>都是经过<span
+class="math inline">\(exp1,exp2\)</span>减同一个数得到的,那么<span
+class="math inline">\(E1&gt;E2\)</span>则<span
+class="math inline">\(exp1&gt;exp2\)</span></p>
+<p>反过来也是这样,如果<span
+class="math inline">\(exp1&gt;exp2\)</span>则<span
+class="math inline">\(E1&gt;E2\)</span></p>
+<p>如果正数最高位为1负数最高位为0,那么很自然的<span
+class="math inline">\(1&gt;0\)</span>,正数大于负数.</p>
 <p>两个同号的exp比较时就从最高位遍历到最低位一视同仁</p>
 <p>那么任意两个exp比较只需要从最高位遍历到最低位,谁的高位有1谁大</p>
 <p>这样比较大小顺理成章,不用特判符号位</p>
 <p>总结:</p>
-<p>Bias这样设计考虑了排序方便,并且减去的这个数正好是区间的一半,相当于$[0,10]-5\Rightarrow[-5,5]$,使得正负数平分秋色.</p>
+<p>Bias这样设计考虑了排序方便,并且减去的这个数正好是区间的一半,相当于<span
+class="math inline">\([0,10]-5\Rightarrow[-5,5]\)</span>,使得正负数平分秋色.</p>
 <p>解决了正负号问题同时附带着解决了大小问题,岂不美哉</p>
 </blockquote>
-<h4 id="frac"><a href="#frac" class="headerlink" title="frac"></a>frac</h4><p>前面说过,从frac到真正的尾数M也需要分类讨论办手续</p>
+<h4 id="frac">frac</h4>
+<p>前面说过,从frac到真正的尾数M也需要分类讨论办手续</p>
 <p>现在就是分类讨论情况1</p>
-<p>当exp不全为0也不全为1(即表示一个规格化数时)<br>$$<br>M&#x3D;1+frac&#x3D;1.f_{n-1}f_{n-2}…f_0<br>$$<br>即存储时自动忽略了小数点左边的1,计算式要加上</p>
-<h5 id="总结"><a href="#总结" class="headerlink" title="总结"></a>总结</h5><p>现在我们知道了exp到E的手续还有frac到M的手续,符号s没有手续.</p>
+<p>当exp不全为0也不全为1(即表示一个规格化数时) <span
+class="math display">\[
+M=1+frac=1.f_{n-1}f_{n-2}...f_0
+\]</span> 即存储时自动忽略了小数点左边的1,计算式要加上</p>
+<h5 id="总结">总结</h5>
+<p>现在我们知道了exp到E的手续还有frac到M的手续,符号s没有手续.</p>
 <p>手续齐全了,一个规格化数的表示和存储的关系我们也就明了了</p>
-<p>还是以一开始举的例子,假设一个float的存储是这样的<br>$$<br>0’0000\ 0001’0000\ 0000\ 0000\ 0000\ 0000\ 001<br>$$</p>
+<p>还是以一开始举的例子,假设一个float的存储是这样的 <span
+class="math display">\[
+0&#39;0000\ 0001&#39;0000\ 0000\ 0000\ 0000\ 0000\ 001
+\]</span></p>
 <table>
 <thead>
 <tr>
@@ -371,21 +466,45 @@
 <th>frac</th>
 </tr>
 </thead>
-<tbody><tr>
+<tbody>
+<tr>
 <td>0</td>
 <td>0000 0001</td>
 <td>0000 0000 0000 0000 0000 001</td>
 </tr>
-</tbody></table>
-<p>$Bias&#x3D;0111\ 1111(2)&#x3D;127(10)$</p>
-<p>$E&#x3D;exp&#x3D;Bias&#x3D;1-127&#x3D;-126(10)$</p>
-<p>$M&#x3D;1+frac&#x3D;1.0000\ 0000\ 0000\ 0000\ 0000\ 001(2)&#x3D;1+2^{-23}(10)$<br>$$<br>\begin{aligned}<br>b&amp;&#x3D;(-1)^s\times M\times 2^E\<br>&amp;&#x3D;(-1)^0\times(1+2^{-23})\times 2^{-126}\<br>&amp;&#x3D;1\frac{1}{2^{23}}\times 2^{-126}<br>\end{aligned}<br>$$</p>
-<h5 id="范围"><a href="#范围" class="headerlink" title="范围"></a>范围</h5><p>考虑一个exp有k位,frac有n位的规格化数能够表示的数的范围</p>
-<p>首先考虑$exp$的范围,由于其不能全为0或者全为1,因此有$exp\in[00…001]$<br>$$<br>exp\in[\begin{matrix}\underbrace{000\cdots 0001}\k-1个0,1个1\end{matrix},\begin{matrix}\underbrace{111\cdots 1110}\k-1个1,1个0\end{matrix}]<br>$$<br>即$exp\in[1,2^{k}-2]$</p>
-<p>那么$E&#x3D;exp-Bias&#x3D;exp-(2^{k-1}-1)\in [2-2^{k-1},2^{k-1}-1]$</p>
-<p>$frac\in[0,\sum_{i&#x3D;-1}^{-n}2^i]&#x3D;[0,1-2^{-n}]$</p>
-<p>$M&#x3D;1+frac\in[1,2-2^{-n}]$</p>
+</tbody>
+</table>
+<p><span class="math inline">\(Bias=0111\ 1111(2)=127(10)\)</span></p>
+<p><span class="math inline">\(E=exp=Bias=1-127=-126(10)\)</span></p>
+<p><span class="math inline">\(M=1+frac=1.0000\ 0000\ 0000\ 0000\ 0000\
+001(2)=1+2^{-23}(10)\)</span> <span class="math display">\[
+\begin{aligned}
+b&amp;=(-1)^s\times M\times 2^E\\
+&amp;=(-1)^0\times(1+2^{-23})\times 2^{-126}\\
+&amp;=1\frac{1}{2^{23}}\times 2^{-126}
+\end{aligned}
+\]</span></p>
+<h5 id="范围">范围</h5>
+<p>考虑一个exp有k位,frac有n位的规格化数能够表示的数的范围</p>
+<p>首先考虑<span
+class="math inline">\(exp\)</span>的范围,由于其不能全为0或者全为1,因此有<span
+class="math inline">\(exp\in[00...001]\)</span> <span
+class="math display">\[
+exp\in[\begin{matrix}\underbrace{000\cdots
+0001}\\k-1个0,1个1\end{matrix},\begin{matrix}\underbrace{111\cdots
+1110}\\k-1个1,1个0\end{matrix}]
+\]</span> 即<span class="math inline">\(exp\in[1,2^{k}-2]\)</span></p>
+<p>那么<span class="math inline">\(E=exp-Bias=exp-(2^{k-1}-1)\in
+[2-2^{k-1},2^{k-1}-1]\)</span></p>
+<p><span
+class="math inline">\(frac\in[0,\sum_{i=-1}^{-n}2^i]=[0,1-2^{-n}]\)</span></p>
+<p><span class="math inline">\(M=1+frac\in[1,2-2^{-n}]\)</span></p>
 <table>
+<colgroup>
+<col style="width: 27%" />
+<col style="width: 49%" />
+<col style="width: 23%" />
+</colgroup>
 <thead>
 <tr>
 <th>符号</th>
@@ -393,34 +512,42 @@
 <th>最小值</th>
 </tr>
 </thead>
-<tbody><tr>
+<tbody>
+<tr>
 <td>exp</td>
-<td>$2^k-2$</td>
+<td><span class="math inline">\(2^k-2\)</span></td>
 <td>1</td>
 </tr>
 <tr>
 <td>E</td>
-<td>$2^{k-1}-1$</td>
-<td>$2-2^{k-1}$</td>
+<td><span class="math inline">\(2^{k-1}-1\)</span></td>
+<td><span class="math inline">\(2-2^{k-1}\)</span></td>
 </tr>
 <tr>
 <td>frac</td>
-<td>$1-2^{-n}$</td>
+<td><span class="math inline">\(1-2^{-n}\)</span></td>
 <td>0</td>
 </tr>
 <tr>
 <td>M</td>
-<td>$2-2^{-n}$</td>
+<td><span class="math inline">\(2-2^{-n}\)</span></td>
 <td>1</td>
 </tr>
 <tr>
 <td>规格化数<strong>绝对值</strong></td>
-<td>$(2-2^{-n})\times 2^{2^{k-1}-1}$</td>
-<td>$2^{2-2^{k-1}}$</td>
+<td><span class="math inline">\((2-2^{-n})\times
+2^{2^{k-1}-1}\)</span></td>
+<td><span class="math inline">\(2^{2-2^{k-1}}\)</span></td>
 </tr>
-</tbody></table>
-<p>比如对于float类型,k&#x3D;11,n&#x3D;23</p>
+</tbody>
+</table>
+<p>比如对于float类型,k=11,n=23</p>
 <table>
+<colgroup>
+<col style="width: 17%" />
+<col style="width: 57%" />
+<col style="width: 25%" />
+</colgroup>
 <thead>
 <tr>
 <th>符号</th>
@@ -428,165 +555,243 @@
 <th>最小值</th>
 </tr>
 </thead>
-<tbody><tr>
+<tbody>
+<tr>
 <td>exp</td>
-<td>$2^{11}-2&#x3D;2046$</td>
+<td><span class="math inline">\(2^{11}-2=2046\)</span></td>
 <td>1</td>
 </tr>
 <tr>
 <td>E</td>
-<td>$2^{11-1}-1&#x3D;1023$</td>
-<td>$2-2^{11-1}&#x3D;-1022$</td>
+<td><span class="math inline">\(2^{11-1}-1=1023\)</span></td>
+<td><span class="math inline">\(2-2^{11-1}=-1022\)</span></td>
 </tr>
 <tr>
 <td>frac</td>
-<td>$1-2^{-n}&#x3D;1-2^{-23}$</td>
+<td><span class="math inline">\(1-2^{-n}=1-2^{-23}\)</span></td>
 <td>0</td>
 </tr>
 <tr>
 <td>M</td>
-<td>$2-2^{-n}&#x3D;2-2^{-23}$</td>
+<td><span class="math inline">\(2-2^{-n}=2-2^{-23}\)</span></td>
 <td>1</td>
 </tr>
 <tr>
 <td>规格化数<strong>绝对值</strong></td>
-<td>$(2-2^{-23})\times 2^{2^{10}-1}&#x3D;(2-2^{-23})\times 2^{1023}$</td>
-<td>$2^{2-2^{11-1}}&#x3D;2^{-1022}$</td>
+<td><span class="math inline">\((2-2^{-23})\times
+2^{2^{10}-1}=(2-2^{-23})\times 2^{1023}\)</span></td>
+<td><span class="math inline">\(2^{2-2^{11-1}}=2^{-1022}\)</span></td>
 </tr>
-</tbody></table>
-<h4 id="非规格化数"><a href="#非规格化数" class="headerlink" title="非规格化数"></a>非规格化数</h4><p>非规格化数是干啥用的呢?都叫他”非规格化”了,看来不规范,为啥还要用它呢?</p>
-<p>现在要存储一个值为0的float.而规格化时我们要求$M$左边是1,存储的时候省去</p>
+</tbody>
+</table>
+<h4 id="非规格化数">非规格化数</h4>
+<p>非规格化数是干啥用的呢?都叫他"非规格化"了,看来不规范,为啥还要用它呢?</p>
+<p>现在要存储一个值为0的float.而规格化时我们要求<span
+class="math inline">\(M\)</span>左边是1,存储的时候省去</p>
 <p>对于0,打死也找不到一个1放在小数点左边啊</p>
-<h5 id="exp-1"><a href="#exp-1" class="headerlink" title="exp"></a>exp</h5><p>当exp全0时,存储的数就是一个非规格化数</p>
-<p>这时求$E$的手续又有变化$E&#x3D;1-Bias$</p>
-<p>$Bias&#x3D;2^{k-1}-1$不变</p>
-<h5 id="frac-1"><a href="#frac-1" class="headerlink" title="frac"></a>frac</h5><p>求尾数M的手续也有变化$M&#x3D;frac$,没有隐含的1了</p>
-<h5 id="总结-1"><a href="#总结-1" class="headerlink" title="总结"></a>总结</h5><p>如果一个非规格化数的存储是这样的:<br>$$<br>0’0000\ 0000’0000\ 0000\ 0000\ 0000\ 0000\ 000<br>$$<br>全是0</p>
-<p>$E&#x3D;1-Bias&#x3D;1-127&#x3D;-126$</p>
-<p>$M&#x3D;frac&#x3D;0$<br>$$<br>b&#x3D;(-1)^0\times 0\times 2^{-126}&#x3D;0<br>$$</p>
+<h5 id="exp-1">exp</h5>
+<p>当exp全0时,存储的数就是一个非规格化数</p>
+<p>这时求<span class="math inline">\(E\)</span>的手续又有变化<span
+class="math inline">\(E=1-Bias\)</span></p>
+<p><span class="math inline">\(Bias=2^{k-1}-1\)</span>不变</p>
+<h5 id="frac-1">frac</h5>
+<p>求尾数M的手续也有变化<span
+class="math inline">\(M=frac\)</span>,没有隐含的1了</p>
+<h5 id="总结-1">总结</h5>
+<p>如果一个非规格化数的存储是这样的: <span class="math display">\[
+0&#39;0000\ 0000&#39;0000\ 0000\ 0000\ 0000\ 0000\ 000
+\]</span> 全是0</p>
+<p><span class="math inline">\(E=1-Bias=1-127=-126\)</span></p>
+<p><span class="math inline">\(M=frac=0\)</span> <span
+class="math display">\[
+b=(-1)^0\times 0\times 2^{-126}=0
+\]</span></p>
 <p>同理,如果只有符号位为1,由于M为0,我们也可以得到0</p>
-<p>这两个0有区别,符号位0的为+0,符号位1的为-0.两者在计算$1&#x2F;+0,1&#x2F;-0$时分别得到正负无穷大</p>
-<h5 id="范围-1"><a href="#范围-1" class="headerlink" title="范围"></a>范围</h5><p>$M&#x3D;frac\in[0,1-2^{-n}]$</p>
-<p>$E&#x3D;1-Bias&#x3D;2-2^{k-1}$</p>
-<p>阶是不变的,只有尾数$M$可以变</p>
+<p>这两个0有区别,符号位0的为+0,符号位1的为-0.两者在计算<span
+class="math inline">\(1/+0,1/-0\)</span>时分别得到正负无穷大</p>
+<h5 id="范围-1">范围</h5>
+<p><span class="math inline">\(M=frac\in[0,1-2^{-n}]\)</span></p>
+<p><span class="math inline">\(E=1-Bias=2-2^{k-1}\)</span></p>
+<p>阶是不变的,只有尾数<span class="math inline">\(M\)</span>可以变</p>
 <blockquote>
 <p>到此仍然体会不到非规格化数的作用,仍然懵逼的很.不能就因为要表示0就单开一种类型吧?</p>
 <p>这么说吧,非规格化数还可以表示距离0很近的数.啥意思呢?</p>
-<p>注意非规格化数的阶码$E&#x3D;2-2^{k-1}$这个定值正好是<strong>规格化数阶码</strong>的最小值</p>
-<p>再看尾数,规格化数的尾数最小是1,但是非规格化的尾数$M\in[0,1-2^{-n}]$永远小于1</p>
-<p>规格化数最靠近0的数为$2^{2-2^{k-1}}$,不能再小了,但是非规格化数可以再通过改变尾数更接近0</p>
+<p>注意非规格化数的阶码<span
+class="math inline">\(E=2-2^{k-1}\)</span>这个定值正好是<strong>规格化数阶码</strong>的最小值</p>
+<p>再看尾数,规格化数的尾数最小是1,但是非规格化的尾数<span
+class="math inline">\(M\in[0,1-2^{-n}]\)</span>永远小于1</p>
+<p>规格化数最靠近0的数为<span
+class="math inline">\(2^{2-2^{k-1}}\)</span>,不能再小了,但是非规格化数可以再通过改变尾数更接近0</p>
 <p>即同为正数的 规格化数 一定大于 非规格化数</p>
 <p>画在数轴上就是CSAPP给出的这幅图</p>
-<p><img src="https://raw.githubusercontent.com/DeutschBall/test/master/image-20220605210411034.png" alt="image-20220605210411034"></p>
-<p>这里”偏置量”就是bias</p>
+<figure>
+<img
+src="https://raw.githubusercontent.com/DeutschBall/test/master/image-20220605210411034.png"
+alt="image-20220605210411034" />
+<figcaption aria-hidden="true">image-20220605210411034</figcaption>
+</figure>
+<p>这里"偏置量"就是bias</p>
 </blockquote>
-<h3 id="以八位浮点数为例"><a href="#以八位浮点数为例" class="headerlink" title="以八位浮点数为例"></a>以八位浮点数为例</h3><p><img src="https://raw.githubusercontent.com/DeutschBall/test/master/image-20220605210629786.png"></p>
+<h3 id="以八位浮点数为例">以八位浮点数为例</h3>
+<p><img
+src="https://raw.githubusercontent.com/DeutschBall/test/master/image-20220605210629786.png" /></p>
 <p>这个表上可以发现很多问题</p>
-<h4 id="1-非规格化数呈现等差数列-相邻两项相差-frac-1-512-这是为什么"><a href="#1-非规格化数呈现等差数列-相邻两项相差-frac-1-512-这是为什么" class="headerlink" title="1.非规格化数呈现等差数列,相邻两项相差$\frac{1}{512}$,这是为什么?"></a>1.非规格化数呈现等差数列,相邻两项相差$\frac{1}{512}$,这是为什么?</h4><p>非规格化数的阶码是固定的,用$C&#x3D;2^{2-2^{k-1}}&#x3D;2^{-6}&#x3D;\frac{1}{64}$表示固定的权</p>
-<p>尾数$M$从$0$逐次增加$\frac{1}{8}$,那么非规格化数序列就是$0C,\frac{1}{8}C,\frac{2}{8}C…\frac{7}{8}C$</p>
-<p>任意相邻两项差均为$\frac{1}{8}C$为定值</p>
-<h4 id="2-从最大的非规格化数到最小的规格化数貌似仍然维持了非规格化数的公差-那么规格化数也是等差数列吗"><a href="#2-从最大的非规格化数到最小的规格化数貌似仍然维持了非规格化数的公差-那么规格化数也是等差数列吗" class="headerlink" title="2.从最大的非规格化数到最小的规格化数貌似仍然维持了非规格化数的公差,那么规格化数也是等差数列吗?"></a>2.从最大的非规格化数到最小的规格化数貌似仍然维持了非规格化数的公差,那么规格化数也是等差数列吗?</h4><p>不是</p>
+<h4
+id="非规格化数呈现等差数列相邻两项相差frac1512这是为什么">1.非规格化数呈现等差数列,相邻两项相差<span
+class="math inline">\(\frac{1}{512}\)</span>,这是为什么?</h4>
+<p>非规格化数的阶码是固定的,用<span
+class="math inline">\(C=2^{2-2^{k-1}}=2^{-6}=\frac{1}{64}\)</span>表示固定的权</p>
+<p>尾数<span class="math inline">\(M\)</span>从<span
+class="math inline">\(0\)</span>逐次增加<span
+class="math inline">\(\frac{1}{8}\)</span>,那么非规格化数序列就是<span
+class="math inline">\(0C,\frac{1}{8}C,\frac{2}{8}C...\frac{7}{8}C\)</span></p>
+<p>任意相邻两项差均为<span
+class="math inline">\(\frac{1}{8}C\)</span>为定值</p>
+<h4
+id="从最大的非规格化数到最小的规格化数貌似仍然维持了非规格化数的公差那么规格化数也是等差数列吗">2.从最大的非规格化数到最小的规格化数貌似仍然维持了非规格化数的公差,那么规格化数也是等差数列吗?</h4>
+<p>不是</p>
 <p>相邻两个规格化数的增长,既要考虑阶码的增长的可能,又要考虑尾数增长的可能</p>
-<p>对于一个固定的阶码,尾数只有$0,\frac{1}{8},…,\frac{7}{8}$这8种情况,同一个阶码下的这八项组成等差数列</p>
-<p>但是换一个阶码,和刚才的尾数就组不成等差数列了,$\frac{1}{8}C_1$和$\frac{1}{8}C_2$不一样大</p>
+<p>对于一个固定的阶码,尾数只有<span
+class="math inline">\(0,\frac{1}{8},...,\frac{7}{8}\)</span>这8种情况,同一个阶码下的这八项组成等差数列</p>
+<p>但是换一个阶码,和刚才的尾数就组不成等差数列了,<span
+class="math inline">\(\frac{1}{8}C_1\)</span>和<span
+class="math inline">\(\frac{1}{8}C_2\)</span>不一样大</p>
 <p>因此规格化数随着阶码增大,在数轴上的距离将会离得越来越远</p>
-<h4 id="3-阶码最小的规格化数一定可以和非规格化数”平滑过渡”吗"><a href="#3-阶码最小的规格化数一定可以和非规格化数”平滑过渡”吗" class="headerlink" title="3.阶码最小的规格化数一定可以和非规格化数”平滑过渡”吗"></a>3.阶码最小的规格化数一定可以和非规格化数”平滑过渡”吗</h4><p>是的</p>
-<p>阶码最小时$exp&#x3D;1$</p>
-<p>此时$exp-Bias&#x3D;1-Bias$即阶码最小的规格化数和非规格化数的阶码是相同的</p>
+<h4
+id="阶码最小的规格化数一定可以和非规格化数平滑过渡吗">3.阶码最小的规格化数一定可以和非规格化数"平滑过渡"吗</h4>
+<p>是的</p>
+<p>阶码最小时<span class="math inline">\(exp=1\)</span></p>
+<p>此时<span
+class="math inline">\(exp-Bias=1-Bias\)</span>即阶码最小的规格化数和非规格化数的阶码是相同的</p>
 <p>两种数的区别在于尾数前面是否有隐含的1</p>
 <p>而非规格化数恰好从0增长到1之前缺一个单元,阶码最小的规格化数尾数恰好从1开始增长,接了非规格化数的班</p>
 <p>我们的上述2.3两点在CSAPP给出的插图2-34中得到了验证</p>
-<p><img src="https://raw.githubusercontent.com/DeutschBall/test/master/image-20220605212121233.png" alt="image-20220605212121233"></p>
+<figure>
+<img
+src="https://raw.githubusercontent.com/DeutschBall/test/master/image-20220605212121233.png"
+alt="image-20220605212121233" />
+<figcaption aria-hidden="true">image-20220605212121233</figcaption>
+</figure>
 <p>a)中约靠近中心,规格化数之间的距离越近(单调不增),越靠近两头规格化数之间的距离越远(单调不减).</p>
 <p>一定范围内规格化数距离相同,是因为该几个规格化数的阶码相同,只有尾数不同</p>
 <p>b)中最小的规格化数和非规格化数呈等差数列</p>
-<h3 id="舍入问题"><a href="#舍入问题" class="headerlink" title="舍入问题"></a>舍入问题</h3><p>向偶数舍入:</p>
+<h3 id="舍入问题">舍入问题</h3>
+<p>向偶数舍入:</p>
 <blockquote>
 <p>不是四舍五入,不是向上向下舍入</p>
 </blockquote>
-<p><img src="https://raw.githubusercontent.com/DeutschBall/test/master/image-20220605213150852.png" alt="image-20220605213150852"></p>
+<figure>
+<img
+src="https://raw.githubusercontent.com/DeutschBall/test/master/image-20220605213150852.png"
+alt="image-20220605213150852" />
+<figcaption aria-hidden="true">image-20220605213150852</figcaption>
+</figure>
 <p>在类型转换从浮点数到整数时还是使用向0舍入</p>
 <p>向偶舍入是一个浮点数表示不开的时候采用的方法</p>
-<h2 id="x86-64上浮点数的机器级表示"><a href="#x86-64上浮点数的机器级表示" class="headerlink" title="x86-64上浮点数的机器级表示"></a>x86-64上浮点数的机器级表示</h2><h3 id="16个媒体寄存器"><a href="#16个媒体寄存器" class="headerlink" title="16个媒体寄存器"></a>16个媒体寄存器</h3><p><img src="https://raw.githubusercontent.com/DeutschBall/test/master/image-20220605215315252.png" alt="image-20220605215315252"></p>
+<h2 id="x86-64上浮点数的机器级表示">x86-64上浮点数的机器级表示</h2>
+<h3 id="个媒体寄存器">16个媒体寄存器</h3>
+<figure>
+<img
+src="https://raw.githubusercontent.com/DeutschBall/test/master/image-20220605215315252.png"
+alt="image-20220605215315252" />
+<figcaption aria-hidden="true">image-20220605215315252</figcaption>
+</figure>
 <p>这里媒体寄存器都长的出奇,最短的用法是128位的xmm寄存器</p>
 <p>然而一个浮点类型,要么是32位的float,要么是64位的double,</p>
 <p>既然常用类型最长64位,为啥要整128甚至256位的寄存器呢?</p>
 <blockquote>
 <p>目前猜测这些寄存器不光有存放浮点类型的作用</p>
-<p>否则不会叫做”媒体”寄存器,怎么不改名浮点寄存器</p>
+<p>否则不会叫做"媒体"寄存器,怎么不改名浮点寄存器</p>
 <p>实际上看了后面确实如此,xmm,ymm寄存器可以一次性存放好几个值</p>
-<p>$[x_1,x_2,x_3,x_4]$这种向量,其中每一个x都是一个float,合起来一共128位刚好占用一共xmm寄存器.</p>
+<p><span
+class="math inline">\([x_1,x_2,x_3,x_4]\)</span>这种向量,其中每一个x都是一个float,合起来一共128位刚好占用一共xmm寄存器.</p>
 <p>如果是四个double组成的向量则恰好一个ymm寄存器</p>
 </blockquote>
-<h3 id="汇编指令"><a href="#汇编指令" class="headerlink" title="汇编指令"></a>汇编指令</h3><h4 id="标量指令"><a href="#标量指令" class="headerlink" title="标量指令"></a>标量指令</h4><p>为了理解”标量”这个概念,必须得和”向量”这个概念联系对比</p>
+<h3 id="汇编指令">汇编指令</h3>
+<h4 id="标量指令">标量指令</h4>
+<p>为了理解"标量"这个概念,必须得和"向量"这个概念联系对比</p>
 <p>当然这里的向量和标量不是数学物理上的概念</p>
 <p>更像是概率论与数理童祭时学的概念</p>
-<p>X是一个样本,$X_i$是样本成员<br>$$<br>X&#x3D;[X_1,X_2,X_3,…,X_n]<br>$$<br>这里$X$就是一个向量,他是有一群标量$X_1,X_2,…,X_n$按照顺序组成的集合</p>
-<p>又比如一个有着横纵坐标的二维几何点就可以叫做一个”向量”$P(X,Y)$</p>
+<p>X是一个样本,<span class="math inline">\(X_i\)</span>是样本成员 <span
+class="math display">\[
+X=[X_1,X_2,X_3,...,X_n]
+\]</span> 这里<span
+class="math inline">\(X\)</span>就是一个向量,他是有一群标量<span
+class="math inline">\(X_1,X_2,...,X_n\)</span>按照顺序组成的集合</p>
+<p>又比如一个有着横纵坐标的二维几何点就可以叫做一个"向量"<span
+class="math inline">\(P(X,Y)\)</span></p>
 <p>标量就是一个数据</p>
 <p>而向量是一组数据</p>
 <p><strong>标量指令</strong>对单个数据进行操作,一条标量指令只涉及一个数据的传递等操作</p>
 <p>而<strong>向量指令</strong>可以一条指令完成对多个数据的操作</p>
-<p>在接触浮点数的机器表示时,我们没有见过”向量指令”这个说法,是因为之前一直都是标量指令,不涉及向量的概念,当时CSAPP没有必要引入一个概念吓唬初学者</p>
+<p>在接触浮点数的机器表示时,我们没有见过"向量指令"这个说法,是因为之前一直都是标量指令,不涉及向量的概念,当时CSAPP没有必要引入一个概念吓唬初学者</p>
 <p><strong>引用内存的指令是标量指令</strong></p>
 <p>也就是从寄存器到内存或者从内存到寄存器,只能一次搬一个数据,不能搬多了</p>
 <p>那么可以推测,有这么一些指令,可以在xmm寄存器之间一口气搬好几个数据</p>
-<h4 id="浮点传送指令"><a href="#浮点传送指令" class="headerlink" title="浮点传送指令"></a>浮点传送指令</h4><p><img src="https://raw.githubusercontent.com/DeutschBall/test/master/image-20220606145220374.png" alt="image-20220606145220374"></p>
+<h4 id="浮点传送指令">浮点传送指令</h4>
+<figure>
+<img
+src="https://raw.githubusercontent.com/DeutschBall/test/master/image-20220606145220374.png"
+alt="image-20220606145220374" />
+<figcaption aria-hidden="true">image-20220606145220374</figcaption>
+</figure>
 <p><code>main.c</code></p>
 <figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line"><span class="type">void</span> <span class="title function_">func</span><span class="params">()</span>&#123;</span><br><span class="line">    <span class="keyword">register</span> <span class="type">float</span> a=<span class="number">12</span>;</span><br><span class="line">    <span class="keyword">register</span> <span class="type">float</span> b=a;<span class="comment">//使用register修饰提醒编译器使用寄存器存放a变量,但是实际上编译器很可能忽略</span></span><br><span class="line">    <span class="type">float</span> c=a;</span><br><span class="line">    <span class="type">float</span> *d=&amp;c;</span><br><span class="line">    <span class="type">float</span> e=*d;</span><br><span class="line">&#125;</span><br><span class="line"><span class="type">int</span> <span class="title function_">main</span><span class="params">()</span>&#123;</span><br><span class="line">    func();</span><br><span class="line">    <span class="keyword">return</span> <span class="number">0</span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-
 <figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">┌──(kali㉿Executor)-[/mnt/c/Users/86135/desktop/float]</span><br><span class="line">└─$ gcc main.c -O0 -o main</span><br><span class="line"></span><br><span class="line">┌──(kali㉿Executor)-[/mnt/c/Users/86135/desktop/float]</span><br><span class="line">└─$ objdump main -d &gt; main.asm</span><br></pre></td></tr></table></figure>
-
 <p><code>main.asm</code></p>
 <figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line">0000000000001129 &lt;func&gt;:</span><br><span class="line">    1129:	55                   	push   %rbp</span><br><span class="line">    112a:	48 89 e5             	mov    %rsp,%rbp</span><br><span class="line">    112d:	f3 0f 10 0d cf 0e 00 	movss  0xecf(%rip),%xmm1        # 2004 &lt;_IO_stdin_used+0x4&gt;</span><br><span class="line">    1134:	00 </span><br><span class="line">    1135:	f3 0f 11 4d f0       	movss  %xmm1,-0x10(%rbp)</span><br><span class="line">    113a:	48 8d 45 f0          	lea    -0x10(%rbp),%rax</span><br><span class="line">    113e:	48 89 45 f8          	mov    %rax,-0x8(%rbp)</span><br><span class="line">    1142:	48 8b 45 f8          	mov    -0x8(%rbp),%rax</span><br><span class="line">    1146:	f3 0f 10 00          	movss  (%rax),%xmm0</span><br><span class="line">    114a:	f3 0f 11 45 f4       	movss  %xmm0,-0xc(%rbp)</span><br><span class="line">    114f:	90                   	nop</span><br><span class="line">    1150:	5d                   	pop    %rbp</span><br><span class="line">    1151:	c3                   	ret    </span><br></pre></td></tr></table></figure>
-
 <p>这里面<code>a,b,c,d,e</code>分别以什么形式存储呢?这得联系上下文了</p>
 <p><code>movss  0xecf(%rip),%xmm1</code>从内存rodata区到寄存器使用了<code>movss</code>指令,对应<code>register float a=12;</code>,即a存放在xmm1中</p>
 <p><code>movss  %xmm1,-0x10(%rbp)</code>从寄存器到内存栈区使用了<code>movss</code>指令,</p>
 <p>可能对应<code>register float b=a;</code>,因为编译器有可能忽略register修饰,也可能对应<code>float c=a;</code></p>
-<p>怎么区分这两种情况呢?源代码下文中有对c的地址引用,因此后面如果有对<code>-0x10(%rbp)</code>的地址引用操作, 那么可以判定为c</p>
+<p>怎么区分这两种情况呢?源代码下文中有对c的地址引用,因此后面如果有对<code>-0x10(%rbp)</code>的地址引用操作,
+那么可以判定为c</p>
 <p><code>lea    -0x10(%rbp),%rax</code>,rax中存放刚才搬进栈区的局部变量的地址</p>
 <p><code>mov    %rax,-0x8(%rbp)</code>这个地址通过rax中转放到栈上,这一步明显对应<code>float *d=&amp;c;</code>,</p>
 <p>那么可以推出,d放在栈区<code>-0x8(%rbp)</code>,c放在栈区<code>-0x10(%rbp)</code></p>
 <p><code>mov    -0x8(%rbp),%rax</code>这步实际上没有作用,rax之前就是存的<code>-0x8(%rbp)</code>,只不过<code>-O0</code>优化显得编译器根傻子一样</p>
 <p><code>movss  (%rax),%xmm0</code>,<code>*d</code>放到寄存器xmm0里,</p>
-<p><code>movss  %xmm0,-0xc(%rbp)</code> <code>*d</code>通过xmm0中转了一下又放到栈区</p>
-<p>显然对应<code> float e=*d;</code>,<code>e</code>放在了栈区<code>-0xc(%rbp)</code></p>
-<p>见鬼的是<code>register float b=a;</code>这句好像没有起作用.为了保证我们没有出现幻觉,源代码中去掉这一句重新编译然后反编译\</p>
+<p><code>movss  %xmm0,-0xc(%rbp)</code>
+<code>*d</code>通过xmm0中转了一下又放到栈区</p>
+<p>显然对应<code>float e=*d;</code>,<code>e</code>放在了栈区<code>-0xc(%rbp)</code></p>
+<p>见鬼的是<code>register float b=a;</code>这句好像没有起作用.为了保证我们没有出现幻觉,源代码中去掉这一句重新编译然后反编译<br />
+</p>
 <figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line"><span class="type">void</span> <span class="title function_">func</span><span class="params">()</span>&#123;</span><br><span class="line">    <span class="keyword">register</span> <span class="type">float</span> a=<span class="number">12</span>;</span><br><span class="line">    <span class="comment">// register float b=a;</span></span><br><span class="line">    <span class="type">float</span> c=a;</span><br><span class="line">    <span class="type">float</span> *d=&amp;c;</span><br><span class="line">    <span class="type">float</span> e=*d;</span><br><span class="line">&#125;</span><br><span class="line"><span class="type">int</span> <span class="title function_">main</span><span class="params">()</span>&#123;</span><br><span class="line">    func();</span><br><span class="line">    <span class="keyword">return</span> <span class="number">0</span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-
 <figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">┌──(kali㉿Executor)-[/mnt/c/Users/86135/desktop/float]</span><br><span class="line">└─$ gcc main.c -O0 -o main -g</span><br><span class="line"></span><br><span class="line">┌──(kali㉿Executor)-[/mnt/c/Users/86135/desktop/float]</span><br><span class="line">└─$ objdump main -d &gt; main.asm</span><br></pre></td></tr></table></figure>
-
-
-
 <figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line">0000000000001129 &lt;func&gt;:</span><br><span class="line">    1129:	55                   	push   %rbp</span><br><span class="line">    112a:	48 89 e5             	mov    %rsp,%rbp</span><br><span class="line">    112d:	f3 0f 10 0d cf 0e 00 	movss  0xecf(%rip),%xmm1        # 2004 &lt;_IO_stdin_used+0x4&gt;</span><br><span class="line">    1134:	00 </span><br><span class="line">    1135:	f3 0f 11 4d f0       	movss  %xmm1,-0x10(%rbp)</span><br><span class="line">    113a:	48 8d 45 f0          	lea    -0x10(%rbp),%rax</span><br><span class="line">    113e:	48 89 45 f8          	mov    %rax,-0x8(%rbp)</span><br><span class="line">    1142:	48 8b 45 f8          	mov    -0x8(%rbp),%rax</span><br><span class="line">    1146:	f3 0f 10 00          	movss  (%rax),%xmm0</span><br><span class="line">    114a:	f3 0f 11 45 f4       	movss  %xmm0,-0xc(%rbp)</span><br><span class="line">    114f:	90                   	nop</span><br><span class="line">    1150:	5d                   	pop    %rbp</span><br><span class="line">    1151:	c3                   	ret    </span><br></pre></td></tr></table></figure>
-
 <p>和刚才一模一样<code>register float b=a;</code>这句直接被优化掉了</p>
 <p>哦上帝啊,<code>-O0</code>的gcc竟然也会有优化</p>
-<h4 id="浮点转换指令"><a href="#浮点转换指令" class="headerlink" title="浮点转换指令"></a>浮点转换指令</h4><p><img src="https://raw.githubusercontent.com/DeutschBall/test/master/image-20220606152907983.png" alt="image-20220606152907983"></p>
-<p>一看就明白,没必要做实验分析了 </p>
-<h4 id="其他指令"><a href="#其他指令" class="headerlink" title="其他指令"></a>其他指令</h4><p>比较指令,位级运算指令都是按位进行的,类比整数的情形即可</p>
-<h3 id="System-V-调用约定"><a href="#System-V-调用约定" class="headerlink" title="System V 调用约定"></a>System V 调用约定</h3><h4 id="参数传递约定"><a href="#参数传递约定" class="headerlink" title="参数传递约定"></a>参数传递约定</h4><figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="type">void</span> <span class="title function_">func</span><span class="params">(<span class="type">float</span> a,<span class="type">float</span> b,<span class="type">float</span> c,<span class="type">float</span> d,<span class="type">float</span> e,</span></span><br><span class="line"><span class="params">          <span class="type">float</span> f,<span class="type">float</span> g,<span class="type">float</span> h,<span class="type">float</span> i,<span class="type">float</span> j)</span></span><br><span class="line">		&#123;&#125;<span class="comment">//传递十个参数</span></span><br><span class="line"></span><br><span class="line"><span class="type">int</span> <span class="title function_">main</span><span class="params">()</span>&#123;</span><br><span class="line">    func(<span class="number">1</span>,<span class="number">2</span>,<span class="number">3</span>,<span class="number">4</span>,<span class="number">5</span>,<span class="number">6</span>,<span class="number">7</span>,<span class="number">8</span>,<span class="number">9</span>,<span class="number">10</span>);</span><br><span class="line">    <span class="keyword">return</span> <span class="number">0</span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-
+<h4 id="浮点转换指令">浮点转换指令</h4>
+<figure>
+<img
+src="https://raw.githubusercontent.com/DeutschBall/test/master/image-20220606152907983.png"
+alt="image-20220606152907983" />
+<figcaption aria-hidden="true">image-20220606152907983</figcaption>
+</figure>
+<p>一看就明白,没必要做实验分析了</p>
+<h4 id="其他指令">其他指令</h4>
+<p>比较指令,位级运算指令都是按位进行的,类比整数的情形即可</p>
+<h3 id="system-v-调用约定">System V 调用约定</h3>
+<h4 id="参数传递约定">参数传递约定</h4>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="type">void</span> <span class="title function_">func</span><span class="params">(<span class="type">float</span> a,<span class="type">float</span> b,<span class="type">float</span> c,<span class="type">float</span> d,<span class="type">float</span> e,</span></span><br><span class="line"><span class="params">          <span class="type">float</span> f,<span class="type">float</span> g,<span class="type">float</span> h,<span class="type">float</span> i,<span class="type">float</span> j)</span></span><br><span class="line">		&#123;&#125;<span class="comment">//传递十个参数</span></span><br><span class="line"></span><br><span class="line"><span class="type">int</span> <span class="title function_">main</span><span class="params">()</span>&#123;</span><br><span class="line">    func(<span class="number">1</span>,<span class="number">2</span>,<span class="number">3</span>,<span class="number">4</span>,<span class="number">5</span>,<span class="number">6</span>,<span class="number">7</span>,<span class="number">8</span>,<span class="number">9</span>,<span class="number">10</span>);</span><br><span class="line">    <span class="keyword">return</span> <span class="number">0</span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
 <figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">┌──(root㉿Executor)-[/mnt/c/Users/86135/desktop/float]</span><br><span class="line">└─# gcc main.c -O0 -o main</span><br><span class="line"></span><br><span class="line">┌──(root㉿Executor)-[/mnt/c/Users/86135/desktop/float]</span><br><span class="line">└─# objdump main -d &gt; main.asm</span><br></pre></td></tr></table></figure>
-
 <p><code>main.asm</code></p>
 <p>main函数</p>
 <figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br></pre></td><td class="code"><pre><span class="line">0000000000001158 &lt;main&gt;:</span><br><span class="line">;开端,帧指针压栈保存,帧指针获得此时栈顶指针拷贝</span><br><span class="line">    1158:	55                   	push   %rbp</span><br><span class="line">    1159:	48 89 e5             	mov    %rsp,%rbp</span><br><span class="line">    ;func的参数从右向左压栈,首先安排10的位置</span><br><span class="line">    ;PC相对寻址,将M[rip+0xea0]放在xmm0寄存器</span><br><span class="line">    115c:	f3 0f 10 05 a0 0e 00 	movss  0xea0(%rip),%xmm0        # 2004 &lt;_IO_stdin_used+0x4&gt;</span><br><span class="line">    1163:	00 </span><br><span class="line">    1164:	48 8d 64 24 f8       	lea    -0x8(%rsp),%rsp	;rsp=rsp-8,栈上申请8字节空间</span><br><span class="line">    1169:	f3 0f 11 04 24       	movss  %xmm0,(%rsp)		;从xmm0搬到M[rsp]上</span><br><span class="line">    </span><br><span class="line">    ;重复刚才的过程,压栈从右向左数的第二个参数</span><br><span class="line">    116e:	f3 0f 10 05 92 0e 00 	movss  0xe92(%rip),%xmm0        # 2008 &lt;_IO_stdin_used+0x8&gt;</span><br><span class="line">    1175:	00 </span><br><span class="line">    1176:	48 8d 64 24 f8       	lea    -0x8(%rsp),%rsp</span><br><span class="line">    117b:	f3 0f 11 04 24       	movss  %xmm0,(%rsp)</span><br><span class="line">    </span><br><span class="line">    ;此后的八个参数恰好用8个媒体寄存器xmm0~7传递</span><br><span class="line">    1180:	f3 0f 10 3d 84 0e 00 	movss  0xe84(%rip),%xmm7        # 200c &lt;_IO_stdin_used+0xc&gt;</span><br><span class="line">    1187:	00 </span><br><span class="line">    1188:	f3 0f 10 35 80 0e 00 	movss  0xe80(%rip),%xmm6        # 2010 &lt;_IO_stdin_used+0x10&gt;</span><br><span class="line">    118f:	00 </span><br><span class="line">    1190:	f3 0f 10 2d 7c 0e 00 	movss  0xe7c(%rip),%xmm5        # 2014 &lt;_IO_stdin_used+0x14&gt;</span><br><span class="line">    1197:	00 </span><br><span class="line">    1198:	f3 0f 10 25 78 0e 00 	movss  0xe78(%rip),%xmm4        # 2018 &lt;_IO_stdin_used+0x18&gt;</span><br><span class="line">    119f:	00 </span><br><span class="line">    11a0:	f3 0f 10 1d 74 0e 00 	movss  0xe74(%rip),%xmm3        # 201c &lt;_IO_stdin_used+0x1c&gt;</span><br><span class="line">    11a7:	00 </span><br><span class="line">    11a8:	f3 0f 10 15 70 0e 00 	movss  0xe70(%rip),%xmm2        # 2020 &lt;_IO_stdin_used+0x20&gt;</span><br><span class="line">    11af:	00 </span><br><span class="line">    11b0:	f3 0f 10 0d 6c 0e 00 	movss  0xe6c(%rip),%xmm1        # 2024 &lt;_IO_stdin_used+0x24&gt;</span><br><span class="line">    11b7:	00 </span><br><span class="line">    </span><br><span class="line">    ;蜜汁操作,就这个左边的参数搞特殊,非得用eax中转2一下,也是少见的64位机器上用到eax寄存器</span><br><span class="line">    11b8:	8b 05 6a 0e 00 00    	mov    0xe6a(%rip),%eax        # 2028 &lt;_IO_stdin_used+0x28&gt;</span><br><span class="line">    11be:	66 0f 6e c0          	movd   %eax,%xmm0</span><br><span class="line">    </span><br><span class="line">    ;参数准备完毕,可以调用函数func</span><br><span class="line">    11c2:	e8 62 ff ff ff       	call   1129 &lt;func&gt;</span><br><span class="line">    </span><br><span class="line">    ;尾声</span><br><span class="line">    11c7:	48 83 c4 10          	add    $0x10,%rsp	;传递最右侧两个参数时压栈16字节,此时正好退回16个字节.调用者清理参数</span><br><span class="line">    </span><br><span class="line">    ;eax存放main函数的返回值0</span><br><span class="line">    11cb:	b8 00 00 00 00       	mov    $0x0,%eax</span><br><span class="line">    11d0:	c9                   	leave  	;leave指令将栈中存放的rbp退还</span><br><span class="line">    11d1:	c3                   	ret    ;函数返回</span><br><span class="line">    </span><br><span class="line">    ;滥竽充数填充字节</span><br><span class="line">    11d2:	66 2e 0f 1f 84 00 00 	cs nopw 0x0(%rax,%rax,1)</span><br><span class="line">    11d9:	00 00 00 </span><br><span class="line">    11dc:	0f 1f 40 00          	nopl   0x0(%rax)</span><br></pre></td></tr></table></figure>
-
 <p>func函数</p>
 <figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line">0000000000001129 &lt;func&gt;:</span><br><span class="line">    1129:	55                   	push   %rbp</span><br><span class="line">    112a:	48 89 e5             	mov    %rsp,%rbp</span><br><span class="line">    112d:	f3 0f 11 45 fc       	movss  %xmm0,-0x4(%rbp)</span><br><span class="line">    1132:	f3 0f 11 4d f8       	movss  %xmm1,-0x8(%rbp)</span><br><span class="line">    1137:	f3 0f 11 55 f4       	movss  %xmm2,-0xc(%rbp)</span><br><span class="line">    113c:	f3 0f 11 5d f0       	movss  %xmm3,-0x10(%rbp)</span><br><span class="line">    1141:	f3 0f 11 65 ec       	movss  %xmm4,-0x14(%rbp)</span><br><span class="line">    1146:	f3 0f 11 6d e8       	movss  %xmm5,-0x18(%rbp)</span><br><span class="line">    114b:	f3 0f 11 75 e4       	movss  %xmm6,-0x1c(%rbp)</span><br><span class="line">    1150:	f3 0f 11 7d e0       	movss  %xmm7,-0x20(%rbp)</span><br><span class="line">    1155:	90                   	nop</span><br><span class="line">    1156:	5d                   	pop    %rbp</span><br><span class="line">    1157:	c3                   	ret    </span><br></pre></td></tr></table></figure>
-
-<p>这里使用媒体寄存器传递的参数又压入栈中,这和前面我们学习过的x64linux使用的System V的整数传参时的约定是相同的</p>
+<p>这里使用媒体寄存器传递的参数又压入栈中,这和前面我们学习过的x64linux使用的System
+V的整数传参时的约定是相同的</p>
 <p>三个问题</p>
-<p><strong>1.<code>movss  0xea0(%rip),%xmm0 </code>此处的<code>0xea0(%rip)</code>指向啥东西</strong></p>
+<p><strong>1.<code>movss  0xea0(%rip),%xmm0</code>此处的<code>0xea0(%rip)</code>指向啥东西</strong></p>
 <p>使用ida64反编译观察</p>
 <figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line">.text:000000000000115C                 movss   xmm0, cs:dword_2004</span><br><span class="line">...</span><br><span class="line">.rodata:0000000000002004 dword_2004      dd 41200000h            ; DATA XREF: main+4↑r</span><br><span class="line">.rodata:0000000000002008 dword_2008      dd 41100000h            ; DATA XREF: main+16↑r</span><br><span class="line">.rodata:000000000000200C dword_200C      dd 41000000h            ; DATA XREF: main+28↑r</span><br><span class="line">.rodata:0000000000002010 dword_2010      dd 40E00000h            ; DATA XREF: main+30↑r</span><br><span class="line">.rodata:0000000000002014 dword_2014      dd 40C00000h            ; DATA XREF: main+38↑r</span><br><span class="line">.rodata:0000000000002018 dword_2018      dd 40A00000h            ; DATA XREF: main+40↑r</span><br><span class="line">.rodata:000000000000201C dword_201C      dd 40800000h            ; DATA XREF: main+48↑r</span><br><span class="line">.rodata:0000000000002020 dword_2020      dd 40400000h            ; DATA XREF: main+50↑r</span><br><span class="line">.rodata:0000000000002024 dword_2024      dd 40000000h            ; DATA XREF: main+58↑r</span><br><span class="line">.rodata:0000000000002028 dword_2028      dd 3F800000h            ; DATA XREF: main+60↑r</span><br></pre></td></tr></table></figure>
-
 <p>可以发现,该位置在只读变量rodata区,存了这么一个值<code>0x41200000h</code></p>
 <p>然而我们主函数中传递的是10啊,这存了一个鬼啊?</p>
 <p>这就是IEEE754规定的浮点数存储方法了,下面我们可以算他一下</p>
-<p>这个16进制数展开成一个32位二进制数为<br>$$<br>0100’0001’0010’0000’0000’0000’0000’0000<br>$$<br>按照s,exp,frac划分开</p>
+<p>这个16进制数展开成一个32位二进制数为 <span class="math display">\[
+0100&#39;0001&#39;0010&#39;0000&#39;0000&#39;0000&#39;0000&#39;0000
+\]</span> 按照s,exp,frac划分开</p>
 <table>
 <thead>
 <tr>
@@ -595,40 +800,45 @@
 <th>frac</th>
 </tr>
 </thead>
-<tbody><tr>
+<tbody>
+<tr>
 <td>0</td>
 <td>1000 0010</td>
 <td>010 0000 0000 0000 0000</td>
 </tr>
-</tbody></table>
-<p>对于一个32位的float,其exp占用k&#x3D;8位,其frac占用n&#x3D;23位</p>
-<p>$Bias&#x3D;2^{k-1}-1&#x3D;2^7-1&#x3D;127(10)&#x3D;0111’1111(2)$</p>
-<p>$E&#x3D;exp-Bias&#x3D;1000’0010-0111’1111&#x3D;0000’0011&#x3D;3$</p>
-<p>$M&#x3D;1+frac&#x3D;1+2^{-2}&#x3D;\frac{5}{4}$</p>
-<p>$(-1)^s\times M\times 2^E&#x3D;1\times \frac{5}{4}\times 2^3&#x3D;10$</p>
+</tbody>
+</table>
+<p>对于一个32位的float,其exp占用k=8位,其frac占用n=23位</p>
+<p><span
+class="math inline">\(Bias=2^{k-1}-1=2^7-1=127(10)=0111&#39;1111(2)\)</span></p>
+<p><span
+class="math inline">\(E=exp-Bias=1000&#39;0010-0111&#39;1111=0000&#39;0011=3\)</span></p>
+<p><span
+class="math inline">\(M=1+frac=1+2^{-2}=\frac{5}{4}\)</span></p>
+<p><span class="math inline">\((-1)^s\times M\times 2^E=1\times
+\frac{5}{4}\times 2^3=10\)</span></p>
 <p>正好是我们主函数中对func传递的参数中最右边那个</p>
 <p>2.<strong>在最右侧两个参数压栈传递的时候</strong></p>
 <figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">1164:	48 8d 64 24 f8       	lea    -0x8(%rsp),%rsp	;rsp=rsp-8,栈上申请8字节空间</span><br><span class="line">1169:	f3 0f 11 04 24       	movss  %xmm0,(%rsp)		;从xmm0搬到M[rsp]上</span><br></pre></td></tr></table></figure>
-
 <p>为啥每个参数要在栈上开8字节的空间?</p>
 <p>后面func中将媒体寄存器中的参数压栈的时候却每个参数占用4字节的空间.</p>
-<p>这也是x64Linux上System V的调用约定,参数传递的时候要8字节对齐,不管是int还是long还是double还是float,只要是用栈传递参数,就要每个参数8字节对齐</p>
+<p>这也是x64Linux上System
+V的调用约定,参数传递的时候要8字节对齐,不管是int还是long还是double还是float,只要是用栈传递参数,就要每个参数8字节对齐</p>
 <p><strong>3.我们在main函数调用func时传递的参数都是立即数<code>1,2,3,4,5,6,7,8,9,10</code></strong></p>
 <p>但是在汇编层面上为什么没有直接用立即数<code>$1,$2</code>这种,而是采用PC相对寻址,去.rodata区找变量呢?</p>
-<p><code>   115c:	f3 0f 10 05 a0 0e 00 	movss  0xea0(%rip),%xmm0</code></p>
+<p><code>115c:  f3 0f 10 05 a0 0e 00    movss  0xea0(%rip),%xmm0</code></p>
 <p>这是浮点常数和整数常数的区别</p>
 <p>与浮点操作相关的指令,不能以立即数作为操作数,编译器必须为所有常数分配和初始化存储空间</p>
 <p>将常数写入内存,然后采用各种寻址方法去找常数</p>
-<h4 id="返回值约定"><a href="#返回值约定" class="headerlink" title="返回值约定"></a>返回值约定</h4><p>如果一个函数返回值为浮点类型,会使用什么寄存器返回呢?eax还是xmm0?</p>
+<h4 id="返回值约定">返回值约定</h4>
+<p>如果一个函数返回值为浮点类型,会使用什么寄存器返回呢?eax还是xmm0?</p>
 <figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="type">float</span> <span class="title function_">func</span><span class="params">()</span>&#123;</span><br><span class="line">    <span class="keyword">return</span> <span class="number">1.0</span>;</span><br><span class="line">&#125;</span><br><span class="line"></span><br></pre></td></tr></table></figure>
-
 <figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">┌──(root㉿Executor)-[/mnt/c/Users/86135/desktop/float]</span><br><span class="line">└─# gcc main.c -O0 -c -o main.o</span><br><span class="line"></span><br><span class="line">┌──(root㉿Executor)-[/mnt/c/Users/86135/desktop/float]</span><br><span class="line">└─# objdump main.o -d &gt; main.s</span><br></pre></td></tr></table></figure>
-
 <p><code>main.s</code></p>
 <figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">0000000000000000 &lt;func&gt;:</span><br><span class="line">   0:	55                   	push   %rbp</span><br><span class="line">   1:	48 89 e5             	mov    %rsp,%rbp</span><br><span class="line">   4:	f3 0f 10 05 00 00 00 	movss  0x0(%rip),%xmm0        # c &lt;func+0xc&gt;</span><br><span class="line">   b:	00 </span><br><span class="line">   c:	5d                   	pop    %rbp</span><br><span class="line">   d:	c3                   	ret    </span><br></pre></td></tr></table></figure>
-
 <p>用的xmm0寄存器传递浮点参数</p>
-<h4 id=""><a href="#" class="headerlink" title=""></a></h4>
+<h4 id="section"></h4>
+
     </div>
 
     
@@ -711,7 +921,7 @@
 
       <!--noindex-->
       <div class="post-toc-wrap sidebar-panel">
-          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#%E6%B5%AE%E7%82%B9%E6%95%B0%E7%9A%84%E6%9C%BA%E5%99%A8%E7%BA%A7%E8%A1%A8%E7%A4%BA"><span class="nav-number">1.</span> <span class="nav-text">浮点数的机器级表示</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#%E8%8D%AF%E5%BC%95%E5%AD%90%E5%92%8C%E5%91%BD%E6%A0%B9%E5%AD%90"><span class="nav-number">1.1.</span> <span class="nav-text">药引子和命根子</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E4%BB%8E%E5%8D%81%E8%BF%9B%E5%88%B6%E7%A7%91%E5%AD%A6%E8%AE%A1%E6%95%B0%E6%B3%95%E8%AF%B4%E8%B5%B7"><span class="nav-number">1.1.1.</span> <span class="nav-text">从十进制科学计数法说起</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E4%BB%8E%E7%A7%91%E8%AE%A1%E6%B3%95%E5%88%B0%E4%BA%8C%E8%BF%9B%E5%88%B6"><span class="nav-number">1.1.2.</span> <span class="nav-text">从科计法到二进制</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#IEEE754%E6%A0%87%E5%87%86"><span class="nav-number">1.2.</span> <span class="nav-text">IEEE754标准</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%B5%AE%E7%82%B9%E6%95%B0%E7%9A%84%E6%89%8B%E5%86%99%E8%A1%A8%E7%A4%BA%E6%B3%95"><span class="nav-number">1.2.1.</span> <span class="nav-text">浮点数的手写表示法</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%B5%AE%E7%82%B9%E6%95%B0%E7%9A%84%E5%AE%9E%E9%99%85%E5%AD%98%E5%82%A8%E7%8A%B6%E6%80%81"><span class="nav-number">1.2.2.</span> <span class="nav-text">浮点数的实际存储状态</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#%E7%8A%B6%E6%80%81%E8%AE%BE%E8%AE%A1"><span class="nav-number">1.2.2.1.</span> <span class="nav-text">状态设计</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E8%A7%84%E6%A0%BC%E5%8C%96%E6%95%B0"><span class="nav-number">1.2.2.2.</span> <span class="nav-text">规格化数</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#exp"><span class="nav-number">1.2.2.3.</span> <span class="nav-text">exp</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#frac"><span class="nav-number">1.2.2.4.</span> <span class="nav-text">frac</span></a><ol class="nav-child"><li class="nav-item nav-level-5"><a class="nav-link" href="#%E6%80%BB%E7%BB%93"><span class="nav-number">1.2.2.4.1.</span> <span class="nav-text">总结</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#%E8%8C%83%E5%9B%B4"><span class="nav-number">1.2.2.4.2.</span> <span class="nav-text">范围</span></a></li></ol></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E9%9D%9E%E8%A7%84%E6%A0%BC%E5%8C%96%E6%95%B0"><span class="nav-number">1.2.2.5.</span> <span class="nav-text">非规格化数</span></a><ol class="nav-child"><li class="nav-item nav-level-5"><a class="nav-link" href="#exp-1"><span class="nav-number">1.2.2.5.1.</span> <span class="nav-text">exp</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#frac-1"><span class="nav-number">1.2.2.5.2.</span> <span class="nav-text">frac</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#%E6%80%BB%E7%BB%93-1"><span class="nav-number">1.2.2.5.3.</span> <span class="nav-text">总结</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#%E8%8C%83%E5%9B%B4-1"><span class="nav-number">1.2.2.5.4.</span> <span class="nav-text">范围</span></a></li></ol></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E4%BB%A5%E5%85%AB%E4%BD%8D%E6%B5%AE%E7%82%B9%E6%95%B0%E4%B8%BA%E4%BE%8B"><span class="nav-number">1.2.3.</span> <span class="nav-text">以八位浮点数为例</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#1-%E9%9D%9E%E8%A7%84%E6%A0%BC%E5%8C%96%E6%95%B0%E5%91%88%E7%8E%B0%E7%AD%89%E5%B7%AE%E6%95%B0%E5%88%97-%E7%9B%B8%E9%82%BB%E4%B8%A4%E9%A1%B9%E7%9B%B8%E5%B7%AE-frac-1-512-%E8%BF%99%E6%98%AF%E4%B8%BA%E4%BB%80%E4%B9%88"><span class="nav-number">1.2.3.1.</span> <span class="nav-text">1.非规格化数呈现等差数列,相邻两项相差$\frac{1}{512}$,这是为什么?</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#2-%E4%BB%8E%E6%9C%80%E5%A4%A7%E7%9A%84%E9%9D%9E%E8%A7%84%E6%A0%BC%E5%8C%96%E6%95%B0%E5%88%B0%E6%9C%80%E5%B0%8F%E7%9A%84%E8%A7%84%E6%A0%BC%E5%8C%96%E6%95%B0%E8%B2%8C%E4%BC%BC%E4%BB%8D%E7%84%B6%E7%BB%B4%E6%8C%81%E4%BA%86%E9%9D%9E%E8%A7%84%E6%A0%BC%E5%8C%96%E6%95%B0%E7%9A%84%E5%85%AC%E5%B7%AE-%E9%82%A3%E4%B9%88%E8%A7%84%E6%A0%BC%E5%8C%96%E6%95%B0%E4%B9%9F%E6%98%AF%E7%AD%89%E5%B7%AE%E6%95%B0%E5%88%97%E5%90%97"><span class="nav-number">1.2.3.2.</span> <span class="nav-text">2.从最大的非规格化数到最小的规格化数貌似仍然维持了非规格化数的公差,那么规格化数也是等差数列吗?</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#3-%E9%98%B6%E7%A0%81%E6%9C%80%E5%B0%8F%E7%9A%84%E8%A7%84%E6%A0%BC%E5%8C%96%E6%95%B0%E4%B8%80%E5%AE%9A%E5%8F%AF%E4%BB%A5%E5%92%8C%E9%9D%9E%E8%A7%84%E6%A0%BC%E5%8C%96%E6%95%B0%E2%80%9D%E5%B9%B3%E6%BB%91%E8%BF%87%E6%B8%A1%E2%80%9D%E5%90%97"><span class="nav-number">1.2.3.3.</span> <span class="nav-text">3.阶码最小的规格化数一定可以和非规格化数”平滑过渡”吗</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E8%88%8D%E5%85%A5%E9%97%AE%E9%A2%98"><span class="nav-number">1.2.4.</span> <span class="nav-text">舍入问题</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#x86-64%E4%B8%8A%E6%B5%AE%E7%82%B9%E6%95%B0%E7%9A%84%E6%9C%BA%E5%99%A8%E7%BA%A7%E8%A1%A8%E7%A4%BA"><span class="nav-number">1.3.</span> <span class="nav-text">x86-64上浮点数的机器级表示</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#16%E4%B8%AA%E5%AA%92%E4%BD%93%E5%AF%84%E5%AD%98%E5%99%A8"><span class="nav-number">1.3.1.</span> <span class="nav-text">16个媒体寄存器</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%B1%87%E7%BC%96%E6%8C%87%E4%BB%A4"><span class="nav-number">1.3.2.</span> <span class="nav-text">汇编指令</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#%E6%A0%87%E9%87%8F%E6%8C%87%E4%BB%A4"><span class="nav-number">1.3.2.1.</span> <span class="nav-text">标量指令</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E6%B5%AE%E7%82%B9%E4%BC%A0%E9%80%81%E6%8C%87%E4%BB%A4"><span class="nav-number">1.3.2.2.</span> <span class="nav-text">浮点传送指令</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E6%B5%AE%E7%82%B9%E8%BD%AC%E6%8D%A2%E6%8C%87%E4%BB%A4"><span class="nav-number">1.3.2.3.</span> <span class="nav-text">浮点转换指令</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E5%85%B6%E4%BB%96%E6%8C%87%E4%BB%A4"><span class="nav-number">1.3.2.4.</span> <span class="nav-text">其他指令</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#System-V-%E8%B0%83%E7%94%A8%E7%BA%A6%E5%AE%9A"><span class="nav-number">1.3.3.</span> <span class="nav-text">System V 调用约定</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#%E5%8F%82%E6%95%B0%E4%BC%A0%E9%80%92%E7%BA%A6%E5%AE%9A"><span class="nav-number">1.3.3.1.</span> <span class="nav-text">参数传递约定</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E8%BF%94%E5%9B%9E%E5%80%BC%E7%BA%A6%E5%AE%9A"><span class="nav-number">1.3.3.2.</span> <span class="nav-text">返回值约定</span></a></li><li class="nav-item nav-level-4"><a class="nav-link"><span class="nav-number">1.3.3.3.</span> <span class="nav-text"></span></a></li></ol></li></ol></li></ol></li></ol></div>
+          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#%E6%B5%AE%E7%82%B9%E6%95%B0%E7%9A%84%E6%9C%BA%E5%99%A8%E7%BA%A7%E8%A1%A8%E7%A4%BA"><span class="nav-number">1.</span> <span class="nav-text">浮点数的机器级表示</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#%E8%8D%AF%E5%BC%95%E5%AD%90%E5%92%8C%E5%91%BD%E6%A0%B9%E5%AD%90"><span class="nav-number">1.1.</span> <span class="nav-text">药引子和命根子</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E4%BB%8E%E5%8D%81%E8%BF%9B%E5%88%B6%E7%A7%91%E5%AD%A6%E8%AE%A1%E6%95%B0%E6%B3%95%E8%AF%B4%E8%B5%B7"><span class="nav-number">1.1.1.</span> <span class="nav-text">从十进制科学计数法说起</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E4%BB%8E%E7%A7%91%E8%AE%A1%E6%B3%95%E5%88%B0%E4%BA%8C%E8%BF%9B%E5%88%B6"><span class="nav-number">1.1.2.</span> <span class="nav-text">从科计法到二进制</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#ieee754%E6%A0%87%E5%87%86"><span class="nav-number">1.2.</span> <span class="nav-text">IEEE754标准</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%B5%AE%E7%82%B9%E6%95%B0%E7%9A%84%E6%89%8B%E5%86%99%E8%A1%A8%E7%A4%BA%E6%B3%95"><span class="nav-number">1.2.1.</span> <span class="nav-text">浮点数的手写表示法</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%B5%AE%E7%82%B9%E6%95%B0%E7%9A%84%E5%AE%9E%E9%99%85%E5%AD%98%E5%82%A8%E7%8A%B6%E6%80%81"><span class="nav-number">1.2.2.</span> <span class="nav-text">浮点数的实际存储状态</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#%E7%8A%B6%E6%80%81%E8%AE%BE%E8%AE%A1"><span class="nav-number">1.2.2.1.</span> <span class="nav-text">状态设计</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E8%A7%84%E6%A0%BC%E5%8C%96%E6%95%B0"><span class="nav-number">1.2.2.2.</span> <span class="nav-text">规格化数</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#exp"><span class="nav-number">1.2.2.3.</span> <span class="nav-text">exp</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#frac"><span class="nav-number">1.2.2.4.</span> <span class="nav-text">frac</span></a><ol class="nav-child"><li class="nav-item nav-level-5"><a class="nav-link" href="#%E6%80%BB%E7%BB%93"><span class="nav-number">1.2.2.4.1.</span> <span class="nav-text">总结</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#%E8%8C%83%E5%9B%B4"><span class="nav-number">1.2.2.4.2.</span> <span class="nav-text">范围</span></a></li></ol></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E9%9D%9E%E8%A7%84%E6%A0%BC%E5%8C%96%E6%95%B0"><span class="nav-number">1.2.2.5.</span> <span class="nav-text">非规格化数</span></a><ol class="nav-child"><li class="nav-item nav-level-5"><a class="nav-link" href="#exp-1"><span class="nav-number">1.2.2.5.1.</span> <span class="nav-text">exp</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#frac-1"><span class="nav-number">1.2.2.5.2.</span> <span class="nav-text">frac</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#%E6%80%BB%E7%BB%93-1"><span class="nav-number">1.2.2.5.3.</span> <span class="nav-text">总结</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#%E8%8C%83%E5%9B%B4-1"><span class="nav-number">1.2.2.5.4.</span> <span class="nav-text">范围</span></a></li></ol></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E4%BB%A5%E5%85%AB%E4%BD%8D%E6%B5%AE%E7%82%B9%E6%95%B0%E4%B8%BA%E4%BE%8B"><span class="nav-number">1.2.3.</span> <span class="nav-text">以八位浮点数为例</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#%E9%9D%9E%E8%A7%84%E6%A0%BC%E5%8C%96%E6%95%B0%E5%91%88%E7%8E%B0%E7%AD%89%E5%B7%AE%E6%95%B0%E5%88%97%E7%9B%B8%E9%82%BB%E4%B8%A4%E9%A1%B9%E7%9B%B8%E5%B7%AEfrac1512%E8%BF%99%E6%98%AF%E4%B8%BA%E4%BB%80%E4%B9%88"><span class="nav-number">1.2.3.1.</span> <span class="nav-text">1.非规格化数呈现等差数列,相邻两项相差\(\frac{1}{512}\),这是为什么?</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E4%BB%8E%E6%9C%80%E5%A4%A7%E7%9A%84%E9%9D%9E%E8%A7%84%E6%A0%BC%E5%8C%96%E6%95%B0%E5%88%B0%E6%9C%80%E5%B0%8F%E7%9A%84%E8%A7%84%E6%A0%BC%E5%8C%96%E6%95%B0%E8%B2%8C%E4%BC%BC%E4%BB%8D%E7%84%B6%E7%BB%B4%E6%8C%81%E4%BA%86%E9%9D%9E%E8%A7%84%E6%A0%BC%E5%8C%96%E6%95%B0%E7%9A%84%E5%85%AC%E5%B7%AE%E9%82%A3%E4%B9%88%E8%A7%84%E6%A0%BC%E5%8C%96%E6%95%B0%E4%B9%9F%E6%98%AF%E7%AD%89%E5%B7%AE%E6%95%B0%E5%88%97%E5%90%97"><span class="nav-number">1.2.3.2.</span> <span class="nav-text">2.从最大的非规格化数到最小的规格化数貌似仍然维持了非规格化数的公差,那么规格化数也是等差数列吗?</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E9%98%B6%E7%A0%81%E6%9C%80%E5%B0%8F%E7%9A%84%E8%A7%84%E6%A0%BC%E5%8C%96%E6%95%B0%E4%B8%80%E5%AE%9A%E5%8F%AF%E4%BB%A5%E5%92%8C%E9%9D%9E%E8%A7%84%E6%A0%BC%E5%8C%96%E6%95%B0%E5%B9%B3%E6%BB%91%E8%BF%87%E6%B8%A1%E5%90%97"><span class="nav-number">1.2.3.3.</span> <span class="nav-text">3.阶码最小的规格化数一定可以和非规格化数&quot;平滑过渡&quot;吗</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E8%88%8D%E5%85%A5%E9%97%AE%E9%A2%98"><span class="nav-number">1.2.4.</span> <span class="nav-text">舍入问题</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#x86-64%E4%B8%8A%E6%B5%AE%E7%82%B9%E6%95%B0%E7%9A%84%E6%9C%BA%E5%99%A8%E7%BA%A7%E8%A1%A8%E7%A4%BA"><span class="nav-number">1.3.</span> <span class="nav-text">x86-64上浮点数的机器级表示</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E4%B8%AA%E5%AA%92%E4%BD%93%E5%AF%84%E5%AD%98%E5%99%A8"><span class="nav-number">1.3.1.</span> <span class="nav-text">16个媒体寄存器</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%B1%87%E7%BC%96%E6%8C%87%E4%BB%A4"><span class="nav-number">1.3.2.</span> <span class="nav-text">汇编指令</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#%E6%A0%87%E9%87%8F%E6%8C%87%E4%BB%A4"><span class="nav-number">1.3.2.1.</span> <span class="nav-text">标量指令</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E6%B5%AE%E7%82%B9%E4%BC%A0%E9%80%81%E6%8C%87%E4%BB%A4"><span class="nav-number">1.3.2.2.</span> <span class="nav-text">浮点传送指令</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E6%B5%AE%E7%82%B9%E8%BD%AC%E6%8D%A2%E6%8C%87%E4%BB%A4"><span class="nav-number">1.3.2.3.</span> <span class="nav-text">浮点转换指令</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E5%85%B6%E4%BB%96%E6%8C%87%E4%BB%A4"><span class="nav-number">1.3.2.4.</span> <span class="nav-text">其他指令</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#system-v-%E8%B0%83%E7%94%A8%E7%BA%A6%E5%AE%9A"><span class="nav-number">1.3.3.</span> <span class="nav-text">System V 调用约定</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#%E5%8F%82%E6%95%B0%E4%BC%A0%E9%80%92%E7%BA%A6%E5%AE%9A"><span class="nav-number">1.3.3.1.</span> <span class="nav-text">参数传递约定</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E8%BF%94%E5%9B%9E%E5%80%BC%E7%BA%A6%E5%AE%9A"><span class="nav-number">1.3.3.2.</span> <span class="nav-text">返回值约定</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#section"><span class="nav-number">1.3.3.3.</span> <span class="nav-text"></span></a></li></ol></li></ol></li></ol></li></ol></div>
       </div>
       <!--/noindex-->
 

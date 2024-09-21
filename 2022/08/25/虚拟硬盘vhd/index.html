@@ -20,31 +20,18 @@
     var CONFIG = {"hostname":"dustball.top","root":"/","scheme":"Muse","version":"7.8.0","exturl":false,"sidebar":{"position":"left","display":"post","padding":18,"offset":12,"onmobile":false},"copycode":{"enable":false,"show_result":false,"style":null},"back2top":{"enable":true,"sidebar":false,"scrollpercent":false},"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":false,"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"algolia":{"hits":{"per_page":10},"labels":{"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}},"localsearch":{"enable":false,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false},"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}}};
   </script>
 
-  <meta name="description" content="虚拟硬盘vhdvirtual hard disk 用virtualbox新建的没有操作系统的虚拟电脑,选择VHD格式虚拟硬盘,固定大小2G. 刚建立的vhd虚拟硬盘文件的最后512字节是有意义的,前面其他字节都是空的 这最后512个字节是啥呢?  结构体定义1234567891011121314151617181920struct hd_ftr &#123; &#x2F;&#x2F;harddisk_footer">
+  <meta name="description" content="虚拟硬盘vhd virtual hard disk 用virtualbox新建的没有操作系统的虚拟电脑,选择VHD格式虚拟硬盘,固定大小2G. 刚建立的vhd虚拟硬盘文件的最后512字节是有意义的,前面其他字节都是空的 这最后512个字节是啥呢?   image-20220825094005879  结构体定义 1234567891011121314151617181920st">
 <meta property="og:type" content="article">
 <meta property="og:title" content="x86汇编语言 chapter 4 虚拟磁盘">
 <meta property="og:url" content="http://dustball.top/2022/08/25/%E8%99%9A%E6%8B%9F%E7%A1%AC%E7%9B%98vhd/index.html">
 <meta property="og:site_name" content="dustland">
-<meta property="og:description" content="虚拟硬盘vhdvirtual hard disk 用virtualbox新建的没有操作系统的虚拟电脑,选择VHD格式虚拟硬盘,固定大小2G. 刚建立的vhd虚拟硬盘文件的最后512字节是有意义的,前面其他字节都是空的 这最后512个字节是啥呢?  结构体定义1234567891011121314151617181920struct hd_ftr &#123; &#x2F;&#x2F;harddisk_footer">
+<meta property="og:description" content="虚拟硬盘vhd virtual hard disk 用virtualbox新建的没有操作系统的虚拟电脑,选择VHD格式虚拟硬盘,固定大小2G. 刚建立的vhd虚拟硬盘文件的最后512字节是有意义的,前面其他字节都是空的 这最后512个字节是啥呢?   image-20220825094005879  结构体定义 1234567891011121314151617181920st">
 <meta property="og:locale" content="en_US">
-<meta property="og:image" content="https://raw.githubusercontent.com/DeutschBall/DeutschBall/main/image-20220825094005879.png">
-<meta property="og:image" content="https://raw.githubusercontent.com/DeutschBall/DeutschBall/main/image-20220825094803757.png">
-<meta property="og:image" content="https://raw.githubusercontent.com/DeutschBall/DeutschBall/main/image-20220825102119209.png">
-<meta property="og:image" content="https://raw.githubusercontent.com/DeutschBall/DeutschBall/main/2843224-46fb935cd31addbd.png">
-<meta property="og:image" content="https://raw.githubusercontent.com/DeutschBall/DeutschBall/main/image-20220825105415000.png">
-<meta property="og:image" content="https://raw.githubusercontent.com/DeutschBall/DeutschBall/main/2843224-56f2056f0b36009f.png">
-<meta property="og:image" content="https://raw.githubusercontent.com/DeutschBall/DeutschBall/main/2843224-e0854f19c817c83c.png">
-<meta property="og:image" content="https://raw.githubusercontent.com/DeutschBall/DeutschBall/main/image-20220825111708551.png">
-<meta property="og:image" content="https://raw.githubusercontent.com/DeutschBall/DeutschBall/main/image-20220825113210639.png">
-<meta property="og:image" content="https://raw.githubusercontent.com/DeutschBall/DeutschBall/main/image-20220825115728499.png">
-<meta property="og:image" content="https://raw.githubusercontent.com/DeutschBall/DeutschBall/main/image-20220825115716225.png">
-<meta property="og:image" content="https://raw.githubusercontent.com/DeutschBall/DeutschBall/main/image-20220825115945064.png">
 <meta property="article:published_time" content="2022-08-25T06:54:00.000Z">
 <meta property="article:modified_time" content="2022-09-20T01:17:11.107Z">
 <meta property="article:author" content="dustball">
 <meta property="article:tag" content="x86汇编语言从实模式到保护模式">
 <meta name="twitter:card" content="summary">
-<meta name="twitter:image" content="https://raw.githubusercontent.com/DeutschBall/DeutschBall/main/image-20220825094005879.png">
 
 <link rel="canonical" href="http://dustball.top/2022/08/25/%E8%99%9A%E6%8B%9F%E7%A1%AC%E7%9B%98vhd/">
 
@@ -211,33 +198,57 @@
     <div class="post-body" itemprop="articleBody">
 
       
-        <h1 id="虚拟硬盘vhd"><a href="#虚拟硬盘vhd" class="headerlink" title="虚拟硬盘vhd"></a>虚拟硬盘vhd</h1><p>virtual hard disk</p>
+        <h1 id="虚拟硬盘vhd">虚拟硬盘vhd</h1>
+<p>virtual hard disk</p>
 <p>用virtualbox新建的没有操作系统的虚拟电脑,选择VHD格式虚拟硬盘,固定大小2G.</p>
 <p>刚建立的vhd虚拟硬盘文件的最后512字节是有意义的,前面其他字节都是空的</p>
 <p>这最后512个字节是啥呢?</p>
-<p><img src="https://raw.githubusercontent.com/DeutschBall/DeutschBall/main/image-20220825094005879.png" alt="image-20220825094005879"></p>
-<h2 id="结构体定义"><a href="#结构体定义" class="headerlink" title="结构体定义"></a>结构体定义</h2><figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br></pre></td><td class="code"><pre><span class="line"><span class="class"><span class="keyword">struct</span> <span class="title">hd_ftr</span> &#123;</span> <span class="comment">//harddisk_footer</span></span><br><span class="line">  <span class="type">char</span>   cookie[<span class="number">8</span>];       <span class="comment">/* Identifies original creator of the disk      */</span> <span class="comment">//魔数</span></span><br><span class="line">  u32    features;        <span class="comment">/* Feature Support -- see below                 */</span> </span><br><span class="line">  u32    ff_version;      <span class="comment">/* (major,minor) version of disk file           */</span> </span><br><span class="line">  u64    data_offset;     <span class="comment">/* Abs. offset from SOF to next structure       */</span> </span><br><span class="line">  u32    timestamp;       <span class="comment">/* Creation time.  secs since 1/1/2000GMT       */</span> </span><br><span class="line">  <span class="type">char</span>   crtr_app[<span class="number">4</span>];     <span class="comment">/* Creator application                          */</span> </span><br><span class="line">  u32    crtr_ver;        <span class="comment">/* Creator version (major,minor)                */</span> </span><br><span class="line">  u32    crtr_os;         <span class="comment">/* Creator host OS                              */</span> </span><br><span class="line">  u64    orig_size;       <span class="comment">/* Size at creation (bytes)                     */</span> </span><br><span class="line">  u64    curr_size;       <span class="comment">/* Current size of disk (bytes)                 */</span> </span><br><span class="line">  u32    geometry;        <span class="comment">/* Disk geometry                                */</span> </span><br><span class="line">  u32    type;            <span class="comment">/* Disk type                                    */</span> </span><br><span class="line">  u32    checksum;        <span class="comment">/* 1&#x27;s comp sum of this struct.                 */</span> </span><br><span class="line">  <span class="type">vhd_uuid_t</span> uuid;        <span class="comment">/* Unique disk ID, used for naming parents      */</span> </span><br><span class="line">  <span class="type">char</span>   saved;           <span class="comment">/* one-bit -- is this disk/VM in a saved state? */</span> </span><br><span class="line">  <span class="type">char</span>   hidden;          <span class="comment">/* tapdisk-specific field: is this vdi hidden?  */</span> </span><br><span class="line">  <span class="type">char</span>   reserved[<span class="number">426</span>];   <span class="comment">/* padding                                      */</span> </span><br><span class="line">&#125;; </span><br><span class="line"></span><br></pre></td></tr></table></figure>
-
-<h3 id="cookie"><a href="#cookie" class="headerlink" title="cookie"></a>cookie</h3><p>可以理解为文件魔数,通过检查cookie值是否是”conectix”,判断该VHD是否有效</p>
+<figure>
+<img
+src="https://raw.githubusercontent.com/DeutschBall/DeutschBall/main/image-20220825094005879.png"
+alt="image-20220825094005879" />
+<figcaption aria-hidden="true">image-20220825094005879</figcaption>
+</figure>
+<h2 id="结构体定义">结构体定义</h2>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br></pre></td><td class="code"><pre><span class="line"><span class="class"><span class="keyword">struct</span> <span class="title">hd_ftr</span> &#123;</span> <span class="comment">//harddisk_footer</span></span><br><span class="line">  <span class="type">char</span>   cookie[<span class="number">8</span>];       <span class="comment">/* Identifies original creator of the disk      */</span> <span class="comment">//魔数</span></span><br><span class="line">  u32    features;        <span class="comment">/* Feature Support -- see below                 */</span> </span><br><span class="line">  u32    ff_version;      <span class="comment">/* (major,minor) version of disk file           */</span> </span><br><span class="line">  u64    data_offset;     <span class="comment">/* Abs. offset from SOF to next structure       */</span> </span><br><span class="line">  u32    timestamp;       <span class="comment">/* Creation time.  secs since 1/1/2000GMT       */</span> </span><br><span class="line">  <span class="type">char</span>   crtr_app[<span class="number">4</span>];     <span class="comment">/* Creator application                          */</span> </span><br><span class="line">  u32    crtr_ver;        <span class="comment">/* Creator version (major,minor)                */</span> </span><br><span class="line">  u32    crtr_os;         <span class="comment">/* Creator host OS                              */</span> </span><br><span class="line">  u64    orig_size;       <span class="comment">/* Size at creation (bytes)                     */</span> </span><br><span class="line">  u64    curr_size;       <span class="comment">/* Current size of disk (bytes)                 */</span> </span><br><span class="line">  u32    geometry;        <span class="comment">/* Disk geometry                                */</span> </span><br><span class="line">  u32    type;            <span class="comment">/* Disk type                                    */</span> </span><br><span class="line">  u32    checksum;        <span class="comment">/* 1&#x27;s comp sum of this struct.                 */</span> </span><br><span class="line">  <span class="type">vhd_uuid_t</span> uuid;        <span class="comment">/* Unique disk ID, used for naming parents      */</span> </span><br><span class="line">  <span class="type">char</span>   saved;           <span class="comment">/* one-bit -- is this disk/VM in a saved state? */</span> </span><br><span class="line">  <span class="type">char</span>   hidden;          <span class="comment">/* tapdisk-specific field: is this vdi hidden?  */</span> </span><br><span class="line">  <span class="type">char</span>   reserved[<span class="number">426</span>];   <span class="comment">/* padding                                      */</span> </span><br><span class="line">&#125;; </span><br><span class="line"></span><br></pre></td></tr></table></figure>
+<h3 id="cookie">cookie</h3>
+<p>可以理解为文件魔数,通过检查cookie值是否是"conectix",判断该VHD是否有效</p>
 <p>conectix是connectix公司的名称缩写,这个技术是connectix发明的</p>
-<h3 id="features"><a href="#features" class="headerlink" title="features"></a>features</h3><figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#<span class="keyword">define</span> HD_NO_FEATURES     0x00000000 </span></span><br><span class="line"><span class="meta">#<span class="keyword">define</span> HD_TEMPORARY       0x00000001 <span class="comment">/* disk can be deleted on shutdown */</span> <span class="comment">//只要关机就删除硬盘</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">define</span> HD_RESERVED        0x00000002 <span class="comment">/* <span class="doctag">NOTE:</span> must always be set        */</span> </span></span><br></pre></td></tr></table></figure>
-
-
-
-<h3 id="ff-version"><a href="#ff-version" class="headerlink" title="ff_version"></a>ff_version</h3><p>VHD版本</p>
-<h3 id="data-offset"><a href="#data-offset" class="headerlink" title="data_offset"></a>data_offset</h3><p>对固定磁盘来说,该值总是0xFFFFFFFF,不重要</p>
+<h3 id="features">features</h3>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#<span class="keyword">define</span> HD_NO_FEATURES     0x00000000 </span></span><br><span class="line"><span class="meta">#<span class="keyword">define</span> HD_TEMPORARY       0x00000001 <span class="comment">/* disk can be deleted on shutdown */</span> <span class="comment">//只要关机就删除硬盘</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">define</span> HD_RESERVED        0x00000002 <span class="comment">/* <span class="doctag">NOTE:</span> must always be set        */</span> </span></span><br></pre></td></tr></table></figure>
+<h3 id="ff_version">ff_version</h3>
+<p>VHD版本</p>
+<h3 id="data_offset">data_offset</h3>
+<p>对固定磁盘来说,该值总是0xFFFFFFFF,不重要</p>
 <p>对于动态磁盘来说,该值是dd_hdr的文件偏移量</p>
-<h3 id="timestamp"><a href="#timestamp" class="headerlink" title="timestamp"></a>timestamp</h3><p>VHD文件的创建时间,不重要</p>
-<h3 id="crtr-app"><a href="#crtr-app" class="headerlink" title="crtr_app"></a>crtr_app</h3><p>创建该VHD文件使用的应用程序,如果是virtualbox创建的则为”vbox”</p>
-<h3 id="crtr-ver"><a href="#crtr-ver" class="headerlink" title="crtr_ver"></a>crtr_ver</h3><p>创建版本,不同磁盘版本管理方法不同</p>
-<h3 id="crtr-os"><a href="#crtr-os" class="headerlink" title="crtr_os"></a>crtr_os</h3><p>操作系统枚举值</p>
-<p><img src="https://raw.githubusercontent.com/DeutschBall/DeutschBall/main/image-20220825094803757.png" alt="image-20220825094803757"></p>
-<h3 id="orig-size"><a href="#orig-size" class="headerlink" title="orig_size"></a>orig_size</h3><p>创建时该虚拟磁盘的可用寻址空间,大小等于整个vhd文件大小减去该尾部扇区512字节</p>
+<h3 id="timestamp">timestamp</h3>
+<p>VHD文件的创建时间,不重要</p>
+<h3 id="crtr_app">crtr_app</h3>
+<p>创建该VHD文件使用的应用程序,如果是virtualbox创建的则为"vbox"</p>
+<h3 id="crtr_ver">crtr_ver</h3>
+<p>创建版本,不同磁盘版本管理方法不同</p>
+<h3 id="crtr_os">crtr_os</h3>
+<p>操作系统枚举值</p>
+<figure>
+<img
+src="https://raw.githubusercontent.com/DeutschBall/DeutschBall/main/image-20220825094803757.png"
+alt="image-20220825094803757" />
+<figcaption aria-hidden="true">image-20220825094803757</figcaption>
+</figure>
+<h3 id="orig_size">orig_size</h3>
+<p>创建时该虚拟磁盘的可用寻址空间,大小等于整个vhd文件大小减去该尾部扇区512字节</p>
 <p>该nobody.vhd文件在创建时我们选择的大小是整2G,用010editor打开观察,发现除了最后一个扇区正好2G,全空.</p>
 <p>加上最后一个扇区则为2GB+512B</p>
-<h3 id="curr-size"><a href="#curr-size" class="headerlink" title="curr_size"></a>curr_size</h3><p>当前大小,可能是扩容后的可用寻址空间</p>
-<h3 id="geometry"><a href="#geometry" class="headerlink" title="geometry"></a>geometry</h3><p>几何参数,即柱面数C,磁头数H,扇区数S</p>
-<p><img src="https://raw.githubusercontent.com/DeutschBall/DeutschBall/main/image-20220825102119209.png" alt="image-20220825102119209"></p>
+<h3 id="curr_size">curr_size</h3>
+<p>当前大小,可能是扩容后的可用寻址空间</p>
+<h3 id="geometry">geometry</h3>
+<p>几何参数,即柱面数C,磁头数H,扇区数S</p>
+<figure>
+<img
+src="https://raw.githubusercontent.com/DeutschBall/DeutschBall/main/image-20220825102119209.png"
+alt="image-20220825102119209" />
+<figcaption aria-hidden="true">image-20220825102119209</figcaption>
+</figure>
 <p>VHD规范中,每个扇区sector大小是512B</p>
 <p>刚建立的2G的虚拟硬盘,有4161个柱面</p>
 <p>16个磁头,即16个盘面</p>
@@ -245,20 +256,20 @@
 <p>VHD文件最开始的512字节,就对磁盘的0面0道1扇区,也就是主引导扇区</p>
 <p>接下来是0面0道2扇区</p>
 <p>0面0道3扇区</p>
-<p>…</p>
+<p>...</p>
 <p>0面0道63扇区</p>
 <p>1面0道1扇区</p>
 <p>1面0道2扇区</p>
-<p>…</p>
+<p>...</p>
 <p>1面0道63扇区</p>
-<p>…</p>
+<p>...</p>
 <p>15面0道0扇区</p>
 <p>15面0道1扇区</p>
 <p>15面0道63扇区</p>
 <p>0面1道0扇区</p>
-<h3 id="type"><a href="#type" class="headerlink" title="type"></a>type</h3><p>VHD类型</p>
+<h3 id="type">type</h3>
+<p>VHD类型</p>
 <figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#<span class="keyword">define</span> HD_TYPE_NONE       0 <span class="comment">//无类型</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">define</span> HD_TYPE_FIXED      2 <span class="comment">//固定大小 </span></span></span><br><span class="line"><span class="meta">#<span class="keyword">define</span> HD_TYPE_DYNAMIC    3 <span class="comment">//动态大小</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">define</span> HD_TYPE_DIFF       4 <span class="comment">//差分磁盘</span></span></span><br></pre></td></tr></table></figure>
-
 <blockquote>
 <p>前三个容易理解,第四个差分磁盘是什么呢?</p>
 <p>差分盘分成母盘和子盘,一个母盘可以带好几个子盘,母盘存放这几个子盘共有的东西,比如操作系统代码,就跟so动态库似的可以复用</p>
@@ -269,35 +280,77 @@
 <p>因此可以用母盘放8G的操作系统,四个子盘每个2G存放各自的数据.</p>
 <p>这样总共占用物理磁盘16G</p>
 </blockquote>
-<h3 id="checksum"><a href="#checksum" class="headerlink" title="checksum"></a>checksum</h3><p>检校和</p>
+<h3 id="checksum">checksum</h3>
+<p>检校和</p>
 <p>最后这个扇区的所有字节相加得到的32位数按位取反</p>
-<h3 id="uuid"><a href="#uuid" class="headerlink" title="uuid"></a>uuid</h3><p>VHD识别号,决定VHD主从关系</p>
-<h3 id="saved"><a href="#saved" class="headerlink" title="saved"></a>saved</h3><p>动态磁盘才会使用,不重要</p>
-<h3 id=""><a href="#" class="headerlink" title=""></a></h3><h3 id="reserved"><a href="#reserved" class="headerlink" title="reserved"></a>reserved</h3><p>保留关键字,尚未使用</p>
-<h2 id="物理磁盘"><a href="#物理磁盘" class="headerlink" title="物理磁盘"></a>物理磁盘</h2><h3 id="磁盘结构"><a href="#磁盘结构" class="headerlink" title="磁盘结构"></a>磁盘结构</h3><h4 id="结构总览"><a href="#结构总览" class="headerlink" title="结构总览"></a>结构总览</h4><p><img src="https://raw.githubusercontent.com/DeutschBall/DeutschBall/main/2843224-46fb935cd31addbd.png" alt="img"></p>
-<p><img src="https://raw.githubusercontent.com/DeutschBall/DeutschBall/main/image-20220825105415000.png" alt="image-20220825105415000"></p>
+<h3 id="uuid">uuid</h3>
+<p>VHD识别号,决定VHD主从关系</p>
+<h3 id="saved">saved</h3>
+<p>动态磁盘才会使用,不重要</p>
+<h3 id="section"></h3>
+<h3 id="reserved">reserved</h3>
+<p>保留关键字,尚未使用</p>
+<h2 id="物理磁盘">物理磁盘</h2>
+<h3 id="磁盘结构">磁盘结构</h3>
+<h4 id="结构总览">结构总览</h4>
+<figure>
+<img
+src="https://raw.githubusercontent.com/DeutschBall/DeutschBall/main/2843224-46fb935cd31addbd.png"
+alt="img" />
+<figcaption aria-hidden="true">img</figcaption>
+</figure>
+<figure>
+<img
+src="https://raw.githubusercontent.com/DeutschBall/DeutschBall/main/image-20220825105415000.png"
+alt="image-20220825105415000" />
+<figcaption aria-hidden="true">image-20220825105415000</figcaption>
+</figure>
 <p>面0,面1,实际上就是磁头0,磁头1</p>
 <p>因为每个面上都会有一个磁头负责读写该面的数据</p>
-<h4 id="扇区和磁道的关系"><a href="#扇区和磁道的关系" class="headerlink" title="扇区和磁道的关系"></a>扇区和磁道的关系</h4><p><img src="https://raw.githubusercontent.com/DeutschBall/DeutschBall/main/2843224-56f2056f0b36009f.png" alt="img"></p>
+<h4 id="扇区和磁道的关系">扇区和磁道的关系</h4>
+<figure>
+<img
+src="https://raw.githubusercontent.com/DeutschBall/DeutschBall/main/2843224-56f2056f0b36009f.png"
+alt="img" />
+<figcaption aria-hidden="true">img</figcaption>
+</figure>
 <p>一个盘面从里向外有多个同心圆磁道,每个磁道上有多个扇区,但是任意两个磁道的扇区数是相同的,</p>
 <p>可以想象,越往外的磁道,一个扇区约长,数据约稀疏</p>
-<h4 id="磁头和柱面"><a href="#磁头和柱面" class="headerlink" title="磁头和柱面"></a>磁头和柱面</h4><p><img src="https://raw.githubusercontent.com/DeutschBall/DeutschBall/main/2843224-e0854f19c817c83c.png" alt="img"></p>
+<h4 id="磁头和柱面">磁头和柱面</h4>
+<figure>
+<img
+src="https://raw.githubusercontent.com/DeutschBall/DeutschBall/main/2843224-e0854f19c817c83c.png"
+alt="img" />
+<figcaption aria-hidden="true">img</figcaption>
+</figure>
 <p>柱面和磁头都是从0开始编号,但是扇区是从1开始编号的</p>
 <p>一个盘片就像一个烧饼一样有两面,每面上都有磁道,一个柱面就是所有等半径的磁道集合</p>
 <p>比如有三个盘片就有6个盘面,那么半径为2厘米的磁道就有6条,半径为2厘米的柱面就包含了这6条磁道</p>
 <p>有多少个盘面就得有多少个磁头,每个磁头负责一个盘面的读写</p>
 <p>所有磁头的动作都是同步的,就算是要读写最顶上这个盘的上面,所有的磁头都得跟着最上面这个磁头动,从顶向下看所有磁头是重叠的.但是只有上面这个磁头可以读写数据.控制哪个磁头也是硬盘控制器要做的工作</p>
-<h3 id="读写速度"><a href="#读写速度" class="headerlink" title="读写速度"></a>读写速度</h3><p>磁盘的读写速度有三个方面组成</p>
+<h3 id="读写速度">读写速度</h3>
+<p>磁盘的读写速度有三个方面组成</p>
 <p>寻道时间,旋转时间,传送时间</p>
-<h4 id="寻道时间"><a href="#寻道时间" class="headerlink" title="寻道时间"></a>寻道时间</h4><p>假如一开始磁头都趴在最外环上,现在需要往最内环的扇区读写数据,那么传动臂就得跟个塔吊一样把磁头吊过去</p>
+<h4 id="寻道时间">寻道时间</h4>
+<p>假如一开始磁头都趴在最外环上,现在需要往最内环的扇区读写数据,那么传动臂就得跟个塔吊一样把磁头吊过去</p>
 <p>这是肉眼可见的,显然速度非常慢</p>
-<h4 id="旋转时间"><a href="#旋转时间" class="headerlink" title="旋转时间"></a>旋转时间</h4><p>现在磁头已经到达了最内环,要读写该环上的第一个扇区,但是不巧,磁头刚过来时,第一个扇区刚转过去,磁头就得等到盘子转一整圈才能盼来第一个扇区,而CPU早已望眼欲穿了</p>
-<h4 id="传送时间"><a href="#传送时间" class="headerlink" title="传送时间"></a>传送时间</h4><p>扇区也到位了,磁头赶紧趴下看看扇区上写了啥</p>
+<h4 id="旋转时间">旋转时间</h4>
+<p>现在磁头已经到达了最内环,要读写该环上的第一个扇区,但是不巧,磁头刚过来时,第一个扇区刚转过去,磁头就得等到盘子转一整圈才能盼来第一个扇区,而CPU早已望眼欲穿了</p>
+<h4 id="传送时间">传送时间</h4>
+<p>扇区也到位了,磁头赶紧趴下看看扇区上写了啥</p>
 <p>这个过程肉眼几乎不可见,是最快的</p>
 <p>这三个过程前面两个都是毫秒量级的,并且差不多.最后的传送时间稀松了了,相对于前面俩可以忽略</p>
-<h2 id="访问模式"><a href="#访问模式" class="headerlink" title="访问模式"></a>访问模式</h2><p>访问模式有两种,老古董CHS模式,即通过指定柱面,磁头,扇区三个坐标访问一个扇区</p>
-<p>现代LBA(logical block address)模式,不考虑柱面,磁头数了,所有扇区统一编号,将逻辑扇区号翻译成CHS的工作交给硬盘控制器干</p>
-<h3 id="LBA和CHS的映射关系"><a href="#LBA和CHS的映射关系" class="headerlink" title="LBA和CHS的映射关系"></a>LBA和CHS的映射关系</h3><p><img src="https://raw.githubusercontent.com/DeutschBall/DeutschBall/main/image-20220825111708551.png" alt="image-20220825111708551"></p>
+<h2 id="访问模式">访问模式</h2>
+<p>访问模式有两种,老古董CHS模式,即通过指定柱面,磁头,扇区三个坐标访问一个扇区</p>
+<p>现代LBA(logical block
+address)模式,不考虑柱面,磁头数了,所有扇区统一编号,将逻辑扇区号翻译成CHS的工作交给硬盘控制器干</p>
+<h3 id="lba和chs的映射关系">LBA和CHS的映射关系</h3>
+<figure>
+<img
+src="https://raw.githubusercontent.com/DeutschBall/DeutschBall/main/image-20220825111708551.png"
+alt="image-20220825111708551" />
+<figcaption aria-hidden="true">image-20220825111708551</figcaption>
+</figure>
 <p>逻辑扇区从0开始编号</p>
 <p>假设某个硬盘有h个磁头,c个柱面,每个磁道上有s个扇区,给定一个逻辑扇区号g,求改扇区落在哪个盘子的哪个磁道上</p>
 <blockquote>
@@ -309,34 +362,52 @@
 <p><code>n*h*s&lt;=g&lt;(n+1)*h*s</code></p>
 <p>n就是第几个柱面,也就是哪个磁道,至于哪个盘子</p>
 <figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">k*s&lt;=(g-n*h*s)&lt;(k+1)*s</span><br></pre></td></tr></table></figure>
-
 <p>k就是哪个盘子</p>
-<h2 id="瞎写主引导记录"><a href="#瞎写主引导记录" class="headerlink" title="瞎写主引导记录"></a>瞎写主引导记录</h2><p>程序来自教材x86汇编语言从实模式到保护模式</p>
-<p><img src="https://raw.githubusercontent.com/DeutschBall/DeutschBall/main/image-20220825113210639.png" alt="image-20220825113210639"></p>
-<p>他这段程序用nasm编会报错,因为<code>mov [0x00],&#39;a&#39;</code>只指定了目的地址,但是没有说明大小</p>
-<p>我是把’a’搬到0x00这个位置上一个字节?还是<code>0x00~0x01</code>这个字还是<code>0x00~0x03</code>这个双字?没有说清.</p>
+<h2 id="瞎写主引导记录">瞎写主引导记录</h2>
+<p>程序来自教材x86汇编语言从实模式到保护模式</p>
+<figure>
+<img
+src="https://raw.githubusercontent.com/DeutschBall/DeutschBall/main/image-20220825113210639.png"
+alt="image-20220825113210639" />
+<figcaption aria-hidden="true">image-20220825113210639</figcaption>
+</figure>
+<p>他这段程序用nasm编会报错,因为<code>mov [0x00],'a'</code>只指定了目的地址,但是没有说明大小</p>
+<p>我是把'a'搬到0x00这个位置上一个字节?还是<code>0x00~0x01</code>这个字还是<code>0x00~0x03</code>这个双字?没有说清.</p>
 <blockquote>
-<p>假:’a’不是一个字节吗?自然搬过去还是一个字节喽!</p>
+<p>假:'a'不是一个字节吗?自然搬过去还是一个字节喽!</p>
 </blockquote>
-<p>这里’a’实际上就是一个立即数,就是’a’的ASCII码.而一个立即数是不能决定占用几个字节的</p>
+<p>这里'a'实际上就是一个立即数,就是'a'的ASCII码.而一个立即数是不能决定占用几个字节的</p>
 <p>如果写<code>mov [0x00],al</code>这样就可以,把al这个字节寄存器的东西搬到内存0x00位置上,这时候就不用指定多大的内存了,因为al自己隐含就是一个字节寄存器了</p>
 <p>并且这一点儿代码根本凑不够一个扇区,需要写一些废话填满一个扇区才有效</p>
 <p>应该这样写:</p>
 <figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line">; <span class="number">4</span><span class="number">-2.</span><span class="keyword">asm</span></span><br><span class="line">mov ax,<span class="number">0xb800</span>                 </span><br><span class="line">mov ds,ax</span><br><span class="line"></span><br><span class="line">mov byte [<span class="number">0x00</span>],<span class="string">&#x27;a&#x27;</span></span><br><span class="line">mov byte [<span class="number">0x02</span>],<span class="string">&#x27;s&#x27;</span></span><br><span class="line">mov byte [<span class="number">0x04</span>],<span class="string">&#x27;m&#x27;</span>     </span><br><span class="line"></span><br><span class="line">jmp $</span><br><span class="line">times <span class="number">510</span>-($-$$) db <span class="number">0</span></span><br><span class="line">db <span class="number">0x55</span>,<span class="number">0xaa</span></span><br></pre></td></tr></table></figure>
-
 <p>编译:</p>
 <figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">nasm main.asm -o main.bin</span><br></pre></td></tr></table></figure>
-
 <p>然后使用fixvhdw2把main.bin写到虚拟磁盘nobody.vhd中</p>
-<p><img src="https://raw.githubusercontent.com/DeutschBall/DeutschBall/main/image-20220825115728499.png" alt="image-20220825115728499"></p>
+<figure>
+<img
+src="https://raw.githubusercontent.com/DeutschBall/DeutschBall/main/image-20220825115728499.png"
+alt="image-20220825115728499" />
+<figcaption aria-hidden="true">image-20220825115728499</figcaption>
+</figure>
 <p>现在就可以开启虚拟机了</p>
-<p><img src="https://raw.githubusercontent.com/DeutschBall/DeutschBall/main/image-20220825115716225.png" alt="image-20220825115716225"></p>
+<figure>
+<img
+src="https://raw.githubusercontent.com/DeutschBall/DeutschBall/main/image-20220825115716225.png"
+alt="image-20220825115716225" />
+<figcaption aria-hidden="true">image-20220825115716225</figcaption>
+</figure>
 <p>asm三个字已经打印在最左上角</p>
-<h3 id="如果不够512字节"><a href="#如果不够512字节" class="headerlink" title="如果不够512字节"></a>如果不够512字节</h3><p>如果main.asm没写废话</p>
+<h3 id="如果不够512字节">如果不够512字节</h3>
+<p>如果main.asm没写废话</p>
 <figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">mov ax,<span class="number">0xb800</span>                 </span><br><span class="line">mov ds,ax</span><br><span class="line"></span><br><span class="line">mov byte [<span class="number">0x00</span>],<span class="string">&#x27;a&#x27;</span></span><br><span class="line">mov byte [<span class="number">0x02</span>],<span class="string">&#x27;s&#x27;</span></span><br><span class="line">mov byte [<span class="number">0x04</span>],<span class="string">&#x27;m&#x27;</span>     </span><br></pre></td></tr></table></figure>
-
 <p>编译成main.bin之后是远没有512个字节的</p>
-<p><img src="https://raw.githubusercontent.com/DeutschBall/DeutschBall/main/image-20220825115945064.png" alt="image-20220825115945064"></p>
+<figure>
+<img
+src="https://raw.githubusercontent.com/DeutschBall/DeutschBall/main/image-20220825115945064.png"
+alt="image-20220825115945064" />
+<figcaption aria-hidden="true">image-20220825115945064</figcaption>
+</figure>
 <p>不够512个字节的主引导记录作废了,写到磁盘里然后尝试启动会说<del>找不到靴子</del></p>
 <p>至于怎么凑够的512字节,以及为啥可以在屏幕上输出asm,那是后话了</p>
 
@@ -422,7 +493,7 @@
 
       <!--noindex-->
       <div class="post-toc-wrap sidebar-panel">
-          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#%E8%99%9A%E6%8B%9F%E7%A1%AC%E7%9B%98vhd"><span class="nav-number">1.</span> <span class="nav-text">虚拟硬盘vhd</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#%E7%BB%93%E6%9E%84%E4%BD%93%E5%AE%9A%E4%B9%89"><span class="nav-number">1.1.</span> <span class="nav-text">结构体定义</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#cookie"><span class="nav-number">1.1.1.</span> <span class="nav-text">cookie</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#features"><span class="nav-number">1.1.2.</span> <span class="nav-text">features</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#ff-version"><span class="nav-number">1.1.3.</span> <span class="nav-text">ff_version</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#data-offset"><span class="nav-number">1.1.4.</span> <span class="nav-text">data_offset</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#timestamp"><span class="nav-number">1.1.5.</span> <span class="nav-text">timestamp</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#crtr-app"><span class="nav-number">1.1.6.</span> <span class="nav-text">crtr_app</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#crtr-ver"><span class="nav-number">1.1.7.</span> <span class="nav-text">crtr_ver</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#crtr-os"><span class="nav-number">1.1.8.</span> <span class="nav-text">crtr_os</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#orig-size"><span class="nav-number">1.1.9.</span> <span class="nav-text">orig_size</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#curr-size"><span class="nav-number">1.1.10.</span> <span class="nav-text">curr_size</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#geometry"><span class="nav-number">1.1.11.</span> <span class="nav-text">geometry</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#type"><span class="nav-number">1.1.12.</span> <span class="nav-text">type</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#checksum"><span class="nav-number">1.1.13.</span> <span class="nav-text">checksum</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#uuid"><span class="nav-number">1.1.14.</span> <span class="nav-text">uuid</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#saved"><span class="nav-number">1.1.15.</span> <span class="nav-text">saved</span></a></li><li class="nav-item nav-level-3"><a class="nav-link"><span class="nav-number">1.1.16.</span> <span class="nav-text"></span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#reserved"><span class="nav-number">1.1.17.</span> <span class="nav-text">reserved</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E7%89%A9%E7%90%86%E7%A3%81%E7%9B%98"><span class="nav-number">1.2.</span> <span class="nav-text">物理磁盘</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E7%A3%81%E7%9B%98%E7%BB%93%E6%9E%84"><span class="nav-number">1.2.1.</span> <span class="nav-text">磁盘结构</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#%E7%BB%93%E6%9E%84%E6%80%BB%E8%A7%88"><span class="nav-number">1.2.1.1.</span> <span class="nav-text">结构总览</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E6%89%87%E5%8C%BA%E5%92%8C%E7%A3%81%E9%81%93%E7%9A%84%E5%85%B3%E7%B3%BB"><span class="nav-number">1.2.1.2.</span> <span class="nav-text">扇区和磁道的关系</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E7%A3%81%E5%A4%B4%E5%92%8C%E6%9F%B1%E9%9D%A2"><span class="nav-number">1.2.1.3.</span> <span class="nav-text">磁头和柱面</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E8%AF%BB%E5%86%99%E9%80%9F%E5%BA%A6"><span class="nav-number">1.2.2.</span> <span class="nav-text">读写速度</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#%E5%AF%BB%E9%81%93%E6%97%B6%E9%97%B4"><span class="nav-number">1.2.2.1.</span> <span class="nav-text">寻道时间</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E6%97%8B%E8%BD%AC%E6%97%B6%E9%97%B4"><span class="nav-number">1.2.2.2.</span> <span class="nav-text">旋转时间</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E4%BC%A0%E9%80%81%E6%97%B6%E9%97%B4"><span class="nav-number">1.2.2.3.</span> <span class="nav-text">传送时间</span></a></li></ol></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E8%AE%BF%E9%97%AE%E6%A8%A1%E5%BC%8F"><span class="nav-number">1.3.</span> <span class="nav-text">访问模式</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#LBA%E5%92%8CCHS%E7%9A%84%E6%98%A0%E5%B0%84%E5%85%B3%E7%B3%BB"><span class="nav-number">1.3.1.</span> <span class="nav-text">LBA和CHS的映射关系</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E7%9E%8E%E5%86%99%E4%B8%BB%E5%BC%95%E5%AF%BC%E8%AE%B0%E5%BD%95"><span class="nav-number">1.4.</span> <span class="nav-text">瞎写主引导记录</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%A6%82%E6%9E%9C%E4%B8%8D%E5%A4%9F512%E5%AD%97%E8%8A%82"><span class="nav-number">1.4.1.</span> <span class="nav-text">如果不够512字节</span></a></li></ol></li></ol></li></ol></div>
+          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#%E8%99%9A%E6%8B%9F%E7%A1%AC%E7%9B%98vhd"><span class="nav-number">1.</span> <span class="nav-text">虚拟硬盘vhd</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#%E7%BB%93%E6%9E%84%E4%BD%93%E5%AE%9A%E4%B9%89"><span class="nav-number">1.1.</span> <span class="nav-text">结构体定义</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#cookie"><span class="nav-number">1.1.1.</span> <span class="nav-text">cookie</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#features"><span class="nav-number">1.1.2.</span> <span class="nav-text">features</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#ff_version"><span class="nav-number">1.1.3.</span> <span class="nav-text">ff_version</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#data_offset"><span class="nav-number">1.1.4.</span> <span class="nav-text">data_offset</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#timestamp"><span class="nav-number">1.1.5.</span> <span class="nav-text">timestamp</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#crtr_app"><span class="nav-number">1.1.6.</span> <span class="nav-text">crtr_app</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#crtr_ver"><span class="nav-number">1.1.7.</span> <span class="nav-text">crtr_ver</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#crtr_os"><span class="nav-number">1.1.8.</span> <span class="nav-text">crtr_os</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#orig_size"><span class="nav-number">1.1.9.</span> <span class="nav-text">orig_size</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#curr_size"><span class="nav-number">1.1.10.</span> <span class="nav-text">curr_size</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#geometry"><span class="nav-number">1.1.11.</span> <span class="nav-text">geometry</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#type"><span class="nav-number">1.1.12.</span> <span class="nav-text">type</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#checksum"><span class="nav-number">1.1.13.</span> <span class="nav-text">checksum</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#uuid"><span class="nav-number">1.1.14.</span> <span class="nav-text">uuid</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#saved"><span class="nav-number">1.1.15.</span> <span class="nav-text">saved</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#section"><span class="nav-number">1.1.16.</span> <span class="nav-text"></span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#reserved"><span class="nav-number">1.1.17.</span> <span class="nav-text">reserved</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E7%89%A9%E7%90%86%E7%A3%81%E7%9B%98"><span class="nav-number">1.2.</span> <span class="nav-text">物理磁盘</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E7%A3%81%E7%9B%98%E7%BB%93%E6%9E%84"><span class="nav-number">1.2.1.</span> <span class="nav-text">磁盘结构</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#%E7%BB%93%E6%9E%84%E6%80%BB%E8%A7%88"><span class="nav-number">1.2.1.1.</span> <span class="nav-text">结构总览</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E6%89%87%E5%8C%BA%E5%92%8C%E7%A3%81%E9%81%93%E7%9A%84%E5%85%B3%E7%B3%BB"><span class="nav-number">1.2.1.2.</span> <span class="nav-text">扇区和磁道的关系</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E7%A3%81%E5%A4%B4%E5%92%8C%E6%9F%B1%E9%9D%A2"><span class="nav-number">1.2.1.3.</span> <span class="nav-text">磁头和柱面</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E8%AF%BB%E5%86%99%E9%80%9F%E5%BA%A6"><span class="nav-number">1.2.2.</span> <span class="nav-text">读写速度</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#%E5%AF%BB%E9%81%93%E6%97%B6%E9%97%B4"><span class="nav-number">1.2.2.1.</span> <span class="nav-text">寻道时间</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E6%97%8B%E8%BD%AC%E6%97%B6%E9%97%B4"><span class="nav-number">1.2.2.2.</span> <span class="nav-text">旋转时间</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E4%BC%A0%E9%80%81%E6%97%B6%E9%97%B4"><span class="nav-number">1.2.2.3.</span> <span class="nav-text">传送时间</span></a></li></ol></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E8%AE%BF%E9%97%AE%E6%A8%A1%E5%BC%8F"><span class="nav-number">1.3.</span> <span class="nav-text">访问模式</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#lba%E5%92%8Cchs%E7%9A%84%E6%98%A0%E5%B0%84%E5%85%B3%E7%B3%BB"><span class="nav-number">1.3.1.</span> <span class="nav-text">LBA和CHS的映射关系</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E7%9E%8E%E5%86%99%E4%B8%BB%E5%BC%95%E5%AF%BC%E8%AE%B0%E5%BD%95"><span class="nav-number">1.4.</span> <span class="nav-text">瞎写主引导记录</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%A6%82%E6%9E%9C%E4%B8%8D%E5%A4%9F512%E5%AD%97%E8%8A%82"><span class="nav-number">1.4.1.</span> <span class="nav-text">如果不够512字节</span></a></li></ol></li></ol></li></ol></div>
       </div>
       <!--/noindex-->
 

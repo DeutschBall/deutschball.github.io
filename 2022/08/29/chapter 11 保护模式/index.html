@@ -20,36 +20,18 @@
     var CONFIG = {"hostname":"dustball.top","root":"/","scheme":"Muse","version":"7.8.0","exturl":false,"sidebar":{"position":"left","display":"post","padding":18,"offset":12,"onmobile":false},"copycode":{"enable":false,"show_result":false,"style":null},"back2top":{"enable":true,"sidebar":false,"scrollpercent":false},"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":false,"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"algolia":{"hits":{"per_page":10},"labels":{"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}},"localsearch":{"enable":false,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false},"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}}};
   </script>
 
-  <meta name="description" content="chapter 11 保护模式全局描述符表32位保护模式下任何段使用之前都需要注册登记,否则不让用, 注册时还需要说明该段的访问权限,如果一个只能读写的段非要在上面执行代码会被制止 如果访问范围超过了段的界限也会除法处理器产生内部异常中断 注册登记段信息的地方就是描述符表,描述符表有全局的GDT也有局部的LDT 全局描述符表是给整个系统服务的,处理器从实模式进入保护模式之前必须设置好全局描述符表,">
+  <meta name="description" content="chapter 11 保护模式 全局描述符表 32位保护模式下任何段使用之前都需要注册登记,否则不让用, 注册时还需要说明该段的访问权限,如果一个只能读写的段非要在上面执行代码会被制止 如果访问范围超过了段的界限也会除法处理器产生内部异常中断 注册登记段信息的地方就是描述符表,描述符表有全局的GDT也有局部的LDT 全局描述符表是给整个系统服务的,处理器从实模式进入保护模式之前必须设置">
 <meta property="og:type" content="article">
 <meta property="og:title" content="x86汇编语言 chapter 11 保护模式">
 <meta property="og:url" content="http://dustball.top/2022/08/29/chapter%2011%20%E4%BF%9D%E6%8A%A4%E6%A8%A1%E5%BC%8F/index.html">
 <meta property="og:site_name" content="dustland">
-<meta property="og:description" content="chapter 11 保护模式全局描述符表32位保护模式下任何段使用之前都需要注册登记,否则不让用, 注册时还需要说明该段的访问权限,如果一个只能读写的段非要在上面执行代码会被制止 如果访问范围超过了段的界限也会除法处理器产生内部异常中断 注册登记段信息的地方就是描述符表,描述符表有全局的GDT也有局部的LDT 全局描述符表是给整个系统服务的,处理器从实模式进入保护模式之前必须设置好全局描述符表,">
+<meta property="og:description" content="chapter 11 保护模式 全局描述符表 32位保护模式下任何段使用之前都需要注册登记,否则不让用, 注册时还需要说明该段的访问权限,如果一个只能读写的段非要在上面执行代码会被制止 如果访问范围超过了段的界限也会除法处理器产生内部异常中断 注册登记段信息的地方就是描述符表,描述符表有全局的GDT也有局部的LDT 全局描述符表是给整个系统服务的,处理器从实模式进入保护模式之前必须设置">
 <meta property="og:locale" content="en_US">
-<meta property="og:image" content="https://raw.githubusercontent.com/DeutschBall/DeutschBall/main/image-20220829164636897.png">
-<meta property="og:image" content="https://raw.githubusercontent.com/DeutschBall/DeutschBall/main/image-20220829164840344.png">
-<meta property="og:image" content="https://raw.githubusercontent.com/DeutschBall/DeutschBall/main/image-20220829165349719.png">
-<meta property="og:image" content="https://raw.githubusercontent.com/DeutschBall/DeutschBall/main/image-20220829172645403.png">
-<meta property="og:image" content="https://raw.githubusercontent.com/DeutschBall/DeutschBall/main/image-20220829191817146.png">
-<meta property="og:image" content="https://raw.githubusercontent.com/DeutschBall/DeutschBall/main/image-20220829203454342.png">
-<meta property="og:image" content="https://raw.githubusercontent.com/DeutschBall/DeutschBall/main/image-20220829203538236.png">
-<meta property="og:image" content="https://raw.githubusercontent.com/DeutschBall/DeutschBall/main/image-20220829210802621.png">
-<meta property="og:image" content="https://raw.githubusercontent.com/DeutschBall/DeutschBall/main/image-20220829170144452.png">
-<meta property="og:image" content="https://raw.githubusercontent.com/DeutschBall/DeutschBall/main/image-20220829213426419.png">
-<meta property="og:image" content="https://raw.githubusercontent.com/DeutschBall/DeutschBall/main/image-20220829213823071.png">
-<meta property="og:image" content="https://raw.githubusercontent.com/DeutschBall/DeutschBall/main/image-20220829214456572.png">
-<meta property="og:image" content="https://raw.githubusercontent.com/DeutschBall/DeutschBall/main/image-20220829223100310.png">
-<meta property="og:image" content="https://raw.githubusercontent.com/DeutschBall/DeutschBall/main/image-20220829224646277.png">
-<meta property="og:image" content="https://raw.githubusercontent.com/DeutschBall/DeutschBall/main/image-20220829232306055.png">
-<meta property="og:image" content="https://raw.githubusercontent.com/DeutschBall/DeutschBall/main/image-20220829230722202.png">
-<meta property="og:image" content="https://raw.githubusercontent.com/DeutschBall/DeutschBall/main/image-20220829231354276.png">
 <meta property="article:published_time" content="2022-08-29T15:23:00.000Z">
 <meta property="article:modified_time" content="2022-08-29T15:24:34.369Z">
 <meta property="article:author" content="dustball">
 <meta property="article:tag" content="x86汇编语言从实模式到保护模式">
 <meta name="twitter:card" content="summary">
-<meta name="twitter:image" content="https://raw.githubusercontent.com/DeutschBall/DeutschBall/main/image-20220829164636897.png">
 
 <link rel="canonical" href="http://dustball.top/2022/08/29/chapter%2011%20%E4%BF%9D%E6%8A%A4%E6%A8%A1%E5%BC%8F/">
 
@@ -210,70 +192,115 @@
     <div class="post-body" itemprop="articleBody">
 
       
-        <h1 id="chapter-11-保护模式"><a href="#chapter-11-保护模式" class="headerlink" title="chapter 11 保护模式"></a>chapter 11 保护模式</h1><h2 id="全局描述符表"><a href="#全局描述符表" class="headerlink" title="全局描述符表"></a>全局描述符表</h2><p>32位保护模式下任何段使用之前都需要注册登记,否则不让用,</p>
+        <h1 id="chapter-11-保护模式">chapter 11 保护模式</h1>
+<h2 id="全局描述符表">全局描述符表</h2>
+<p>32位保护模式下任何段使用之前都需要注册登记,否则不让用,</p>
 <p>注册时还需要说明该段的访问权限,如果一个只能读写的段非要在上面执行代码会被制止</p>
 <p>如果访问范围超过了段的界限也会除法处理器产生内部异常中断</p>
 <p>注册登记段信息的地方就是描述符表,描述符表有全局的GDT也有局部的LDT</p>
 <p>全局描述符表是给整个系统服务的,处理器从实模式进入保护模式之前必须设置好全局描述符表,即GDT是在实模式下建立的,那么其内存地址应该不超过8086的寻址范围1M,(在进入保护模式之后搬到别的地方另说)</p>
-<p>处理器怎么直到GDT放到内存上哪里了呢?全局描述符表寄存器GDTR就是干这个事的–它专门记录全局描述符表在内存中的位置</p>
+<p>处理器怎么直到GDT放到内存上哪里了呢?全局描述符表寄存器GDTR就是干这个事的--它专门记录全局描述符表在内存中的位置</p>
 <p>GDTR有48位,高32位记录的是全局描述符表的基地址,低16位记录的是该表的界限,因此该表可以在在32位可寻址的4G内存的任何地方,长度最长是64KB.</p>
-<p>又全局描述符表的表项一条是8字节,因此该表最大可以有64K&#x2F;8&#x3D;8K条记录</p>
-<p><img src="https://raw.githubusercontent.com/DeutschBall/DeutschBall/main/image-20220829164636897.png" alt="image-20220829164636897"></p>
-<p><img src="https://raw.githubusercontent.com/DeutschBall/DeutschBall/main/image-20220829164840344.png" alt="image-20220829164840344"></p>
-<h2 id="段选择子"><a href="#段选择子" class="headerlink" title="段选择子"></a>段选择子</h2><h2 id="段描述符"><a href="#段描述符" class="headerlink" title="段描述符"></a>段描述符</h2><p>用段寄存器中存放的选择子中的索引查段描述符表得到段描述符,段描述符相当于一个保存段信息的结构体</p>
+<p>又全局描述符表的表项一条是8字节,因此该表最大可以有64K/8=8K条记录</p>
+<figure>
+<img
+src="https://raw.githubusercontent.com/DeutschBall/DeutschBall/main/image-20220829164636897.png"
+alt="image-20220829164636897" />
+<figcaption aria-hidden="true">image-20220829164636897</figcaption>
+</figure>
+<figure>
+<img
+src="https://raw.githubusercontent.com/DeutschBall/DeutschBall/main/image-20220829164840344.png"
+alt="image-20220829164840344" />
+<figcaption aria-hidden="true">image-20220829164840344</figcaption>
+</figure>
+<h2 id="段选择子">段选择子</h2>
+<h2 id="段描述符">段描述符</h2>
+<p>用段寄存器中存放的选择子中的索引查段描述符表得到段描述符,段描述符相当于一个保存段信息的结构体</p>
 <p>段描述符就是描述符表GDT或者LDT等的表项,每个段描述符长8字节</p>
-<p><img src="https://raw.githubusercontent.com/DeutschBall/DeutschBall/main/image-20220829165349719.png" alt="image-20220829165349719"></p>
+<figure>
+<img
+src="https://raw.githubusercontent.com/DeutschBall/DeutschBall/main/image-20220829165349719.png"
+alt="image-20220829165349719" />
+<figcaption aria-hidden="true">image-20220829165349719</figcaption>
+</figure>
 <p>这个段描述符长的很不顺溜,段基地址被分成了三块,段界限被分成两块</p>
 <p>这样设计是为了和废物16位保护模式兼容</p>
-<h3 id="基址和界限"><a href="#基址和界限" class="headerlink" title="基址和界限"></a>基址和界限</h3><p>段基地址共32位,段界限共20位,即一个段的基地址可以是4G地址空间中的任何地方,段大小最大是1M(或4G,取决于粒度G的规定)</p>
-<h3 id="粒度G"><a href="#粒度G" class="headerlink" title="粒度G"></a>粒度G</h3><p>Granularity,粒度,用于解释段界限的含义</p>
-<p>段界限占用了16位,如果以1B为单位,则一个段最大是$2^{20}\times 1B&#x3D;1MB$大小</p>
+<h3 id="基址和界限">基址和界限</h3>
+<p>段基地址共32位,段界限共20位,即一个段的基地址可以是4G地址空间中的任何地方,段大小最大是1M(或4G,取决于粒度G的规定)</p>
+<h3 id="粒度g">粒度G</h3>
+<p>Granularity,粒度,用于解释段界限的含义</p>
+<p>段界限占用了16位,如果以1B为单位,则一个段最大是<span
+class="math inline">\(2^{20}\times 1B=1MB\)</span>大小</p>
 <p>然而4G的地址空间应该允许以G为量级的段</p>
-<p>当段界限的单位是4KB时则一个段最大是$2^{20}\times 4KB&#x3D;4G$</p>
+<p>当段界限的单位是4KB时则一个段最大是<span
+class="math inline">\(2^{20}\times 4KB=4G\)</span></p>
 <p>为啥要以4KB为单位?因为分页时一页的大小就是4KB,这样规定粒度方便给一个段分配页数</p>
-<p>G&#x3D;0表示段界限的单位是1B</p>
-<p>G&#x3D;1表示段界限的单位是4KB</p>
-<h3 id="段描述符类型S"><a href="#段描述符类型S" class="headerlink" title="段描述符类型S"></a>段描述符类型S</h3><p>S&#x3D;0表示系统段</p>
-<p>S&#x3D;1表示代码段或者数据段</p>
-<h3 id="描述符特权级DPL"><a href="#描述符特权级DPL" class="headerlink" title="描述符特权级DPL"></a>描述符特权级DPL</h3><p>Descpirtor Privilege Level</p>
+<p>G=0表示段界限的单位是1B</p>
+<p>G=1表示段界限的单位是4KB</p>
+<h3 id="段描述符类型s">段描述符类型S</h3>
+<p>S=0表示系统段</p>
+<p>S=1表示代码段或者数据段</p>
+<h3 id="描述符特权级dpl">描述符特权级DPL</h3>
+<p>Descpirtor Privilege Level</p>
 <p>指定要访问该段需要最低的权限</p>
 <p>即0环还是3环,规定段级别,</p>
 <p>0环为最高级,只能由系统访问</p>
 <p>3环为最低级,可以由系统或者用户程序访问.</p>
-<h3 id="段存在位P"><a href="#段存在位P" class="headerlink" title="段存在位P"></a>段存在位P</h3><p>Segment Present</p>
-<p>P&#x3D;0表示段不存在于物理内存中,即建立了描述符但是尚未建立对应物理页,或者刚才该段在内存中存在但是现在被交换到了磁盘中,也需要把P置0</p>
-<p>P&#x3D;1表示该段已经在物理内存中了</p>
+<h3 id="段存在位p">段存在位P</h3>
+<p>Segment Present</p>
+<p>P=0表示段不存在于物理内存中,即建立了描述符但是尚未建立对应物理页,或者刚才该段在内存中存在但是现在被交换到了磁盘中,也需要把P置0</p>
+<p>P=1表示该段已经在物理内存中了</p>
 <p>该位用于触发缺页中断,属于虚存调度策略</p>
-<h3 id="默认操作数大小D-B"><a href="#默认操作数大小D-B" class="headerlink" title="默认操作数大小D&#x2F;B"></a>默认操作数大小D&#x2F;B</h3><p>Default Operation Size</p>
+<h3 id="默认操作数大小db">默认操作数大小D/B</h3>
+<p>Default Operation Size</p>
 <p>用于兼容16位保护模式</p>
-<h4 id="对于代码段-该位是D位"><a href="#对于代码段-该位是D位" class="headerlink" title="对于代码段,该位是D位"></a>对于代码段,该位是D位</h4><p>D&#x3D;0表示指令中的偏移地址和操作数都是16位的,比如使用ax,ip等16位的寄存器,不使用eax,eip等32位寄存器,即使eax的高16位有东西也忽略</p>
-<p>D&#x3D;1则是32位的</p>
-<h4 id="对于数据段-该位是B位"><a href="#对于数据段-该位是B位" class="headerlink" title="对于数据段,该位是B位"></a>对于数据段,该位是B位</h4><p>B&#x3D;0表示16位的,B&#x3D;1表示32位的</p>
-<p>B&#x3D;0使用16位栈顶指针sp,不使用esp,栈边界也是16位的</p>
-<h3 id="描述符子类型TYPE"><a href="#描述符子类型TYPE" class="headerlink" title="描述符子类型TYPE"></a>描述符子类型TYPE</h3><p>TYPE占用了4位,分别是X(执行),E&#x2F;C(拓展方向&#x2F;特权依从),W(写)A位</p>
-<p><img src="https://raw.githubusercontent.com/DeutschBall/DeutschBall/main/image-20220829172645403.png" alt="image-20220829172645403"></p>
+<h4 id="对于代码段该位是d位">对于代码段,该位是D位</h4>
+<p>D=0表示指令中的偏移地址和操作数都是16位的,比如使用ax,ip等16位的寄存器,不使用eax,eip等32位寄存器,即使eax的高16位有东西也忽略</p>
+<p>D=1则是32位的</p>
+<h4 id="对于数据段该位是b位">对于数据段,该位是B位</h4>
+<p>B=0表示16位的,B=1表示32位的</p>
+<p>B=0使用16位栈顶指针sp,不使用esp,栈边界也是16位的</p>
+<h3 id="描述符子类型type">描述符子类型TYPE</h3>
+<p>TYPE占用了4位,分别是X(执行),E/C(拓展方向/特权依从),W(写)A位</p>
+<figure>
+<img
+src="https://raw.githubusercontent.com/DeutschBall/DeutschBall/main/image-20220829172645403.png"
+alt="image-20220829172645403" />
+<figcaption aria-hidden="true">image-20220829172645403</figcaption>
+</figure>
 <p>A位不管是代码段还是数据段,都表示是否已访问(Access),属于虚存调度的范畴</p>
-<h4 id="对数据段"><a href="#对数据段" class="headerlink" title="对数据段"></a>对数据段</h4><p>E指定的拓展方向,该段是往地址增大的方向生长,比如堆;还是往地址减小的方向生长,比如栈</p>
-<p>W&#x3D;0表示只读,W&#x3D;1表示读写,不管怎么找,必须有读的权限</p>
-<p>X&#x3D;0表示不可执行,X&#x3D;1表示可执行,可以猜测NX保护就是修改的该位</p>
-<h4 id="对代码段"><a href="#对代码段" class="headerlink" title="对代码段"></a>对代码段</h4><p>C表示是否特权级依从,这里的特权级就是DPL指定的段描述符特权级</p>
-<p>C&#x3D;0表示可以被同级段调用</p>
-<p>C&#x3D;1表示可以被低级段调用</p>
+<h4 id="对数据段">对数据段</h4>
+<p>E指定的拓展方向,该段是往地址增大的方向生长,比如堆;还是往地址减小的方向生长,比如栈</p>
+<p>W=0表示只读,W=1表示读写,不管怎么找,必须有读的权限</p>
+<p>X=0表示不可执行,X=1表示可执行,可以猜测NX保护就是修改的该位</p>
+<h4 id="对代码段">对代码段</h4>
+<p>C表示是否特权级依从,这里的特权级就是DPL指定的段描述符特权级</p>
+<p>C=0表示可以被同级段调用</p>
+<p>C=1表示可以被低级段调用</p>
 <p>R表示是否可读,</p>
-<p>R&#x3D;0不可读</p>
-<p>R&#x3D;1可读</p>
+<p>R=0不可读</p>
+<p>R=1可读</p>
 <p>不管怎么着,代码段一定是不可写,可执行的</p>
 <p>这里的可读不可读是对程序的限制,不是对处理器的限制,处理器从代码段取代码是不受限制的,但是程序如果尝试使用[cs:offset]从代码段取东西看看,是不被允许的</p>
-<h3 id="软件可用位AVL"><a href="#软件可用位AVL" class="headerlink" title="软件可用位AVL"></a>软件可用位AVL</h3><p>操作系统使用,处理器不管这一位.算是预留的一位</p>
-<h3 id="64位代码段标记L"><a href="#64位代码段标记L" class="headerlink" title="64位代码段标记L"></a>64位代码段标记L</h3><p>L&#x3D;1表示64位</p>
-<p>L&#x3D;0表示32位</p>
+<h3 id="软件可用位avl">软件可用位AVL</h3>
+<p>操作系统使用,处理器不管这一位.算是预留的一位</p>
+<h3 id="位代码段标记l">64位代码段标记L</h3>
+<p>L=1表示64位</p>
+<p>L=0表示32位</p>
 <p>32位下该位置0</p>
-<h2 id="走向保护模式"><a href="#走向保护模式" class="headerlink" title="走向保护模式"></a>走向保护模式</h2><p>例子中将栈安排在0x7C00开始往低地址方向生长</p>
+<h2 id="走向保护模式">走向保护模式</h2>
+<p>例子中将栈安排在0x7C00开始往低地址方向生长</p>
 <p>主引导程序512个字节占据从0x7C00开始到0x7E00</p>
 <p>从0x7E00开始的64K到0x17DFF是GDT</p>
-<p><img src="https://raw.githubusercontent.com/DeutschBall/DeutschBall/main/image-20220829191817146.png" alt="image-20220829191817146"></p>
-<h3 id="计算GDT所在的逻辑段地址"><a href="#计算GDT所在的逻辑段地址" class="headerlink" title="计算GDT所在的逻辑段地址"></a>计算GDT所在的逻辑段地址</h3><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line">;计算GDT所在的逻辑段地址 </span><br><span class="line">mov ax,[cs:gdt_base+0x7c00]        ;低16位 </span><br><span class="line">mov dx,[cs:gdt_base+0x7c00+0x02]   ;高16位 </span><br><span class="line">mov bx,16        </span><br><span class="line">div bx            </span><br><span class="line">mov ds,ax                          ;令DS指向该段以进行操作</span><br><span class="line">mov bx,dx                          ;段内起始偏移地址 </span><br><span class="line">....</span><br><span class="line">gdt_size         dw 0</span><br><span class="line">gdt_base         dd 0x00007e00     ;GDT的物理地址 </span><br></pre></td></tr></table></figure>
-
+<figure>
+<img
+src="https://raw.githubusercontent.com/DeutschBall/DeutschBall/main/image-20220829191817146.png"
+alt="image-20220829191817146" />
+<figcaption aria-hidden="true">image-20220829191817146</figcaption>
+</figure>
+<h3 id="计算gdt所在的逻辑段地址">计算GDT所在的逻辑段地址</h3>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line">;计算GDT所在的逻辑段地址 </span><br><span class="line">mov ax,[cs:gdt_base+0x7c00]        ;低16位 </span><br><span class="line">mov dx,[cs:gdt_base+0x7c00+0x02]   ;高16位 </span><br><span class="line">mov bx,16        </span><br><span class="line">div bx            </span><br><span class="line">mov ds,ax                          ;令DS指向该段以进行操作</span><br><span class="line">mov bx,dx                          ;段内起始偏移地址 </span><br><span class="line">....</span><br><span class="line">gdt_size         dw 0</span><br><span class="line">gdt_base         dd 0x00007e00     ;GDT的物理地址 </span><br></pre></td></tr></table></figure>
 <p><code>0x7c00</code>是本程序加载到内存中的位置</p>
 <p><code>cs:gdt_base</code>是该标号的汇编地址</p>
 <p>两者加起来才得到该标号的物理地址也就是<code>gdt_base</code>的地址</p>
@@ -282,80 +309,98 @@
 <p>此时还处在实模式,因此段地址除以16再交给段寄存器</p>
 </blockquote>
 <p>从ds:bx开始就是全局段描述符表了</p>
-<h3 id="创建段描述符"><a href="#创建段描述符" class="headerlink" title="创建段描述符"></a>创建段描述符</h3><p>Intel处理器要求0号段描述符为空,有意义的段描述符从1号开始</p>
+<h3 id="创建段描述符">创建段描述符</h3>
+<p>Intel处理器要求0号段描述符为空,有意义的段描述符从1号开始</p>
 <figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><span class="line">;创建<span class="number">0</span>#描述符，它是空描述符，这是处理器的要求</span><br><span class="line">mov dword [bx+<span class="number">0x00</span>],<span class="number">0x00</span></span><br><span class="line">mov dword [bx+<span class="number">0x04</span>],<span class="number">0x00</span>  </span><br><span class="line"></span><br><span class="line">;创建#<span class="number">1</span>描述符，保护模式下的代码段描述符</span><br><span class="line">mov dword [bx+<span class="number">0x08</span>],<span class="number">0x7c0001ff</span>     </span><br><span class="line">mov dword [bx+<span class="number">0x0c</span>],<span class="number">0x00409800</span>     </span><br><span class="line"></span><br><span class="line">;创建#<span class="number">2</span>描述符，保护模式下的数据段描述符（文本模式下的显示缓冲区） </span><br><span class="line">mov dword [bx+<span class="number">0x10</span>],<span class="number">0x8000ffff</span>     </span><br><span class="line">mov dword [bx+<span class="number">0x14</span>],<span class="number">0x0040920b</span>     </span><br><span class="line"></span><br><span class="line">;创建#<span class="number">3</span>描述符，保护模式下的堆栈段描述符</span><br><span class="line">mov dword [bx+<span class="number">0x18</span>],<span class="number">0x00007a00</span></span><br><span class="line">mov dword [bx+<span class="number">0x1c</span>],<span class="number">0x00409600</span></span><br></pre></td></tr></table></figure>
-
-
-
 <p>这里1号段描述符的意义是:</p>
 <p>段基址0x00007c00,恰好是主引导记录加载到内存中的地址</p>
 <p>段界限0x001ff,段长度为512字节</p>
-<p>G&#x3D;0,粒度为字节,</p>
-<p>D&#x3D;1,32位段</p>
-<p>L&#x3D;0,非64位段</p>
-<p>AVL&#x3D;0</p>
-<p>P&#x3D;1,目前位于内存中</p>
-<p>DPL&#x3D;00,0环</p>
-<p>S&#x3D;1,代码段</p>
-<p>TYPE(XCRA)&#x3D;1000,只能执行,向上拓展</p>
-<h3 id="初始化段描述符表寄存器"><a href="#初始化段描述符表寄存器" class="headerlink" title="初始化段描述符表寄存器"></a>初始化段描述符表寄存器</h3><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">;初始化描述符表寄存器GDTR</span><br><span class="line">mov word [cs: gdt_size+0x7c00],31  ;描述符表的界限（总字节数减一）   </span><br><span class="line">                                    </span><br><span class="line">lgdt [cs: gdt_size+0x7c00]</span><br></pre></td></tr></table></figure>
-
+<p>G=0,粒度为字节,</p>
+<p>D=1,32位段</p>
+<p>L=0,非64位段</p>
+<p>AVL=0</p>
+<p>P=1,目前位于内存中</p>
+<p>DPL=00,0环</p>
+<p>S=1,代码段</p>
+<p>TYPE(XCRA)=1000,只能执行,向上拓展</p>
+<h3 id="初始化段描述符表寄存器">初始化段描述符表寄存器</h3>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">;初始化描述符表寄存器GDTR</span><br><span class="line">mov word [cs: gdt_size+0x7c00],31  ;描述符表的界限（总字节数减一）   </span><br><span class="line">                                    </span><br><span class="line">lgdt [cs: gdt_size+0x7c00]</span><br></pre></td></tr></table></figure>
 <p>算上没有意义的0号描述符,一共有四个描述符,共32字节,因此GDT表的界限应该是31,放到gdt_size中</p>
 <p>lgdt指令用于加载GDT表地址到GDTR寄存器,其操作数是一个48位数,也就是内存中6个字节,高32位是GDT地址,低16位是GDT界限</p>
-<p>这里使用<code> lgdt [cs: gdt_size+0x7c00]</code>意思是从gdt_size标号开始的48位,低16位作为GDT界限,高32位作为GDT地址,放到GDTR中</p>
+<p>这里使用<code>lgdt [cs: gdt_size+0x7c00]</code>意思是从gdt_size标号开始的48位,低16位作为GDT界限,高32位作为GDT地址,放到GDTR中</p>
 <p>而gdt_size开始的内存是这样定义的:</p>
 <figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">gdt_size         dw <span class="number">0</span>		;低地址,一个字,<span class="number">16</span>位</span><br><span class="line">gdt_base         dd <span class="number">0x00007e00</span>     ;高地址,一共双字,<span class="number">32</span>位</span><br></pre></td></tr></table></figure>
-
 <p>由于先前用<code>mov word [cs: gdt_size+0x7c00],31</code>已经设置好了gdt_size</p>
 <p>这里lgdt准确地将GDT的地址和界限放到了GDTR中</p>
-<h3 id="A20与地址回绕"><a href="#A20与地址回绕" class="headerlink" title="A20与地址回绕"></a>A20与地址回绕</h3><p>8086只有20根地址总线A0-A19,不存在A20这根线.</p>
-<p>在8086时,地址最大值是0xFFFFF,再加1就高位截断了成了0x00000,这就是地址回绕.书上说当时很多程序员利用这个”特性”编程,并且好像还那个以此为自豪</p>
-<p>80286时地址线就有24根儿了,0xFFFFF+1&#x3D;0x100000,因为位数足够多,不会高位截断,也就不再回绕了,这样原来利用地址回绕写的程序全都寄了.</p>
-<p>为了保持兼容性,保持一下这些程序员的自尊心,IBM在A20上设置了一个开关,兼容8086时就不用A20,让他一直置0,这就有了0x0FFFFF+1&#x3D;0x000000,又绕起来了.IBM把A20和键盘控制器上一个开关按位与了再接到内存条子上,这个开关的端口号0x60.</p>
+<h3 id="a20与地址回绕">A20与地址回绕</h3>
+<p>8086只有20根地址总线A0-A19,不存在A20这根线.</p>
+<p>在8086时,地址最大值是0xFFFFF,再加1就高位截断了成了0x00000,这就是地址回绕.书上说当时很多程序员利用这个"特性"编程,并且好像还那个以此为自豪</p>
+<p>80286时地址线就有24根儿了,0xFFFFF+1=0x100000,因为位数足够多,不会高位截断,也就不再回绕了,这样原来利用地址回绕写的程序全都寄了.</p>
+<p>为了保持兼容性,保持一下这些程序员的自尊心,IBM在A20上设置了一个开关,兼容8086时就不用A20,让他一直置0,这就有了0x0FFFFF+1=0x000000,又绕起来了.IBM把A20和键盘控制器上一个开关按位与了再接到内存条子上,这个开关的端口号0x60.</p>
 <p>向0x60端口写入数据,第一位置1则该键向与门输出1,此时A20生效</p>
 <p>向0x60端口写入数据,第一位置0则该键向与门输出0,此时A20失效</p>
-<p><img src="https://raw.githubusercontent.com/DeutschBall/DeutschBall/main/image-20220829203454342.png" alt="image-20220829203454342"></p>
+<figure>
+<img
+src="https://raw.githubusercontent.com/DeutschBall/DeutschBall/main/image-20220829203454342.png"
+alt="image-20220829203454342" />
+<figcaption aria-hidden="true">image-20220829203454342</figcaption>
+</figure>
 <p>80486以后处理器有了A20M#引脚,低电平时A20失效</p>
-<p><img src="https://raw.githubusercontent.com/DeutschBall/DeutschBall/main/image-20220829203538236.png" alt="image-20220829203538236"></p>
+<figure>
+<img
+src="https://raw.githubusercontent.com/DeutschBall/DeutschBall/main/image-20220829203538236.png"
+alt="image-20220829203538236" />
+<figcaption aria-hidden="true">image-20220829203538236</figcaption>
+</figure>
 <p>向0x92端口的第二位(位1)置1就打开了A20,A20有效.置0则A20失效.</p>
 <p>开机时自动置有效</p>
 <p>0x60和0x92关于A20的控制是或,即只要有一个开关打开,A20就有效</p>
 <p>而要从实模式转换为32位保护模式,显然需要打开A20</p>
 <figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">in al,<span class="number">0x92</span>                         ;南桥芯片内的端口 </span><br><span class="line">or al,<span class="number">0000</span>_0010B</span><br><span class="line">out <span class="number">0x92</span>,al                        ;打开A20</span><br></pre></td></tr></table></figure>
-
 <p>in就是从0x92读取一个字节的数据放到al寄存器</p>
 <p>然后通过按位或将al的第二位(位1)置高,其他位不变</p>
 <p>然后out将al输出到0x92一个字节</p>
 <p>这就设置好了0x92端口处的快速A20和初始化寄存器.A20就打开了</p>
-<h3 id="关闭中断"><a href="#关闭中断" class="headerlink" title="关闭中断"></a>关闭中断</h3><p>进入保护模式后,BIOS提供的实模式下的中断功能不能再使用,而保护模式的中断环境尚未设置,因此进入保护模式前需要先关闭中断</p>
+<h3 id="关闭中断">关闭中断</h3>
+<p>进入保护模式后,BIOS提供的实模式下的中断功能不能再使用,而保护模式的中断环境尚未设置,因此进入保护模式前需要先关闭中断</p>
 <figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">cli</span><br></pre></td></tr></table></figure>
-
-
-
-<h3 id="CR0与保护模式"><a href="#CR0与保护模式" class="headerlink" title="CR0与保护模式"></a>CR0与保护模式</h3><p>控制CPU运行模式的开关在CR0寄存器</p>
+<h3 id="cr0与保护模式">CR0与保护模式</h3>
+<p>控制CPU运行模式的开关在CR0寄存器</p>
 <p>CR0的最低位(位0)如果是1则CPU进入保护模式,置0则为实模式</p>
 <p>至于CR0其他位干啥的现在不关心</p>
 <figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">mov eax,cr0                    ;cr0放到eax</span><br><span class="line">or eax,1                           ;低位置1</span><br><span class="line">mov cr0,eax                        ;设置PE位</span><br></pre></td></tr></table></figure>
-
 <p>此后CPU就工作在保护模式了</p>
-<h3 id="32位机器上的段寄存器"><a href="#32位机器上的段寄存器" class="headerlink" title="32位机器上的段寄存器"></a>32位机器上的段寄存器</h3><p><img src="https://raw.githubusercontent.com/DeutschBall/DeutschBall/main/image-20220829210802621.png" alt="image-20220829210802621"></p>
+<h3 id="位机器上的段寄存器">32位机器上的段寄存器</h3>
+<figure>
+<img
+src="https://raw.githubusercontent.com/DeutschBall/DeutschBall/main/image-20220829210802621.png"
+alt="image-20220829210802621" />
+<figcaption aria-hidden="true">image-20220829210802621</figcaption>
+</figure>
 <p>高16位是段选择子,对外可见,并且兼容8086的段寄存器用法</p>
 <p>描述符高速缓存器不可见,存放段基地址,段界限,段属性</p>
 <p>为啥叫缓存器呢?</p>
-<h4 id="32位实模式段寄存器用法"><a href="#32位实模式段寄存器用法" class="headerlink" title="32位实模式段寄存器用法"></a>32位实模式段寄存器用法</h4><p>8086实模式下,段寄存器中直接放段基址,段寄存器就是16位,没有描述符高速缓存器这种东西,寻址的时候就段寄存器×16+偏移量</p>
+<h4 id="位实模式段寄存器用法">32位实模式段寄存器用法</h4>
+<p>8086实模式下,段寄存器中直接放段基址,段寄存器就是16位,没有描述符高速缓存器这种东西,寻址的时候就段寄存器×16+偏移量</p>
 <p>而32位机器的实模式,前16位和8086的段寄存器作用相同,但是有高速缓存器这种东西</p>
 <p>它缓存了个啥呢?寻址的时候不是要段寄存器×16吗,高速缓存器就缓存了这个值(聊胜于无吧)</p>
 <p>给段寄存器赋值的时候就把该值✖16然后放到高速缓存器中了</p>
 <p>对外表现仍然像8086的20位实模式,只不过由于高速缓存器的存在,速度更快了</p>
-<h4 id="32位保护模式段寄存器的用法"><a href="#32位保护模式段寄存器的用法" class="headerlink" title="32位保护模式段寄存器的用法"></a>32位保护模式段寄存器的用法</h4><p>32位保护模式下,段寄存器CS,DS等等仍然是16位的,显然让他们继续保存段基址已经放不下了,他们确实也不再直接保存段地址,而是保存的段选择子,</p>
+<h4 id="位保护模式段寄存器的用法">32位保护模式段寄存器的用法</h4>
+<p>32位保护模式下,段寄存器CS,DS等等仍然是16位的,显然让他们继续保存段基址已经放不下了,他们确实也不再直接保存段地址,而是保存的段选择子,</p>
 <p>段选择子是段描述符表的下标,</p>
 <p>即用段选择子去查相应的段描述符表,得到的表项是段描述符,</p>
 <p>段描述符中包含了段基址,界限,段类型等等各种信息</p>
 <figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">实模式:查段寄存器立刻获得段基址</span><br><span class="line">32位保护模式:查段寄存器中的段选择子获得段描述符表下标,查段描述符表获得段描述符</span><br><span class="line">段描述符包含段基址信息</span><br></pre></td></tr></table></figure>
-
-<p><img src="https://raw.githubusercontent.com/DeutschBall/DeutschBall/main/image-20220829170144452.png" alt="image-20220829170144452"></p>
+<figure>
+<img
+src="https://raw.githubusercontent.com/DeutschBall/DeutschBall/main/image-20220829170144452.png"
+alt="image-20220829170144452" />
+<figcaption aria-hidden="true">image-20220829170144452</figcaption>
+</figure>
 <p>高13位就是段描述符表中的下标,13位可以寻址8K条记录,这和段描述符表最大记录数量是一致的</p>
-<p>再低一位是全局&#x2F;局部 段描述表标志,如果是0则该选择子中的索引是全局描述符表的下标</p>
+<p>再低一位是全局/局部
+段描述表标志,如果是0则该选择子中的索引是全局描述符表的下标</p>
 <p>如果是1则该选择子中的索引是局部描述符表的下标</p>
 <p>最低的两位是请求特权级RPL,表示给出该选择子的程序的特权级</p>
 <blockquote>
@@ -363,45 +408,60 @@
 <p>DPL表示的是该段的特权级</p>
 <p>RPL表示需要访问该段的程序的特权级</p>
 </blockquote>
-<p>高速缓存器的作用是啥呢?在段描述符表中也有段的基址,界限,属性,为啥又要在描述符高速缓存器中再写一遍?这就是”缓存”的作用.如果没有高速缓存寄存器,那么每次使用这个段,都需要用段选择字查段描述符表获得段描述符指定的基址和界限,这就涉及到内存访问了.如果第一次放问该段时查表获得了段基址,把他存到高速缓存器中,那么下一次使用这个段的时候,就不需要访问内存了.显然访问寄存器速度比访问内存快</p>
-<h3 id="保护模式下的内存访问"><a href="#保护模式下的内存访问" class="headerlink" title="保护模式下的内存访问"></a>保护模式下的内存访问</h3><p>数据段当初是这样创建的</p>
+<p>高速缓存器的作用是啥呢?在段描述符表中也有段的基址,界限,属性,为啥又要在描述符高速缓存器中再写一遍?这就是"缓存"的作用.如果没有高速缓存寄存器,那么每次使用这个段,都需要用段选择字查段描述符表获得段描述符指定的基址和界限,这就涉及到内存访问了.如果第一次放问该段时查表获得了段基址,把他存到高速缓存器中,那么下一次使用这个段的时候,就不需要访问内存了.显然访问寄存器速度比访问内存快</p>
+<h3 id="保护模式下的内存访问">保护模式下的内存访问</h3>
+<p>数据段当初是这样创建的</p>
 <figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">;创建#2描述符，保护模式下的数据段描述符（文本模式下的显示缓冲区） </span><br><span class="line">mov dword [bx+0x10],0x8000ffff     </span><br><span class="line">mov dword [bx+0x14],0x0040920b    </span><br></pre></td></tr></table></figure>
-
 <p>段基址指向0xb8000,即显存区域</p>
 <p>mbr程序中,将ds寄存器置为数据段的选择子,数据段描述符在全局段描述符表的第3项,下标为2,权限为00,因此将0x10放到ds中作为段选择子</p>
 <figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br></pre></td><td class="code"><pre><span class="line">flush:</span><br><span class="line">     mov cx,00000000000_10_000B         ;加载数据段选择子(0x10)</span><br><span class="line">     mov ds,cx</span><br><span class="line"></span><br><span class="line">     ;以下在屏幕上显示&quot;Protect mode OK.&quot; </span><br><span class="line">     mov byte [0x00],&#x27;P&#x27;  ;这里[0x00]默认使用ds指向段</span><br><span class="line">     mov byte [0x02],&#x27;r&#x27;</span><br><span class="line">     mov byte [0x04],&#x27;o&#x27;</span><br><span class="line">     mov byte [0x06],&#x27;t&#x27;</span><br><span class="line">     mov byte [0x08],&#x27;e&#x27;</span><br><span class="line">     mov byte [0x0a],&#x27;c&#x27;</span><br><span class="line">     mov byte [0x0c],&#x27;t&#x27;</span><br><span class="line">     mov byte [0x0e],&#x27; &#x27;</span><br><span class="line">     mov byte [0x10],&#x27;m&#x27;</span><br><span class="line">     mov byte [0x12],&#x27;o&#x27;</span><br><span class="line">     mov byte [0x14],&#x27;d&#x27;</span><br><span class="line">     mov byte [0x16],&#x27;e&#x27;</span><br><span class="line">     mov byte [0x18],&#x27; &#x27;</span><br><span class="line">     mov byte [0x1a],&#x27;O&#x27;</span><br><span class="line">     mov byte [0x1c],&#x27;K&#x27;</span><br></pre></td></tr></table></figure>
-
-<h4 id="加载描述符高速缓存器"><a href="#加载描述符高速缓存器" class="headerlink" title="加载描述符高速缓存器"></a>加载描述符高速缓存器</h4><p>当<code>mov ds,cx</code>这条改变段寄存器ds的指令执行之后,处理器会自动查GDT表获取段基址,界限,属性,填到高速缓存器中</p>
+<h4 id="加载描述符高速缓存器">加载描述符高速缓存器</h4>
+<p>当<code>mov ds,cx</code>这条改变段寄存器ds的指令执行之后,处理器会自动查GDT表获取段基址,界限,属性,填到高速缓存器中</p>
 <p>这个过程用图表示为</p>
-<p><img src="https://raw.githubusercontent.com/DeutschBall/DeutschBall/main/image-20220829213426419.png" alt="image-20220829213426419"></p>
+<figure>
+<img
+src="https://raw.githubusercontent.com/DeutschBall/DeutschBall/main/image-20220829213426419.png"
+alt="image-20220829213426419" />
+<figcaption aria-hidden="true">image-20220829213426419</figcaption>
+</figure>
 <p>用段寄存器中的索引值乘以8是因为,GDT表的表项8字节,加上GDTR中存放的GDT表基地址,就得到了相应表项的起始地址,从该段描述符中获取相关信息填到高速缓存器中</p>
-<h4 id="地址翻译"><a href="#地址翻译" class="headerlink" title="地址翻译"></a>地址翻译</h4><p>由于访问内存前首先要设置段寄存器,只要是使段寄存器发生变化的指令,比如mov,jmp far,call far等,都会导致处理器自动加载高速缓存器</p>
+<h4 id="地址翻译">地址翻译</h4>
+<p>由于访问内存前首先要设置段寄存器,只要是使段寄存器发生变化的指令,比如mov,jmp
+far,call far等,都会导致处理器自动加载高速缓存器</p>
 <p>那么当实际需要访问内存的时候,高速缓存器已经加载好了,基地址是0xb8000,</p>
 <p>这时高速缓存器中的基址等信息和用选择子查GDT表获取到的基址等信息是相同的,因此不需要再查段地址了</p>
-<p><img src="https://raw.githubusercontent.com/DeutschBall/DeutschBall/main/image-20220829213823071.png" alt="image-20220829213823071"></p>
-<p><code>mov byte [0x00],&#39;P&#39;</code>这条指令,默认使用ds指向的数据段,偏移量0x00,</p>
+<figure>
+<img
+src="https://raw.githubusercontent.com/DeutschBall/DeutschBall/main/image-20220829213823071.png"
+alt="image-20220829213823071" />
+<figcaption aria-hidden="true">image-20220829213823071</figcaption>
+</figure>
+<p><code>mov byte [0x00],'P'</code>这条指令,默认使用ds指向的数据段,偏移量0x00,</p>
 <p>寻址的时候只需要从ds段寄存器的描述符高速缓存器中,</p>
 <p>把缓存好的数据段界限拿出来,和偏移量比一下,看看该偏移量是否越界了,如果没有则</p>
 <p>把缓存好的数据段基址拿出来,加上该偏移量,得到32位线性地址0xb8000</p>
 <p>地址总线上0x000b8000信号置高</p>
-<p>然后把’P’的ASCII码放到数据总线上,置高</p>
-<p>然后CPU发出内存写指令,’P’就写到内存的0x000b8000位置了,这个位置恰好又是显存映射区,因此直接输出到屏幕了</p>
+<p>然后把'P'的ASCII码放到数据总线上,置高</p>
+<p>然后CPU发出内存写指令,'P'就写到内存的0x000b8000位置了,这个位置恰好又是显存映射区,因此直接输出到屏幕了</p>
 <blockquote>
-<p>这里地址翻译的结果是”线性地址”,不是物理地址,这是因为,如果使用了分页机制,那么该线性地址有可能不等于物理地址,其所在虚拟页号不一定等于物理页号</p>
+<p>这里地址翻译的结果是"线性地址",不是物理地址,这是因为,如果使用了分页机制,那么该线性地址有可能不等于物理地址,其所在虚拟页号不一定等于物理页号</p>
 <p>如果没有使用分页机制,那么可以说线性地址就是物理地址</p>
 </blockquote>
 <p>取指过程也类似</p>
-<p><img src="https://raw.githubusercontent.com/DeutschBall/DeutschBall/main/image-20220829214456572.png" alt="image-20220829214456572"></p>
-<h3 id="清空流水线"><a href="#清空流水线" class="headerlink" title="清空流水线"></a>清空流水线</h3><p>在进入保护模式前,段寄存器以及高速缓存器已经有东西了,进入保护模式需要更新这些值.并且很多实模式的指令已经在流水线上了,进入保护模式后不再适用,需要清空流水线</p>
+<figure>
+<img
+src="https://raw.githubusercontent.com/DeutschBall/DeutschBall/main/image-20220829214456572.png"
+alt="image-20220829214456572" />
+<figcaption aria-hidden="true">image-20220829214456572</figcaption>
+</figure>
+<h3 id="清空流水线">清空流水线</h3>
+<p>在进入保护模式前,段寄存器以及高速缓存器已经有东西了,进入保护模式需要更新这些值.并且很多实模式的指令已经在流水线上了,进入保护模式后不再适用,需要清空流水线</p>
 <p>使用远jmp或者远call,既可以更新段寄存器,又可以把流水线扬了</p>
 <p>因此在设置PE位之后有一个jmp dword跳转</p>
 <p>jmp dword 32位远跳转指令</p>
 <figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line">     mov eax,cr0                    ;cr0放到eax</span><br><span class="line">     or eax,1                           ;低位置1</span><br><span class="line">     mov cr0,eax                        ;设置PE位</span><br><span class="line">  </span><br><span class="line">     ;以下进入保护模式... ...</span><br><span class="line">     jmp dword 0x0008:flush             ;16位的描述符选择子：32位偏移</span><br><span class="line">                                        ;清流水线并串行化处理器 </span><br><span class="line">     [bits 32] ;伪指令,此后用32位编译</span><br><span class="line"></span><br><span class="line">flush:</span><br><span class="line">     mov cx,00000000000_10_000B         ;加载数据段选择子(0x10)</span><br><span class="line">     mov ds,cx</span><br></pre></td></tr></table></figure>
-
-
-
 <p>这里jmp dword 0x0008:flush</p>
-<p>意思是跳转到一个32位地址,段选择子是0x0008,(即GDT索引为0x1,G&#x3D;0,RPL&#x3D;00)偏移量为flush</p>
+<p>意思是跳转到一个32位地址,段选择子是0x0008,(即GDT索引为0x1,G=0,RPL=00)偏移量为flush</p>
 <blockquote>
 <p>dword修饰意思是使用32位的偏移量,编译成的机器码带有前缀0x66,表示处理器会按32位的方式执行该指令</p>
 </blockquote>
@@ -411,99 +471,120 @@
 <p>然后[bits 32]是nasm伪指令,意思是后面的代码编译成32位模式</p>
 <p>但是保护模式下不允许使用mov指令修改CS寄存器内容,就算用ax寄存器中转也白搭.</p>
 <p>只是对于CS寄存器有这个限制,其他段寄存器没有限制</p>
-<h3 id="保护模式的栈"><a href="#保护模式的栈" class="headerlink" title="保护模式的栈"></a>保护模式的栈</h3><h4 id="堆栈段描述符"><a href="#堆栈段描述符" class="headerlink" title="堆栈段描述符"></a>堆栈段描述符</h4><p>GDT中堆栈段描述符长这样</p>
+<h3 id="保护模式的栈">保护模式的栈</h3>
+<h4 id="堆栈段描述符">堆栈段描述符</h4>
+<p>GDT中堆栈段描述符长这样</p>
 <figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">;创建#3描述符，保护模式下的堆栈段描述符</span><br><span class="line">mov dword [bx+0x18],0x00007a00</span><br><span class="line">mov dword [bx+0x1c],0x00409600</span><br></pre></td></tr></table></figure>
-
 <p>线性基地址0</p>
 <p>段界限0x7A00,最大7A00字节</p>
-<p>粒度G&#x3D;0字节</p>
-<p>D&#x3D;1,32位段,默认push压栈4个字节,使用esp(如果是D&#x3D;0,16位,则默认push压栈字,使用sp)</p>
-<p>S&#x3D;1,数据段</p>
-<p>P&#x3D;1,在内存中</p>
-<p>DPL&#x3D;0,0环</p>
-<p>TYPE&#x3D;0010 可读写,向下生长</p>
-<h4 id="初始化堆栈"><a href="#初始化堆栈" class="headerlink" title="初始化堆栈"></a>初始化堆栈</h4><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">mov cx,00000000000_11_000B         ;加载堆栈段选择子</span><br><span class="line">mov ss,cx</span><br><span class="line">mov esp,0x7c00</span><br></pre></td></tr></table></figure>
-
-<p>选择子意思是下标0x11&#x3D;3,查全局段描述符表,0环权限</p>
+<p>粒度G=0字节</p>
+<p>D=1,32位段,默认push压栈4个字节,使用esp(如果是D=0,16位,则默认push压栈字,使用sp)</p>
+<p>S=1,数据段</p>
+<p>P=1,在内存中</p>
+<p>DPL=0,0环</p>
+<p>TYPE=0010 可读写,向下生长</p>
+<h4 id="初始化堆栈">初始化堆栈</h4>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">mov cx,00000000000_11_000B         ;加载堆栈段选择子</span><br><span class="line">mov ss,cx</span><br><span class="line">mov esp,0x7c00</span><br></pre></td></tr></table></figure>
+<p>选择子意思是下标0x11=3,查全局段描述符表,0环权限</p>
 <p>将该段选择子放到ss堆栈段寄存器,将引起处理器自动查GDT表获取段基址放到段描述符高速缓存器中</p>
 <p>然后将esp置为0x7c00表示栈顶指针位置,</p>
 <p>对于esp,有一个要求,esp&gt;粒度×界限,也就是说esp最低要保证栈空间满足粒度呈×界限这么多,但是高不封顶</p>
 <p>啥意思呢?你不是esp要比粒度×界限大吗,我大一个字节也是大,大10个字节也是大,esp顶到天上也是大</p>
-<p><img src="https://raw.githubusercontent.com/DeutschBall/DeutschBall/main/image-20220829223100310.png" alt="image-20220829223100310"></p>
+<figure>
+<img
+src="https://raw.githubusercontent.com/DeutschBall/DeutschBall/main/image-20220829223100310.png"
+alt="image-20220829223100310" />
+<figcaption aria-hidden="true">image-20220829223100310</figcaption>
+</figure>
 <p>esp的变化方向将会是0x7c00-&gt;0</p>
-<h4 id="使用堆栈"><a href="#使用堆栈" class="headerlink" title="使用堆栈"></a>使用堆栈</h4><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line">     mov ebp,esp                        ;保存堆栈指针 </span><br><span class="line">     push byte &#x27;.&#x27;                      ;压入立即数（字节）</span><br><span class="line">     </span><br><span class="line">     sub ebp,4</span><br><span class="line">     cmp ebp,esp                        ;判断压入立即数时，ESP是否减4 </span><br><span class="line">     jnz ghalt                          </span><br><span class="line">     pop eax</span><br><span class="line">     mov [0x1e],al                      ;显示句点 </span><br><span class="line">ghalt:     </span><br><span class="line">     hlt                                ;已经禁止中断，将不会被唤醒 </span><br></pre></td></tr></table></figure>
-
+<h4 id="使用堆栈">使用堆栈</h4>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line">     mov ebp,esp                        ;保存堆栈指针 </span><br><span class="line">     push byte &#x27;.&#x27;                      ;压入立即数（字节）</span><br><span class="line">     </span><br><span class="line">     sub ebp,4</span><br><span class="line">     cmp ebp,esp                        ;判断压入立即数时，ESP是否减4 </span><br><span class="line">     jnz ghalt                          </span><br><span class="line">     pop eax</span><br><span class="line">     mov [0x1e],al                      ;显示句点 </span><br><span class="line">ghalt:     </span><br><span class="line">     hlt                                ;已经禁止中断，将不会被唤醒 </span><br></pre></td></tr></table></figure>
 <p>ebp获得esp拷贝</p>
-<p>push byte指令导致’.’压栈,但是实际压入栈中的是<strong>一个双字</strong>,esp会减4,在esp+1放上’.’,在esp+2,esp+3,esp+4都放0</p>
-<p>为了证实这一点,ebp直接-4,如果刚才的理论正确,则ebp此时应该等于esp,那么cmp指令将会把ZF&#x3D;1置起来.那么jnz跳转不实现,那么将栈上刚压入的一个四字推给eax寄存器,esp+4恢复原样,然后al字节放到显存[0x1e]上打印句点到屏幕</p>
+<p>push
+byte指令导致'.'压栈,但是实际压入栈中的是<strong>一个双字</strong>,esp会减4,在esp+1放上'.',在esp+2,esp+3,esp+4都放0</p>
+<p>为了证实这一点,ebp直接-4,如果刚才的理论正确,则ebp此时应该等于esp,那么cmp指令将会把ZF=1置起来.那么jnz跳转不实现,那么将栈上刚压入的一个四字推给eax寄存器,esp+4恢复原样,然后al字节放到显存[0x1e]上打印句点到屏幕</p>
 <p>也就是说只要是运行起来最后有句点,说明理论正确</p>
-<p><img src="https://raw.githubusercontent.com/DeutschBall/DeutschBall/main/image-20220829224646277.png" alt="image-20220829224646277"></p>
-<p>运行结果确实有句点,证明<code>push byte &#39;.&#39; </code>导致栈顶下降了4字节</p>
-<h2 id="调试"><a href="#调试" class="headerlink" title="调试"></a>调试</h2><h3 id="可能会预见的问题"><a href="#可能会预见的问题" class="headerlink" title="可能会预见的问题"></a>可能会预见的问题</h3><p>每次虚拟机运行关闭之后,都会在虚拟硬盘目录下面产生一共.lock文件</p>
-<p><img src="https://raw.githubusercontent.com/DeutschBall/DeutschBall/main/image-20220829232306055.png" alt="image-20220829232306055"></p>
+<figure>
+<img
+src="https://raw.githubusercontent.com/DeutschBall/DeutschBall/main/image-20220829224646277.png"
+alt="image-20220829224646277" />
+<figcaption aria-hidden="true">image-20220829224646277</figcaption>
+</figure>
+<p>运行结果确实有句点,证明<code>push byte '.'</code>导致栈顶下降了4字节</p>
+<h2 id="调试">调试</h2>
+<h3 id="可能会预见的问题">可能会预见的问题</h3>
+<p>每次虚拟机运行关闭之后,都会在虚拟硬盘目录下面产生一共.lock文件</p>
+<figure>
+<img
+src="https://raw.githubusercontent.com/DeutschBall/DeutschBall/main/image-20220829232306055.png"
+alt="image-20220829232306055" />
+<figcaption aria-hidden="true">image-20220829232306055</figcaption>
+</figure>
 <p>只要是有这个东西下一次开机虚拟机准起不来</p>
 <p>扬了就行了</p>
-<h3 id="观察处理器上电后的段寄存器状态"><a href="#观察处理器上电后的段寄存器状态" class="headerlink" title="观察处理器上电后的段寄存器状态"></a>观察处理器上电后的段寄存器状态</h3><p>使用bochs调试运行nobody.vhd,bochs会自动在第一条指令指向前停下</p>
+<h3
+id="观察处理器上电后的段寄存器状态">观察处理器上电后的段寄存器状态</h3>
+<p>使用bochs调试运行nobody.vhd,bochs会自动在第一条指令指向前停下</p>
 <p>此时用r观察所有寄存器状态</p>
 <figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br></pre></td><td class="code"><pre><span class="line">&lt;bochs:1&gt; r</span><br><span class="line">rax: 00000000_00000000</span><br><span class="line">rbx: 00000000_00000000</span><br><span class="line">rcx: 00000000_00000000</span><br><span class="line">rdx: 00000000_00000000</span><br><span class="line">rsp: 00000000_00000000</span><br><span class="line">rbp: 00000000_00000000</span><br><span class="line">rsi: 00000000_00000000</span><br><span class="line">rdi: 00000000_00000000</span><br><span class="line">r8 : 00000000_00000000</span><br><span class="line">r9 : 00000000_00000000</span><br><span class="line">r10: 00000000_00000000</span><br><span class="line">r11: 00000000_00000000</span><br><span class="line">r12: 00000000_00000000</span><br><span class="line">r13: 00000000_00000000</span><br><span class="line">r14: 00000000_00000000</span><br><span class="line">r15: 00000000_00000000</span><br><span class="line">rip: 00000000_0000fff0</span><br><span class="line">eflags 0x00000002: id vip vif ac vm rf nt IOPL=0 of df if tf sf zf af pf cf</span><br></pre></td></tr></table></figure>
-
 <p>除了程序计数器rip,其他寄存器全是0</p>
 <p>使用sreg观察所有段寄存器状态</p>
 <p>bochs可以观察高速缓存器的内容</p>
 <p>dh,dl是段描述符的内容,显然此时还没有建立GDT,dh和dl的值是bochs根据高速缓存器的值造的</p>
 <figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br></pre></td><td class="code"><pre><span class="line">&lt;bochs:2&gt; sreg</span><br><span class="line">es:0x0000, dh=0x00009300, dl=0x0000ffff, valid=7</span><br><span class="line">        Data segment, base=0x00000000, limit=0x0000ffff, Read/Write, Accessed</span><br><span class="line">cs:0xf000, dh=0xff0093ff, dl=0x0000ffff, valid=7</span><br><span class="line">        Data segment, base=0xffff0000, limit=0x0000ffff, Read/Write, Accessed</span><br><span class="line">ss:0x0000, dh=0x00009300, dl=0x0000ffff, valid=7</span><br><span class="line">        Data segment, base=0x00000000, limit=0x0000ffff, Read/Write, Accessed</span><br><span class="line">ds:0x0000, dh=0x00009300, dl=0x0000ffff, valid=7</span><br><span class="line">        Data segment, base=0x00000000, limit=0x0000ffff, Read/Write, Accessed</span><br><span class="line">fs:0x0000, dh=0x00009300, dl=0x0000ffff, valid=7</span><br><span class="line">        Data segment, base=0x00000000, limit=0x0000ffff, Read/Write, Accessed</span><br><span class="line">gs:0x0000, dh=0x00009300, dl=0x0000ffff, valid=7</span><br><span class="line">        Data segment, base=0x00000000, limit=0x0000ffff, Read/Write, Accessed</span><br><span class="line">ldtr:0x0000, dh=0x00008200, dl=0x0000ffff, valid=1</span><br><span class="line">tr:0x0000, dh=0x00008b00, dl=0x0000ffff, valid=1</span><br><span class="line">gdtr:base=0x0000000000000000, limit=0xffff</span><br><span class="line">idtr:base=0x0000000000000000, limit=0xffff</span><br></pre></td></tr></table></figure>
-
 <p>只有cs段寄存器的基地址是0xf0000,其他都是0</p>
-<h3 id="lgdt之后全局gdtr寄存器的变化"><a href="#lgdt之后全局gdtr寄存器的变化" class="headerlink" title="lgdt之后全局gdtr寄存器的变化"></a>lgdt之后全局gdtr寄存器的变化</h3><p>lgdt以内存操作数的低16位为界限,高32位为基址,加载gdt表信息到gdtr寄存器</p>
+<h3 id="lgdt之后全局gdtr寄存器的变化">lgdt之后全局gdtr寄存器的变化</h3>
+<p>lgdt以内存操作数的低16位为界限,高32位为基址,加载gdt表信息到gdtr寄存器</p>
 <p>怎么观察这个事呢?</p>
-<p>首先需要找到lgdt的地址,可以在0x7c00处下断点,按c执行到此,然后u&#x2F;20反汇编20条指令,观察这些指令的地址</p>
-<p><img src="https://raw.githubusercontent.com/DeutschBall/DeutschBall/main/image-20220829230722202.png" alt="image-20220829230722202"></p>
+<p>首先需要找到lgdt的地址,可以在0x7c00处下断点,按c执行到此,然后u/20反汇编20条指令,观察这些指令的地址</p>
+<figure>
+<img
+src="https://raw.githubusercontent.com/DeutschBall/DeutschBall/main/image-20220829230722202.png"
+alt="image-20220829230722202" />
+<figcaption aria-hidden="true">image-20220829230722202</figcaption>
+</figure>
 <p>这就找到了lgdt的地址,然后再0x7c5f上下断点,按c执行到此</p>
 <p>执行之前sreg打印一下gdtr的状态</p>
 <figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">gdtr:base=0x00000000000f9ad7, limit=0x30</span><br></pre></td></tr></table></figure>
-
 <p>s单步执行之后再打印一下gdtr的状态</p>
 <figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">gdtr:base=0x0000000000007e00, limit=0x1f</span><br></pre></td></tr></table></figure>
-
-<p>使用xp&#x2F;8 0x7e00观察GDT表</p>
+<p>使用xp/8 0x7e00观察GDT表</p>
 <figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">&lt;bochs:13&gt; 0x/8 0x7e00</span><br><span class="line">[bochs]:</span><br><span class="line">0x0000000000007e00 &lt;bogus+       0&gt;:    0x00000000      0x00000000      0x7c0001ff      0x00409800</span><br><span class="line">0x0000000000007e10 &lt;bogus+      16&gt;:    0x8000ffff      0x0040920b      0x00007a00      0x00409600</span><br></pre></td></tr></table></figure>
-
 <p>0x7e00处是全空的0下标段描述符,后面的段描述符是有实际意义的</p>
-<h3 id="置PE位后段寄存器的变化"><a href="#置PE位后段寄存器的变化" class="headerlink" title="置PE位后段寄存器的变化"></a>置PE位后段寄存器的变化</h3><p>通过设置CR0的PE位,处理器进入保护模式,段寄存器仍然保存了实模式下的内容,除非有修改段寄存器的指令</p>
+<h3 id="置pe位后段寄存器的变化">置PE位后段寄存器的变化</h3>
+<p>通过设置CR0的PE位,处理器进入保护模式,段寄存器仍然保存了实模式下的内容,除非有修改段寄存器的指令</p>
 <p>怎么观察这个事呢?</p>
 <p>首先需要找到即将进入保护模式的指令</p>
-<p>可以使用u&#x2F;balabala 反汇编一坨指令找他</p>
+<p>可以使用u/balabala 反汇编一坨指令找他</p>
 <figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">0000000000007c73: (                    ): mov cr0, eax              ; 0f22c0</span><br></pre></td></tr></table></figure>
-
 <p>在0x7c73下断点然后c执行到此</p>
-<p><img src="https://raw.githubusercontent.com/DeutschBall/DeutschBall/main/image-20220829231354276.png" alt="image-20220829231354276"></p>
+<figure>
+<img
+src="https://raw.githubusercontent.com/DeutschBall/DeutschBall/main/image-20220829231354276.png"
+alt="image-20220829231354276" />
+<figcaption aria-hidden="true">image-20220829231354276</figcaption>
+</figure>
 <p>执行前后用sreg观察段寄存器是没有任何变化的</p>
-<p>后面jmp dword远跳转就会改变段寄存器了,首先反汇编找到该远跳转的地址</p>
+<p>后面jmp
+dword远跳转就会改变段寄存器了,首先反汇编找到该远跳转的地址</p>
 <figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">0000000000007c76: (                    ): jmpf 0x0008:0000007e      ; 66ea7e0000000800</span><br></pre></td></tr></table></figure>
-
 <p>在0x7c76下断点然后c执行到此</p>
 <p>执行前先sreg打印一下CS的状态</p>
 <figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">cs:0x0000, dh=0x00009300, dl=0x0000ffff, valid=7</span><br><span class="line">        Data segment, base=0x00000000, limit=0x0000ffff, Read/Write, Accessed</span><br></pre></td></tr></table></figure>
-
 <p>s单步执行后再sreg观察cs的状态</p>
 <figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">cs:0x0008, dh=0x00409900, dl=0x7c0001ff, valid=1</span><br><span class="line">        Code segment, base=0x00007c00, limit=0x000001ff, Execute-Only, Non-Conforming, Accessed, 32-bit</span><br></pre></td></tr></table></figure>
-
-
-
 <p>此时dh,dl都指向了GDT中的信息,cs存放的是选择子</p>
 <p>高速缓存器中的base和limit业已设置好了</p>
-<h3 id="观察控制寄存器CR0的变化"><a href="#观察控制寄存器CR0的变化" class="headerlink" title="观察控制寄存器CR0的变化"></a>观察控制寄存器CR0的变化</h3><p>重新调试运行,找到设置PE位的指令</p>
+<h3 id="观察控制寄存器cr0的变化">观察控制寄存器CR0的变化</h3>
+<p>重新调试运行,找到设置PE位的指令</p>
 <figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">0000000000007c73: (                    ): mov cr0, eax              ; 0f22c0</span><br></pre></td></tr></table></figure>
-
 <p>在0x7c73下断点然后c运行到此</p>
 <p>执行前creg打印一下CR0的状态</p>
 <figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">&lt;bochs:6&gt; creg</span><br><span class="line">CR0=0x60000010: pg CD NW ac wp ne ET ts em mp pe</span><br></pre></td></tr></table></figure>
-
-<p>此时的pe&#x3D;0表明处理器工作在实模式</p>
+<p>此时的pe=0表明处理器工作在实模式</p>
 <p>然后s单步执行之后creg观察CR0</p>
 <figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">&lt;bochs:7&gt; s</span><br><span class="line">Next at t=17179024</span><br><span class="line">(0) [0x000000007c76] 0000:0000000000007c76 (unk. ctxt): jmpf 0x0008:0000007e      ; 66ea7e0000000800</span><br><span class="line">&lt;bochs:8&gt; creg</span><br><span class="line">CR0=0x60000011: pg CD NW ac wp ne ET ts em mp PE</span><br></pre></td></tr></table></figure>
-
-<p>果然PE&#x3D;1了,表明处理器工作在保护状态</p>
+<p>果然PE=1了,表明处理器工作在保护状态</p>
 
     </div>
 
@@ -587,7 +668,7 @@
 
       <!--noindex-->
       <div class="post-toc-wrap sidebar-panel">
-          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#chapter-11-%E4%BF%9D%E6%8A%A4%E6%A8%A1%E5%BC%8F"><span class="nav-number">1.</span> <span class="nav-text">chapter 11 保护模式</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%85%A8%E5%B1%80%E6%8F%8F%E8%BF%B0%E7%AC%A6%E8%A1%A8"><span class="nav-number">1.1.</span> <span class="nav-text">全局描述符表</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E6%AE%B5%E9%80%89%E6%8B%A9%E5%AD%90"><span class="nav-number">1.2.</span> <span class="nav-text">段选择子</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E6%AE%B5%E6%8F%8F%E8%BF%B0%E7%AC%A6"><span class="nav-number">1.3.</span> <span class="nav-text">段描述符</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%9F%BA%E5%9D%80%E5%92%8C%E7%95%8C%E9%99%90"><span class="nav-number">1.3.1.</span> <span class="nav-text">基址和界限</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E7%B2%92%E5%BA%A6G"><span class="nav-number">1.3.2.</span> <span class="nav-text">粒度G</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%AE%B5%E6%8F%8F%E8%BF%B0%E7%AC%A6%E7%B1%BB%E5%9E%8BS"><span class="nav-number">1.3.3.</span> <span class="nav-text">段描述符类型S</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%8F%8F%E8%BF%B0%E7%AC%A6%E7%89%B9%E6%9D%83%E7%BA%A7DPL"><span class="nav-number">1.3.4.</span> <span class="nav-text">描述符特权级DPL</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%AE%B5%E5%AD%98%E5%9C%A8%E4%BD%8DP"><span class="nav-number">1.3.5.</span> <span class="nav-text">段存在位P</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E9%BB%98%E8%AE%A4%E6%93%8D%E4%BD%9C%E6%95%B0%E5%A4%A7%E5%B0%8FD-B"><span class="nav-number">1.3.6.</span> <span class="nav-text">默认操作数大小D&#x2F;B</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#%E5%AF%B9%E4%BA%8E%E4%BB%A3%E7%A0%81%E6%AE%B5-%E8%AF%A5%E4%BD%8D%E6%98%AFD%E4%BD%8D"><span class="nav-number">1.3.6.1.</span> <span class="nav-text">对于代码段,该位是D位</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E5%AF%B9%E4%BA%8E%E6%95%B0%E6%8D%AE%E6%AE%B5-%E8%AF%A5%E4%BD%8D%E6%98%AFB%E4%BD%8D"><span class="nav-number">1.3.6.2.</span> <span class="nav-text">对于数据段,该位是B位</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%8F%8F%E8%BF%B0%E7%AC%A6%E5%AD%90%E7%B1%BB%E5%9E%8BTYPE"><span class="nav-number">1.3.7.</span> <span class="nav-text">描述符子类型TYPE</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#%E5%AF%B9%E6%95%B0%E6%8D%AE%E6%AE%B5"><span class="nav-number">1.3.7.1.</span> <span class="nav-text">对数据段</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E5%AF%B9%E4%BB%A3%E7%A0%81%E6%AE%B5"><span class="nav-number">1.3.7.2.</span> <span class="nav-text">对代码段</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E8%BD%AF%E4%BB%B6%E5%8F%AF%E7%94%A8%E4%BD%8DAVL"><span class="nav-number">1.3.8.</span> <span class="nav-text">软件可用位AVL</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#64%E4%BD%8D%E4%BB%A3%E7%A0%81%E6%AE%B5%E6%A0%87%E8%AE%B0L"><span class="nav-number">1.3.9.</span> <span class="nav-text">64位代码段标记L</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E8%B5%B0%E5%90%91%E4%BF%9D%E6%8A%A4%E6%A8%A1%E5%BC%8F"><span class="nav-number">1.4.</span> <span class="nav-text">走向保护模式</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E8%AE%A1%E7%AE%97GDT%E6%89%80%E5%9C%A8%E7%9A%84%E9%80%BB%E8%BE%91%E6%AE%B5%E5%9C%B0%E5%9D%80"><span class="nav-number">1.4.1.</span> <span class="nav-text">计算GDT所在的逻辑段地址</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%88%9B%E5%BB%BA%E6%AE%B5%E6%8F%8F%E8%BF%B0%E7%AC%A6"><span class="nav-number">1.4.2.</span> <span class="nav-text">创建段描述符</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%88%9D%E5%A7%8B%E5%8C%96%E6%AE%B5%E6%8F%8F%E8%BF%B0%E7%AC%A6%E8%A1%A8%E5%AF%84%E5%AD%98%E5%99%A8"><span class="nav-number">1.4.3.</span> <span class="nav-text">初始化段描述符表寄存器</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#A20%E4%B8%8E%E5%9C%B0%E5%9D%80%E5%9B%9E%E7%BB%95"><span class="nav-number">1.4.4.</span> <span class="nav-text">A20与地址回绕</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%85%B3%E9%97%AD%E4%B8%AD%E6%96%AD"><span class="nav-number">1.4.5.</span> <span class="nav-text">关闭中断</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#CR0%E4%B8%8E%E4%BF%9D%E6%8A%A4%E6%A8%A1%E5%BC%8F"><span class="nav-number">1.4.6.</span> <span class="nav-text">CR0与保护模式</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#32%E4%BD%8D%E6%9C%BA%E5%99%A8%E4%B8%8A%E7%9A%84%E6%AE%B5%E5%AF%84%E5%AD%98%E5%99%A8"><span class="nav-number">1.4.7.</span> <span class="nav-text">32位机器上的段寄存器</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#32%E4%BD%8D%E5%AE%9E%E6%A8%A1%E5%BC%8F%E6%AE%B5%E5%AF%84%E5%AD%98%E5%99%A8%E7%94%A8%E6%B3%95"><span class="nav-number">1.4.7.1.</span> <span class="nav-text">32位实模式段寄存器用法</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#32%E4%BD%8D%E4%BF%9D%E6%8A%A4%E6%A8%A1%E5%BC%8F%E6%AE%B5%E5%AF%84%E5%AD%98%E5%99%A8%E7%9A%84%E7%94%A8%E6%B3%95"><span class="nav-number">1.4.7.2.</span> <span class="nav-text">32位保护模式段寄存器的用法</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E4%BF%9D%E6%8A%A4%E6%A8%A1%E5%BC%8F%E4%B8%8B%E7%9A%84%E5%86%85%E5%AD%98%E8%AE%BF%E9%97%AE"><span class="nav-number">1.4.8.</span> <span class="nav-text">保护模式下的内存访问</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#%E5%8A%A0%E8%BD%BD%E6%8F%8F%E8%BF%B0%E7%AC%A6%E9%AB%98%E9%80%9F%E7%BC%93%E5%AD%98%E5%99%A8"><span class="nav-number">1.4.8.1.</span> <span class="nav-text">加载描述符高速缓存器</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E5%9C%B0%E5%9D%80%E7%BF%BB%E8%AF%91"><span class="nav-number">1.4.8.2.</span> <span class="nav-text">地址翻译</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%B8%85%E7%A9%BA%E6%B5%81%E6%B0%B4%E7%BA%BF"><span class="nav-number">1.4.9.</span> <span class="nav-text">清空流水线</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E4%BF%9D%E6%8A%A4%E6%A8%A1%E5%BC%8F%E7%9A%84%E6%A0%88"><span class="nav-number">1.4.10.</span> <span class="nav-text">保护模式的栈</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#%E5%A0%86%E6%A0%88%E6%AE%B5%E6%8F%8F%E8%BF%B0%E7%AC%A6"><span class="nav-number">1.4.10.1.</span> <span class="nav-text">堆栈段描述符</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E5%88%9D%E5%A7%8B%E5%8C%96%E5%A0%86%E6%A0%88"><span class="nav-number">1.4.10.2.</span> <span class="nav-text">初始化堆栈</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E4%BD%BF%E7%94%A8%E5%A0%86%E6%A0%88"><span class="nav-number">1.4.10.3.</span> <span class="nav-text">使用堆栈</span></a></li></ol></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E8%B0%83%E8%AF%95"><span class="nav-number">1.5.</span> <span class="nav-text">调试</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%8F%AF%E8%83%BD%E4%BC%9A%E9%A2%84%E8%A7%81%E7%9A%84%E9%97%AE%E9%A2%98"><span class="nav-number">1.5.1.</span> <span class="nav-text">可能会预见的问题</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E8%A7%82%E5%AF%9F%E5%A4%84%E7%90%86%E5%99%A8%E4%B8%8A%E7%94%B5%E5%90%8E%E7%9A%84%E6%AE%B5%E5%AF%84%E5%AD%98%E5%99%A8%E7%8A%B6%E6%80%81"><span class="nav-number">1.5.2.</span> <span class="nav-text">观察处理器上电后的段寄存器状态</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#lgdt%E4%B9%8B%E5%90%8E%E5%85%A8%E5%B1%80gdtr%E5%AF%84%E5%AD%98%E5%99%A8%E7%9A%84%E5%8F%98%E5%8C%96"><span class="nav-number">1.5.3.</span> <span class="nav-text">lgdt之后全局gdtr寄存器的变化</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E7%BD%AEPE%E4%BD%8D%E5%90%8E%E6%AE%B5%E5%AF%84%E5%AD%98%E5%99%A8%E7%9A%84%E5%8F%98%E5%8C%96"><span class="nav-number">1.5.4.</span> <span class="nav-text">置PE位后段寄存器的变化</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E8%A7%82%E5%AF%9F%E6%8E%A7%E5%88%B6%E5%AF%84%E5%AD%98%E5%99%A8CR0%E7%9A%84%E5%8F%98%E5%8C%96"><span class="nav-number">1.5.5.</span> <span class="nav-text">观察控制寄存器CR0的变化</span></a></li></ol></li></ol></li></ol></div>
+          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#chapter-11-%E4%BF%9D%E6%8A%A4%E6%A8%A1%E5%BC%8F"><span class="nav-number">1.</span> <span class="nav-text">chapter 11 保护模式</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%85%A8%E5%B1%80%E6%8F%8F%E8%BF%B0%E7%AC%A6%E8%A1%A8"><span class="nav-number">1.1.</span> <span class="nav-text">全局描述符表</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E6%AE%B5%E9%80%89%E6%8B%A9%E5%AD%90"><span class="nav-number">1.2.</span> <span class="nav-text">段选择子</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E6%AE%B5%E6%8F%8F%E8%BF%B0%E7%AC%A6"><span class="nav-number">1.3.</span> <span class="nav-text">段描述符</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%9F%BA%E5%9D%80%E5%92%8C%E7%95%8C%E9%99%90"><span class="nav-number">1.3.1.</span> <span class="nav-text">基址和界限</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E7%B2%92%E5%BA%A6g"><span class="nav-number">1.3.2.</span> <span class="nav-text">粒度G</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%AE%B5%E6%8F%8F%E8%BF%B0%E7%AC%A6%E7%B1%BB%E5%9E%8Bs"><span class="nav-number">1.3.3.</span> <span class="nav-text">段描述符类型S</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%8F%8F%E8%BF%B0%E7%AC%A6%E7%89%B9%E6%9D%83%E7%BA%A7dpl"><span class="nav-number">1.3.4.</span> <span class="nav-text">描述符特权级DPL</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%AE%B5%E5%AD%98%E5%9C%A8%E4%BD%8Dp"><span class="nav-number">1.3.5.</span> <span class="nav-text">段存在位P</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E9%BB%98%E8%AE%A4%E6%93%8D%E4%BD%9C%E6%95%B0%E5%A4%A7%E5%B0%8Fdb"><span class="nav-number">1.3.6.</span> <span class="nav-text">默认操作数大小D&#x2F;B</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#%E5%AF%B9%E4%BA%8E%E4%BB%A3%E7%A0%81%E6%AE%B5%E8%AF%A5%E4%BD%8D%E6%98%AFd%E4%BD%8D"><span class="nav-number">1.3.6.1.</span> <span class="nav-text">对于代码段,该位是D位</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E5%AF%B9%E4%BA%8E%E6%95%B0%E6%8D%AE%E6%AE%B5%E8%AF%A5%E4%BD%8D%E6%98%AFb%E4%BD%8D"><span class="nav-number">1.3.6.2.</span> <span class="nav-text">对于数据段,该位是B位</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%8F%8F%E8%BF%B0%E7%AC%A6%E5%AD%90%E7%B1%BB%E5%9E%8Btype"><span class="nav-number">1.3.7.</span> <span class="nav-text">描述符子类型TYPE</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#%E5%AF%B9%E6%95%B0%E6%8D%AE%E6%AE%B5"><span class="nav-number">1.3.7.1.</span> <span class="nav-text">对数据段</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E5%AF%B9%E4%BB%A3%E7%A0%81%E6%AE%B5"><span class="nav-number">1.3.7.2.</span> <span class="nav-text">对代码段</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E8%BD%AF%E4%BB%B6%E5%8F%AF%E7%94%A8%E4%BD%8Davl"><span class="nav-number">1.3.8.</span> <span class="nav-text">软件可用位AVL</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E4%BD%8D%E4%BB%A3%E7%A0%81%E6%AE%B5%E6%A0%87%E8%AE%B0l"><span class="nav-number">1.3.9.</span> <span class="nav-text">64位代码段标记L</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E8%B5%B0%E5%90%91%E4%BF%9D%E6%8A%A4%E6%A8%A1%E5%BC%8F"><span class="nav-number">1.4.</span> <span class="nav-text">走向保护模式</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E8%AE%A1%E7%AE%97gdt%E6%89%80%E5%9C%A8%E7%9A%84%E9%80%BB%E8%BE%91%E6%AE%B5%E5%9C%B0%E5%9D%80"><span class="nav-number">1.4.1.</span> <span class="nav-text">计算GDT所在的逻辑段地址</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%88%9B%E5%BB%BA%E6%AE%B5%E6%8F%8F%E8%BF%B0%E7%AC%A6"><span class="nav-number">1.4.2.</span> <span class="nav-text">创建段描述符</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%88%9D%E5%A7%8B%E5%8C%96%E6%AE%B5%E6%8F%8F%E8%BF%B0%E7%AC%A6%E8%A1%A8%E5%AF%84%E5%AD%98%E5%99%A8"><span class="nav-number">1.4.3.</span> <span class="nav-text">初始化段描述符表寄存器</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#a20%E4%B8%8E%E5%9C%B0%E5%9D%80%E5%9B%9E%E7%BB%95"><span class="nav-number">1.4.4.</span> <span class="nav-text">A20与地址回绕</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%85%B3%E9%97%AD%E4%B8%AD%E6%96%AD"><span class="nav-number">1.4.5.</span> <span class="nav-text">关闭中断</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#cr0%E4%B8%8E%E4%BF%9D%E6%8A%A4%E6%A8%A1%E5%BC%8F"><span class="nav-number">1.4.6.</span> <span class="nav-text">CR0与保护模式</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E4%BD%8D%E6%9C%BA%E5%99%A8%E4%B8%8A%E7%9A%84%E6%AE%B5%E5%AF%84%E5%AD%98%E5%99%A8"><span class="nav-number">1.4.7.</span> <span class="nav-text">32位机器上的段寄存器</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#%E4%BD%8D%E5%AE%9E%E6%A8%A1%E5%BC%8F%E6%AE%B5%E5%AF%84%E5%AD%98%E5%99%A8%E7%94%A8%E6%B3%95"><span class="nav-number">1.4.7.1.</span> <span class="nav-text">32位实模式段寄存器用法</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E4%BD%8D%E4%BF%9D%E6%8A%A4%E6%A8%A1%E5%BC%8F%E6%AE%B5%E5%AF%84%E5%AD%98%E5%99%A8%E7%9A%84%E7%94%A8%E6%B3%95"><span class="nav-number">1.4.7.2.</span> <span class="nav-text">32位保护模式段寄存器的用法</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E4%BF%9D%E6%8A%A4%E6%A8%A1%E5%BC%8F%E4%B8%8B%E7%9A%84%E5%86%85%E5%AD%98%E8%AE%BF%E9%97%AE"><span class="nav-number">1.4.8.</span> <span class="nav-text">保护模式下的内存访问</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#%E5%8A%A0%E8%BD%BD%E6%8F%8F%E8%BF%B0%E7%AC%A6%E9%AB%98%E9%80%9F%E7%BC%93%E5%AD%98%E5%99%A8"><span class="nav-number">1.4.8.1.</span> <span class="nav-text">加载描述符高速缓存器</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E5%9C%B0%E5%9D%80%E7%BF%BB%E8%AF%91"><span class="nav-number">1.4.8.2.</span> <span class="nav-text">地址翻译</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%B8%85%E7%A9%BA%E6%B5%81%E6%B0%B4%E7%BA%BF"><span class="nav-number">1.4.9.</span> <span class="nav-text">清空流水线</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E4%BF%9D%E6%8A%A4%E6%A8%A1%E5%BC%8F%E7%9A%84%E6%A0%88"><span class="nav-number">1.4.10.</span> <span class="nav-text">保护模式的栈</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#%E5%A0%86%E6%A0%88%E6%AE%B5%E6%8F%8F%E8%BF%B0%E7%AC%A6"><span class="nav-number">1.4.10.1.</span> <span class="nav-text">堆栈段描述符</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E5%88%9D%E5%A7%8B%E5%8C%96%E5%A0%86%E6%A0%88"><span class="nav-number">1.4.10.2.</span> <span class="nav-text">初始化堆栈</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E4%BD%BF%E7%94%A8%E5%A0%86%E6%A0%88"><span class="nav-number">1.4.10.3.</span> <span class="nav-text">使用堆栈</span></a></li></ol></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E8%B0%83%E8%AF%95"><span class="nav-number">1.5.</span> <span class="nav-text">调试</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%8F%AF%E8%83%BD%E4%BC%9A%E9%A2%84%E8%A7%81%E7%9A%84%E9%97%AE%E9%A2%98"><span class="nav-number">1.5.1.</span> <span class="nav-text">可能会预见的问题</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E8%A7%82%E5%AF%9F%E5%A4%84%E7%90%86%E5%99%A8%E4%B8%8A%E7%94%B5%E5%90%8E%E7%9A%84%E6%AE%B5%E5%AF%84%E5%AD%98%E5%99%A8%E7%8A%B6%E6%80%81"><span class="nav-number">1.5.2.</span> <span class="nav-text">观察处理器上电后的段寄存器状态</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#lgdt%E4%B9%8B%E5%90%8E%E5%85%A8%E5%B1%80gdtr%E5%AF%84%E5%AD%98%E5%99%A8%E7%9A%84%E5%8F%98%E5%8C%96"><span class="nav-number">1.5.3.</span> <span class="nav-text">lgdt之后全局gdtr寄存器的变化</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E7%BD%AEpe%E4%BD%8D%E5%90%8E%E6%AE%B5%E5%AF%84%E5%AD%98%E5%99%A8%E7%9A%84%E5%8F%98%E5%8C%96"><span class="nav-number">1.5.4.</span> <span class="nav-text">置PE位后段寄存器的变化</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E8%A7%82%E5%AF%9F%E6%8E%A7%E5%88%B6%E5%AF%84%E5%AD%98%E5%99%A8cr0%E7%9A%84%E5%8F%98%E5%8C%96"><span class="nav-number">1.5.5.</span> <span class="nav-text">观察控制寄存器CR0的变化</span></a></li></ol></li></ol></li></ol></div>
       </div>
       <!--/noindex-->
 
