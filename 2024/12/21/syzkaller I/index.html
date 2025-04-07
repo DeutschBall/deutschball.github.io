@@ -20,21 +20,18 @@
     var CONFIG = {"hostname":"deutschball.github.io","root":"/","scheme":"Pisces","version":"7.8.0","exturl":false,"sidebar":{"position":"left","display":"always","padding":18,"offset":12,"onmobile":false},"copycode":{"enable":true,"show_result":true,"style":"mac"},"back2top":{"enable":true,"sidebar":true,"scrollpercent":true},"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":false,"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"algolia":{"hits":{"per_page":10},"labels":{"input_placeholder":"万一找到了呢","hits_empty":"你说的 ${query} 我怎么找不着呢 ","hits_stats":"找到了 ${hits} 个结果，用时 ${time} 毫秒"}},"localsearch":{"enable":true,"trigger":"auto","top_n_per_article":-1,"unescape":false,"preload":false},"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}}};
   </script>
 
-  <meta name="description" content="[Syzkaller I]Get start Syzkaller is the start-of-the-art kernel fuzzer. Syzkaller takes in a collection of syscall descriptions provided by human experts as template , which provide the fuzzer awarene">
+  <meta name="description" content="[Syzkaller I]Get start  Syzkaller is the start-of-the-art kernel fuzzer. Syzkaller takes in a collection of syscall descriptions provided by human experts as template , which provide the fuzzer aw">
 <meta property="og:type" content="article">
 <meta property="og:title" content="Syzkaller I - Get start">
 <meta property="og:url" content="http://deutschball.github.io/2024/12/21/syzkaller%20I/index.html">
 <meta property="og:site_name" content="dustland">
-<meta property="og:description" content="[Syzkaller I]Get start Syzkaller is the start-of-the-art kernel fuzzer. Syzkaller takes in a collection of syscall descriptions provided by human experts as template , which provide the fuzzer awarene">
+<meta property="og:description" content="[Syzkaller I]Get start  Syzkaller is the start-of-the-art kernel fuzzer. Syzkaller takes in a collection of syscall descriptions provided by human experts as template , which provide the fuzzer aw">
 <meta property="og:locale" content="en_US">
-<meta property="og:image" content="https://raw.githubusercontent.com/DeutschBall/picbed/main/image-20241221203510528.png">
-<meta property="og:image" content="https://raw.githubusercontent.com/DeutschBall/picbed/main/image-20241221210627723.png">
 <meta property="article:published_time" content="2024-12-21T13:09:00.000Z">
-<meta property="article:modified_time" content="2024-12-21T13:21:15.065Z">
+<meta property="article:modified_time" content="2024-12-21T13:30:19.790Z">
 <meta property="article:author" content="dustball">
 <meta property="article:tag" content="syzkaller">
 <meta name="twitter:card" content="summary">
-<meta name="twitter:image" content="https://raw.githubusercontent.com/DeutschBall/picbed/main/image-20241221203510528.png">
 
 <link rel="canonical" href="http://deutschball.github.io/2024/12/21/syzkaller%20I/">
 
@@ -198,7 +195,7 @@
               <span class="post-meta-item-text">Posted on</span>
               
 
-              <time title="Created: 2024-12-21 21:09:00 / Modified: 21:21:15" itemprop="dateCreated datePublished" datetime="2024-12-21T21:09:00+08:00">2024-12-21</time>
+              <time title="Created: 2024-12-21 21:09:00 / Modified: 21:30:19" itemprop="dateCreated datePublished" datetime="2024-12-21T21:09:00+08:00">2024-12-21</time>
             </span>
 
           
@@ -219,149 +216,156 @@
     <div class="post-body" itemprop="articleBody">
 
       
-        <h1 id="Syzkaller-I-Get-start"><a href="#Syzkaller-I-Get-start" class="headerlink" title="[Syzkaller I]Get start"></a>[Syzkaller I]Get start</h1><blockquote>
+        <h1 id="syzkaller-iget-start">[Syzkaller I]Get start</h1>
+<blockquote>
 <p>Syzkaller is the start-of-the-art kernel fuzzer.</p>
-<p>Syzkaller takes in a collection of syscall descriptions provided by human experts as template , which provide the fuzzer awareness of the type and arguments of syscalls to be called and dependencies between syscalls . Then the fuzzer randomly generates test cases based on the template , start a kernel to run the test cases , meanwhile monitor the kernel state and collect crash reports.</p>
+<p>Syzkaller takes in a collection of syscall descriptions provided by
+human experts as template , which provide the fuzzer awareness of the
+type and arguments of syscalls to be called and dependencies between
+syscalls . Then the fuzzer randomly generates test cases based on the
+template , start a kernel to run the test cases , meanwhile monitor the
+kernel state and collect crash reports.</p>
 </blockquote>
-<h2 id="0x0-TL-DR"><a href="#0x0-TL-DR" class="headerlink" title="0x0 TL;DR"></a>0x0 TL;DR</h2><p>This post will take a look at the Syzkaller environment setup , and I will provide an ez demo to report a heap overflow in a kernel module. Hopefully my time consuming debugging process can help you . Let’s go.</p>
-<h2 id="0x1-setup"><a href="#0x1-setup" class="headerlink" title="0x1 setup"></a>0x1 setup</h2><h3 id="0-enable-cpu-feature-kvm"><a href="#0-enable-cpu-feature-kvm" class="headerlink" title="0.enable cpu feature kvm"></a>0.enable cpu feature kvm</h3><p>inspect the cpuinfo to make sure cpu support the kvm feature</p>
+<h2 id="x0-tldr">0x0 TL;DR</h2>
+<p>This post will take a look at the Syzkaller environment setup , and I
+will provide an ez demo to report a heap overflow in a kernel module.
+Hopefully my time consuming debugging process can help you . Let's
+go.</p>
+<h2 id="x1-setup">0x1 setup</h2>
+<h3 id="enable-cpu-feature-kvm">0.enable cpu feature kvm</h3>
+<p>inspect the cpuinfo to make sure cpu support the kvm feature</p>
 <ul>
 <li>for intel:</li>
 </ul>
 <figure class="highlight sh"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="built_in">cat</span> /proc/cpuinfo | grep <span class="string">&quot;vmx&quot;</span> </span><br></pre></td></tr></table></figure>
-
 <ul>
 <li>for AMD:</li>
 </ul>
 <figure class="highlight sh"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="built_in">cat</span> /proc/cpuinfo | grep <span class="string">&quot;svm&quot;</span> </span><br></pre></td></tr></table></figure>
-
-
-
-<h3 id="1-setup-golang-environment"><a href="#1-setup-golang-environment" class="headerlink" title="1.setup golang environment"></a>1.setup golang environment</h3><blockquote>
+<h3 id="setup-golang-environment">1.setup golang environment</h3>
+<blockquote>
 <p>Golang version is 1.23.4 up to that time.</p>
 </blockquote>
 <figure class="highlight sh"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">wget https://go.dev/dl/go1.23.4.linux-amd64.tar.gz</span><br><span class="line">tar -xzf go1.23.4.linux-amd64.tar.gz</span><br></pre></td></tr></table></figure>
-
 <p>add Gopath to environment</p>
 <figure class="highlight sh"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="built_in">export</span> GOROOT=/path/to/go</span><br><span class="line"><span class="built_in">export</span> PATH=<span class="variable">$GOROOT</span>/bin:<span class="variable">$PATH</span></span><br></pre></td></tr></table></figure>
-
 <p>run <code>go version</code> to check Golang environment</p>
-<h3 id="2-build-Syzkaller"><a href="#2-build-Syzkaller" class="headerlink" title="2.build Syzkaller"></a>2.build Syzkaller</h3><blockquote>
+<h3 id="build-syzkaller">2.build Syzkaller</h3>
+<blockquote>
 <p>ensure your golang environment</p>
 </blockquote>
 <figure class="highlight sh"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">git <span class="built_in">clone</span> https://github.com/google/syzkaller/</span><br><span class="line"><span class="built_in">cd</span> syzkaller</span><br><span class="line">make</span><br></pre></td></tr></table></figure>
-
-<h3 id="3-compile-Linux-kernel"><a href="#3-compile-Linux-kernel" class="headerlink" title="3.compile Linux kernel"></a>3.compile Linux kernel</h3><p>take Linux 5.14 for example</p>
+<h3 id="compile-linux-kernel">3.compile Linux kernel</h3>
+<p>take Linux 5.14 for example</p>
 <figure class="highlight sh"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">wget https://mirrors.edge.kernel.org/pub/linux/kernel/v5.x/linux-5.14.tar.xz</span><br><span class="line">tar -xf linux-5.14.tar.xz</span><br><span class="line"><span class="built_in">cd</span> linux-5.14</span><br><span class="line">make defconfig</span><br></pre></td></tr></table></figure>
-
 <p>then append the following CONFIGS to .config</p>
 <figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br></pre></td><td class="code"><pre><span class="line">CONFIG_KCOV=y</span><br><span class="line">CONFIG_KCOV_INSTRUMENT_ALL=y</span><br><span class="line">CONFIG_KCOV_ENABLE_COMPARISONS=y</span><br><span class="line">CONFIG_DEBUG_FS=y</span><br><span class="line">CONFIG_DEBUG_KMEMLEAK=y</span><br><span class="line">CONFIG_DEBUG_INFO_DWARF_TOOLCHAIN_DEFAULT=y</span><br><span class="line">CONFIG_KALLSYMS=y</span><br><span class="line">CONFIG_KALLSYMS_ALL=y</span><br><span class="line">CONFIG_CONFIGFS_FS=y</span><br><span class="line">CONFIG_SECURITYFS=y</span><br><span class="line">CONFIG_NAMESPACES=y</span><br><span class="line">CONFIG_UTS_NS=y</span><br><span class="line">CONFIG_IPC_NS=y</span><br><span class="line">CONFIG_PID_NS=y</span><br><span class="line">CONFIG_NET_NS=y</span><br><span class="line">CONFIG_CGROUP_PIDS=y</span><br><span class="line">CONFIG_MEMCG=y</span><br><span class="line">CONFIG_CMDLINE_BOOL=y</span><br><span class="line">CONFIG_CMDLINE=&quot;net.ifnames=0&quot;</span><br><span class="line">CONFIG_KASAN=y</span><br><span class="line">CONFIG_KASAN_INLINE=y</span><br></pre></td></tr></table></figure>
-
 <blockquote>
-<p>more configs : </p>
-<p><a target="_blank" rel="noopener" href="https://github.com/google/syzkaller/blob/master/docs/linux/kernel_configs.md">https://github.com/google/syzkaller/blob/master/docs/linux/kernel_configs.md</a></p>
+<p>more configs :</p>
+<p>https://github.com/google/syzkaller/blob/master/docs/linux/kernel_configs.md</p>
 </blockquote>
 <p>the compile the kernel</p>
 <figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">make -j `nproc`</span><br></pre></td></tr></table></figure>
-
 <p>this will take for a while when you get a bootable kernel image .</p>
 <figure class="highlight sh"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">file ./arch/x86/boot/bzImage </span><br></pre></td></tr></table></figure>
-
-<h3 id="4-build-virtual-hard-disk"><a href="#4-build-virtual-hard-disk" class="headerlink" title="4.build virtual hard disk"></a>4.build virtual hard disk</h3><p>to build a disk image with MBR and basic file system</p>
+<h3 id="build-virtual-hard-disk">4.build virtual hard disk</h3>
+<p>to build a disk image with MBR and basic file system</p>
 <figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">cd /path/to/syzkaller</span><br><span class="line">mkdir image</span><br><span class="line">cp ./tools/create-image.sh ./image</span><br><span class="line">cd image</span><br><span class="line">./create-image.sh</span><br></pre></td></tr></table></figure>
-
-<p>this will take for a while when you get bullseye.img as the disk image and two ssh key file</p>
+<p>this will take for a while when you get bullseye.img as the disk
+image and two ssh key file</p>
 <blockquote>
 <p>bullseye is the release name of Debian up to that time.</p>
 </blockquote>
-<h3 id="5-build-QEMU"><a href="#5-build-QEMU" class="headerlink" title="5.build QEMU"></a>5.build QEMU</h3><figure class="highlight sh"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">apt install qemu-system</span><br></pre></td></tr></table></figure>
-
-<h3 id="6-run-the-kernel"><a href="#6-run-the-kernel" class="headerlink" title="6.run the kernel"></a>6.run the kernel</h3><figure class="highlight sh"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line">qemu-system-x86_64 \</span><br><span class="line">    -m 2G \</span><br><span class="line">    -smp 2 \</span><br><span class="line">    -no-reboot \</span><br><span class="line">    -kernel /path/to/linux-5.14/arch/x86/boot/bzImage \</span><br><span class="line">    -append <span class="string">&quot;console=ttyS0 root=/dev/sda earlyprintk=serial net.ifnames=0&quot;</span> \</span><br><span class="line">    -drive file=/path/to/syzkaller/image/bullseye.img,format=raw \</span><br><span class="line">    -net user,hostfwd=tcp:127.0.0.1:10021-:22 \</span><br><span class="line">    -net nic,model=e1000 \</span><br><span class="line">    -enable-kvm \</span><br><span class="line">    -nographic \</span><br><span class="line">    -pidfile vm.pid 2&gt;&amp;1 | <span class="built_in">tee</span> vm.log</span><br><span class="line"></span><br></pre></td></tr></table></figure>
-
+<h3 id="build-qemu">5.build QEMU</h3>
+<figure class="highlight sh"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">apt install qemu-system</span><br></pre></td></tr></table></figure>
+<h3 id="run-the-kernel">6.run the kernel</h3>
+<figure class="highlight sh"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line">qemu-system-x86_64 \</span><br><span class="line">    -m 2G \</span><br><span class="line">    -smp 2 \</span><br><span class="line">    -no-reboot \</span><br><span class="line">    -kernel /path/to/linux-5.14/arch/x86/boot/bzImage \</span><br><span class="line">    -append <span class="string">&quot;console=ttyS0 root=/dev/sda earlyprintk=serial net.ifnames=0&quot;</span> \</span><br><span class="line">    -drive file=/path/to/syzkaller/image/bullseye.img,format=raw \</span><br><span class="line">    -net user,hostfwd=tcp:127.0.0.1:10021-:22 \</span><br><span class="line">    -net nic,model=e1000 \</span><br><span class="line">    -enable-kvm \</span><br><span class="line">    -nographic \</span><br><span class="line">    -pidfile vm.pid 2&gt;&amp;1 | <span class="built_in">tee</span> vm.log</span><br><span class="line"></span><br></pre></td></tr></table></figure>
 <p>Login as root without password</p>
 <blockquote>
 <p>errors :</p>
 <figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">network backend &#x27;user&#x27; is not compiled into this binary</span><br></pre></td></tr></table></figure>
-
 <p>check this post :</p>
-<p><a target="_blank" rel="noopener" href="https://stackoverflow.com/questions/75641274/network-backend-user-is-not-compiled-into-this-binary">https://stackoverflow.com/questions/75641274/network-backend-user-is-not-compiled-into-this-binary</a></p>
+<p>https://stackoverflow.com/questions/75641274/network-backend-user-is-not-compiled-into-this-binary</p>
 </blockquote>
 <p>then make sure ssh is avaliable</p>
 <figure class="highlight sh"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">ssh -i ./image/bullseye.id_rsa -p 10021 -o <span class="string">&quot;StrictHostKeyChecking no&quot;</span> root@localhost</span><br></pre></td></tr></table></figure>
-
-<h3 id="7-start-SyzKaller"><a href="#7-start-SyzKaller" class="headerlink" title="7.start SyzKaller"></a>7.start SyzKaller</h3><figure class="highlight sh"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="built_in">cd</span> /path/to/syzkaller</span><br><span class="line"><span class="built_in">mkdir</span> workdir</span><br></pre></td></tr></table></figure>
-
+<h3 id="start-syzkaller">7.start SyzKaller</h3>
+<figure class="highlight sh"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="built_in">cd</span> /path/to/syzkaller</span><br><span class="line"><span class="built_in">mkdir</span> workdir</span><br></pre></td></tr></table></figure>
 <p>and edit a config file saved as default.cfg</p>
 <figure class="highlight json"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br></pre></td><td class="code"><pre><span class="line"><span class="punctuation">&#123;</span></span><br><span class="line">        <span class="attr">&quot;target&quot;</span><span class="punctuation">:</span> <span class="string">&quot;linux/amd64&quot;</span><span class="punctuation">,</span></span><br><span class="line">        <span class="attr">&quot;http&quot;</span><span class="punctuation">:</span> <span class="string">&quot;127.0.0.1:56741&quot;</span><span class="punctuation">,</span></span><br><span class="line">        <span class="attr">&quot;workdir&quot;</span><span class="punctuation">:</span> <span class="string">&quot;/path/to/syzkaller/workdir&quot;</span><span class="punctuation">,</span></span><br><span class="line">        <span class="attr">&quot;kernel_obj&quot;</span><span class="punctuation">:</span> <span class="string">&quot;/path/to/linux-5.14/&quot;</span><span class="punctuation">,</span></span><br><span class="line">        <span class="attr">&quot;image&quot;</span><span class="punctuation">:</span> <span class="string">&quot;/path/to/syzkaller/image/bullseye.img&quot;</span><span class="punctuation">,</span></span><br><span class="line">        <span class="attr">&quot;sshkey&quot;</span><span class="punctuation">:</span> <span class="string">&quot;/path/to/syzkaller/image/bullseye.id_rsa&quot;</span><span class="punctuation">,</span></span><br><span class="line">        <span class="attr">&quot;syzkaller&quot;</span><span class="punctuation">:</span> <span class="string">&quot;/path/to/syzkaller/&quot;</span><span class="punctuation">,</span></span><br><span class="line">        <span class="attr">&quot;procs&quot;</span><span class="punctuation">:</span> <span class="number">8</span><span class="punctuation">,</span></span><br><span class="line">        <span class="attr">&quot;type&quot;</span><span class="punctuation">:</span> <span class="string">&quot;qemu&quot;</span><span class="punctuation">,</span></span><br><span class="line">        <span class="attr">&quot;vm&quot;</span><span class="punctuation">:</span> <span class="punctuation">&#123;</span></span><br><span class="line">                <span class="attr">&quot;count&quot;</span><span class="punctuation">:</span> <span class="number">4</span><span class="punctuation">,</span></span><br><span class="line">                <span class="attr">&quot;kernel&quot;</span><span class="punctuation">:</span> <span class="string">&quot;/path/to/linux-5.14/arch/x86/boot/bzImage&quot;</span><span class="punctuation">,</span></span><br><span class="line">                <span class="attr">&quot;cpu&quot;</span><span class="punctuation">:</span> <span class="number">2</span><span class="punctuation">,</span></span><br><span class="line">                <span class="attr">&quot;mem&quot;</span><span class="punctuation">:</span> <span class="number">2048</span> <span class="punctuation">,</span></span><br><span class="line">                <span class="attr">&quot;cmdline&quot;</span><span class="punctuation">:</span> <span class="string">&quot;net.ifnames=0&quot;</span></span><br><span class="line">        <span class="punctuation">&#125;</span></span><br><span class="line"><span class="punctuation">&#125;</span></span><br></pre></td></tr></table></figure>
-
 <p>run Syzkaller by:</p>
 <figure class="highlight sh"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">./bin/syz-manager -config=./default.cfg -debug</span><br></pre></td></tr></table></figure>
-
-<p>meanwhile explorer 127.0.0.1:56741 to get a view of the current fuzzing state</p>
-<h2 id="0x2-demo"><a href="#0x2-demo" class="headerlink" title="0x2 demo"></a>0x2 demo</h2><p>take a kernel heap overflow for example.</p>
-<h3 id="1-build-a-vulnability-kernel-module"><a href="#1-build-a-vulnability-kernel-module" class="headerlink" title="1.build a vulnability kernel module"></a>1.build a vulnability kernel module</h3><p>this module contains a heap overflow in function proc_write, and we will compile it directly into the kernel</p>
-<p>up to 4096 bytes can be written to a narrow 512 Byte slab object in cache kmalloc-512</p>
+<p>meanwhile explorer 127.0.0.1:56741 to get a view of the current
+fuzzing state</p>
+<h2 id="x2-demo">0x2 demo</h2>
+<p>take a kernel heap overflow for example.</p>
+<h3 id="build-a-vulnability-kernel-module">1.build a vulnability kernel
+module</h3>
+<p>this module contains a heap overflow in function proc_write, and we
+will compile it directly into the kernel</p>
+<p>up to 4096 bytes can be written to a narrow 512 Byte slab object in
+cache kmalloc-512</p>
 <figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;linux/init.h&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;linux/module.h&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;linux/proc_fs.h&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;linux/uaccess.h&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;linux/slab.h&gt;</span></span></span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="type">static</span> <span class="type">int</span> <span class="title function_">proc_open</span> <span class="params">(<span class="keyword">struct</span> inode *proc_inode, <span class="keyword">struct</span> file *proc_file)</span></span><br><span class="line">&#123;</span><br><span class="line">    printk(<span class="string">&quot;:into open!\n&quot;</span>);</span><br><span class="line">    <span class="keyword">return</span> <span class="number">0</span>;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="type">static</span> <span class="type">ssize_t</span> <span class="title function_">proc_read</span> <span class="params">(<span class="keyword">struct</span> file *proc_file, <span class="type">char</span> __user *proc_user, <span class="type">size_t</span> n, <span class="type">loff_t</span> *loff)</span></span><br><span class="line">&#123;</span><br><span class="line">    printk(<span class="string">&quot;:into read&quot;</span>);</span><br><span class="line">    <span class="keyword">return</span> <span class="number">0</span>;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="type">static</span> <span class="type">ssize_t</span> <span class="title function_">proc_write</span> <span class="params">(<span class="keyword">struct</span> file *proc_file, <span class="type">const</span> <span class="type">char</span> __user *proc_user, <span class="type">size_t</span> n, <span class="type">loff_t</span> *loff)</span></span><br><span class="line">&#123;</span><br><span class="line">    <span class="type">char</span> *c = kmalloc(<span class="number">512</span>, GFP_KERNEL);</span><br><span class="line">    copy_from_user(c, proc_user, <span class="number">4096</span>);</span><br><span class="line">    printk(<span class="string">&quot;:into write!\n&quot;</span>);</span><br><span class="line">    <span class="keyword">return</span> <span class="number">0</span>;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="type">static</span> <span class="class"><span class="keyword">struct</span> <span class="title">proc_ops</span> <span class="title">test_op</span> =</span> &#123;</span><br><span class="line">    .proc_open = proc_open,</span><br><span class="line">    .proc_read = proc_read,</span><br><span class="line">    .proc_write = proc_write,</span><br><span class="line">&#125;;</span><br><span class="line"></span><br><span class="line"><span class="type">static</span> <span class="type">int</span> __init <span class="title function_">mod_init</span><span class="params">(<span class="type">void</span>)</span></span><br><span class="line">&#123;</span><br><span class="line">    proc_create(<span class="string">&quot;test1&quot;</span>, S_IRUGO|S_IWUGO, <span class="literal">NULL</span>, &amp;test_op);</span><br><span class="line">    printk(<span class="string">&quot;:proc init over!\n&quot;</span>);</span><br><span class="line">    <span class="keyword">return</span> <span class="number">0</span>;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">module_init(mod_init);</span><br></pre></td></tr></table></figure>
-
 <p>save as <code>linux-5.14/drivers/char/testxy.c</code></p>
-<p>then append following to </p>
+<p>then append following to</p>
 <p><code>linux-5.14/drivers/char/Kconfig</code></p>
 <figure class="highlight yaml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="string">config</span> <span class="string">TESTXY_MODULE</span></span><br><span class="line">  <span class="string">tristate</span> <span class="string">&quot;dustball&#x27;s vulnability module&quot;</span></span><br><span class="line">  <span class="string">default</span> <span class="string">y</span></span><br><span class="line">  <span class="string">help</span></span><br><span class="line">    <span class="string">This</span> <span class="string">file</span> <span class="string">is</span> <span class="string">to</span> <span class="string">test</span> <span class="string">a</span> <span class="string">buffer</span> <span class="string">overflow</span></span><br></pre></td></tr></table></figure>
-
-
-
-<p>then append following to </p>
+<p>then append following to</p>
 <p><code>linux-5.14/drivers/char/Makefile</code></p>
 <figure class="highlight makefile"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">obj-<span class="variable">$(CONFIG_TESTXY_MODULE)</span> += testxy.o</span><br></pre></td></tr></table></figure>
-
-
-
-<p>reconfig the kernel with </p>
+<p>reconfig the kernel with</p>
 <p><code>make menuconfig</code></p>
-<p>we can find the module @Device Drivers&#x2F;dustball’s vulnability module</p>
+<p>we can find the module <span class="citation"
+data-cites="Device">@Device</span> Drivers/dustball's vulnability
+module</p>
 <blockquote>
 <p><code>*</code> means compile into the kernel, chosen</p>
 <p><code>M</code> means compile as independent module</p>
 </blockquote>
-<p><img src="https://raw.githubusercontent.com/DeutschBall/picbed/main/image-20241221203510528.png" alt="image-20241221203510528"></p>
+<figure>
+<img
+src="https://raw.githubusercontent.com/DeutschBall/picbed/main/image-20241221203510528.png"
+alt="image-20241221203510528" />
+<figcaption aria-hidden="true">image-20241221203510528</figcaption>
+</figure>
 <p>recompile the kernel</p>
 <figure class="highlight sh"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">make -j `<span class="built_in">nproc</span>`</span><br></pre></td></tr></table></figure>
-
-
-
 <p>rerun the kernel and check the module loaded</p>
 <figure class="highlight sh"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="built_in">ls</span> /proc/test1</span><br></pre></td></tr></table></figure>
-
-
-
-<h3 id="2-provide-syscall-descriptions"><a href="#2-provide-syscall-descriptions" class="headerlink" title="2.provide syscall descriptions"></a>2.provide syscall descriptions</h3><p>2.1 save the following syscall descriptions as</p>
-<p> <code>/syzkaller/sys/linux/proc_testxy.txt</code></p>
+<h3 id="provide-syscall-descriptions">2.provide syscall
+descriptions</h3>
+<p>2.1 save the following syscall descriptions as</p>
+<p><code>/syzkaller/sys/linux/proc_testxy.txt</code></p>
 <figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">include &lt;linux/fs.h&gt;</span><br><span class="line">open$testxy(file ptr[in, <span class="built_in">string</span>[<span class="string">&quot;/proc/test1&quot;</span>]], flags flags[proc_open_flags], mode flags[proc_open_mode]) fd</span><br><span class="line">read$testxy(fd fd, buf buffer[out], count len[buf])</span><br><span class="line">write$testxy(fd fd, buf buffer[in], count len[buf])</span><br><span class="line"></span><br><span class="line">proc_open_flags = O_RDONLY, O_WRONLY, O_RDWR, O_APPEND, FASYNC, O_CLOEXEC, O_CREAT, O_DIRECT, O_DIRECTORY, O_EXCL, O_LARGEFILE, O_NOATIME, O_NOCTTY, O_NOFOLLOW, O_NONBLOCK, O_PATH, O_SYNC, O_TRUNC, __O_TMPFILE</span><br><span class="line">proc_open_mode = S_IRUSR, S_IWUSR, S_IXUSR, S_IRGRP, S_IWGRP, S_IXGRP, S_IROTH, S_IWOTH, S_IXOTH</span><br></pre></td></tr></table></figure>
-
 <blockquote>
 <p>more syzlang :</p>
-<p><a target="_blank" rel="noopener" href="https://github.com/google/syzkaller/blob/master/docs/syscall_descriptions_syntax.md">https://github.com/google/syzkaller/blob/master/docs/syscall_descriptions_syntax.md</a></p>
+<p>https://github.com/google/syzkaller/blob/master/docs/syscall_descriptions_syntax.md</p>
 </blockquote>
-<p>2.2 extract necessary information like syscall numbers and macro values using syz-extract</p>
+<p>2.2 extract necessary information like syscall numbers and macro
+values using syz-extract</p>
 <figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">cd /path/to/syzkaller</span><br><span class="line">./bin/syz-extract -os linux -arch amd64 -sourcedir &quot;/path/to/linux-5.14&quot; proc_testxy.txt</span><br></pre></td></tr></table></figure>
-
-<p>check  <code>syzkaller/sys/linux/proc.testxy.txt.const</code>  when finished</p>
-<p>2.3 generate syzkaller-awareness datastructure in golang </p>
+<p>check <code>syzkaller/sys/linux/proc.testxy.txt.const</code> when
+finished</p>
+<p>2.3 generate syzkaller-awareness datastructure in golang</p>
 <figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">cd /path/to/syzkaller</span><br><span class="line">./bin/syz-sysgen</span><br></pre></td></tr></table></figure>
-
-<p>check <code>syzkaller/executor/syscalls.h</code> to find <code>read$testxy</code> when finished</p>
+<p>check <code>syzkaller/executor/syscalls.h</code> to find
+<code>read$testxy</code> when finished</p>
 <p>2.4 rebuild Syzkaller</p>
 <figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">make generate </span><br><span class="line">make</span><br></pre></td></tr></table></figure>
-
-<h3 id="3-start-Syzkaller"><a href="#3-start-Syzkaller" class="headerlink" title="3.start Syzkaller"></a>3.start Syzkaller</h3><p>edit a test.cfg file</p>
+<h3 id="start-syzkaller-1">3.start Syzkaller</h3>
+<p>edit a test.cfg file</p>
 <figure class="highlight json"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br></pre></td><td class="code"><pre><span class="line"><span class="punctuation">&#123;</span></span><br><span class="line">        <span class="attr">&quot;target&quot;</span><span class="punctuation">:</span> <span class="string">&quot;linux/amd64&quot;</span><span class="punctuation">,</span></span><br><span class="line">        <span class="attr">&quot;http&quot;</span><span class="punctuation">:</span> <span class="string">&quot;127.0.0.1:56741&quot;</span><span class="punctuation">,</span></span><br><span class="line">        <span class="attr">&quot;workdir&quot;</span><span class="punctuation">:</span> <span class="string">&quot;/path/to/syzkaller/workdir&quot;</span><span class="punctuation">,</span></span><br><span class="line">        <span class="attr">&quot;kernel_obj&quot;</span><span class="punctuation">:</span> <span class="string">&quot;/path/to/linux-5.14/&quot;</span><span class="punctuation">,</span></span><br><span class="line">        <span class="attr">&quot;image&quot;</span><span class="punctuation">:</span> <span class="string">&quot;/path/to/syzkaller/image/bullseye.img&quot;</span><span class="punctuation">,</span></span><br><span class="line">        <span class="attr">&quot;sshkey&quot;</span><span class="punctuation">:</span> <span class="string">&quot;/path/to/syzkaller/image/bullseye.id_rsa&quot;</span><span class="punctuation">,</span></span><br><span class="line">        <span class="attr">&quot;syzkaller&quot;</span><span class="punctuation">:</span> <span class="string">&quot;/path/to/syzkaller/&quot;</span><span class="punctuation">,</span></span><br><span class="line">        <span class="attr">&quot;procs&quot;</span><span class="punctuation">:</span> <span class="number">8</span><span class="punctuation">,</span></span><br><span class="line">        <span class="attr">&quot;type&quot;</span><span class="punctuation">:</span> <span class="string">&quot;qemu&quot;</span><span class="punctuation">,</span></span><br><span class="line">        <span class="attr">&quot;sandbox&quot;</span><span class="punctuation">:</span> <span class="string">&quot;setuid&quot;</span><span class="punctuation">,</span></span><br><span class="line">        	<span class="attr">&quot;enable_syscalls&quot;</span><span class="punctuation">:</span><span class="punctuation">[</span></span><br><span class="line">        		<span class="string">&quot;open$testxy&quot;</span><span class="punctuation">,</span></span><br><span class="line">        		<span class="string">&quot;read$testxy&quot;</span><span class="punctuation">,</span></span><br><span class="line">        		<span class="string">&quot;write$testxy&quot;</span></span><br><span class="line">        <span class="punctuation">]</span><span class="punctuation">,</span></span><br><span class="line">        <span class="attr">&quot;vm&quot;</span><span class="punctuation">:</span> <span class="punctuation">&#123;</span></span><br><span class="line">                <span class="attr">&quot;count&quot;</span><span class="punctuation">:</span> <span class="number">1</span><span class="punctuation">,</span></span><br><span class="line">                <span class="attr">&quot;kernel&quot;</span><span class="punctuation">:</span> <span class="string">&quot;/path/to/linux-5.14/arch/x86/boot/bzImage&quot;</span><span class="punctuation">,</span></span><br><span class="line">                <span class="attr">&quot;cpu&quot;</span><span class="punctuation">:</span> <span class="number">2</span><span class="punctuation">,</span></span><br><span class="line">                <span class="attr">&quot;mem&quot;</span><span class="punctuation">:</span> <span class="number">2048</span> <span class="punctuation">,</span></span><br><span class="line">                <span class="attr">&quot;cmdline&quot;</span><span class="punctuation">:</span> <span class="string">&quot;net.ifnames=0&quot;</span> </span><br><span class="line">        <span class="punctuation">&#125;</span></span><br><span class="line"><span class="punctuation">&#125;</span></span><br></pre></td></tr></table></figure>
-
 <p>then run Syzkaller by</p>
 <figure class="highlight sh"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="built_in">cd</span> syzkaller</span><br><span class="line">./bin/syz-manager -config=./test.cfg -debug</span><br></pre></td></tr></table></figure>
-
-<p>visit <a target="_blank" rel="noopener" href="http://127.0.0.1:56741/">http://127.0.0.1:56741/</a> and wait for crash reports</p>
-<p><img src="https://raw.githubusercontent.com/DeutschBall/picbed/main/image-20241221210627723.png" alt="image-20241221210627723"></p>
-<h2 id="0x3-see-also"><a href="#0x3-see-also" class="headerlink" title="0x3 see also"></a>0x3 see also</h2><p><a target="_blank" rel="noopener" href="https://blingblingxuanxuan.github.io/2019/10/26/syzkaller/">https://blingblingxuanxuan.github.io/2019/10/26/syzkaller/</a></p>
+<p>visit http://127.0.0.1:56741/ and wait for crash reports</p>
+<figure>
+<img
+src="https://raw.githubusercontent.com/DeutschBall/picbed/main/image-20241221210627723.png"
+alt="image-20241221210627723" />
+<figcaption aria-hidden="true">image-20241221210627723</figcaption>
+</figure>
+<h2 id="x3-see-also">0x3 see also</h2>
+<p>https://blingblingxuanxuan.github.io/2019/10/26/syzkaller/</p>
 
     </div>
 
@@ -383,7 +387,10 @@
     <a href="/2024/11/26/kernel%20rop/" rel="prev" title="kernel rop">
       <i class="fa fa-chevron-left"></i> kernel rop
     </a></div>
-      <div class="post-nav-item"></div>
+      <div class="post-nav-item">
+    <a href="/2025/04/08/%5B%E8%B1%A1%E6%A3%8B%E5%A4%8D%E7%9B%98%5D%20%E9%A1%BA%E7%82%AE%E7%9B%B4%E8%BD%A6%E5%AF%B9%E6%A8%AA%E8%BD%A6%20%E7%BA%A2%E8%BF%87%E6%B2%B3%E8%BD%A6/" rel="next" title="顺炮直车对横车 红过河车 复盘">
+      顺炮直车对横车 红过河车 复盘 <i class="fa fa-chevron-right"></i>
+    </a></div>
     </div>
       </footer>
     
@@ -442,7 +449,9 @@
 
       <!--noindex-->
       <div class="post-toc-wrap sidebar-panel">
-          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#Syzkaller-I-Get-start"><span class="nav-number">1.</span> <span class="nav-text">[Syzkaller I]Get start</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#0x0-TL-DR"><span class="nav-number">1.1.</span> <span class="nav-text">0x0 TL;DR</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#0x1-setup"><span class="nav-number">1.2.</span> <span class="nav-text">0x1 setup</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#0-enable-cpu-feature-kvm"><span class="nav-number">1.2.1.</span> <span class="nav-text">0.enable cpu feature kvm</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#1-setup-golang-environment"><span class="nav-number">1.2.2.</span> <span class="nav-text">1.setup golang environment</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#2-build-Syzkaller"><span class="nav-number">1.2.3.</span> <span class="nav-text">2.build Syzkaller</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#3-compile-Linux-kernel"><span class="nav-number">1.2.4.</span> <span class="nav-text">3.compile Linux kernel</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#4-build-virtual-hard-disk"><span class="nav-number">1.2.5.</span> <span class="nav-text">4.build virtual hard disk</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#5-build-QEMU"><span class="nav-number">1.2.6.</span> <span class="nav-text">5.build QEMU</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#6-run-the-kernel"><span class="nav-number">1.2.7.</span> <span class="nav-text">6.run the kernel</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#7-start-SyzKaller"><span class="nav-number">1.2.8.</span> <span class="nav-text">7.start SyzKaller</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#0x2-demo"><span class="nav-number">1.3.</span> <span class="nav-text">0x2 demo</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#1-build-a-vulnability-kernel-module"><span class="nav-number">1.3.1.</span> <span class="nav-text">1.build a vulnability kernel module</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#2-provide-syscall-descriptions"><span class="nav-number">1.3.2.</span> <span class="nav-text">2.provide syscall descriptions</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#3-start-Syzkaller"><span class="nav-number">1.3.3.</span> <span class="nav-text">3.start Syzkaller</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#0x3-see-also"><span class="nav-number">1.4.</span> <span class="nav-text">0x3 see also</span></a></li></ol></li></ol></div>
+          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#syzkaller-iget-start"><span class="nav-number">1.</span> <span class="nav-text">[Syzkaller I]Get start</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#x0-tldr"><span class="nav-number">1.1.</span> <span class="nav-text">0x0 TL;DR</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#x1-setup"><span class="nav-number">1.2.</span> <span class="nav-text">0x1 setup</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#enable-cpu-feature-kvm"><span class="nav-number">1.2.1.</span> <span class="nav-text">0.enable cpu feature kvm</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#setup-golang-environment"><span class="nav-number">1.2.2.</span> <span class="nav-text">1.setup golang environment</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#build-syzkaller"><span class="nav-number">1.2.3.</span> <span class="nav-text">2.build Syzkaller</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#compile-linux-kernel"><span class="nav-number">1.2.4.</span> <span class="nav-text">3.compile Linux kernel</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#build-virtual-hard-disk"><span class="nav-number">1.2.5.</span> <span class="nav-text">4.build virtual hard disk</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#build-qemu"><span class="nav-number">1.2.6.</span> <span class="nav-text">5.build QEMU</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#run-the-kernel"><span class="nav-number">1.2.7.</span> <span class="nav-text">6.run the kernel</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#start-syzkaller"><span class="nav-number">1.2.8.</span> <span class="nav-text">7.start SyzKaller</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#x2-demo"><span class="nav-number">1.3.</span> <span class="nav-text">0x2 demo</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#build-a-vulnability-kernel-module"><span class="nav-number">1.3.1.</span> <span class="nav-text">1.build a vulnability kernel
+module</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#provide-syscall-descriptions"><span class="nav-number">1.3.2.</span> <span class="nav-text">2.provide syscall
+descriptions</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#start-syzkaller-1"><span class="nav-number">1.3.3.</span> <span class="nav-text">3.start Syzkaller</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#x3-see-also"><span class="nav-number">1.4.</span> <span class="nav-text">0x3 see also</span></a></li></ol></li></ol></div>
       </div>
       <!--/noindex-->
 
@@ -456,7 +465,7 @@
 <div class="site-state-wrap motion-element">
   <nav class="site-state">
       <div class="site-state-item site-state-tags">
-        <span class="site-state-item-count">36</span>
+        <span class="site-state-item-count">37</span>
         <span class="site-state-item-name">tags</span>
       </div>
   </nav>
@@ -490,7 +499,7 @@
 <div class="copyright">
   
   &copy; 
-  <span itemprop="copyrightYear">2024</span>
+  <span itemprop="copyrightYear">2025</span>
   <span class="with-love">
     <i class="fa fa-heart"></i>
   </span>

@@ -167,6 +167,279 @@
   
   
   <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="en">
+    <link itemprop="mainEntityOfPage" href="http://deutschball.github.io/2023/01/04/%E6%95%B0%E4%BD%8DDP/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="https://raw.githubusercontent.com/DeutschBall/picbed/main/dustball.png">
+      <meta itemprop="name" content="dustball">
+      <meta itemprop="description" content="dustland">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="dustland">
+    </span>
+      <header class="post-header">
+        <h2 class="post-title" itemprop="name headline">
+          
+            <a href="/2023/01/04/%E6%95%B0%E4%BD%8DDP/" class="post-title-link" itemprop="url">动态规划-数位DP</a>
+        </h2>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-calendar"></i>
+              </span>
+              <span class="post-meta-item-text">Posted on</span>
+              
+
+              <time title="Created: 2023-01-04 21:30:00 / Modified: 21:24:01" itemprop="dateCreated datePublished" datetime="2023-01-04T21:30:00+08:00">2023-01-04</time>
+            </span>
+
+          
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+          <h1 id="数位dp">数位DP</h1>
+<h2 id="p2602-数字计数"><a
+target="_blank" rel="noopener" href="https://www.luogu.com.cn/problem/P2602">P2602 数字计数</a></h2>
+<p>给定正整数a,b,求<span
+class="math inline">\([a,b]\)</span>所有的整数中,0到9每个数码各自总共出现多少次</p>
+<p>由前缀和的思想,设<span class="math inline">\(sum[n]\)</span>表示<span
+class="math inline">\([0,n]\)</span>中0到9各个数码各自出现了多少次</p>
+<p>那么<span
+class="math inline">\(sum[b]-sum[a-1]\)</span>就是所求值</p>
+<p>问题转化为如何求<span class="math inline">\(sum[n]\)</span>即<span
+class="math inline">\([0,n]\)</span>中0到9各个数码各自出现了多少次</p>
+<p>设计状态<span
+class="math inline">\(dp[i]\)</span>表示"当范围涵盖了完整的i位时,前i位中每个数字出现的次数."</p>
+<blockquote>
+<p>啥意思呢?</p>
+<p>比如对于<span
+class="math inline">\([1000,1999]\)</span>显然能够找出i=1的完整区间,比如<span
+class="math inline">\([1000,1009]\)</span>等等</p>
+<p>显然也能够找出i=2的完整区间,比如<span
+class="math inline">\([1900,1999]\)</span>等等</p>
+<p>显然也能够找出i=3的完整区间,比如<span
+class="math inline">\([1000,1999]\)</span>,只有这一个</p>
+<p>找不出i=4的完整区间了</p>
+<p>如果对于[10,2000000],这就可以找到i=4的完整区间,也就是<strong>低四位能够遍历[0,9999]</strong>这个范围的区间,比如</p>
+<p><span class="math inline">\([10000,19999]\)</span></p>
+</blockquote>
+<blockquote>
+<p>这样设计dp有一个隐患就是,忽略了前导0的区别.比如给定区间[0,999],显然最大可以找到i=3的区间[0,999]</p>
+<p>但是正常情况下,0不能作为前导,也就是说不能有012或001或000或020这种数字,可以有210或100这种数字</p>
+<p>最后再考虑去除前导零的情况,现在先不考虑</p>
+</blockquote>
+<p>状态转移方程为: <span class="math display">\[
+dp[i]=10\times dp[i-1]+10^{i-1}
+\]</span> 如何考虑这个方程呢?排列组合问题</p>
+<p>第i位假设放了一个X(先不管到底放了啥),考虑他对低i-1位的影响,</p>
+<p>X有0,1,2,...,9十种可能,于是之前计算得到的dp[i-1]就得乘以10,</p>
+<p>也就是说,1在低i-1上出现过<span class="math inline">\(10\times
+dp[i-1]\)</span>次</p>
+<p>okk,现在看低i-1位给第i位造成的影响,第i位假如放一个1,低i-1位随便放有<span
+class="math inline">\(10^{i-1}\)</span>种放法</p>
+<p>因此1就在第i位上出现过<span
+class="math inline">\(10^{i-1}\)</span>次</p>
+<blockquote>
+<p>举个实际例子,以[0,999]为例,前导零的情况也计算在内</p>
+<p><span
+class="math inline">\(dp[1]=1\)</span>,边界条件,意思是区间为[0,9]的时候,一个数字显然只出现一次</p>
+<p><span class="math inline">\(dp[2]=10\times
+dp[1]+10^{1}=20\)</span></p>
+<p>假设个位上放一个X,十位有十种可能,0X,1X,2X,3X,...,9X,也就是说,十位对个位计数的贡献就是<span
+class="math inline">\(10\times dp[1]\)</span></p>
+<p>假设十位上放一个X,个位有十种可能,X0,X1,X2,X3,...,X9.也就是说,个位对十位计数的贡献就是<span
+class="math inline">\(10^{1}\)</span></p>
+<blockquote>
+<p>笑死,只有两位,要不你影响我,要不我影响你,怎么贡献方式还不一样?</p>
+<p>再多一位就可以体现了</p>
+</blockquote>
+<p><span class="math inline">\(dp[3]=10\times
+dp[2]+10^{2}=300\)</span></p>
+<p>这时候发现貌似不容易计算百位对于前两位的贡献了,如何解释<span
+class="math inline">\(10\times dp[2]\)</span>怎么来的呢?</p>
+<p>可以这样想:</p>
+<p>原来在计算<span
+class="math inline">\(dp[2]\)</span>时,这样只有一个[0,99]区间,而考虑了百位之后,就有</p>
+<p><span
+class="math inline">\([0,99],[100,199],[200,299],...,[900,999]\)</span>这10个区间了,每个区间内数字的出现个数都是<span
+class="math inline">\(dp[2]\)</span>现在有十个相同区间,因此当有三位的时候,从前两位计算得到的数字出现个数就是<span
+class="math inline">\(10\times dp[2]\)</span></p>
+<p>假设百位上放一个X,前两位稍微一动就是一个新数,X就得多记录一次</p>
+<p>比如X23,X24,X25,这样百位上的X就记了3次.那么前两位一共有多少种可能的排列呢?<span
+class="math inline">\(10^2\)</span>那么X在第三位上出现的次数就是<span
+class="math inline">\(10^2\)</span></p>
+</blockquote>
+<p>然后考虑如何去除前导0</p>
+<p>去除前导零,也就是给0的计数中去掉0出现在最高位的情况</p>
+<p>去除前导0,<strong>只会对0的计数有影响,对其他数字没有影响</strong>,因为</p>
+<p>012345去除前导0不是说把012345给去掉,而是保留12345,12345这五个数字各自统计一次,0此时不应计数</p>
+<p>要去除i=6上的前导零计数,也就是去除</p>
+<p>0XXXXX这种情况对0计数的贡献,显然有<span
+class="math inline">\(10^5\)</span>种</p>
+<p>去除i=5上的前导零计数,也就是去除</p>
+<p>0XXXX这种情况对0计数的贡献,显然有<span
+class="math inline">\(10^4\)</span>种</p>
+<p>也就是去除第i位上的前导0影响,就是去除<span
+class="math inline">\(10^{i-1}\)</span>次0的计数</p>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;iostream&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;algorithm&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;vector&gt;</span></span></span><br><span class="line"><span class="keyword">using</span> <span class="keyword">namespace</span> std;</span><br><span class="line"><span class="type">const</span> <span class="type">int</span> maxn=<span class="number">15</span>;</span><br><span class="line"><span class="type">long</span> <span class="type">long</span> dp[maxn];</span><br><span class="line"><span class="type">long</span> <span class="type">long</span> pow_10[maxn];</span><br><span class="line"></span><br><span class="line"><span class="function">vector&lt;<span class="type">long</span> <span class="type">long</span>&gt; <span class="title">solve</span><span class="params">(<span class="type">long</span> <span class="type">long</span> n)</span></span>&#123;</span><br><span class="line">    <span class="type">long</span> <span class="type">long</span> temp=n;</span><br><span class="line">    <span class="type">int</span> length=<span class="number">0</span>;</span><br><span class="line">    <span class="type">int</span> top[maxn];</span><br><span class="line">    <span class="function">vector&lt;<span class="type">long</span> <span class="type">long</span>&gt; <span class="title">result</span><span class="params">(<span class="number">10</span>)</span></span>;</span><br><span class="line">    <span class="keyword">while</span>(n)&#123;</span><br><span class="line">        top[++length]=n%<span class="number">10</span>;</span><br><span class="line">        n/=<span class="number">10</span>;</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">for</span>(<span class="type">int</span> i=length;i&gt;=<span class="number">1</span>;--i)&#123;</span><br><span class="line">        <span class="keyword">for</span>(<span class="type">int</span> j=<span class="number">0</span>;j&lt;<span class="number">10</span>;++j)&#123;</span><br><span class="line">            result[j]+=dp[i<span class="number">-1</span>]*top[i];</span><br><span class="line">        &#125;</span><br><span class="line">        <span class="keyword">for</span>(<span class="type">int</span> j=<span class="number">0</span>;j&lt;top[i];++j)&#123;</span><br><span class="line">            result[j]+=pow_10[i<span class="number">-1</span>];</span><br><span class="line">        &#125;</span><br><span class="line">        temp-=pow_10[i<span class="number">-1</span>]*top[i];</span><br><span class="line">        result[top[i]]+=temp<span class="number">+1</span>;</span><br><span class="line">        result[<span class="number">0</span>]-=pow_10[i<span class="number">-1</span>];</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">return</span> result;</span><br><span class="line">&#125;</span><br><span class="line"><span class="type">long</span> <span class="type">long</span> l,r;</span><br><span class="line"><span class="function"><span class="type">int</span> <span class="title">main</span><span class="params">()</span></span>&#123;</span><br><span class="line">    cin&gt;&gt;l&gt;&gt;r;</span><br><span class="line">    pow_10[<span class="number">0</span>]=<span class="number">1</span>;</span><br><span class="line">    <span class="keyword">for</span>(<span class="type">int</span> i=<span class="number">1</span>;i&lt;maxn;++i)&#123;</span><br><span class="line">        dp[i]=dp[i<span class="number">-1</span>]*<span class="number">10</span>+pow_10[i<span class="number">-1</span>];</span><br><span class="line">        pow_10[i]=<span class="number">10</span>*pow_10[i<span class="number">-1</span>];</span><br><span class="line">    &#125;</span><br><span class="line">    vector&lt;<span class="type">long</span> <span class="type">long</span>&gt;left=<span class="built_in">solve</span>(l<span class="number">-1</span>);</span><br><span class="line">    vector&lt;<span class="type">long</span> <span class="type">long</span>&gt;right=<span class="built_in">solve</span>(r);</span><br><span class="line">    <span class="keyword">for</span>(<span class="type">int</span> i=<span class="number">0</span>;i&lt;=<span class="number">9</span>;++i)&#123;</span><br><span class="line">        cout&lt;&lt;right[i]-left[i]&lt;&lt;<span class="string">&quot; &quot;</span>;</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">return</span> <span class="number">0</span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>其中比较抽象的是后面这个循环,他里面都干了什么呢?</p>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">for</span>(<span class="keyword">auto</span> j=<span class="number">0</span>;j&lt;<span class="number">10</span>;++j)result[j]+=dp[i<span class="number">-1</span>]*top[i];</span><br></pre></td></tr></table></figure>
+<p>计算当前位i随便安排时,对前i位中,数位统计的贡献</p>
+<p>使用<span class="math inline">\(top[i]\)</span>因为第i位上只有<span
+class="math inline">\([0,top[i]-1]\)</span>共<span
+class="math inline">\(top[i]\)</span>种情况</p>
+<blockquote>
+<p>为什么不是<span class="math inline">\([0,top[i]]\)</span>共<span
+class="math inline">\(top[i]+1\)</span>种情况?假如对于<span
+class="math inline">\([0,6524]\)</span></p>
+<p>当前i=4,top[4]=6,可以找到区间[0,999],[1000,1999]</p>
+<p>[2000,2999],[3000,3999],[4000,4999],[5000,5999]</p>
+<p>共6个=top[4]</p>
+<p>没有包括[6000,6999],因为最大到6524,即top[i]作为最高位时前i位找不出完整的区间来</p>
+</blockquote>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">for</span>(<span class="keyword">auto</span> j=<span class="number">0</span>;j&lt;top[i];++j)result[j]+=<span class="built_in">pow</span>(<span class="number">10</span>,i<span class="number">-1</span>); </span><br></pre></td></tr></table></figure>
+<p>计算前i位随便安排时,对第i位数位统计的贡献</p>
+<p>由于最高位上只可能出现<span
+class="math inline">\([0,top[i]-1]\)</span>,再高top[i]没有完全区间,再高<span
+class="math inline">\(top[i]+1\)</span>不可能出现,因此不能统计对<span
+class="math inline">\([top[i],9]\)</span>这些数字的贡献</p>
+<blockquote>
+<p>比如当n=6524</p>
+<p>i=6,也就是说存在1XXX,2XXX,3XXX,4XXX,5XXX这些完整区间(XXX表示[0,999])</p>
+<p>6XXX没有完全区间,只有[6000,6524]</p>
+<p>更不存在7XXX了</p>
+</blockquote>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">       </span><br><span class="line">temp-=<span class="built_in">pow</span>(<span class="number">10</span>,i<span class="number">-1</span>)*top[i];<span class="comment">//去掉最高位</span></span><br><span class="line">result[top[i]]+=temp<span class="number">+1</span>;<span class="comment">//之前统计贡献时,i位的最高数字总是不满区间,现在单独处理</span></span><br></pre></td></tr></table></figure>
+<p>啥意思呢?还是n=6524举例子</p>
+<p>temp=n=6524</p>
+<p>然后temp=6524-6000=524</p>
+<p>这524就是对top[4]=6统计次数的贡献,也就是6在i=4位上出现了524+1=525次</p>
+<p>加一的原因是,524表示[0,524]共525种情况</p>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">result[<span class="number">0</span>]-=<span class="built_in">pow</span>(<span class="number">10</span>,i<span class="number">-1</span>);<span class="comment">//去除前导零</span></span><br></pre></td></tr></table></figure>
+<p>前导零有多种情况,比如0524,0024,0004,0000</p>
+<p>这里每次只会处理一种情况,i=4时只会消除0999,0998,...,0000这种前导0.</p>
+<h2 id="p8764-二进位问题"><a
+target="_blank" rel="noopener" href="https://www.luogu.com.cn/problem/P8764">P8764 二进位问题</a></h2>
+<p><span
+class="math inline">\([1,n]\)</span>这些整数中,二进制表示有k个1的有多少个</p>
+<p>如果问题变成:m个二进制位,其中有k个1的有多少个数</p>
+<p>显然是<span class="math inline">\(C_m^k\)</span></p>
+<p>假设n表示成二进制形式之后,最高位是<span
+class="math inline">\(bit[len]=1\)</span>,最低位是<span
+class="math inline">\(bit[1]\)</span></p>
+<p>显然前<span
+class="math inline">\(len-1\)</span>位所有状态都包含在内了,因此首先有<span
+class="math inline">\(C_{len-1}^k\)</span>,也就是最高位位0时,低<span
+class="math inline">\(len-1\)</span>位任意安排</p>
+<p>下面考虑最高位为1的情况,</p>
+<p>从次高位<span
+class="math inline">\(bit[len-1]\)</span>往低位bit[1]方向看</p>
+<p>如果<span
+class="math inline">\(bit[i]\)</span>为0则跳过,否则加上<span
+class="math inline">\(C_{i-1}^{k-t}\)</span></p>
+<p>其中t表示<span
+class="math inline">\([i+1,len]\)</span>这些位上的1个数</p>
+<p>比如<span class="math inline">\(n=101000,len=6\)</span></p>
+<table>
+<thead>
+<tr>
+<th>i</th>
+<th>bit[i]</th>
+<th>操作</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>5</td>
+<td>0</td>
+<td>跳过</td>
+</tr>
+<tr>
+<td>4</td>
+<td>1</td>
+<td><span class="math inline">\(+C_{4-1}^{k-1}\)</span></td>
+</tr>
+<tr>
+<td></td>
+<td></td>
+<td></td>
+</tr>
+</tbody>
+</table>
+<p>为啥加上这个数呢?第4位上有一个1,这表明存在</p>
+<p><span
+class="math inline">\([100000b,100111b]\)</span>,低三位存在完整区间,从这个完整区间中统计有<span
+class="math inline">\(k-1\)</span>个1的数,是因为之前已经有一个1了,需要在剩下的位中找出k-1个1即可</p>
+<p>现在的主要问题是如何快速求解<span
+class="math inline">\(C_m^k\)</span></p>
+<p><span class="math inline">\(C_m^0=1\)</span></p>
+<p><span
+class="math inline">\(C_m^k=C_{m-1}^{k-1}+C_{m-1}^k\)</span></p>
+<p>用<span class="math inline">\(c[m][k]\)</span>数组预处理即可</p>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;iostream&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;algorithm&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;vector&gt;</span></span></span><br><span class="line"><span class="keyword">using</span> <span class="keyword">namespace</span> std;</span><br><span class="line"><span class="comment">//c[m][k]</span></span><br><span class="line"><span class="type">const</span> <span class="type">int</span> maxm=<span class="number">100</span>;</span><br><span class="line"><span class="type">const</span> <span class="type">int</span> maxk=<span class="number">100</span>;</span><br><span class="line"><span class="type">long</span> <span class="type">long</span> c[maxm][maxk];</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="function"><span class="type">void</span> <span class="title">init</span><span class="params">()</span></span>&#123;</span><br><span class="line">    <span class="comment">// c[1][0]=c[1][1]=1;</span></span><br><span class="line">    c[<span class="number">0</span>][<span class="number">0</span>]=<span class="number">1</span>;</span><br><span class="line">    <span class="keyword">for</span>(<span class="type">int</span> i=<span class="number">1</span>;i&lt;maxm;i++)&#123;</span><br><span class="line">        c[i][<span class="number">0</span>]=<span class="number">1</span>;</span><br><span class="line">        <span class="keyword">for</span>(<span class="type">int</span> j=<span class="number">1</span>;j&lt;i;++j)&#123;</span><br><span class="line">            c[i][j]=c[i<span class="number">-1</span>][j<span class="number">-1</span>]+c[i<span class="number">-1</span>][j];</span><br><span class="line">        &#125;</span><br><span class="line">        c[i][i]=<span class="number">1</span>;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br><span class="line"><span class="function"><span class="type">void</span> <span class="title">print</span><span class="params">()</span></span>&#123;</span><br><span class="line">    <span class="keyword">for</span>(<span class="type">int</span> i=<span class="number">1</span>;i&lt;<span class="number">20</span>;i++)&#123;</span><br><span class="line">        <span class="keyword">for</span>(<span class="type">int</span> j=<span class="number">0</span>;j&lt;=i;j++)&#123;</span><br><span class="line">            cout&lt;&lt;c[i][j]&lt;&lt;<span class="string">&quot; &quot;</span>;</span><br><span class="line">        &#125;</span><br><span class="line">        cout&lt;&lt;endl;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="type">long</span> <span class="type">long</span> n;</span><br><span class="line"><span class="type">int</span> k;</span><br><span class="line"><span class="type">long</span> <span class="type">long</span> bit[maxm];</span><br><span class="line"><span class="type">long</span> <span class="type">long</span> len;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="type">int</span> <span class="title">main</span><span class="params">()</span></span>&#123;</span><br><span class="line">    <span class="built_in">init</span>();</span><br><span class="line">    cin&gt;&gt;n&gt;&gt;k;</span><br><span class="line">    <span class="type">long</span> <span class="type">long</span> temp=n;</span><br><span class="line">    <span class="keyword">while</span>(temp)&#123;</span><br><span class="line">        bit[++len]=temp&amp;<span class="number">1</span>;</span><br><span class="line">        temp&gt;&gt;=<span class="number">1</span>;</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="type">long</span> <span class="type">long</span> result=<span class="number">0</span>;</span><br><span class="line">    result+=c[len<span class="number">-1</span>][k];</span><br><span class="line">    <span class="type">int</span> t=<span class="number">1</span>;</span><br><span class="line">    <span class="keyword">for</span>(<span class="type">int</span> i=len<span class="number">-1</span>;i&gt;=<span class="number">1</span>;--i)&#123;</span><br><span class="line">        <span class="keyword">if</span>(bit[i]==<span class="number">0</span>)&#123;</span><br><span class="line">            <span class="keyword">continue</span>;</span><br><span class="line">        &#125;</span><br><span class="line">        <span class="keyword">if</span>(k-t&lt;<span class="number">0</span>)<span class="keyword">break</span>;</span><br><span class="line">        result+=c[i<span class="number">-1</span>][k-t];</span><br><span class="line">        ++t;</span><br><span class="line"></span><br><span class="line">    &#125;</span><br><span class="line">    cout&lt;&lt;result&lt;&lt;endl;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">return</span> <span class="number">0</span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<h2 id="p2657-windy数"><a
+target="_blank" rel="noopener" href="https://www.luogu.com.cn/problem/P2657">P2657 windy数</a></h2>
+<p>定义windy数:相邻两个十进制位必须至少差2,比如135,2597等等</p>
+<p>给定区间[l,r]求这之间的windy数有多少</p>
+<p>问题转化为[1,n]中的windy数有多少</p>
+<p>设计状态: <span class="math display">\[
+dp[i][j]表示i个10进制位,最高位第i位上是j的windy数的个数
+\]</span> 边界条件显然是只有一位的时候,<span
+class="math inline">\(dp[1][j]=1\)</span></p>
+<p>转移方程: <span class="math display">\[
+dp[i][j]=\sum_{|k-j|\ge2}dp[i-1][k]
+\]</span></p>
+<p>下面考虑[1,n]中有多少windy数</p>
+<p>首先划分成十进位</p>
+<p>dec[len],dec[len-1],...,dec[1],最高位是dec[len]</p>
+<p>那么显然有低len-1位的完整区间,全算上</p>
+<p>第len位上,从1到dec[len]-1这些<code>dp[len][i]</code>也是都有的</p>
+<p>只剩下len位上放dec[len]的情况了,这是最贴近上边界的情况,如何考虑?</p>
+<p>i从len-1往1遍历</p>
+<p>对于当前位i,尝试放置<span class="math inline">\(0\le
+j&lt;dec[i]\)</span>,因为第i位最高可以为dec[i],比他小的数都存在</p>
+<p>然后判断j是否合法,依据就是j和dec[i+1]距离是否大于等于2,</p>
+<p>如果是,则加上<span class="math inline">\(dp[i][j]\)</span></p>
+<p>这样第i位就统计完毕,尝试往更低位统计,第i位最终放置的是dec[i]</p>
+<p>如果dec[i+1]和dec[i]相差小于2,就不能继续往低位统计了</p>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;iostream&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;algorithm&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;cmath&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;cstring&gt;</span></span></span><br><span class="line"><span class="keyword">using</span> <span class="keyword">namespace</span> std;</span><br><span class="line"><span class="type">const</span> <span class="type">int</span> maxn=<span class="number">20</span>;</span><br><span class="line"><span class="type">long</span> <span class="type">long</span> dp[maxn][<span class="number">10</span>];</span><br><span class="line"><span class="function"><span class="type">void</span> <span class="title">init</span><span class="params">()</span></span>&#123;</span><br><span class="line">    <span class="keyword">for</span>(<span class="type">int</span> j=<span class="number">0</span>;j&lt;<span class="number">10</span>;++j)&#123;</span><br><span class="line">        dp[<span class="number">1</span>][j]=<span class="number">1</span>;</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">for</span>(<span class="type">int</span> i=<span class="number">2</span>;i&lt;maxn;i++)&#123;</span><br><span class="line">        <span class="keyword">for</span>(<span class="type">int</span> j=<span class="number">0</span>;j&lt;<span class="number">10</span>;++j)&#123;</span><br><span class="line">            <span class="keyword">for</span>(<span class="type">int</span> k=<span class="number">0</span>;k&lt;<span class="number">10</span>;k++)&#123;</span><br><span class="line">                <span class="keyword">if</span>(<span class="built_in">abs</span>(j-k)&gt;=<span class="number">2</span>)&#123;</span><br><span class="line">                    dp[i][j]+=dp[i<span class="number">-1</span>][k];</span><br><span class="line">                &#125;</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br><span class="line"><span class="function"><span class="type">long</span> <span class="type">long</span> <span class="title">solve</span><span class="params">(<span class="type">int</span> n)</span></span>&#123;</span><br><span class="line">    <span class="keyword">if</span>(n==<span class="number">0</span>)&#123;</span><br><span class="line">        <span class="keyword">return</span> <span class="number">0</span>;</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="type">long</span> <span class="type">long</span> result=<span class="number">0</span>;</span><br><span class="line">    <span class="type">long</span> <span class="type">long</span> temp=n;</span><br><span class="line">    <span class="type">long</span> <span class="type">long</span> dec[maxn];</span><br><span class="line">    <span class="built_in">memset</span>(dec,<span class="number">0</span>,<span class="built_in">sizeof</span>(dec));</span><br><span class="line">    <span class="type">int</span> len=<span class="number">0</span>;</span><br><span class="line">    <span class="keyword">while</span>(temp)&#123;</span><br><span class="line">        dec[++len]=temp%<span class="number">10</span>;</span><br><span class="line">        temp/=<span class="number">10</span>;</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="comment">// cout&lt;&lt;&quot;actived&quot;&lt;&lt;endl;</span></span><br><span class="line">    <span class="keyword">for</span>(<span class="type">int</span> i=<span class="number">1</span>;i&lt;=len<span class="number">-1</span>;++i)&#123;</span><br><span class="line">        <span class="keyword">for</span>(<span class="type">int</span> j=<span class="number">1</span>;j&lt;=<span class="number">9</span>;++j)&#123;</span><br><span class="line">            result+=dp[i][j];</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">for</span>(<span class="type">int</span> j=<span class="number">1</span>;j&lt;dec[len];++j)&#123;</span><br><span class="line">        result+=dp[len][j];</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">for</span>(<span class="type">int</span> i=len<span class="number">-1</span>;i&gt;=<span class="number">1</span>;--i)&#123;</span><br><span class="line">        <span class="comment">// cout&lt;&lt;&quot;in loop&quot;&lt;&lt;endl;</span></span><br><span class="line">        <span class="keyword">for</span>(<span class="type">int</span> j=<span class="number">0</span>;j&lt;=dec[i]<span class="number">-1</span>;++j)&#123;</span><br><span class="line">            <span class="keyword">if</span>(<span class="built_in">abs</span>(j-dec[i<span class="number">+1</span>])&gt;=<span class="number">2</span>)&#123;</span><br><span class="line">                result+=dp[i][j];</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;</span><br><span class="line">        <span class="keyword">if</span>(<span class="built_in">abs</span>(dec[i]-dec[i<span class="number">+1</span>])&lt;<span class="number">2</span>)&#123;</span><br><span class="line">            <span class="keyword">break</span>;</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"></span><br><span class="line">    <span class="keyword">return</span> result;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="type">int</span> l,r;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="type">int</span> <span class="title">main</span><span class="params">()</span></span>&#123;</span><br><span class="line">    cin&gt;&gt;l&gt;&gt;r;</span><br><span class="line">    <span class="built_in">init</span>();</span><br><span class="line">    <span class="comment">// cout&lt;&lt;solve(r+1)&lt;&lt;endl&lt;&lt;solve(l)&lt;&lt;endl;</span></span><br><span class="line">    cout&lt;&lt;<span class="built_in">solve</span>(r)-<span class="built_in">solve</span>(l<span class="number">-1</span>)&lt;&lt;endl;</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">    <span class="keyword">return</span> <span class="number">0</span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<h2 id="p4999-烦人的数学作业"><a
+target="_blank" rel="noopener" href="https://www.luogu.com.cn/problem/P4999">P4999
+烦人的数学作业</a></h2>
+<p>给定区间[l,r],求每个数各个十进制位的数字和</p>
+<p>比如[123,125],就有1+2+3+1+2+4+1+2+5</p>
+<p>首先问题转化为[1,n]区间上拆分数字和<a
+target="_blank" rel="noopener" href="https://www.luogu.com.cn/problem/P1836">P1836 数页码</a></p>
+<p>然后问题还可以转化为P2602求每个数字出现的次数</p>
+<p>最终累计i×i的出现次数即可</p>
+
+      
+    </div>
+
+    
+    
+    
+      <footer class="post-footer">
+        <div class="post-eof"></div>
+      </footer>
+  </article>
+  
+  
+  
+
+      
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="en">
     <link itemprop="mainEntityOfPage" href="http://deutschball.github.io/2023/01/04/MVC%E6%A1%86%E6%9E%B6/">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
@@ -3682,125 +3955,6 @@ alt="image-20220924210055100" />
   
   
 
-      
-  
-  
-  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="en">
-    <link itemprop="mainEntityOfPage" href="http://deutschball.github.io/2022/09/24/todolist/">
-
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="image" content="https://raw.githubusercontent.com/DeutschBall/picbed/main/dustball.png">
-      <meta itemprop="name" content="dustball">
-      <meta itemprop="description" content="dustland">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="dustland">
-    </span>
-      <header class="post-header">
-        <h2 class="post-title" itemprop="name headline">
-          
-            <a href="/2022/09/24/todolist/" class="post-title-link" itemprop="url">ToDoList</a>
-        </h2>
-
-        <div class="post-meta">
-            <span class="post-meta-item">
-              <span class="post-meta-item-icon">
-                <i class="far fa-calendar"></i>
-              </span>
-              <span class="post-meta-item-text">Posted on</span>
-              
-
-              <time title="Created: 2022-09-24 00:06:00 / Modified: 00:04:56" itemprop="dateCreated datePublished" datetime="2022-09-24T00:06:00+08:00">2022-09-24</time>
-            </span>
-
-          
-
-        </div>
-      </header>
-
-    
-    
-    
-    <div class="post-body" itemprop="articleBody">
-
-      
-          <h1 id="todolist">ToDoList</h1>
-<p><del>2022.9.9到达前线的第二天,manim已经看恶心了,整理一下思路</del></p>
-<p>2022.9.23到达前线半个月,manim基本放弃,水太深,整理一下思路</p>
-<h2 id="todolist-on-9.23">ToDoList on 9.23</h2>
-<h3 id="windows-二进制">windows 二进制</h3>
-<p>这两个星期内的进展主要在&lt;&lt;0Day安全 软件漏洞分析技术&gt;&gt;</p>
-<p>&lt;&lt;0Day安全 软件漏洞分析技术&gt;&gt;基本看完前6章,留一个6.1
-windows
-SEH机制没看明白,6.1,11,14章都是SEH相关内容,看不大动了.转到&lt;<核心原理>&gt;第48章SEH,做实验看看.</p>
-<p>前两天做梦给程序打了一针(物理上用针管子朝内存条子上扎了一针),然后程序就有右键菜单了,结果这个的实现就真的在&lt;<加密与解密>&gt;中找到了,已加入等待队列</p>
-<p>入口点的逆向分析好早之前就像看了,到现在一直没看,还有就是C++全局对象是怎么初始化的,主要依据是&lt;<自我修养>&gt;
-第11章</p>
-<h3 id="ida">ida</h3>
-<p>需要完善一下ida的用法,目前可以想到的是识别函数,结构体.</p>
-<p>主要依据是IDA权威指南,之前只看完前10章,以后需要看的是第八章结构类型,以及第11章之后</p>
-<h3 id="计网">计网</h3>
-<p>什么差错控制都摆烂没看,该学链路层了,和之前的差错控制关系好像不是很大.</p>
-<p>下面要讲的协议挺有意思,可以看看</p>
-<h3 id="计组">计组</h3>
-<p>流水线基本没听课,光知道算那几个B数什么吞吐率啥的有个🔨意思?</p>
-<p>下面IO,端口,中断,中断向量,可以看看</p>
-<h3 id="whats-next">what's next</h3>
-<p>实验室终于有场地了,可以泡实验室了</p>
-<p>下面想看一下&lt;<核心原理>&gt;45章以后,TLS,PEB,TEB</p>
-<h2 id="todolist-on-9.9">ToDoList on 9.9</h2>
-<h3 id="以往的错误">以往的错误</h3>
-<p>太难的CTF直接摆烂</p>
-<p>打完CTF懒得复盘,很多题做了一半就废了</p>
-<p>不敢看CVE,总是觉得看不明白,总是想看完所有书再开始</p>
-<p>做的题太少,linux动态链接当时会了,现在又模糊了,再做ret2libc又抓瞎</p>
-<h3 id="win32程序设计">win32程序设计</h3>
-<p>写完记事本,扫雷,然后逆向自己写的还有winxp自带的</p>
-<h3
-id="x86汇编语言从实模式到保护模式">x86汇编语言从实模式到保护模式</h3>
-<p>已经看完的是3.4.5.6.10.11.13.14</p>
-<p>但是从第5章之后感觉很虚很虚,只是分析了一下源码写了注释,实验几乎都没做,这导致后来看13.14的课后实验时啥也写不出来.需要补上.</p>
-<h3 id="数据库计网">数据库,计网</h3>
-<p>计网带宽,速率那一坨公式没大听,傅里叶变换还没看懂</p>
-<p>数据库不想听课,课本落下100页没看了</p>
-<h3 id="manim">manim</h3>
-<p>怎么画椭圆?</p>
-<p>怎么画切线?</p>
-<p>都有啥函数可以用?</p>
-<p>越来越感觉这里水很深,要用顺溜必须得看源码</p>
-<p>这玩意也不用做笔记,代码看懂了用一次就记住了</p>
-<p>geogebra里面的一些功能,对应到manim里面怎么用?</p>
-<p>这个可以记一下,只记函数接口.可能看看API就会了吧</p>
-<p>先放放,先放放</p>
-<h3 id="逆向工程核心原理">逆向工程核心原理</h3>
-<p>消息钩取在win11上成功了,但是DLL注入白搭</p>
-<p>消息钩取后的调试也没上机实验</p>
-<h3 id="程序员的自我修养">程序员的自我修养</h3>
-<p>需要复习一下第8章linux共享库,然后第11,12,13还没看</p>
-<h3 id="csapp">CSAPP</h3>
-<p>可以看第四章了,正好计组学到流水线了</p>
-<p>第9章有个malloc的实现,等玩具内核写到一定程度了,需要用算法管理内存的时候再说吧</p>
-<h3 id="计网自顶向下">计网自顶向下</h3>
-<p>第四章网络层放假前看完了,但是当时没有做笔记,是逼着自己看完的,很虚,需要再看一遍</p>
-<p>第三章传输层的TCP协议还没看</p>
-<h3 id="whats-next-1">What's Next?</h3>
-<p>恶恶心心的,先看CSAPP 第四章吧,相对来说是个软柿子</p>
-
-      
-    </div>
-
-    
-    
-    
-      <footer class="post-footer">
-        <div class="post-eof"></div>
-      </footer>
-  </article>
-  
-  
-  
-
 
   
   <nav class="pagination">
@@ -3870,7 +4024,7 @@ id="x86汇编语言从实模式到保护模式">x86汇编语言从实模式到�
 <div class="site-state-wrap motion-element">
   <nav class="site-state">
       <div class="site-state-item site-state-tags">
-        <span class="site-state-item-count">36</span>
+        <span class="site-state-item-count">37</span>
         <span class="site-state-item-name">tags</span>
       </div>
   </nav>
@@ -3904,7 +4058,7 @@ id="x86汇编语言从实模式到保护模式">x86汇编语言从实模式到�
 <div class="copyright">
   
   &copy; 
-  <span itemprop="copyrightYear">2024</span>
+  <span itemprop="copyrightYear">2025</span>
   <span class="with-love">
     <i class="fa fa-heart"></i>
   </span>
