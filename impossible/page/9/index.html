@@ -167,6 +167,1886 @@
   
   
   <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="en">
+    <link itemprop="mainEntityOfPage" href="http://deutschball.github.io/2022/05/23/%E6%B1%87%E7%BC%96%E8%AF%AD%E8%A8%80/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="https://raw.githubusercontent.com/DeutschBall/picbed/main/dustball.png">
+      <meta itemprop="name" content="dustball">
+      <meta itemprop="description" content="dustland">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="dustland">
+    </span>
+      <header class="post-header">
+        <h2 class="post-title" itemprop="name headline">
+          
+            <a href="/2022/05/23/%E6%B1%87%E7%BC%96%E8%AF%AD%E8%A8%80/" class="post-title-link" itemprop="url">CSAPP-chapter3 x86-64汇编语言</a>
+        </h2>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-calendar"></i>
+              </span>
+              <span class="post-meta-item-text">Posted on</span>
+              
+
+              <time title="Created: 2022-05-23 19:30:00 / Modified: 19:37:19" itemprop="dateCreated datePublished" datetime="2022-05-23T19:30:00+08:00">2022-05-23</time>
+            </span>
+
+          
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+          <h1 id="csapp-chapter3-x86-64-assembly">CSAPP-chapter3 x86-64
+Assembly</h1>
+<h2 id="汇编变种后缀的应用场景">汇编变种后缀的应用场景</h2>
+<h3 id="前置知识">前置知识:</h3>
+<h4 id="c语言数据格式">0.C语言数据格式</h4>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;iostream&gt;</span></span></span><br><span class="line"><span class="keyword">using</span> <span class="keyword">namespace</span> std;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="type">int</span> <span class="title">main</span><span class="params">()</span> </span>&#123;</span><br><span class="line">	cout &lt;&lt; <span class="string">&quot;sizeof(char)=&quot;</span> &lt;&lt; <span class="built_in">sizeof</span>(<span class="type">char</span>) &lt;&lt; endl;</span><br><span class="line">	cout &lt;&lt; <span class="string">&quot;sizeof(short)=&quot;</span> &lt;&lt; <span class="built_in">sizeof</span>(<span class="type">short</span>) &lt;&lt; endl;</span><br><span class="line">	cout &lt;&lt; <span class="string">&quot;sizeof(int)=&quot;</span> &lt;&lt; <span class="built_in">sizeof</span>(<span class="type">int</span>) &lt;&lt; endl;</span><br><span class="line">	cout &lt;&lt; <span class="string">&quot;sizeof(long)=&quot;</span> &lt;&lt; <span class="built_in">sizeof</span>(<span class="type">long</span>) &lt;&lt; endl;</span><br><span class="line">	cout &lt;&lt; <span class="string">&quot;sizeof(long long)=&quot;</span> &lt;&lt; <span class="built_in">sizeof</span>(<span class="type">long</span> <span class="type">long</span>) &lt;&lt; endl;</span><br><span class="line">	cout &lt;&lt; <span class="string">&quot;sizeof(void*)=&quot;</span> &lt;&lt; <span class="built_in">sizeof</span>(<span class="type">void</span> *) &lt;&lt; endl;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>在64位ubuntu上的运行结果</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">root@deutschball-virtual-machine:/home/deutschball/mydir# g++ test.cpp -o test.out</span><br><span class="line">root@deutschball-virtual-machine:/home/deutschball/mydir# ./test.out</span><br><span class="line">sizeof(char)=1</span><br><span class="line">sizeof(short)=2</span><br><span class="line">sizeof(int)=4</span><br><span class="line">sizeof(long)=8</span><br><span class="line">sizeof(long long)=8</span><br><span class="line">sizeof(void*)=8</span><br></pre></td></tr></table></figure>
+<blockquote>
+<p>在64位windows上的运行结果稍有不同</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">sizeof(char)=1</span><br><span class="line">sizeof(short)=2</span><br><span class="line">sizeof(int)=4</span><br><span class="line">sizeof(long)=4</span><br><span class="line">sizeof(long long)=8</span><br><span class="line">sizeof(void*)=8</span><br></pre></td></tr></table></figure>
+<p>在32位windows上的运行结果</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">sizeof(char)=1</span><br><span class="line">sizeof(short)=2</span><br><span class="line">sizeof(int)=4</span><br><span class="line">sizeof(long)=4</span><br><span class="line">sizeof(long long)=8</span><br><span class="line">sizeof(void*)=4</span><br></pre></td></tr></table></figure>
+</blockquote>
+<table>
+<thead>
+<tr>
+<th>操作系统(字节)</th>
+<th>char</th>
+<th>short</th>
+<th>int</th>
+<th>long</th>
+<th>long long</th>
+<th>void*</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>linux64位</td>
+<td>1</td>
+<td>2</td>
+<td>4</td>
+<td>8</td>
+<td>8</td>
+<td>8</td>
+</tr>
+<tr>
+<td>windows64位</td>
+<td>1</td>
+<td>2</td>
+<td>4</td>
+<td>4</td>
+<td>8</td>
+<td>8</td>
+</tr>
+<tr>
+<td>windows32位</td>
+<td>1</td>
+<td>2</td>
+<td>4</td>
+<td>4</td>
+<td>8</td>
+<td>4</td>
+</tr>
+</tbody>
+</table>
+<h4 id="寄存器规格">1.寄存器规格</h4>
+<p>大多数的后缀都与寄存器规格有关,下图将会被多次用到</p>
+<figure>
+<img
+src="https://raw.githubusercontent.com/DeutschBall/test/master/image-20220406175644150.png"
+alt="image-20220406175644150" />
+<figcaption aria-hidden="true">image-20220406175644150</figcaption>
+</figure>
+<h4 id="寻址方式">2.寻址方式</h4>
+<figure>
+<img
+src="https://raw.githubusercontent.com/DeutschBall/test/master/image-20220406180238442.png"
+alt="image-20220406180238442" />
+<figcaption aria-hidden="true">image-20220406180238442</figcaption>
+</figure>
+<h3 id="mov类">mov类</h3>
+<h4 id="操作数长度相关后缀bwlq">操作数长度相关后缀b,w,l,q</h4>
+<p>mov类命令的<strong>数据流动方向</strong>有五种,</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">立即数-&gt;寄存器</span><br><span class="line">寄存器-&gt;寄存器</span><br><span class="line">主存  -&gt;寄存器</span><br><span class="line">立即数-&gt;主存</span><br><span class="line">寄存器-&gt;主存</span><br></pre></td></tr></table></figure>
+<p>显然<code>立即数-&gt;立即数</code>是不可能的,这里立即数相当于右值,就好比说把5存到6上</p>
+<p>并且规定不能从主存直接到主存即<code>主存-&gt;主存</code>,必须经过寄存器</p>
+<p>与<strong>数据长度有关的后缀</strong>有</p>
+<figure>
+<img
+src="https://raw.githubusercontent.com/DeutschBall/test/master/image-20220406174739043.png"
+alt="image-20220406174739043" />
+<figcaption aria-hidden="true">image-20220406174739043</figcaption>
+</figure>
+<blockquote>
+<p>这里两个字节等于一个字</p>
+<p>便于记忆,可以了解后缀的含义:</p>
+<p>b:byte,一个字节</p>
+<p>w:word,一个字(两个字节)</p>
+</blockquote>
+<p>使用哪种后缀需要与数据流动方向一起决定,具体规则是:</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">1.主存没有决定后缀的权利</span><br><span class="line"></span><br><span class="line">2.如果源或者目的其一是寄存器则根据寄存器大小决定,如果使用的是`%al,%spl`这种单字节寄存器则mov命令用b后缀,</span><br><span class="line">同理如果使 `%rax,%rsp`这种8个字节寄存器则mov命令用q后缀.</span><br><span class="line">如果源和目的都是寄存器则跟随目的寄存器规格</span><br><span class="line"></span><br><span class="line">3.寄存器比立即字的优先级高</span><br></pre></td></tr></table></figure>
+<p>记住这三条规则才能完成3.2</p>
+<figure>
+<img
+src="https://raw.githubusercontent.com/DeutschBall/test/master/image-20220406175452026.png"
+alt="image-20220406175452026" />
+<figcaption aria-hidden="true">image-20220406175452026</figcaption>
+</figure>
+<p><strong>1.<code>movl %eax,(%rsp)</code></strong></p>
+<figure>
+<img
+src="https://raw.githubusercontent.com/DeutschBall/test/master/image-20220406175737319.png"
+alt="image-20220406175737319" />
+<figcaption aria-hidden="true">image-20220406175737319</figcaption>
+</figure>
+<p>源<code>%eax</code>为32位(=4字节=2字)寄存器,</p>
+<p>目的<code>(%rsp)</code>是采用简介寻址,实际地址位于内存中,没有发言权,</p>
+<p>因此<code>mov</code>的后缀跟随<code>%eav</code>即传送双字,使用l后缀</p>
+<p><strong>2.<code>movw (%rax),%dx</code></strong></p>
+<figure>
+<img
+src="https://raw.githubusercontent.com/DeutschBall/test/master/image-20220406180020141.png"
+alt="image-20220406180020141" />
+<figcaption aria-hidden="true">image-20220406180020141</figcaption>
+</figure>
+<p>源<code>(%rax)</code>在内存中,没有发言权,</p>
+<p>目的<code>%dx</code>是一个16位(=2字节=1字)寄存器</p>
+<p>因此<code>mov</code>的后缀跟随<code>%dx</code>即传送单字,使用w后缀</p>
+<p><strong>3.<code>movb $0xFF %bl</code></strong></p>
+<figure>
+<img
+src="https://raw.githubusercontent.com/DeutschBall/test/master/image-20220406180630017.png"
+alt="image-20220406180630017" />
+<figcaption aria-hidden="true">image-20220406180630017</figcaption>
+</figure>
+<p>源<code>$0xFF</code>是一个立即字,优先级低</p>
+<p>目的<code>%bl</code>是一个字节寄存器,优先级高</p>
+<p><code>mov</code>后缀跟随<code>%bl</code>使用b</p>
+<p><strong>4.<code>movb (%rsp,%rdx,4) %dl</code></strong></p>
+<figure>
+<img
+src="https://raw.githubusercontent.com/DeutschBall/test/master/image-20220406180836564.png"
+alt="image-20220406180836564" />
+<figcaption aria-hidden="true">image-20220406180836564</figcaption>
+</figure>
+<p>源<code>(%rsp,%rdx,4)</code>在内存上,没有发言权</p>
+<p>目的<code>%dl</code>是一个字节寄存器</p>
+<p><code>mov</code>后缀跟随<code>%dl</code>使用b</p>
+<p><strong>5.<code>movq (%rdx),%rax</code></strong></p>
+<figure>
+<img
+src="https://raw.githubusercontent.com/DeutschBall/test/master/image-20220406181217813.png"
+alt="image-20220406181217813" />
+<figcaption aria-hidden="true">image-20220406181217813</figcaption>
+</figure>
+<p>源<code>(%rdx)</code>在内存上,没有发言权</p>
+<p>目的<code>%rax</code>是一个四字寄存器</p>
+<p><code>mov</code>后缀跟随<code>%rax</code>使用q</p>
+<p><strong>6.<code>movw %dx,(%rax)</code></strong></p>
+<figure>
+<img
+src="https://raw.githubusercontent.com/DeutschBall/test/master/image-20220406181231776.png"
+alt="image-20220406181231776" />
+<figcaption aria-hidden="true">image-20220406181231776</figcaption>
+</figure>
+<p>源<code>%dx</code>是一个单字寄存器</p>
+<p>目的<code>(%rax)</code>在内存上,没有发言权</p>
+<p>因此<code>mov</code>后缀跟随<code>%dx</code>用w</p>
+<h5 id="长度类后缀的其他细节差异">长度类后缀的其他细节差异</h5>
+<figure>
+<img
+src="https://raw.githubusercontent.com/DeutschBall/test/master/image-20220406191326874.png"
+alt="image-20220406191326874" />
+<figcaption aria-hidden="true">image-20220406191326874</figcaption>
+</figure>
+<p>1.<code>movb,movw</code>只会修改目标寄存器的对应低位</p>
+<p>2.<code>movl</code>不光会修改目标寄存器的对应低位,并且会将高位全部置零</p>
+<p>3.对于64位的立即数,1.只能用<code>movabsq</code>2.将其存到寄存器中,<code>movq</code>只能处理32位的立即数</p>
+<h4 id="数据拓展相关后缀zs">数据拓展相关后缀z,s</h4>
+<figure>
+<img
+src="https://raw.githubusercontent.com/DeutschBall/test/master/image-20220406193244989.png"
+alt="image-20220406193244989" />
+<figcaption aria-hidden="true">image-20220406193244989</figcaption>
+</figure>
+<blockquote>
+<p>零拓展和符号拓展的区别:</p>
+<figure>
+<img
+src="https://raw.githubusercontent.com/DeutschBall/test/master/image-20220406194028869.png"
+alt="image-20220406194028869" />
+<figcaption aria-hidden="true">image-20220406194028869</figcaption>
+</figure>
+<p><code>R(%dl)=AA=10101010</code>符号位为1</p>
+<p>第4行符号拓展直接将高位全都置1得到一串F</p>
+<p>第5行零拓展直接将高位全都置0得到一串0</p>
+<p>有符号数拓展时使用符号拓展</p>
+<p>无符号数拓展时使用0拓展,可以理解为无符号拓展</p>
+</blockquote>
+<figure>
+<img
+src="https://raw.githubusercontent.com/DeutschBall/test/master/image-20220406200228709.png"
+alt="image-20220406200228709" />
+<figcaption aria-hidden="true">image-20220406200228709</figcaption>
+</figure>
+<p>1.首先,使用指针的目的是,使实际操作的地址在内存中,如此需要在寄存器中过度一次,将转型分成两个阶段,即<code>源内存-&gt;寄存器</code>和<code>寄存器-&gt;目的内存</code>两个阶段</p>
+<p>2.然后一定注意"==当执行强制类型转换即涉及大小变化又涉及C语言中的符号变化时,操作应该先改变大小=="</p>
+<blockquote>
+<p>这里"先改变大小"的意思是,无符号源用z,有符号源用s,然后决定大小的后缀看目的的大小</p>
+</blockquote>
+<p><strong>1.long到long</strong></p>
+<p>不涉及大小变化,不涉及符号变化,只需要使用传送四字指令<code>movq</code>,两个阶段相同</p>
+<p><strong>2.char到int</strong></p>
+<p>只涉及大小变化,首先从字节内存到双字寄存器需要符号拓展指令<code>movsbl</code>
+然后从双字寄存器到内存根据寄存器规格决定使用双字传送指令<code>movl</code></p>
+<p><strong>3.char到unsigned</strong></p>
+<p>既涉及大小变化,又涉及符号变化</p>
+<p>首先改变大小,从有符号字节内存到双字寄存器需要符号拓展指令<code>movsbl</code></p>
+<p>然后从双字寄存器到双字内存根据寄存器规格决定使用双字传送指令<code>movl</code>,即目的符号不起作用</p>
+<blockquote>
+<p>char到unsigned int和char到int形成的汇编语言是相同的</p>
+</blockquote>
+<blockquote>
+<p>这一点可以实验验证</p>
+<p>对于char的最小值-128=0x80,如果强制转型到unsigned,可能的结果:</p>
+<p>1.首先变化符号,然后变化大小,即首先使用<code>movzbl</code>,然后<code>movl</code>,这样unsigned的值为<code>0x00000080=128</code></p>
+<p>2.首先变化大小,然后变化符号,即首先使用<code>movsbl</code>,然后<code>movl</code>,这样unsigned值为<code>0xFFFFFF80=4294967168</code></p>
+<p>基于上述两种猜想,可以写如下程序验证</p>
+<figure>
+<img
+src="https://raw.githubusercontent.com/DeutschBall/test/master/image-20220406201752965.png"
+alt="image-20220406201752965" />
+<figcaption aria-hidden="true">image-20220406201752965</figcaption>
+</figure>
+<p>证明猜想2是正确的</p>
+</blockquote>
+<p><strong>4.unsigned char到long</strong></p>
+<p>既涉及大小变化,又涉及符号变化</p>
+<p>首先改变大小,从无符号字节内存到四字寄存器,要使用无符号拓展指令<code>movzbq</code></p>
+<p>然后从四字寄存器到内存,使用四字传送指令<code>movq</code></p>
+<p>然而实际上首先使用的是<code>movzbl</code></p>
+<p><a target="_blank" rel="noopener" href="https://www.zhihu.com/question/291651098">查阅了知乎</a></p>
+<p>然后官方给出的解释:</p>
+<blockquote>
+<p>(Clarification, not an erratum) Figure 3.5.</p>
+<p>Although there is an instruction movzbq, the GCC compiler typically
+generates the instruction movzbl for this purpose, relying on the
+property that an instruction generating a 4-byte with a register as
+destination will fill the upper 4 bytes of the register with zeros.</p>
+<p>尽管应该使用movzbq指令,但是GCC编译器通常使用movzbl指令来达到相同的目的,</p>
+<p>==这是因为只要是以寄存器为目的并且生成低位4字节的指令都会将高位的4字节置零==</p>
+</blockquote>
+<p>博客上其他人的解释</p>
+<figure>
+<img
+src="https://raw.githubusercontent.com/DeutschBall/test/master/image-20220406203013260.png"
+alt="image-20220406203013260" />
+<figcaption aria-hidden="true">image-20220406203013260</figcaption>
+</figure>
+<p>这就很明白了</p>
+<p><strong>5.int到char</strong></p>
+<p>只涉及大小转换,大变小直接截取</p>
+<p>直接从内存中取出双字数据放到寄存器里然后截取低8位传送给内存</p>
+<p>即首先使用<code>movl</code>然后<code>movb</code></p>
+<p><strong>6.unsigned到unsigned char</strong></p>
+<p>只涉及大小转换,大变小直接截取</p>
+<p>直接从内存中取出双字数据放到双字寄存器然后截取低8位传送给内存</p>
+<p>即首先使用<code>movl</code>然后<code>movb</code></p>
+<p><strong>7.char到short</strong></p>
+<p>只涉及大小变换,小变大需要拓展</p>
+<p>首先使用有符号拓展<code>movsbw</code>将字节数据传送到单字寄存器</p>
+<p>然后使用<code>movw</code>从单字寄存器传送到内存</p>
+<h2 id="汇编语言特殊算术操作">汇编语言特殊算术操作</h2>
+<p>首先纠错</p>
+<figure>
+<img
+src="https://raw.githubusercontent.com/DeutschBall/test/master/image-20220407195514558.png"
+alt="image-20220407195514558" />
+<figcaption aria-hidden="true">image-20220407195514558</figcaption>
+</figure>
+<p>书上除法这里是有错误的,商和余数都放在了<code>R[%rdx]</code>这显然是不合理的,我觉得应该写为:</p>
+<figure>
+<img
+src="https://raw.githubusercontent.com/DeutschBall/test/master/image-20220407210130248.png"
+alt="image-20220407210130248" />
+<figcaption aria-hidden="true">image-20220407210130248</figcaption>
+</figure>
+<h3 id="乘法">乘法</h3>
+<p>c源文件</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;inttypes.h&gt;</span></span></span><br><span class="line"><span class="keyword">typedef</span> <span class="type">unsigned</span> __int128 <span class="type">uint128_t</span>;</span><br><span class="line"><span class="comment">//此处改名的目的是让128位整数能够类似64位整数使用</span></span><br><span class="line"><span class="type">void</span> <span class="title function_">store_uprod</span><span class="params">(<span class="type">uint128_t</span> *dest,<span class="type">uint64_t</span> x,<span class="type">uint64_t</span> y)</span>&#123;</span><br><span class="line">                *dest=x*(<span class="type">uint128_t</span>) y;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>汇编语言</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">movq    %rsi, %rax</span><br><span class="line">mulq    %rdx</span><br><span class="line">movq    %rax, (%rdi)</span><br><span class="line">movq    %rdx, 8(%rdi)</span><br><span class="line">ret</span><br></pre></td></tr></table></figure>
+<p>逻辑分析:</p>
+<p>首先三个参数分别存放在</p>
+<figure>
+<img
+src="https://raw.githubusercontent.com/DeutschBall/test/master/image-20220407195244614.png"
+alt="image-20220407195244614" />
+<figcaption aria-hidden="true">image-20220407195244614</figcaption>
+</figure>
+<p>即</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">R[%rdi]=dest//这里%rdi寄存器中存放的是dest这个位置 dest这个位置 dest这个位置</span><br><span class="line">R[%rsi]=x</span><br><span class="line">R[%rdx]=y</span><br></pre></td></tr></table></figure>
+<p><strong>1.<code>movq    %rsi, %rax</code></strong></p>
+<p>即令<code>R[%rax]=R[%rsi]=x</code>将x放在了<code>%rax</code>寄存器中</p>
+<p><strong>2.<code>mulq    %rdx</code></strong></p>
+<p><code>R[%rdx]=y</code></p>
+<figure>
+<img
+src="https://raw.githubusercontent.com/DeutschBall/test/master/image-20220407195537665.png"
+alt="image-20220407195537665" />
+<figcaption aria-hidden="true">image-20220407195537665</figcaption>
+</figure>
+<p>看似只有一个操作数,实际上隐含着另一个操作数在<code>%rax</code>寄存器中</p>
+<p>即令<code>R[%rdx]*R[%rax]</code>,两个64位数的计算机结果是一个128位数,显然单独一个64位寄存器是放不下的,因此计算结果被分成两部分</p>
+<p>低64位放在<code>%rax</code>寄存器,高64位放在<code>%rdx</code>寄存器</p>
+<p><strong>3.<code>movq    %rax, (%rdi)</code></strong></p>
+<p><code>R[%rdi]=dest</code>这是指针指向内存中的位置</p>
+<p><code>M[R[%rdi]]=M[dest]</code>对内存中的位置dest应用解引用函数<span
+class="math inline">\(M[dest]\)</span>得到的是该地址上的实际数值</p>
+<p>令<code>M[R[%rdi]]=R[%rax]</code>,将<code>%rax</code>寄存器中刚刚算出的低64位结果放在内存中,位置为<code>R[%rdi]</code>(间接寻址)</p>
+<p><strong>4.<code>movq    %rdx, 8(%rdi)</code></strong></p>
+<p>刚才在第3步时存放了低64位,那么此时应该做到就是存放高64位</p>
+<p>令<code>M[R(%rdi)+8]=R[%rdx]</code>,将<code>%rdx</code>寄存器中刚刚算出的高64位结果放在内存中,位置为<code>R(%rdi)+8</code>(基址+偏移量寻址)</p>
+<p>此处的+8为偏移8个字节,因为低地址恰好占用这8个字节</p>
+<p>在小端机器上低地址存放低位,高地址存放高位</p>
+<p>到此乘法的计算结果已经被分成两个64位数存进了一个<code>uint128_t *</code>指针指向的地址</p>
+<h3 id="除法">除法</h3>
+<p>c源文件</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="type">void</span> <span class="title function_">remdiv</span><span class="params">(<span class="type">long</span> x,<span class="type">long</span> y,<span class="type">long</span> *qp,<span class="type">long</span> *rp)</span>&#123;<span class="comment">//希望计算x/y将商存到指针qp指向的地址,将余数存到指针rp指向的地址</span></span><br><span class="line">        <span class="type">long</span> q=x/y;</span><br><span class="line">        <span class="type">long</span> r=x%y;</span><br><span class="line">        *qp=q;</span><br><span class="line">        *rp=r;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>汇编语言</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">movq    %rdi, %rax</span><br><span class="line">movq    %rdx, %r8</span><br><span class="line">cqto</span><br><span class="line">idivq   %rsi</span><br><span class="line">movq    %rax, (%r8)</span><br><span class="line">movq    %rdx, (%rcx)</span><br><span class="line">ret</span><br></pre></td></tr></table></figure>
+<figure>
+<img
+src="https://raw.githubusercontent.com/DeutschBall/test/master/image-20220407201308477.png"
+alt="image-20220407201308477" />
+<figcaption aria-hidden="true">image-20220407201308477</figcaption>
+</figure>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">R[%rdi]=x</span><br><span class="line">R[%rsi]=y</span><br><span class="line">R[%rdx]=qp</span><br><span class="line">R[%rcx]=rp</span><br></pre></td></tr></table></figure>
+<p><strong>1.<code>movq    %rdi, %rax</code></strong></p>
+<p>令<code>R[%rax]=R[%rdi]=x</code>将x存放在<code>%rax</code>寄存器里</p>
+<p><strong>2.<code>movq    %rdx, %r8</code></strong></p>
+<p>令<code>R[%r8]=R[%rdx]=qp</code>将商==在内存中的地址==存放在<code>%r8</code>寄存器里</p>
+<figure>
+<img
+src="https://raw.githubusercontent.com/DeutschBall/test/master/image-20220407210300140.png"
+alt="image-20220407210300140" />
+<figcaption aria-hidden="true">image-20220407210300140</figcaption>
+</figure>
+<p>对于一个128位数的除法运算,被除数的低64位存放在<code>%rax</code>寄存器中,高64位存放在<code>%rdx</code>寄存器中</p>
+<p>刚才在第1步时已经将64位数x放在<code>%rax</code>寄存器中了,但是高64位所在的<code>%rdx</code>现在被第三个参数<code>qp</code>占用,因此将<code>qp</code>放在另一个寄存器<code>%r8</code>中,然后将<code>%rdx</code>腾出来方便存放高64位</p>
+<p><strong>3.<code>cqto</code></strong></p>
+<figure>
+<img
+src="https://raw.githubusercontent.com/DeutschBall/test/master/image-20220407205028742.png"
+alt="image-20220407205028742" />
+<figcaption aria-hidden="true">image-20220407205028742</figcaption>
+</figure>
+<p>为什么要进行符号拓展?</p>
+<p>被除数应该是一个128位数,但是目前我们只是确定了其低64位为x,高64位还是第三个参数的值没有修改,如果此时直接计算则高64位的值可以认为是乱码,那么怎么消除高64位的乱码呢?置零或者置符号,我们将要进行符号除法,因此高64位置符号</p>
+<p>即高64位按照<code>R[%rax]=x</code>的符号位拓展</p>
+<p><strong>4.<code>idivq   %rsi</code></strong></p>
+<p><code>R[%rsi]=y</code></p>
+<p><img
+src="https://raw.githubusercontent.com/DeutschBall/test/master/image-20220407210300140.png" /></p>
+<p><code>R[%rdx]=x mod y</code></p>
+<p><code>R[%rax]=x/y</code></p>
+<p><strong>5.<code>movq    %rax, (%r8)</code></strong></p>
+<p><code>R[%r8]=qp</code></p>
+<p><code>M[R[%r8]]=M[qp]=*qp=R[%rax]=x/y</code></p>
+<p><strong>6.<code>movq    %rdx, (%rcx)</code></strong></p>
+<p><code>R[%rcx]=rp</code></p>
+<p><code>M[R[%rcx]]=M[rp]=*rp=R[%rdx]=x mod y</code></p>
+<h3 id="习题3.12">习题3.12</h3>
+<p><img
+src="https://raw.githubusercontent.com/DeutschBall/test/master/image-20220407210655421.png" /></p>
+<p>首先四个参数的存放位置为:</p>
+<figure>
+<img
+src="https://raw.githubusercontent.com/DeutschBall/test/master/image-20220407201308477.png"
+alt="image-20220407201308477" />
+<figcaption aria-hidden="true">image-20220407201308477</figcaption>
+</figure>
+<p>执行除法的时候只会提供一个操作数S作为除数,表示被除数的另两个操作数是隐含的<code>%rax,%rdx</code></p>
+<figure>
+<img
+src="https://raw.githubusercontent.com/DeutschBall/test/master/image-20220407210829932.png"
+alt="image-20220407210829932" />
+<figcaption aria-hidden="true">image-20220407210829932</figcaption>
+</figure>
+<p>那么在执行除法命令之前,应该把被除数先安置好</p>
+<p>1.首先128位被除数的低64位存放在<code>%rax</code>中,即<code>R[%rax]=x</code>
+2.然后高64位存放在<code>%rdx</code>中,无符号除法时应当全置0,</p>
+<p>但是由于第三个参数qp已经占据了<code>%rdx</code>,因此在将其全都置零之前应当请三个参数挪个地方,比如<code>%r8</code></p>
+<p><code>movq %rdx,%r8</code></p>
+<p>3.此时就可以将被除数的高64位<code>%rdx</code>寄存器置0了,最直接的置零方法是<code>movq $0,%rdx</code>,还可以利用异或的性质<code>xorq %rdx,%rdx</code></p>
+<p>至于应该选择哪一个?应该选择二进制长度最短的指令</p>
+<blockquote>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">0000000000000000 &lt;.text&gt;:</span><br><span class="line">0:   48 c7 c2 00 00 00 00    mov    $0x0,%rdx</span><br><span class="line">7:   48 99                   cqto</span><br><span class="line">9:   48 31 d2                xor    %rdx,%rdx</span><br></pre></td></tr></table></figure>
+<p>由此可见为什么刚才有符号除法时要用cqto,因为其长度最短</p>
+<p>然后xor也是不错的选择</p>
+<p>最迫不得已才会选择movq指令</p>
+<p>当发现实际编译器使用的命令与我们理想的不一样时,可以写一个.s文件然后将自己理想的汇编指令和实际的汇编指令各写一行</p>
+<p>然后使用<code>gcc -Og -c</code>命令,使其编译成为.o文件,注意必须指定<code>-c</code>选项,否则直接编译成.exe或者.out会发生链接错误,因为刚才我门写的.s文件是非常不完整的,连main函数都没有</p>
+<p>然后对.o文件使用objdump命令反编译
+,就可以观察指令及其二进制编码长度了</p>
+<p>一般理想与现实不同都是由于有更加短但是可以完成同样目的的指令我们没有考虑到</p>
+</blockquote>
+<p>在本题中我不知道类似<code>cqto</code>但是是无符号拓展的指令,可以先用异或指令达到相同的目的</p>
+<p>4.被除数在3中已经准备好了,可以进行除法了</p>
+<figure>
+<img
+src="https://raw.githubusercontent.com/DeutschBall/test/master/image-20220407212434845.png"
+alt="image-20220407212434845" />
+<figcaption aria-hidden="true">image-20220407212434845</figcaption>
+</figure>
+<p>这里S是除数,本题中除数是第二个参数y存放在<code>%rsi</code>寄存器中,即<code>R[%rsi]=y</code></p>
+<p>那么除法指令为<code>divq %rsi</code></p>
+<p>5.除法进行完毕,瓜分商和余数</p>
+<p>商位于<code>%rax</code>寄存器中,希望传送到内存中的qp位置,而内存中的qp位置存放在寄存器<code>%r8</code>中(即<code>R[%r8]=qp,M[R[%r8]]=*qp</code>)因此使用指令<code>movq %rax,(%r8)</code></p>
+<p>余数位于<code>%rdx</code>寄存器中,希望传送到内存中的rp位置,而内存中的rp位置存放在寄存器<code>%rcx</code>中(即<code>R[%rcx]=rp,M[R[%rcx]]=*rp</code>)因此使用指令<code>movq %rdx,(%rcx)</code></p>
+<h2 id="标志与条件控制">标志与条件控制</h2>
+<h3 id="标志位">标志位</h3>
+<p>标志位的作用都是为了表征刚刚进行过的算术运算的结果,比如是否有溢出,是否有进位,结果是否为0等等,</p>
+<p>设置这些标志的目的之一是方便判断错误</p>
+<p>之二是决定后面的程序走向,是实现条件,==循环等控制语句的基础==</p>
+<figure>
+<img
+src="http://raw.githubusercontent.com/DeutschBall/test/master/image-20220408152343527.png"
+alt="image-20220408152343527" />
+<figcaption aria-hidden="true">image-20220408152343527</figcaption>
+</figure>
+<p>其中常用的标志位有:</p>
+<figure>
+<img
+src="http://raw.githubusercontent.com/DeutschBall/test/master/image-20220408152408112.png"
+alt="image-20220408152408112" />
+<figcaption aria-hidden="true">image-20220408152408112</figcaption>
+</figure>
+<p>作用:</p>
+<h4 id="cf">CF</h4>
+<p>进位标志</p>
+<p>作用于无符号数,比如对于八位无符号数</p>
+<p>加法结果进位溢出:<code>0xFF+0x01=0x100</code>溢出了,此时<code>CF=1</code>表明刚才的算术运算有溢出</p>
+<p>减法借位溢出:<code>0x00-0x01=0x100-0x01=0xFF</code>,被减数需要向他不存在的高位借位,此时<code>CF=1</code>表示被减数不够减的</p>
+<p>对于有符号整数的加减法,忽略进位标志<code>CF</code></p>
+<p>比如有符号整数<code>0x00-0x01=0x00+0xFF=0xFF</code>表示的是<code>0-1=-1</code>,</p>
+<p><code>0xFF</code>为-1的补码表示.显然这是合乎情理的</p>
+<p>同样的两个数如果是无符号数则计算结果为<code>0xFF=255</code>这两个正数相减越减越多显然不合理,因此<code>CF=1</code>标志有进位溢出</p>
+<h4 id="of">OF</h4>
+<p>溢出标志</p>
+<p>对有符号整数(即补码)运算有效,比如</p>
+<p>两个八位二进制数正数<code>01000000(B)=0x40(H)=64</code>相加,</p>
+<p><code>0x40+0x40=0x80(H)=10000000(B)=</code>怎么就成了一个负数<code>-128</code>?</p>
+<p>这显然不符合情理,此时<code>OF=1</code>标志有符号数溢出</p>
+<p>又或者:</p>
+<p>两个八位二进制负数<code>10000000=0x80=-128</code>相加</p>
+<p><code>0x80+0x80=0x100=0x00=0</code>怎么就成了0?</p>
+<p>这也是不符合情理的,此时<code>OF=1</code></p>
+<blockquote>
+<p>怎样检验有符号数加减是否有溢出?</p>
+<p>计组上我们学过双标志位法,计算结果的两个符号位如果不同则说明有溢出</p>
+</blockquote>
+<p><code>OF</code>标志对于无符号整数运算无效</p>
+<h4 id="zf">ZF</h4>
+<p>零标志</p>
+<p>如果运算结果为0则<code>ZF=1</code></p>
+<h4 id="sf">SF</h4>
+<p>符号标志</p>
+<p>如果运算结果为负数则<code>SF=1</code></p>
+<h3 id="可以修改标志位的指令">可以修改标志位的指令</h3>
+<h4 id="除了leaq外的逻辑运算指令">除了leaq外的逻辑运算指令</h4>
+<figure>
+<img
+src="http://raw.githubusercontent.com/DeutschBall/test/master/image-20220408155420102.png"
+alt="image-20220408155420102" />
+<figcaption aria-hidden="true">image-20220408155420102</figcaption>
+</figure>
+<h4 id="比较和测试指令">比较和测试指令</h4>
+<figure>
+<img
+src="http://raw.githubusercontent.com/DeutschBall/test/master/image-20220408155446113.png"
+alt="image-20220408155446113" />
+<figcaption aria-hidden="true">image-20220408155446113</figcaption>
+</figure>
+<h4
+id="一条指令可能会修改多个标志位具体规则为">一条指令可能会修改多个标志位,具体规则为:</h4>
+<blockquote>
+<p><strong>MOV NOT JMP</strong>*</p>
+<p>does not affect flags</p>
+<p>MOV,NOT,JMP指令不会修改标志位</p>
+<p><strong>NEG</strong></p>
+<p>The CF flag set to 0 if the source operand is 0; otherwise it is set
+to 1. The OF, SF, ZF, AF, and PF</p>
+<p>flags are set according to the result.</p>
+<p>NEG取反指令:如果NEG的操作数是0则CF=1,否则CF=0.</p>
+<p>OF,SF,ZF,AF,PF标志根据结果设定</p>
+<p><strong>AND OR</strong></p>
+<p>The OF and CF flags are cleared; the SF, ZF, and PF flags are set
+according to the result. The state</p>
+<p>of the AF flag is undefined</p>
+<p>AND,OR指令的OF和CF前面已经给出;SF,ZF,PF根据结果而定,AF状态无所谓</p>
+<p><strong>DEC INC</strong></p>
+<p>The CF flag is not affected. The OF, SF, ZF, AF, and PF flags are set
+according to the result</p>
+<p>DEC,INC自增自减指令的CF位不受影响,其他标志位都视结果而定</p>
+<p><strong>ADD ADC SUB SBB</strong></p>
+<p>The OF, SF, ZF, AF, PF, and CF flags are set according to the
+result.</p>
+<p>ADD,ADC,SUB,SBB指令的所有标志位都视结果而定</p>
+<p><strong>CMP</strong></p>
+<p>Modify status flags in the same manner as the SUB instruction</p>
+<p>CMP与SUB指令对于标志位的效果相同</p>
+<p>以两个有符号八位2进制数运算为例子</p>
+<p><code>0x00-0x01=0x00+0xFF=0xFF</code>,<code>OF=0</code>无溢出</p>
+<p><code>0x40+0x40=0x80=10000000=-128</code>,<code>OF=1</code>有溢出</p>
+<p>减法也有可能溢出,一个负数减去一个正数时</p>
+<p><code>0x80-0x7F=0x80+0x81=0x101=0x01</code>成了一个正数,此时<code>OF=1</code></p>
+</blockquote>
+<h3 id="比较指令">比较指令</h3>
+<figure>
+<img
+src="http://raw.githubusercontent.com/DeutschBall/test/master/image-20220408154303941.png"
+alt="image-20220408154303941" />
+<figcaption aria-hidden="true">image-20220408154303941</figcaption>
+</figure>
+<h4
+id="执行比较指令后通过标志位组合判断比较结果">执行比较指令后通过==标志位组合==判断比较结果</h4>
+<p><code>cmp s1,s2</code>指令基于<code>S2-S1</code>,意思是首先对<code>S2-S1</code>求值,然后结果放在<code>s2</code>原来的地方</p>
+<p>如果为负数则<code>SF=1</code>,否则(非负数)<code>SF=0</code>,</p>
+<p>后面的程序只需要访问一下Flag
+Register中的<code>SF</code>值就"可以????"知道<code>S2,S1</code>谁大谁小了</p>
+<blockquote>
+<p>==注意这里"可以"是假的==,</p>
+<p>因为如果结果是一个比较大的负数,造成溢出,截断之后成了一个正数,此时<code>SF=0</code>,此时只凭借SF值会造成误判,就比如</p>
+<p><code>0x80-0x7F=0x80+0x81=0x101=0x01</code>结果成了一个正数,那么符号标志位<code>SF=0</code>只凭SF值就会认为<code>0x80&gt;=0x7F</code></p>
+<p>而<code>0x80=-128&lt;0x7F=127</code></p>
+<p>因此只凭借SF标志位是无法判断两个操作数的大小的,==还应当考虑是否有溢出==.</p>
+<p>==考虑什么时候会发生溢出?==</p>
+<p>两个正数相减显然结果绝对值小于两者中的任何一个,不会溢出</p>
+<p>两个负数相减同样</p>
+<p>两个正数相加显然可以,比如<code>0x7F+0x01=0x80</code>成了负数</p>
+<p>两个负数相加也可以,比如<code>0x80+0x80=0x100=0x00</code>成了0</p>
+<p>正数-负数也可以,比如<code>0x7F-0xFF=0x7F+0x01=0x80</code>成了负数</p>
+<p>负数-正数也可以,比如<code>0x80-0x7F=0x80+0x81=0x101=0x01</code>成了正数</p>
+<p>==现在考虑如何完善判断两个数的大小==</p>
+<p>两个数做差有四种情况</p>
+<p>1.正-正</p>
+<p>2.负-负</p>
+<p>3.正-负</p>
+<p>4.负-正</p>
+<p>前两种情况没有溢出,<code>OF=0</code>,直接看<code>SF</code></p>
+<p>后两种可能有溢出,如果没有溢出则看<code>SF</code>,如果有溢出则<code>SF</code>取反</p>
+<p>而区分前两种和后两种的方法也很容易观察得出,即两个操作数的符号是否一致</p>
+<p>令<code>F=[A-B]</code>,<code>A</code>为被减数,<code>B</code>为减数,<code>[X]</code>表示对<code>X</code>取符号,<code>X≥0</code>则<code>[X]=0</code>,否则<code>[X]=1</code></p>
+<p>列出真值表</p>
+<figure>
+<img
+src="http://raw.githubusercontent.com/DeutschBall/test/master/image-20220408164041343.png"
+alt="image-20220408164041343" />
+<figcaption aria-hidden="true">image-20220408164041343</figcaption>
+</figure>
+</blockquote>
+<blockquote>
+<p>我们想要得到F的值,并且我们已经知道<code>OF</code>和<code>SF</code>的值,而大小判断与A,B无关,只与Flag
+Register中的标志位组合有关,那么问题转化为</p>
+<figure>
+<img
+src="http://raw.githubusercontent.com/DeutschBall/test/master/image-20220408164147132.png"
+alt="image-20220408164147132" />
+<figcaption aria-hidden="true">image-20220408164147132</figcaption>
+</figure>
+<p>从真值表上我们可以观察得出,当OF=0时,F和SF是一致的,当OF=1时,F和SF是相反的</p>
+<p>那么怎么用一条表达式写出F与OF,SF的关系呢?</p>
+<p>根据F=1的项可以立刻得到</p>
+<p><span class="math inline">\(F=\overline {OF}SF+OF\overline
+{SF}=OF\oplus SF\)</span></p>
+<p>到此可以总结如何判断两个有符号数的大小了</p>
+<p>如果<span class="math inline">\(OF\oplus
+SF\)</span>异或值为1则前小后大,否则前大后小</p>
+</blockquote>
+<p><code>test S1,S2</code>指令基于<code>S1&amp;S2</code>,意思是首先对<code>S1&amp;S2</code>求值,按位与只有两个操作数一模一样才会是真,否则为假.如果为假即0,则<code>ZF=1</code>,否则<code>ZF=0</code>,后面的程序只需要访问一下Flag
+Register中的<code>ZF</code>值就可以知道<code>S2,S1</code>是否相同了</p>
+<h3 id="访问条件码的方式">访问条件码的方式</h3>
+<p>在刚刚进行完一次逻辑运算之后,此时Flag
+Register的各个标志位已经设置完毕,下面就要根据其中一个或者几个标志位的组合进行决策,选择执行或者不执行一些命令</p>
+<blockquote>
+<p>1)可以根据条件码的某种组合, 将一个字节设置为0或者1</p>
+<p>2)可以条件跳转到程序的某个其他的部分</p>
+<p>3)可以有条件地传送数据</p>
+</blockquote>
+<h4
+id="根据flagregister的情况将一个字节设置为0或者1">1.根据FlagRegister的情况将一个字节设置为0或者1</h4>
+<p>SET指令</p>
+<figure>
+<img
+src="http://raw.githubusercontent.com/DeutschBall/test/master/image-20220408202821368.png"
+alt="image-20220408202821368" />
+<figcaption aria-hidden="true">image-20220408202821368</figcaption>
+</figure>
+<p>这种指令怎么发挥作用呢?</p>
+<p>以<code>sete</code>为例子,</p>
+<p>假设刚刚进行的运算是<code>a-a=0</code>,此时<code>ZF=1</code>表示刚才的计算结果为<code>0</code>,</p>
+<p>此时使用<code>sete 目标寄存器</code>,满足设置条件(相等/零),于是向目标寄存器存放<code>ZF</code>值即<code>1</code></p>
+<p><strong>练习3.13</strong></p>
+<figure>
+<img
+src="http://raw.githubusercontent.com/DeutschBall/test/master/image-20220408204021860.png"
+alt="image-20220408204021860" />
+<figcaption aria-hidden="true">image-20220408204021860</figcaption>
+</figure>
+<blockquote>
+<figure>
+<img
+src="http://raw.githubusercontent.com/DeutschBall/test/master/image-20220408204354747.png"
+alt="image-20220408204354747" />
+<figcaption aria-hidden="true">image-20220408204354747</figcaption>
+</figure>
+</blockquote>
+<p>A项第一行使用了cmpl比较双字命令,说明两个操作数都是双字(int,unsigned),第二行使用setl有符号小于运算,因此操作数只能是int类型</p>
+<p>B项第一行使用cmpw比较字命令,说明两个操作数都是字(short,unsigned
+short),第二行使用setge有符号大于等于,因此操作数只能是short</p>
+<p>C项第一行使用了cmpb比较字节命令,说明两个操作数都是字节(char,unsigned
+char),第二行使用setbe无符号小于等于,因此操作数只能是unsigned char</p>
+<p>D项第一行使用了cmpq比较四字命令,说明两个操作数都是四字(long,unsigned
+long),第二行
+使用setne不等/非零,因此操作数无法确定有无符号,long或者unsigned
+long均可</p>
+<h4 id="条件跳转">2.条件跳转</h4>
+<h5 id="条件跳转表">条件跳转表</h5>
+<p>该表在后来会经常用到</p>
+<figure>
+<img
+src="http://raw.githubusercontent.com/DeutschBall/test/master/image-20220408155109547.png"
+alt="image-20220408155109547" />
+<figcaption aria-hidden="true">image-20220408155109547</figcaption>
+</figure>
+<h5 id="条件跳转指令实现if-else语句">条件跳转指令实现if-else语句</h5>
+<p>c源代码:</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line"><span class="type">long</span> <span class="title function_">absdiff_se</span><span class="params">(<span class="type">long</span> x,<span class="type">long</span> y)</span>&#123;</span><br><span class="line">        <span class="type">long</span> result;</span><br><span class="line">        <span class="keyword">if</span>(x&lt;y)&#123;</span><br><span class="line">                result=y-x;</span><br><span class="line">        &#125;</span><br><span class="line">        <span class="keyword">else</span> &#123;</span><br><span class="line">                result=x-y;</span><br><span class="line">        &#125;</span><br><span class="line">        <span class="keyword">return</span> result;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>给定参数x,y如果x&lt;y,则返回y-x,否则返回x-y,即返回两个数的差的绝对值</p>
+<p>汇编代码</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line">absdiff_se:</span><br><span class="line">.LFB0:</span><br><span class="line">        movq    %rsi, %rax</span><br><span class="line">        cmpq    %rsi, %rdi</span><br><span class="line">        jge     .L2</span><br><span class="line">        subq    %rdi, %rax</span><br><span class="line">        ret</span><br><span class="line">.L2:</span><br><span class="line">        subq    %rsi, %rdi</span><br><span class="line">        movq    %rdi, %rax</span><br><span class="line">        ret</span><br></pre></td></tr></table></figure>
+<p>分析其汇编语言都干了什么</p>
+<p>首先两个参数的位置</p>
+<figure>
+<img
+src="http://raw.githubusercontent.com/DeutschBall/test/master/image-20220408154047128.png"
+alt="image-20220408154047128" />
+<figcaption aria-hidden="true">image-20220408154047128</figcaption>
+</figure>
+<p>即</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">R[%rdi]=x</span><br><span class="line">R[%rsi]=y</span><br></pre></td></tr></table></figure>
+<p><strong>1.<code>movq    %rsi, %rax</code></strong></p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">R[%rax]=R[%rsi]=x</span><br></pre></td></tr></table></figure>
+<figure>
+<img
+src="http://raw.githubusercontent.com/DeutschBall/test/master/image-20220408154223239.png"
+alt="image-20220408154223239" />
+<figcaption aria-hidden="true">image-20220408154223239</figcaption>
+</figure>
+<p>将x搬到<code>%rax</code>寄存器中,猜测有可能以后的变化都在x身上进行最后返回<code>%rax</code>寄存器中的值</p>
+<p><strong>2.<code>cmpq    %rsi, %rdi</code></strong></p>
+<p>注意是==后减前==</p>
+<p>做差<code>R[%rdi]-R[%rsi]</code>,(一定注意是后减前)SF和OF标志位根据结果确定</p>
+<p><strong>3.<code>jge     .L2</code></strong></p>
+<figure>
+<img
+src="http://raw.githubusercontent.com/DeutschBall/test/master/image-20220408155127559.png"
+alt="image-20220408155127559" />
+<figcaption aria-hidden="true">image-20220408155127559</figcaption>
+</figure>
+<p>根据刚才我们推导的<code>R[%rdi]-R[%rsi]&lt;0</code>时<span
+class="math inline">\(OF\oplus
+SF=1\)</span>,那么<code>R[%rdi]-R[%rsi]≥0</code>就应该有<span
+class="math inline">\(!(OF\oplus SF)=1\)</span></p>
+<p>这里<code>jge=jump if greater</code>即<code>R[%rdi]-R[%rsi]≥0</code>的情况</p>
+<p>联系前两句,第三句可以理解为:如果<span
+class="math inline">\(R[\%rdi]-R[\%rsi]=y-x≥0\)</span>则跳转到<code>.L2</code></p>
+<p>此后程序分叉了,如果3没有满足执行没有跳转则顺序执行<code>subq    %rdi, %rax</code>即<code>R[%rdi]=R[%rax]-R[%rdi]=x-y</code></p>
+<p>如果3满足条件并且跳转则跳到.L2执行<code>subq    %rsi, %rdi</code>即<code>R[%rsi]=R[%rdi]-R[%rsi]=y-x</code>一定是非负的</p>
+<p>不管是否跳转,3保证了后面的减法一定是大数-小数</p>
+<p>汇编语言的程序结构类似于</p>
+<figure>
+<img
+src="http://raw.githubusercontent.com/DeutschBall/test/master/image-20220408170852710.png"
+alt="image-20220408170852710" />
+<figcaption aria-hidden="true">image-20220408170852710</figcaption>
+</figure>
+<p>而c源程序的结构类似于</p>
+<figure>
+<img
+src="http://raw.githubusercontent.com/DeutschBall/test/master/image-20220408170946086.png"
+alt="image-20220408170946086" />
+<figcaption aria-hidden="true">image-20220408170946086</figcaption>
+</figure>
+<h5 id="条件跳转指令实现循环">条件跳转指令实现循环</h5>
+<p>求一个数n的阶乘,c源文件用while和for分别这样写</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br></pre></td><td class="code"><pre><span class="line"><span class="type">int</span> <span class="title function_">fact_while</span><span class="params">(<span class="type">int</span> n)</span>&#123;</span><br><span class="line">        <span class="type">int</span> ans=<span class="number">1</span>;</span><br><span class="line">        <span class="type">int</span> i=<span class="number">1</span>;</span><br><span class="line">        <span class="keyword">while</span>(i&lt;=n)&#123;</span><br><span class="line">                ans*=i;</span><br><span class="line">                ++i;</span><br><span class="line">        &#125;</span><br><span class="line">        <span class="keyword">return</span> ans;</span><br><span class="line"></span><br><span class="line">&#125;</span><br><span class="line"><span class="type">int</span> <span class="title function_">fact_for</span><span class="params">(<span class="type">int</span> n)</span>&#123;</span><br><span class="line">        <span class="type">int</span> ans=<span class="number">1</span>;</span><br><span class="line">        <span class="keyword">for</span>(<span class="type">int</span> i=<span class="number">1</span>;i&lt;=n;++i)&#123;</span><br><span class="line">                ans*=i;</span><br><span class="line">        &#125;</span><br><span class="line">        <span class="keyword">return</span> ans;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<blockquote>
+<p>根据前面学过的标志位的用法,大体可以推测一下汇编语言可能怎么写</p>
+<p>参数<code>int n</code>放在<code>edi</code>寄存器</p>
+<p><img
+src="http://raw.githubusercontent.com/DeutschBall/test/master/image-20220409151147527.png" /></p>
+<p>一开始<code>int ans=1;</code>要从一个寄存器里放一个1,由于最后返回的也是ans,因此可以直接用<code>eax</code>(int32位,需要双字寄存器eax,不用四字寄存器rax)寄存器方便返回</p>
+<p>然后循环临时变量i也需要一个寄存器存储其值,用<code>edx</code></p>
+<p>循环判断就是i和n的大小判断<code>cmp %edx,%edi</code>,这个式子基于<code>R[%edi]-R[%edx]=n-i</code></p>
+<p>当i&lt;=n时,cmp指令执行完毕之后<code>SF=0</code>恒成立,表示cmp运算结果非负</p>
+<p>然后进入循环体<code>ans*=i;</code>,其中<code>R[%eax]=ans,R[%edx]=i</code>,翻译成汇编语言,</p>
+<figure>
+<img
+src="http://raw.githubusercontent.com/DeutschBall/test/master/image-20220409152257759.png"
+alt="image-20220409152257759" />
+<figcaption aria-hidden="true">image-20220409152257759</figcaption>
+</figure>
+<p><code>imul %eax,%edx</code>计算<code>R[%eax]*R[%edx]</code>然后将结果存放到<code>%eax</code></p>
+<p>循环体执行完毕,下面应该循环变量i自增</p>
+<figure>
+<img
+src="http://raw.githubusercontent.com/DeutschBall/test/master/image-20220409152802338.png"
+alt="image-20220409152802338" />
+<figcaption aria-hidden="true">image-20220409152802338</figcaption>
+</figure>
+<p><code>inc %edx</code></p>
+<p>下面要回头执行下一次循环,此处应当使用无条件跳转命令,跳到循环判断语句</p>
+<p>考虑当循环判断语句不满足时,应当跳转到何处?</p>
+<p>使用条件跳转到循环下面的语句</p>
+<p><strong>总的来说,推测的汇编逻辑是这样的:</strong></p>
+<p>1.安置好形参n,ans,临时变量i在寄存器中的位置</p>
+<p>2.循环判断</p>
+<p>3.根据刚才的循环判断,决定是否条件跳转出循环</p>
+<p>如果没有出循环则执行循环体(乘法),然后自增临时变量i,然后无条件跳转到2</p>
+<p>如果跳出了循环则继续执行后面的语句,循环不再考虑</p>
+</blockquote>
+<p>下面实验观察汇编器是如何做的</p>
+<p>编译成.o文件之后用objdump反汇编得到</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br></pre></td><td class="code"><pre><span class="line">Disassembly of section .text:</span><br><span class="line"></span><br><span class="line">0000000000000000 &lt;fact_while&gt;:</span><br><span class="line">   0:   f3 0f 1e fa             endbr64</span><br><span class="line">   4:   b8 01 00 00 00          mov    $0x1,%eax</span><br><span class="line">   9:   ba 01 00 00 00          mov    $0x1,%edx</span><br><span class="line">   e:   39 f8                   cmp    %edi,%eax</span><br><span class="line">  10:   7f 08                   jg     1a &lt;fact_while+0x1a&gt;</span><br><span class="line">  12:   0f af d0                imul   %eax,%edx</span><br><span class="line">  15:   83 c0 01                add    $0x1,%eax</span><br><span class="line">  18:   eb f4                   jmp    e &lt;fact_while+0xe&gt;</span><br><span class="line">  1a:   89 d0                   mov    %edx,%eax</span><br><span class="line">  1c:   c3                      retq</span><br><span class="line"></span><br><span class="line">000000000000001d &lt;fact_for&gt;:</span><br><span class="line">  1d:   f3 0f 1e fa             endbr64</span><br><span class="line">  21:   b8 01 00 00 00          mov    $0x1,%eax</span><br><span class="line">  26:   ba 01 00 00 00          mov    $0x1,%edx</span><br><span class="line">  2b:   39 f8                   cmp    %edi,%eax</span><br><span class="line">  2d:   7f 08                   jg     37 &lt;fact_for+0x1a&gt;</span><br><span class="line">  2f:   0f af d0                imul   %eax,%edx</span><br><span class="line">  32:   83 c0 01                add    $0x1,%eax</span><br><span class="line">  35:   eb f4                   jmp    2b &lt;fact_for+0xe&gt;</span><br><span class="line">  37:   89 d0                   mov    %edx,%eax</span><br><span class="line">  39:   c3                      retq</span><br></pre></td></tr></table></figure>
+<p>这样两种循环的写法在机器层面是一模一样的.现在研究其汇编语言的逻辑,以fact_while的汇编语言为例分析其汇编语言的逻辑</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line">0000000000000000 &lt;fact_while&gt;:</span><br><span class="line">   0:   f3 0f 1e fa             endbr64</span><br><span class="line">   4:   b8 01 00 00 00          mov    $0x1,%eax</span><br><span class="line">   9:   ba 01 00 00 00          mov    $0x1,%edx</span><br><span class="line">   e:   39 f8                   cmp    %edi,%eax</span><br><span class="line">  10:   7f 08                   jg     1a &lt;fact_while+0x1a&gt;</span><br><span class="line">  12:   0f af d0                imul   %eax,%edx</span><br><span class="line">  15:   83 c0 01                add    $0x1,%eax</span><br><span class="line">  18:   eb f4                   jmp    e &lt;fact_while+0xe&gt;</span><br><span class="line">  1a:   89 d0                   mov    %edx,%eax</span><br><span class="line">  1c:   c3                      retq</span><br></pre></td></tr></table></figure>
+<p><strong>1.<code>mov    $0x1,%eax</code></strong></p>
+<p><code>R[%eax]=0x1</code></p>
+<p>这里我们可能会这样分析:eax寄存器是返回值的一部分,因此可以推断,这一句对应c源代码中的<code>int ans=1;</code></p>
+<p>但是实际上这里对应的是<code>int i=1</code></p>
+<p>==这一点可以从下文中分析得出==</p>
+<p><strong>2.<code>mov    $0x1,%edx</code></strong></p>
+<p><code>R[%edx]=0x1</code>,对应的是<code>int ans=1</code></p>
+<p><strong>3.<code>cmp    %edi,%eax</code></strong></p>
+<p>这里就可以看出1和2中,或者说<code>%edx,%eax</code>中到底谁放了ans,谁放了i</p>
+<p>比较指令,基于<code>R[%eax]-R[%edi]</code>,如果与c源程序<code>while(i&lt;=n)</code>对应的话</p>
+<p><code>R[%edi]=n</code>是可以肯定的,因为第一个参数放在<code>edi</code>中</p>
+<p>那么<code>R[%eax]=i</code>随之确定了</p>
+<p>(感觉可以把i和ans的寄存器换一换,这样返回的时候可以直接返回rax,其中正好存放ans,但是当前不知道为啥,编译器没有这样做,而是在最后将edx拷贝到eax)</p>
+<p><strong>4.<code>jg     1a &lt;fact_while+0x1a&gt;</code></strong></p>
+<p><code>jg:jump if greater</code>,</p>
+<p><img
+src="http://raw.githubusercontent.com/DeutschBall/test/master/image-20220409154729279.png" /></p>
+<p>如果<code>!(i&lt;=n)即i&gt;n</code>,则<code>cmp %edi,%edx=R[%edx]-R[%edi]=i-n&gt;0</code>,<code>ZF=0</code>,并且显然这里没有溢出和进位,即满足<code>~(SF^OF)&amp;~SF</code>,jg跳转条件成立,发生条抓</p>
+<p>这里和<code>while(i&lt;=n)</code>成立的条件是相同的,都是在进入循环之前首先进行条件判断</p>
+<p>注意跳转位置:<code>1a &lt;fact_while+0x1a&gt;</code></p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">18:   eb f4                   jmp    e &lt;fact_while+0xe&gt;</span><br><span class="line">1a:   89 d0                   mov    %edx,%eax</span><br></pre></td></tr></table></figure>
+<p><code>1a</code>位置恰好为无条件跳转的下一句,表明出了循环</p>
+<p><strong>5.<code>imul   %eax,%edx</code></strong></p>
+<p>==注意后者为目的==</p>
+<p><code>R[%edx]=R[%eax]*R[%edx]</code></p>
+<p>对应循环体<code>ans*=i</code></p>
+<p><strong>6.<code>add    $0x1,%eax</code></strong></p>
+<p><code>R[%eax]=R[%eax]+0x1</code></p>
+<p>对应临时变量i自增</p>
+<p><strong>7.<code>jmp    e &lt;fact_while+0xe&gt;</code></strong></p>
+<p>无条件跳转,跳转位置是fact_while开始向后偏移0xe字节</p>
+<figure>
+<img
+src="http://raw.githubusercontent.com/DeutschBall/test/master/image-20220409155811948.png"
+alt="image-20220409155811948" />
+<figcaption aria-hidden="true">image-20220409155811948</figcaption>
+</figure>
+<p>实际跳转到判断指令cmp,意思是重新进行循环</p>
+<p><strong>8.<code>mov    %edx,%eax</code></strong></p>
+<p>如果程序执行到此句,它上一句又是无条件跳转,说明程序是从更早的条件跳转过来的,对应<code>jg     1a &lt;fact_while+0x1a&gt;</code></p>
+<p>这一句的逻辑是把<code>edx</code>寄存器中的东西拷贝给<code>eax</code>一份</p>
+<p>edx我们分析过存放的是ans</p>
+<p>eax我们分析过存放的是i</p>
+<p>然而函数希望返回ans,并且返回值是以eax寄存器为准</p>
+<p>因此这里需要把ans搬到eax中</p>
+<p><strong>9.<code>retq</code></strong></p>
+<p>函数返回</p>
+<h4 id="条件传送数据">3.条件传送数据</h4>
+<figure>
+<img
+src="http://raw.githubusercontent.com/DeutschBall/test/master/image-20220409163206775.png"
+alt="image-20220409163206775" />
+<figcaption aria-hidden="true">image-20220409163206775</figcaption>
+</figure>
+<p>条件传送数据指令,意思就是当满足某些条件时,才会将数据从哪里拷贝到哪里,还是比较容易理解的</p>
+<h2 id="跳转指令">跳转指令</h2>
+<figure>
+<img
+src="https://raw.githubusercontent.com/DeutschBall/test/master/image-20220410230358338.png"
+alt="image-20220410230358338" />
+<figcaption aria-hidden="true">image-20220410230358338</figcaption>
+</figure>
+<h3 id="pc相对寻址跳转">PC相对寻址跳转</h3>
+<p>首先分析CSAPP给出的例子</p>
+<figure>
+<img
+src="https://raw.githubusercontent.com/DeutschBall/test/master/image-20220410230546880.png"
+alt="image-20220410230546880" />
+<figcaption aria-hidden="true">image-20220410230546880</figcaption>
+</figure>
+<p>1.<code>movq %rdi,%rdx</code></p>
+<p><code>R[%rdx]=R[%rdi]=x</code>将传入的参数放进<code>rax</code>寄存器</p>
+<p>2.<code>jmp  .L2</code></p>
+<p>无条件跳转到<code>.L2</code></p>
+<p>.L2:</p>
+<p>首先<code>testq %rax,%rax</code>作用是置符号标志,方便判断<code>R[%rax]</code>是负数还是非负数</p>
+<p>然后<code>jg .L3</code> ,jump if greater
+即如果<code>R[%rax]&gt;0</code>则跳转.L3</p>
+<p>.L3:</p>
+<p><code>sarq %rax</code>,寄存器<code>%rax</code>中的值右移一位,即除以二下取整</p>
+<p>显然当<code>R[%rax]=0</code>时.L2中的jg不再满足条件,执行第八行
+的返回语句</p>
+<p>因此可以推断,源c程序是这样写的:</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="type">void</span> <span class="title function_">func</span><span class="params">(<span class="type">int</span> x)</span>&#123;</span><br><span class="line">	<span class="keyword">while</span>(x&gt;<span class="number">0</span>)&#123;</span><br><span class="line">		x&gt;&gt;=<span class="number">1</span>;</span><br><span class="line">	&#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>对.o文件使用objdump反汇编得到</p>
+<figure>
+<img
+src="https://raw.githubusercontent.com/DeutschBall/test/master/image-20220410231054590.png"
+alt="image-20220410231054590" />
+<figcaption aria-hidden="true">image-20220410231054590</figcaption>
+</figure>
+<p>第一行和刚才相同</p>
+<p>第二行<code>jmp 8</code>这里8怎么来的?左侧的机器码为<code>eb 03</code>,即实际操作数是0x03,然后程序进行到loop+0x3位置即该指令时,首先要做的就是程序计数器移动到下一条指令的位置,即移动loop+0x03这条指令的长度2,此时PC=5,然后jmp
+8的8就是PC+0x03=5+3=8,这样得到的</p>
+<p><strong>习题3.15</strong></p>
+<figure>
+<img
+src="https://raw.githubusercontent.com/DeutschBall/test/master/image-20220410231355967.png"
+alt="image-20220410231355967" />
+<figcaption aria-hidden="true">image-20220410231355967</figcaption>
+</figure>
+<p>A.当执行4003fa条指令时,PC=4003fc,然后<code>74 02</code>表明要跳转的位置是<code>PC+0x02=0x4003fc+0x02=0x4003fe</code>,即<code>je 0x4003fe</code></p>
+<p>B.当执行40042f条指令时,PC=400431,然后<code>74 f4</code>表明要跳转的位置时<code>PC-0x0C=0x400431-0x0C=0x400425</code>,即<code>je 0x400425</code></p>
+<p>C.执行前一条指令的时候,程序计数器指示下一行的指令位置,即为PC,<code>0x400547=PC+0x02</code>得到<code>PC=0x400545</code>,则第一行的指令地址为<code>0x400545-2=0x400543</code></p>
+<p>D.执行4005e8条指令时,PC=4005ed,字节按照从最低位到最高位的顺序列出为<code>0xff ff ff 73=-141=-0x00 00 00 8D</code></p>
+<p><code>PC-0x8D=0x4005ed-0x8d=0x400560</code></p>
+<p>因此<code>jmpq 0x400560</code></p>
+<h3 id="习题3.18">习题3.18</h3>
+<figure>
+<img
+src="https://raw.githubusercontent.com/DeutschBall/test/master/image-20220410233232652.png"
+alt="image-20220410233232652" />
+<figcaption aria-hidden="true">image-20220410233232652</figcaption>
+</figure>
+<p>程序逻辑分析如下:</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br></pre></td><td class="code"><pre><span class="line">R[%rax]=R[%rdi]+R[%rsi]=x+y</span><br><span class="line">R[%rax]=R[%rax]+R[%rdx]=x+y+z</span><br><span class="line">计算R[%rdi]-(-3)=R[%rdi]+3=x+3,根据结果置符号位SF和溢出位OF</span><br><span class="line">如果刚才的值大于等于0即x+3&gt;=0,x&gt;=-3则跳转到.L2</span><br><span class="line">否则计算R[%rsi]-R[%rdx]=y-z</span><br><span class="line">如果刚才的值大于0即y-z=&gt;0即y&gt;=z则跳转.L3</span><br><span class="line">否则R[%rax]=R[%rdi]=z</span><br><span class="line">R[%rax]=R[%rax]*R[%rdi]=x*z;</span><br><span class="line">return R[%rax]=x*z;</span><br><span class="line"></span><br><span class="line">.L3:</span><br><span class="line">R[%rax]=R[%rsi]=y</span><br><span class="line">R[%rax]=R[%rax]*R[%rdx]=y*z</span><br><span class="line">return R[%rax]=y*z;</span><br><span class="line"></span><br><span class="line">.L2:</span><br><span class="line">计算R[%rdi]-2,g,根据结果置符号位SF和溢出位OF</span><br><span class="line">不考虑溢出,则当SF=1或者ZF=1即刚才的结果小于等于0即R[%rdi]-2&lt;=0即R[%rdi]=x&lt;=2,则跳转.L4</span><br><span class="line">否则R[%rax]=R[%rdi]=x</span><br><span class="line">R[%rax]=R[%rax]*R[%rdx]=x*z</span><br><span class="line"></span><br><span class="line">.L4</span><br><span class="line">return R[%rax]</span><br><span class="line"></span><br></pre></td></tr></table></figure>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br></pre></td><td class="code"><pre><span class="line">int func(int x,int y,int z)&#123;</span><br><span class="line">	int temp=x+y+z;</span><br><span class="line">	if(x&gt;=-3)&#123;</span><br><span class="line">		if(x&lt;=2)&#123;</span><br><span class="line">			return temp;</span><br><span class="line">		&#125;</span><br><span class="line">		else&#123;</span><br><span class="line">			return x*z;</span><br><span class="line">		&#125;</span><br><span class="line">	&#125;</span><br><span class="line">	else if(y&gt;=z)&#123;</span><br><span class="line">		return y*z;</span><br><span class="line">	&#125;</span><br><span class="line">	else</span><br><span class="line">		return x*y;</span><br><span class="line">&#125;</span><br><span class="line"></span><br></pre></td></tr></table></figure>
+<p>但是这样写会有4条return语句,答案只有一条return语句,在完成所有条件判断之后返回val</p>
+<figure>
+<img
+src="https://raw.githubusercontent.com/DeutschBall/test/master/image-20220411082058654.png"
+alt="image-20220411082058654" />
+<figcaption aria-hidden="true">image-20220411082058654</figcaption>
+</figure>
+<p>首先改写成:</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br></pre></td><td class="code"><pre><span class="line">int func(int x,int y,int z)&#123;</span><br><span class="line">	int temp=x+y+z;</span><br><span class="line">	if(x&gt;=-3)&#123;</span><br><span class="line">		if(x&lt;=2)&#123;</span><br><span class="line">			//啥也不干</span><br><span class="line">		&#125;</span><br><span class="line">		else&#123;</span><br><span class="line">			temp=x*z;</span><br><span class="line">		&#125;</span><br><span class="line">	&#125;</span><br><span class="line">	else if(y&gt;=z)&#123;</span><br><span class="line">		temp= y*z;</span><br><span class="line">	&#125;</span><br><span class="line">	else</span><br><span class="line">		temp= x*y;</span><br><span class="line">&#125;</span><br><span class="line"></span><br></pre></td></tr></table></figure>
+<p>然后<code>x&gt;=-3,x&lt;=2</code>下面是没有东西的,考虑不写这一条</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">if(x&gt;=-3)&#123;</span><br><span class="line">	if(x&gt;2)temp=x*z;</span><br><span class="line">&#125;</span><br><span class="line">else if(y&gt;=z)&#123;</span><br><span class="line">	temp=y*z;</span><br><span class="line">&#125;</span><br><span class="line">else temp=x*y;</span><br><span class="line">return temp;</span><br></pre></td></tr></table></figure>
+<p>这样写还是与给定的格式不一样</p>
+<p>第一个if下面应该有一个if,有一个else,最后不应该有else</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">if(x&lt;-3)&#123;</span><br><span class="line">	if(y&gt;=z)temp=y*z;</span><br><span class="line">	else temp=x*y;</span><br><span class="line">&#125;</span><br><span class="line">else if(x&gt;2)temp=x*z;</span><br><span class="line">return temp;</span><br></pre></td></tr></table></figure>
+<p>此时就和给定的格式相同了</p>
+<figure>
+<img
+src="https://raw.githubusercontent.com/DeutschBall/test/master/image-20220411082631746.png"
+alt="image-20220411082631746" />
+<figcaption aria-hidden="true">image-20220411082631746</figcaption>
+</figure>
+<p>testq %rsi之后各标志位的情况</p>
+<table>
+<thead>
+<tr>
+<th><code>R[%rsi]</code></th>
+<th><code>testq %rsi=R[%rsi]+R[%rsi]</code></th>
+<th>SF</th>
+<th>ZF</th>
+<th>OF</th>
+<th>CF</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>正数</td>
+<td>无溢出</td>
+<td>0</td>
+<td>0</td>
+<td>0</td>
+<td>0</td>
+</tr>
+<tr>
+<td>0</td>
+<td>无溢出</td>
+<td>0</td>
+<td>1</td>
+<td>0</td>
+<td>0</td>
+</tr>
+<tr>
+<td>负数</td>
+<td>无溢出</td>
+<td>1</td>
+<td>0</td>
+<td>0</td>
+<td>0</td>
+</tr>
+<tr>
+<td>正数</td>
+<td>溢出</td>
+<td>1</td>
+<td>0</td>
+<td>1</td>
+<td></td>
+</tr>
+<tr>
+<td>负数</td>
+<td>溢出</td>
+<td>0</td>
+<td>0</td>
+<td>1</td>
+<td></td>
+</tr>
+</tbody>
+</table>
+<p>用testq如何判断一个数是正数还是负数?</p>
+<p>正数时<code>SF^OF=0andZF=0</code></p>
+<p>负数时<code>SF^OF=1</code></p>
+<p>0时<code>ZF=1</code></p>
+<p>非负数<code>SF^OF=0</code></p>
+<p>那么配合<code>jge</code></p>
+<figure>
+<img
+src="https://raw.githubusercontent.com/DeutschBall/test/master/image-20220411085309367.png"
+alt="image-20220411085309367" />
+<figcaption aria-hidden="true">image-20220411085309367</figcaption>
+</figure>
+<p>跳转成立条件即<span class="math inline">\(!(SF\oplus
+OF)=1\)</span>即<span class="math inline">\(SF\oplus OF =0\)</span></p>
+<figure>
+<img
+src="https://raw.githubusercontent.com/DeutschBall/test/master/image-20220411085754492.png"
+alt="image-20220411085754492" />
+<figcaption aria-hidden="true">image-20220411085754492</figcaption>
+</figure>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line">long loop_while2(long a,long b)&#123;</span><br><span class="line">	if(b&lt;=0)&#123;</span><br><span class="line">		return b;</span><br><span class="line">	&#125;</span><br><span class="line">	else&#123;</span><br><span class="line">		int temp=b;</span><br><span class="line">		while(b&gt;0)&#123;</span><br><span class="line">			temp*=a;</span><br><span class="line">			b-=a;</span><br><span class="line">		&#125;</span><br><span class="line">		return temp;</span><br><span class="line">	&#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<figure>
+<img
+src="https://raw.githubusercontent.com/DeutschBall/test/master/image-20220411090237810.png"
+alt="image-20220411090237810" />
+<figcaption aria-hidden="true">image-20220411090237810</figcaption>
+</figure>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">long loop_while2(long a,long b)&#123;</span><br><span class="line">	long result=b;</span><br><span class="line">	while(b&gt;0)&#123;</span><br><span class="line">		result=result*a;</span><br><span class="line">		b=b-a;</span><br><span class="line">	&#125;</span><br><span class="line">	return result;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<h2 id="递归过程">递归过程</h2>
+<p>需要了解一下过程,调用约定</p>
+<figure>
+<img
+src="https://raw.githubusercontent.com/DeutschBall/test/master/image-20220420205909645.png"
+alt="image-20220420205909645" />
+<figcaption aria-hidden="true">image-20220420205909645</figcaption>
+</figure>
+<figure>
+<img
+src="https://raw.githubusercontent.com/DeutschBall/test/master/image-20220420205922083.png"
+alt="image-20220420205922083" />
+<figcaption aria-hidden="true">image-20220420205922083</figcaption>
+</figure>
+<p>汇编第6行如果跳转实现的话(<code>rdi</code>中存放的<code>x=0</code>)则到11行将被调用者保存的rbx还原,之前又把<code>eax</code>置0,因此返回0,相当于啥也没干</p>
+<p>对应<code>rfun</code>函数中的条件判断</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">if(x==0)return 0;</span><br></pre></td></tr></table></figure>
+<p>c程序下面的递归过程对应汇编中不满足条件跳转的语句(7到12行)</p>
+<p>第7行将<code>rdi</code>中存放的x右移两位</p>
+<p>第8行就调用<code>rfun</code>了,<code>rdi</code>是调用者保存的,用来给<code>rfun</code>传递参数,</p>
+<p><code>rfun(x)</code>将会调用<code>rfun(x&gt;&gt;2)</code></p>
+<p>这样一直递归调用到最内层的函数时<code>x==0</code>不满足跳转条件了,返回<code>0,rbx</code>值不变,还是调用者给的值,</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br></pre></td><td class="code"><pre><span class="line">假设上级函数rbx=y</span><br><span class="line">rfun(x)<span class="comment">//x放到rdi里</span></span><br><span class="line">	把rbx中的y存一下</span><br><span class="line">	x放到rbx里</span><br><span class="line">	eax归零</span><br><span class="line">	<span class="keyword">if</span>(x==<span class="number">0</span>)&#123;</span><br><span class="line">		把刚才放起来y重新放回rbx里</span><br><span class="line">		<span class="keyword">return</span> <span class="number">0</span>;</span><br><span class="line">	&#125;</span><br><span class="line">	rdi中的x右移两位成为x1</span><br><span class="line">	<span class="title function_">rfun</span><span class="params">(x1)</span>&#123;&#125;</span><br><span class="line">		...</span><br><span class="line">		rdi中的x1右移两位成为x2</span><br><span class="line">		<span class="title function_">rfun</span><span class="params">(x2)</span>&#123;</span><br><span class="line">			...</span><br><span class="line">		&#125;</span><br><span class="line">		rbx中的x1加到rax上</span><br><span class="line">		返回rax</span><br><span class="line">	&#125;</span><br><span class="line">	rbx中的x加到rax上</span><br><span class="line">	返回rax</span><br><span class="line">	</span><br></pre></td></tr></table></figure>
+<p>rax中累计的是历次x的值</p>
+<p>rbx保存"本次"x 的值</p>
+<blockquote>
+<p><code>rdi</code>也是本次x的值啊?为什么还要<code>rbx</code>保存一下?</p>
+<p>在将本次的x累加到<code>rax</code>中之前<code>rdi</code>中的x已经右移两位了,应该用<code>rbx</code>记住x之后再右移</p>
+<p><code>rbx</code>的作用就是记住本次本次本次的x值,</p>
+<p>可以这样理解:</p>
+<p>如果不用<code>rbx</code>,可以开一个数组,</p>
+<p>比如第一层函数的参数x放到数组第一位</p>
+<p>第二层函数的参数x1放到数组的第二位</p>
+<p>...</p>
+<p>然后在返回的时候只需要将下一层函数的返回值与本层在数组中存放的参数值乘起来然后返回</p>
+<p>但是实际上寄存器很有限,被调用者寄存器只有六个,如果递归层数很多了则这种数组是不现实的</p>
+<p>只用一个的话就是滚动数组的思想了</p>
+<p>在返回之前,由于要返回的值已经用完了,rbx的暂时存放使命完成,可以还给上一层函数了,继续承担上一层函数的暂时存放使命</p>
+</blockquote>
+
+      
+    </div>
+
+    
+    
+    
+      <footer class="post-footer">
+        <div class="post-eof"></div>
+      </footer>
+  </article>
+  
+  
+  
+
+      
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="en">
+    <link itemprop="mainEntityOfPage" href="http://deutschball.github.io/2022/05/23/%E5%BC%82%E5%B8%B8/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="https://raw.githubusercontent.com/DeutschBall/picbed/main/dustball.png">
+      <meta itemprop="name" content="dustball">
+      <meta itemprop="description" content="dustland">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="dustland">
+    </span>
+      <header class="post-header">
+        <h2 class="post-title" itemprop="name headline">
+          
+            <a href="/2022/05/23/%E5%BC%82%E5%B8%B8/" class="post-title-link" itemprop="url">CSAPP-chapter8 异常与进程</a>
+        </h2>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-calendar"></i>
+              </span>
+              <span class="post-meta-item-text">Posted on</span>
+              
+
+              <time title="Created: 2022-05-23 18:55:00 / Modified: 19:44:56" itemprop="dateCreated datePublished" datetime="2022-05-23T18:55:00+08:00">2022-05-23</time>
+            </span>
+
+          
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+          <h1 id="csapp-chapter8">CSAPP-chapter8</h1>
+<p>感觉大一上学期c语言还有下学期基于c语言的基础课程设计学得好失败.</p>
+<p>当时一个位图放缩,我既不懂位图格式,也不懂二进制文件,还不熟悉glibc函数.</p>
+<p>本学期操作系统,更是云里雾里,对虚拟内存,进程等概念从未听过,却上来就要讲缺页置换算法,调度算法等等各种算法</p>
+<p>对于CSAPP这本书,只能说相见恨晚,应当替代大一下的基础课程设计,作为计组和操作系统先修课.</p>
+<p>欠的债在大二下才还上,可以说亡羊补牢?</p>
+<h2 id="异常">异常</h2>
+<h3 id="控制流">控制流</h3>
+<p>一个没有跳转,正常执行的程序,其执行过程中程序计数器PC总是连续变化的,</p>
+<p>假设指令序列为 <span class="math display">\[
+I_1,I_2....,I_n
+\]</span></p>
+<p>指令对应的地址为 <span class="math display">\[
+A_1,A_2,...,A_n
+\]</span> 由于x86上的指令采用变长编码方式,因此<span
+class="math inline">\(A_1,A_2,...,A_n\)</span>有可能不是等差数列,但是可以啃腚的是他们连续,</p>
+<p>程序计数器PC的值构成的序列被称为控制流,如果程序一直顺序进行没有调用跳转返回,并且没有发生异常,则PC的值一直连续,这样的控制流称为"平滑的"</p>
+<p>当程序中有跳转,函数调用,函数返回,或者异常时,控制流不再平滑,此时控制流被称为"异常控制流"(ECF)
+异常控制流包括跳转,调用,返回,异常等</p>
+<h3 id="异常的定义">异常的定义</h3>
+<p>先说一些必要的废话</p>
+<p>定义:异常就是控制流中的突变,按照这个定义,跳转,调用,返回,异常处理程序都是</p>
+<p>异常是异常控制流(ECF)的一种,需要硬件和操作系统协同实现.</p>
+<h3 id="异常处理的过程">异常处理的过程</h3>
+<h4 id="序幕异常的触发">序幕:异常的触发</h4>
+<p>异常是<strong>如何触发</strong>的呢?</p>
+<p>处理器中的<strong>重大</strong>状态变化,状态可以是某些寄存器中的某些位等,被处理器检测到(检测电平的变化对于处理器来说易如反掌,可以实现)</p>
+<blockquote>
+<p>就好像一个人走着走着感觉低血糖了
+,这人自然就感觉到了,然后对低血糖的对策应该吃点糖.这吃点糖就是异常处理程序</p>
+<p>吃完糖然后缓过来了继续走路</p>
+<p>这就是控制还给之前正在执行的指令</p>
+<p>如果低血糖非常厉害,人直接寄了,相当于发生了终止,先前的进程不再进行</p>
+</blockquote>
+<h4 id="开端异常的察觉与定性">开端:异常的察觉与定性</h4>
+<p>处理器根据状态位的变化判断,发生甚么事了</p>
+<blockquote>
+<p>就好像这个走路的人走着走着感觉头晕,无力,快要饿死,这三种状态一组合,人就知道发生了低血糖</p>
+</blockquote>
+<figure>
+<img
+src="https://raw.githubusercontent.com/DeutschBall/test/master/image-20220518201336935.png"
+alt="image-20220518201336935" />
+<figcaption aria-hidden="true">image-20220518201336935</figcaption>
+</figure>
+<p>每种事件在制作处理器时都已经交给处理器一个编号,发生某种事件处理器就可以知道对应哪个编号</p>
+<blockquote>
+<p>就好比从小就教给这个人,</p>
+<p>高血糖编号0,</p>
+<p>低血糖编号1,</p>
+<p>尿急编号2,...</p>
+<p>然后有一天这个人犯了低血糖,他就知道自己犯了编号为1的毛病</p>
+</blockquote>
+<blockquote>
+<p>但是这个人知道了自己犯了1号病有啥意义呢?实践生活中也确实没有这样整,应该是怪没有意义的</p>
+<p>那么给<strong>事件编号的意义</strong>又是啥?</p>
+<p>这种编号感觉类似协议,处理器调用异常处理程序的时候只需要根据特定的编号去调用特定的处理程序,而处理程序的代码不是处理器管,是操作系统维护的异常表管的,那么处理器用什么信息去查表调用相关的异常处理程序呢?</p>
+<p>如果现实中也是这样,人知道了自己犯了1号毛病,去了门诊直接说"我犯了1号病",大夫就知道应该开葡萄糖的药,不需要病人<strong>费一大堆话描述</strong>"我犯了
+头晕无力饿 的病"</p>
+<p>同样,处理器在查表之前将自己的各种状态量化成一个魔数,把最困难的事自己解决了,然后用这个魔数去查表岂不是轻轻松松</p>
+<p>但是现实生活中并没有给低血糖这种病编号,看起来这种方法很简单快捷,为什么不用?</p>
+<p>一是人生活中要记的事情已经太多,病的编号记不住,二是病人觉得是1号病但是大夫可能不这样认为,有可能是更大的毛病</p>
+<p>但是对机器来说,没有这么多的可能,根据状态位的变化,已经可以清楚地确定发生了甚么,并且每种毛病的编号都已经被写入硬件,永远牢记,因此可以使用这种方式</p>
+</blockquote>
+<h4 id="发展根据事件号查异常表">发展:根据事件号查异常表</h4>
+<p>处理器确定事件及事件编号之后,要根据事件编号采取相应的异常处理程序,这时需要去查异常表</p>
+<blockquote>
+<p>异常表是由操作系统启动时分配和初始化的,存放在主存中,事件编号作为下标,异常处理程序的地址作为表项</p>
+</blockquote>
+<p>用事件编号作为下标去查异常表,获得的表项是异常处理程序的地址,然后控制交给该异常处理程序</p>
+<blockquote>
+<p>整个查表的过程与页表的工作方式很像</p>
+<p>单级页表的下标是虚拟页号VPN,页表项是物理页号</p>
+</blockquote>
+<blockquote>
+<p>处理器怎么知道表在哪里的呢?</p>
+<p>异常表的起始地址会专门被一个寄存器--异常表基址寄存器(exception table
+base regsiter)保存,这个寄存器在CPU里</p>
+<p>查表的时候</p>
+<figure>
+<img
+src="https://raw.githubusercontent.com/DeutschBall/test/master/image-20220518203658495.png"
+alt="image-20220518203658495" />
+<figcaption aria-hidden="true">image-20220518203658495</figcaption>
+</figure>
+<p>etbr寄存器中存放基址,异常号(可能存放在某个寄存器中)作为偏移量,两个加起来去访问数组项</p>
+</blockquote>
+<h4 id="高潮异常处理">高潮:异常处理</h4>
+<p>刚才查完异常表之后处理器已经获得了异常处理程序的首地址,处理器只需要把PC值改为该异常处理程序的首地址</p>
+<p>看到这里不禁疑惑,如果异常不是很严重可以被处理,处理完了怎么回到刚才的程序呢?谁来保存刚才进程的执行现场呢?</p>
+<p>CSAPP用异常处理和函数调用的对比解决了这个疑惑</p>
+<p>执行异常处理程序之前,处理器会将<strong>返回时的指令地址</strong>,以及其他一些状态(通用寄存器,堆栈指针,程序状态字等等)统统滴压入<strong>内核栈</strong>,注意不是用户栈</p>
+<blockquote>
+<p>这里从异常处理程序返回时的指令地址只有两种,要么是触发异常的指令地址,要么是下一条指令,</p>
+<p>具体是那一条要根据事件类型确定,即根据事件编号确定.</p>
+<p>这是后话</p>
+</blockquote>
+<blockquote>
+<p>为什么要压入内核栈?我的猜测是</p>
+<p>异常处理程序要运行在内核状态,访问内核栈方便</p>
+<p>为什么异常处理程序要运行在内核状态?我的猜测是</p>
+<p>异常处理程序需要请求一些内核的资源,比如缺页异常处理程序会进行磁盘到内存换页的操作,设计了IO操作.而这些在用户状态没有权限做到</p>
+</blockquote>
+<p>上述进程信息都压内核栈保存之后,PC置为异常处理程序的地址,控制交给异常处理程序(或者说异常处理程序占用处理器)</p>
+<h4 id="结局异常处理完了返回">结局:异常处理完了返回</h4>
+<blockquote>
+<p>首先考虑一个人大街上走着低血糖了可能怎么处理</p>
+<p>一是轻微的,吃块糖缓过来接着走</p>
+<p>二是稍微严重,回家歇着了,改天再出来</p>
+<p>三是非常严重,人暴毙了(虽然几率不大),这辈子不可能再走路了,也省了处理的麻烦</p>
+</blockquote>
+<p>根据引发异常的事件类型,异常处理完后的返回也可以分成三种</p>
+<p>1.返回给当前指令(触发异常的指令),重新进行,比如缺页异常</p>
+<p>2.返回给当前指令的下一条指令</p>
+<blockquote>
+<p>下一条指不发生异常时下一条应该执行的指令</p>
+</blockquote>
+<p>3.发生异常的程序被中断,不再执行</p>
+<h2 id="异常的类别">异常的类别</h2>
+<p>异常就四种,中断,陷阱,故障,终止</p>
+<figure>
+<img
+src="https://raw.githubusercontent.com/DeutschBall/test/master/image-20220518210426662.png"
+alt="image-20220518210426662" />
+<figcaption aria-hidden="true">image-20220518210426662</figcaption>
+</figure>
+<p>其中只有属于异步异常的中断发生在CPU之外,只能由IO设备产生,比如按下键盘,点击鼠标,打印到屏幕,等等各种事件</p>
+<p>陷阱是有意为之的,目的是从是处理器从用户态陷入内核态(通过修改某种标志位),作用是拥有使用任意资源的权限,比如syscall指令</p>
+<p>故障和终止都是不希望发生的,区别是故障算是比较轻微的异常,比如缺页,通过牺牲物理页换入缺页就可以解决</p>
+<p>但是终止就是比较严重的异常,程序无法继续运行了,比如栈缓冲区溢出被金丝雀检测到</p>
+<h3 id="中断">中断</h3>
+<p>此处的"中断"更确切的是说"外部中断"或者"硬件中断",即IO外设导致的中断,不是程序有意产生的中断</p>
+<p>up九曲阑干举例是键盘输入导致的中断</p>
+<figure>
+<img
+src="https://raw.githubusercontent.com/DeutschBall/test/master/image-20220518211331500.png"
+alt="image-20220518211331500" />
+<figcaption aria-hidden="true">image-20220518211331500</figcaption>
+</figure>
+<p>在这个计算机的模型机中,内存总线和IO总线不是一路,但是汇集到IO桥,然后IO桥通过系统总线连接到CPU中的总线接口,总线接口是与CPU内部寄存器相连的</p>
+<blockquote>
+<p>IO总线上挂着的都是IO外设,比如USB,显示器,键鼠,磁盘等等,计算机就算没有这些东西也可以运行</p>
+</blockquote>
+<p>按下键盘的时候,键盘控制器会向处理器的中断引脚发送中断信号,并且会把异常号通过IO总线,IO桥,系统总线传递给CPU,</p>
+<p>中断信号的目的是提醒CPU应该处理中断了,异常号的作用是告诉CPU是键盘出现异常,而不是鼠标</p>
+<p>中断信号和异常号都是CPU判断异常事件需要用到的信息</p>
+<p>由于键盘发送信号和CPU处理指令是<strong>异步</strong>的,因此当键盘发送中断信号的时候,CPU有可能还在执行一条命令.CPU必须完成了手头上那一条命令之后,才可以处理中断.</p>
+<p>完成手头上的指令后,CPU检测到中断引脚那里发生了电位变化,因此知道发生中断了,然后通过异常号知道是哪个IO设备发生了中断,根据这两个信息CPU就能确定发生了什么事,下面就可以异常处理了</p>
+<p>异常处理完之后,应该返回什么地方呢?由于刚才手头上的最后一条指令已经被彻底执行了,自然应该返回下一条指令.</p>
+<blockquote>
+<p>这就好比</p>
+<p>正在写作业,突然有人敲门,为了防止当前正在解决的数学问题思路被打断重来,我先做完这道题,然后去处理访客的问题</p>
+<p>到了门口得先问问是谁在敲门,是熟人就开门</p>
+<p>然后得端茶倒水儿,把客人招待好,等客人走了把门一关回去接着做下一道题</p>
+<p>这里数学题就相当于CPU正在执行的指令,</p>
+<p>敲门这个信号就相当于中断引脚上的电位变化,</p>
+<p>做完这道题再去开门就相当于CPU执行完当前一条指令然后再去处理中断,</p>
+<p>询问访客姓名和敲门合起来,相当于CPU确定事件号,</p>
+<p>招待客人的过程相当于执行中断处理程序</p>
+<p>客人走了继续做下一道题相当于中断处理完成之后返回下一条指令</p>
+</blockquote>
+<p>综上,中断处理过程的流程图表示为</p>
+<figure>
+<img
+src="https://raw.githubusercontent.com/DeutschBall/test/master/image-20220518212631468.png"
+alt="image-20220518212631468" />
+<figcaption aria-hidden="true">image-20220518212631468</figcaption>
+</figure>
+<p>从数学作业的角度来说,中间招待客人的时候,数学作业没有被处理,但是作业本子也不知道这个做题的是玩电脑去了还是蹲坑去了还是招待客人去了.反正这不重要.重要的是不管中间干了啥,数学作业都是被完整做完的.</p>
+<p>因为访客和做作业是异步的,所以招待客人和数学作业玩不玩成一点关系都没有</p>
+<p>从正在执行的进程角度看,发生中断被抢占CPU和被其他进程抢占CPU没有区别,进程也没有因为中断被改变什么</p>
+<h3 id="陷阱系统调用">陷阱(系统调用)</h3>
+<p>陷阱又可以理解为软件<strong>主动</strong>产生的"软中断",是有意为之的</p>
+<p><strong>系统调用</strong>,陷阱最重要的用途是在用户程序和内核之间提供一个像过程一样的接口，又叫做系统调用。</p>
+<blockquote>
+<p>在网上搜索的时候,感觉有一种<strong>广义</strong>的"系统调用",表示一整个从用户程序到硬件然后再返回用户程序的过程</p>
+<p>感觉还有一种<strong>狭义</strong>的系统调用,就是导致CPU从用户态改变到内核态那关键的一条汇编指令<code>int $0x80</code></p>
+</blockquote>
+<p><strong>系统级函数</strong>,比如<code>open(),read(),close()</code>等等,涉及IO操作,显然只在用户态是干不成事情的,需要使用内核的资源,需要陷入内核态,因此需要去执行系统调用</p>
+<p>我们写的程序怎么陷入内核态呢?在c源代码层面上只需要调用glibc中的系统级函数</p>
+<p><strong>汇编语言层面观察系统级函数write的实现</strong></p>
+<blockquote>
+<p>CSAPP上给出的x86-64linux系统调用号表(感觉这里系统级函数和系统调用的概念有些混淆,应该是广义的系统调用)</p>
+<figure>
+<img
+src="https://raw.githubusercontent.com/DeutschBall/test/master/image-20220518215022569.png"
+alt="image-20220518215022569" />
+<figcaption aria-hidden="true">image-20220518215022569</figcaption>
+</figure>
+<p>调用write</p>
+<figure>
+<img
+src="https://raw.githubusercontent.com/DeutschBall/test/master/image-20220519074321305.png"
+alt="image-20220519074321305" />
+<figcaption aria-hidden="true">image-20220519074321305</figcaption>
+</figure>
+<p>系统调用号用rax传递</p>
+<p>文件描述符用rdi传递</p>
+<p>字符串用rsi传递</p>
+<p>字符串长度用rdx传递</p>
+<p><strong>syscall即侠义的系统调用</strong></p>
+</blockquote>
+<h4
+id="在用户视角下系统调用过程示意图">在<strong>用户视角下</strong>系统调用过程示意图</h4>
+<figure>
+<img
+src="https://raw.githubusercontent.com/DeutschBall/test/master/image-20220519073514392.png"
+alt="image-20220519073514392" />
+<figcaption aria-hidden="true">image-20220519073514392</figcaption>
+</figure>
+<blockquote>
+<p>程序员视角意味着"陷阱处理程序"是一个抽象的概念,程序员知道系统要做这么一个陷阱处理,但是具体做了啥程序员不知道,</p>
+<p>程序员可以知道的是自己的程序会调用syscall,然后CPU的使用权就不属于自己的程序了,而是属于陷阱处理.程序员还知道的是陷阱处理之后的结果,比如调用write之后将缓冲区<code>char buffer[20];</code>中的字符打印到了屏幕上</p>
+</blockquote>
+<p><strong>废话:为什么要有陷阱(系统调用)这种异常?</strong></p>
+<figure>
+<img
+src="https://raw.githubusercontent.com/DeutschBall/test/master/image-20220522191723763.png"
+alt="image-20220522191723763" />
+<figcaption aria-hidden="true">image-20220522191723763</figcaption>
+</figure>
+<p><strong>c库函数,系统级函数,系统调用的关系</strong></p>
+<figure>
+<img
+src="https://raw.githubusercontent.com/DeutschBall/test/master/image-20220522170002447.png"
+alt="image-20220522170002447" />
+<figcaption aria-hidden="true">image-20220522170002447</figcaption>
+</figure>
+<p><strong>c库函数</strong></p>
+<p>libc和glibc都是Linux下的c函数库</p>
+<blockquote>
+<p><strong>glibc</strong>是linux下面c标准库的实现，即GNU C
+Library。glibc本身是GNU旗下的C标准库，<strong>后来逐渐成为了Linux的标准c库，而Linux下原来的标准c库Linux
+libc逐渐不再被维护</strong>。Linux下面的标准c库不仅有这一个，如uclibc、klibc，以及上面被提到的Linux
+libc，但是<strong>glibc无疑是用得最多的</strong>。glibc在/lib目录下的.so文件为libc.so.6。</p>
+</blockquote>
+<p>c函数库中的函数非常多,可以按照有没有涉及系统调用进行分类</p>
+<blockquote>
+<p>涉及系统调用的<code>printf,scanf,malloc,free</code>等,这些函数都是<strong>系统级函数</strong>,这些函数执行系统调用陷入内核</p>
+<p>不涉及系统调用的<code>itoa,strstr</code>等</p>
+</blockquote>
+<p>关于库函数和内核函数的区别,这个问题中文站点搜了好多,全在扯淡,最后参考了
+<a
+target="_blank" rel="noopener" href="https://stackoverflow.com/questions/31873923/difference-fork-and-sys-fork">stackoverflow</a></p>
+<blockquote>
+<p>比如内核函数sys_fork就是c库函数fork系统调用入口,即当我们的的代码中使用<code>fork</code>函数的时候,fork函数会去自己调用<code>sys_fork</code>而不是调用<code>sys_write</code></p>
+<blockquote>
+<p>为啥要这样套娃呢?</p>
+<p>因为<code>sys_call</code>是内核函数,依赖于系统</p>
+<p>但是<code>fork</code>是c库函数,要求POSIX可移植</p>
+<p>这就好似协议分层,<code>fork</code>所在高层只管调用内核提供的一个叫<code>sys_fork</code>函数,内核具体怎么实现这个函数不关心</p>
+<p>而内核也不知道上层会有什么,只管根据人的需要涉及<code>sys_fork</code>的参数返回值,功能等等</p>
+</blockquote>
+<blockquote>
+<p>fork函数大体的调用链(踢皮球链)</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">fork() -&gt; glibc wrapper -&gt; raw syscall invocation -&gt; transition to kernel mode -&gt; syscall lookup -&gt; sys_fork() -&gt; do_fork().</span><br></pre></td></tr></table></figure>
+</blockquote>
+</blockquote>
+<p><strong>内核函数</strong></p>
+<p>kernel函数即内核函数</p>
+<blockquote>
+<p><a
+target="_blank" rel="noopener" href="https://www.tutorialspoint.com/assembly_programming/assembly_system_calls.htm">Assembly
+- System Calls
+(tutorialspoint.com)</a>给出了一个x86linux上调用write时,在内核函数层面发生的事情</p>
+<p>x86linux内核函数表:</p>
+<figure>
+<img
+src="https://raw.githubusercontent.com/DeutschBall/test/master/image-20220518215333246.png"
+alt="image-20220518215333246" />
+<figcaption aria-hidden="true">image-20220518215333246</figcaption>
+</figure>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">mov	edx,4		; message length						;要打印的信息长度用edx传递</span><br><span class="line">mov	ecx,msg		; message to write						;要打印的信息msg用ecx寄存器传递</span><br><span class="line">mov	ebx,1		; file descriptor (stdout)				;文件描述符,魔数1表示标准输出,即显示器</span><br><span class="line">mov	eax,4		; system call number (sys_write)		;eax存放内核函数号,决定调用sys_write函数</span><br><span class="line">int	0x80		; call kernel						   ;陷入内核,根据先前放在eax中的系统调用号决定执行什么命令</span><br></pre></td></tr></table></figure>
+</blockquote>
+<p><strong>系统命令和系统调用的关系</strong></p>
+<p>系统命令比如<code>ls</code>,<code>ifconfig</code>,<code>mv</code>,<code>cp</code>等等是由一个或者多个c库函数实现的,可能其中会用到系统调用.系统命令和系统调用之间还有一段距离</p>
+<p>CSAPP上就有练习题让我们用<code>&lt;stdio.h&gt;</code>等头文件里面c库函数写一个<code>mv</code>命令之类的</p>
+<h4 id="操作系统视角下的系统调用过程">操作系统视角下的系统调用过程</h4>
+<p>用户进程通过eax寄存器将内核函数号交给<code>system_call</code>函数,这时已经下到kernel模式了</p>
+<p><code>system_call</code>函数的作用是,根据内核函数号去查<code>system_call_table</code>表,执行相应的sys_开头的内核函数,</p>
+<p>内核函数执行完毕之后执行<code>syscall_exit</code>返回到<code>system_call</code>函数</p>
+<p><code>system_call</code>函数执行<code>resume_userspace</code>返回用户空间</p>
+<h4 id="系统调用的整个过程">系统调用的整个过程</h4>
+<figure>
+<img
+src="https://raw.githubusercontent.com/DeutschBall/test/master/image-20220522212228880.png"
+alt="image-20220522212228880" />
+<figcaption aria-hidden="true">image-20220522212228880</figcaption>
+</figure>
+<p>例如<code>getpid</code>函数系统调用的简化过程</p>
+<figure>
+<img
+src="https://raw.githubusercontent.com/DeutschBall/test/master/image-20220522210953699.png"
+alt="image-20220522210953699" />
+<figcaption aria-hidden="true">image-20220522210953699</figcaption>
+</figure>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">getpid()</span><br><span class="line">	int 0x80</span><br><span class="line">		system_call</span><br><span class="line">			sys_getpid()</span><br></pre></td></tr></table></figure>
+<h4 id="实验添加系统调用">实验:添加系统调用</h4>
+<p>添加一个系统调用不只是向系统调用号表中添加一个表项,要考虑内核中整个系统调用过程</p>
+<p>1.根据系统调用类型查系统调用号表获得系统调用号</p>
+<p>2.系统调用号查内核函数跳转表找到应该执行的内核函数</p>
+<p>3.执行内核函数</p>
+<p>各部分的具体作用和位置如下</p>
+<h5
+id="系统调用号表unistd_32.h">系统调用号表<code>unistd_32.h</code></h5>
+<blockquote>
+<p>前置知识:c语言宏定义</p>
+</blockquote>
+<p>在我校的操作系统实验中,使用的操作系统内核版本是<code>linux-2.6.32.60</code></p>
+<p>在<code>/usr/src/linux-2.6.32.60/arch/x86/include/asm/unistd_32.h</code>位置</p>
+<p>该文件中全是宏定义,形如<code>#define __NR_exit        1</code>,将每一个系统调用号魔数定义为一个有实际意义的字面量</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#<span class="keyword">ifndef</span> _ASM_X86_UNISTD_32_H</span></span><br><span class="line"><span class="meta">#<span class="keyword">define</span> _ASM_X86_UNISTD_32_H</span></span><br><span class="line"></span><br><span class="line"><span class="comment">/*</span></span><br><span class="line"><span class="comment"> * This file contains the system call numbers.</span></span><br><span class="line"><span class="comment"> */</span></span><br><span class="line"></span><br><span class="line"><span class="meta">#<span class="keyword">define</span> __NR_restart_syscall      0</span></span><br><span class="line"><span class="meta">#<span class="keyword">define</span> __NR_exit		  1</span></span><br><span class="line"><span class="meta">#<span class="keyword">define</span> __NR_fork		  2</span></span><br><span class="line"><span class="meta">#<span class="keyword">define</span> __NR_read		  3</span></span><br><span class="line"><span class="meta">#<span class="keyword">define</span> __NR_write		  4</span></span><br><span class="line">...</span><br><span class="line">    </span><br><span class="line"><span class="meta">#<span class="keyword">define</span> NR_syscalls 337			<span class="comment">//系统调用总个数</span></span></span><br><span class="line">    </span><br><span class="line">...</span><br></pre></td></tr></table></figure>
+<blockquote>
+<p>感觉类似于DNS协议</p>
+<p>将ip地址号映射到一个方便人类记忆的域名</p>
+<p>将一个域名解析到一个ip地址号</p>
+</blockquote>
+<h5
+id="内核函数跳转表syscall_table_32.s">内核函数跳转表<code>syscall_table_32.S</code></h5>
+<blockquote>
+<blockquote>
+<p>前置知识x86汇编语言</p>
+</blockquote>
+<p>.S:汇编语言源程序;预处理,汇编</p>
+<p>也就是说该文件是汇编写的</p>
+</blockquote>
+<p>内核函数跳转表以系统调用好表中的系统调用号为下标,总个数也是在<code>unistd_32.h</code>中宏定义的<code>#define NR_syscalls 337</code></p>
+<p>系统调用号和内核函数跳转表项是一个萝卜一个坑的关系,修改系统调用号就得修改跳转表项,因此现有的不要乱改</p>
+<p>如果系统调用号没有对应下标的内核跳转表表项,则默认指向函数调用表中,教材中说是<code>sys_ni_syscall()</code></p>
+<p>在我校的操作系统实验课程的安排中,这个内核函数跳转表的位置在<code>/usr/src/linux-2.6.32.60/arch/x86/kernel/syscall_table_32.S</code></p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line">ENTRY(sys_call_table)</span><br><span class="line">	.<span class="type">long</span> sys_restart_syscall	<span class="comment">/* 0 - old &quot;setup()&quot; system call, used for restarting */</span></span><br><span class="line">	.<span class="type">long</span> sys_exit</span><br><span class="line">	.<span class="type">long</span> ptregs_fork</span><br><span class="line">	.<span class="type">long</span> sys_read</span><br><span class="line">	.<span class="type">long</span> sys_write</span><br><span class="line">	.<span class="type">long</span> sys_open		<span class="comment">/* 5 */</span></span><br><span class="line">	.<span class="type">long</span> sys_close</span><br><span class="line">	.<span class="type">long</span> sys_waitpid</span><br></pre></td></tr></table></figure>
+<p>这个跳转表也比较类似CSAPP第三章上介绍的switch跳转表</p>
+<figure>
+<img
+src="https://raw.githubusercontent.com/DeutschBall/test/master/image-20220523075250116.png"
+alt="image-20220523075250116" />
+<figcaption aria-hidden="true">image-20220523075250116</figcaption>
+</figure>
+<blockquote>
+<p>系统调用号表和内核函数跳转表有一一对应关系</p>
+<figure>
+<img
+src="https://raw.githubusercontent.com/DeutschBall/test/master/image-20220522215928689.png"
+alt="image-20220522215928689" />
+<figcaption aria-hidden="true">image-20220522215928689</figcaption>
+</figure>
+</blockquote>
+<h5 id="内核函数声明syscalls.h">内核函数声明<code>syscalls.h</code></h5>
+<p>该声明在<code>/usr/src/linux-2.6.32.60/include/linux/syscalls.h</code>中</p>
+<p>就是一个头文件,里面都是函数声明,在链接时起到引用的作用</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line">asmlinkage <span class="type">long</span> <span class="title function_">sys_time</span><span class="params">(<span class="type">time_t</span> __user *tloc)</span>;</span><br><span class="line">asmlinkage <span class="type">long</span> <span class="title function_">sys_stime</span><span class="params">(<span class="type">time_t</span> __user *tptr)</span>;</span><br><span class="line">asmlinkage <span class="type">long</span> <span class="title function_">sys_gettimeofday</span><span class="params">(<span class="keyword">struct</span> timeval __user *tv,</span></span><br><span class="line"><span class="params">				<span class="keyword">struct</span> timezone __user *tz)</span>;</span><br><span class="line">asmlinkage <span class="type">long</span> <span class="title function_">sys_settimeofday</span><span class="params">(<span class="keyword">struct</span> timeval __user *tv,</span></span><br><span class="line"><span class="params">				<span class="keyword">struct</span> timezone __user *tz)</span>;</span><br><span class="line">asmlinkage <span class="type">long</span> <span class="title function_">sys_adjtimex</span><span class="params">(<span class="keyword">struct</span> timex __user *txc_p)</span>;</span><br><span class="line"></span><br><span class="line">asmlinkage <span class="type">long</span> <span class="title function_">sys_times</span><span class="params">(<span class="keyword">struct</span> tms __user *tbuf)</span>;</span><br><span class="line"></span><br><span class="line">asmlinkage <span class="type">long</span> <span class="title function_">sys_gettid</span><span class="params">(<span class="type">void</span>)</span>;</span><br><span class="line">asmlinkage <span class="type">long</span> <span class="title function_">sys_nanosleep</span><span class="params">(<span class="keyword">struct</span> timespec __user *rqtp, <span class="keyword">struct</span> timespec __user *rmtp)</span>;</span><br><span class="line">...</span><br></pre></td></tr></table></figure>
+<blockquote>
+<p>关于asmlinkage修饰符:</p>
+<blockquote>
+<p>需要前置知识,x86汇编语言和调用约定</p>
+</blockquote>
+<p>类似位置的修饰符我们见过<code>__cdecl</code>,<code>__fastcall</code>,这里<code>asmlinkage</code>也是一种调用约定的修饰符,试想如果不声明该修饰符,则linux上按照System
+V AMD64
+ABI约定的函数传参方法,前六个参数是通过<code>edi,esi,edx,ecx,r8d,r9d</code>这六个寄存器传递的,返回值是通过eax寄存器传递的.</p>
+<p>而对于内核函数</p>
+<p><code>asmlinkage</code>是一个宏定义<code>#define asmlinkage CPP_ASMLINKAGE __attribute__((regparm(0)))</code>,</p>
+<p>其作用是使用<code>eax,ebx,ecx</code>传递参数,<code>eax</code>始终传递系统调用号(内核函数号)</p>
+<figure>
+<img
+src="https://raw.githubusercontent.com/DeutschBall/test/master/image-20220523084202556.png"
+alt="eax传递内核函数号" />
+<figcaption aria-hidden="true">eax传递内核函数号</figcaption>
+</figure>
+<p>比如write函数从用户态下到内核态system_call时的调用过程</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">mov	edx,4		; message length						;要打印的信息长度用edx传递</span><br><span class="line">mov	ecx,msg		; message to write						;要打印的信息msg用ecx寄存器传递</span><br><span class="line">mov	ebx,1		; file descriptor (stdout)				;文件描述符,魔数1表示标准输出,即显示器</span><br><span class="line">mov	eax,4		; system call number (sys_write)		;eax存放内核函数号,决定调用sys_write函数</span><br><span class="line">int	0x80		; call kernel						   ;陷入内核,根据先前放在eax中的系统调用号决定执行什么命令</span><br></pre></td></tr></table></figure>
+</blockquote>
+<h5 id="内核函数实现sys.c">内核函数实现<code>sys.c</code></h5>
+<p>内核函数的定义实现在<code>/usr/src/linux-2.6.32.60/kernel/sys.c</code>里</p>
+<p>该源文件开幕就是版权声明,是龙得卧着,是虎得盘着,我Linus是什么人不用我自己说</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">/*</span></span><br><span class="line"><span class="comment"> *  linux/kernel/sys.c</span></span><br><span class="line"><span class="comment"> *</span></span><br><span class="line"><span class="comment"> *  Copyright (C) 1991, 1992  Linus Torvalds</span></span><br><span class="line"><span class="comment"> */</span></span><br></pre></td></tr></table></figure>
+<p>然后include了一大堆头文件,其中就有<code>syscalls.h</code></p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;linux/module.h&gt;</span></span></span><br><span class="line">.....</span><br><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;linux/syscalls.h&gt;</span></span></span><br><span class="line">....</span><br><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;asm/unistd.h&gt;</span></span></span><br></pre></td></tr></table></figure>
+<p>然后就见鬼了,一个<code>sys_</code>开头的函数实现都没有找到,这样<code>syscalls.h</code>岂不是include了个寂寞</p>
+<p>在<code>syscalls.h</code>的宏定义中我们可以找到答案</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#<span class="keyword">define</span> SYSCALL_DEFINE0(name)	   asmlinkage long sys_##name(void)</span></span><br><span class="line"><span class="meta">#<span class="keyword">define</span> SYSCALL_DEFINE1(name, ...) SYSCALL_DEFINEx(1, _##name, __VA_ARGS__)</span></span><br><span class="line">...</span><br><span class="line"><span class="meta">#<span class="keyword">define</span> SYSCALL_DEFINE6(name, ...) SYSCALL_DEFINEx(6, _##name, __VA_ARGS__)</span></span><br><span class="line"></span><br><span class="line">...</span><br><span class="line">  </span><br><span class="line"><span class="meta">#<span class="keyword">define</span> SYSCALL_DEFINE(name) asmlinkage long sys_##name</span></span><br><span class="line"><span class="meta">#<span class="keyword">define</span> __SYSCALL_DEFINEx(x, name, ...)					\</span></span><br><span class="line"><span class="meta">	asmlinkage long sys##name(__SC_DECL##x(__VA_ARGS__));		\</span></span><br><span class="line"><span class="meta">	static inline long SYSC##name(__SC_DECL##x(__VA_ARGS__));	\</span></span><br><span class="line"><span class="meta">	asmlinkage long SyS##name(__SC_LONG##x(__VA_ARGS__))		\</span></span><br><span class="line"><span class="meta">	&#123;								\</span></span><br><span class="line"><span class="meta">		__SC_TEST##x(__VA_ARGS__);				\</span></span><br><span class="line"><span class="meta">		return (long) SYSC##name(__SC_CAST##x(__VA_ARGS__));	\</span></span><br><span class="line"><span class="meta">	&#125;								\</span></span><br><span class="line"><span class="meta">	SYSCALL_ALIAS(sys##name, SyS##name);				\</span></span><br><span class="line"><span class="meta">	static inline long SYSC##name(__SC_DECL##x(__VA_ARGS__))</span></span><br><span class="line"></span><br></pre></td></tr></table></figure>
+<p>即<code>asmlinkage long sys_##name</code>这种格式的函数接口都被统一地宏定义为<code>__SYSCALL_DEFINEx(x, name, ...)</code></p>
+<blockquote>
+<p>统一定义成<code>SYSCALL_DEFINE0</code>到<code>SYSCALL_DEFINE6</code>这7种宏定义,作用是是实现起来方便</p>
+</blockquote>
+<p>而<code>sys.c</code>中就有<code>__SYSCALL_DEFINEx(x,name,...)</code>这类函数的实现</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><span class="line">SYSCALL_DEFINE3(setpriority, <span class="type">int</span>, which, <span class="type">int</span>, who, <span class="type">int</span>, niceval)</span><br><span class="line">&#123;</span><br><span class="line">...</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="comment">/*</span></span><br><span class="line"><span class="comment"> * Ugh. To avoid negative return values, &quot;getpriority()&quot; will</span></span><br><span class="line"><span class="comment"> * not return the normal nice-value, but a negated value that</span></span><br><span class="line"><span class="comment"> * has been offset by 20 (ie it returns 40..1 instead of -20..19)</span></span><br><span class="line"><span class="comment"> * to stay compatible.</span></span><br><span class="line"><span class="comment"> */</span></span><br><span class="line">SYSCALL_DEFINE2(getpriority, <span class="type">int</span>, which, <span class="type">int</span>, who)</span><br><span class="line">&#123;</span><br><span class="line">...</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>我们自定义的内核函数又少又简单,没有必要也遵守这种宏定义,直接在<code>sys.c</code>中按照<code>syscalls.h</code>中的函数声明去实现函数即可.反正宏定义只是起别名,叫绰号和叫原名都不会错</p>
+<h5 id="我们需要做的">我们需要做的</h5>
+<p>考虑上述各部分的作用,我们需要做的</p>
+<p><strong>1.添加系统调用表<code>unistd_32.h</code>项</strong></p>
+<p>修改之前:</p>
+<figure>
+<img
+src="https://raw.githubusercontent.com/DeutschBall/test/master/image-20220522222645579.png"
+alt="image-20220522222645579" />
+<figcaption aria-hidden="true">image-20220522222645579</figcaption>
+</figure>
+<p>格式比着葫芦画个瓢,修改之后</p>
+<figure>
+<img
+src="https://raw.githubusercontent.com/DeutschBall/test/master/QQ%E6%88%AA%E5%9B%BE20220522222731.png"
+alt="QQ截图20220522222731" />
+<figcaption aria-hidden="true">QQ截图20220522222731</figcaption>
+</figure>
+<p>注意下面<code>#define NR_syscalls 338</code>也得跟着改,</p>
+<p>这个值表示的是系统调用的总数,由于系统调用号从0开始编号,因此当我们新增一个337号时,总数有338个</p>
+<p><strong>2.添加内核函数跳转表<code>syscall_table_32.S</code>表项</strong></p>
+<figure>
+<img
+src="https://raw.githubusercontent.com/DeutschBall/test/master/QQ%E6%88%AA%E5%9B%BE20220522223100.png"
+alt="QQ截图20220522223100" />
+<figcaption aria-hidden="true">QQ截图20220522223100</figcaption>
+</figure>
+<p>只需要在最后一行添加一项,格式比着葫芦画个瓢</p>
+<p><strong>3.在<code>syscalls.h</code>中增加一条函数声明</strong></p>
+<p>注意以root打开文件才有权限修改</p>
+<figure>
+<img
+src="https://raw.githubusercontent.com/DeutschBall/test/master/image-20220523073622059.png"
+alt="image-20220523073622059" />
+<figcaption aria-hidden="true">image-20220523073622059</figcaption>
+</figure>
+<p><strong>4.在<code>sys.c</code>中增加内核函数的实现</strong></p>
+<figure>
+<img
+src="https://raw.githubusercontent.com/DeutschBall/test/master/image-20220523074428529.png"
+alt="image-20220523074428529" />
+<figcaption aria-hidden="true">image-20220523074428529</figcaption>
+</figure>
+<p>这里最后手残写了一个S一开始没发现,编译就是不通过,在形成<code>sys.o</code>时报错,回来看笔记才发现多一个S</p>
+<p><strong>5.编译内核</strong></p>
+<blockquote>
+<p>前置知识</p>
+<p>linux内核</p>
+<p>链接</p>
+<p>makefile的编写</p>
+<p>我几乎都不会</p>
+</blockquote>
+<p>学校给的实验环境中写好了makefile,好长一个,整个内核的编译,我唧己啃腚写不出来.</p>
+<p>并且makefile涉及链接操作,在CSAPP第七章有比较详细的介绍,这是后话了</p>
+<p>然后就是makefile的语法,这我目前也不会,这也是后话了</p>
+<p>总之就是</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">make menuconfig <span class="comment">#修改一下内核名称这种无关紧要的东西,其他的不敢改也不会改,在这里我</span></span><br><span class="line">make	<span class="comment">#执行makefile文件,开始漫长的编译过程</span></span><br><span class="line">make modules_install</span><br><span class="line">make install</span><br></pre></td></tr></table></figure>
+<p>如果上述四步都能完整执行,真的烧高香了</p>
+<p>编译完了会形成一个vmlinux.o目标模块,链接后会形成vmlinux这么一个32位ELF可执行文件</p>
+<figure>
+<img
+src="https://raw.githubusercontent.com/DeutschBall/test/master/image-20220523115115233.png"
+alt="image-20220523115115233" />
+<figcaption aria-hidden="true">image-20220523115115233</figcaption>
+</figure>
+<p>后面两步完了之后会在<code>/lib/modules</code>下面生成</p>
+<figure>
+<img
+src="https://raw.githubusercontent.com/DeutschBall/test/master/QQ%E6%88%AA%E5%9B%BE20220523115917.png"
+alt="QQ截图20220523115917" />
+<figcaption aria-hidden="true">QQ截图20220523115917</figcaption>
+</figure>
+<p><code>2.6.32-28-generic</code>是系统原来自带的</p>
+<p><code>2.6.32.60XXXXXXXXXXXXh</code>是实验一生成的</p>
+<p><code>2.6.32.60XXXXXXXXXXXXf</code>是本次实验生成的</p>
+<p>然后使用<code>update-initramfs -c -k 2.6.32.60XXXXXXXXXXf</code>生成"虚拟盘文件"</p>
+<p>我们正在玩一个大型橙光游戏,动辄编译个把小时,以防万一,此时拍一个快照吧</p>
+<figure>
+<img
+src="https://raw.githubusercontent.com/DeutschBall/test/master/image-20220523121014189.png"
+alt="image-20220523121014189" />
+<figcaption aria-hidden="true">image-20220523121014189</figcaption>
+</figure>
+<p><strong>6.修改<code>grub.cfg</code></strong></p>
+<p><code>grub.cfg</code>在<code>/boot/grub/grub.cfg</code></p>
+<p>比着葫芦画瓢,照抄一个稍微改一下</p>
+<figure>
+<img
+src="https://raw.githubusercontent.com/DeutschBall/test/master/QQ%E6%88%AA%E5%9B%BE20220523120814.png"
+alt="QQ截图20220523120814" />
+<figcaption aria-hidden="true">QQ截图20220523120814</figcaption>
+</figure>
+<p>完了保存重启</p>
+<p><strong>7.验证</strong></p>
+<p><code>/mnt/hgfs/share/test.c</code>中这样写</p>
+<blockquote>
+<p>选这么一个位置纯粹是因为共享文件夹,可以在本机直接用vscode编写,虚拟机输入个字符都卡的要死</p>
+</blockquote>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;stdio.h&gt;</span></span></span><br><span class="line"><span class="type">int</span> <span class="title function_">main</span><span class="params">()</span>&#123;</span><br><span class="line">    <span class="built_in">printf</span>(<span class="string">&quot;test sjf&#x27;s syscall,%d\n&quot;</span>,syscall(<span class="number">337</span>,<span class="number">13</span>));<span class="comment">//调用337号系统调用</span></span><br><span class="line">    <span class="keyword">return</span> <span class="number">0</span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<figure>
+<img
+src="https://raw.githubusercontent.com/DeutschBall/test/master/image-20220523130855962.png"
+alt="image-20220523130855962" />
+<figcaption aria-hidden="true">image-20220523130855962</figcaption>
+</figure>
+<p>然后使用<code>dmesg</code>命令查看我们在自定义的内核函数中的输出<code>printk</code>,最后一行是这样的</p>
+<figure>
+<img
+src="https://raw.githubusercontent.com/DeutschBall/test/master/image-20220523131010973.png"
+alt="image-20220523131010973" />
+<figcaption aria-hidden="true">image-20220523131010973</figcaption>
+</figure>
+<p>这与我们编写的是相同的,证明我们自己新增的系统调用的整个过程奏效了</p>
+<h3 id="故障">故障</h3>
+<p>由错误情况引起,可能被故障处理程序修正.</p>
+<figure>
+<img
+src="https://raw.githubusercontent.com/DeutschBall/test/master/image-20220519073802747.png"
+alt="image-20220519073802747" />
+<figcaption aria-hidden="true">image-20220519073802747</figcaption>
+</figure>
+<p>比如缺页异常</p>
+<h3 id="终止">终止</h3>
+<p>发生致命错误,程序直接寄掉,处理程序将控制返回<code>abort</code>历程</p>
+<figure>
+<img
+src="https://raw.githubusercontent.com/DeutschBall/test/master/image-20220519073854260.png"
+alt="image-20220519073854260" />
+<figcaption aria-hidden="true">image-20220519073854260</figcaption>
+</figure>
+<h3 id="异常号">异常号</h3>
+<p>发现异常的时候会用事件号查事件表.这里的异常号不是事件号,而是对每个异常都进行编号</p>
+<p><code>0~31</code>号异常由Intel架构师定义</p>
+<p><code>32~255</code>号异常由操作系统设计师定义</p>
+<figure>
+<img
+src="https://raw.githubusercontent.com/DeutschBall/test/master/image-20220519074127003.png"
+alt="image-20220519074127003" />
+<figcaption aria-hidden="true">image-20220519074127003</figcaption>
+</figure>
+<h2 id="进程">进程</h2>
+<p>进程上下文:程序正确运行所需的状态组合,包括堆栈,代码和数据,通用寄存器,程序计数器,环境变量,打开的文件描述符集合</p>
+<h3 id="私有虚拟地址空间">私有虚拟地址空间</h3>
+<p>用户栈往下的部分都是进程独立的虚拟地址空间</p>
+<figure>
+<img
+src="https://raw.githubusercontent.com/DeutschBall/test/master/image-20220519075052410.png"
+alt="image-20220519075052410" />
+<figcaption aria-hidden="true">image-20220519075052410</figcaption>
+</figure>
+<p>私有虚拟地址空间,不是私有物理地址空间.</p>
+<p>共享库在主存中只有一块物理地址空间,但是在两个进程虚拟地址空间中映射到不同部分</p>
+<h3 id="用户态和内核态">用户态和内核态</h3>
+<p>设置两种状态的作用是,限制进程对内核数据结构的访问修改,只有操作系统进程可以运行在内核态.用户应用进程永远不可能运行在内核态,用户应用进程只能通过系统调用,请操作系统去完成目的.</p>
+<p>异常处理程序都运行在内核态</p>
+<p>用户态和内核态怎么区分的?通过CPU中某个控制寄存器中的某个模式位</p>
+<h3 id="上下文切换">上下文切换</h3>
+<p>高层次的异常</p>
+<p>进程上下文包括堆栈,数据和代码,各种寄存器,程序状态字,内核栈,内核各种数据结构比如页表</p>
+<p>上下文切换的意思是,挂起当前正在运行的进程,保存其运行现场,然后执行其他进程.当该进程再次被<strong>调度</strong>时还原其运行现场</p>
+<p>发生上下文切换时,操作系统会1.保存当前进程的上下文(放在内存里),2.恢复先前某个被挂起的进程执行现场3.控制交给该进程</p>
+<p>上下文切换发生的时机:</p>
+<p>1.系统调用可能引发上下文切换,比如当前进程使用系统级函数<code>write</code>向标准输出打印,这个过程对于CPU来说非常漫长.CPU会切换到执行另一个进程,不会等待数据写到显示器.更加明显的是<code>sleep</code>系统调用,不妨把话说得更明白些,直接让进程睡觉.</p>
+<blockquote>
+<figure>
+<img
+src="https://raw.githubusercontent.com/DeutschBall/test/master/image-20220519080431478.png"
+alt="image-20220519080431478" />
+<figcaption aria-hidden="true">image-20220519080431478</figcaption>
+</figure>
+</blockquote>
+<p>2.软件中断,进程时间片用光了,该让给另一个进程执行了.</p>
+<p>在程序员视角,进程的状态只有三种</p>
+<figure>
+<img
+src="https://raw.githubusercontent.com/DeutschBall/test/master/image-20220519082556372.png"
+alt="image-20220519082556372" />
+<figcaption aria-hidden="true">image-20220519082556372</figcaption>
+</figure>
+<h3 id="进程控制">进程控制</h3>
+<p>控制进程的函数都是系统级函数</p>
+<h4 id="获取进程id">获取进程ID</h4>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#<span class="keyword">define</span> pid_t int</span></span><br><span class="line"><span class="type">pid_t</span> <span class="title function_">getpid</span><span class="params">(<span class="type">void</span>)</span>;		<span class="comment">//获取当前进程id</span></span><br><span class="line"><span class="type">pid_t</span> <span class="title function_">getppid</span><span class="params">(<span class="type">void</span>)</span>;	<span class="comment">//获得父进程id</span></span><br></pre></td></tr></table></figure>
+<p><code>proc.c</code></p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;unistd.h&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;stdio.h&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;stdlib.h&gt;</span></span></span><br><span class="line"><span class="type">int</span> <span class="title function_">main</span><span class="params">()</span>&#123;</span><br><span class="line">    <span class="type">int</span> pid=getpid();</span><br><span class="line">    <span class="type">int</span> ppid=getppid();</span><br><span class="line">    <span class="built_in">printf</span>(<span class="string">&quot;pid=%d,ppid=%d&quot;</span>,pid,ppid);</span><br><span class="line">    <span class="keyword">return</span> <span class="number">0</span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>在bash shell命令行上编译运行</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line">┌──(kali㉿Executor)-[/mnt/c/Users/86135/desktop/os]</span><br><span class="line">└─$ ps</span><br><span class="line">  PID TTY          TIME CMD</span><br><span class="line">    9 pts/0    00:00:00 bash</span><br><span class="line">   41 pts/0    00:00:00 ps</span><br><span class="line"></span><br><span class="line">┌──(kali㉿Executor)-[/mnt/c/Users/86135/desktop/os]</span><br><span class="line">└─$ ./proc</span><br><span class="line">pid=42,ppid=9</span><br></pre></td></tr></table></figure>
+<p>bash调用ps程序,因此bash是ps的父进程</p>
+<p>由于proc进程是由bash创建的,因此bash是proc的父进程</p>
+<p>进程号只会越来越大,不会重复利用一个已经完成的进程的进程号</p>
+<h4 id="创建进程">创建进程</h4>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="type">pid_t</span> <span class="title function_">fork</span><span class="params">(<span class="type">void</span>)</span>;<span class="comment">//子进程返回0,父进程返回子进程pid</span></span><br></pre></td></tr></table></figure>
+<p>非常疑惑的一点是为什么一个函数调用可以返回两次</p>
+<blockquote>
+<p>对两个进程分别返回一次</p>
+</blockquote>
+<p><code>proc.c</code></p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;unistd.h&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;stdio.h&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;stdlib.h&gt;</span></span></span><br><span class="line"><span class="type">int</span> <span class="title function_">main</span><span class="params">()</span>&#123;</span><br><span class="line">    <span class="built_in">printf</span>(<span class="string">&quot;in father process 0\n&quot;</span>);	<span class="comment">//fork之前只会被父进程执行一次</span></span><br><span class="line">    <span class="type">int</span> pid=fork();						<span class="comment">//此处子进程和父进程并行</span></span><br><span class="line">    <span class="keyword">if</span>(pid==<span class="number">0</span>)&#123;		<span class="comment">//对于子进程来说,它确实有一个正整数进程号,但是fork返回的不是</span></span><br><span class="line">        <span class="built_in">printf</span>(<span class="string">&quot;in son process 1\n&quot;</span>);</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">if</span>(pid!=<span class="number">0</span>)&#123; </span><br><span class="line">        <span class="built_in">printf</span>(<span class="string">&quot;in father process 1\n&quot;</span>);</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>运行结果:</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">┌──(kali㉿Executor)-[/mnt/c/Users/86135/desktop/os]</span><br><span class="line">└─$ ./proc</span><br><span class="line"><span class="keyword">in</span> father process 0</span><br><span class="line"><span class="keyword">in</span> father process 1</span><br><span class="line"><span class="keyword">in</span> son process 1</span><br></pre></td></tr></table></figure>
+<p>不管什么进程,其进程号都是正数,不可能是0.fork对子进程的返回值为0并不代表一个进程号,而是区分子进程和父进程的标志</p>
+<p>根据fork的返回值不同,这是一模一样的代码区分是父进程在执行还是子进程在执行的唯一标志</p>
+<blockquote>
+<p>这里c风格fork创建进程和C++中使用thread创建线程差别很大</p>
+<p>thread创建线程,只需创建一个thread对象,对其构造函数传递一个函数,后面该函数就会自己开一条线程执行,thread对象就是线程的句柄.可以在函数线程之外,比如主线程处,通过thread对象,很自然地操作线程的行为比如detach或者join</p>
+<p>而在这里唯一能区分线程的句柄就是一个整数pid,并且这个pid位于进程之中,只能在运行时通过pid判断是哪一个进程.不能在进程之外操作进程的行为</p>
+</blockquote>
+<p>fork之后原来的进程照旧执行,一个新的进程会拥有原进程的一模一样的虚拟地址空间的<strong>拷贝</strong>,包括代码数据寄存器堆栈等等.子进程和父进程的虚拟地址空间相互独立</p>
+<p><code>proc.c</code></p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;unistd.h&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;stdio.h&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;stdlib.h&gt;</span></span></span><br><span class="line"><span class="type">int</span> global=<span class="number">10</span>;</span><br><span class="line"><span class="type">int</span> <span class="title function_">main</span><span class="params">()</span>&#123;</span><br><span class="line">    <span class="type">int</span> local=<span class="number">20</span>;</span><br><span class="line">    <span class="type">int</span> pid=fork();</span><br><span class="line">    <span class="keyword">if</span>(pid==<span class="number">0</span>)&#123;</span><br><span class="line">        <span class="built_in">printf</span>(<span class="string">&quot;in son process: &quot;</span>);</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">else</span>&#123;</span><br><span class="line">        <span class="built_in">printf</span>(<span class="string">&quot;in father process: &quot;</span>);</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="built_in">printf</span>(<span class="string">&quot;global=%d,local=%d\n&quot;</span>,global++,local++);<span class="comment">//这里有修改</span></span><br><span class="line"></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">┌──(kali㉿Executor)-[/mnt/c/Users/86135/desktop/os]</span><br><span class="line">└─$ ./proc</span><br><span class="line"><span class="keyword">in</span> father process: global=10,<span class="built_in">local</span>=20</span><br><span class="line"><span class="keyword">in</span> son process: global=10,<span class="built_in">local</span>=20	<span class="comment">#两个打印相同说明global有两个,local有两个</span></span><br></pre></td></tr></table></figure>
+<p>父进程和子进程都打印到屏幕说明父子进程共享父进程已经打开的文件描述符1</p>
+<p>用进程图描述fork是比较直观的</p>
+<figure>
+<img
+src="https://raw.githubusercontent.com/DeutschBall/test/master/image-20220519084511671.png"
+alt="image-20220519084511671" />
+<figcaption aria-hidden="true">image-20220519084511671</figcaption>
+</figure>
+<h5 id="进程图如何实现">进程图如何实现</h5>
+<p>1.main上多个分支</p>
+<figure>
+<img
+src="https://raw.githubusercontent.com/DeutschBall/test/master/image-20220519092351240.png"
+alt="image-20220519092351240" />
+<figcaption aria-hidden="true">image-20220519092351240</figcaption>
+</figure>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;unistd.h&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;stdio.h&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;stdlib.h&gt;</span></span></span><br><span class="line"><span class="type">int</span> <span class="title function_">main</span><span class="params">()</span>&#123;</span><br><span class="line">    </span><br><span class="line">    <span class="type">int</span> pids[<span class="number">5</span>];</span><br><span class="line">    <span class="type">int</span> fpid=getpid();<span class="comment">//fpid在fork之前先计算好,此后即使所有子进程都拷贝,也只是拷贝的父进程号</span></span><br><span class="line">    <span class="keyword">if</span>(fpid==getpid())&#123;<span class="comment">//getpid在每个进程都不同,只有父进程中才会有fpid=getpid</span></span><br><span class="line">        <span class="keyword">for</span>(<span class="type">int</span> i=<span class="number">0</span>;i&lt;<span class="number">5</span>;++i)&#123;</span><br><span class="line">            pids[i]=fork();<span class="comment">//实际上后来的子进程的pids也会存有数据,原因是父进程在创建第i个子进程时,pids已经写入前i-1个子进程号了</span></span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">if</span>(fpid==getpid())&#123;<span class="comment">//getpid在每个进程都不同,只有父进程中才会有fpid=getpid</span></span><br><span class="line">        <span class="built_in">printf</span>(<span class="string">&quot;in father process,pid=%d\n&quot;</span>,fpid);</span><br><span class="line">        <span class="keyword">for</span>(<span class="type">int</span> i=<span class="number">0</span>;i&lt;<span class="number">5</span>;++i)&#123;</span><br><span class="line">            <span class="built_in">printf</span>(<span class="string">&quot;pid%d=%d,&quot;</span>,i,pids[i]);</span><br><span class="line">        &#125;</span><br><span class="line">        <span class="built_in">printf</span>(<span class="string">&quot;\n&quot;</span>);</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">return</span> <span class="number">0</span>;</span><br><span class="line"></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>这样实际上的进程图</p>
+<figure>
+<img
+src="https://raw.githubusercontent.com/DeutschBall/test/master/image-20220519093748088.png"
+alt="image-20220519093748088" />
+<figcaption aria-hidden="true">image-20220519093748088</figcaption>
+</figure>
+<p>运行结果:</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">┌──(kali㉿Executor)-[/mnt/c/Users/86135/desktop/os]</span><br><span class="line">└─$ ./proc</span><br><span class="line"><span class="keyword">in</span> father process,pid=222</span><br><span class="line">pid0=223,pid1=224,pid2=226,pid3=230,pid4=235,</span><br></pre></td></tr></table></figure>
+<p>2.main和第一个子进程同时分支</p>
+<figure>
+<img
+src="https://raw.githubusercontent.com/DeutschBall/test/master/image-20220519093425314.png"
+alt="image-20220519093425314" />
+<figcaption aria-hidden="true">image-20220519093425314</figcaption>
+</figure>
+<p>这个很容易实现</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">fork();</span><br><span class="line">fork();</span><br></pre></td></tr></table></figure>
+<h5 id="fork前后"><strong>fork前后</strong></h5>
+<p><code>proc.c</code></p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;unistd.h&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;stdio.h&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;stdlib.h&gt;</span></span></span><br><span class="line"><span class="type">int</span> global=<span class="number">10</span>;</span><br><span class="line"><span class="type">int</span> <span class="title function_">main</span><span class="params">()</span>&#123;</span><br><span class="line">    <span class="type">int</span> local=<span class="number">20</span>;</span><br><span class="line">    <span class="type">int</span> pid0=getpid();          <span class="comment">//fork之前getpid</span></span><br><span class="line">    <span class="type">int</span> forkid=fork();          <span class="comment">//forkid只是用来</span></span><br><span class="line">    <span class="type">int</span> pid1=getpid();          <span class="comment">//fork之后getpid</span></span><br><span class="line">   </span><br><span class="line">    <span class="keyword">if</span>(forkid==<span class="number">0</span>)&#123;</span><br><span class="line">        <span class="built_in">printf</span>(<span class="string">&quot;in son process,pid0=%d,pid1=%d,forkid=%d\n&quot;</span>,pid0,pid1,forkid);</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">else</span>&#123;</span><br><span class="line">        <span class="built_in">printf</span>(<span class="string">&quot;in father process,pid0=%d,pid1=%d,forkid=%d\n&quot;</span>,pid0,pid1,forkid);</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">return</span> <span class="number">0</span>;</span><br><span class="line"></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>运行结果:</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">┌──(kali㉿Executor)-[/mnt/c/Users/86135/desktop/os]</span><br><span class="line">└─$ ./proc</span><br><span class="line"><span class="keyword">in</span> father process,pid0=116,pid1=116,forkid=117</span><br><span class="line"><span class="keyword">in</span> son process,pid0=116,pid1=117,forkid=0</span><br></pre></td></tr></table></figure>
+<p>不管是父进程还是子进程,<code>pid0=116</code>相同,而<code>pid1</code>却不同,这是因为,pid0是fork之前执行的,当fork执行时,pid0已经被计算出了,作为一个局部变量压栈了,子进程不会再去计算pid0,而是从父进程堆栈的拷贝上直接拿.</p>
+<p>但是pid1的情况不同,fork之后,子进程已经获得了父进程堆栈的拷贝,此后两个进程地址空间独立,后来的pid1就是分别计算之后分别存放在自己的堆栈里</p>
+<p>看起来像是数据不管是fork前后都会被复制,实际上只复制了fork前的数据,此后进程各自维护自己的数据</p>
+<h4 id="终止进程">终止进程</h4>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="type">void</span> <span class="title function_">exit</span><span class="params">(<span class="type">int</span> status)</span>;<span class="comment">//以status状态码返回</span></span><br></pre></td></tr></table></figure>
+<p><code>proc.c</code></p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;unistd.h&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;stdio.h&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;stdlib.h&gt;</span></span></span><br><span class="line"><span class="type">int</span> <span class="title function_">main</span><span class="params">()</span>&#123;</span><br><span class="line">    <span class="type">int</span> forkid=fork();</span><br><span class="line">    <span class="type">int</span> pid=getpid();</span><br><span class="line">    <span class="keyword">if</span>(forkid==<span class="number">0</span>)&#123;</span><br><span class="line">        <span class="built_in">printf</span>(<span class="string">&quot;in son process,pid=%d\n&quot;</span>,pid);</span><br><span class="line">        <span class="built_in">exit</span>(<span class="number">0</span>);			<span class="comment">//让子进程结束运行</span></span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">else</span>&#123;</span><br><span class="line">        <span class="built_in">printf</span>(<span class="string">&quot;in father process,pid=%d\n&quot;</span>,pid);</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="built_in">printf</span>(<span class="string">&quot;process %d is still running\n&quot;</span>,pid);		<span class="comment">//此句打印表明还在运行的进程</span></span><br><span class="line"></span><br><span class="line">    <span class="keyword">return</span> <span class="number">0</span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">┌──(kali㉿Executor)-[/mnt/c/Users/86135/desktop/os]</span><br><span class="line">└─$ ./proc</span><br><span class="line"><span class="keyword">in</span> father process,pid=134</span><br><span class="line">process 134 is still running</span><br><span class="line"><span class="keyword">in</span> son process,pid=135</span><br></pre></td></tr></table></figure>
+<h4 id="回收子进程">回收子进程</h4>
+<p>进程终止之后并不会立刻消失地无影无踪,而是处于一种等待被父进程回收的状态,父进程回收终止子进程时,内核将子进程的exit状态传递给父进程.子进程被回收后才会消失地无影无踪</p>
+<p>如果父进程一直没有回收已经终止的子进程,子进程就一直存在,称为"僵死进程"</p>
+<p>如果父进程提前结束呢?内核会安排init进程成为孤儿进程的父进程</p>
+<p>这就好比未成年的孩子父母双亡,被警察局送给孤儿院收养</p>
+<p>这里起孤儿院作用的init进程,其pid=1,在系统启动时被内核创建,除非关机,否则永不终止.是所有进程的老祖宗.孤儿进程终止后,init会回收之</p>
+<h5 id="waitpid">waitpid</h5>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="type">pid_t</span> <span class="title function_">waitpid</span><span class="params">(<span class="type">pid_t</span> pid,<span class="type">int</span> *statusp,<span class="type">int</span> options)</span>;</span><br></pre></td></tr></table></figure>
+<blockquote>
+<p><strong>Attention!!!</strong>当第三个参数options不设置的时候,函数的默认行为是:<strong>挂起调用进程，直到有满足条件的子进程终止</strong>。</p>
+<p>参数意义:</p>
+<p><strong>1.<code>pid_t pid</code></strong></p>
+<p>如果<code>pid&gt;0</code>则等待该指定pid的子进程终止</p>
+<p>如果<code>pid=-1</code>则等待该进程的<strong>所有子进程</strong>,如果有其中的一个终止则waitpid返回该终止子进程的pid</p>
+<p><code>proc.c</code></p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;unistd.h&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;stdio.h&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;stdlib.h&gt;</span></span></span><br><span class="line"><span class="type">int</span> <span class="title function_">main</span><span class="params">()</span>&#123;</span><br><span class="line"><span class="type">int</span> fpid=getpid();</span><br><span class="line"><span class="type">int</span> forkid=fork();</span><br><span class="line"><span class="keyword">if</span>(forkid==<span class="number">0</span>)&#123;<span class="comment">//子进程中</span></span><br><span class="line"><span class="built_in">printf</span>(<span class="string">&quot;in son process,id=%d\n&quot;</span>,getpid());</span><br><span class="line">  <span class="type">int</span> n=<span class="number">1000000</span>;</span><br><span class="line">  <span class="keyword">while</span>(n--);<span class="comment">//拖延时间</span></span><br><span class="line">  <span class="built_in">exit</span>(<span class="number">0</span>);</span><br><span class="line">&#125;</span><br><span class="line"><span class="keyword">else</span>&#123;<span class="comment">//父进程中</span></span><br><span class="line">  <span class="built_in">printf</span>(<span class="string">&quot;in father process,id=%d\n&quot;</span>,fpid);</span><br><span class="line">  waitpid(forkid,<span class="number">0</span>,<span class="number">0</span>);<span class="comment">//指定等待唯一的子进程返回			//只指定第一个参数,其他使用缺省值</span></span><br><span class="line">  <span class="built_in">printf</span>(<span class="string">&quot;son process %d exit\n&quot;</span>,forkid);</span><br><span class="line">&#125;</span><br><span class="line"><span class="built_in">printf</span>(<span class="string">&quot;process %d is still running\n&quot;</span>,getpid());</span><br><span class="line"><span class="keyword">return</span> <span class="number">0</span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>运行结果:</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">┌──(kali㉿Executor)-[/mnt/c/Users/86135/desktop/os]</span><br><span class="line">└─$ ./proc</span><br><span class="line"><span class="keyword">in</span> father process,<span class="built_in">id</span>=273</span><br><span class="line"><span class="keyword">in</span> son process,<span class="built_in">id</span>=274		<span class="comment">#父进程需要等待子进程完成</span></span><br><span class="line">son process 274 <span class="built_in">exit</span></span><br><span class="line">process 273 is still running</span><br></pre></td></tr></table></figure>
+<p><strong>2.<code>int *stausp</code></strong></p>
+<p>如果statusp非空,则waitpid就会在statusp中记录子进程的exit
+status,使用指针引用传递</p>
+<p><code>proc.c</code></p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;unistd.h&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;stdio.h&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;stdlib.h&gt;</span></span></span><br><span class="line"><span class="type">int</span> <span class="title function_">main</span><span class="params">()</span>&#123;</span><br><span class="line"><span class="type">int</span> fpid=getpid();</span><br><span class="line"><span class="type">int</span> forkid=fork();<span class="comment">//区分父子进程</span></span><br><span class="line"><span class="keyword">if</span>(forkid==<span class="number">0</span>)&#123;<span class="comment">//子进程中</span></span><br><span class="line"><span class="built_in">printf</span>(<span class="string">&quot;in son process,id=%d\n&quot;</span>,getpid());</span><br><span class="line">  <span class="type">int</span> n=<span class="number">1000000</span>;</span><br><span class="line"><span class="keyword">while</span>(n--);<span class="comment">//拖延时间</span></span><br><span class="line">  <span class="built_in">exit</span>(<span class="number">1</span>);<span class="comment">//子进程以status=0状态终止</span></span><br><span class="line">&#125;</span><br><span class="line"><span class="keyword">else</span>&#123;<span class="comment">//父进程中</span></span><br><span class="line">  <span class="type">int</span> status=<span class="number">999</span>;<span class="comment">//设置status初始值</span></span><br><span class="line">  <span class="built_in">printf</span>(<span class="string">&quot;in father process,id=%d\n&quot;</span>,fpid);</span><br><span class="line">  waitpid(forkid,&amp;status,<span class="number">0</span>);<span class="comment">//使用status承载子进程的exit状态值		//缺省第三个参数</span></span><br><span class="line">  <span class="built_in">printf</span>(<span class="string">&quot;son process %d exit with status= %d\n&quot;</span>,forkid,status);</span><br><span class="line">  <span class="built_in">printf</span>(<span class="string">&quot;WIFEXITED(status)=%d\n&quot;</span>,WIFEXITED(status));</span><br><span class="line">  <span class="built_in">printf</span>(<span class="string">&quot;WEXITSTATUS(status)=%d\n&quot;</span>,WEXITSTATUS(status));</span><br><span class="line"><span class="built_in">printf</span>(<span class="string">&quot;WIFSIGNALED(status)=%d\n&quot;</span>,WIFSIGNALED(status));</span><br><span class="line">  <span class="built_in">printf</span>(<span class="string">&quot;WTERMSIG(status)=%d\n&quot;</span>,WTERMSIG(status));</span><br><span class="line"><span class="built_in">printf</span>(<span class="string">&quot;WIFSTOPPED(status)=%d\n&quot;</span>,WIFSTOPPED(status));</span><br><span class="line"><span class="built_in">printf</span>(<span class="string">&quot;WSTOPSIG(status)=%d\n&quot;</span>,WSTOPSIG(status));</span><br><span class="line"><span class="built_in">printf</span>(<span class="string">&quot;WIFCONTINUED(status)=%d\n&quot;</span>,WIFCONTINUED(status));</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="built_in">printf</span>(<span class="string">&quot;process %d is still running\n&quot;</span>,getpid());</span><br><span class="line"></span><br><span class="line"><span class="keyword">return</span> <span class="number">0</span>;</span><br><span class="line"></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>运行结果:</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line">┌──(kali㉿Executor)-[/mnt/c/Users/86135/desktop/os]</span><br><span class="line">└─$ ./proc</span><br><span class="line"><span class="keyword">in</span> father process,<span class="built_in">id</span>=41</span><br><span class="line"><span class="keyword">in</span> son process,<span class="built_in">id</span>=42</span><br><span class="line">son process 42 <span class="built_in">exit</span> with status= 256	</span><br><span class="line">WIFEXITED(status)=1</span><br><span class="line">WEXITSTATUS(status)=1	<span class="comment">#这是exit(status)中的status</span></span><br><span class="line">WIFSIGNALED(status)=0</span><br><span class="line">WTERMSIG(status)=0</span><br><span class="line">WIFSTOPPED(status)=0</span><br><span class="line">WSTOPSIG(status)=1</span><br><span class="line">WIFCONTINUED(status)=0</span><br><span class="line">process 41 is still running</span><br></pre></td></tr></table></figure>
+<blockquote>
+<p>解释status的几个宏定义</p>
+<figure>
+<img
+src="https://raw.githubusercontent.com/DeutschBall/test/master/image-20220521075243518.png"
+alt="image-20220521075243518" />
+<figcaption aria-hidden="true">image-20220521075243518</figcaption>
+</figure>
+<p>奇怪的是,status明明是一个整数,为什么还能使用类似函数调用的宏,得到不同的结果?</p>
+<p>推测status这个双字整形的每一位都携带着某种信息,实际上相当于一个布尔值的返回值集合,这些宏定义通过按位运算相当于在这个返回值集合中取了一部分值做运算</p>
+</blockquote>
+<p><strong>3.<code>int options</code>修改子进程的处理方式</strong></p>
+<p>在<code>waitflags.h</code>中有这么几个宏定义</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">/* Bits in the third argument to `waitpid&#x27;.  */</span>				<span class="comment">//waitpid的第三个参数 其中的一些位</span></span><br><span class="line"><span class="meta">#<span class="keyword">define</span>	WNOHANG		1	<span class="comment">/* Don&#x27;t block waiting.  */</span>						<span class="comment">//01</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">define</span>	WUNTRACED	2	<span class="comment">/* Report status of stopped children.  */</span>		  <span class="comment">//10</span></span></span><br></pre></td></tr></table></figure>
+<p>函数的默认行为是:<strong>挂起调用进程，直到有满足条件的子进程终止</strong></p>
+<p>指定options之后,函数的行为:</p>
+<table>
+<colgroup>
+<col style="width: 25%" />
+<col style="width: 74%" />
+</colgroup>
+<thead>
+<tr>
+<th>options</th>
+<th>作用</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>WNOHANG</code></td>
+<td>如果指定的子进程或者等待集合中的子进程都没有终止则立即返回0</td>
+</tr>
+<tr>
+<td><code>WUNTRACED</code></td>
+<td>挂起父进程,直到等待集合中的一个进程变成已终止<strong>或者被停止</strong>,返回该子进程pid</td>
+</tr>
+<tr>
+<td><code>WCONTINUED</code></td>
+<td>挂起父进程,直到等待集合中一个正在运行的进程终止或者等待集合中一个被停职的进程收到SIGCONT信号重新开始</td>
+</tr>
+<tr>
+<td><code>WNOHANG | WUNTRACED</code></td>
+<td>立即返回.如果等待集合中的子进程都没有被停止或者终止,返回0.如果有一个子进程停止或者终止,返回该子进程pid</td>
+</tr>
+<tr>
+<td></td>
+<td></td>
+</tr>
+</tbody>
+</table>
+</blockquote>
+<p>如果调用<code>waitpid</code>的进程没有任何子进程则<code>waitpid</code>返回-1,并设置<code>errno=EINTR</code></p>
+<h6 id="wait">wait</h6>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;sys/types.h&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;sys/wait.h&gt;</span></span></span><br><span class="line"></span><br><span class="line"><span class="type">pid_t</span> <span class="title function_">wait</span><span class="params">(<span class="type">int</span> *statusup)</span>;</span><br></pre></td></tr></table></figure>
+<p><code>wait(&amp;status)</code>等价于<code>waitpid(-1,&amp;status,0)</code></p>
+<p>父进程挂起,等待子进程之一终止则返回其pid</p>
+<h5 id="sleep">sleep</h5>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;unistd.h&gt;</span></span></span><br><span class="line"><span class="type">unsigned</span> <span class="type">int</span> <span class="title function_">sleep</span><span class="params">(<span class="type">unsigned</span> <span class="type">int</span> secs)</span>;</span><br></pre></td></tr></table></figure>
+<p>休眠secs秒,睡够了觉则sleep返回0否则返回还要睡多久</p>
+<h5 id="pause">pause</h5>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;unistd.h&gt;</span></span></span><br><span class="line"><span class="type">int</span> <span class="title function_">pause</span><span class="params">(<span class="type">void</span>)</span>;</span><br></pre></td></tr></table></figure>
+<p>让调用者进程休眠,直到该进程接收到信号</p>
+<h4 id="加载并运行程序execve">加载并运行程序execve</h4>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;unistd.h&gt;</span></span></span><br><span class="line"><span class="type">int</span> <span class="title function_">execve</span><span class="params">(<span class="type">const</span> <span class="type">char</span> * filename,<span class="type">const</span> <span class="type">char</span> *argv[],<span class="type">const</span> <span class="type">char</span> * envp[])</span>;<span class="comment">//成功则不返回,失败则返回-1</span></span><br></pre></td></tr></table></figure>
+<p>执行filename指向的文件,参数为argv,环境为envp</p>
+<p>例如:</p>
+<p><code>execve.c</code></p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;stdio.h&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;unistd.h&gt;</span></span></span><br><span class="line"><span class="type">int</span> <span class="title function_">main</span><span class="params">()</span>&#123;</span><br><span class="line">    execve(<span class="string">&quot;/bin/sh&quot;</span>,<span class="number">0</span>,<span class="number">0</span>);</span><br><span class="line">    <span class="keyword">return</span> <span class="number">0</span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">kali@Executor:/mnt/c/Users/86135/desktop/os$ gcc execve.c -O0 -o execve</span><br><span class="line"></span><br><span class="line">kali@Executor:/mnt/c/Users/86135/desktop/os$ ./execve</span><br><span class="line">$ </span><br></pre></td></tr></table></figure>
+<p>执行之后shell由bash换成了sh</p>
+<blockquote>
+<p>关于参数<code>const char *envp[]</code></p>
+<figure>
+<img
+src="https://raw.githubusercontent.com/DeutschBall/test/master/image-20220521094616486.png"
+alt="image-20220521094616486" />
+<figcaption aria-hidden="true">image-20220521094616486</figcaption>
+</figure>
+<p>必须使用get或者set方法访问或者修改环境</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;stdlib.h&gt;</span></span></span><br><span class="line"><span class="type">char</span> *<span class="title function_">getenv</span><span class="params">(<span class="type">const</span> <span class="type">char</span> *name)</span>;<span class="comment">//返回name键对应的value值</span></span><br><span class="line"><span class="type">int</span> <span class="title function_">putenv</span><span class="params">(<span class="type">char</span> *str)</span>;<span class="comment">//这里str的格式为name=value,将[name,value]键值对放在环境表中,如果name键存在则覆盖之</span></span><br><span class="line"><span class="type">int</span> <span class="title function_">setenv</span><span class="params">(<span class="type">const</span> <span class="type">char</span> *name,<span class="type">const</span> <span class="type">char</span> *newvalue,<span class="type">int</span> overwrite)</span>;<span class="comment">//[name,newvalue]键值对放在环境表中,如果name键存在则根据overwrite是否为1决定是否覆盖</span></span><br><span class="line"><span class="type">int</span> <span class="title function_">unsetenv</span><span class="params">(<span class="type">const</span> <span class="type">char</span> *name)</span>;<span class="comment">//清除环境表中的[name,value]键值对,如果name键不存在则什么都不会发生</span></span><br></pre></td></tr></table></figure>
+<p><code>myecho.c</code></p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br></pre></td><td class="code"><pre><span class="line">&gt;<span class="meta">#<span class="keyword">include</span> <span class="string">&lt;stdio.h&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;stdlib.h&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;string.h&gt;</span></span></span><br><span class="line"></span><br><span class="line"><span class="type">int</span> <span class="title function_">main</span><span class="params">(<span class="type">int</span> argc,<span class="type">char</span> *argv[])</span>&#123;</span><br><span class="line"></span><br><span class="line"> <span class="built_in">printf</span>(<span class="string">&quot;%s\n&quot;</span>,getenv(<span class="string">&quot;HOME&quot;</span>));<span class="comment">//home起始目录</span></span><br><span class="line"> <span class="built_in">printf</span>(<span class="string">&quot;%s\n&quot;</span>,getenv(<span class="string">&quot;SHELL&quot;</span>));<span class="comment">//用户首选shell名</span></span><br><span class="line">    <span class="built_in">printf</span>(<span class="string">&quot;%s\n&quot;</span>,getenv(<span class="string">&quot;PWD&quot;</span>));<span class="comment">//当前工作目录绝对路径</span></span><br><span class="line">   </span><br><span class="line">    setenv(<span class="string">&quot;SHELL&quot;</span>,<span class="string">&quot;/bin/sh&quot;</span>,<span class="number">0</span>);<span class="comment">//将用户首选的shell改成/bin/sh,overwrite=0表示如果已经存在name=SHELL的键则啥也不干</span></span><br><span class="line"> <span class="built_in">printf</span>(<span class="string">&quot;%s\n&quot;</span>,getenv(<span class="string">&quot;SHELL&quot;</span>));</span><br><span class="line">   </span><br><span class="line">    setenv(<span class="string">&quot;SHELL&quot;</span>,<span class="string">&quot;/bin/sh&quot;</span>,<span class="number">1</span>);<span class="comment">//将用户首选的shell改成/bin/sh,overwrite=1表示如果已经存在name=SHELL的键则覆盖原来的value</span></span><br><span class="line"> <span class="built_in">printf</span>(<span class="string">&quot;%s\n&quot;</span>,getenv(<span class="string">&quot;SHELL&quot;</span>));</span><br><span class="line">    <span class="keyword">return</span> <span class="number">0</span>;</span><br><span class="line">   &#125;</span><br></pre></td></tr></table></figure>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line">&gt;┌──(kali㉿Executor)-[/mnt/c/Users/86135/desktop/os]</span><br><span class="line">└─$ gcc myecho.c -Og -o myecho</span><br><span class="line"></span><br><span class="line">┌──(kali㉿Executor)-[/mnt/c/Users/86135/desktop/os]</span><br><span class="line">└─$ ./myecho</span><br><span class="line">/home/kali</span><br><span class="line">/bin/bash</span><br><span class="line">/mnt/c/Users/86135/desktop/os</span><br><span class="line">/bin/bash</span><br><span class="line">/bin/sh</span><br></pre></td></tr></table></figure>
+<p><code>setenv</code>还可以新建环境变量,如果<code>name</code>键没有找到则新建环境变量</p>
+<p>环境变量表</p>
+<figure>
+<img
+src="https://raw.githubusercontent.com/DeutschBall/test/master/image-20220521100230271.png"
+alt="image-20220521100230271" />
+<figcaption aria-hidden="true">image-20220521100230271</figcaption>
+</figure>
+<p>在当前进程中修改环境变量对当前进程无效,但是对该进程后续建立的子进程有效</p>
+<blockquote>
+<p>这里注意<code>putenv</code>和<code>setenv</code>在<code>overwrite=1</code>时的区别</p>
+<p>一是参数的格式,<code>putenv</code>中<code>char *str</code>让写的是<code>name=value</code>这种格式,而<code>setenv</code>中<code>name</code>和<code>value</code>分开成为两个参数</p>
+<p>二是参数的类型,<code>putenv</code>中的参数没有<code>const</code>修饰,这就意味着<strong>str是可以被修改的</strong></p>
+<p>而<code>setenv</code>中的name和newvalue都带有const修饰,不可修改</p>
+<p>实际上<code>putenv</code>不会为新的环境变量另外开空间,而是直接把传入的参数(不管是堆上还是栈上还是全局的)填入环境表</p>
+<p><code>setenv</code>则会另开空间拷贝一份环境变量放进环境表</p>
+<p>比如下面例子</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;stdio.h&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;stdlib.h&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;string.h&gt;</span></span></span><br><span class="line"></span><br><span class="line"><span class="type">int</span> <span class="title function_">main</span><span class="params">(<span class="type">int</span> argc,<span class="type">char</span> *argv[])</span>&#123;</span><br><span class="line">    <span class="type">char</span> str[]=<span class="string">&quot;myid=deutschball&quot;</span>;</span><br><span class="line">    putenv(str);</span><br><span class="line">    <span class="built_in">printf</span>(<span class="string">&quot;%s\n&quot;</span>,getenv(<span class="string">&quot;myid&quot;</span>));</span><br><span class="line">    <span class="built_in">strcpy</span>(str,<span class="string">&quot;myid=dustball&quot;</span>);				<span class="comment">//此处修改str将会导致环境表中键myid的值变化</span></span><br><span class="line">    <span class="built_in">printf</span>(<span class="string">&quot;%s\n&quot;</span>,getenv(<span class="string">&quot;myid&quot;</span>));</span><br><span class="line"></span><br><span class="line">    <span class="type">char</span> name[]=<span class="string">&quot;myunit&quot;</span>;</span><br><span class="line">    <span class="type">char</span> value[]=<span class="string">&quot;empire&quot;</span>;</span><br><span class="line">    setenv(name,value,<span class="number">0</span>);</span><br><span class="line">    <span class="built_in">printf</span>(<span class="string">&quot;%s\n&quot;</span>,getenv(name));</span><br><span class="line">    <span class="built_in">strcpy</span>(value,<span class="string">&quot;rebel&quot;</span>);</span><br><span class="line">    <span class="built_in">printf</span>(<span class="string">&quot;%s\n&quot;</span>,getenv(name));</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">    <span class="keyword">return</span> <span class="number">0</span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line">┌──(kali㉿Executor)-[/mnt/c/Users/86135/desktop/os]</span><br><span class="line">└─$ gcc myecho.c -Og -o myecho</span><br><span class="line"></span><br><span class="line">┌──(kali㉿Executor)-[/mnt/c/Users/86135/desktop/os]</span><br><span class="line">└─$ ./myecho</span><br><span class="line">deutschball</span><br><span class="line">dustball					<span class="comment">#此处值发生了变化</span></span><br><span class="line">empire</span><br><span class="line">empire						<span class="comment">#此处值不发生改变</span></span><br></pre></td></tr></table></figure>
+</blockquote>
+</blockquote>
+<p>此处应有一个编个shell的实验,但是工程量太大,现在不想写,留作后话吧</p>
+
+      
+    </div>
+
+    
+    
+    
+      <footer class="post-footer">
+        <div class="post-eof"></div>
+      </footer>
+  </article>
+  
+  
+  
+
+      
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="en">
     <link itemprop="mainEntityOfPage" href="http://deutschball.github.io/2022/05/07/datastruct/">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
