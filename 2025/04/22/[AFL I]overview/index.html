@@ -1,0 +1,725 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 7.3.0">
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png">
+  <link rel="mask-icon" href="/images/logo.svg" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+<link rel="stylesheet" href="//fonts.googleapis.com/css?family=Cascadia Code:300,300italic,400,400italic,700,700italic&display=swap&subset=latin,latin-ext">
+<link rel="stylesheet" href="/lib/font-awesome/css/all.min.css">
+
+<script id="hexo-configurations">
+    var NexT = window.NexT || {};
+    var CONFIG = {"hostname":"deutschball.github.io","root":"/","scheme":"Pisces","version":"7.8.0","exturl":false,"sidebar":{"position":"left","display":"always","padding":18,"offset":12,"onmobile":false},"copycode":{"enable":true,"show_result":true,"style":"mac"},"back2top":{"enable":true,"sidebar":true,"scrollpercent":true},"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":false,"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"algolia":{"hits":{"per_page":10},"labels":{"input_placeholder":"万一找到了呢","hits_empty":"你说的 ${query} 我怎么找不着呢 ","hits_stats":"找到了 ${hits} 个结果，用时 ${time} 毫秒"}},"localsearch":{"enable":true,"trigger":"auto","top_n_per_article":-1,"unescape":false,"preload":false},"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}}};
+  </script>
+
+  <meta name="description" content="[AFL I] overview 使用AFL进行模糊测试的流程: 1.使用afl-gcc代替gcc编译目标程序 2.指定初始的输入语料文件, 开始fuzz 编译时插桩技术   image-20250210133521674  1234567891011121314151617gcc main.c    -B &#x2F;usr&#x2F;src&#x2F;AFL    -no-integrated-as AF">
+<meta property="og:type" content="article">
+<meta property="og:title" content="AFL I - overview">
+<meta property="og:url" content="http://deutschball.github.io/2025/04/22/[AFL%20I]overview/index.html">
+<meta property="og:site_name" content="dustland">
+<meta property="og:description" content="[AFL I] overview 使用AFL进行模糊测试的流程: 1.使用afl-gcc代替gcc编译目标程序 2.指定初始的输入语料文件, 开始fuzz 编译时插桩技术   image-20250210133521674  1234567891011121314151617gcc main.c    -B &#x2F;usr&#x2F;src&#x2F;AFL    -no-integrated-as AF">
+<meta property="og:locale" content="en_US">
+<meta property="article:published_time" content="2025-04-22T05:14:00.000Z">
+<meta property="article:modified_time" content="2025-04-22T05:21:54.682Z">
+<meta property="article:author" content="dustball">
+<meta property="article:tag" content="模糊测试">
+<meta name="twitter:card" content="summary">
+
+<link rel="canonical" href="http://deutschball.github.io/2025/04/22/[AFL%20I]overview/">
+
+
+<script id="page-configurations">
+  // https://hexo.io/docs/variables.html
+  CONFIG.page = {
+    sidebar: "",
+    isHome : false,
+    isPost : true,
+    lang   : 'en'
+  };
+</script>
+
+  <title>AFL I - overview | dustland</title>
+  
+
+
+
+
+
+
+  <noscript>
+  <style>
+  .use-motion .brand,
+  .use-motion .menu-item,
+  .sidebar-inner,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-header { opacity: initial; }
+
+  .use-motion .site-title,
+  .use-motion .site-subtitle {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line-before i { left: initial; }
+  .use-motion .logo-line-after i { right: initial; }
+  </style>
+</noscript>
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage">
+  <div class="container use-motion">
+    <div class="headband"></div>
+
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="Toggle navigation bar">
+      <span class="toggle-line toggle-line-first"></span>
+      <span class="toggle-line toggle-line-middle"></span>
+      <span class="toggle-line toggle-line-last"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <span class="logo-line-before"><i></i></span>
+      <h1 class="site-title">dustland</h1>
+      <span class="logo-line-after"><i></i></span>
+    </a>
+      <p class="site-subtitle" itemprop="description">dustball in dustland</p>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger">
+        <i class="fa fa-search fa-fw fa-lg"></i>
+    </div>
+  </div>
+</div>
+
+
+
+
+<nav class="site-nav">
+  <ul id="menu" class="main-menu menu">
+        <li class="menu-item menu-item-archives">
+
+    <a href="/archives/" rel="section"><i class="fa fa-archive fa-fw"></i>Archives</a>
+
+  </li>
+      <li class="menu-item menu-item-search">
+        <a role="button" class="popup-trigger"><i class="fa fa-search fa-fw"></i>Search
+        </a>
+      </li>
+  </ul>
+</nav>
+
+
+
+  <div class="search-pop-overlay">
+    <div class="popup search-popup">
+        <div class="search-header">
+  <span class="search-icon">
+    <i class="fa fa-search"></i>
+  </span>
+  <div class="search-input-container"></div>
+  <span class="popup-btn-close">
+    <i class="fa fa-times-circle"></i>
+  </span>
+</div>
+<div class="algolia-results">
+  <div id="algolia-stats"></div>
+  <div id="algolia-hits"></div>
+  <div id="algolia-pagination" class="algolia-pagination"></div>
+</div>
+
+      
+    </div>
+  </div>
+
+</div>
+    </header>
+
+    
+  <div class="reading-progress-bar"></div>
+
+  <a href="https://github.com/deutschball" class="github-corner" title="Follow me on GayHub" aria-label="Follow me on GayHub" rel="noopener" target="_blank"><svg width="80" height="80" viewBox="0 0 250 250" aria-hidden="true"><path d="M0,0 L115,115 L130,115 L142,142 L250,250 L250,0 Z"></path><path d="M128.3,109.0 C113.8,99.7 119.0,89.6 119.0,89.6 C122.0,82.7 120.5,78.6 120.5,78.6 C119.2,72.0 123.4,76.3 123.4,76.3 C127.3,80.9 125.5,87.3 125.5,87.3 C122.9,97.6 130.6,101.9 134.4,103.2" fill="currentColor" style="transform-origin: 130px 106px;" class="octo-arm"></path><path d="M115.0,115.0 C114.9,115.1 118.7,116.5 119.8,115.4 L133.7,101.6 C136.9,99.2 139.9,98.4 142.2,98.6 C133.8,88.0 127.5,74.4 143.8,58.0 C148.5,53.4 154.0,51.2 159.7,51.0 C160.3,49.4 163.2,43.6 171.4,40.1 C171.4,40.1 176.1,42.5 178.8,56.2 C183.1,58.6 187.2,61.8 190.9,65.4 C194.5,69.0 197.7,73.2 200.1,77.6 C213.8,80.2 216.3,84.9 216.3,84.9 C212.7,93.1 206.9,96.0 205.4,96.6 C205.1,102.4 203.0,107.8 198.3,112.5 C181.9,128.9 168.3,122.5 157.7,114.1 C157.9,116.9 156.7,120.9 152.7,124.9 L141.0,136.5 C139.8,137.7 141.6,141.9 141.8,141.8 Z" fill="currentColor" class="octo-body"></path></svg></a>
+
+
+    <main class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+
+          <div class="content post posts-expand">
+            
+
+    
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="en">
+    <link itemprop="mainEntityOfPage" href="http://deutschball.github.io/2025/04/22/[AFL%20I]overview/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="https://raw.githubusercontent.com/DeutschBall/picbed/main/dustball.png">
+      <meta itemprop="name" content="dustball">
+      <meta itemprop="description" content="dustland">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="dustland">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          AFL I - overview
+        </h1>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-calendar"></i>
+              </span>
+              <span class="post-meta-item-text">Posted on</span>
+              
+
+              <time title="Created: 2025-04-22 13:14:00 / Modified: 13:21:54" itemprop="dateCreated datePublished" datetime="2025-04-22T13:14:00+08:00">2025-04-22</time>
+            </span>
+
+          
+            <span class="post-meta-item" title="Views" id="busuanzi_container_page_pv" style="display: none;">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-eye"></i>
+              </span>
+              <span class="post-meta-item-text">Views: </span>
+              <span id="busuanzi_value_page_pv"></span>
+            </span>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+        <h1 id="afl-i-overview">[AFL I] overview</h1>
+<p>使用AFL进行模糊测试的流程:</p>
+<p>1.使用afl-gcc代替gcc编译目标程序</p>
+<p>2.指定初始的输入语料文件, 开始fuzz</p>
+<h2 id="编译时插桩技术">编译时插桩技术</h2>
+<figure>
+<img
+src="https://raw.githubusercontent.com/DeutschBall/VideoBed/main/image-20250210133521674.png"
+alt="image-20250210133521674" />
+<figcaption aria-hidden="true">image-20250210133521674</figcaption>
+</figure>
+<figure class="highlight sh"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br></pre></td><td class="code"><pre><span class="line">gcc main.c</span><br><span class="line">    -B /usr/src/AFL</span><br><span class="line">    -no-integrated-as AFL_HARDEN</span><br><span class="line">    -fstack-protector-all</span><br><span class="line">    -D_FORTIFY_SOURCE=2 AFL_USE_ASAN AFL_USE_MSAN</span><br><span class="line">    -U_FORTIFY_SOURCE AFL_DONT_OPTIMIZE</span><br><span class="line">    -g</span><br><span class="line">    -O3</span><br><span class="line">    -funroll-loops</span><br><span class="line">    -D__AFL_COMPILER=1 AFL_NO_BUILTIN</span><br><span class="line">    -fno-builtin-strcmp</span><br><span class="line">    -fno-builtin-strncmp</span><br><span class="line">    -fno-builtin-strcasecmp</span><br><span class="line">    -fno-builtin-strncasecmp</span><br><span class="line">    -fno-builtin-memcmp</span><br><span class="line">    -fno-builtin-strstr</span><br><span class="line">    -fno-builtin-strcasestr</span><br></pre></td></tr></table></figure>
+<h3 id="插桩的作用">插桩的作用?</h3>
+<p>将汇编代码以<strong>标号</strong>划分成块</p>
+<p>work函数在汇编层面有work,L2,L3三个标号,那么就划分为对应的三块</p>
+<p>将代码块作为节点, 以跳转方向为边就构建了一张有向图</p>
+<p>块的性质如下:</p>
+<p>1.块内不允许有任何“跳转指令”,包括跳转jmp,和各种条件跳转如jz,jle等</p>
+<p>2.块内可以有函数调用以及返回指令,函数调用视为节点内的子图</p>
+<p>3.在每个块的最开始加入AFL TRAMPOLINE,
+用于记录该块的访问状态,由于块内不含有跳转指令,那么当蹦床被调用时,就意味着整块都被访问到了</p>
+<p><strong>那么覆盖率问题就变成了有向图节点的可达性统计</strong></p>
+<p>这个蹦床的作用就是:当其所在节点被执行到时通知覆盖率统计器</p>
+<figure>
+<img
+src="https://raw.githubusercontent.com/DeutschBall/VideoBed/main/image-20250210170146007.png"
+alt="image-20250210170146007" />
+<figcaption aria-hidden="true">image-20250210170146007</figcaption>
+</figure>
+<h3 id="蹦床什么样">蹦床什么样?</h3>
+<blockquote>
+<p>蹦床指一段格式固定,发挥中介作用帮助程序实现控制流跳跃的某段代码或者某个函数</p>
+<p>比如系统调用从内核态返回到用户态时走trampoline函数回复用户态上下文</p>
+</blockquote>
+<figure>
+<img
+src="https://raw.githubusercontent.com/DeutschBall/VideoBed/main/image-20250210164937725.png"
+alt="image-20250210164937725" />
+<figcaption aria-hidden="true">image-20250210164937725</figcaption>
+</figure>
+<p>在进入标号的一开始加入蹦床,原代码块保持不变</p>
+<p>蹦床上干了这几件事:</p>
+<p>1.保护现场</p>
+<p>2.以<code>rcx</code>传递参数<code>0xb3a7</code></p>
+<p>3.调用<code>__afl_maybe_log</code>函数</p>
+<p>4.恢复现场</p>
+<p>这里每个代码块的蹦床上,rcx传递的参数值不同,可以理解为一个代码块的指纹</p>
+<p>比如work块的指纹 就是0x6769, L2块的指纹就是0xea58等</p>
+<p>除去在每个代码块开头加上的蹦床外，在汇编代码最后又加上了AFL
+mainpayload</p>
+<p>其中就包含了蹦床中调用到的<code>__afl_maybe_log</code>函数</p>
+<h3 id="蹦床怎样加上的">蹦床怎样加上的?</h3>
+<p>首先明确afl-as的输入输出</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">插桩前汇编代码main.s =&gt; afl-as插桩 =&gt; 插桩后汇编代码</span><br></pre></td></tr></table></figure>
+<p>这个过程是现在<code>add_instrumentation@afl-as.c</code>函数中,</p>
+<p>这个函数可以视为一个硬编码的解释器,只用了<code>245</code>行,就集成了词法分析,语法分析,语义分析的功能.</p>
+<p>各种语法分析的目的，就是在<code>main.s</code>中找到每个代码块儿入口位置，并插桩</p>
+<h3 id="共享内存的作用">共享内存的作用?</h3>
+<p>蹦床实际上调用了<code>__afl_maybe_log($rcx)</code></p>
+<p>该函数会首先初始化共享内存,然后根据rcx记录相应的访问路径</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br></pre></td><td class="code"><pre><span class="line">__afl_maybe_log:</span><br><span class="line">							;保存现场</span><br><span class="line">  lahf						;将eflags低8位保存到ah</span><br><span class="line">  seto  %al					;将of标志位保存到al</span><br><span class="line"></span><br><span class="line">  /* Check if SHM region is already mapped. */</span><br><span class="line"></span><br><span class="line">  movq  __afl_area_ptr(%rip), %rdx		;检查共享内存区是否已经初始化</span><br><span class="line">  testq %rdx, %rdx						</span><br><span class="line">  je    __afl_setup						;如果没有初始化则先初始化</span><br><span class="line">										;否则掉进__afl_store</span><br><span class="line">__afl_store:</span><br><span class="line"></span><br><span class="line">  /* Calculate and store hit for the code location specified in rcx. */</span><br><span class="line"></span><br><span class="line">  xorq __afl_prev_loc(%rip), %rcx		</span><br><span class="line">  xorq %rcx, __afl_prev_loc(%rip)</span><br><span class="line">  shrq $1, __afl_prev_loc(%rip)</span><br><span class="line"></span><br><span class="line">  incb (%rdx, %rcx, 1)					;rdx是共享内存基地址,rcx是key</span><br><span class="line"></span><br><span class="line">__afl_return:</span><br><span class="line">										;恢复现场</span><br><span class="line">  addb $127, %al</span><br><span class="line">  sahf</span><br><span class="line">  ret</span><br><span class="line"></span><br><span class="line">.align 8</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">.AFL_VARS:</span><br><span class="line"></span><br><span class="line">  .lcomm   __afl_area_ptr, 8</span><br><span class="line">  .lcomm   __afl_prev_loc, 8</span><br><span class="line">  .lcomm   __afl_fork_pid, 4</span><br><span class="line">  .lcomm   __afl_temp, 4</span><br><span class="line">  .lcomm   __afl_setup_failure, 1</span><br><span class="line">  .comm    __afl_global_area_ptr, 8, 8</span><br></pre></td></tr></table></figure>
+<p>最初<code>__afl_prev_loc = 0</code></p>
+<p>每次<code>rcx</code>携带一个蹦床指纹<code>key</code>进来</p>
+<p>第一次:</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">rcx = 0 ^ key = key</span><br><span class="line">prev = 0 ^ key ^ 0 = key</span><br><span class="line">prev = key &gt;&gt; 1 </span><br><span class="line">shm[key]++;</span><br></pre></td></tr></table></figure>
+<p>第二次:</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">rcx = (prev_key &gt;&gt; 1 )^ key</span><br><span class="line">prev = ((prev_key &gt;&gt; 1 )^ key) ^ (prev_key &gt;&gt; 1) = key</span><br><span class="line">prev = key &gt;&gt; 1</span><br><span class="line">shm[(prev_key&gt;&gt;1) ^ key]++;</span><br></pre></td></tr></table></figure>
+<p>也就是说,<code>__afl_prev_loc</code>永远等于上一个key右移一位</p>
+<p>那么这个记录<code>shm[(prev_key&gt;&gt;1) ^ key]++;</code>的意义是什么呢</p>
+<p>上一个key右移一位与当前<code>key</code>做异或,在这个值上加一</p>
+<p>实际上<code>(prev_key&gt;&gt;1) ^ key</code>这个值记录了从上一个代码块到当前代码块的路径,</p>
+<p>其<code>shm</code>记录值加一意思就是记录这条路径被访问次数+1</p>
+<p>这个过程实际上就是实现了<a
+target="_blank" rel="noopener" href="https://github.com/google/AFL/blob/master/docs/technical_details.txt">AFL/docs/technical_details.txt
+at master · google/AFL · GitHub</a>中记录的:</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">cur_location = &lt;COMPILE_TIME_RANDOM&gt;;</span><br><span class="line">shared_mem[cur_location ^ prev_location]++; </span><br><span class="line">prev_location = cur_location &gt;&gt; <span class="number">1</span>;</span><br></pre></td></tr></table></figure>
+<h3 id="共享内存初始化">共享内存初始化</h3>
+<p>上集说到,<code>__afl_maybe_log</code>函数首次调用时会对共享内存区域进行初始化,
+发现共享内存未初始化后会进入<code>__afl_setup</code></p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br><span class="line">75</span><br><span class="line">76</span><br><span class="line">77</span><br><span class="line">78</span><br><span class="line">79</span><br><span class="line">80</span><br><span class="line">81</span><br><span class="line">82</span><br><span class="line">83</span><br><span class="line">84</span><br><span class="line">85</span><br></pre></td><td class="code"><pre><span class="line">__afl_setup:</span><br><span class="line"></span><br><span class="line">  /* Do not retry setup if we had previous failures. */</span><br><span class="line"></span><br><span class="line">  cmpb $0, __afl_setup_failure(%rip)				;如果失败过一次,那么之后都会失败,开摆</span><br><span class="line">  jne __afl_return									;让你看见loser真的非常抱歉,我会识趣离开</span><br><span class="line"></span><br><span class="line">  /* Check out if we have a global pointer on file. */</span><br><span class="line"></span><br><span class="line">  movq  __afl_global_area_ptr@GOTPCREL(%rip), %rdx	;如果该指针为空说明还未初始化,跳转__afl_setup_first进行初始化</span><br><span class="line">  movq  (%rdx), %rdx</span><br><span class="line">  testq %rdx, %rdx</span><br><span class="line">  je    __afl_setup_first</span><br><span class="line"></span><br><span class="line">  movq %rdx, __afl_area_ptr(%rip)</span><br><span class="line">  jmp  __afl_store</span><br><span class="line"></span><br><span class="line">__afl_setup_first:</span><br><span class="line"></span><br><span class="line">  /* Save everything that is not yet saved and that may be touched by</span><br><span class="line">     getenv() and several other libcalls we&#x27;ll be relying on. */</span><br><span class="line"></span><br><span class="line">  leaq -352(%rsp), %rsp</span><br><span class="line"></span><br><span class="line">  movq %rax,   0(%rsp)</span><br><span class="line">  movq %rcx,   8(%rsp)</span><br><span class="line">  movq %rdi,  16(%rsp)</span><br><span class="line">  movq %rsi,  32(%rsp)</span><br><span class="line">  movq %r8,   40(%rsp)</span><br><span class="line">  movq %r9,   48(%rsp)</span><br><span class="line">  movq %r10,  56(%rsp)</span><br><span class="line">  movq %r11,  64(%rsp)</span><br><span class="line"></span><br><span class="line">  movq %xmm0,  96(%rsp)</span><br><span class="line">  movq %xmm1,  112(%rsp)</span><br><span class="line">  movq %xmm2,  128(%rsp)</span><br><span class="line">  movq %xmm3,  144(%rsp)</span><br><span class="line">  movq %xmm4,  160(%rsp)</span><br><span class="line">  movq %xmm5,  176(%rsp)</span><br><span class="line">  movq %xmm6,  192(%rsp)</span><br><span class="line">  movq %xmm7,  208(%rsp)</span><br><span class="line">  movq %xmm8,  224(%rsp)</span><br><span class="line">  movq %xmm9,  240(%rsp)</span><br><span class="line">  movq %xmm10, 256(%rsp)</span><br><span class="line">  movq %xmm11, 272(%rsp)</span><br><span class="line">  movq %xmm12, 288(%rsp)</span><br><span class="line">  movq %xmm13, 304(%rsp)</span><br><span class="line">  movq %xmm14, 320(%rsp)</span><br><span class="line">  movq %xmm15, 336(%rsp)</span><br><span class="line"></span><br><span class="line">  /* Map SHM, jumping to __afl_setup_abort if something goes wrong. */</span><br><span class="line"></span><br><span class="line">  /* The 64-bit ABI requires 16-byte stack alignment. We&#x27;ll keep the</span><br><span class="line">     original stack ptr in the callee-saved r12. */</span><br><span class="line"></span><br><span class="line">  pushq %r12</span><br><span class="line">  movq  %rsp, %r12</span><br><span class="line">  subq  $16, %rsp</span><br><span class="line">  andq  $0xfffffffffffffff0, %rsp</span><br><span class="line"></span><br><span class="line">  leaq .AFL_SHM_ENV(%rip), %rdi</span><br><span class="line">call getenv@PLT					;获取环境变量__AFL_SHM_ID				;检查环境变量中有没有开启AFL共享内存</span><br><span class="line"></span><br><span class="line">  testq %rax, %rax</span><br><span class="line">  je    __afl_setup_abort		;如果没有设置此环境变量则中止初始化</span><br><span class="line"></span><br><span class="line">  movq  %rax, %rdi</span><br><span class="line">call atoi@PLT</span><br><span class="line"></span><br><span class="line">  xorq %rdx, %rdx   /* shmat flags    */								;shmat flag以环境变量__AFL_SHM_ID值传递</span><br><span class="line">  xorq %rsi, %rsi   /* requested addr */</span><br><span class="line">  movq %rax, %rdi   /* SHM ID         */</span><br><span class="line">call shmat@PLT</span><br><span class="line"></span><br><span class="line">  cmpq $-1, %rax</span><br><span class="line">  je   __afl_setup_abort</span><br><span class="line"></span><br><span class="line">  /* Store the address of the SHM region. */</span><br><span class="line"></span><br><span class="line">  movq %rax, %rdx</span><br><span class="line">  movq %rax, __afl_area_ptr(%rip)</span><br><span class="line"></span><br><span class="line">  movq __afl_global_area_ptr@GOTPCREL(%rip), %rdx						;至此完成了共享</span><br><span class="line">  movq %rax, (%rdx)</span><br><span class="line">  movq %rax, %rdx</span><br></pre></td></tr></table></figure>
+<p>映射共享内存</p>
+<blockquote>
+<p><strong>Linux 共享内存功能</strong></p>
+<p>共享内存并不是AFL自己实现的功能,而是Linux提供的进程间通信机制</p>
+<p>共享内存使用的API:</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="type">int</span> <span class="title function_">shmget</span><span class="params">(<span class="type">key_t</span> key, <span class="type">size_t</span> size, <span class="type">int</span> shmflg)</span>;</span><br></pre></td></tr></table></figure>
+<p>创建共享内存,该共享内存段明敏为key,共享内存段大小为size,权限标志为shmflg</p>
+<p>返回共享内存标识符</p>
+<p>共享内存创建后不能立刻被任何进程访问, 包括创建者,
+还需要映射到进程地址空间中</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="type">void</span> *<span class="title function_">shmat</span><span class="params">(<span class="type">int</span> shmid, <span class="type">const</span> <span class="type">void</span> *shmaddr, <span class="type">int</span> shmflg)</span>;</span><br></pre></td></tr></table></figure>
+<p>Shared memory Attach, 将共享内存映射进入调用shmat的进程内存</p>
+<p>shmid共享内存id, 由shmget返回</p>
+<p>shmaddr指定将共享内存区映射到本进程的地址</p>
+<p>shmflg指定本进程对该共享内存映射区的读写执行权限</p>
+<p>返回该共享内存区实际映射地址,
+如果<code>shmaddr</code>不能满足则Linux内核给哥们挑一个返回.
+如果失败则返回-1</p>
+</blockquote>
+<p>在<code>afl-gcc</code>编译生成的汇编代码<code>target.s</code>中,<code>shmid</code>直接由环境变量传入,
+调用<code>shmat</code>, 没有调用<code>shmget</code>,
+那么这块共享内存是由谁创建的呢?</p>
+<p>由上位者<code>afl–fuzz</code>创建并传递给下位者—被测程序</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br></pre></td><td class="code"><pre><span class="line">call getenv@PLT					;获取环境变量__AFL_SHM_ID				;检查环境变量中有没有开启AFL共享内存</span><br><span class="line"></span><br><span class="line">  testq %rax, %rax</span><br><span class="line">  je    __afl_setup_abort		;如果没有设置此环境变量则中止初始化</span><br><span class="line"></span><br><span class="line">  movq  %rax, %rdi</span><br><span class="line">call atoi@PLT</span><br><span class="line"></span><br><span class="line">  xorq %rdx, %rdx   /* shmat flags    */								;shmat flag以环境变量__AFL_SHM_ID值传递</span><br><span class="line">  xorq %rsi, %rsi   /* requested addr */</span><br><span class="line">  movq %rax, %rdi   /* SHM ID         */</span><br><span class="line">call shmat@PLT</span><br><span class="line"></span><br><span class="line">  cmpq $-1, %rax</span><br><span class="line">  je   __afl_setup_abort</span><br><span class="line"></span><br><span class="line">  /* Store the address of the SHM region. */</span><br><span class="line"></span><br><span class="line">  movq %rax, %rdx</span><br><span class="line">  movq %rax, __afl_area_ptr(%rip)				;将shmat返回的共享内存映射地址保存到__afl_area_ptr中</span><br><span class="line"></span><br><span class="line">  movq __afl_global_area_ptr@GOTPCREL(%rip), %rdx	;并且将该地址保存到__afl_global_area_ptr指针上</span><br><span class="line">  movq %rax, (%rdx)</span><br><span class="line">  movq %rax, %rdx</span><br><span class="line"></span><br></pre></td></tr></table></figure>
+<p>至此, 被测程序<code>target</code>中保存好了共享内存映射区</p>
+<h3 id="启用fork-server">启用fork server</h3>
+<p><code>fork server</code>的作用是, 避免目标程序多次重启,
+以提高模糊测试效率</p>
+<p>其原理是在目标进程首次启动后, <code>AFL</code>共享内存初始化完毕,
+此后目标进程由该进程<code>fork</code>出来,
+保持了<code>AFL</code>共享内存已初始化的状态,
+减少了重新初始化共享内存的开销.</p>
+<p>要理解<code>fork server</code>的作用，必须知道这中间每个线程都在干什么</p>
+<p><code>afl-fuzz</code>会亲自扶持一个傀儡目标进程，并亲自和该傀儡进程通信，</p>
+<p><code>afl-fuzz</code>创建的共享内存，傀儡进程会将其映射到自己的地址空间</p>
+<p>然后傀儡进程此后只负责以自己为模块<code>fork</code>出子进程进行模糊测试，并向<code>afl-fuzz</code>汇报子进程信息</p>
+<p>这里的<code>client-server</code>以管道实现，<code>afl-fuzz</code>扮演<code>client</code>，傀儡进程扮演<code>server</code></p>
+<p><code>afl-fuzz</code>通过<code>199</code>描述符接收傀儡的汇报，通过<code>198</code>描述符向傀儡发送命令，这就建立了半双工的信道</p>
+<p>由于傀儡进程以<code>fork</code>复制自身创建子进程，因此子进程出生就能访问到共享内存，</p>
+<p>傀儡进程的控制流是这样的：</p>
+<figure>
+<img
+src="https://raw.githubusercontent.com/DeutschBall/picbed/main/image-20250212235154919.png"
+alt="afl-fuzz控制流" />
+<figcaption aria-hidden="true">afl-fuzz控制流</figcaption>
+</figure>
+<p>整个<code>fuzzing</code>过程如图所示：</p>
+<figure>
+<img
+src="https://raw.githubusercontent.com/DeutschBall/picbed/main/image-20250213002337941.png"
+alt="傀儡进程控制流" />
+<figcaption aria-hidden="true">傀儡进程控制流</figcaption>
+</figure>
+
+    </div>
+
+    
+    
+    
+
+      <footer class="post-footer">
+          <div class="post-tags">
+              <a href="/tags/%E6%A8%A1%E7%B3%8A%E6%B5%8B%E8%AF%95/" rel="tag"># 模糊测试</a>
+          </div>
+
+        
+
+
+        
+    <div class="post-nav">
+      <div class="post-nav-item">
+    <a href="/2025/04/22/%5BAFL%20IV%5D%20afl-showmap/" rel="prev" title="AFL IV - afl-showmap">
+      <i class="fa fa-chevron-left"></i> AFL IV - afl-showmap
+    </a></div>
+      <div class="post-nav-item"></div>
+    </div>
+      </footer>
+    
+  </article>
+  
+  
+  
+
+
+
+          </div>
+          
+
+<script>
+  window.addEventListener('tabs:register', () => {
+    let { activeClass } = CONFIG.comments;
+    if (CONFIG.comments.storage) {
+      activeClass = localStorage.getItem('comments_active') || activeClass;
+    }
+    if (activeClass) {
+      let activeTab = document.querySelector(`a[href="#comment-${activeClass}"]`);
+      if (activeTab) {
+        activeTab.click();
+      }
+    }
+  });
+  if (CONFIG.comments.storage) {
+    window.addEventListener('tabs:click', event => {
+      if (!event.target.matches('.tabs-comment .tab-content .tab-pane')) return;
+      let commentClass = event.target.classList[1];
+      localStorage.setItem('comments_active', commentClass);
+    });
+  }
+</script>
+
+        </div>
+          
+  
+  <div class="toggle sidebar-toggle">
+    <span class="toggle-line toggle-line-first"></span>
+    <span class="toggle-line toggle-line-middle"></span>
+    <span class="toggle-line toggle-line-last"></span>
+  </div>
+
+  <aside class="sidebar">
+    <div class="sidebar-inner">
+
+      <ul class="sidebar-nav motion-element">
+        <li class="sidebar-nav-toc">
+          Table of Contents
+        </li>
+        <li class="sidebar-nav-overview">
+          Overview
+        </li>
+      </ul>
+
+      <!--noindex-->
+      <div class="post-toc-wrap sidebar-panel">
+          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#afl-i-overview"><span class="nav-number">1.</span> <span class="nav-text">[AFL I] overview</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#%E7%BC%96%E8%AF%91%E6%97%B6%E6%8F%92%E6%A1%A9%E6%8A%80%E6%9C%AF"><span class="nav-number">1.1.</span> <span class="nav-text">编译时插桩技术</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%8F%92%E6%A1%A9%E7%9A%84%E4%BD%9C%E7%94%A8"><span class="nav-number">1.1.1.</span> <span class="nav-text">插桩的作用?</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E8%B9%A6%E5%BA%8A%E4%BB%80%E4%B9%88%E6%A0%B7"><span class="nav-number">1.1.2.</span> <span class="nav-text">蹦床什么样?</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E8%B9%A6%E5%BA%8A%E6%80%8E%E6%A0%B7%E5%8A%A0%E4%B8%8A%E7%9A%84"><span class="nav-number">1.1.3.</span> <span class="nav-text">蹦床怎样加上的?</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%85%B1%E4%BA%AB%E5%86%85%E5%AD%98%E7%9A%84%E4%BD%9C%E7%94%A8"><span class="nav-number">1.1.4.</span> <span class="nav-text">共享内存的作用?</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%85%B1%E4%BA%AB%E5%86%85%E5%AD%98%E5%88%9D%E5%A7%8B%E5%8C%96"><span class="nav-number">1.1.5.</span> <span class="nav-text">共享内存初始化</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%90%AF%E7%94%A8fork-server"><span class="nav-number">1.1.6.</span> <span class="nav-text">启用fork server</span></a></li></ol></li></ol></li></ol></div>
+      </div>
+      <!--/noindex-->
+
+      <div class="site-overview-wrap sidebar-panel">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+    <img class="site-author-image" itemprop="image" alt="dustball"
+      src="https://raw.githubusercontent.com/DeutschBall/picbed/main/dustball.png">
+  <p class="site-author-name" itemprop="name">dustball</p>
+  <div class="site-description" itemprop="description">dustland</div>
+</div>
+<div class="site-state-wrap motion-element">
+  <nav class="site-state">
+      <div class="site-state-item site-state-tags">
+        <span class="site-state-item-count">39</span>
+        <span class="site-state-item-name">tags</span>
+      </div>
+  </nav>
+</div>
+  <div class="cc-license motion-element" itemprop="license">
+    <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" class="cc-opacity" rel="noopener" target="_blank"><img src="/images/cc-by-nc-sa.svg" alt="Creative Commons"></a>
+  </div>
+
+
+
+      </div>
+        <div class="back-to-top motion-element">
+          <i class="fa fa-arrow-up"></i>
+          <span>0%</span>
+        </div>
+
+    </div>
+  </aside>
+  <div id="sidebar-dimmer"></div>
+
+
+      </div>
+    </main>
+
+    <footer class="footer">
+      <div class="footer-inner">
+        
+
+        
+
+<div class="copyright">
+  
+  &copy; 
+  <span itemprop="copyrightYear">2025</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">dustball</span>
+</div>
+  <div class="powered-by">Powered by <a href="https://hexo.io/" class="theme-link" rel="noopener" target="_blank">Hexo</a> & <a href="https://pisces.theme-next.org/" class="theme-link" rel="noopener" target="_blank">NexT.Pisces</a>
+  </div>
+
+        
+<div class="busuanzi-count">
+  <script data-pjax async src="https://busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+    <span class="post-meta-item" id="busuanzi_container_site_uv" style="display: none;">
+      <span class="post-meta-item-icon">
+        <i class="fa fa-user"></i>
+      </span>
+      <span class="site-uv" title="Total Visitors">
+        <span id="busuanzi_value_site_uv"></span>
+      </span>
+    </span>
+    <span class="post-meta-divider">|</span>
+    <span class="post-meta-item" id="busuanzi_container_site_pv" style="display: none;">
+      <span class="post-meta-item-icon">
+        <i class="fa fa-eye"></i>
+      </span>
+      <span class="site-pv" title="Total Views">
+        <span id="busuanzi_value_site_pv"></span>
+      </span>
+    </span>
+</div>
+
+
+
+
+
+
+
+
+      </div>
+    </footer>
+  </div>
+
+  
+  <script src="/lib/anime.min.js"></script>
+  <script src="/lib/pjax/pjax.min.js"></script>
+  <script src="/lib/velocity/velocity.min.js"></script>
+  <script src="/lib/velocity/velocity.ui.min.js"></script>
+
+<script src="/js/utils.js"></script>
+
+<script src="/js/motion.js"></script>
+
+
+<script src="/js/schemes/pisces.js"></script>
+
+
+<script src="/js/next-boot.js"></script>
+
+  <script>
+var pjax = new Pjax({
+  selectors: [
+    'head title',
+    '#page-configurations',
+    '.content-wrap',
+    '.post-toc-wrap',
+    '.languages',
+    '#pjax'
+  ],
+  switches: {
+    '.post-toc-wrap': Pjax.switches.innerHTML
+  },
+  analytics: false,
+  cacheBust: false,
+  scrollTo : !CONFIG.bookmark.enable
+});
+
+window.addEventListener('pjax:success', () => {
+  document.querySelectorAll('script[data-pjax], script#page-configurations, #pjax script').forEach(element => {
+    var code = element.text || element.textContent || element.innerHTML || '';
+    var parent = element.parentNode;
+    parent.removeChild(element);
+    var script = document.createElement('script');
+    if (element.id) {
+      script.id = element.id;
+    }
+    if (element.className) {
+      script.className = element.className;
+    }
+    if (element.type) {
+      script.type = element.type;
+    }
+    if (element.src) {
+      script.src = element.src;
+      // Force synchronous loading of peripheral JS.
+      script.async = false;
+    }
+    if (element.dataset.pjax !== undefined) {
+      script.dataset.pjax = '';
+    }
+    if (code !== '') {
+      script.appendChild(document.createTextNode(code));
+    }
+    parent.appendChild(script);
+  });
+  NexT.boot.refresh();
+  // Define Motion Sequence & Bootstrap Motion.
+  if (CONFIG.motion.enable) {
+    NexT.motion.integrator
+      .init()
+      .add(NexT.motion.middleWares.subMenu)
+      .add(NexT.motion.middleWares.postList)
+      .bootstrap();
+  }
+  NexT.utils.updateSidebarPosition();
+});
+</script>
+
+
+
+
+  
+  <script data-pjax>
+    (function(){
+      var canonicalURL, curProtocol;
+      //Get the <link> tag
+      var x=document.getElementsByTagName("link");
+		//Find the last canonical URL
+		if(x.length > 0){
+			for (i=0;i<x.length;i++){
+				if(x[i].rel.toLowerCase() == 'canonical' && x[i].href){
+					canonicalURL=x[i].href;
+				}
+			}
+		}
+    //Get protocol
+	    if (!canonicalURL){
+	    	curProtocol = window.location.protocol.split(':')[0];
+	    }
+	    else{
+	    	curProtocol = canonicalURL.split(':')[0];
+	    }
+      //Get current URL if the canonical URL does not exist
+	    if (!canonicalURL) canonicalURL = window.location.href;
+	    //Assign script content. Replace current URL with the canonical URL
+      !function(){var e=/([http|https]:\/\/[a-zA-Z0-9\_\.]+\.baidu\.com)/gi,r=canonicalURL,t=document.referrer;if(!e.test(r)){var n=(String(curProtocol).toLowerCase() === 'https')?"https://sp0.baidu.com/9_Q4simg2RQJ8t7jm9iCKT-xh_/s.gif":"//api.share.baidu.com/s.gif";t?(n+="?r="+encodeURIComponent(document.referrer),r&&(n+="&l="+r)):r&&(n+="?l="+r);var i=new Image;i.src=n}}(window);})();
+  </script>
+
+
+
+
+  
+<script src="//cdn.jsdelivr.net/npm/algoliasearch@4/dist/algoliasearch-lite.umd.js"></script>
+<script src="//cdn.jsdelivr.net/npm/instantsearch.js@4/dist/instantsearch.production.min.js"></script>
+<script src="/js/algolia-search.js"></script>
+
+
+
+
+
+
+
+
+
+
+
+
+<script data-pjax>
+if (document.querySelectorAll('pre.mermaid').length) {
+  NexT.utils.getScript('//cdn.jsdelivr.net/npm/mermaid@8/dist/mermaid.min.js', () => {
+    mermaid.initialize({
+      theme    : 'dark',
+      logLevel : 3,
+      flowchart: { curve     : 'linear' },
+      gantt    : { axisFormat: '%m/%d/%Y' },
+      sequence : { actorMargin: 50 }
+    });
+  }, window.mermaid);
+}
+</script>
+
+
+    <div id="pjax">
+  
+
+  
+      
+
+<script>
+  if (typeof MathJax === 'undefined') {
+    window.MathJax = {
+      loader: {
+          load: ['[tex]/mhchem'],
+        source: {
+          '[tex]/amsCd': '[tex]/amscd',
+          '[tex]/AMScd': '[tex]/amscd'
+        }
+      },
+      tex: {
+        inlineMath: {'[+]': [['$', '$']]},
+          packages: {'[+]': ['mhchem']},
+        tags: 'ams'
+      },
+      options: {
+        renderActions: {
+          findScript: [10, doc => {
+            document.querySelectorAll('script[type^="math/tex"]').forEach(node => {
+              const display = !!node.type.match(/; *mode=display/);
+              const math = new doc.options.MathItem(node.textContent, doc.inputJax[0], display);
+              const text = document.createTextNode('');
+              node.parentNode.replaceChild(text, node);
+              math.start = {node: text, delim: '', n: 0};
+              math.end = {node: text, delim: '', n: 0};
+              doc.math.push(math);
+            });
+          }, '', false],
+          insertedScript: [200, () => {
+            document.querySelectorAll('mjx-container').forEach(node => {
+              let target = node.parentNode;
+              if (target.nodeName.toLowerCase() === 'li') {
+                target.parentNode.classList.add('has-jax');
+              }
+            });
+          }, '', false]
+        }
+      }
+    };
+    (function () {
+      var script = document.createElement('script');
+      script.src = '//cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js';
+      script.defer = true;
+      document.head.appendChild(script);
+    })();
+  } else {
+    MathJax.startup.document.state(0);
+    MathJax.texReset();
+    MathJax.typeset();
+  }
+</script>
+
+    
+
+  
+
+    </div>
+</body>
+</html>
