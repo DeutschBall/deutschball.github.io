@@ -167,6 +167,430 @@
   
   
   <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="en">
+    <link itemprop="mainEntityOfPage" href="http://deutschball.github.io/2022/08/23/windows%20SDK%20chapter%2010%20%E8%8F%9C%E5%8D%95%E4%B8%8E%E8%B5%84%E6%BA%90/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="https://raw.githubusercontent.com/DeutschBall/picbed/main/dustball.png">
+      <meta itemprop="name" content="dustball">
+      <meta itemprop="description" content="dustland">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="dustland">
+    </span>
+      <header class="post-header">
+        <h2 class="post-title" itemprop="name headline">
+          
+            <a href="/2022/08/23/windows%20SDK%20chapter%2010%20%E8%8F%9C%E5%8D%95%E4%B8%8E%E8%B5%84%E6%BA%90/" class="post-title-link" itemprop="url">win32程序设计-chapter10 菜单</a>
+        </h2>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-calendar"></i>
+              </span>
+              <span class="post-meta-item-text">Posted on</span>
+              
+
+              <time title="Created: 2022-08-23 16:09:00 / Modified: 16:09:30" itemprop="dateCreated datePublished" datetime="2022-08-23T16:09:00+08:00">2022-08-23</time>
+            </span>
+
+          
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+          <h1 id="windows-sdk-chapter-10-菜单与资源">windows SDK chapter 10
+菜单与资源</h1>
+<h2 id="资源">资源</h2>
+<p>图标光标等资源不是重点,重点在菜单</p>
+<p>图标,光标,菜单,对话框都是资源类型.<strong>保存在.exe或者.dll等文件中</strong>.程序使用函数显式或者隐式地将资源加载进入内存使用,比如LoadIcon和LoadCursor</p>
+<p>注意到资源是保存在exe或者dll文件中的,这意味着,不需要另外保存bmp或者ico等文件格式了,要啥直接放到到exe文件中,万事不求人了</p>
+<h3 id="资源脚本">资源脚本</h3>
+<p>资源脚本以.RC为后缀</p>
+<figure>
+<img
+src="https://raw.githubusercontent.com/DeutschBall/DeutschBall/main/image-20220821171827617.png"
+alt="image-20220821171827617" />
+<figcaption aria-hidden="true">image-20220821171827617</figcaption>
+</figure>
+<p>在visual studio解决方案视图下,它是这样的</p>
+<figure>
+<img
+src="https://raw.githubusercontent.com/DeutschBall/DeutschBall/main/image-20220821171915530.png"
+alt="image-20220821171915530" />
+<figcaption aria-hidden="true">image-20220821171915530</figcaption>
+</figure>
+<p>如果用其他文本编辑器比如vscode打开ICONDEMO.rc,他实际上时类似于头文件的代码</p>
+<p>它不存放任何资源文件,但是指出这些文件的路径还有ID编号</p>
+<p>其中菜单的结构最明显</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">//Microsoft Visual C++ 生成的资源脚本。</span></span><br><span class="line"><span class="comment">//</span></span><br><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&quot;resource.h&quot;</span></span></span><br><span class="line"></span><br><span class="line"><span class="meta">#<span class="keyword">define</span> APSTUDIO_READONLY_SYMBOLS</span></span><br><span class="line"><span class="comment">/////////////////////////////////////////////////////////////////////////////</span></span><br><span class="line"><span class="comment">//</span></span><br><span class="line"><span class="comment">// 从 TEXTINCLUDE 资源生成。</span></span><br><span class="line"><span class="comment">//</span></span><br><span class="line"><span class="meta">#<span class="keyword">ifndef</span> APSTUDIO_INVOKED</span></span><br><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&quot;targetver.h&quot;</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">endif</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">define</span> APSTUDIO_HIDDEN_SYMBOLS</span></span><br><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&quot;windows.h&quot;</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">undef</span> APSTUDIO_HIDDEN_SYMBOLS</span></span><br><span class="line"><span class="comment">/////////////////////////////////////////////////////////////////////////////</span></span><br><span class="line"><span class="meta">#<span class="keyword">undef</span> APSTUDIO_READONLY_SYMBOLS</span></span><br><span class="line"></span><br><span class="line"><span class="meta">#<span class="keyword">if</span> !defined(AFX_RESOURCE_DLL) || defined(AFX_TARG_CHS)</span></span><br><span class="line">LANGUAGE <span class="number">4</span>, <span class="number">2</span></span><br><span class="line"></span><br><span class="line"><span class="comment">/////////////////////////////////////////////////////////////////////////////</span></span><br><span class="line"><span class="comment">//</span></span><br><span class="line"><span class="comment">// 图标</span></span><br><span class="line"><span class="comment">//</span></span><br><span class="line"></span><br><span class="line"><span class="comment">// ID 值最低的图标放在最前面，以确保应用程序图标</span></span><br><span class="line"><span class="comment">// 在所有系统中保持一致。</span></span><br><span class="line"></span><br><span class="line">IDI_ICONDEMO       ICON         <span class="string">&quot;ICONDEMO.ico&quot;</span></span><br><span class="line">IDI_SMALL               ICON         <span class="string">&quot;small.ico&quot;</span></span><br><span class="line"></span><br><span class="line"><span class="comment">/////////////////////////////////////////////////////////////////////////////</span></span><br><span class="line"><span class="comment">//</span></span><br><span class="line"><span class="comment">// 菜单</span></span><br><span class="line"><span class="comment">//</span></span><br><span class="line"></span><br><span class="line">IDC_ICONDEMO MENU</span><br><span class="line">BEGIN</span><br><span class="line">    POPUP <span class="string">&quot;文件(&amp;F)&quot;</span></span><br><span class="line">    BEGIN</span><br><span class="line">        MENUITEM <span class="string">&quot;退出(&amp;X)&quot;</span>,                IDM_EXIT</span><br><span class="line">    END</span><br><span class="line">    POPUP <span class="string">&quot;帮助(&amp;H)&quot;</span></span><br><span class="line">    BEGIN</span><br><span class="line">        MENUITEM <span class="string">&quot;关于(&amp;A) ...&quot;</span>,           IDM_ABOUT</span><br><span class="line">    END</span><br><span class="line">END</span><br><span class="line"></span><br><span class="line">...</span><br></pre></td></tr></table></figure>
+<p>资源脚本.rc文件引用了<code>Resource.h</code>头文件,which是给资源编号的,每个资源有唯一的编号方便过程函数按图索骥</p>
+<p>Resource.h允许c源程序和.rc资源描述文件引用相同的符号</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">//&#123;&#123;NO_DEPENDENCIES&#125;&#125;</span></span><br><span class="line"><span class="comment">// Microsoft Visual C++ 生成的包含文件。</span></span><br><span class="line"><span class="comment">// 使用者 ICONDEMO.rc</span></span><br><span class="line"></span><br><span class="line"><span class="meta">#<span class="keyword">define</span> IDS_APP_TITLE			103</span></span><br><span class="line"></span><br><span class="line"><span class="meta">#<span class="keyword">define</span> IDR_MAINFRAME			128</span></span><br><span class="line"><span class="meta">#<span class="keyword">define</span> IDD_ICONDEMO_DIALOG	102</span></span><br><span class="line"><span class="meta">#<span class="keyword">define</span> IDD_ABOUTBOX			103</span></span><br><span class="line"><span class="meta">#<span class="keyword">define</span> IDM_ABOUT				104</span></span><br><span class="line"><span class="meta">#<span class="keyword">define</span> IDM_EXIT				105</span></span><br><span class="line"><span class="meta">#<span class="keyword">define</span> IDI_ICONDEMO			107</span></span><br><span class="line"><span class="meta">#<span class="keyword">define</span> IDI_SMALL				108</span></span><br><span class="line"><span class="meta">#<span class="keyword">define</span> IDC_ICONDEMO			109</span></span><br><span class="line"><span class="meta">#<span class="keyword">define</span> IDC_MYICON				2</span></span><br><span class="line"><span class="meta">#<span class="keyword">ifndef</span> IDC_STATIC</span></span><br><span class="line"><span class="meta">#<span class="keyword">define</span> IDC_STATIC				-1</span></span><br><span class="line"><span class="meta">#<span class="keyword">endif</span></span></span><br><span class="line"><span class="comment">// 新对象的下一组默认值</span></span><br><span class="line"><span class="comment">//</span></span><br><span class="line"><span class="meta">#<span class="keyword">ifdef</span> APSTUDIO_INVOKED</span></span><br><span class="line"><span class="meta">#<span class="keyword">ifndef</span> APSTUDIO_READONLY_SYMBOLS</span></span><br><span class="line"></span><br><span class="line"><span class="meta">#<span class="keyword">define</span> _APS_NO_MFC					130</span></span><br><span class="line"><span class="meta">#<span class="keyword">define</span> _APS_NEXT_RESOURCE_VALUE	129</span></span><br><span class="line"><span class="meta">#<span class="keyword">define</span> _APS_NEXT_COMMAND_VALUE		32771</span></span><br><span class="line"><span class="meta">#<span class="keyword">define</span> _APS_NEXT_CONTROL_VALUE		1000</span></span><br><span class="line"><span class="meta">#<span class="keyword">define</span> _APS_NEXT_SYMED_VALUE		110</span></span><br><span class="line"><span class="meta">#<span class="keyword">endif</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">endif</span></span></span><br><span class="line"></span><br></pre></td></tr></table></figure>
+<p>书上给出的忠告是,不要直接修改资源描述文件和资源头文件,让visual
+studio维护这些东西</p>
+<p>visual
+studio使用RC.EXE工具编译资源在编译阶段把ICONDEMO.rc编译,然后在连接阶段随obj和lib进入exe文件</p>
+<h3 id="图标">图标</h3>
+<p>怎么绘制图标无所谓,只要是.ico格式的都能当成图标,关键看程序怎么用这个图标</p>
+<p>在程序中使用自定义图标,不再使用Load(NULL,IDI_APPLICATION)指定的系统默认图标</p>
+<p>应该这样写:</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">wndclass.hIcon = LoadIcon (hInstance, MAKEINTRESOURCE (IDI_ICON)) ;</span><br></pre></td></tr></table></figure>
+<p>意思是往本应用程序实例中加载一个编号为IDI_ICON的图标</p>
+<p>在visualstudio项目中可以添加资源</p>
+<figure>
+<img
+src="https://raw.githubusercontent.com/DeutschBall/DeutschBall/main/image-20220821173846421.png"
+alt="image-20220821173846421" />
+<figcaption aria-hidden="true">image-20220821173846421</figcaption>
+</figure>
+<p>添加Icon图标资源</p>
+<figure>
+<img
+src="https://raw.githubusercontent.com/DeutschBall/DeutschBall/main/image-20220821173911820.png"
+alt="image-20220821173911820" />
+<figcaption aria-hidden="true">image-20220821173911820</figcaption>
+</figure>
+<p>选择<code>32*32</code>,32位色,然后就可以在<code>32*32</code>的格格矩阵上画画了</p>
+<figure>
+<img
+src="https://raw.githubusercontent.com/DeutschBall/DeutschBall/main/image-20220821173956694.png"
+alt="image-20220821173956694" />
+<figcaption aria-hidden="true">image-20220821173956694</figcaption>
+</figure>
+<p>visual studio顶部会有工具栏</p>
+<figure>
+<img
+src="https://raw.githubusercontent.com/DeutschBall/DeutschBall/main/image-20220821174601043.png"
+alt="image-20220821174601043" />
+<figcaption aria-hidden="true">image-20220821174601043</figcaption>
+</figure>
+<p>画完了还得把以前的图标删了,让自己的图标顶置</p>
+<figure>
+<img
+src="https://raw.githubusercontent.com/DeutschBall/DeutschBall/main/image-20220822085630711.png"
+alt="image-20220822085630711" />
+<figcaption aria-hidden="true">image-20220822085630711</figcaption>
+</figure>
+<p>然后去资源视图改ID,在画画这里找一年也找不到</p>
+<figure>
+<img
+src="https://raw.githubusercontent.com/DeutschBall/DeutschBall/main/image-20220821175726126.png"
+alt="image-20220821175726126" />
+<figcaption aria-hidden="true">image-20220821175726126</figcaption>
+</figure>
+<p>给他改成ID=IDI_ICON1,visual
+studio会自动在rc文件和资源头文件中修改变化的,此时在资源头文件Resource.h中可以看到IDI_ICON1的宏定义了</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#<span class="keyword">define</span> IDI_ICON1                       129</span></span><br></pre></td></tr></table></figure>
+<p>此时在创建窗口类的时候再写</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">wndclass.hIcon = LoadIcon (hInstance, MAKEINTRESOURCE (IDI_ICON1)) ;</span><br></pre></td></tr></table></figure>
+<p>就可以加载图标了</p>
+<p>这个图标是放在项目根目录下的,如果删了他,对运行已经编译链接好的程序没有影响,但是再编译时会报错找不到文件</p>
+<h3 id="loadicon">LoadIcon</h3>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">HICON <span class="title function_">LoadIconA</span><span class="params">(</span></span><br><span class="line"><span class="params">  [in, optional] HINSTANCE hInstance,</span></span><br><span class="line"><span class="params">  [in]           LPCSTR    lpIconName</span></span><br><span class="line"><span class="params">)</span>;</span><br></pre></td></tr></table></figure>
+<p>hInstance指定图标的文件来源,</p>
+<p>NULL则为系统图标</p>
+<p>本应用程序实例句柄则为本exe文件中包含的图标</p>
+<p>lpIconName指定要加载的图标名.</p>
+<p>可以使用字符串,也可以使用MAKEINTERESOURCE宏指定图标的宏定义</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#<span class="keyword">define</span> MAKEINTRESOURCEA(i) ((LPSTR)((ULONG_PTR)((WORD)(i))))</span></span><br><span class="line"><span class="meta">#<span class="keyword">define</span> MAKEINTRESOURCEW(i) ((LPWSTR)((ULONG_PTR)((WORD)(i))))</span></span><br></pre></td></tr></table></figure>
+<p>i先强制转化为WORD类型,这意味着i的有效范围是16位,更高位直接扬了</p>
+<p>资源就到此为止吧,再学就不礼貌了,该点菜了</p>
+<h2 id="菜单">菜单</h2>
+<p>一开始我还想直接看菜单不看前面的图标光标这种资源,看到资源脚本直接蒙蔽了</p>
+<h3 id="概念">概念</h3>
+<p>主菜单,顶级菜单:标题栏下面,客户区顶的常驻菜单</p>
+<p>子菜单,下拉菜单,弹出菜单:主菜单点击后下拉的菜单.这种菜单可以嵌套多层</p>
+<p>状态:菜单有启用,禁用状态,启用时有选中和非选中状态.</p>
+<h3 id="菜单结构">菜单结构</h3>
+<p>每个菜单项有三个特征定义,分别是菜单显式什么,菜单ID或者句柄,属性</p>
+<h3 id="定义菜单">定义菜单</h3>
+<p>visual studio中可以向项目添加资源,其中就包括菜单</p>
+<figure>
+<img
+src="https://raw.githubusercontent.com/DeutschBall/DeutschBall/main/image-20220821163145869.png"
+alt="image-20220821163145869" />
+<figcaption aria-hidden="true">image-20220821163145869</figcaption>
+</figure>
+<p>编辑菜单的方式是交互式的,右侧的菜单编辑器可以调制菜单属性(幸好一个菜单的属性稀松)</p>
+<figure>
+<img
+src="https://raw.githubusercontent.com/DeutschBall/DeutschBall/main/image-20220821163233880.png"
+alt="image-20220821163233880" />
+<figcaption aria-hidden="true">image-20220821163233880</figcaption>
+</figure>
+<h4 id="菜单属性">菜单属性</h4>
+<p>能够编辑的菜单属性有12个(实际11个,最下边那个提示是MFC编程用的)</p>
+<figure>
+<img
+src="https://raw.githubusercontent.com/DeutschBall/DeutschBall/main/image-20220821163420651.png"
+alt="image-20220821163420651" />
+<figcaption aria-hidden="true">image-20220821163420651</figcaption>
+</figure>
+<p>弹出菜单为TRUE则本菜单可以弹出子菜单</p>
+<p>灰显指菜单栏变灰且不活动,即禁用了,点击不会产生WM_COMMAND消息</p>
+<p>描述文字就是菜单键上的文字</p>
+<blockquote>
+<p>如果描述文字前面加上一个&amp;符号,则该菜单项第一个字符会带上下划线,方便Alt更改菜单时索引他就像这样
+<img
+src="https://raw.githubusercontent.com/DeutschBall/DeutschBall/main/image-20220821165229684.png"
+alt="image-20220821165229684" /></p>
+</blockquote>
+<p>已勾选为TRUE则该菜单左侧有一个对号,这是复选标记</p>
+<figure>
+<img
+src="https://raw.githubusercontent.com/DeutschBall/DeutschBall/main/image-20220821163918622.png"
+alt="image-20220821163918622" />
+<figcaption aria-hidden="true">image-20220821163918622</figcaption>
+</figure>
+<p>已启用和灰显作用类似,但是只是点了没反应,字体不会变灰</p>
+<p>分隔就是把该菜单作为分割线,比如1123和3菜单中间这个杠</p>
+<figure>
+<img
+src="https://raw.githubusercontent.com/DeutschBall/DeutschBall/main/image-20220821164249794.png"
+alt="image-20220821164249794" />
+<figcaption aria-hidden="true">image-20220821164249794</figcaption>
+</figure>
+<p>关键是ID,这是窗口过程给该菜单设置逻辑的唯一凭证</p>
+<p>这里的ID是宏定义,实际上的数值visualstudio给我们放到Resource.h中了</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// Microsoft Visual C++ 生成的包含文件。</span></span><br><span class="line"><span class="comment">// 供 chapter10.rc 使用</span></span><br><span class="line"><span class="comment">//</span></span><br><span class="line"><span class="meta">#<span class="keyword">define</span> IDC_MYICON                      2</span></span><br><span class="line"><span class="meta">#<span class="keyword">define</span> IDD_CHAPTER10_DIALOG            102</span></span><br><span class="line"><span class="meta">#<span class="keyword">define</span> IDS_APP_TITLE                   103</span></span><br><span class="line"><span class="meta">#<span class="keyword">define</span> IDD_ABOUTBOX                    103</span></span><br><span class="line"><span class="meta">#<span class="keyword">define</span> IDM_ABOUT                       104</span></span><br><span class="line"><span class="meta">#<span class="keyword">define</span> IDM_EXIT                        105</span></span><br><span class="line"><span class="meta">#<span class="keyword">define</span> IDI_CHAPTER10                   107</span></span><br><span class="line"><span class="meta">#<span class="keyword">define</span> IDI_SMALL                       108</span></span><br><span class="line"><span class="meta">#<span class="keyword">define</span> IDC_CHAPTER10                   109</span></span><br><span class="line"><span class="meta">#<span class="keyword">define</span> IDR_MAINFRAME                   128</span></span><br><span class="line"><span class="meta">#<span class="keyword">define</span> IDR_MENU1                       129</span></span><br><span class="line"><span class="meta">#<span class="keyword">define</span> ID_32771                        32771</span></span><br><span class="line"><span class="meta">#<span class="keyword">define</span> ID_32772                        32772</span></span><br><span class="line"><span class="meta">#<span class="keyword">define</span> ID_32773                        32773</span></span><br><span class="line"><span class="meta">#<span class="keyword">define</span> ID_32774                        32774</span></span><br><span class="line"><span class="meta">#<span class="keyword">define</span> ID_32775                        32775</span></span><br><span class="line"><span class="meta">#<span class="keyword">define</span> ID_32776                        32776</span></span><br><span class="line"><span class="meta">#<span class="keyword">define</span> ID_32777                        32777</span></span><br><span class="line"><span class="meta">#<span class="keyword">define</span> ID_32778                        32778</span></span><br><span class="line"><span class="meta">#<span class="keyword">define</span> IDC_STATIC                      -1</span></span><br></pre></td></tr></table></figure>
+<p>如果需要更多的资源则自己添加宏定义</p>
+<h3 id="程序中使用菜单">程序中使用菜单</h3>
+<p>有多个可以指定菜单的地方,</p>
+<p>最初可以指定菜单是在注册窗口类时</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">wndclass.lpszMenuName   = MAKEINTRESOURCEW(IDC_ICONDEMO);</span><br></pre></td></tr></table></figure>
+<p>然后在从创建窗口实例的时候可以指定菜单覆盖窗口类的菜单</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">HWND hWnd = CreateWindowW(szWindowClass, szTitle, WS_OVERLAPPEDWINDOW,</span><br><span class="line">   CW_USEDEFAULT, <span class="number">0</span>, CW_USEDEFAULT, <span class="number">0</span>, nullptr, hMenu, hInstance, nullptr);</span><br></pre></td></tr></table></figure>
+<p>这里hMenu句柄可以是LoadMenu打开的菜单资源</p>
+<p>如果CreateWindow这里不指定菜单, 则默认使用窗口类的菜单.否则覆盖之</p>
+<p>窗口实例创建之后还有改变菜单的方法</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">SetMenu(hwnd,hMenu)</span><br></pre></td></tr></table></figure>
+<h3 id="菜单和消息">菜单和消息</h3>
+<h4 id="wm_menuselect">WM_MENUSELECT</h4>
+<p>当鼠标在菜单上移动时产生</p>
+<h5 id="lowordwparam-弹出菜单索引或者菜单id">LOWORD(wParam)
+弹出菜单索引或者菜单ID</h5>
+<h5 id="hiwordwparam-选择标记">HIWORD(wParam) 选择标记</h5>
+<table>
+<colgroup>
+<col style="width: 32%" />
+<col style="width: 67%" />
+</colgroup>
+<thead>
+<tr>
+<th style="text-align: left;">Value</th>
+<th style="text-align: left;">Meaning</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align: left;"><strong>MF_BITMAP</strong>0x00000004L</td>
+<td style="text-align: left;">Item displays a bitmap.</td>
+</tr>
+<tr>
+<td
+style="text-align: left;"><strong>MF_CHECKED</strong>0x00000008L</td>
+<td style="text-align: left;">Item is checked.</td>
+</tr>
+<tr>
+<td
+style="text-align: left;"><strong>MF_DISABLED</strong>0x00000002L</td>
+<td style="text-align: left;">Item is disabled.</td>
+</tr>
+<tr>
+<td style="text-align: left;"><strong>MF_GRAYED</strong>0x00000001L</td>
+<td style="text-align: left;">Item is grayed.</td>
+</tr>
+<tr>
+<td style="text-align: left;"><strong>MF_HILITE</strong>0x00000080L</td>
+<td style="text-align: left;">Item is highlighted.</td>
+</tr>
+<tr>
+<td
+style="text-align: left;"><strong>MF_MOUSESELECT</strong>0x00008000L</td>
+<td style="text-align: left;">Item is selected with the mouse.</td>
+</tr>
+<tr>
+<td
+style="text-align: left;"><strong>MF_OWNERDRAW</strong>0x00000100L</td>
+<td style="text-align: left;">Item is an owner-drawn item.</td>
+</tr>
+<tr>
+<td style="text-align: left;"><strong>MF_POPUP</strong>0x00000010L</td>
+<td style="text-align: left;">Item opens a drop-down menu or
+submenu.</td>
+</tr>
+<tr>
+<td
+style="text-align: left;"><strong>MF_SYSMENU</strong>0x00002000L</td>
+<td style="text-align: left;">Item is contained in the window menu. The
+<em>lParam</em> parameter contains a handle to the menu associated with
+the message.</td>
+</tr>
+</tbody>
+</table>
+<h5 id="lparam-包含所选项的菜单句柄">lParam 包含所选项的菜单句柄</h5>
+<p>该消息用于暂时高亮菜单,显式完整文本描述</p>
+<h4 id="wm_command">WM_COMMAND</h4>
+<p>最重要</p>
+<p>表示点击了某个启用的菜单</p>
+<p>LOWORD(wParam)菜单ID</p>
+<p>下面的三个消息几乎用不到</p>
+<h4 id="wm_initmenupopup">WM_INITMENUPOPUP</h4>
+<p>要显示弹出菜单时的消息</p>
+<p>wParam弹出菜单的句柄</p>
+<p>LOWORD(lParam)弹出菜单的索引</p>
+<p>HIWORD(lParam)1系统菜单,0其他菜单</p>
+<h4 id="wm_syscommand">WM_SYSCOMMAND</h4>
+<p>点击了系统菜单某个启用的菜单项</p>
+<p>LWORD(wParam)菜单ID</p>
+<p>LOWORD(lParam)鼠标x坐标,屏幕坐标</p>
+<p>HIWORD(lParam)鼠标y坐标</p>
+<h4 id="wm_menuchar">WM_MENUCHAR</h4>
+<p>用户按下了Alt和不对应任何菜单项字符键.</p>
+<p>或者弹出菜单时按下不对应任何菜单项的字符键</p>
+<p>用于程序捕获并提醒快捷键不存在</p>
+<p>LOWORD(wParam) 字符码</p>
+<p>HIWORD(wParam) 选择吗</p>
+<p>lParam 菜单句柄</p>
+<p>该消息直接发送给DefWindowProc会导致操作系统MessageBeep</p>
+<h3 id="例程">例程</h3>
+<h4 id="菜单结构-1">菜单结构</h4>
+<figure>
+<img
+src="https://raw.githubusercontent.com/DeutschBall/DeutschBall/main/image-20220823105251663.png"
+alt="visual studio中编辑菜单" />
+<figcaption aria-hidden="true">visual studio中编辑菜单</figcaption>
+</figure>
+<p>使用文本编辑器打开MENUDEMO.rc文件,其菜单结构是按照BEGIN,END分块的</p>
+<p>BEGIN,END块可以嵌套,约外层的菜单嵌套层数越低</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br></pre></td><td class="code"><pre><span class="line"></span><br><span class="line">IDC_MENUDEMO MENU</span><br><span class="line">BEGIN</span><br><span class="line">    POPUP <span class="string">&quot;文件(&amp;F)&quot;</span></span><br><span class="line">    BEGIN</span><br><span class="line">        MENUITEM <span class="string">&quot;&amp;New&quot;</span>,                        IDM_FILE_NEW</span><br><span class="line">        MENUITEM <span class="string">&quot;&amp;Open&quot;</span>,                       IDM_FILE_OPEN</span><br><span class="line">        MENUITEM <span class="string">&quot;&amp;Save&quot;</span>,                       IDM_FILE_SAVE</span><br><span class="line">        MENUITEM <span class="string">&quot;Save &amp;As&quot;</span>,                    IDM_FILE_SAVE_AS</span><br><span class="line">        MENUITEM <span class="string">&quot;E&amp;xit&quot;</span>,                       IDM_APP_EXIT</span><br><span class="line">        MENUITEM SEPARATOR</span><br><span class="line">    END</span><br><span class="line">    POPUP <span class="string">&quot;编辑(&amp;E)&quot;</span></span><br><span class="line">    BEGIN</span><br><span class="line">        MENUITEM <span class="string">&quot;&amp;Undo&quot;</span>,                       IDM_EDIT_UNDO</span><br><span class="line">        MENUITEM SEPARATOR</span><br><span class="line">        MENUITEM <span class="string">&quot;C&amp;ut&quot;</span>,                        IDM_EDIT_CUT</span><br><span class="line">        MENUITEM <span class="string">&quot;&amp;Copy&quot;</span>,                       IDM_EDIT_COPY</span><br><span class="line">        MENUITEM <span class="string">&quot;&amp;Paste&quot;</span>,                      IDM_EDIT_PASTE</span><br><span class="line">        MENUITEM <span class="string">&quot;De&amp;lete&quot;</span>,                     IDM_EDIT_CLEAR</span><br><span class="line">    END</span><br><span class="line">    POPUP <span class="string">&quot;背景(&amp;B)&quot;</span></span><br><span class="line">    BEGIN</span><br><span class="line">        MENUITEM <span class="string">&quot;&amp;White&quot;</span>,                      IDM_BKGND_WHITE, CHECKED</span><br><span class="line">        MENUITEM <span class="string">&quot;&amp;Light Gray&quot;</span>,                 IDM_BKGND_LTGRAY</span><br><span class="line">        MENUITEM <span class="string">&quot;&amp;Gray&quot;</span>,                       IDM_BKGND_GRAY</span><br><span class="line">        MENUITEM <span class="string">&quot;&amp;Dark Gray&quot;</span>,                  IDM_BKGND_DKGRAY</span><br><span class="line">        MENUITEM <span class="string">&quot;&amp;Black&quot;</span>,                      IDM_BKGND_BLACK</span><br><span class="line">    END</span><br><span class="line">    POPUP <span class="string">&quot;计时(&amp;T)&quot;</span></span><br><span class="line">    BEGIN</span><br><span class="line">        MENUITEM <span class="string">&quot;&amp;Start&quot;</span>,                      IDM_TIMER_START</span><br><span class="line">        MENUITEM <span class="string">&quot;S&amp;top&quot;</span>,                       IDM_TIMER_STOP, GRAYED</span><br><span class="line">    END</span><br><span class="line">    POPUP <span class="string">&quot;帮助(&amp;H)&quot;</span></span><br><span class="line">    BEGIN</span><br><span class="line">        MENUITEM <span class="string">&quot;&amp;Help...&quot;</span>,                    IDM_APP_HELP</span><br><span class="line">        MENUITEM <span class="string">&quot;&amp;About MenuDmo...&quot;</span>,           IDM_APP_ABOUT</span><br><span class="line">    END</span><br><span class="line">END</span><br><span class="line"></span><br></pre></td></tr></table></figure>
+<p>菜单项前面加&amp;,是为了加下划线,方便使用快捷键</p>
+<p>整个菜单的ID表示在一开始列出了,是IDC_MENUDEMO,该值供注册窗口类或者实例化窗口时引用</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">IDC_MENUDEMO MENU</span><br><span class="line">    <span class="comment">//标识符	资源类型</span></span><br></pre></td></tr></table></figure>
+<blockquote>
+<p>这个ID是多少不重要,只要保证每个资源有唯一的ID就可以了,我们只管给资源ID规定宏定义,visualstudio会自动帮我们分配一个正整数的</p>
+</blockquote>
+<p>此后顶级菜单,即弹出菜单,都会有POPUP声明,然后跟着BEGIN,END作用块</p>
+<p>比如<code>POPUP "文件(&amp;F)"</code>,这就声明了一个文件弹出菜单.其后面紧跟着的BEGIN,END包裹的块就是它的弹出菜单项</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">  POPUP <span class="string">&quot;文件(&amp;F)&quot;</span><span class="comment">//弹出菜单</span></span><br><span class="line">  BEGIN</span><br><span class="line">...弹出菜单项</span><br><span class="line">  END</span><br></pre></td></tr></table></figure>
+<p>所有弹出菜单都不能有ID标识,只能是普通菜单项MENUITEM可以有ID标识,比如</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">MENUITEM <span class="string">&quot;&amp;New&quot;</span>,                        IDM_FILE_NEW</span><br></pre></td></tr></table></figure>
+<p>因为弹出菜单只负责展示其菜单项,不能安排其他行为</p>
+<h4 id="程序中使用菜单-1">程序中使用菜单</h4>
+<p>visual studio默认建立的资源都是使用ID索引的,没有使用字符串</p>
+<p>刚才建立的菜单其ID为<code>IDC_MENUDEMO</code>,怎样才能让窗口使用这个菜单呢?</p>
+<p>可以在创建窗口类的时候使用MAKEINTRESOURCE宏</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">wndclass.lpszMenuName = MAKEINTRESOURCE(IDC_MENUDEMO);</span><br></pre></td></tr></table></figure>
+<p>也可以在创建窗口实例的时候才指定菜单</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">wndclass.lpszMenuName = <span class="literal">NULL</span>;<span class="comment">//创建窗口类的时候不指定菜单</span></span><br><span class="line">...</span><br><span class="line">HMENU hMenu = LoadMenu(hInstance, MAKEINTRESOURCE(IDC_MENUDEMO));<span class="comment">//加载菜单句柄</span></span><br><span class="line">hwnd = CreateWindow(szAppName, TEXT(<span class="string">&quot;Menu Demonstration&quot;</span>),</span><br><span class="line">	WS_OVERLAPPEDWINDOW,</span><br><span class="line">	CW_USEDEFAULT, CW_USEDEFAULT,</span><br><span class="line">	CW_USEDEFAULT, CW_USEDEFAULT,</span><br><span class="line">	<span class="literal">NULL</span>, hMenu, hInstance, <span class="literal">NULL</span>);</span><br></pre></td></tr></table></figure>
+<h4 id="菜单消息">菜单消息</h4>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br></pre></td><td class="code"><pre><span class="line"></span><br><span class="line"><span class="keyword">switch</span> (message)</span><br><span class="line">&#123;</span><br><span class="line"><span class="keyword">case</span> WM_COMMAND:</span><br><span class="line">	hMenu = GetMenu(hwnd);</span><br><span class="line"></span><br><span class="line">	<span class="keyword">switch</span> (LOWORD(wParam))</span><br><span class="line">	&#123;</span><br><span class="line">	<span class="keyword">case</span> IDM_FILE_NEW:</span><br><span class="line">	<span class="keyword">case</span> IDM_FILE_OPEN:</span><br><span class="line">	<span class="keyword">case</span> IDM_FILE_SAVE:</span><br><span class="line">	<span class="keyword">case</span> IDM_FILE_SAVE_AS:</span><br><span class="line"></span><br><span class="line">		MessageBeep(<span class="number">0</span>);<span class="comment">//蜂鸣</span></span><br><span class="line">		<span class="keyword">return</span> <span class="number">0</span>;</span><br><span class="line">	<span class="keyword">case</span> IDM_APP_EXIT:</span><br><span class="line">		SendMessage(hwnd, WM_CLOSE, <span class="number">0</span>, <span class="number">0</span>);<span class="comment">//发送程序退出关闭消息</span></span><br><span class="line">		<span class="keyword">return</span> <span class="number">0</span>;</span><br><span class="line"></span><br><span class="line">	<span class="keyword">case</span> IDM_EDIT_UNDO:</span><br><span class="line">	<span class="keyword">case</span> IDM_EDIT_CUT:</span><br><span class="line">	<span class="keyword">case</span> IDM_EDIT_COPY:</span><br><span class="line">	<span class="keyword">case</span> IDM_EDIT_PASTE:</span><br><span class="line">	<span class="keyword">case</span> IDM_EDIT_CLEAR:</span><br><span class="line">		MessageBeep(<span class="number">0</span>);</span><br><span class="line">		<span class="keyword">return</span> <span class="number">0</span>;</span><br><span class="line"></span><br><span class="line">	<span class="keyword">case</span> IDM_BKGND_WHITE: <span class="comment">// Note: Logic below //各种颜色背景是互斥关系,只能使用一个</span></span><br><span class="line">	<span class="keyword">case</span> IDM_BKGND_LTGRAY: <span class="comment">// assumes that IDM_WHITE </span></span><br><span class="line">	<span class="keyword">case</span> IDM_BKGND_GRAY: <span class="comment">// through IDM_BLACK are </span></span><br><span class="line">	<span class="keyword">case</span> IDM_BKGND_DKGRAY: <span class="comment">// consecutive numbers in </span></span><br><span class="line">	<span class="keyword">case</span> IDM_BKGND_BLACK: <span class="comment">// the order shown here. </span></span><br><span class="line"></span><br><span class="line">		CheckMenuItem(hMenu, iSelection, MF_UNCHECKED);<span class="comment">//原来的选择弃选</span></span><br><span class="line">		iSelection = LOWORD(wParam);<span class="comment">//对于WM_COMMAND消息来说,LOWORD(wParam)=点选菜单ID,这里获取新的点选背景ID</span></span><br><span class="line">		CheckMenuItem(hMenu, iSelection, MF_CHECKED);<span class="comment">//修改新的背景色</span></span><br><span class="line"></span><br><span class="line">		SetClassLong(hwnd, GCL_HBRBACKGROUND, (LONG)GetStockObject(idColor[LOWORD(wParam) - IDM_BKGND_WHITE]));<span class="comment">//修改系统属性,画刷颜色修改为新选中的颜色</span></span><br><span class="line"></span><br><span class="line">		InvalidateRect(hwnd, <span class="literal">NULL</span>, TRUE);</span><br><span class="line">		<span class="keyword">return</span> <span class="number">0</span>;</span><br><span class="line"></span><br><span class="line">	<span class="keyword">case</span> IDM_TIMER_START:</span><br><span class="line">		<span class="keyword">if</span> (SetTimer(hwnd, ID_TIMER, <span class="number">1000</span>, <span class="literal">NULL</span>))<span class="comment">//开始计时,时钟编号ID_TIMER(1)</span></span><br><span class="line">		&#123;</span><br><span class="line">			EnableMenuItem(hMenu, IDM_TIMER_START, MF_GRAYED);<span class="comment">//禁用</span></span><br><span class="line">			EnableMenuItem(hMenu, IDM_TIMER_STOP, MF_ENABLED);<span class="comment">//启用计时结束实践</span></span><br><span class="line">		&#125;</span><br><span class="line">		<span class="keyword">return</span> <span class="number">0</span>;</span><br><span class="line"></span><br><span class="line">	<span class="keyword">case</span> IDM_TIMER_STOP:</span><br><span class="line">		KillTimer(hwnd, ID_TIMER);<span class="comment">//销毁时钟</span></span><br><span class="line">		EnableMenuItem(hMenu, IDM_TIMER_START, MF_ENABLED);</span><br><span class="line">		EnableMenuItem(hMenu, IDM_TIMER_STOP, MF_GRAYED);</span><br><span class="line">		<span class="keyword">return</span> <span class="number">0</span>;</span><br><span class="line">	<span class="keyword">case</span> IDM_APP_HELP:</span><br><span class="line">		MessageBox(hwnd, TEXT(<span class="string">&quot;Help not yet implemented!&quot;</span>),<span class="comment">//摆烂</span></span><br><span class="line">			szAppName, MB_ICONEXCLAMATION | MB_OK);</span><br><span class="line">		<span class="keyword">return</span> <span class="number">0</span>;</span><br><span class="line"></span><br><span class="line">	<span class="keyword">case</span> IDM_APP_ABOUT:</span><br><span class="line">		MessageBox(hwnd, TEXT(<span class="string">&quot;Menu Demonstration Program\n&quot;</span>)</span><br><span class="line">			TEXT(<span class="string">&quot;(c) Charles Petzold, 1998&quot;</span>),</span><br><span class="line">			szAppName, MB_ICONINFORMATION | MB_OK);</span><br><span class="line">		<span class="keyword">return</span> <span class="number">0</span>;</span><br><span class="line">	&#125;</span><br><span class="line">	<span class="keyword">break</span>;</span><br></pre></td></tr></table></figure>
+<p>所有点击活动菜单的消息都有一个WM_COMMAND命令</p>
+<p>此时其LOWORD(lParam)保存的是击中菜单的ID,如果击中的是弹出菜单则系统负载该逻辑,自动展开菜单,不需要我们指定弹出菜单的行为(事实上弹出菜单不允许拥有ID,这就意味着在程序中无法索引到它,无法安排行为)</p>
+<h5 id="复用关闭消息">复用关闭消息</h5>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">case</span> IDM_APP_EXIT:</span><br><span class="line">	SendMessage(hwnd, WM_CLOSE, <span class="number">0</span>, <span class="number">0</span>);<span class="comment">//发送程序退出关闭消息</span></span><br></pre></td></tr></table></figure>
+<p>当点击菜单项项时,直接发送一体哦啊WM_CLOSE消息即可借助已有代码完成功能</p>
+<h5 id="改变勾选状态">改变勾选状态</h5>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">DWORD <span class="title function_">CheckMenuItem</span><span class="params">(</span></span><br><span class="line"><span class="params">	HMENU hMenu,<span class="comment">//菜单句柄,使用GetMenu(hwnd)获得</span></span></span><br><span class="line"><span class="params">	UINT uIDCheckItem,<span class="comment">//需要修改状态的菜单项ID</span></span></span><br><span class="line"><span class="params">	UINT uCheck<span class="comment">//修改后的状态</span></span></span><br><span class="line"><span class="params">)</span>;</span><br></pre></td></tr></table></figure>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">CheckMenuItem(hMenu, iSelection, MF_UNCHECKED);<span class="comment">//原来的选择弃选</span></span><br><span class="line">iSelection = LOWORD(wParam);<span class="comment">//对于WM_COMMAND消息来说,LOWORD(wParam)=点选菜单ID,这里获取新的点选背景ID</span></span><br><span class="line">CheckMenuItem(hMenu, iSelection, MF_CHECKED);<span class="comment">//修改新的背景色</span></span><br><span class="line">SetClassLong(hwnd, GCL_HBRBACKGROUND, (LONG)GetStockObject(idColor[LOWORD(wParam) - IDM_BKGND_WHITE]));<span class="comment">//修改系统属性,画刷颜色修改为新选中的颜色</span></span><br></pre></td></tr></table></figure>
+<p>点选新的背景颜色之后,首先弃选先前的背景颜色,然后修改为新的背景颜色</p>
+<p>之后修使用SetClassLong改程序的背景颜色</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">DWORD <span class="title function_">SetClassLongA</span><span class="params">(</span></span><br><span class="line"><span class="params">  [in] HWND hWnd,<span class="comment">//需要修改属性的窗口句柄</span></span></span><br><span class="line"><span class="params">  [in] <span class="type">int</span>  nIndex,<span class="comment">//需要修改的属性</span></span></span><br><span class="line"><span class="params">  [in] LONG dwNewLong<span class="comment">//该属性的新值</span></span></span><br><span class="line"><span class="params">)</span>;</span><br></pre></td></tr></table></figure>
+<h2 id="菜单快捷键">菜单快捷键</h2>
+<h3 id="右键菜单">右键菜单</h3>
+<p>在处理右键消息的时候可以安排上右键快捷菜单</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line">BOOL <span class="title function_">TrackPopupMenu</span><span class="params">(</span></span><br><span class="line"><span class="params">  [in]           HMENU      hMenu,<span class="comment">//需要显式的菜单句柄</span></span></span><br><span class="line"><span class="params">  [in]           UINT       uFlags,<span class="comment">//点选菜单的方式</span></span></span><br><span class="line"><span class="params">  [in]           <span class="type">int</span>        x,</span></span><br><span class="line"><span class="params">  [in]           <span class="type">int</span>        y,</span></span><br><span class="line"><span class="params">  [in]           <span class="type">int</span>        nReserved,</span></span><br><span class="line"><span class="params">  [in]           HWND       hWnd,</span></span><br><span class="line"><span class="params">  [in, optional] <span class="type">const</span> RECT *prcRect</span></span><br><span class="line"><span class="params">)</span>;</span><br></pre></td></tr></table></figure>
+<p>在指定的位置展示一个快捷菜单,并且追踪在该菜单上的选择.</p>
+<p>该快捷菜单可以出现在任何地方</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">Displays a shortcut menu at the specified location and tracks the selection of items on the menu. The shortcut menu can appear anywhere on the screen.</span><br></pre></td></tr></table></figure>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">case</span> WM_CREATE:</span><br><span class="line">	hMenu = LoadMenu(hInst, MAKEINTRESOURCE(IDC_MENUDEMO));<span class="comment">//hMenu获取整个菜单句柄</span></span><br><span class="line">	hMenu = GetSubMenu(hMenu, <span class="number">0</span>);<span class="comment">//此时hMenu句柄是第一个顶级菜单的句柄,不是整个菜单的句柄,即文件弹出菜单,如果这里写1则为编辑弹出菜单</span></span><br><span class="line">	<span class="keyword">return</span> <span class="number">0</span>;</span><br><span class="line"><span class="keyword">case</span> WM_RBUTTONUP:</span><br><span class="line">	point.x = LOWORD(lParam);</span><br><span class="line">	point.y = HIWORD(lParam);</span><br><span class="line">	ClientToScreen(hwnd, &amp;point);</span><br><span class="line">	TrackPopupMenu(hMenu, TPM_RIGHTBUTTON, point.x, point.y, <span class="number">0</span>, hwnd, <span class="literal">NULL</span>);<span class="comment">//允许使用左键和右键,在本菜单上作用相同</span></span><br><span class="line">	<span class="keyword">return</span> <span class="number">0</span>;</span><br></pre></td></tr></table></figure>
+<h3 id="键盘加速键">键盘加速键</h3>
+<p>键盘加速键不是处理WM_KEYDOWN或者WM_CHAR复制键盘功能,当然这样写也能达到相同的目标</p>
+<p>但是键盘加速键可以省去其逻辑</p>
+<p>此处略去一大堆优点,因为有些优点现在我也体会不到</p>
+<p>键盘加速键应当是Shift,Ctrl,Alt带领的跨界见,避免使用Tab,Enter,Esc,Space作键盘加速键</p>
+<p>比如Ctrl+Z 撤销,Ctrl+X剪切,Del删除</p>
+<h3 id="加速键表">加速键表</h3>
+<p>加速键表也是资源的一种,可以在visual studio中添加Accelerator资源</p>
+<figure>
+<img
+src="https://raw.githubusercontent.com/DeutschBall/DeutschBall/main/image-20220823114008382.png"
+alt="一方通行" />
+<figcaption aria-hidden="true">一方通行</figcaption>
+</figure>
+<p>加速键表长这样</p>
+<p>ID就是该加速键的编号,键对应键盘动作,类型要么是虚拟键VIRTKEY,要么是字符CHAR</p>
+<figure>
+<img
+src="https://raw.githubusercontent.com/DeutschBall/DeutschBall/main/image-20220823114110566.png"
+alt="image-20220823114110566" />
+<figcaption aria-hidden="true">image-20220823114110566</figcaption>
+</figure>
+<p>如果键盘加速键想要和菜单关联起来,那么一个键盘加速键的ID需要设置成一个菜单项的ID</p>
+<p>整个加速键表类似菜单一样,也有自己的一个ID标识,这个可以在资源视图看到</p>
+<figure>
+<img
+src="https://raw.githubusercontent.com/DeutschBall/DeutschBall/main/image-20220823145812581.png"
+alt="image-20220823145812581" />
+<figcaption aria-hidden="true">image-20220823145812581</figcaption>
+</figure>
+<p>通常方便使用,加速键表名和程序名,菜单名都相同</p>
+<p>有了这个加速键表ID我们就可以在表的层面上和程序打交道,而不是需要负责每个加速键的逻辑.在程序中使用LoadAccelerators函数加载加速键表并获得句柄</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">HANDLE hAccel=LoadAccelerators(hInstance,MAKEINTRESOURCE(IDC_MENUDEMO));</span><br></pre></td></tr></table></figure>
+<p>现在程序中就有加速键表句柄了,下面就是如何使用该句柄了</p>
+<p>在消息循环翻译分派消息之前先尝试翻译成加速键消息</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">while</span> (GetMessage(&amp;msg, <span class="literal">NULL</span>, <span class="number">0</span>, <span class="number">0</span>)) &#123;</span><br><span class="line">	<span class="keyword">if</span> (!TranslateAccelerator(hwnd, hAccel, &amp;msg)) &#123;<span class="comment">//此处使用了加速键表句柄hAccel</span></span><br><span class="line">		TranslateMessage(&amp;msg);</span><br><span class="line">		DispatchMessageW(&amp;msg);</span><br><span class="line">	&#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>对于每个消息都会先经过一个加速键翻译,TranslateAccelerator函数确定保存在msg中的消息是否是键盘消息(包括虚拟键消息和字符消息),如果是,并且hAccel是一个有效的加速键表句柄,下面就调用hwnd指向窗口的窗口过程,向其发送同键盘加速键ID对应的菜单项按下的WM_COMMAND或者WM_SYSCOMMAND消息</p>
+<p>显然这个翻译后的消息还会进入消息队列,但是翻译后的消息是WM_COMMAND消息,不是WM_KEYDOWN,WM_CHAR消息,不会再被TranslateAccelerator翻译,因此通过条件判断,正式进入消息循环处理</p>
+<p>注意到<code>TranslateAccelerator(hwnd, hAccel, &amp;msg)</code>这里指定了一个主窗口句柄,但是一个程序可以有多个窗口,这就会导致所有加速键消息发往主窗口.</p>
+<p>如果想让一个消息发往现在的焦点窗口,则可以使用msg.hwnd,这个hwnd是目前消息的窗口句柄</p>
+<h3 id="处理wm_command消息">处理WM_COMMAND消息</h3>
+<p>在处理WM_COMMAND消息时,加速键,菜单,控件消息的参数含义:</p>
+<figure>
+<img
+src="https://raw.githubusercontent.com/DeutschBall/DeutschBall/main/image-20220823151633079.png"
+alt="image-20220823151633079" />
+<figcaption aria-hidden="true">image-20220823151633079</figcaption>
+</figure>
+<p>如此看来,如果加速键ID和功能表ID故意设置成相同值,就不用大费周折了</p>
+<h3 id="例程-1">例程</h3>
+<h4 id="menudemo2.rc">MENUDEMO2.rc</h4>
+<h5 id="菜单表">菜单表</h5>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br></pre></td><td class="code"><pre><span class="line">IDC_MENUDEMO2 MENU</span><br><span class="line">BEGIN</span><br><span class="line">    POPUP <span class="string">&quot;&amp;File&quot;</span></span><br><span class="line">    BEGIN</span><br><span class="line">        MENUITEM <span class="string">&quot;&amp;New&quot;</span>,                        IDM_FILE_NEW</span><br><span class="line">        MENUITEM <span class="string">&quot;&amp;Open&quot;</span>,                       IDM_FILE_OPEN</span><br><span class="line">        MENUITEM <span class="string">&quot;&amp;Save&quot;</span>,                       IDM_FILE_SAVE</span><br><span class="line">        MENUITEM <span class="string">&quot;Save &amp;As&quot;</span>,                    IDM_FILE_SAVE_AS</span><br><span class="line">        MENUITEM SEPARATOR</span><br><span class="line">        MENUITEM <span class="string">&quot;&amp;Print&quot;</span>,                      IDM_FILE_PRINT</span><br><span class="line">        MENUITEM SEPARATOR</span><br><span class="line">        MENUITEM <span class="string">&quot;E&amp;xit&quot;</span>,                       IDM_APP_EXIT</span><br><span class="line">    END</span><br><span class="line">    POPUP <span class="string">&quot;&amp;Edit&quot;</span></span><br><span class="line">    BEGIN</span><br><span class="line">        MENUITEM <span class="string">&quot;&amp;Undo\tCtrl+Z&quot;</span>,               IDM_EDIT_UNDO</span><br><span class="line">        MENUITEM SEPARATOR</span><br><span class="line">        MENUITEM <span class="string">&quot;Cu&amp;t\tCtrl+X&quot;</span>,                IDM_EDIT_CUT</span><br><span class="line">        MENUITEM <span class="string">&quot;&amp;Copy\tCtrl+C&quot;</span>,               IDM_EDIT_COPY</span><br><span class="line">        MENUITEM <span class="string">&quot;&amp;Paste\tCtrl+V&quot;</span>,              IDM_EDIT_PASTE</span><br><span class="line">        MENUITEM <span class="string">&quot;De&amp;lete\tDel&quot;</span>,                IDM_EDIT_DELETE</span><br><span class="line">        MENUITEM SEPARATOR</span><br><span class="line">        MENUITEM <span class="string">&quot;&amp;Select All&quot;</span>,                 IDM_EDIT_SELECT_ALL</span><br><span class="line">    END</span><br><span class="line">    POPUP <span class="string">&quot;&amp;Help&quot;</span></span><br><span class="line">    BEGIN</span><br><span class="line">        MENUITEM <span class="string">&quot;&amp;Help...\tF1&quot;</span>,                IDM_HELP_HELP</span><br><span class="line">        MENUITEM <span class="string">&quot;&amp;About...&quot;</span>,                   IDM_APP_ABOUT</span><br><span class="line">    END</span><br><span class="line">END</span><br></pre></td></tr></table></figure>
+<h5 id="加速键表-1">加速键表</h5>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line">IDC_MENUDEMO2 ACCELERATORS</span><br><span class="line">BEGIN</span><br><span class="line">    <span class="string">&quot;8&quot;</span>,            IDM_UNDO,               VIRTKEY, ALT, NOINVERT</span><br><span class="line">    VK_DELETE,      IDM_EDIT_CLEAR,         VIRTKEY, NOINVERT</span><br><span class="line">    VK_DELETE,      IDM_EDIT_CUT,           VIRTKEY, SHIFT, NOINVERT</span><br><span class="line">    VK_F1,          IDM_HELP_HELP,          VIRTKEY, NOINVERT</span><br><span class="line">    VK_INSERT,      IDM_EDIT_COPY,          VIRTKEY, CONTROL, NOINVERT</span><br><span class="line">    VK_INSERT,      IDM_EDIT_PASTE,         VIRTKEY, SHIFT, NOINVERT</span><br><span class="line">    <span class="string">&quot;^C&quot;</span>,           IDM_EDIT_COPY,          ASCII,  NOINVERT</span><br><span class="line">    <span class="string">&quot;^V&quot;</span>,           IDM_EDIT_PASTE,         ASCII,  NOINVERT</span><br><span class="line">    <span class="string">&quot;^X&quot;</span>,           IDM_EDIT_CUT,           ASCII,  NOINVERT</span><br><span class="line">    <span class="string">&quot;^Z&quot;</span>,           IDM_EDIT_UNDO,          ASCII,  NOINVERT</span><br><span class="line">    <span class="string">&quot;^A&quot;</span>,           IDM_EDIT_SELECT_ALL,    ASCII,  NOINVERT</span><br><span class="line">END</span><br></pre></td></tr></table></figure>
+<p>菜单名和加速键表ID都是IDC_MENUDEMO2,可以使用MAKEINTRESOURCE宏加载资源</p>
+<h4 id="menudemo2.cpp">MENUDEMO2.cpp</h4>
+<p>使用父窗口控制编辑控件子窗口,大大减轻自己写编辑逻辑的工作量</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br><span class="line">75</span><br><span class="line">76</span><br><span class="line">77</span><br><span class="line">78</span><br><span class="line">79</span><br><span class="line">80</span><br><span class="line">81</span><br><span class="line">82</span><br><span class="line">83</span><br><span class="line">84</span><br><span class="line">85</span><br><span class="line">86</span><br><span class="line">87</span><br><span class="line">88</span><br><span class="line">89</span><br><span class="line">90</span><br><span class="line">91</span><br><span class="line">92</span><br><span class="line">93</span><br><span class="line">94</span><br><span class="line">95</span><br><span class="line">96</span><br><span class="line">97</span><br><span class="line">98</span><br><span class="line">99</span><br><span class="line">100</span><br><span class="line">101</span><br><span class="line">102</span><br><span class="line">103</span><br><span class="line">104</span><br><span class="line">105</span><br><span class="line">106</span><br><span class="line">107</span><br><span class="line">108</span><br><span class="line">109</span><br><span class="line">110</span><br><span class="line">111</span><br><span class="line">112</span><br><span class="line">113</span><br><span class="line">114</span><br><span class="line">115</span><br><span class="line">116</span><br><span class="line">117</span><br><span class="line">118</span><br><span class="line">119</span><br><span class="line">120</span><br><span class="line">121</span><br><span class="line">122</span><br><span class="line">123</span><br><span class="line">124</span><br><span class="line">125</span><br><span class="line">126</span><br><span class="line">127</span><br><span class="line">128</span><br><span class="line">129</span><br><span class="line">130</span><br><span class="line">131</span><br><span class="line">132</span><br><span class="line">133</span><br><span class="line">134</span><br><span class="line">135</span><br><span class="line">136</span><br><span class="line">137</span><br><span class="line">138</span><br><span class="line">139</span><br><span class="line">140</span><br><span class="line">141</span><br><span class="line">142</span><br><span class="line">143</span><br><span class="line">144</span><br><span class="line">145</span><br><span class="line">146</span><br><span class="line">147</span><br><span class="line">148</span><br><span class="line">149</span><br><span class="line">150</span><br><span class="line">151</span><br><span class="line">152</span><br><span class="line">153</span><br><span class="line">154</span><br><span class="line">155</span><br><span class="line">156</span><br><span class="line">157</span><br><span class="line">158</span><br><span class="line">159</span><br><span class="line">160</span><br><span class="line">161</span><br><span class="line">162</span><br><span class="line">163</span><br><span class="line">164</span><br><span class="line">165</span><br><span class="line">166</span><br><span class="line">167</span><br><span class="line">168</span><br><span class="line">169</span><br><span class="line">170</span><br><span class="line">171</span><br><span class="line">172</span><br><span class="line">173</span><br><span class="line">174</span><br><span class="line">175</span><br><span class="line">176</span><br><span class="line">177</span><br><span class="line">178</span><br><span class="line">179</span><br><span class="line">180</span><br><span class="line">181</span><br><span class="line">182</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;windows.h&gt;</span> </span></span><br><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&quot;MENUDEMO2.h&quot;</span> </span></span><br><span class="line"><span class="meta">#<span class="keyword">define</span> ID_EDIT 1 </span></span><br><span class="line">LRESULT CALLBACK <span class="title function_">WndProc</span><span class="params">(HWND, UINT, WPARAM, LPARAM)</span>;</span><br><span class="line">TCHAR szAppName[] = TEXT(<span class="string">&quot;PopPad2&quot;</span>);</span><br><span class="line"><span class="type">int</span> WINAPI <span class="title function_">WinMain</span><span class="params">(HINSTANCE hInstance, HINSTANCE hPrevInstance, PSTR szCmdLine, <span class="type">int</span> iCmdShow)</span></span><br><span class="line">&#123;</span><br><span class="line">	HACCEL hAccel;</span><br><span class="line">	HWND hwnd;</span><br><span class="line">	MSG msg;</span><br><span class="line">	WNDCLASS wndclass;</span><br><span class="line">	wndclass.style = CS_HREDRAW | CS_VREDRAW;</span><br><span class="line">	wndclass.lpfnWndProc = WndProc;</span><br><span class="line">	wndclass.cbClsExtra = <span class="number">0</span>;</span><br><span class="line">	wndclass.cbWndExtra = <span class="number">0</span>;</span><br><span class="line">	wndclass.hInstance = hInstance;</span><br><span class="line">	wndclass.hIcon = LoadIcon(hInstance,szAppName);</span><br><span class="line">	wndclass.hCursor = LoadCursor(<span class="literal">NULL</span>, IDC_ARROW);</span><br><span class="line">	wndclass.hbrBackground = (HBRUSH)GetStockObject(WHITE_BRUSH);</span><br><span class="line">	wndclass.lpszMenuName = MAKEINTRESOURCE(IDC_MENUDEMO2);</span><br><span class="line">	wndclass.lpszClassName = szAppName;</span><br><span class="line"></span><br><span class="line">	<span class="keyword">if</span> (!RegisterClass(&amp;wndclass))</span><br><span class="line">	&#123;</span><br><span class="line">		MessageBox(<span class="literal">NULL</span>, TEXT(<span class="string">&quot;This program requires Windows NT!&quot;</span>), szAppName, MB_ICONERROR);</span><br><span class="line">		<span class="keyword">return</span> <span class="number">0</span>;</span><br><span class="line">	&#125;</span><br><span class="line"></span><br><span class="line">	hwnd = CreateWindow(<span class="comment">//创建父窗口</span></span><br><span class="line">		szAppName, szAppName,</span><br><span class="line">		WS_OVERLAPPEDWINDOW,</span><br><span class="line">		GetSystemMetrics(SM_CXSCREEN) / <span class="number">4</span>,</span><br><span class="line">		GetSystemMetrics(SM_CYSCREEN) / <span class="number">4</span>,</span><br><span class="line">		GetSystemMetrics(SM_CXSCREEN) / <span class="number">2</span>,</span><br><span class="line">		GetSystemMetrics(SM_CYSCREEN) / <span class="number">2</span>,</span><br><span class="line">		<span class="literal">NULL</span>, <span class="literal">NULL</span>, hInstance, <span class="literal">NULL</span></span><br><span class="line">	);</span><br><span class="line"></span><br><span class="line">	ShowWindow(hwnd, iCmdShow);</span><br><span class="line">	UpdateWindow(hwnd);</span><br><span class="line"></span><br><span class="line">	hAccel = LoadAccelerators(hInstance, MAKEINTRESOURCE(IDC_MENUDEMO2));<span class="comment">//加载加速键表资源</span></span><br><span class="line">	<span class="keyword">while</span> (GetMessage(&amp;msg, <span class="literal">NULL</span>, <span class="number">0</span>, <span class="number">0</span>))</span><br><span class="line">	&#123;</span><br><span class="line">		<span class="keyword">if</span> (!TranslateAccelerator(hwnd, hAccel, &amp;msg))<span class="comment">//翻译加速键</span></span><br><span class="line">		&#123;</span><br><span class="line">			TranslateMessage(&amp;msg);</span><br><span class="line">			DispatchMessage(&amp;msg);</span><br><span class="line">		&#125;</span><br><span class="line">	&#125;</span><br><span class="line">	<span class="keyword">return</span> msg.wParam;</span><br><span class="line">&#125;</span><br><span class="line"><span class="type">int</span> <span class="title function_">AskConfirmation</span><span class="params">(HWND hwnd)</span><span class="comment">//关闭父窗口时的询问</span></span><br><span class="line">&#123;</span><br><span class="line">	<span class="keyword">return</span> MessageBox(hwnd, TEXT(<span class="string">&quot;Really want to close PopPad2?&quot;</span>),</span><br><span class="line">		szAppName, MB_YESNO | MB_ICONQUESTION);</span><br><span class="line">&#125;</span><br><span class="line">LRESULT CALLBACK <span class="title function_">WndProc</span><span class="params">(HWND hwnd, UINT message, WPARAM wParam, LPARAM lParam)</span></span><br><span class="line">&#123;</span><br><span class="line">	<span class="type">static</span> HWND hwndEdit;</span><br><span class="line">	<span class="type">int</span> iSelect, iEnable;</span><br><span class="line"></span><br><span class="line">	<span class="keyword">switch</span> (message)</span><br><span class="line">	&#123;</span><br><span class="line">	<span class="keyword">case</span> WM_CREATE:</span><br><span class="line">		hwndEdit = CreateWindow(TEXT(<span class="string">&quot;edit&quot;</span>), <span class="literal">NULL</span>,<span class="comment">//创建子窗口,父窗口过程管理子窗口过程,子窗口是预定义好的编辑控件</span></span><br><span class="line">			WS_CHILD | WS_VISIBLE | WS_HSCROLL | WS_VSCROLL |<span class="comment">//子窗口|可见|横竖滚动|边框|左对齐|多行|自动滚动</span></span><br><span class="line">			WS_BORDER | ES_LEFT | ES_MULTILINE |</span><br><span class="line">			ES_AUTOHSCROLL | ES_AUTOVSCROLL,</span><br><span class="line">			<span class="number">0</span>, <span class="number">0</span>, <span class="number">0</span>, <span class="number">0</span>, hwnd, (HMENU)ID_EDIT,<span class="comment">//子窗口ID</span></span><br><span class="line">			((LPCREATESTRUCT)lParam)-&gt;hInstance, <span class="literal">NULL</span>);</span><br><span class="line">		<span class="keyword">return</span> <span class="number">0</span>;</span><br><span class="line"></span><br><span class="line">	<span class="keyword">case</span> WM_SETFOCUS:</span><br><span class="line">		SetFocus(hwndEdit);<span class="comment">//父窗口将焦点让给子窗口</span></span><br><span class="line">		<span class="keyword">return</span> <span class="number">0</span>;</span><br><span class="line"></span><br><span class="line">	<span class="keyword">case</span> WM_SIZE:</span><br><span class="line">		MoveWindow(hwndEdit, <span class="number">0</span>, <span class="number">0</span>, LOWORD(lParam), HIWORD(lParam),TRUE);<span class="comment">//父窗口移动子窗口,始终填充整个父窗口的客户区</span></span><br><span class="line">		<span class="keyword">return</span> <span class="number">0</span>;</span><br><span class="line"></span><br><span class="line">	<span class="keyword">case</span> WM_INITMENUPOPUP:<span class="comment">//初始化弹出菜单,每次点击顶级菜单时,在接收到WM_COMMAND之前先接收到WM_INITMENUPOPUP</span></span><br><span class="line">		<span class="keyword">if</span> (lParam == <span class="number">1</span>)</span><br><span class="line">		&#123;</span><br><span class="line">			EnableMenuItem(</span><br><span class="line">				(HMENU)wParam,IDM_EDIT_UNDO,</span><br><span class="line">				SendMessage(hwndEdit, EM_CANUNDO, <span class="number">0</span>, <span class="number">0</span>) ?</span><br><span class="line">				MF_ENABLED : MF_GRAYED</span><br><span class="line">			);</span><br><span class="line"></span><br><span class="line">			EnableMenuItem((HMENU)wParam,</span><br><span class="line">				IDM_EDIT_PASTE,</span><br><span class="line">				IsClipboardFormatAvailable(CF_TEXT) ?<span class="comment">//询问剪切板状态,决定使能还是灰化粘贴键</span></span><br><span class="line">				MF_ENABLED : MF_GRAYED);</span><br><span class="line"></span><br><span class="line">			iSelect = SendMessage(hwndEdit, EM_GETSEL,<span class="number">0</span>, <span class="number">0</span>);<span class="comment">//获取高亮选中位置</span></span><br><span class="line"></span><br><span class="line">			<span class="keyword">if</span> (HIWORD(iSelect) == LOWORD(iSelect))<span class="comment">//LOWORD(iSelect)指向开始高亮的地方,HIWORD(iSelect)指向结束高亮的地方</span></span><br><span class="line">				iEnable = MF_GRAYED;<span class="comment">//如果开始==结束说明没有选中东西</span></span><br><span class="line">			<span class="keyword">else</span></span><br><span class="line">				iEnable = MF_ENABLED;<span class="comment">//如果开始!=结束说明选中东西了</span></span><br><span class="line"></span><br><span class="line">			EnableMenuItem((HMENU)wParam, IDM_EDIT_CUT, iEnable);<span class="comment">//根据有没有选中东西决定复制,剪切,粘贴是否使能</span></span><br><span class="line">			EnableMenuItem((HMENU)wParam, IDM_EDIT_COPY, iEnable);</span><br><span class="line">			EnableMenuItem((HMENU)wParam, IDM_EDIT_CLEAR, iEnable);</span><br><span class="line">			<span class="keyword">return</span> <span class="number">0</span>;</span><br><span class="line">		&#125;</span><br><span class="line">		<span class="keyword">break</span>;</span><br><span class="line">	<span class="keyword">case</span> WM_COMMAND:</span><br><span class="line">		<span class="keyword">if</span> (lParam)</span><br><span class="line">		&#123;</span><br><span class="line">			<span class="keyword">if</span> (LOWORD(lParam) == ID_EDIT &amp;&amp;</span><br><span class="line">				(HIWORD(wParam) == EN_ERRSPACE ||</span><br><span class="line">					HIWORD(wParam) == EN_MAXTEXT))</span><br><span class="line">				MessageBox(hwnd, TEXT(<span class="string">&quot;Edit control out of space.&quot;</span>),</span><br><span class="line">					szAppName, MB_OK | MB_ICONSTOP);</span><br><span class="line">			<span class="keyword">return</span> <span class="number">0</span>;</span><br><span class="line">		&#125;</span><br><span class="line">		<span class="keyword">else</span> <span class="keyword">switch</span> (LOWORD(wParam))</span><br><span class="line">		&#123;</span><br><span class="line">		<span class="keyword">case</span> IDM_FILE_NEW:</span><br><span class="line">		<span class="keyword">case</span> IDM_FILE_OPEN:</span><br><span class="line">		<span class="keyword">case</span> IDM_FILE_SAVE:</span><br><span class="line">		<span class="keyword">case</span> IDM_FILE_SAVE_AS:</span><br><span class="line">		<span class="keyword">case</span> IDM_FILE_PRINT:</span><br><span class="line">			MessageBeep(<span class="number">0</span>);<span class="comment">//尚未实现</span></span><br><span class="line">			<span class="keyword">return</span> <span class="number">0</span>;</span><br><span class="line"></span><br><span class="line">		<span class="keyword">case</span> IDM_APP_EXIT:</span><br><span class="line">			SendMessage(hwnd, WM_CLOSE, <span class="number">0</span>, <span class="number">0</span>);</span><br><span class="line">			<span class="keyword">return</span> <span class="number">0</span>;</span><br><span class="line">		<span class="keyword">case</span> IDM_EDIT_UNDO:</span><br><span class="line">			SendMessage(hwndEdit, WM_UNDO, <span class="number">0</span>, <span class="number">0</span>);<span class="comment">//编辑控件的预定义动作</span></span><br><span class="line">			<span class="keyword">return</span> <span class="number">0</span>;</span><br><span class="line"></span><br><span class="line">		<span class="keyword">case</span> IDM_EDIT_CUT:</span><br><span class="line">			SendMessage(hwndEdit, WM_CUT, <span class="number">0</span>, <span class="number">0</span>);<span class="comment">//预定义动作,剪切,不需要手动实现</span></span><br><span class="line">			<span class="keyword">return</span> <span class="number">0</span>;</span><br><span class="line"></span><br><span class="line">		<span class="keyword">case</span> IDM_EDIT_COPY:</span><br><span class="line">			SendMessage(hwndEdit, WM_COPY, <span class="number">0</span>, <span class="number">0</span>);</span><br><span class="line">			<span class="keyword">return</span> <span class="number">0</span>;</span><br><span class="line">		<span class="keyword">case</span> IDM_EDIT_PASTE:</span><br><span class="line">			SendMessage(hwndEdit, WM_PASTE, <span class="number">0</span>, <span class="number">0</span>);</span><br><span class="line">			<span class="keyword">return</span> <span class="number">0</span>;</span><br><span class="line"></span><br><span class="line">		<span class="keyword">case</span> IDM_EDIT_CLEAR:</span><br><span class="line">			SendMessage(hwndEdit, WM_CLEAR, <span class="number">0</span>, <span class="number">0</span>);</span><br><span class="line">			<span class="keyword">return</span> <span class="number">0</span>;</span><br><span class="line">		<span class="keyword">case</span> IDM_EDIT_SELECT_ALL:<span class="comment">//Ctrl+A</span></span><br><span class="line">			SendMessage(hwndEdit, EM_SETSEL, <span class="number">0</span>, <span class="number">-1</span>);</span><br><span class="line">			<span class="keyword">return</span> <span class="number">0</span>;</span><br><span class="line"></span><br><span class="line">		<span class="keyword">case</span> IDM_HELP_HELP:</span><br><span class="line">			MessageBox(hwnd, TEXT(<span class="string">&quot;Help not yet implemented!&quot;</span>), </span><br><span class="line">				szAppName, MB_OK | MB_ICONEXCLAMATION);</span><br><span class="line">			<span class="keyword">return</span> <span class="number">0</span>;</span><br><span class="line"></span><br><span class="line">		<span class="keyword">case</span> IDM_APP_ABOUT:</span><br><span class="line">			MessageBox(hwnd, TEXT(<span class="string">&quot;dustball&#x27;s 卑鄙 notepad&quot;</span>),</span><br><span class="line">				szAppName, MB_OK | MB_ICONINFORMATION);</span><br><span class="line">			<span class="keyword">return</span> <span class="number">0</span>;</span><br><span class="line">		&#125;</span><br><span class="line">		<span class="keyword">break</span>;</span><br><span class="line"></span><br><span class="line">	<span class="keyword">case</span> WM_CLOSE:</span><br><span class="line">		<span class="keyword">if</span> (IDYES == AskConfirmation(hwnd))</span><br><span class="line">			DestroyWindow(hwnd);</span><br><span class="line">		<span class="keyword">return</span> <span class="number">0</span>;</span><br><span class="line"></span><br><span class="line">	<span class="keyword">case</span> WM_QUERYENDSESSION:</span><br><span class="line">		<span class="keyword">if</span> (IDYES == AskConfirmation(hwnd))</span><br><span class="line">			<span class="keyword">return</span> <span class="number">1</span>;</span><br><span class="line">		<span class="keyword">else</span></span><br><span class="line">			<span class="keyword">return</span> <span class="number">0</span>;</span><br><span class="line"></span><br><span class="line">	<span class="keyword">case</span> WM_DESTROY:</span><br><span class="line">		PostQuitMessage(<span class="number">0</span>);</span><br><span class="line">		<span class="keyword">return</span> <span class="number">0</span>;</span><br><span class="line">	&#125;</span><br><span class="line">	<span class="keyword">return</span> DefWindowProc(hwnd, message, wParam, lParam);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>未实现的保存,打开,新建等功能需要等到学了对话框再说了</p>
+
+      
+    </div>
+
+    
+    
+    
+      <footer class="post-footer">
+        <div class="post-eof"></div>
+      </footer>
+  </article>
+  
+  
+  
+
+      
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="en">
     <link itemprop="mainEntityOfPage" href="http://deutschball.github.io/2022/08/20/windows%20SDK%20chapter%2021%20%E5%8A%A8%E6%80%81%E9%93%BE%E6%8E%A5%E5%BA%93/">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
@@ -5033,576 +5457,6 @@ alt="image-20220727213433217" />
 </blockquote>
 <p>那为啥有一个<code>vector&lt;bool&gt;</code>后来却从来不用他?</p>
 <p>从反汇编得到的指令来看,确实是有调用<code>vector&lt;bool&gt;</code>的构造函数的,可能是出题的为了混淆视听吧</p>
-
-      
-    </div>
-
-    
-    
-    
-      <footer class="post-footer">
-        <div class="post-eof"></div>
-      </footer>
-  </article>
-  
-  
-  
-
-      
-  
-  
-  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="en">
-    <link itemprop="mainEntityOfPage" href="http://deutschball.github.io/2022/07/24/Docker/">
-
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="image" content="https://raw.githubusercontent.com/DeutschBall/picbed/main/dustball.png">
-      <meta itemprop="name" content="dustball">
-      <meta itemprop="description" content="dustland">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="dustland">
-    </span>
-      <header class="post-header">
-        <h2 class="post-title" itemprop="name headline">
-          
-            <a href="/2022/07/24/Docker/" class="post-title-link" itemprop="url">Docker@wsl</a>
-        </h2>
-
-        <div class="post-meta">
-            <span class="post-meta-item">
-              <span class="post-meta-item-icon">
-                <i class="far fa-calendar"></i>
-              </span>
-              <span class="post-meta-item-text">Posted on</span>
-
-              <time title="Created: 2022-07-24 22:33:00" itemprop="dateCreated datePublished" datetime="2022-07-24T22:33:00+08:00">2022-07-24</time>
-            </span>
-              <span class="post-meta-item">
-                <span class="post-meta-item-icon">
-                  <i class="far fa-calendar-check"></i>
-                </span>
-                <span class="post-meta-item-text">Edited on</span>
-                <time title="Modified: 2023-10-16 22:46:10" itemprop="dateModified" datetime="2023-10-16T22:46:10+08:00">2023-10-16</time>
-              </span>
-
-          
-
-        </div>
-      </header>
-
-    
-    
-    
-    <div class="post-body" itemprop="articleBody">
-
-      
-          <h1 id="dockerwsl">Docker@wsl</h1>
-<h2 id="docker是什么">docker是什么?</h2>
-<p>docker相对于虚拟机是更新一代的虚拟化技术</p>
-<p><a
-target="_blank" rel="noopener" href="https://zhuanlan.zhihu.com/p/487824422">Docker和虚拟机的区别？ -
-知乎 (zhihu.com)</a></p>
-<figure>
-<img
-src="https://raw.githubusercontent.com/DeutschBall/test/master/v2-9e4980b5c77243ed64760574cd3cdfb9_1440w.jpg"
-alt="img" />
-<figcaption aria-hidden="true">img</figcaption>
-</figure>
-<p>基础设施就是笔记本电脑</p>
-<p>主操作系统就是windows11</p>
-<p>Hypervisor虚拟机管理系统比如windows的Hyper-V,还有VMWare,VritualBox等等</p>
-<p>从操作系统就是虚拟机,比如VMWare上的windows server
-2003,又如Hyper-V上的WSL.</p>
-<p>每个从操作系统都占有独立的内存,CPU等硬件资源.这体现在VMware虚拟机或者WSL运行前可以设置使用CPU数量,内存大小等待</p>
-<p>在Docker中,Docker守护进程取代了虚拟机管理类系统,docker是运行在操作系统之上的后台进程,管理docker容器</p>
-<p>所有Docker容器都经过Docker守护进程使用CPU,内存等硬件资源.而守护进程是主操作系统的一个后台进程,受主操作系统的调度.</p>
-<p>简单的说,docker就是更先进的更轻量级的虚拟技术?</p>
-<h3 id="docker四个核心组件">docker四个核心组件</h3>
-<p>docker的四个核心组件:</p>
-<p>客户端与服务器</p>
-<p>镜像</p>
-<p>仓库</p>
-<p>容器</p>
-<h4 id="cs体系">C/S体系</h4>
-<p>docker可以作为工作站使用,也可以作为客户端使用.</p>
-<p>就是计网中的C/S模型</p>
-<h4 id="docker镜像">docker镜像</h4>
-<p>"一个docker镜像可以包含一个完整的ubuntu操作系统环境,里面仅安装了Apache或用户需要的其他应用程序"</p>
-<p>可以类比.exe文件,exe在磁盘中躺着的时候,就是一个文件.但是加载进入内存之后就成了进程映像.</p>
-<p>docker镜像和.exe文件一个性质,而docker容器和进程映像一个性质</p>
-<p>docker镜像是只读的,这好理解,就好比一个已经编译链接生成的.exe文件也是只读的一个道理.因为它就没有被改变的理由.如果要"修改"docker镜像,只能是重新生成或者制作</p>
-<h4 id="docker容器">docker容器</h4>
-<p>容器是从镜像创建的运行实例.</p>
-<p>镜像是一个静态概念,而容器就是一个动态概念</p>
-<table>
-<thead>
-<tr>
-<th>docker中的概念</th>
-<th>目标文件中的概念</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td>docker镜像</td>
-<td>文件系统中的.exe文件</td>
-</tr>
-<tr>
-<td>docker容器</td>
-<td>内存中的进程映像</td>
-</tr>
-</tbody>
-</table>
-<p>到此不禁要考虑一个问题,如果本次在docker容器中写了一个test.txt文件并保存,</p>
-<p>关机之后,下次再启动这个docker容器,这个test.txt还存在吗?如果存在,显然是保存在了磁盘中,保存在那里了?docker镜像中吗?还是主操作系统中?</p>
-<p>如果导出这个容器,制作一个新镜像,然后新镜像导入成其他电脑的docker容器,那么这个容器中还有test.txt吗?</p>
-<p>实际上docker在镜像上面还有一可写入层,镜像被多个容器共用,每个容器创建后私自的改动写入自己的可写入层</p>
-<h4 id="docker仓库">docker仓库</h4>
-<p>集中存放docker镜像文件的地方</p>
-<blockquote>
-<p>仓库的概念可以类比git,有本地的git仓库,也有远程的公共仓库服务器github,gitee</p>
-<table>
-<thead>
-<tr>
-<th>docker概念</th>
-<th>git概念</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td>docker镜像</td>
-<td>仓库中的文件</td>
-</tr>
-<tr>
-<td>docker本地仓库</td>
-<td>git本地仓库</td>
-</tr>
-<tr>
-<td>docker远程仓库</td>
-<td>github中的仓库</td>
-</tr>
-<tr>
-<td>docker注册仓库服务器</td>
-<td>github</td>
-</tr>
-</tbody>
-</table>
-</blockquote>
-<h4 id="四组件关系">四组件关系</h4>
-<figure>
-<img
-src="https://raw.githubusercontent.com/DeutschBall/test/master/image-20220722201232759.png"
-alt="image-20220722201232759" />
-<figcaption aria-hidden="true">image-20220722201232759</figcaption>
-</figure>
-<p>现阶段用不到Dockerfile,甚至Docker仓库也只是白嫖一下官方的镜像,上传什么的以后再说</p>
-<h2 id="wsl上使用docker">wsl上使用docker</h2>
-<p>ubuntu wsl上的docker安装见</p>
-<p><a
-target="_blank" rel="noopener" href="https://blog.csdn.net/lupengfei1009/article/details/94637398">window10下子系统ubuntu安装Docker</a></p>
-<h3 id="换docker下载源">换docker下载源</h3>
-<p>在使用docker之前,先把下载源换成国内源,会方便很多</p>
-<p>如果梯子流量管够并且梯子够快,当然不用换下载源.</p>
-<p>这里换元不是指wsl的apt命令下载源,也不是指docker中容器的apt命令下载源.</p>
-<p>而是<strong>指docker从哪里拉取镜像</strong></p>
-<p>在wsl中<code>vim /etc/docker/daemon.json</code></p>
-<p>然后添加下载源</p>
-<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">&#123;</span><br><span class="line">  &quot;registry-mirrors&quot;: [</span><br><span class="line">    &quot;https://hub-mirror.c.163.com&quot;,</span><br><span class="line">    &quot;https://ustc-edu-cn.mirror.aliyuncs.com&quot;,</span><br><span class="line">    &quot;https://ghcr.io&quot;,</span><br><span class="line">    &quot;https://mirror.baidubce.com&quot;</span><br><span class="line">  ]</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-<p>保存后重启docker服务</p>
-<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">service docker restart</span><br></pre></td></tr></table></figure>
-<h3 id="docker命令">docker命令</h3>
-<h4 id="docker基本命令">docker基本命令</h4>
-<h5 id="版本信息">版本信息</h5>
-<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">docker version</span><br></pre></td></tr></table></figure>
-<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br></pre></td><td class="code"><pre><span class="line">root@Executor:/home/docker# docker version</span><br><span class="line">Client: Docker Engine - Community</span><br><span class="line"> Version:           20.10.17</span><br><span class="line"> API version:       1.41</span><br><span class="line"> Go version:        go1.17.11</span><br><span class="line"> Git commit:        100c701</span><br><span class="line"> Built:             Mon Jun  6 23:02:57 2022</span><br><span class="line"> OS/Arch:           linux/amd64</span><br><span class="line"> Context:           default</span><br><span class="line"> Experimental:      true</span><br><span class="line"></span><br><span class="line">Server: Docker Engine - Community</span><br><span class="line"> Engine:</span><br><span class="line">  Version:          20.10.17</span><br><span class="line">  API version:      1.41 (minimum version 1.12)</span><br><span class="line">  Go version:       go1.17.11</span><br><span class="line">  Git commit:       a89b842</span><br><span class="line">  Built:            Mon Jun  6 23:01:03 2022</span><br><span class="line">  OS/Arch:          linux/amd64</span><br><span class="line">  Experimental:     false</span><br><span class="line"> containerd:</span><br><span class="line">  Version:          1.6.6</span><br><span class="line">  GitCommit:        10c12954828e7c7c9b6e0ea9b0c02b01407d3ae1</span><br><span class="line"> runc:</span><br><span class="line">  Version:          1.1.2</span><br><span class="line">  GitCommit:        v1.1.2-0-ga916309</span><br><span class="line"> docker-init:</span><br><span class="line">  Version:          0.19.0</span><br><span class="line">  GitCommit:        de40ad0</span><br></pre></td></tr></table></figure>
-<h5 id="系统信息">系统信息</h5>
-<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br></pre></td><td class="code"><pre><span class="line">root@Executor:/home/docker# docker info</span><br><span class="line">Client:</span><br><span class="line"> Context:    default</span><br><span class="line"> Debug Mode: false</span><br><span class="line"> Plugins:</span><br><span class="line">  app: Docker App (Docker Inc., v0.9.1-beta3)</span><br><span class="line">  buildx: Docker Buildx (Docker Inc., v0.8.2-docker)</span><br><span class="line">  scan: Docker Scan (Docker Inc., v0.17.0)</span><br><span class="line"></span><br><span class="line">Server:</span><br><span class="line"> Containers: 1</span><br><span class="line">  Running: 1</span><br><span class="line">  Paused: 0</span><br><span class="line">  Stopped: 0</span><br><span class="line"> Images: 3</span><br><span class="line"> Server Version: 20.10.17</span><br><span class="line"> Storage Driver: overlay2</span><br><span class="line">  Backing Filesystem: extfs</span><br><span class="line">  Supports d_type: true</span><br><span class="line">  Native Overlay Diff: true</span><br><span class="line">  userxattr: false</span><br><span class="line"> Logging Driver: json-file</span><br><span class="line"> Cgroup Driver: cgroupfs</span><br><span class="line"> Cgroup Version: 1</span><br><span class="line"> Plugins:</span><br><span class="line">  Volume: local</span><br><span class="line">  Network: bridge host ipvlan macvlan null overlay</span><br><span class="line">  Log: awslogs fluentd gcplogs gelf journald json-file local logentries splunk syslog</span><br><span class="line"> Swarm: inactive</span><br><span class="line"> Runtimes: io.containerd.runc.v2 io.containerd.runtime.v1.linux runc</span><br><span class="line"> Default Runtime: runc</span><br><span class="line"> Init Binary: docker-init</span><br><span class="line"> containerd version: 10c12954828e7c7c9b6e0ea9b0c02b01407d3ae1</span><br><span class="line"> runc version: v1.1.2-0-ga916309</span><br><span class="line"> init version: de40ad0</span><br><span class="line"> Security Options:</span><br><span class="line">  seccomp</span><br><span class="line">   Profile: default</span><br><span class="line"> Kernel Version: 5.10.102.1-microsoft-standard-WSL2		;wsl系统内核版本信息</span><br><span class="line"> Operating System: Ubuntu 20.04.4 LTS			;wsl的操作系统信息</span><br><span class="line"> OSType: linux</span><br><span class="line"> Architecture: x86_64</span><br><span class="line"> CPUs: 8</span><br><span class="line"> Total Memory: 3.831GiB</span><br><span class="line"> Name: Executor</span><br><span class="line"> ID: 7LD5:E4VA:BGYO:LUWX:AUSB:2MM2:2RI2:DULK:QK6O:YFNA:REKG:CUFA</span><br><span class="line"> Docker Root Dir: /var/lib/docker</span><br><span class="line"> Debug Mode: false</span><br><span class="line"> Registry: https://index.docker.io/v1/</span><br><span class="line"> Labels:</span><br><span class="line"> Experimental: false</span><br><span class="line"> Insecure Registries:</span><br><span class="line">  127.0.0.0/8</span><br><span class="line"> Registry Mirrors:</span><br><span class="line">  https://hub-mirror.c.163.com/</span><br><span class="line">  https://ustc-edu-cn.mirror.aliyuncs.com/</span><br><span class="line">  https://ghcr.io/</span><br><span class="line">  https://mirror.baidubce.com/</span><br><span class="line"> Live Restore Enabled: false</span><br><span class="line"></span><br><span class="line">WARNING: No blkio throttle.read_bps_device support</span><br><span class="line">WARNING: No blkio throttle.write_bps_device support</span><br><span class="line">WARNING: No blkio throttle.read_iops_device support</span><br><span class="line">WARNING: No blkio throttle.write_iops_device support</span><br></pre></td></tr></table></figure>
-<h4 id="docker镜像的使用">docker镜像的使用</h4>
-<h5 id="查找注册仓库中的镜像">查找注册仓库中的镜像</h5>
-<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">docker search &lt;镜像&gt;</span><br></pre></td></tr></table></figure>
-<figure class="highlight sh"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">root@Executor:/home/docker# docker search httpd</span><br><span class="line">NAME                                 DESCRIPTION                                     STARS     OFFICIAL   AUTOMATED</span><br><span class="line">httpd                                The Apache HTTP Server Project                  4090      [OK]</span><br><span class="line">centos/httpd-24-centos7              Platform <span class="keyword">for</span> running Apache httpd 2.4 or bui…   44</span><br><span class="line">centos/httpd                                                                         35                   [OK]</span><br><span class="line">clearlinux/httpd                     httpd HyperText Transfer Protocol (HTTP) ser…   2</span><br><span class="line">...</span><br></pre></td></tr></table></figure>
-<p>其中STARS表明该镜像的权威性</p>
-<p>OFFICIAL表明该镜像是否为官方镜像</p>
-<h5 id="从仓库拉取镜像">从仓库拉取镜像</h5>
-<p>要私人定制一个花里胡哨的ubuntu镜像,首先得有一个干净的基础镜像</p>
-<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">docker pull &lt;仓库名&gt;:&lt;标签&gt;</span><br></pre></td></tr></table></figure>
-<blockquote>
-<p>这里仓库名一般就是操作系统名比如ubuntu,标签就是操作系统版本比如20.04</p>
-<p>因为docker仓库一般以操作系统命名,其中的镜像文件一般以对应操作系统版本号命名</p>
-</blockquote>
-<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">root@Executor:~# docker pull ubuntu:20.04</span><br><span class="line">20.04: Pulling from library/ubuntu</span><br><span class="line">d7bfe07ed847: Pull complete</span><br><span class="line">Digest: sha256:fd92c36d3cb9b1d027c4d2a72c6bf0125da82425fc2ca37c414d4f010180dc19</span><br><span class="line">Status: Downloaded newer image for ubuntu:20.04</span><br><span class="line">docker.io/library/ubuntu:20.04</span><br></pre></td></tr></table></figure>
-<h5 id="查看本地镜像列表">查看本地镜像列表</h5>
-<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">root@Executor:~# docker images</span><br><span class="line">REPOSITORY                    TAG       IMAGE ID       CREATED       SIZE</span><br><span class="line">ubuntu                        20.04     20fffa419e3a   6 weeks ago   72.8MB</span><br><span class="line">ansible/ubuntu14.04-ansible   latest    4621d4fe2959   6 years ago   461MB</span><br></pre></td></tr></table></figure>
-<table>
-<thead>
-<tr>
-<th>栏目</th>
-<th>意义</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td>RESPOSITORY</td>
-<td>镜像仓库源</td>
-</tr>
-<tr>
-<td>TAG</td>
-<td>镜像标签</td>
-</tr>
-<tr>
-<td>IMAGE ID</td>
-<td>镜像ID</td>
-</tr>
-<tr>
-<td>CREATED</td>
-<td>镜像创建时间</td>
-</tr>
-<tr>
-<td>SIZE</td>
-<td>镜像大小</td>
-</tr>
-</tbody>
-</table>
-<p>可以使用<code>仓库源:镜像标签</code>来指定一个唯一的镜像,也可以直接使用镜像ID指定一个唯一的镜像</p>
-<h5 id="删除本地镜像">删除本地镜像</h5>
-<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">docker rmi &lt;镜像&gt;</span><br></pre></td></tr></table></figure>
-<blockquote>
-<p>这里镜像或者是仓库原:镜像标签指定,或者是镜像ID指定</p>
-<p>甚至不用输全信息就可以指定唯一一个镜像</p>
-<p>比如只输入镜像ID的前两位或者前三位</p>
-</blockquote>
-<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line">root@Executor:~# docker images</span><br><span class="line">REPOSITORY                    TAG       IMAGE ID       CREATED        SIZE</span><br><span class="line">ubuntu                        20.04     20fffa419e3a   6 weeks ago    72.8MB</span><br><span class="line">ubuntu                        18.04     5a214d77f5d7   9 months ago   63.1MB</span><br><span class="line">ansible/ubuntu14.04-ansible   latest    4621d4fe2959   6 years ago    461MB</span><br><span class="line">root@Executor:~# docker rmi 5a</span><br><span class="line">Untagged: ubuntu:18.04</span><br><span class="line">Untagged: ubuntu@sha256:0fedbd5bd9fb72089c7bbca476949e10593cebed9b1fb9edf5b79dbbacddd7d6</span><br><span class="line">Deleted: sha256:5a214d77f5d747e6ed81632310baa6190301feeb875cf6bf9da560108fa09972</span><br><span class="line">Deleted: sha256:824bf068fd3dc3ad967022f187d85250eb052f61fe158486b2df4e002f6f984e</span><br></pre></td></tr></table></figure>
-<p>这里使用<code>ubuntu:18.04</code>镜像的ID号删除,只需要指定前2位</p>
-<blockquote>
-<p>正在被引用的镜像不能被删除(该镜像有运行容器时不能删除)</p>
-</blockquote>
-<h5 id="创建镜像">创建镜像</h5>
-<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">docker commit</span><br></pre></td></tr></table></figure>
-<p>在一个ubuntu20.04的<strong>容器中</strong>(不是wsl中,是wsl的docker容器中)安装ssh之后创建镜像,然后使用新镜像创建容器,看看ssh还有没有</p>
-<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">root@Executor:/home/docker# docker commit -m=&quot;ssh&quot; -a=&quot;dustball&quot; 49e5c3d8f7c6 ssh/ubuntu</span><br><span class="line">sha256:886ba4c00ba4b506eb6070d729ff9282a5220717153f3fb8a1f20e7b9f69a236</span><br></pre></td></tr></table></figure>
-<blockquote>
-<p>-m提交描述信息</p>
-<p>-a指定作者</p>
-<p>ssh/ubuntu:镜像名称</p>
-</blockquote>
-<p>sha256码表明镜像创建完毕,使用<code>docker images</code>观察本地所有镜像</p>
-<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">root@Executor:/home/docker# docker images</span><br><span class="line">REPOSITORY   TAG       IMAGE ID       CREATED          SIZE</span><br><span class="line">ssh/ubuntu   latest    886ba4c00ba4   27 seconds ago   235MB</span><br><span class="line">ubuntu       20.04     20fffa419e3a   6 weeks ago      72.8MB</span><br></pre></td></tr></table></figure>
-<p>新镜像ssh/ubuntu显然比安装ssh之前的镜像ubuntu大好多</p>
-<p>用新镜像创建容器并尝试运行ssh,发现是有的</p>
-<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line">root@Executor:/home/docker# docker run -it ssh/ubuntu bash</span><br><span class="line">root@2e155d040460:/# ssh</span><br><span class="line">usage: ssh [-46AaCfGgKkMNnqsTtVvXxYy] [-B bind_interface]</span><br><span class="line">           [-b bind_address] [-c cipher_spec] [-D [bind_address:]port]</span><br><span class="line">           [-E log_file] [-e escape_char] [-F configfile] [-I pkcs11]</span><br><span class="line">           [-i identity_file] [-J [user@]host[:port]] [-L address]</span><br><span class="line">           [-l login_name] [-m mac_spec] [-O ctl_cmd] [-o option] [-p port]</span><br><span class="line">           [-Q query_option] [-R address] [-S ctl_path] [-W host:port]</span><br><span class="line">           [-w local_tun[:remote_tun]] destination [command]</span><br></pre></td></tr></table></figure>
-<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">patchelf --set-interpreter /home/kali/glibc-all-in-one/libs/2.23-0ubuntu3_amd64/ld-2.23.so --set-rpath /home/kali/glibc-all-in-one/libs/2.23-0ubuntu3_amd64 target_file</span><br><span class="line"></span><br></pre></td></tr></table></figure>
-<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">$ patchelf --set-interpreter /home/kali/glibc-all-in-one/libs/2.23-0ubuntu3_amd64/ld-2.23.so --set-rpath /home/kali/glibc-all-in-one/libs/2.23-0ubuntu3_amd64 test</span><br><span class="line"></span><br></pre></td></tr></table></figure>
-<h4 id="docker容器的使用">docker容器的使用</h4>
-<h5 id="创建删除容器">创建/删除容器</h5>
-<p><strong>创建容器</strong></p>
-<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">docker create [启动选项] &lt;镜像&gt; [命令行] </span><br></pre></td></tr></table></figure>
-<p>比如创建一个终端上交互启动,默认自动执行/bin/bash命令的ubuntu:20.04容器</p>
-<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">root@Executor:~# docker create -t -i ubuntu:20.04 /bin/bash</span><br><span class="line">e94cf81e102f33880cc1e21d9e50985eaac9927642d925009c4cadc761bb2d8c</span><br><span class="line">root@Executor:~# docker ps -a | grep e94</span><br><span class="line">e94cf81e102f   ubuntu:20.04                  &quot;/bin/bash&quot;   20 seconds ago   Created                                                                 quirky_chatelet</span><br></pre></td></tr></table></figure>
-<p>已经创建但是从未运行过的容器,其状态为"Created"</p>
-<blockquote>
-<p>这里命令行的作用是,规定容器启动后要自动执行的命令</p>
-<p><code>/bin/bash</code>意思是启动后立刻执行<code>/bin/bash</code>这条命令,如果之前默认的shell是bash则无所谓,如果之前默认的shell是sh,tsh等等其他shell,则改为使用bash</p>
-</blockquote>
-<blockquote>
-<p>关于"启动选项"和"命令行参数"</p>
-<p>一定要分清两个东西,前者规定的是如何启动容器,后者规定的是启动后容器立刻自动干啥</p>
-</blockquote>
-<p><strong>删除容器</strong>前提是该容器没有被运行</p>
-<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">docker rm &lt;容器&gt;</span><br></pre></td></tr></table></figure>
-<p>运行状态的容器需要强制删除</p>
-<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">docker rm -f &lt;容器&gt;</span><br></pre></td></tr></table></figure>
-<p>删除所有容器</p>
-<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line">root@Executor:~# docker  <span class="built_in">rm</span> $(docker ps -a -q)</span><br><span class="line">e94cf81e102f</span><br><span class="line">205041549d08</span><br><span class="line">fa210e84dd67</span><br><span class="line">bce56d6e5727</span><br><span class="line">08142959bdde</span><br><span class="line">dd33995e37ab</span><br><span class="line">3a666c93b635</span><br><span class="line">b458aa62f64c</span><br><span class="line">85c3fa6b67d3</span><br><span class="line">3519c8f7070f</span><br><span class="line">79543801ed50</span><br><span class="line">897a086a85f4</span><br></pre></td></tr></table></figure>
-<p>或者使用<code>docker container prune</code></p>
-<h5 id="查看所有容器">查看所有容器</h5>
-<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">docker ps -a</span><br></pre></td></tr></table></figure>
-<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line">root@Executor:~# docker ps -a</span><br><span class="line">CONTAINER ID   IMAGE                         COMMAND       CREATED          STATUS                        PORTS     NAMES</span><br><span class="line">08142959bdde   ubuntu:20.04                  &quot;bash&quot;        21 minutes ago   Exited (0) 18 minutes ago               awesome_austin</span><br><span class="line">dd33995e37ab   ubuntu:20.04                  &quot;bash&quot;        23 minutes ago   Exited (0) 23 minutes ago               festive_lamarr</span><br><span class="line">3a666c93b635   ubuntu:20.04                  &quot;bash&quot;        24 minutes ago   Exited (129) 38 seconds ago             quirky_kilby</span><br><span class="line">b458aa62f64c   ubuntu:20.04                  &quot;-t&quot;          24 minutes ago   Created                                 angry_mclean</span><br><span class="line">85c3fa6b67d3   ubuntu:20.04                  &quot;bash&quot;        24 minutes ago   Exited (0) 24 minutes ago               quizzical_grothendieck</span><br><span class="line">3519c8f7070f   ubuntu:20.04                  &quot;bash&quot;        25 minutes ago   Exited (0) 25 minutes ago               affectionate_kare</span><br><span class="line">79543801ed50   ubuntu:20.04                  &quot;bash&quot;        26 minutes ago   Exited (0) 23 minutes ago               sleepy_driscoll</span><br><span class="line">897a086a85f4   ansible/ubuntu14.04-ansible   &quot;/bin/bash&quot;   2 hours ago      Exited (255) 2 hours ago                friendly_bhaskara</span><br></pre></td></tr></table></figure>
-<table>
-<colgroup>
-<col style="width: 15%" />
-<col style="width: 10%" />
-<col style="width: 75%" />
-</colgroup>
-<thead>
-<tr>
-<th>栏目</th>
-<th>意义</th>
-<th>备注</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td>CONTAINER ID</td>
-<td>容器</td>
-<td>注意不是镜像id,本地所有容器都有一个自己独特的id,用于区分和索引</td>
-</tr>
-<tr>
-<td>IMAGE</td>
-<td>镜像</td>
-<td>容器是从哪个镜像创建的</td>
-</tr>
-<tr>
-<td>COMMAND</td>
-<td>命令行</td>
-<td>create创建或者run创建并启动时的命令行参数</td>
-</tr>
-<tr>
-<td>CREATED</td>
-<td>创建时间</td>
-<td>使用docker run创建该容器的时间</td>
-</tr>
-<tr>
-<td>STATUS</td>
-<td>状态</td>
-<td>created（已创建）<br />restarting（重启中）<br />running（运行中）
-<br />removing（迁移中） <br />paused（暂停） <br />exited（停止）
-<br />dead（死亡）</td>
-</tr>
-<tr>
-<td>PORTS</td>
-<td>端口</td>
-<td>容器的端口信息和使用的连接类型（tcp）</td>
-</tr>
-<tr>
-<td>NAMES</td>
-<td>名称</td>
-<td>Docker自动给每个容器都起一个名字,格式是:形容词__名<br />awesome_austin<br />festive_lamarr<br />...<br />如果要人为给容器起名字,需要在docker
-run的命令行上加上<code>--name=&lt;名字&gt;</code></td>
-</tr>
-</tbody>
-</table>
-<h5 id="运行停止容器">运行/停止容器</h5>
-<p>容器用create创建之后不会执行,需要start命令执行</p>
-<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">docker start [启动选项] &lt;容器&gt;</span><br><span class="line">docker start [启动选项] &lt;容器1&gt; &lt;容器2&gt; ...</span><br><span class="line">docker stop [停止选项] &lt;容器&gt;</span><br><span class="line">docker stop [停止选项] &lt;容器1&gt;&lt;容器2&gt; ...</span><br></pre></td></tr></table></figure>
-<p>启动选项要么是<code>-a(attach)</code>,要么是<code>-i(interactive)</code></p>
-<p>对于<code>stop</code>(或者<code>kill</code>)指令,其停止选项可以是多长时间之后停止</p>
-<blockquote>
-<p>关于"启动选项"和"命令行参数"</p>
-<p>一定要分清两个东西,前者规定的是如何启动容器,后者规定的是启动后容器立刻自动干啥</p>
-<p>ps -a列出的COMMAND栏目,这是docker
-create时指定的<strong>命令行参数</strong>,它告诉容器启动后自动做什么</p>
-<p>而docker
-start的<strong>启动选项</strong>只有两种,-a或者-i,区别是:</p>
-<p>-a只会将容器的标准输出绑定到当前终端,<code>docker start -a &lt;容器&gt;</code>执行后,这时候可以看到容器的输出<code>root@容器id</code></p>
-<p>但是尝试在终端输入什么命令,都不会有结果,但是终端也没有阻塞,可以一直输入.</p>
-<p>这是因为-a启动的容器,其标准输入并没有绑定到终端,因此我们在终端的任何输入都没有发往容器.</p>
-<p>也就是说我们可以从终端上接收docker容器的输出,但是没法给他输入</p>
-<p>这貌似很奇怪,因为没有输入哪来的输出呢?</p>
-<p>实际上可以在创建容器的时候指定<strong>命令行参数</strong>,让容器启动就自动执行一些命令,此时这些命令的输出就可以打印到终端</p>
-<p>比如创建一个在后台自动每1秒执行一次打印"helloworld"的容器,然后用<code>-a</code>启动参数启动它,就可以看到它一直向终端输出<code>helloworld</code>了</p>
-<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">root@Executor:~# docker create ubuntu:20.04 /bin/sh -c &quot;while true; do echo hello world; sleep 1; done&quot;</span><br><span class="line">167d2e45de172117166431467875f3e44f81a29fbaa1e786fecf2caf77227d25</span><br><span class="line">root@Executor:~# docker start -a 167</span><br><span class="line">hello world</span><br><span class="line">hello world</span><br><span class="line">...</span><br></pre></td></tr></table></figure>
-<p>-i会将容器的标准输入绑定到当前终端</p>
-</blockquote>
-<p>使用<code>docker start</code>默认后台运行容器,该命令执行后终端环境还是在wsl中,相应容器已经在后台运行</p>
-<p>如果想要让容器在前台与我们交互,可以使用<code>-i</code>启动选项(前提是,create创建容器的时候有加入-it选项,否则start使用-i选项无效)</p>
-<p>即:</p>
-<p><strong>使用<code>docker create -it &lt;容器&gt;</code>这样创建的容器,使用<code>docker start &lt;容器&gt;</code>会在后台运行(即使没有长期任务也会一直运行),使用<code>docker start -i &lt;容器&gt;</code>会在前台交互.</strong></p>
-<p><strong>使用<code>docker create &lt;容器&gt;</code>这样创建的容器,最多可以<code>docker start -a &lt;容器&gt;</code>绑定输出(前提是create时命令行上有长期的任务),但是<code>docker start -i &lt;容器&gt;</code>无效,如果创建容器时命令行上没有给容器指定一个长期的任务,那么后台运行的容器会立刻停止</strong></p>
-<h5 id="创建运行容器">创建+运行容器</h5>
-<figure class="highlight sh"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">docker run [OPTIONS] IMAGE [COMMAND] [ARG...]</span><br></pre></td></tr></table></figure>
-<blockquote>
-<p>其作用相当于</p>
-<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">docker create [OPTIONS] &lt;镜像&gt; [COMMAND][ARG...]</span><br><span class="line">docker start [OPTIONS] &lt;容器&gt;</span><br></pre></td></tr></table></figure>
-</blockquote>
-<blockquote>
-<p>OPTIONS是docker start 的启动选项啊</p>
-<p>COMMAND是docker create的命令行参数</p>
-<p>一定要分清两者</p>
-</blockquote>
-<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">docker run -t -i &lt;镜像&gt; /bin/bash</span><br></pre></td></tr></table></figure>
-<blockquote>
-<p>这里镜像可以是镜像id,也可以是仓库源:镜像标签</p>
-<p>-it一起用,意思是让docker分配一个伪终端,并绑定到容器的标准输入</p>
-<p>说人话-t作用是加上<code>root@容器号:</code>这种命令提示,不用-t,只有-i也可以进行命令交互,但是不会有这种提示</p>
-<p>后面命令行/bin/bash意思是,启动后自动运行bash(虽然默认也是运行的bash,但是可能有些容器默认运行sh),使用bash这个shell进行交互</p>
-</blockquote>
-<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">root@Executor:~# docker run -t -i ubuntu:20.04</span><br><span class="line">root@08142959bdde:/#</span><br></pre></td></tr></table></figure>
-<p>可以发现主机名已经由<code>Executor</code>编变成了容器的id号,现在的终端已经是docker内部环境了</p>
-<p>这里容器id和镜像id不同,本地的每个容器都有一个不同的id</p>
-<p>如果要退出容器到wsl,只需要在docker容器的终端中输入exit</p>
-<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">root@Executor:~# docker run -t -i ubuntu:20.04</span><br><span class="line">root@08142959bdde:/# exit</span><br><span class="line">exit</span><br><span class="line">root@Executor:~#</span><br></pre></td></tr></table></figure>
-<p>主机名又变回Executor说明目前已经在wsl中了</p>
-<p>Exit命令执行后,该docker容器立刻停止.后来如果还想继续使用则需要在wsl中使用docker
-start命令</p>
-<blockquote>
-<p>创建容器时Docker干了啥</p>
-<figure>
-<img
-src="https://raw.githubusercontent.com/DeutschBall/test/master/image-20220722210940799.png"
-alt="image-20220722210940799" />
-<figcaption aria-hidden="true">image-20220722210940799</figcaption>
-</figure>
-<p>单从"桥接一个虚拟接口到容器",就知道物理机和docker容器在同一个网段</p>
-</blockquote>
-<p><strong>后台运行</strong></p>
-<p>刚才已经知道,直接用<code>docker run -t -i ubuntu:20.04</code>这种命令创建容器时,创建容器后终端环境是容器中环境,主机名会变成docker容器号</p>
-<p>而现在只想让docker容器运行,但是终端依然是wsl的环境,不进入docker容器,应该咋整呢?</p>
-<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">docker run -d &lt;镜像&gt; &lt;命令行参数&gt;</span><br></pre></td></tr></table></figure>
-<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">root@Executor:~# docker run -d -it ubuntu:20.04</span><br><span class="line">fa210e84dd679b8402a78ca404988fe7ec031f0475385631f95fb497d764e86b</span><br><span class="line">root@Executor:~# docker ps -a | grep fa21</span><br><span class="line">fa210e84dd67   ubuntu:20.04                  &quot;bash&quot;        12 seconds ago      Up 12 seconds                            intelligent_austin</span><br><span class="line">root@Executor:~#</span><br></pre></td></tr></table></figure>
-<p>可以发现,<code>run -d</code>创建容器并运行之后,终端上还是显示<code>root@Executor</code>表明仍然在wsl中,没有进到容器里</p>
-<p>相当于<code>docker create -it &lt;容器&gt;</code>然后<code>docker run &lt;容器&gt;</code></p>
-<h5 id="进入退出容器">进入/退出容器</h5>
-<p>对于正在后台运行的容器,如果想要进入容器与之交互,需要使用</p>
-<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">docker attach [选项] &lt;正在运行的容器&gt; [命令行]</span><br><span class="line">docker exec [选项] &lt;正在运行的容器&gt;</span><br></pre></td></tr></table></figure>
-<blockquote>
-<p>两者的区别是,</p>
-<p>使用attach进入容器,在容器中用exit退出时,容器会停止运行</p>
-<p>使用exec进入容器,在容器中用exit退出时,容器会继续运行</p>
-</blockquote>
-<p>由于在wsl中可以使用<code>docker stop</code>命令停止容器,因此只使用<code>exec</code>命令即可</p>
-<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line">root@Executor:~# docker ps -a</span><br><span class="line">CONTAINER ID   IMAGE          COMMAND   CREATED             STATUS         PORTS     NAMES</span><br><span class="line">49e5c3d8f7c6   ubuntu:20.04   <span class="string">&quot;bash&quot;</span>    About an hour ago   Up 9 minutes             lucid_ramanujan</span><br><span class="line">root@Executor:~# docker <span class="built_in">exec</span> -it 49 bash</span><br><span class="line">root@49e5c3d8f7c6:/# <span class="built_in">exit</span></span><br><span class="line"><span class="built_in">exit</span></span><br><span class="line">root@Executor:~# docker ps -a</span><br><span class="line">CONTAINER ID   IMAGE          COMMAND   CREATED             STATUS         PORTS     NAMES</span><br><span class="line">49e5c3d8f7c6   ubuntu:20.04   <span class="string">&quot;bash&quot;</span>    About an hour ago   Up 9 minutes             lucid_ramanujan</span><br></pre></td></tr></table></figure>
-<p>退出容器使用<code>exit</code>,或者<code>ctrl+d</code></p>
-<h5 id="导出导入容器">导出/导入容器</h5>
-<p>将容器导出成tar包</p>
-<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">docker export &lt;容器&gt; &gt; &lt;位置&gt;</span><br></pre></td></tr></table></figure>
-<p>比如将<code>49e5c3d8f7c6</code>这个容器(已安装ssh)导出到当前目录</p>
-<figure class="highlight sh"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">root@Executor:/home/docker# docker <span class="built_in">export</span> 49 &gt; ssh-ubuntu.tar</span><br><span class="line">root@Executor:/home/docker# <span class="built_in">ls</span></span><br><span class="line">ssh-ubuntu.tar</span><br></pre></td></tr></table></figure>
-<p>将tar包导入成镜像(不能直接导入成容器)</p>
-<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">docker import [OPTIONS] &lt;tar包&gt; &lt;镜像&gt;</span><br></pre></td></tr></table></figure>
-<p>将tar包导入为指定名称的镜像</p>
-<figure class="highlight sh"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">root@Executor:/home/docker# <span class="built_in">ls</span></span><br><span class="line">ssh-ubuntu.tar</span><br><span class="line">root@Executor:/home/docker# docker import ssh-ubuntu.tar ssh/ubuntu</span><br><span class="line">sha256:725bf542d42fc0f7aad48f47ef2b81d1bcf7931bd1283a2b91ccbd3f8246e876</span><br><span class="line">root@Executor:/home/docker# docker images</span><br><span class="line">REPOSITORY   TAG       IMAGE ID       CREATED         SIZE</span><br><span class="line">ssh/ubuntu   latest    725bf542d42f   5 seconds ago   234MB</span><br><span class="line">ubuntu       20.04     20fffa419e3a   6 weeks ago     72.8MB</span><br></pre></td></tr></table></figure>
-<p>后面使用该镜像只需要<code>docker run -it &lt;镜像&gt; bash</code></p>
-<h2 id="docker网络">docker网络</h2>
-<p>参考</p>
-<p><a target="_blank" rel="noopener" href="https://zhuanlan.zhihu.com/p/212772001">Docker
-网络模式详解及容器间网络通信 - 知乎 (zhihu.com)</a></p>
-<p><a
-target="_blank" rel="noopener" href="https://www.cnblogs.com/zuxing/articles/8780661.html#:~:text=Docker：网络模式详解.%20Docker作为目前最火的轻量级容器技术，牛逼的功能，如Docker的镜像管理，不足的地方网络方面。.%20安装Docker时，它会自动创建三个网络，bridge（创建容器默认连接到此网络）、%20none,、host.%20host：容器将不会虚拟出自己的网卡，配置自己的IP等，而是使用宿主机的IP和端口。.%20Container：创建的容器不会创建自己的网卡，配置自己的IP，而是和一个指定的容器">Docker：网络模式详解
-- Gringer - 博客园 (cnblogs.com)</a></p>
-<h3 id="四个模式">四个模式</h3>
-<h4 id="host">host</h4>
-<p>docker容器与wsl共用ip地址,docker服务直接使用wsl的端口地址空间,外界可以通过ip:port方式访问docker容器</p>
-<h4 id="none">none</h4>
-<p>无网络链接</p>
-<h4 id="bridge">bridge</h4>
-<p>桥接模式,安装Docker时会为wsl创建一个叫做docker0的虚拟网桥</p>
-<p>这个网桥只对桥接的docker容器还有wsl本身可见,作用是wsl和桥接容器之间的通信</p>
-<p>两个接到同一网桥的容器或者容器和网桥之间均可以相互通信</p>
-<p>对于容器来说,wsl上的网桥就相当于一个交换机</p>
-<p>wsl:</p>
-<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line">root@Executor:~# ifconfig</span><br><span class="line">docker0: flags=4163&lt;UP,BROADCAST,RUNNING,MULTICAST&gt;  mtu 1500</span><br><span class="line">        inet 172.17.0.1  netmask 255.255.0.0  broadcast 172.17.255.255</span><br><span class="line">        inet6 fe80::42:d9ff:fedd:7c32  prefixlen 64  scopeid 0x20&lt;link&gt;</span><br><span class="line">        ether 02:42:d9:dd:7c:32  txqueuelen 0  (Ethernet)</span><br><span class="line">        RX packets 23965  bytes 1142407 (1.1 MB)</span><br><span class="line">        RX errors 0  dropped 0  overruns 0  frame 0</span><br><span class="line">        TX packets 39791  bytes 118121373 (118.1 MB)</span><br><span class="line">        TX errors 0  dropped 0 overruns 0  carrier 0  collisions 0</span><br></pre></td></tr></table></figure>
-<p>容器1:</p>
-<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">root@2c98c979b54a:/# ifconfig</span><br><span class="line">eth0: flags=4163&lt;UP,BROADCAST,RUNNING,MULTICAST&gt;  mtu 1500</span><br><span class="line">        inet 172.17.0.4  netmask 255.255.0.0  broadcast 172.17.255.255</span><br><span class="line">        ether 02:42:ac:11:00:04  txqueuelen 0  (Ethernet)</span><br><span class="line">        RX packets 147  bytes 206651 (206.6 KB)</span><br><span class="line">        RX errors 0  dropped 0  overruns 0  frame 0</span><br><span class="line">        TX packets 120  bytes 8092 (8.0 KB)</span><br><span class="line">        TX errors 0  dropped 0 overruns 0  carrier 0  collisions 0</span><br></pre></td></tr></table></figure>
-<p>容器2:</p>
-<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">root@7cf02bb435be:/var/www/html# ifconfig</span><br><span class="line">eth0: flags=4163&lt;UP,BROADCAST,RUNNING,MULTICAST&gt;  mtu 1500</span><br><span class="line">        inet 172.17.0.2  netmask 255.255.0.0  broadcast 172.17.255.255</span><br><span class="line">        ether 02:42:ac:11:00:02  txqueuelen 0  (Ethernet)</span><br><span class="line">        RX packets 6  bytes 516 (516.0 B)</span><br><span class="line">        RX errors 0  dropped 0  overruns 0  frame 0</span><br><span class="line">        TX packets 0  bytes 0 (0.0 B)</span><br><span class="line">        TX errors 0  dropped 0 overruns 0  carrier 0  collisions 0</span><br></pre></td></tr></table></figure>
-<p>wsl的docker0网卡,两个容器的eth0网卡,其IP地址都是<code>172.17.0.X</code>(实际上从子网掩码看出该网段的IP地址可以是<code>172.17.X.X</code>)</p>
-<blockquote>
-<p>docker的桥接和虚拟机的桥接不同</p>
-<p>虚拟机和主机桥接之后,虚拟机,主机,主机连接的路由器,都在同一网段</p>
-<p>docker容器和docker主机的桥接,所有docker容器和docker主机的docker0网卡在同一网段,docker主机的另一张网卡eth0和路由器在同一网段</p>
-<figure>
-<img
-src="https://images2018.cnblogs.com/blog/1259802/201804/1259802-20180410165500455-232801094.jpg"
-alt="img" />
-<figcaption aria-hidden="true">img</figcaption>
-</figure>
-<p>docker容器和docker0网桥相连使用了veth
-pair技术,每个容器的eth0都与docker0上的一个veth*(一个数字)配对,两个虚拟网卡组成数据通道,从一个进去必然从另一出来</p>
-<p>说是"桥接",实际上相当于docker主机进行了一个NAT变换</p>
-<p>所有容器的数据通过自己的虚拟网卡eth0发往docker主机的虚拟
-网卡docker0,然后docker主机用"外网"网卡eth0上网(这里外网是相对于docker0虚拟网桥而言的,当然相对于路由器来说eth0还是"内网")</p>
-</blockquote>
-<h4 id="container">container</h4>
-<p>两个容器共享同一网络空间,包括ip地址和端口号</p>
-<p>目前用不到,用到时再说</p>
-<h3 id="docker网络相关命令">docker网络相关命令</h3>
-<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">docker network ...</span><br></pre></td></tr></table></figure>
-<h4 id="查看网络模式">查看网络模式</h4>
-<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">docker network list</span><br></pre></td></tr></table></figure>
-<p>列出三个默认的网络模式</p>
-<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">root@Executor:~# docker network <span class="built_in">ls</span></span><br><span class="line">NETWORK ID     NAME      DRIVER    SCOPE</span><br><span class="line">3ce19195196f   bridge    bridge    <span class="built_in">local</span></span><br><span class="line">c1341214f1d0   host      host      <span class="built_in">local</span></span><br><span class="line">d4e52924ce6b   none      null      <span class="built_in">local</span></span><br></pre></td></tr></table></figure>
-<p>目前只用到<code>docker network list</code>命令,其他需要以后再说</p>
-<h2 id="配置apache2php环境">配置apache2+php环境</h2>
-<p>由于官方的镜像不能满足要求,我需要修改官方镜像创建满足我们要求的镜像</p>
-<h3 id="容器内基本配置">容器内基本配置</h3>
-<p>首先要从官方的镜像改造一个满足我们要求的镜像</p>
-<p>这需要经历一个<code>官方镜像-&gt;改造容器-&gt;导出新镜像</code>的过程</p>
-<h4 id="拉取apachephp镜像">拉取apache+php镜像</h4>
-<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">docker pull php:7.0-apache</span><br></pre></td></tr></table></figure>
-<h4 id="创建临时容器">创建临时容器</h4>
-<blockquote>
-<p>说他是"临时容器",是因为我们需要用这个基础镜像创建容器进行一些改造,然后生成我们需要的镜像</p>
-</blockquote>
-<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">docker run -it php:7.0-apache bash</span><br></pre></td></tr></table></figure>
-<h4 id="换docker容器的apt下载源">换docker容器的apt下载源</h4>
-<h5 id="备份">备份</h5>
-<p>备份原来的下载源</p>
-<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">/etc/apt/sources.list /etc/apt/sources.list.bak</span><br></pre></td></tr></table></figure>
-<h5 id="更新">更新</h5>
-<p>更新下载源,由于此时没有vi没有vim,只能用cat等shell命令完成</p>
-<blockquote>
-<p>换元之前先看一下容器的操作系统版本</p>
-<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">root@06ca8ea43c1c:/var/www/html# cat /etc/issue</span><br><span class="line">Debian GNU/Linux 9 \n \l</span><br></pre></td></tr></table></figure>
-<p>然后上网搜对应版本的国内源进行更换</p>
-</blockquote>
-<p>适用于<code>Debian GNU/LINUX 9</code>的阿里云源:</p>
-<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line">cat &gt; /etc/apt/sources.list &lt;&lt; EOF</span><br><span class="line">deb http://mirrors.aliyun.com/debian/ stretch main non-free contrib</span><br><span class="line">deb-src http://mirrors.aliyun.com/debian/ stretch main non-free contrib</span><br><span class="line">deb http://mirrors.aliyun.com/debian-security stretch/updates main</span><br><span class="line">deb-src http://mirrors.aliyun.com/debian-security stretch/updates main</span><br><span class="line">deb http://mirrors.aliyun.com/debian/ stretch-updates main non-free contrib</span><br><span class="line">deb-src http://mirrors.aliyun.com/debian/ stretch-updates main non-free contrib</span><br><span class="line">deb http://mirrors.aliyun.com/debian/ stretch-backports main non-free contrib</span><br><span class="line">deb-src http://mirrors.aliyun.com/debian/ stretch-backports main non-free contrib</span><br><span class="line">EOF</span><br></pre></td></tr></table></figure>
-<h4 id="配置网站">配置网站</h4>
-<p>在该容器的网站根目录<code>/var/www/html</code>下面,写一个<code>info.php</code>,打印php信息作为测试</p>
-<figure class="highlight php"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">&lt;?php</span> <span class="title function_ invoke__">phpinfo</span>(); <span class="meta">?&gt;</span></span><br></pre></td></tr></table></figure>
-<p>在系统根目录下写一个<code>/start.sh</code></p>
-<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">/etc/init.d/apache2 restart   </span><br><span class="line">/usr/bin/tail -f /dev/null</span><br></pre></td></tr></table></figure>
-<blockquote>
-<p>第一条作用是启动apache2服务器,第二条作用是,让执行这条命令的容器一直有前台进程在忙,防止docker容器自动停止</p>
-</blockquote>
-<h4
-id="安装ssh等其他可有可无的服务...">安装ssh等其他可有可无的服务...</h4>
-<h4 id="导出镜像">导出镜像</h4>
-<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">docker commit &lt;容器&gt; apache/ubuntu:latest</span><br></pre></td></tr></table></figure>
-<blockquote>
-<p>将该容器导出为一个叫"apache/ubuntu:latest"的容器</p>
-</blockquote>
-<h3 id="从新镜像创建新容器">从新镜像创建新容器</h3>
-<p>现在使用<code>docker run</code>命令,从新<code>apache/ubuntu:latest</code>镜像上创建并启动新容器</p>
-<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">docker run -dit -p 10011:80 apache/ubuntu:latest /bin/bash -c <span class="string">&quot;/start.sh&quot;</span></span><br></pre></td></tr></table></figure>
-<blockquote>
-<p>-d后台运行</p>
-<p>-it启动交互终端</p>
-<p>-p 10011:80,wsl的10011端口映射到容器的80端口</p>
-<p>apache/ubuntu:latest我们自定义的镜像名</p>
-<p>/bin/bash -c "/start.sh"命令行参数,启动后立刻自动执行</p>
-<p>没有指定网络模式默认为桥接模式</p>
-<p>没有指定端口上的传输层服务类型默认为TCP服务</p>
-</blockquote>
-<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">root@Executor:~# docker run -dit -p 10011:80 apache/ubuntu /bin/bash -c <span class="string">&quot;/start.sh&quot;</span></span><br><span class="line">edc1b61f6c7a20ce4d85989ffa4c5042dc13769161f4d89952604a8496b869d1</span><br><span class="line">root@Executor:~# docker ps -a</span><br><span class="line">CONTAINER ID   IMAGE           COMMAND                  CREATED         STATUS        PORTS                                     NAMES</span><br><span class="line">edc1b61f6c7a   apache/ubuntu   <span class="string">&quot;docker-php-entrypoi…&quot;</span>   2 seconds ago   Up 1 second   0.0.0.0:10011-&gt;80/tcp, :::10011-&gt;80/tcp   friendly_northcutt</span><br></pre></td></tr></table></figure>
-<p>此时新容器就创建好了,可以看到PORTS栏目里面,wsl的10011端口已经映射给了docker的80端口,其上运行了一个tcp服务</p>
-<h4 id="访问容器">访问容器</h4>
-<p>怎么访问这个容器呢?</p>
-<p>访问这个容器就是访问wsl的10011号端口,可以使用<code>ip:port</code>方式进行访问</p>
-<p>在wsl上使用ifconfig看一下wsl的ip地址是多少</p>
-<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br></pre></td><td class="code"><pre><span class="line">root@Executor:~# ifconfig</span><br><span class="line">docker0: flags=4163&lt;UP,BROADCAST,RUNNING,MULTICAST&gt;  mtu 1500</span><br><span class="line">        inet 172.17.0.1  netmask 255.255.0.0  broadcast 172.17.255.255</span><br><span class="line">        inet6 fe80::42:86ff:feaf:17dc  prefixlen 64  scopeid 0x20&lt;<span class="built_in">link</span>&gt;</span><br><span class="line">        ether 02:42:86:af:17:dc  txqueuelen 0  (Ethernet)</span><br><span class="line">        RX packets 45  bytes 26682 (26.6 KB)</span><br><span class="line">        RX errors 0  dropped 0  overruns 0  frame 0</span><br><span class="line">        TX packets 50  bytes 5382 (5.3 KB)</span><br><span class="line">        TX errors 0  dropped 0 overruns 0  carrier 0  collisions 0</span><br><span class="line"></span><br><span class="line">eth0: flags=4163&lt;UP,BROADCAST,RUNNING,MULTICAST&gt;  mtu 1500</span><br><span class="line">        inet 172.31.174.19  netmask 255.255.240.0  broadcast 172.31.175.255</span><br><span class="line">        inet6 fe80::215:5dff:fe99:9ce8  prefixlen 64  scopeid 0x20&lt;<span class="built_in">link</span>&gt;</span><br><span class="line">        ether 00:15:5d:99:9c:e8  txqueuelen 1000  (Ethernet)</span><br><span class="line">        RX packets 613  bytes 86373 (86.3 KB)</span><br><span class="line">        RX errors 0  dropped 0  overruns 0  frame 0</span><br><span class="line">        TX packets 304  bytes 90966 (90.9 KB)</span><br><span class="line">        TX errors 0  dropped 0 overruns 0  carrier 0  collisions 0</span><br></pre></td></tr></table></figure>
-<p>发现wsl在windows主机NAT后面的ip地址是<code>172.31.174.19</code></p>
-<p>虽然wsl和windows主机之间的网络模式是NAT模式,与windows主机同路由器局域网内的其他设备是无法访问wsl的,</p>
-<p>但是windows主机是可以访问wsl的,windows主机相对于wsl就是"外网环境",我们只需要在windows主机浏览器上访问<code>172.31.174.19:10011</code></p>
-<p>或者windows主机上<code>curl 172.31.174.19:10011/info.php</code></p>
-<figure>
-<img
-src="https://raw.githubusercontent.com/DeutschBall/test/master/image-20220724204301206.png"
-alt="image-20220724204301206" />
-<figcaption aria-hidden="true">image-20220724204301206</figcaption>
-</figure>
-<p>可以看见,windows主机是可以访问docker容器的apache2服务的</p>
-<blockquote>
-<p>站在windows主机的角度,怎样看出这是一个docker容器提供的apache2服务,而不是wsl提供的apache2服务呢?</p>
-<p>从该phpinfo的回显结果可以隐约看出这是一个docker容器提供的服务</p>
-<figure>
-<img
-src="https://raw.githubusercontent.com/DeutschBall/test/master/image-20220724204601250.png"
-alt="image-20220724204601250" />
-<figcaption aria-hidden="true">image-20220724204601250</figcaption>
-</figure>
-<p>首先这个System名,谁会起一个edc1b61f6c7a作为主机名啊?这个数是一个docker容器id</p>
-<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">root@Executor:~# docker ps -a</span><br><span class="line">CONTAINER ID   IMAGE           COMMAND                  CREATED          STATUS          PORTS                                     NAMES</span><br><span class="line">edc1b61f6c7a   apache/ubuntu   <span class="string">&quot;docker-php-entrypoi…&quot;</span>   12 minutes ago   Up 11 minutes   0.0.0.0:10011-&gt;80/tcp, :::10011-&gt;80/tcp   friendly_northcutt</span><br></pre></td></tr></table></figure>
-<p>其次,后面的configuration-&gt;apache2handler中</p>
-<figure>
-<img
-src="https://raw.githubusercontent.com/DeutschBall/test/master/image-20220724204736232.png"
-alt="image-20220724204736232" />
-<figcaption aria-hidden="true">image-20220724204736232</figcaption>
-</figure>
-<p>这里ip地址和端口号均与wsl不一样,如果是wsl直接提供apache2服务,这里应是<code>172.31.174.19:80</code></p>
-</blockquote>
-<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line">deb http://mirrors.aliyun.com/ubuntu/ bionic main restricted universe multiverse</span><br><span class="line">deb http://mirrors.aliyun.com/ubuntu/ bionic-security main restricted universe multiverse</span><br><span class="line">deb http://mirrors.aliyun.com/ubuntu/ bionic-updates main restricted universe multiverse</span><br><span class="line">deb http://mirrors.aliyun.com/ubuntu/ bionic-proposed main restricted universe multiverse</span><br><span class="line">deb http://mirrors.aliyun.com/ubuntu/ bionic-backports main restricted universe multiverse</span><br><span class="line">deb-src http://mirrors.aliyun.com/ubuntu/ bionic main restricted universe multiverse</span><br><span class="line">deb-src http://mirrors.aliyun.com/ubuntu/ bionic-security main restricted universe multiverse</span><br><span class="line">deb-src http://mirrors.aliyun.com/ubuntu/ bionic-updates main restricted universe multiverse</span><br><span class="line">deb-src http://mirrors.aliyun.com/ubuntu/ bionic-proposed main restricted universe multiverse</span><br><span class="line">deb-src http://mirrors.aliyun.com/ubuntu/ bionic-backports main restricted universe multiverse</span><br></pre></td></tr></table></figure>
 
       
     </div>
