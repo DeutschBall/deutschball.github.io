@@ -167,6 +167,839 @@
   
   
   <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="en">
+    <link itemprop="mainEntityOfPage" href="http://deutschball.github.io/2022/05/23/%E5%BC%82%E5%B8%B8/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="https://raw.githubusercontent.com/DeutschBall/picbed/main/dustball.png">
+      <meta itemprop="name" content="dustball">
+      <meta itemprop="description" content="dustland">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="dustland">
+    </span>
+      <header class="post-header">
+        <h2 class="post-title" itemprop="name headline">
+          
+            <a href="/2022/05/23/%E5%BC%82%E5%B8%B8/" class="post-title-link" itemprop="url">CSAPP-chapter8 异常与进程</a>
+        </h2>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-calendar"></i>
+              </span>
+              <span class="post-meta-item-text">Posted on</span>
+              
+
+              <time title="Created: 2022-05-23 18:55:00 / Modified: 19:44:56" itemprop="dateCreated datePublished" datetime="2022-05-23T18:55:00+08:00">2022-05-23</time>
+            </span>
+
+          
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+          <h1 id="csapp-chapter8">CSAPP-chapter8</h1>
+<p>感觉大一上学期c语言还有下学期基于c语言的基础课程设计学得好失败.</p>
+<p>当时一个位图放缩,我既不懂位图格式,也不懂二进制文件,还不熟悉glibc函数.</p>
+<p>本学期操作系统,更是云里雾里,对虚拟内存,进程等概念从未听过,却上来就要讲缺页置换算法,调度算法等等各种算法</p>
+<p>对于CSAPP这本书,只能说相见恨晚,应当替代大一下的基础课程设计,作为计组和操作系统先修课.</p>
+<p>欠的债在大二下才还上,可以说亡羊补牢?</p>
+<h2 id="异常">异常</h2>
+<h3 id="控制流">控制流</h3>
+<p>一个没有跳转,正常执行的程序,其执行过程中程序计数器PC总是连续变化的,</p>
+<p>假设指令序列为 <span class="math display">\[
+I_1,I_2....,I_n
+\]</span></p>
+<p>指令对应的地址为 <span class="math display">\[
+A_1,A_2,...,A_n
+\]</span> 由于x86上的指令采用变长编码方式,因此<span
+class="math inline">\(A_1,A_2,...,A_n\)</span>有可能不是等差数列,但是可以啃腚的是他们连续,</p>
+<p>程序计数器PC的值构成的序列被称为控制流,如果程序一直顺序进行没有调用跳转返回,并且没有发生异常,则PC的值一直连续,这样的控制流称为"平滑的"</p>
+<p>当程序中有跳转,函数调用,函数返回,或者异常时,控制流不再平滑,此时控制流被称为"异常控制流"(ECF)
+异常控制流包括跳转,调用,返回,异常等</p>
+<h3 id="异常的定义">异常的定义</h3>
+<p>先说一些必要的废话</p>
+<p>定义:异常就是控制流中的突变,按照这个定义,跳转,调用,返回,异常处理程序都是</p>
+<p>异常是异常控制流(ECF)的一种,需要硬件和操作系统协同实现.</p>
+<h3 id="异常处理的过程">异常处理的过程</h3>
+<h4 id="序幕异常的触发">序幕:异常的触发</h4>
+<p>异常是<strong>如何触发</strong>的呢?</p>
+<p>处理器中的<strong>重大</strong>状态变化,状态可以是某些寄存器中的某些位等,被处理器检测到(检测电平的变化对于处理器来说易如反掌,可以实现)</p>
+<blockquote>
+<p>就好像一个人走着走着感觉低血糖了
+,这人自然就感觉到了,然后对低血糖的对策应该吃点糖.这吃点糖就是异常处理程序</p>
+<p>吃完糖然后缓过来了继续走路</p>
+<p>这就是控制还给之前正在执行的指令</p>
+<p>如果低血糖非常厉害,人直接寄了,相当于发生了终止,先前的进程不再进行</p>
+</blockquote>
+<h4 id="开端异常的察觉与定性">开端:异常的察觉与定性</h4>
+<p>处理器根据状态位的变化判断,发生甚么事了</p>
+<blockquote>
+<p>就好像这个走路的人走着走着感觉头晕,无力,快要饿死,这三种状态一组合,人就知道发生了低血糖</p>
+</blockquote>
+<figure>
+<img
+src="https://raw.githubusercontent.com/DeutschBall/test/master/image-20220518201336935.png"
+alt="image-20220518201336935" />
+<figcaption aria-hidden="true">image-20220518201336935</figcaption>
+</figure>
+<p>每种事件在制作处理器时都已经交给处理器一个编号,发生某种事件处理器就可以知道对应哪个编号</p>
+<blockquote>
+<p>就好比从小就教给这个人,</p>
+<p>高血糖编号0,</p>
+<p>低血糖编号1,</p>
+<p>尿急编号2,...</p>
+<p>然后有一天这个人犯了低血糖,他就知道自己犯了编号为1的毛病</p>
+</blockquote>
+<blockquote>
+<p>但是这个人知道了自己犯了1号病有啥意义呢?实践生活中也确实没有这样整,应该是怪没有意义的</p>
+<p>那么给<strong>事件编号的意义</strong>又是啥?</p>
+<p>这种编号感觉类似协议,处理器调用异常处理程序的时候只需要根据特定的编号去调用特定的处理程序,而处理程序的代码不是处理器管,是操作系统维护的异常表管的,那么处理器用什么信息去查表调用相关的异常处理程序呢?</p>
+<p>如果现实中也是这样,人知道了自己犯了1号毛病,去了门诊直接说"我犯了1号病",大夫就知道应该开葡萄糖的药,不需要病人<strong>费一大堆话描述</strong>"我犯了
+头晕无力饿 的病"</p>
+<p>同样,处理器在查表之前将自己的各种状态量化成一个魔数,把最困难的事自己解决了,然后用这个魔数去查表岂不是轻轻松松</p>
+<p>但是现实生活中并没有给低血糖这种病编号,看起来这种方法很简单快捷,为什么不用?</p>
+<p>一是人生活中要记的事情已经太多,病的编号记不住,二是病人觉得是1号病但是大夫可能不这样认为,有可能是更大的毛病</p>
+<p>但是对机器来说,没有这么多的可能,根据状态位的变化,已经可以清楚地确定发生了甚么,并且每种毛病的编号都已经被写入硬件,永远牢记,因此可以使用这种方式</p>
+</blockquote>
+<h4 id="发展根据事件号查异常表">发展:根据事件号查异常表</h4>
+<p>处理器确定事件及事件编号之后,要根据事件编号采取相应的异常处理程序,这时需要去查异常表</p>
+<blockquote>
+<p>异常表是由操作系统启动时分配和初始化的,存放在主存中,事件编号作为下标,异常处理程序的地址作为表项</p>
+</blockquote>
+<p>用事件编号作为下标去查异常表,获得的表项是异常处理程序的地址,然后控制交给该异常处理程序</p>
+<blockquote>
+<p>整个查表的过程与页表的工作方式很像</p>
+<p>单级页表的下标是虚拟页号VPN,页表项是物理页号</p>
+</blockquote>
+<blockquote>
+<p>处理器怎么知道表在哪里的呢?</p>
+<p>异常表的起始地址会专门被一个寄存器--异常表基址寄存器(exception table
+base regsiter)保存,这个寄存器在CPU里</p>
+<p>查表的时候</p>
+<figure>
+<img
+src="https://raw.githubusercontent.com/DeutschBall/test/master/image-20220518203658495.png"
+alt="image-20220518203658495" />
+<figcaption aria-hidden="true">image-20220518203658495</figcaption>
+</figure>
+<p>etbr寄存器中存放基址,异常号(可能存放在某个寄存器中)作为偏移量,两个加起来去访问数组项</p>
+</blockquote>
+<h4 id="高潮异常处理">高潮:异常处理</h4>
+<p>刚才查完异常表之后处理器已经获得了异常处理程序的首地址,处理器只需要把PC值改为该异常处理程序的首地址</p>
+<p>看到这里不禁疑惑,如果异常不是很严重可以被处理,处理完了怎么回到刚才的程序呢?谁来保存刚才进程的执行现场呢?</p>
+<p>CSAPP用异常处理和函数调用的对比解决了这个疑惑</p>
+<p>执行异常处理程序之前,处理器会将<strong>返回时的指令地址</strong>,以及其他一些状态(通用寄存器,堆栈指针,程序状态字等等)统统滴压入<strong>内核栈</strong>,注意不是用户栈</p>
+<blockquote>
+<p>这里从异常处理程序返回时的指令地址只有两种,要么是触发异常的指令地址,要么是下一条指令,</p>
+<p>具体是那一条要根据事件类型确定,即根据事件编号确定.</p>
+<p>这是后话</p>
+</blockquote>
+<blockquote>
+<p>为什么要压入内核栈?我的猜测是</p>
+<p>异常处理程序要运行在内核状态,访问内核栈方便</p>
+<p>为什么异常处理程序要运行在内核状态?我的猜测是</p>
+<p>异常处理程序需要请求一些内核的资源,比如缺页异常处理程序会进行磁盘到内存换页的操作,设计了IO操作.而这些在用户状态没有权限做到</p>
+</blockquote>
+<p>上述进程信息都压内核栈保存之后,PC置为异常处理程序的地址,控制交给异常处理程序(或者说异常处理程序占用处理器)</p>
+<h4 id="结局异常处理完了返回">结局:异常处理完了返回</h4>
+<blockquote>
+<p>首先考虑一个人大街上走着低血糖了可能怎么处理</p>
+<p>一是轻微的,吃块糖缓过来接着走</p>
+<p>二是稍微严重,回家歇着了,改天再出来</p>
+<p>三是非常严重,人暴毙了(虽然几率不大),这辈子不可能再走路了,也省了处理的麻烦</p>
+</blockquote>
+<p>根据引发异常的事件类型,异常处理完后的返回也可以分成三种</p>
+<p>1.返回给当前指令(触发异常的指令),重新进行,比如缺页异常</p>
+<p>2.返回给当前指令的下一条指令</p>
+<blockquote>
+<p>下一条指不发生异常时下一条应该执行的指令</p>
+</blockquote>
+<p>3.发生异常的程序被中断,不再执行</p>
+<h2 id="异常的类别">异常的类别</h2>
+<p>异常就四种,中断,陷阱,故障,终止</p>
+<figure>
+<img
+src="https://raw.githubusercontent.com/DeutschBall/test/master/image-20220518210426662.png"
+alt="image-20220518210426662" />
+<figcaption aria-hidden="true">image-20220518210426662</figcaption>
+</figure>
+<p>其中只有属于异步异常的中断发生在CPU之外,只能由IO设备产生,比如按下键盘,点击鼠标,打印到屏幕,等等各种事件</p>
+<p>陷阱是有意为之的,目的是从是处理器从用户态陷入内核态(通过修改某种标志位),作用是拥有使用任意资源的权限,比如syscall指令</p>
+<p>故障和终止都是不希望发生的,区别是故障算是比较轻微的异常,比如缺页,通过牺牲物理页换入缺页就可以解决</p>
+<p>但是终止就是比较严重的异常,程序无法继续运行了,比如栈缓冲区溢出被金丝雀检测到</p>
+<h3 id="中断">中断</h3>
+<p>此处的"中断"更确切的是说"外部中断"或者"硬件中断",即IO外设导致的中断,不是程序有意产生的中断</p>
+<p>up九曲阑干举例是键盘输入导致的中断</p>
+<figure>
+<img
+src="https://raw.githubusercontent.com/DeutschBall/test/master/image-20220518211331500.png"
+alt="image-20220518211331500" />
+<figcaption aria-hidden="true">image-20220518211331500</figcaption>
+</figure>
+<p>在这个计算机的模型机中,内存总线和IO总线不是一路,但是汇集到IO桥,然后IO桥通过系统总线连接到CPU中的总线接口,总线接口是与CPU内部寄存器相连的</p>
+<blockquote>
+<p>IO总线上挂着的都是IO外设,比如USB,显示器,键鼠,磁盘等等,计算机就算没有这些东西也可以运行</p>
+</blockquote>
+<p>按下键盘的时候,键盘控制器会向处理器的中断引脚发送中断信号,并且会把异常号通过IO总线,IO桥,系统总线传递给CPU,</p>
+<p>中断信号的目的是提醒CPU应该处理中断了,异常号的作用是告诉CPU是键盘出现异常,而不是鼠标</p>
+<p>中断信号和异常号都是CPU判断异常事件需要用到的信息</p>
+<p>由于键盘发送信号和CPU处理指令是<strong>异步</strong>的,因此当键盘发送中断信号的时候,CPU有可能还在执行一条命令.CPU必须完成了手头上那一条命令之后,才可以处理中断.</p>
+<p>完成手头上的指令后,CPU检测到中断引脚那里发生了电位变化,因此知道发生中断了,然后通过异常号知道是哪个IO设备发生了中断,根据这两个信息CPU就能确定发生了什么事,下面就可以异常处理了</p>
+<p>异常处理完之后,应该返回什么地方呢?由于刚才手头上的最后一条指令已经被彻底执行了,自然应该返回下一条指令.</p>
+<blockquote>
+<p>这就好比</p>
+<p>正在写作业,突然有人敲门,为了防止当前正在解决的数学问题思路被打断重来,我先做完这道题,然后去处理访客的问题</p>
+<p>到了门口得先问问是谁在敲门,是熟人就开门</p>
+<p>然后得端茶倒水儿,把客人招待好,等客人走了把门一关回去接着做下一道题</p>
+<p>这里数学题就相当于CPU正在执行的指令,</p>
+<p>敲门这个信号就相当于中断引脚上的电位变化,</p>
+<p>做完这道题再去开门就相当于CPU执行完当前一条指令然后再去处理中断,</p>
+<p>询问访客姓名和敲门合起来,相当于CPU确定事件号,</p>
+<p>招待客人的过程相当于执行中断处理程序</p>
+<p>客人走了继续做下一道题相当于中断处理完成之后返回下一条指令</p>
+</blockquote>
+<p>综上,中断处理过程的流程图表示为</p>
+<figure>
+<img
+src="https://raw.githubusercontent.com/DeutschBall/test/master/image-20220518212631468.png"
+alt="image-20220518212631468" />
+<figcaption aria-hidden="true">image-20220518212631468</figcaption>
+</figure>
+<p>从数学作业的角度来说,中间招待客人的时候,数学作业没有被处理,但是作业本子也不知道这个做题的是玩电脑去了还是蹲坑去了还是招待客人去了.反正这不重要.重要的是不管中间干了啥,数学作业都是被完整做完的.</p>
+<p>因为访客和做作业是异步的,所以招待客人和数学作业玩不玩成一点关系都没有</p>
+<p>从正在执行的进程角度看,发生中断被抢占CPU和被其他进程抢占CPU没有区别,进程也没有因为中断被改变什么</p>
+<h3 id="陷阱系统调用">陷阱(系统调用)</h3>
+<p>陷阱又可以理解为软件<strong>主动</strong>产生的"软中断",是有意为之的</p>
+<p><strong>系统调用</strong>,陷阱最重要的用途是在用户程序和内核之间提供一个像过程一样的接口，又叫做系统调用。</p>
+<blockquote>
+<p>在网上搜索的时候,感觉有一种<strong>广义</strong>的"系统调用",表示一整个从用户程序到硬件然后再返回用户程序的过程</p>
+<p>感觉还有一种<strong>狭义</strong>的系统调用,就是导致CPU从用户态改变到内核态那关键的一条汇编指令<code>int $0x80</code></p>
+</blockquote>
+<p><strong>系统级函数</strong>,比如<code>open(),read(),close()</code>等等,涉及IO操作,显然只在用户态是干不成事情的,需要使用内核的资源,需要陷入内核态,因此需要去执行系统调用</p>
+<p>我们写的程序怎么陷入内核态呢?在c源代码层面上只需要调用glibc中的系统级函数</p>
+<p><strong>汇编语言层面观察系统级函数write的实现</strong></p>
+<blockquote>
+<p>CSAPP上给出的x86-64linux系统调用号表(感觉这里系统级函数和系统调用的概念有些混淆,应该是广义的系统调用)</p>
+<figure>
+<img
+src="https://raw.githubusercontent.com/DeutschBall/test/master/image-20220518215022569.png"
+alt="image-20220518215022569" />
+<figcaption aria-hidden="true">image-20220518215022569</figcaption>
+</figure>
+<p>调用write</p>
+<figure>
+<img
+src="https://raw.githubusercontent.com/DeutschBall/test/master/image-20220519074321305.png"
+alt="image-20220519074321305" />
+<figcaption aria-hidden="true">image-20220519074321305</figcaption>
+</figure>
+<p>系统调用号用rax传递</p>
+<p>文件描述符用rdi传递</p>
+<p>字符串用rsi传递</p>
+<p>字符串长度用rdx传递</p>
+<p><strong>syscall即侠义的系统调用</strong></p>
+</blockquote>
+<h4
+id="在用户视角下系统调用过程示意图">在<strong>用户视角下</strong>系统调用过程示意图</h4>
+<figure>
+<img
+src="https://raw.githubusercontent.com/DeutschBall/test/master/image-20220519073514392.png"
+alt="image-20220519073514392" />
+<figcaption aria-hidden="true">image-20220519073514392</figcaption>
+</figure>
+<blockquote>
+<p>程序员视角意味着"陷阱处理程序"是一个抽象的概念,程序员知道系统要做这么一个陷阱处理,但是具体做了啥程序员不知道,</p>
+<p>程序员可以知道的是自己的程序会调用syscall,然后CPU的使用权就不属于自己的程序了,而是属于陷阱处理.程序员还知道的是陷阱处理之后的结果,比如调用write之后将缓冲区<code>char buffer[20];</code>中的字符打印到了屏幕上</p>
+</blockquote>
+<p><strong>废话:为什么要有陷阱(系统调用)这种异常?</strong></p>
+<figure>
+<img
+src="https://raw.githubusercontent.com/DeutschBall/test/master/image-20220522191723763.png"
+alt="image-20220522191723763" />
+<figcaption aria-hidden="true">image-20220522191723763</figcaption>
+</figure>
+<p><strong>c库函数,系统级函数,系统调用的关系</strong></p>
+<figure>
+<img
+src="https://raw.githubusercontent.com/DeutschBall/test/master/image-20220522170002447.png"
+alt="image-20220522170002447" />
+<figcaption aria-hidden="true">image-20220522170002447</figcaption>
+</figure>
+<p><strong>c库函数</strong></p>
+<p>libc和glibc都是Linux下的c函数库</p>
+<blockquote>
+<p><strong>glibc</strong>是linux下面c标准库的实现，即GNU C
+Library。glibc本身是GNU旗下的C标准库，<strong>后来逐渐成为了Linux的标准c库，而Linux下原来的标准c库Linux
+libc逐渐不再被维护</strong>。Linux下面的标准c库不仅有这一个，如uclibc、klibc，以及上面被提到的Linux
+libc，但是<strong>glibc无疑是用得最多的</strong>。glibc在/lib目录下的.so文件为libc.so.6。</p>
+</blockquote>
+<p>c函数库中的函数非常多,可以按照有没有涉及系统调用进行分类</p>
+<blockquote>
+<p>涉及系统调用的<code>printf,scanf,malloc,free</code>等,这些函数都是<strong>系统级函数</strong>,这些函数执行系统调用陷入内核</p>
+<p>不涉及系统调用的<code>itoa,strstr</code>等</p>
+</blockquote>
+<p>关于库函数和内核函数的区别,这个问题中文站点搜了好多,全在扯淡,最后参考了
+<a
+target="_blank" rel="noopener" href="https://stackoverflow.com/questions/31873923/difference-fork-and-sys-fork">stackoverflow</a></p>
+<blockquote>
+<p>比如内核函数sys_fork就是c库函数fork系统调用入口,即当我们的的代码中使用<code>fork</code>函数的时候,fork函数会去自己调用<code>sys_fork</code>而不是调用<code>sys_write</code></p>
+<blockquote>
+<p>为啥要这样套娃呢?</p>
+<p>因为<code>sys_call</code>是内核函数,依赖于系统</p>
+<p>但是<code>fork</code>是c库函数,要求POSIX可移植</p>
+<p>这就好似协议分层,<code>fork</code>所在高层只管调用内核提供的一个叫<code>sys_fork</code>函数,内核具体怎么实现这个函数不关心</p>
+<p>而内核也不知道上层会有什么,只管根据人的需要涉及<code>sys_fork</code>的参数返回值,功能等等</p>
+</blockquote>
+<blockquote>
+<p>fork函数大体的调用链(踢皮球链)</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">fork() -&gt; glibc wrapper -&gt; raw syscall invocation -&gt; transition to kernel mode -&gt; syscall lookup -&gt; sys_fork() -&gt; do_fork().</span><br></pre></td></tr></table></figure>
+</blockquote>
+</blockquote>
+<p><strong>内核函数</strong></p>
+<p>kernel函数即内核函数</p>
+<blockquote>
+<p><a
+target="_blank" rel="noopener" href="https://www.tutorialspoint.com/assembly_programming/assembly_system_calls.htm">Assembly
+- System Calls
+(tutorialspoint.com)</a>给出了一个x86linux上调用write时,在内核函数层面发生的事情</p>
+<p>x86linux内核函数表:</p>
+<figure>
+<img
+src="https://raw.githubusercontent.com/DeutschBall/test/master/image-20220518215333246.png"
+alt="image-20220518215333246" />
+<figcaption aria-hidden="true">image-20220518215333246</figcaption>
+</figure>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">mov	edx,4		; message length						;要打印的信息长度用edx传递</span><br><span class="line">mov	ecx,msg		; message to write						;要打印的信息msg用ecx寄存器传递</span><br><span class="line">mov	ebx,1		; file descriptor (stdout)				;文件描述符,魔数1表示标准输出,即显示器</span><br><span class="line">mov	eax,4		; system call number (sys_write)		;eax存放内核函数号,决定调用sys_write函数</span><br><span class="line">int	0x80		; call kernel						   ;陷入内核,根据先前放在eax中的系统调用号决定执行什么命令</span><br></pre></td></tr></table></figure>
+</blockquote>
+<p><strong>系统命令和系统调用的关系</strong></p>
+<p>系统命令比如<code>ls</code>,<code>ifconfig</code>,<code>mv</code>,<code>cp</code>等等是由一个或者多个c库函数实现的,可能其中会用到系统调用.系统命令和系统调用之间还有一段距离</p>
+<p>CSAPP上就有练习题让我们用<code>&lt;stdio.h&gt;</code>等头文件里面c库函数写一个<code>mv</code>命令之类的</p>
+<h4 id="操作系统视角下的系统调用过程">操作系统视角下的系统调用过程</h4>
+<p>用户进程通过eax寄存器将内核函数号交给<code>system_call</code>函数,这时已经下到kernel模式了</p>
+<p><code>system_call</code>函数的作用是,根据内核函数号去查<code>system_call_table</code>表,执行相应的sys_开头的内核函数,</p>
+<p>内核函数执行完毕之后执行<code>syscall_exit</code>返回到<code>system_call</code>函数</p>
+<p><code>system_call</code>函数执行<code>resume_userspace</code>返回用户空间</p>
+<h4 id="系统调用的整个过程">系统调用的整个过程</h4>
+<figure>
+<img
+src="https://raw.githubusercontent.com/DeutschBall/test/master/image-20220522212228880.png"
+alt="image-20220522212228880" />
+<figcaption aria-hidden="true">image-20220522212228880</figcaption>
+</figure>
+<p>例如<code>getpid</code>函数系统调用的简化过程</p>
+<figure>
+<img
+src="https://raw.githubusercontent.com/DeutschBall/test/master/image-20220522210953699.png"
+alt="image-20220522210953699" />
+<figcaption aria-hidden="true">image-20220522210953699</figcaption>
+</figure>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">getpid()</span><br><span class="line">	int 0x80</span><br><span class="line">		system_call</span><br><span class="line">			sys_getpid()</span><br></pre></td></tr></table></figure>
+<h4 id="实验添加系统调用">实验:添加系统调用</h4>
+<p>添加一个系统调用不只是向系统调用号表中添加一个表项,要考虑内核中整个系统调用过程</p>
+<p>1.根据系统调用类型查系统调用号表获得系统调用号</p>
+<p>2.系统调用号查内核函数跳转表找到应该执行的内核函数</p>
+<p>3.执行内核函数</p>
+<p>各部分的具体作用和位置如下</p>
+<h5
+id="系统调用号表unistd_32.h">系统调用号表<code>unistd_32.h</code></h5>
+<blockquote>
+<p>前置知识:c语言宏定义</p>
+</blockquote>
+<p>在我校的操作系统实验中,使用的操作系统内核版本是<code>linux-2.6.32.60</code></p>
+<p>在<code>/usr/src/linux-2.6.32.60/arch/x86/include/asm/unistd_32.h</code>位置</p>
+<p>该文件中全是宏定义,形如<code>#define __NR_exit        1</code>,将每一个系统调用号魔数定义为一个有实际意义的字面量</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#<span class="keyword">ifndef</span> _ASM_X86_UNISTD_32_H</span></span><br><span class="line"><span class="meta">#<span class="keyword">define</span> _ASM_X86_UNISTD_32_H</span></span><br><span class="line"></span><br><span class="line"><span class="comment">/*</span></span><br><span class="line"><span class="comment"> * This file contains the system call numbers.</span></span><br><span class="line"><span class="comment"> */</span></span><br><span class="line"></span><br><span class="line"><span class="meta">#<span class="keyword">define</span> __NR_restart_syscall      0</span></span><br><span class="line"><span class="meta">#<span class="keyword">define</span> __NR_exit		  1</span></span><br><span class="line"><span class="meta">#<span class="keyword">define</span> __NR_fork		  2</span></span><br><span class="line"><span class="meta">#<span class="keyword">define</span> __NR_read		  3</span></span><br><span class="line"><span class="meta">#<span class="keyword">define</span> __NR_write		  4</span></span><br><span class="line">...</span><br><span class="line">    </span><br><span class="line"><span class="meta">#<span class="keyword">define</span> NR_syscalls 337			<span class="comment">//系统调用总个数</span></span></span><br><span class="line">    </span><br><span class="line">...</span><br></pre></td></tr></table></figure>
+<blockquote>
+<p>感觉类似于DNS协议</p>
+<p>将ip地址号映射到一个方便人类记忆的域名</p>
+<p>将一个域名解析到一个ip地址号</p>
+</blockquote>
+<h5
+id="内核函数跳转表syscall_table_32.s">内核函数跳转表<code>syscall_table_32.S</code></h5>
+<blockquote>
+<blockquote>
+<p>前置知识x86汇编语言</p>
+</blockquote>
+<p>.S:汇编语言源程序;预处理,汇编</p>
+<p>也就是说该文件是汇编写的</p>
+</blockquote>
+<p>内核函数跳转表以系统调用好表中的系统调用号为下标,总个数也是在<code>unistd_32.h</code>中宏定义的<code>#define NR_syscalls 337</code></p>
+<p>系统调用号和内核函数跳转表项是一个萝卜一个坑的关系,修改系统调用号就得修改跳转表项,因此现有的不要乱改</p>
+<p>如果系统调用号没有对应下标的内核跳转表表项,则默认指向函数调用表中,教材中说是<code>sys_ni_syscall()</code></p>
+<p>在我校的操作系统实验课程的安排中,这个内核函数跳转表的位置在<code>/usr/src/linux-2.6.32.60/arch/x86/kernel/syscall_table_32.S</code></p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line">ENTRY(sys_call_table)</span><br><span class="line">	.<span class="type">long</span> sys_restart_syscall	<span class="comment">/* 0 - old &quot;setup()&quot; system call, used for restarting */</span></span><br><span class="line">	.<span class="type">long</span> sys_exit</span><br><span class="line">	.<span class="type">long</span> ptregs_fork</span><br><span class="line">	.<span class="type">long</span> sys_read</span><br><span class="line">	.<span class="type">long</span> sys_write</span><br><span class="line">	.<span class="type">long</span> sys_open		<span class="comment">/* 5 */</span></span><br><span class="line">	.<span class="type">long</span> sys_close</span><br><span class="line">	.<span class="type">long</span> sys_waitpid</span><br></pre></td></tr></table></figure>
+<p>这个跳转表也比较类似CSAPP第三章上介绍的switch跳转表</p>
+<figure>
+<img
+src="https://raw.githubusercontent.com/DeutschBall/test/master/image-20220523075250116.png"
+alt="image-20220523075250116" />
+<figcaption aria-hidden="true">image-20220523075250116</figcaption>
+</figure>
+<blockquote>
+<p>系统调用号表和内核函数跳转表有一一对应关系</p>
+<figure>
+<img
+src="https://raw.githubusercontent.com/DeutschBall/test/master/image-20220522215928689.png"
+alt="image-20220522215928689" />
+<figcaption aria-hidden="true">image-20220522215928689</figcaption>
+</figure>
+</blockquote>
+<h5 id="内核函数声明syscalls.h">内核函数声明<code>syscalls.h</code></h5>
+<p>该声明在<code>/usr/src/linux-2.6.32.60/include/linux/syscalls.h</code>中</p>
+<p>就是一个头文件,里面都是函数声明,在链接时起到引用的作用</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line">asmlinkage <span class="type">long</span> <span class="title function_">sys_time</span><span class="params">(<span class="type">time_t</span> __user *tloc)</span>;</span><br><span class="line">asmlinkage <span class="type">long</span> <span class="title function_">sys_stime</span><span class="params">(<span class="type">time_t</span> __user *tptr)</span>;</span><br><span class="line">asmlinkage <span class="type">long</span> <span class="title function_">sys_gettimeofday</span><span class="params">(<span class="keyword">struct</span> timeval __user *tv,</span></span><br><span class="line"><span class="params">				<span class="keyword">struct</span> timezone __user *tz)</span>;</span><br><span class="line">asmlinkage <span class="type">long</span> <span class="title function_">sys_settimeofday</span><span class="params">(<span class="keyword">struct</span> timeval __user *tv,</span></span><br><span class="line"><span class="params">				<span class="keyword">struct</span> timezone __user *tz)</span>;</span><br><span class="line">asmlinkage <span class="type">long</span> <span class="title function_">sys_adjtimex</span><span class="params">(<span class="keyword">struct</span> timex __user *txc_p)</span>;</span><br><span class="line"></span><br><span class="line">asmlinkage <span class="type">long</span> <span class="title function_">sys_times</span><span class="params">(<span class="keyword">struct</span> tms __user *tbuf)</span>;</span><br><span class="line"></span><br><span class="line">asmlinkage <span class="type">long</span> <span class="title function_">sys_gettid</span><span class="params">(<span class="type">void</span>)</span>;</span><br><span class="line">asmlinkage <span class="type">long</span> <span class="title function_">sys_nanosleep</span><span class="params">(<span class="keyword">struct</span> timespec __user *rqtp, <span class="keyword">struct</span> timespec __user *rmtp)</span>;</span><br><span class="line">...</span><br></pre></td></tr></table></figure>
+<blockquote>
+<p>关于asmlinkage修饰符:</p>
+<blockquote>
+<p>需要前置知识,x86汇编语言和调用约定</p>
+</blockquote>
+<p>类似位置的修饰符我们见过<code>__cdecl</code>,<code>__fastcall</code>,这里<code>asmlinkage</code>也是一种调用约定的修饰符,试想如果不声明该修饰符,则linux上按照System
+V AMD64
+ABI约定的函数传参方法,前六个参数是通过<code>edi,esi,edx,ecx,r8d,r9d</code>这六个寄存器传递的,返回值是通过eax寄存器传递的.</p>
+<p>而对于内核函数</p>
+<p><code>asmlinkage</code>是一个宏定义<code>#define asmlinkage CPP_ASMLINKAGE __attribute__((regparm(0)))</code>,</p>
+<p>其作用是使用<code>eax,ebx,ecx</code>传递参数,<code>eax</code>始终传递系统调用号(内核函数号)</p>
+<figure>
+<img
+src="https://raw.githubusercontent.com/DeutschBall/test/master/image-20220523084202556.png"
+alt="eax传递内核函数号" />
+<figcaption aria-hidden="true">eax传递内核函数号</figcaption>
+</figure>
+<p>比如write函数从用户态下到内核态system_call时的调用过程</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">mov	edx,4		; message length						;要打印的信息长度用edx传递</span><br><span class="line">mov	ecx,msg		; message to write						;要打印的信息msg用ecx寄存器传递</span><br><span class="line">mov	ebx,1		; file descriptor (stdout)				;文件描述符,魔数1表示标准输出,即显示器</span><br><span class="line">mov	eax,4		; system call number (sys_write)		;eax存放内核函数号,决定调用sys_write函数</span><br><span class="line">int	0x80		; call kernel						   ;陷入内核,根据先前放在eax中的系统调用号决定执行什么命令</span><br></pre></td></tr></table></figure>
+</blockquote>
+<h5 id="内核函数实现sys.c">内核函数实现<code>sys.c</code></h5>
+<p>内核函数的定义实现在<code>/usr/src/linux-2.6.32.60/kernel/sys.c</code>里</p>
+<p>该源文件开幕就是版权声明,是龙得卧着,是虎得盘着,我Linus是什么人不用我自己说</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">/*</span></span><br><span class="line"><span class="comment"> *  linux/kernel/sys.c</span></span><br><span class="line"><span class="comment"> *</span></span><br><span class="line"><span class="comment"> *  Copyright (C) 1991, 1992  Linus Torvalds</span></span><br><span class="line"><span class="comment"> */</span></span><br></pre></td></tr></table></figure>
+<p>然后include了一大堆头文件,其中就有<code>syscalls.h</code></p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;linux/module.h&gt;</span></span></span><br><span class="line">.....</span><br><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;linux/syscalls.h&gt;</span></span></span><br><span class="line">....</span><br><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;asm/unistd.h&gt;</span></span></span><br></pre></td></tr></table></figure>
+<p>然后就见鬼了,一个<code>sys_</code>开头的函数实现都没有找到,这样<code>syscalls.h</code>岂不是include了个寂寞</p>
+<p>在<code>syscalls.h</code>的宏定义中我们可以找到答案</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#<span class="keyword">define</span> SYSCALL_DEFINE0(name)	   asmlinkage long sys_##name(void)</span></span><br><span class="line"><span class="meta">#<span class="keyword">define</span> SYSCALL_DEFINE1(name, ...) SYSCALL_DEFINEx(1, _##name, __VA_ARGS__)</span></span><br><span class="line">...</span><br><span class="line"><span class="meta">#<span class="keyword">define</span> SYSCALL_DEFINE6(name, ...) SYSCALL_DEFINEx(6, _##name, __VA_ARGS__)</span></span><br><span class="line"></span><br><span class="line">...</span><br><span class="line">  </span><br><span class="line"><span class="meta">#<span class="keyword">define</span> SYSCALL_DEFINE(name) asmlinkage long sys_##name</span></span><br><span class="line"><span class="meta">#<span class="keyword">define</span> __SYSCALL_DEFINEx(x, name, ...)					\</span></span><br><span class="line"><span class="meta">	asmlinkage long sys##name(__SC_DECL##x(__VA_ARGS__));		\</span></span><br><span class="line"><span class="meta">	static inline long SYSC##name(__SC_DECL##x(__VA_ARGS__));	\</span></span><br><span class="line"><span class="meta">	asmlinkage long SyS##name(__SC_LONG##x(__VA_ARGS__))		\</span></span><br><span class="line"><span class="meta">	&#123;								\</span></span><br><span class="line"><span class="meta">		__SC_TEST##x(__VA_ARGS__);				\</span></span><br><span class="line"><span class="meta">		return (long) SYSC##name(__SC_CAST##x(__VA_ARGS__));	\</span></span><br><span class="line"><span class="meta">	&#125;								\</span></span><br><span class="line"><span class="meta">	SYSCALL_ALIAS(sys##name, SyS##name);				\</span></span><br><span class="line"><span class="meta">	static inline long SYSC##name(__SC_DECL##x(__VA_ARGS__))</span></span><br><span class="line"></span><br></pre></td></tr></table></figure>
+<p>即<code>asmlinkage long sys_##name</code>这种格式的函数接口都被统一地宏定义为<code>__SYSCALL_DEFINEx(x, name, ...)</code></p>
+<blockquote>
+<p>统一定义成<code>SYSCALL_DEFINE0</code>到<code>SYSCALL_DEFINE6</code>这7种宏定义,作用是是实现起来方便</p>
+</blockquote>
+<p>而<code>sys.c</code>中就有<code>__SYSCALL_DEFINEx(x,name,...)</code>这类函数的实现</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><span class="line">SYSCALL_DEFINE3(setpriority, <span class="type">int</span>, which, <span class="type">int</span>, who, <span class="type">int</span>, niceval)</span><br><span class="line">&#123;</span><br><span class="line">...</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="comment">/*</span></span><br><span class="line"><span class="comment"> * Ugh. To avoid negative return values, &quot;getpriority()&quot; will</span></span><br><span class="line"><span class="comment"> * not return the normal nice-value, but a negated value that</span></span><br><span class="line"><span class="comment"> * has been offset by 20 (ie it returns 40..1 instead of -20..19)</span></span><br><span class="line"><span class="comment"> * to stay compatible.</span></span><br><span class="line"><span class="comment"> */</span></span><br><span class="line">SYSCALL_DEFINE2(getpriority, <span class="type">int</span>, which, <span class="type">int</span>, who)</span><br><span class="line">&#123;</span><br><span class="line">...</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>我们自定义的内核函数又少又简单,没有必要也遵守这种宏定义,直接在<code>sys.c</code>中按照<code>syscalls.h</code>中的函数声明去实现函数即可.反正宏定义只是起别名,叫绰号和叫原名都不会错</p>
+<h5 id="我们需要做的">我们需要做的</h5>
+<p>考虑上述各部分的作用,我们需要做的</p>
+<p><strong>1.添加系统调用表<code>unistd_32.h</code>项</strong></p>
+<p>修改之前:</p>
+<figure>
+<img
+src="https://raw.githubusercontent.com/DeutschBall/test/master/image-20220522222645579.png"
+alt="image-20220522222645579" />
+<figcaption aria-hidden="true">image-20220522222645579</figcaption>
+</figure>
+<p>格式比着葫芦画个瓢,修改之后</p>
+<figure>
+<img
+src="https://raw.githubusercontent.com/DeutschBall/test/master/QQ%E6%88%AA%E5%9B%BE20220522222731.png"
+alt="QQ截图20220522222731" />
+<figcaption aria-hidden="true">QQ截图20220522222731</figcaption>
+</figure>
+<p>注意下面<code>#define NR_syscalls 338</code>也得跟着改,</p>
+<p>这个值表示的是系统调用的总数,由于系统调用号从0开始编号,因此当我们新增一个337号时,总数有338个</p>
+<p><strong>2.添加内核函数跳转表<code>syscall_table_32.S</code>表项</strong></p>
+<figure>
+<img
+src="https://raw.githubusercontent.com/DeutschBall/test/master/QQ%E6%88%AA%E5%9B%BE20220522223100.png"
+alt="QQ截图20220522223100" />
+<figcaption aria-hidden="true">QQ截图20220522223100</figcaption>
+</figure>
+<p>只需要在最后一行添加一项,格式比着葫芦画个瓢</p>
+<p><strong>3.在<code>syscalls.h</code>中增加一条函数声明</strong></p>
+<p>注意以root打开文件才有权限修改</p>
+<figure>
+<img
+src="https://raw.githubusercontent.com/DeutschBall/test/master/image-20220523073622059.png"
+alt="image-20220523073622059" />
+<figcaption aria-hidden="true">image-20220523073622059</figcaption>
+</figure>
+<p><strong>4.在<code>sys.c</code>中增加内核函数的实现</strong></p>
+<figure>
+<img
+src="https://raw.githubusercontent.com/DeutschBall/test/master/image-20220523074428529.png"
+alt="image-20220523074428529" />
+<figcaption aria-hidden="true">image-20220523074428529</figcaption>
+</figure>
+<p>这里最后手残写了一个S一开始没发现,编译就是不通过,在形成<code>sys.o</code>时报错,回来看笔记才发现多一个S</p>
+<p><strong>5.编译内核</strong></p>
+<blockquote>
+<p>前置知识</p>
+<p>linux内核</p>
+<p>链接</p>
+<p>makefile的编写</p>
+<p>我几乎都不会</p>
+</blockquote>
+<p>学校给的实验环境中写好了makefile,好长一个,整个内核的编译,我唧己啃腚写不出来.</p>
+<p>并且makefile涉及链接操作,在CSAPP第七章有比较详细的介绍,这是后话了</p>
+<p>然后就是makefile的语法,这我目前也不会,这也是后话了</p>
+<p>总之就是</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">make menuconfig <span class="comment">#修改一下内核名称这种无关紧要的东西,其他的不敢改也不会改,在这里我</span></span><br><span class="line">make	<span class="comment">#执行makefile文件,开始漫长的编译过程</span></span><br><span class="line">make modules_install</span><br><span class="line">make install</span><br></pre></td></tr></table></figure>
+<p>如果上述四步都能完整执行,真的烧高香了</p>
+<p>编译完了会形成一个vmlinux.o目标模块,链接后会形成vmlinux这么一个32位ELF可执行文件</p>
+<figure>
+<img
+src="https://raw.githubusercontent.com/DeutschBall/test/master/image-20220523115115233.png"
+alt="image-20220523115115233" />
+<figcaption aria-hidden="true">image-20220523115115233</figcaption>
+</figure>
+<p>后面两步完了之后会在<code>/lib/modules</code>下面生成</p>
+<figure>
+<img
+src="https://raw.githubusercontent.com/DeutschBall/test/master/QQ%E6%88%AA%E5%9B%BE20220523115917.png"
+alt="QQ截图20220523115917" />
+<figcaption aria-hidden="true">QQ截图20220523115917</figcaption>
+</figure>
+<p><code>2.6.32-28-generic</code>是系统原来自带的</p>
+<p><code>2.6.32.60XXXXXXXXXXXXh</code>是实验一生成的</p>
+<p><code>2.6.32.60XXXXXXXXXXXXf</code>是本次实验生成的</p>
+<p>然后使用<code>update-initramfs -c -k 2.6.32.60XXXXXXXXXXf</code>生成"虚拟盘文件"</p>
+<p>我们正在玩一个大型橙光游戏,动辄编译个把小时,以防万一,此时拍一个快照吧</p>
+<figure>
+<img
+src="https://raw.githubusercontent.com/DeutschBall/test/master/image-20220523121014189.png"
+alt="image-20220523121014189" />
+<figcaption aria-hidden="true">image-20220523121014189</figcaption>
+</figure>
+<p><strong>6.修改<code>grub.cfg</code></strong></p>
+<p><code>grub.cfg</code>在<code>/boot/grub/grub.cfg</code></p>
+<p>比着葫芦画瓢,照抄一个稍微改一下</p>
+<figure>
+<img
+src="https://raw.githubusercontent.com/DeutschBall/test/master/QQ%E6%88%AA%E5%9B%BE20220523120814.png"
+alt="QQ截图20220523120814" />
+<figcaption aria-hidden="true">QQ截图20220523120814</figcaption>
+</figure>
+<p>完了保存重启</p>
+<p><strong>7.验证</strong></p>
+<p><code>/mnt/hgfs/share/test.c</code>中这样写</p>
+<blockquote>
+<p>选这么一个位置纯粹是因为共享文件夹,可以在本机直接用vscode编写,虚拟机输入个字符都卡的要死</p>
+</blockquote>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;stdio.h&gt;</span></span></span><br><span class="line"><span class="type">int</span> <span class="title function_">main</span><span class="params">()</span>&#123;</span><br><span class="line">    <span class="built_in">printf</span>(<span class="string">&quot;test sjf&#x27;s syscall,%d\n&quot;</span>,syscall(<span class="number">337</span>,<span class="number">13</span>));<span class="comment">//调用337号系统调用</span></span><br><span class="line">    <span class="keyword">return</span> <span class="number">0</span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<figure>
+<img
+src="https://raw.githubusercontent.com/DeutschBall/test/master/image-20220523130855962.png"
+alt="image-20220523130855962" />
+<figcaption aria-hidden="true">image-20220523130855962</figcaption>
+</figure>
+<p>然后使用<code>dmesg</code>命令查看我们在自定义的内核函数中的输出<code>printk</code>,最后一行是这样的</p>
+<figure>
+<img
+src="https://raw.githubusercontent.com/DeutschBall/test/master/image-20220523131010973.png"
+alt="image-20220523131010973" />
+<figcaption aria-hidden="true">image-20220523131010973</figcaption>
+</figure>
+<p>这与我们编写的是相同的,证明我们自己新增的系统调用的整个过程奏效了</p>
+<h3 id="故障">故障</h3>
+<p>由错误情况引起,可能被故障处理程序修正.</p>
+<figure>
+<img
+src="https://raw.githubusercontent.com/DeutschBall/test/master/image-20220519073802747.png"
+alt="image-20220519073802747" />
+<figcaption aria-hidden="true">image-20220519073802747</figcaption>
+</figure>
+<p>比如缺页异常</p>
+<h3 id="终止">终止</h3>
+<p>发生致命错误,程序直接寄掉,处理程序将控制返回<code>abort</code>历程</p>
+<figure>
+<img
+src="https://raw.githubusercontent.com/DeutschBall/test/master/image-20220519073854260.png"
+alt="image-20220519073854260" />
+<figcaption aria-hidden="true">image-20220519073854260</figcaption>
+</figure>
+<h3 id="异常号">异常号</h3>
+<p>发现异常的时候会用事件号查事件表.这里的异常号不是事件号,而是对每个异常都进行编号</p>
+<p><code>0~31</code>号异常由Intel架构师定义</p>
+<p><code>32~255</code>号异常由操作系统设计师定义</p>
+<figure>
+<img
+src="https://raw.githubusercontent.com/DeutschBall/test/master/image-20220519074127003.png"
+alt="image-20220519074127003" />
+<figcaption aria-hidden="true">image-20220519074127003</figcaption>
+</figure>
+<h2 id="进程">进程</h2>
+<p>进程上下文:程序正确运行所需的状态组合,包括堆栈,代码和数据,通用寄存器,程序计数器,环境变量,打开的文件描述符集合</p>
+<h3 id="私有虚拟地址空间">私有虚拟地址空间</h3>
+<p>用户栈往下的部分都是进程独立的虚拟地址空间</p>
+<figure>
+<img
+src="https://raw.githubusercontent.com/DeutschBall/test/master/image-20220519075052410.png"
+alt="image-20220519075052410" />
+<figcaption aria-hidden="true">image-20220519075052410</figcaption>
+</figure>
+<p>私有虚拟地址空间,不是私有物理地址空间.</p>
+<p>共享库在主存中只有一块物理地址空间,但是在两个进程虚拟地址空间中映射到不同部分</p>
+<h3 id="用户态和内核态">用户态和内核态</h3>
+<p>设置两种状态的作用是,限制进程对内核数据结构的访问修改,只有操作系统进程可以运行在内核态.用户应用进程永远不可能运行在内核态,用户应用进程只能通过系统调用,请操作系统去完成目的.</p>
+<p>异常处理程序都运行在内核态</p>
+<p>用户态和内核态怎么区分的?通过CPU中某个控制寄存器中的某个模式位</p>
+<h3 id="上下文切换">上下文切换</h3>
+<p>高层次的异常</p>
+<p>进程上下文包括堆栈,数据和代码,各种寄存器,程序状态字,内核栈,内核各种数据结构比如页表</p>
+<p>上下文切换的意思是,挂起当前正在运行的进程,保存其运行现场,然后执行其他进程.当该进程再次被<strong>调度</strong>时还原其运行现场</p>
+<p>发生上下文切换时,操作系统会1.保存当前进程的上下文(放在内存里),2.恢复先前某个被挂起的进程执行现场3.控制交给该进程</p>
+<p>上下文切换发生的时机:</p>
+<p>1.系统调用可能引发上下文切换,比如当前进程使用系统级函数<code>write</code>向标准输出打印,这个过程对于CPU来说非常漫长.CPU会切换到执行另一个进程,不会等待数据写到显示器.更加明显的是<code>sleep</code>系统调用,不妨把话说得更明白些,直接让进程睡觉.</p>
+<blockquote>
+<figure>
+<img
+src="https://raw.githubusercontent.com/DeutschBall/test/master/image-20220519080431478.png"
+alt="image-20220519080431478" />
+<figcaption aria-hidden="true">image-20220519080431478</figcaption>
+</figure>
+</blockquote>
+<p>2.软件中断,进程时间片用光了,该让给另一个进程执行了.</p>
+<p>在程序员视角,进程的状态只有三种</p>
+<figure>
+<img
+src="https://raw.githubusercontent.com/DeutschBall/test/master/image-20220519082556372.png"
+alt="image-20220519082556372" />
+<figcaption aria-hidden="true">image-20220519082556372</figcaption>
+</figure>
+<h3 id="进程控制">进程控制</h3>
+<p>控制进程的函数都是系统级函数</p>
+<h4 id="获取进程id">获取进程ID</h4>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#<span class="keyword">define</span> pid_t int</span></span><br><span class="line"><span class="type">pid_t</span> <span class="title function_">getpid</span><span class="params">(<span class="type">void</span>)</span>;		<span class="comment">//获取当前进程id</span></span><br><span class="line"><span class="type">pid_t</span> <span class="title function_">getppid</span><span class="params">(<span class="type">void</span>)</span>;	<span class="comment">//获得父进程id</span></span><br></pre></td></tr></table></figure>
+<p><code>proc.c</code></p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;unistd.h&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;stdio.h&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;stdlib.h&gt;</span></span></span><br><span class="line"><span class="type">int</span> <span class="title function_">main</span><span class="params">()</span>&#123;</span><br><span class="line">    <span class="type">int</span> pid=getpid();</span><br><span class="line">    <span class="type">int</span> ppid=getppid();</span><br><span class="line">    <span class="built_in">printf</span>(<span class="string">&quot;pid=%d,ppid=%d&quot;</span>,pid,ppid);</span><br><span class="line">    <span class="keyword">return</span> <span class="number">0</span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>在bash shell命令行上编译运行</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line">┌──(kali㉿Executor)-[/mnt/c/Users/86135/desktop/os]</span><br><span class="line">└─$ ps</span><br><span class="line">  PID TTY          TIME CMD</span><br><span class="line">    9 pts/0    00:00:00 bash</span><br><span class="line">   41 pts/0    00:00:00 ps</span><br><span class="line"></span><br><span class="line">┌──(kali㉿Executor)-[/mnt/c/Users/86135/desktop/os]</span><br><span class="line">└─$ ./proc</span><br><span class="line">pid=42,ppid=9</span><br></pre></td></tr></table></figure>
+<p>bash调用ps程序,因此bash是ps的父进程</p>
+<p>由于proc进程是由bash创建的,因此bash是proc的父进程</p>
+<p>进程号只会越来越大,不会重复利用一个已经完成的进程的进程号</p>
+<h4 id="创建进程">创建进程</h4>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="type">pid_t</span> <span class="title function_">fork</span><span class="params">(<span class="type">void</span>)</span>;<span class="comment">//子进程返回0,父进程返回子进程pid</span></span><br></pre></td></tr></table></figure>
+<p>非常疑惑的一点是为什么一个函数调用可以返回两次</p>
+<blockquote>
+<p>对两个进程分别返回一次</p>
+</blockquote>
+<p><code>proc.c</code></p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;unistd.h&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;stdio.h&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;stdlib.h&gt;</span></span></span><br><span class="line"><span class="type">int</span> <span class="title function_">main</span><span class="params">()</span>&#123;</span><br><span class="line">    <span class="built_in">printf</span>(<span class="string">&quot;in father process 0\n&quot;</span>);	<span class="comment">//fork之前只会被父进程执行一次</span></span><br><span class="line">    <span class="type">int</span> pid=fork();						<span class="comment">//此处子进程和父进程并行</span></span><br><span class="line">    <span class="keyword">if</span>(pid==<span class="number">0</span>)&#123;		<span class="comment">//对于子进程来说,它确实有一个正整数进程号,但是fork返回的不是</span></span><br><span class="line">        <span class="built_in">printf</span>(<span class="string">&quot;in son process 1\n&quot;</span>);</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">if</span>(pid!=<span class="number">0</span>)&#123; </span><br><span class="line">        <span class="built_in">printf</span>(<span class="string">&quot;in father process 1\n&quot;</span>);</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>运行结果:</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">┌──(kali㉿Executor)-[/mnt/c/Users/86135/desktop/os]</span><br><span class="line">└─$ ./proc</span><br><span class="line"><span class="keyword">in</span> father process 0</span><br><span class="line"><span class="keyword">in</span> father process 1</span><br><span class="line"><span class="keyword">in</span> son process 1</span><br></pre></td></tr></table></figure>
+<p>不管什么进程,其进程号都是正数,不可能是0.fork对子进程的返回值为0并不代表一个进程号,而是区分子进程和父进程的标志</p>
+<p>根据fork的返回值不同,这是一模一样的代码区分是父进程在执行还是子进程在执行的唯一标志</p>
+<blockquote>
+<p>这里c风格fork创建进程和C++中使用thread创建线程差别很大</p>
+<p>thread创建线程,只需创建一个thread对象,对其构造函数传递一个函数,后面该函数就会自己开一条线程执行,thread对象就是线程的句柄.可以在函数线程之外,比如主线程处,通过thread对象,很自然地操作线程的行为比如detach或者join</p>
+<p>而在这里唯一能区分线程的句柄就是一个整数pid,并且这个pid位于进程之中,只能在运行时通过pid判断是哪一个进程.不能在进程之外操作进程的行为</p>
+</blockquote>
+<p>fork之后原来的进程照旧执行,一个新的进程会拥有原进程的一模一样的虚拟地址空间的<strong>拷贝</strong>,包括代码数据寄存器堆栈等等.子进程和父进程的虚拟地址空间相互独立</p>
+<p><code>proc.c</code></p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;unistd.h&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;stdio.h&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;stdlib.h&gt;</span></span></span><br><span class="line"><span class="type">int</span> global=<span class="number">10</span>;</span><br><span class="line"><span class="type">int</span> <span class="title function_">main</span><span class="params">()</span>&#123;</span><br><span class="line">    <span class="type">int</span> local=<span class="number">20</span>;</span><br><span class="line">    <span class="type">int</span> pid=fork();</span><br><span class="line">    <span class="keyword">if</span>(pid==<span class="number">0</span>)&#123;</span><br><span class="line">        <span class="built_in">printf</span>(<span class="string">&quot;in son process: &quot;</span>);</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">else</span>&#123;</span><br><span class="line">        <span class="built_in">printf</span>(<span class="string">&quot;in father process: &quot;</span>);</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="built_in">printf</span>(<span class="string">&quot;global=%d,local=%d\n&quot;</span>,global++,local++);<span class="comment">//这里有修改</span></span><br><span class="line"></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">┌──(kali㉿Executor)-[/mnt/c/Users/86135/desktop/os]</span><br><span class="line">└─$ ./proc</span><br><span class="line"><span class="keyword">in</span> father process: global=10,<span class="built_in">local</span>=20</span><br><span class="line"><span class="keyword">in</span> son process: global=10,<span class="built_in">local</span>=20	<span class="comment">#两个打印相同说明global有两个,local有两个</span></span><br></pre></td></tr></table></figure>
+<p>父进程和子进程都打印到屏幕说明父子进程共享父进程已经打开的文件描述符1</p>
+<p>用进程图描述fork是比较直观的</p>
+<figure>
+<img
+src="https://raw.githubusercontent.com/DeutschBall/test/master/image-20220519084511671.png"
+alt="image-20220519084511671" />
+<figcaption aria-hidden="true">image-20220519084511671</figcaption>
+</figure>
+<h5 id="进程图如何实现">进程图如何实现</h5>
+<p>1.main上多个分支</p>
+<figure>
+<img
+src="https://raw.githubusercontent.com/DeutschBall/test/master/image-20220519092351240.png"
+alt="image-20220519092351240" />
+<figcaption aria-hidden="true">image-20220519092351240</figcaption>
+</figure>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;unistd.h&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;stdio.h&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;stdlib.h&gt;</span></span></span><br><span class="line"><span class="type">int</span> <span class="title function_">main</span><span class="params">()</span>&#123;</span><br><span class="line">    </span><br><span class="line">    <span class="type">int</span> pids[<span class="number">5</span>];</span><br><span class="line">    <span class="type">int</span> fpid=getpid();<span class="comment">//fpid在fork之前先计算好,此后即使所有子进程都拷贝,也只是拷贝的父进程号</span></span><br><span class="line">    <span class="keyword">if</span>(fpid==getpid())&#123;<span class="comment">//getpid在每个进程都不同,只有父进程中才会有fpid=getpid</span></span><br><span class="line">        <span class="keyword">for</span>(<span class="type">int</span> i=<span class="number">0</span>;i&lt;<span class="number">5</span>;++i)&#123;</span><br><span class="line">            pids[i]=fork();<span class="comment">//实际上后来的子进程的pids也会存有数据,原因是父进程在创建第i个子进程时,pids已经写入前i-1个子进程号了</span></span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">if</span>(fpid==getpid())&#123;<span class="comment">//getpid在每个进程都不同,只有父进程中才会有fpid=getpid</span></span><br><span class="line">        <span class="built_in">printf</span>(<span class="string">&quot;in father process,pid=%d\n&quot;</span>,fpid);</span><br><span class="line">        <span class="keyword">for</span>(<span class="type">int</span> i=<span class="number">0</span>;i&lt;<span class="number">5</span>;++i)&#123;</span><br><span class="line">            <span class="built_in">printf</span>(<span class="string">&quot;pid%d=%d,&quot;</span>,i,pids[i]);</span><br><span class="line">        &#125;</span><br><span class="line">        <span class="built_in">printf</span>(<span class="string">&quot;\n&quot;</span>);</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">return</span> <span class="number">0</span>;</span><br><span class="line"></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>这样实际上的进程图</p>
+<figure>
+<img
+src="https://raw.githubusercontent.com/DeutschBall/test/master/image-20220519093748088.png"
+alt="image-20220519093748088" />
+<figcaption aria-hidden="true">image-20220519093748088</figcaption>
+</figure>
+<p>运行结果:</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">┌──(kali㉿Executor)-[/mnt/c/Users/86135/desktop/os]</span><br><span class="line">└─$ ./proc</span><br><span class="line"><span class="keyword">in</span> father process,pid=222</span><br><span class="line">pid0=223,pid1=224,pid2=226,pid3=230,pid4=235,</span><br></pre></td></tr></table></figure>
+<p>2.main和第一个子进程同时分支</p>
+<figure>
+<img
+src="https://raw.githubusercontent.com/DeutschBall/test/master/image-20220519093425314.png"
+alt="image-20220519093425314" />
+<figcaption aria-hidden="true">image-20220519093425314</figcaption>
+</figure>
+<p>这个很容易实现</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">fork();</span><br><span class="line">fork();</span><br></pre></td></tr></table></figure>
+<h5 id="fork前后"><strong>fork前后</strong></h5>
+<p><code>proc.c</code></p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;unistd.h&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;stdio.h&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;stdlib.h&gt;</span></span></span><br><span class="line"><span class="type">int</span> global=<span class="number">10</span>;</span><br><span class="line"><span class="type">int</span> <span class="title function_">main</span><span class="params">()</span>&#123;</span><br><span class="line">    <span class="type">int</span> local=<span class="number">20</span>;</span><br><span class="line">    <span class="type">int</span> pid0=getpid();          <span class="comment">//fork之前getpid</span></span><br><span class="line">    <span class="type">int</span> forkid=fork();          <span class="comment">//forkid只是用来</span></span><br><span class="line">    <span class="type">int</span> pid1=getpid();          <span class="comment">//fork之后getpid</span></span><br><span class="line">   </span><br><span class="line">    <span class="keyword">if</span>(forkid==<span class="number">0</span>)&#123;</span><br><span class="line">        <span class="built_in">printf</span>(<span class="string">&quot;in son process,pid0=%d,pid1=%d,forkid=%d\n&quot;</span>,pid0,pid1,forkid);</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">else</span>&#123;</span><br><span class="line">        <span class="built_in">printf</span>(<span class="string">&quot;in father process,pid0=%d,pid1=%d,forkid=%d\n&quot;</span>,pid0,pid1,forkid);</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">return</span> <span class="number">0</span>;</span><br><span class="line"></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>运行结果:</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">┌──(kali㉿Executor)-[/mnt/c/Users/86135/desktop/os]</span><br><span class="line">└─$ ./proc</span><br><span class="line"><span class="keyword">in</span> father process,pid0=116,pid1=116,forkid=117</span><br><span class="line"><span class="keyword">in</span> son process,pid0=116,pid1=117,forkid=0</span><br></pre></td></tr></table></figure>
+<p>不管是父进程还是子进程,<code>pid0=116</code>相同,而<code>pid1</code>却不同,这是因为,pid0是fork之前执行的,当fork执行时,pid0已经被计算出了,作为一个局部变量压栈了,子进程不会再去计算pid0,而是从父进程堆栈的拷贝上直接拿.</p>
+<p>但是pid1的情况不同,fork之后,子进程已经获得了父进程堆栈的拷贝,此后两个进程地址空间独立,后来的pid1就是分别计算之后分别存放在自己的堆栈里</p>
+<p>看起来像是数据不管是fork前后都会被复制,实际上只复制了fork前的数据,此后进程各自维护自己的数据</p>
+<h4 id="终止进程">终止进程</h4>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="type">void</span> <span class="title function_">exit</span><span class="params">(<span class="type">int</span> status)</span>;<span class="comment">//以status状态码返回</span></span><br></pre></td></tr></table></figure>
+<p><code>proc.c</code></p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;unistd.h&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;stdio.h&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;stdlib.h&gt;</span></span></span><br><span class="line"><span class="type">int</span> <span class="title function_">main</span><span class="params">()</span>&#123;</span><br><span class="line">    <span class="type">int</span> forkid=fork();</span><br><span class="line">    <span class="type">int</span> pid=getpid();</span><br><span class="line">    <span class="keyword">if</span>(forkid==<span class="number">0</span>)&#123;</span><br><span class="line">        <span class="built_in">printf</span>(<span class="string">&quot;in son process,pid=%d\n&quot;</span>,pid);</span><br><span class="line">        <span class="built_in">exit</span>(<span class="number">0</span>);			<span class="comment">//让子进程结束运行</span></span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">else</span>&#123;</span><br><span class="line">        <span class="built_in">printf</span>(<span class="string">&quot;in father process,pid=%d\n&quot;</span>,pid);</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="built_in">printf</span>(<span class="string">&quot;process %d is still running\n&quot;</span>,pid);		<span class="comment">//此句打印表明还在运行的进程</span></span><br><span class="line"></span><br><span class="line">    <span class="keyword">return</span> <span class="number">0</span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">┌──(kali㉿Executor)-[/mnt/c/Users/86135/desktop/os]</span><br><span class="line">└─$ ./proc</span><br><span class="line"><span class="keyword">in</span> father process,pid=134</span><br><span class="line">process 134 is still running</span><br><span class="line"><span class="keyword">in</span> son process,pid=135</span><br></pre></td></tr></table></figure>
+<h4 id="回收子进程">回收子进程</h4>
+<p>进程终止之后并不会立刻消失地无影无踪,而是处于一种等待被父进程回收的状态,父进程回收终止子进程时,内核将子进程的exit状态传递给父进程.子进程被回收后才会消失地无影无踪</p>
+<p>如果父进程一直没有回收已经终止的子进程,子进程就一直存在,称为"僵死进程"</p>
+<p>如果父进程提前结束呢?内核会安排init进程成为孤儿进程的父进程</p>
+<p>这就好比未成年的孩子父母双亡,被警察局送给孤儿院收养</p>
+<p>这里起孤儿院作用的init进程,其pid=1,在系统启动时被内核创建,除非关机,否则永不终止.是所有进程的老祖宗.孤儿进程终止后,init会回收之</p>
+<h5 id="waitpid">waitpid</h5>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="type">pid_t</span> <span class="title function_">waitpid</span><span class="params">(<span class="type">pid_t</span> pid,<span class="type">int</span> *statusp,<span class="type">int</span> options)</span>;</span><br></pre></td></tr></table></figure>
+<blockquote>
+<p><strong>Attention!!!</strong>当第三个参数options不设置的时候,函数的默认行为是:<strong>挂起调用进程，直到有满足条件的子进程终止</strong>。</p>
+<p>参数意义:</p>
+<p><strong>1.<code>pid_t pid</code></strong></p>
+<p>如果<code>pid&gt;0</code>则等待该指定pid的子进程终止</p>
+<p>如果<code>pid=-1</code>则等待该进程的<strong>所有子进程</strong>,如果有其中的一个终止则waitpid返回该终止子进程的pid</p>
+<p><code>proc.c</code></p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;unistd.h&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;stdio.h&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;stdlib.h&gt;</span></span></span><br><span class="line"><span class="type">int</span> <span class="title function_">main</span><span class="params">()</span>&#123;</span><br><span class="line"><span class="type">int</span> fpid=getpid();</span><br><span class="line"><span class="type">int</span> forkid=fork();</span><br><span class="line"><span class="keyword">if</span>(forkid==<span class="number">0</span>)&#123;<span class="comment">//子进程中</span></span><br><span class="line"><span class="built_in">printf</span>(<span class="string">&quot;in son process,id=%d\n&quot;</span>,getpid());</span><br><span class="line">  <span class="type">int</span> n=<span class="number">1000000</span>;</span><br><span class="line">  <span class="keyword">while</span>(n--);<span class="comment">//拖延时间</span></span><br><span class="line">  <span class="built_in">exit</span>(<span class="number">0</span>);</span><br><span class="line">&#125;</span><br><span class="line"><span class="keyword">else</span>&#123;<span class="comment">//父进程中</span></span><br><span class="line">  <span class="built_in">printf</span>(<span class="string">&quot;in father process,id=%d\n&quot;</span>,fpid);</span><br><span class="line">  waitpid(forkid,<span class="number">0</span>,<span class="number">0</span>);<span class="comment">//指定等待唯一的子进程返回			//只指定第一个参数,其他使用缺省值</span></span><br><span class="line">  <span class="built_in">printf</span>(<span class="string">&quot;son process %d exit\n&quot;</span>,forkid);</span><br><span class="line">&#125;</span><br><span class="line"><span class="built_in">printf</span>(<span class="string">&quot;process %d is still running\n&quot;</span>,getpid());</span><br><span class="line"><span class="keyword">return</span> <span class="number">0</span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>运行结果:</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">┌──(kali㉿Executor)-[/mnt/c/Users/86135/desktop/os]</span><br><span class="line">└─$ ./proc</span><br><span class="line"><span class="keyword">in</span> father process,<span class="built_in">id</span>=273</span><br><span class="line"><span class="keyword">in</span> son process,<span class="built_in">id</span>=274		<span class="comment">#父进程需要等待子进程完成</span></span><br><span class="line">son process 274 <span class="built_in">exit</span></span><br><span class="line">process 273 is still running</span><br></pre></td></tr></table></figure>
+<p><strong>2.<code>int *stausp</code></strong></p>
+<p>如果statusp非空,则waitpid就会在statusp中记录子进程的exit
+status,使用指针引用传递</p>
+<p><code>proc.c</code></p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;unistd.h&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;stdio.h&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;stdlib.h&gt;</span></span></span><br><span class="line"><span class="type">int</span> <span class="title function_">main</span><span class="params">()</span>&#123;</span><br><span class="line"><span class="type">int</span> fpid=getpid();</span><br><span class="line"><span class="type">int</span> forkid=fork();<span class="comment">//区分父子进程</span></span><br><span class="line"><span class="keyword">if</span>(forkid==<span class="number">0</span>)&#123;<span class="comment">//子进程中</span></span><br><span class="line"><span class="built_in">printf</span>(<span class="string">&quot;in son process,id=%d\n&quot;</span>,getpid());</span><br><span class="line">  <span class="type">int</span> n=<span class="number">1000000</span>;</span><br><span class="line"><span class="keyword">while</span>(n--);<span class="comment">//拖延时间</span></span><br><span class="line">  <span class="built_in">exit</span>(<span class="number">1</span>);<span class="comment">//子进程以status=0状态终止</span></span><br><span class="line">&#125;</span><br><span class="line"><span class="keyword">else</span>&#123;<span class="comment">//父进程中</span></span><br><span class="line">  <span class="type">int</span> status=<span class="number">999</span>;<span class="comment">//设置status初始值</span></span><br><span class="line">  <span class="built_in">printf</span>(<span class="string">&quot;in father process,id=%d\n&quot;</span>,fpid);</span><br><span class="line">  waitpid(forkid,&amp;status,<span class="number">0</span>);<span class="comment">//使用status承载子进程的exit状态值		//缺省第三个参数</span></span><br><span class="line">  <span class="built_in">printf</span>(<span class="string">&quot;son process %d exit with status= %d\n&quot;</span>,forkid,status);</span><br><span class="line">  <span class="built_in">printf</span>(<span class="string">&quot;WIFEXITED(status)=%d\n&quot;</span>,WIFEXITED(status));</span><br><span class="line">  <span class="built_in">printf</span>(<span class="string">&quot;WEXITSTATUS(status)=%d\n&quot;</span>,WEXITSTATUS(status));</span><br><span class="line"><span class="built_in">printf</span>(<span class="string">&quot;WIFSIGNALED(status)=%d\n&quot;</span>,WIFSIGNALED(status));</span><br><span class="line">  <span class="built_in">printf</span>(<span class="string">&quot;WTERMSIG(status)=%d\n&quot;</span>,WTERMSIG(status));</span><br><span class="line"><span class="built_in">printf</span>(<span class="string">&quot;WIFSTOPPED(status)=%d\n&quot;</span>,WIFSTOPPED(status));</span><br><span class="line"><span class="built_in">printf</span>(<span class="string">&quot;WSTOPSIG(status)=%d\n&quot;</span>,WSTOPSIG(status));</span><br><span class="line"><span class="built_in">printf</span>(<span class="string">&quot;WIFCONTINUED(status)=%d\n&quot;</span>,WIFCONTINUED(status));</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="built_in">printf</span>(<span class="string">&quot;process %d is still running\n&quot;</span>,getpid());</span><br><span class="line"></span><br><span class="line"><span class="keyword">return</span> <span class="number">0</span>;</span><br><span class="line"></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>运行结果:</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line">┌──(kali㉿Executor)-[/mnt/c/Users/86135/desktop/os]</span><br><span class="line">└─$ ./proc</span><br><span class="line"><span class="keyword">in</span> father process,<span class="built_in">id</span>=41</span><br><span class="line"><span class="keyword">in</span> son process,<span class="built_in">id</span>=42</span><br><span class="line">son process 42 <span class="built_in">exit</span> with status= 256	</span><br><span class="line">WIFEXITED(status)=1</span><br><span class="line">WEXITSTATUS(status)=1	<span class="comment">#这是exit(status)中的status</span></span><br><span class="line">WIFSIGNALED(status)=0</span><br><span class="line">WTERMSIG(status)=0</span><br><span class="line">WIFSTOPPED(status)=0</span><br><span class="line">WSTOPSIG(status)=1</span><br><span class="line">WIFCONTINUED(status)=0</span><br><span class="line">process 41 is still running</span><br></pre></td></tr></table></figure>
+<blockquote>
+<p>解释status的几个宏定义</p>
+<figure>
+<img
+src="https://raw.githubusercontent.com/DeutschBall/test/master/image-20220521075243518.png"
+alt="image-20220521075243518" />
+<figcaption aria-hidden="true">image-20220521075243518</figcaption>
+</figure>
+<p>奇怪的是,status明明是一个整数,为什么还能使用类似函数调用的宏,得到不同的结果?</p>
+<p>推测status这个双字整形的每一位都携带着某种信息,实际上相当于一个布尔值的返回值集合,这些宏定义通过按位运算相当于在这个返回值集合中取了一部分值做运算</p>
+</blockquote>
+<p><strong>3.<code>int options</code>修改子进程的处理方式</strong></p>
+<p>在<code>waitflags.h</code>中有这么几个宏定义</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">/* Bits in the third argument to `waitpid&#x27;.  */</span>				<span class="comment">//waitpid的第三个参数 其中的一些位</span></span><br><span class="line"><span class="meta">#<span class="keyword">define</span>	WNOHANG		1	<span class="comment">/* Don&#x27;t block waiting.  */</span>						<span class="comment">//01</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">define</span>	WUNTRACED	2	<span class="comment">/* Report status of stopped children.  */</span>		  <span class="comment">//10</span></span></span><br></pre></td></tr></table></figure>
+<p>函数的默认行为是:<strong>挂起调用进程，直到有满足条件的子进程终止</strong></p>
+<p>指定options之后,函数的行为:</p>
+<table>
+<colgroup>
+<col style="width: 25%" />
+<col style="width: 74%" />
+</colgroup>
+<thead>
+<tr>
+<th>options</th>
+<th>作用</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>WNOHANG</code></td>
+<td>如果指定的子进程或者等待集合中的子进程都没有终止则立即返回0</td>
+</tr>
+<tr>
+<td><code>WUNTRACED</code></td>
+<td>挂起父进程,直到等待集合中的一个进程变成已终止<strong>或者被停止</strong>,返回该子进程pid</td>
+</tr>
+<tr>
+<td><code>WCONTINUED</code></td>
+<td>挂起父进程,直到等待集合中一个正在运行的进程终止或者等待集合中一个被停职的进程收到SIGCONT信号重新开始</td>
+</tr>
+<tr>
+<td><code>WNOHANG | WUNTRACED</code></td>
+<td>立即返回.如果等待集合中的子进程都没有被停止或者终止,返回0.如果有一个子进程停止或者终止,返回该子进程pid</td>
+</tr>
+<tr>
+<td></td>
+<td></td>
+</tr>
+</tbody>
+</table>
+</blockquote>
+<p>如果调用<code>waitpid</code>的进程没有任何子进程则<code>waitpid</code>返回-1,并设置<code>errno=EINTR</code></p>
+<h6 id="wait">wait</h6>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;sys/types.h&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;sys/wait.h&gt;</span></span></span><br><span class="line"></span><br><span class="line"><span class="type">pid_t</span> <span class="title function_">wait</span><span class="params">(<span class="type">int</span> *statusup)</span>;</span><br></pre></td></tr></table></figure>
+<p><code>wait(&amp;status)</code>等价于<code>waitpid(-1,&amp;status,0)</code></p>
+<p>父进程挂起,等待子进程之一终止则返回其pid</p>
+<h5 id="sleep">sleep</h5>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;unistd.h&gt;</span></span></span><br><span class="line"><span class="type">unsigned</span> <span class="type">int</span> <span class="title function_">sleep</span><span class="params">(<span class="type">unsigned</span> <span class="type">int</span> secs)</span>;</span><br></pre></td></tr></table></figure>
+<p>休眠secs秒,睡够了觉则sleep返回0否则返回还要睡多久</p>
+<h5 id="pause">pause</h5>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;unistd.h&gt;</span></span></span><br><span class="line"><span class="type">int</span> <span class="title function_">pause</span><span class="params">(<span class="type">void</span>)</span>;</span><br></pre></td></tr></table></figure>
+<p>让调用者进程休眠,直到该进程接收到信号</p>
+<h4 id="加载并运行程序execve">加载并运行程序execve</h4>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;unistd.h&gt;</span></span></span><br><span class="line"><span class="type">int</span> <span class="title function_">execve</span><span class="params">(<span class="type">const</span> <span class="type">char</span> * filename,<span class="type">const</span> <span class="type">char</span> *argv[],<span class="type">const</span> <span class="type">char</span> * envp[])</span>;<span class="comment">//成功则不返回,失败则返回-1</span></span><br></pre></td></tr></table></figure>
+<p>执行filename指向的文件,参数为argv,环境为envp</p>
+<p>例如:</p>
+<p><code>execve.c</code></p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;stdio.h&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;unistd.h&gt;</span></span></span><br><span class="line"><span class="type">int</span> <span class="title function_">main</span><span class="params">()</span>&#123;</span><br><span class="line">    execve(<span class="string">&quot;/bin/sh&quot;</span>,<span class="number">0</span>,<span class="number">0</span>);</span><br><span class="line">    <span class="keyword">return</span> <span class="number">0</span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">kali@Executor:/mnt/c/Users/86135/desktop/os$ gcc execve.c -O0 -o execve</span><br><span class="line"></span><br><span class="line">kali@Executor:/mnt/c/Users/86135/desktop/os$ ./execve</span><br><span class="line">$ </span><br></pre></td></tr></table></figure>
+<p>执行之后shell由bash换成了sh</p>
+<blockquote>
+<p>关于参数<code>const char *envp[]</code></p>
+<figure>
+<img
+src="https://raw.githubusercontent.com/DeutschBall/test/master/image-20220521094616486.png"
+alt="image-20220521094616486" />
+<figcaption aria-hidden="true">image-20220521094616486</figcaption>
+</figure>
+<p>必须使用get或者set方法访问或者修改环境</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;stdlib.h&gt;</span></span></span><br><span class="line"><span class="type">char</span> *<span class="title function_">getenv</span><span class="params">(<span class="type">const</span> <span class="type">char</span> *name)</span>;<span class="comment">//返回name键对应的value值</span></span><br><span class="line"><span class="type">int</span> <span class="title function_">putenv</span><span class="params">(<span class="type">char</span> *str)</span>;<span class="comment">//这里str的格式为name=value,将[name,value]键值对放在环境表中,如果name键存在则覆盖之</span></span><br><span class="line"><span class="type">int</span> <span class="title function_">setenv</span><span class="params">(<span class="type">const</span> <span class="type">char</span> *name,<span class="type">const</span> <span class="type">char</span> *newvalue,<span class="type">int</span> overwrite)</span>;<span class="comment">//[name,newvalue]键值对放在环境表中,如果name键存在则根据overwrite是否为1决定是否覆盖</span></span><br><span class="line"><span class="type">int</span> <span class="title function_">unsetenv</span><span class="params">(<span class="type">const</span> <span class="type">char</span> *name)</span>;<span class="comment">//清除环境表中的[name,value]键值对,如果name键不存在则什么都不会发生</span></span><br></pre></td></tr></table></figure>
+<p><code>myecho.c</code></p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br></pre></td><td class="code"><pre><span class="line">&gt;<span class="meta">#<span class="keyword">include</span> <span class="string">&lt;stdio.h&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;stdlib.h&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;string.h&gt;</span></span></span><br><span class="line"></span><br><span class="line"><span class="type">int</span> <span class="title function_">main</span><span class="params">(<span class="type">int</span> argc,<span class="type">char</span> *argv[])</span>&#123;</span><br><span class="line"></span><br><span class="line"> <span class="built_in">printf</span>(<span class="string">&quot;%s\n&quot;</span>,getenv(<span class="string">&quot;HOME&quot;</span>));<span class="comment">//home起始目录</span></span><br><span class="line"> <span class="built_in">printf</span>(<span class="string">&quot;%s\n&quot;</span>,getenv(<span class="string">&quot;SHELL&quot;</span>));<span class="comment">//用户首选shell名</span></span><br><span class="line">    <span class="built_in">printf</span>(<span class="string">&quot;%s\n&quot;</span>,getenv(<span class="string">&quot;PWD&quot;</span>));<span class="comment">//当前工作目录绝对路径</span></span><br><span class="line">   </span><br><span class="line">    setenv(<span class="string">&quot;SHELL&quot;</span>,<span class="string">&quot;/bin/sh&quot;</span>,<span class="number">0</span>);<span class="comment">//将用户首选的shell改成/bin/sh,overwrite=0表示如果已经存在name=SHELL的键则啥也不干</span></span><br><span class="line"> <span class="built_in">printf</span>(<span class="string">&quot;%s\n&quot;</span>,getenv(<span class="string">&quot;SHELL&quot;</span>));</span><br><span class="line">   </span><br><span class="line">    setenv(<span class="string">&quot;SHELL&quot;</span>,<span class="string">&quot;/bin/sh&quot;</span>,<span class="number">1</span>);<span class="comment">//将用户首选的shell改成/bin/sh,overwrite=1表示如果已经存在name=SHELL的键则覆盖原来的value</span></span><br><span class="line"> <span class="built_in">printf</span>(<span class="string">&quot;%s\n&quot;</span>,getenv(<span class="string">&quot;SHELL&quot;</span>));</span><br><span class="line">    <span class="keyword">return</span> <span class="number">0</span>;</span><br><span class="line">   &#125;</span><br></pre></td></tr></table></figure>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line">&gt;┌──(kali㉿Executor)-[/mnt/c/Users/86135/desktop/os]</span><br><span class="line">└─$ gcc myecho.c -Og -o myecho</span><br><span class="line"></span><br><span class="line">┌──(kali㉿Executor)-[/mnt/c/Users/86135/desktop/os]</span><br><span class="line">└─$ ./myecho</span><br><span class="line">/home/kali</span><br><span class="line">/bin/bash</span><br><span class="line">/mnt/c/Users/86135/desktop/os</span><br><span class="line">/bin/bash</span><br><span class="line">/bin/sh</span><br></pre></td></tr></table></figure>
+<p><code>setenv</code>还可以新建环境变量,如果<code>name</code>键没有找到则新建环境变量</p>
+<p>环境变量表</p>
+<figure>
+<img
+src="https://raw.githubusercontent.com/DeutschBall/test/master/image-20220521100230271.png"
+alt="image-20220521100230271" />
+<figcaption aria-hidden="true">image-20220521100230271</figcaption>
+</figure>
+<p>在当前进程中修改环境变量对当前进程无效,但是对该进程后续建立的子进程有效</p>
+<blockquote>
+<p>这里注意<code>putenv</code>和<code>setenv</code>在<code>overwrite=1</code>时的区别</p>
+<p>一是参数的格式,<code>putenv</code>中<code>char *str</code>让写的是<code>name=value</code>这种格式,而<code>setenv</code>中<code>name</code>和<code>value</code>分开成为两个参数</p>
+<p>二是参数的类型,<code>putenv</code>中的参数没有<code>const</code>修饰,这就意味着<strong>str是可以被修改的</strong></p>
+<p>而<code>setenv</code>中的name和newvalue都带有const修饰,不可修改</p>
+<p>实际上<code>putenv</code>不会为新的环境变量另外开空间,而是直接把传入的参数(不管是堆上还是栈上还是全局的)填入环境表</p>
+<p><code>setenv</code>则会另开空间拷贝一份环境变量放进环境表</p>
+<p>比如下面例子</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;stdio.h&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;stdlib.h&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;string.h&gt;</span></span></span><br><span class="line"></span><br><span class="line"><span class="type">int</span> <span class="title function_">main</span><span class="params">(<span class="type">int</span> argc,<span class="type">char</span> *argv[])</span>&#123;</span><br><span class="line">    <span class="type">char</span> str[]=<span class="string">&quot;myid=deutschball&quot;</span>;</span><br><span class="line">    putenv(str);</span><br><span class="line">    <span class="built_in">printf</span>(<span class="string">&quot;%s\n&quot;</span>,getenv(<span class="string">&quot;myid&quot;</span>));</span><br><span class="line">    <span class="built_in">strcpy</span>(str,<span class="string">&quot;myid=dustball&quot;</span>);				<span class="comment">//此处修改str将会导致环境表中键myid的值变化</span></span><br><span class="line">    <span class="built_in">printf</span>(<span class="string">&quot;%s\n&quot;</span>,getenv(<span class="string">&quot;myid&quot;</span>));</span><br><span class="line"></span><br><span class="line">    <span class="type">char</span> name[]=<span class="string">&quot;myunit&quot;</span>;</span><br><span class="line">    <span class="type">char</span> value[]=<span class="string">&quot;empire&quot;</span>;</span><br><span class="line">    setenv(name,value,<span class="number">0</span>);</span><br><span class="line">    <span class="built_in">printf</span>(<span class="string">&quot;%s\n&quot;</span>,getenv(name));</span><br><span class="line">    <span class="built_in">strcpy</span>(value,<span class="string">&quot;rebel&quot;</span>);</span><br><span class="line">    <span class="built_in">printf</span>(<span class="string">&quot;%s\n&quot;</span>,getenv(name));</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">    <span class="keyword">return</span> <span class="number">0</span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line">┌──(kali㉿Executor)-[/mnt/c/Users/86135/desktop/os]</span><br><span class="line">└─$ gcc myecho.c -Og -o myecho</span><br><span class="line"></span><br><span class="line">┌──(kali㉿Executor)-[/mnt/c/Users/86135/desktop/os]</span><br><span class="line">└─$ ./myecho</span><br><span class="line">deutschball</span><br><span class="line">dustball					<span class="comment">#此处值发生了变化</span></span><br><span class="line">empire</span><br><span class="line">empire						<span class="comment">#此处值不发生改变</span></span><br></pre></td></tr></table></figure>
+</blockquote>
+</blockquote>
+<p>此处应有一个编个shell的实验,但是工程量太大,现在不想写,留作后话吧</p>
+
+      
+    </div>
+
+    
+    
+    
+      <footer class="post-footer">
+        <div class="post-eof"></div>
+      </footer>
+  </article>
+  
+  
+  
+
+      
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="en">
     <link itemprop="mainEntityOfPage" href="http://deutschball.github.io/2022/05/07/datastruct/">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">

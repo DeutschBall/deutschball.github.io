@@ -167,6 +167,586 @@
   
   
   <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="en">
+    <link itemprop="mainEntityOfPage" href="http://deutschball.github.io/2022/07/27/C++%E9%80%86%E5%90%91%E5%B7%A5%E7%A8%8B%E5%9F%BA%E7%A1%80/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="https://raw.githubusercontent.com/DeutschBall/picbed/main/dustball.png">
+      <meta itemprop="name" content="dustball">
+      <meta itemprop="description" content="dustland">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="dustland">
+    </span>
+      <header class="post-header">
+        <h2 class="post-title" itemprop="name headline">
+          
+            <a href="/2022/07/27/C++%E9%80%86%E5%90%91%E5%B7%A5%E7%A8%8B%E5%9F%BA%E7%A1%80/" class="post-title-link" itemprop="url">C++ reverse</a>
+        </h2>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-calendar"></i>
+              </span>
+              <span class="post-meta-item-text">Posted on</span>
+
+              <time title="Created: 2022-07-27 21:43:00" itemprop="dateCreated datePublished" datetime="2022-07-27T21:43:00+08:00">2022-07-27</time>
+            </span>
+              <span class="post-meta-item">
+                <span class="post-meta-item-icon">
+                  <i class="far fa-calendar-check"></i>
+                </span>
+                <span class="post-meta-item-text">Edited on</span>
+                <time title="Modified: 2022-09-11 21:44:54" itemprop="dateModified" datetime="2022-09-11T21:44:54+08:00">2022-09-11</time>
+              </span>
+
+          
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+          <h1 id="c-reverse">C++ reverse</h1>
+<h2 id="windows-x86-g编译器生成的代码">windows x86
+g++编译器生成的代码</h2>
+<p>以链栈类为例观察C++的反汇编长啥样</p>
+<h3 id="链栈类图">链栈类图</h3>
+<figure>
+<img
+src="https://raw.githubusercontent.com/DeutschBall/test/master/image-20220727214639205.png"
+alt="image-20220727214639205" />
+<figcaption aria-hidden="true">image-20220727214639205</figcaption>
+</figure>
+<p>mermaid在typora上可以正常显式,但是放到网页上就不知道发生什么事了</p>
+<h3 id="代码实现">代码实现</h3>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br><span class="line">75</span><br><span class="line">76</span><br><span class="line">77</span><br><span class="line">78</span><br><span class="line">79</span><br><span class="line">80</span><br><span class="line">81</span><br><span class="line">82</span><br><span class="line">83</span><br><span class="line">84</span><br><span class="line">85</span><br><span class="line">86</span><br><span class="line">87</span><br><span class="line">88</span><br><span class="line">89</span><br><span class="line">90</span><br><span class="line">91</span><br><span class="line">92</span><br><span class="line">93</span><br><span class="line">94</span><br><span class="line">95</span><br><span class="line">96</span><br><span class="line">97</span><br><span class="line">98</span><br><span class="line">99</span><br><span class="line">100</span><br><span class="line">101</span><br><span class="line">102</span><br><span class="line">103</span><br><span class="line">104</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;iostream&gt;</span></span></span><br><span class="line"><span class="keyword">using</span> <span class="keyword">namespace</span> std;</span><br><span class="line"><span class="keyword">class</span> <span class="title class_">Stack</span></span><br><span class="line">&#123;</span><br><span class="line"><span class="keyword">protected</span>:</span><br><span class="line">    <span class="type">int</span> len;</span><br><span class="line"></span><br><span class="line"><span class="keyword">public</span>:</span><br><span class="line">    <span class="built_in">Stack</span>()</span><br><span class="line">    &#123;</span><br><span class="line">        len = <span class="number">0</span>;</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="function"><span class="type">void</span> <span class="title">push</span><span class="params">(<span class="type">const</span> <span class="type">int</span> &amp;x)</span></span>;</span><br><span class="line">    <span class="function"><span class="type">void</span> <span class="title">pop</span><span class="params">()</span></span>;</span><br><span class="line">    <span class="function"><span class="type">int</span> <span class="title">top</span><span class="params">()</span> <span class="type">const</span></span>;</span><br><span class="line">    <span class="function"><span class="type">int</span> <span class="title">length</span><span class="params">()</span> <span class="type">const</span></span></span><br><span class="line"><span class="function">    </span>&#123;</span><br><span class="line">        <span class="keyword">return</span> len;</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="function"><span class="type">bool</span> <span class="title">empty</span><span class="params">()</span> <span class="type">const</span></span></span><br><span class="line"><span class="function">    </span>&#123;</span><br><span class="line">        <span class="keyword">return</span> len == <span class="number">0</span>;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;;</span><br><span class="line"></span><br><span class="line"><span class="keyword">class</span> <span class="title class_">LinkedNode</span></span><br><span class="line">&#123;</span><br><span class="line"><span class="keyword">protected</span>:</span><br><span class="line">    <span class="type">int</span> value;</span><br><span class="line">    LinkedNode *next;</span><br><span class="line"></span><br><span class="line"><span class="keyword">public</span>:</span><br><span class="line">    <span class="built_in">LinkedNode</span>(<span class="type">int</span> v = <span class="number">0</span>, LinkedNode *n = <span class="literal">NULL</span>) : <span class="built_in">value</span>(v), <span class="built_in">next</span>(n) &#123;&#125;</span><br><span class="line">    <span class="function"><span class="type">void</span> <span class="title">setValue</span><span class="params">(<span class="type">int</span> v = <span class="number">0</span>)</span></span></span><br><span class="line"><span class="function">    </span>&#123;</span><br><span class="line">        value = v;</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="function"><span class="type">int</span> <span class="title">getValue</span><span class="params">()</span> <span class="type">const</span></span></span><br><span class="line"><span class="function">    </span>&#123;</span><br><span class="line">        <span class="keyword">return</span> value;</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="function"><span class="type">void</span> <span class="title">setNext</span><span class="params">(LinkedNode *n = <span class="literal">NULL</span>)</span></span></span><br><span class="line"><span class="function">    </span>&#123;</span><br><span class="line">        next = n;</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="function">LinkedNode *<span class="title">getNext</span><span class="params">()</span> <span class="type">const</span></span></span><br><span class="line"><span class="function">    </span>&#123;</span><br><span class="line">        <span class="keyword">return</span> next;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">friend</span> ostream &amp;<span class="keyword">operator</span>&lt;&lt;(ostream &amp;os, <span class="type">const</span> LinkedNode &amp;node)</span><br><span class="line">    &#123;</span><br><span class="line">        os &lt;&lt; node.value;</span><br><span class="line">        <span class="keyword">return</span> os;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;;</span><br><span class="line"><span class="keyword">class</span> <span class="title class_">LinkedStack</span> : <span class="keyword">public</span> Stack</span><br><span class="line">&#123;</span><br><span class="line"><span class="keyword">protected</span>:</span><br><span class="line">    LinkedNode *head;</span><br><span class="line"></span><br><span class="line"><span class="keyword">public</span>:</span><br><span class="line">    <span class="built_in">LinkedStack</span>() : <span class="built_in">Stack</span>()</span><br><span class="line">    &#123;</span><br><span class="line">        head = <span class="keyword">new</span> <span class="built_in">LinkedNode</span>();</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="function"><span class="type">void</span> <span class="title">push</span><span class="params">(<span class="type">const</span> <span class="type">int</span> &amp;x)</span></span></span><br><span class="line"><span class="function">    </span>&#123;</span><br><span class="line">        LinkedNode *node = <span class="keyword">new</span> <span class="built_in">LinkedNode</span>(x, head-&gt;<span class="built_in">getNext</span>());</span><br><span class="line">        head-&gt;<span class="built_in">setNext</span>(node);<span class="comment">//头插</span></span><br><span class="line">        ++len;</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="function"><span class="type">void</span> <span class="title">pop</span><span class="params">()</span></span></span><br><span class="line"><span class="function">    </span>&#123;</span><br><span class="line">        <span class="keyword">if</span> (<span class="built_in">empty</span>())</span><br><span class="line">            <span class="keyword">return</span>;</span><br><span class="line">        LinkedNode *p = head-&gt;<span class="built_in">getNext</span>();</span><br><span class="line">        head-&gt;<span class="built_in">setNext</span>(p-&gt;<span class="built_in">getNext</span>());</span><br><span class="line">        <span class="keyword">delete</span> p;</span><br><span class="line">        --len;</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="function"><span class="type">int</span> <span class="title">top</span><span class="params">()</span> <span class="type">const</span></span></span><br><span class="line"><span class="function">    </span>&#123;</span><br><span class="line">        <span class="keyword">if</span> (<span class="built_in">empty</span>())</span><br><span class="line">            <span class="keyword">return</span> <span class="number">-1</span>;</span><br><span class="line">        <span class="keyword">return</span> head-&gt;<span class="built_in">getNext</span>()-&gt;<span class="built_in">getValue</span>();</span><br><span class="line">    &#125;</span><br><span class="line">&#125;;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="type">int</span> <span class="title">main</span><span class="params">()</span></span></span><br><span class="line"><span class="function"></span>&#123;</span><br><span class="line">    LinkedStack sta;</span><br><span class="line">    <span class="keyword">for</span> (<span class="type">int</span> i = <span class="number">1</span>; i &lt;= <span class="number">10</span>; ++i)</span><br><span class="line">    &#123;</span><br><span class="line">        sta.<span class="built_in">push</span>(i);<span class="comment">//测试压栈功能</span></span><br><span class="line">    &#125;</span><br><span class="line">    cout &lt;&lt; sta.<span class="built_in">length</span>() &lt;&lt; endl;</span><br><span class="line">    <span class="keyword">while</span> (!sta.<span class="built_in">empty</span>())</span><br><span class="line">    &#123;</span><br><span class="line">        cout &lt;&lt; sta.<span class="built_in">top</span>() &lt;&lt; <span class="string">&quot; &quot;</span>;<span class="comment">//测试取栈顶功能</span></span><br><span class="line">        sta.<span class="built_in">pop</span>();<span class="comment">//测试退栈功能</span></span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">return</span> <span class="number">0</span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<h3 id="gcc编译链接">GCC编译链接</h3>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">g++ main.cpp -O0 -o main -m32</span><br></pre></td></tr></table></figure>
+<h3 id="thiscall调用约定">thiscall调用约定</h3>
+<p><strong>thiscall调用约定</strong></p>
+<p><strong>唯一一个不能明确指明的函数修饰，因为thiscall不是关键字。他是C++类成员函数缺省的调用约定。由于成员函数调用还是一个this指针，所以thiscall是专为C++设计的调用方式。</strong></p>
+<p><strong>1、参数从右往左入栈</strong></p>
+<p><strong>2、如果参数个数确定，this指针通过通过ecx传递给被调用者；如果参数个数不确定，this指针在所有参数压栈后被压入堆栈</strong></p>
+<p><strong>3、对参数个数不定的，调用者清理堆栈，否则函数自己清理</strong></p>
+<h3 id="main函数反汇编">main函数反汇编</h3>
+<h4 id="main函数开端">main函数开端</h4>
+<p>main遵守cdecl调用约定,只有成员函数才遵守thiscall调用约定</p>
+<figure>
+<img
+src="https://raw.githubusercontent.com/DeutschBall/test/master/image-20220428152115878.png"
+alt="image-20220428152115878" />
+<figcaption aria-hidden="true">image-20220428152115878</figcaption>
+</figure>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br></pre></td><td class="code"><pre><span class="line">.text:00401530 ; Attributes: bp-based frame fuzzy-sp</span><br><span class="line">.text:00401530</span><br><span class="line">.text:00401530 ; int __cdecl main(int argc, const char **argv, const char **envp)</span><br><span class="line">.text:00401530                 public _main</span><br><span class="line">.text:00401530 _main           proc near               ; CODE XREF: ___tmainCRTStartup+221↑p</span><br><span class="line">.text:00401530</span><br><span class="line">.text:00401530 var_14          = dword ptr -14h</span><br><span class="line">.text:00401530 var_10          = byte ptr -10h</span><br><span class="line">.text:00401530 var_4           = dword ptr -4</span><br><span class="line">.text:00401530 argc            = dword ptr  8</span><br><span class="line">.text:00401530 argv            = dword ptr  0Ch</span><br><span class="line">.text:00401530 envp            = dword ptr  10h</span><br><span class="line">.text:00401530</span><br><span class="line">.text:00401530                 lea     ecx, [esp+4]</span><br><span class="line">.text:00401534                 and     esp, 0FFFFFFF0h</span><br><span class="line">.text:00401537                 push    dword ptr [ecx-4]</span><br><span class="line">.text:0040153A                 push    ebp</span><br><span class="line">.text:0040153B                 mov     ebp, esp</span><br><span class="line">.text:0040153D                 push    ecx</span><br><span class="line">.text:0040153E                 sub     esp, 24h</span><br></pre></td></tr></table></figure>
+<p>main函数刚开始时,esp指向<code>0077FEDC</code>,用OD观察这个位置,是主线程的堆栈</p>
+<figure>
+<img
+src="https://raw.githubusercontent.com/DeutschBall/test/master/image-20220726180155902.png"
+alt="image-20220726180155902" />
+<figcaption aria-hidden="true">image-20220726180155902</figcaption>
+</figure>
+<p>主线程的堆栈起于0x77E000,大小是0x2000即8K</p>
+<p>由于堆栈倒着生长,因此栈底在0x780000,此时栈顶在0x0077FEDC,方向是0x780000-&gt;0x77E000</p>
+<p>距离栈底0x780000-0x77FEDC=0x124即292字节</p>
+<p>但是这时候主函数才是刚开始啊,也只有主函数的三个参数压栈了啊,怎么就已经使用了292个字节这么大呢?</p>
+<p>主函数不是程序的入口点,在主函数执行前还有其他函数要执行,也可能占用线程栈</p>
+<blockquote>
+<p>PE头-&gt;NT头-&gt;可选头-&gt;AddressOfEntryPoint</p>
+<p>其RVA是0x14C0</p>
+<figure>
+<img
+src="https://raw.githubusercontent.com/DeutschBall/test/master/image-20220726170200724.png"
+alt="image-20220726170200724" />
+<figcaption aria-hidden="true">image-20220726170200724</figcaption>
+</figure>
+<p>而ImageBase是0x400000</p>
+<figure>
+<img
+src="https://raw.githubusercontent.com/DeutschBall/test/master/image-20220726170228334.png"
+alt="image-20220726170228334" />
+<figcaption aria-hidden="true">image-20220726170228334</figcaption>
+</figure>
+<p>加起来得到入口点的虚拟地址为<code>0x4014C0</code></p>
+</blockquote>
+<h5 id="lea-ecx-esp4"><code>lea     ecx, [esp+4]</code></h5>
+<p>将要执行此条指令时,esp=0x77FEDC,</p>
+<p>此时栈中是啥呢?</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">0077FEDC  00401386  ___tmainCRTStartup+226</span><br><span class="line">0077FEE0  00000001  </span><br><span class="line">0077FEE4  00CA1650  debug034:00CA1650</span><br><span class="line">0077FEE8  00CA22B8  debug034:00CA22B8</span><br><span class="line">...</span><br></pre></td></tr></table></figure>
+<p>栈顶<code>0077FEDC</code>存放的是主函数的返回地址,这个地址在<code>___tmainCRTStartu</code>函数中</p>
+<blockquote>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">.text:0040136C mov     [esp+90h+lpreserved], eax ; envp</span><br><span class="line">.text:00401370 mov     eax, ds:_argv</span><br><span class="line">.text:00401375 mov     [esp+90h+dwReason], eax ; argv</span><br><span class="line">.text:00401379 mov     eax, ds:_argc</span><br><span class="line">.text:0040137E mov     [esp+90h+dwMilliseconds], eax ; argc</span><br><span class="line">.text:00401381 call    _main</span><br><span class="line">.text:00401386 mov     ecx, ds:_managedapp</span><br></pre></td></tr></table></figure>
+<p>显然这个返回地址是<code>call _main</code>函数压入栈中的</p>
+</blockquote>
+<p>栈顶再往下四个字节,0077FEE0上是1,是main函数的第一个参数<code>int argc</code>,4个字节</p>
+<p>再往下四个字节0077FEE4上是main函数的第二个参数,命令行参数字符串数组<code>const char **argv</code>的基地址,4个字节</p>
+<p>再往下四个字节0077FEE8上市main函数的第三个参数,环境变量字符串数组<code>const char **envp</code>的基地址,4个字节</p>
+<p>esp+4显然就指向main函数的第一个参数<code>int argc</code></p>
+<p>加载有效地址将该参数的地址交给ecx</p>
+<h5 id="and-esp-0fffffff0h"><code>and     esp, 0FFFFFFF0h</code></h5>
+<p>esp低4位置零,高28位保持不变,意思是16字节对齐</p>
+<p>此举只能导致esp不增,要么esp本来低位有数现在降到0,要么本来esp就是16字节对齐了,不用降为0.</p>
+<p>又栈是倒着生长的,因此不用担心此举将会导致新的压栈覆盖三个参数</p>
+<p>对齐的目的应该是追求效率</p>
+<p>此步执行后的栈帧</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">0077FED0  00000002  </span><br><span class="line">0077FED4  00DB1618  debug035:00DB1618</span><br><span class="line">0077FED8  00DB1670  debug035:00DB1670</span><br><span class="line">0077FEDC  00401386  ___tmainCRTStartup+226</span><br></pre></td></tr></table></figure>
+<h5
+id="push-dword-ptr-ecx-4"><code>push    dword ptr [ecx-4]</code></h5>
+<p>ecx在本函数的第一条指令时被置为第一个参数的地址</p>
+<p>现在将ecx-4又退到main函数的返回地址</p>
+<p>这里又把返回地址压栈</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line">0077FECC  00401386  ___tmainCRTStarup+226</span><br><span class="line">0077FED0  00000002  </span><br><span class="line">0077FED4  00DA1618  debug035:00DA16</span><br><span class="line">0077FED8  00DA1670  debug035:00DA16</span><br><span class="line">0077FEDC  00401386  ___tmainCRTStarup+226</span><br><span class="line">0077FEE0  00000004  </span><br><span class="line">0077FEE4  00DA1660  debug035:00DA16</span><br><span class="line">0077FEE8  00DA22B8  debug035:00DA22</span><br><span class="line">0077FEEC  00000000  </span><br></pre></td></tr></table></figure>
+<p>好像把返回值和参数压了两次栈,第一次是调用者<code>___tmainCRTStarup</code>做的,第二次是main函数做的</p>
+<p>为啥要搞重复建设呢?</p>
+<p>推测是因为调用约定不同导致的,<code>___tmainCRTStarup</code>这个函数不是<code>cdecl</code>调用约定的,而是<code>stdcall</code>约定的</p>
+<h5 id="push-ebp"><code>push    ebp</code></h5>
+<p>调用者函数的帧指针ebp压栈保存,方便ebp为现在的函数服务</p>
+<h5 id="mov-ebp-esp"><code>mov     ebp, esp</code></h5>
+<p>ebp获得当前main函数栈顶指针拷贝</p>
+<p>当前栈顶指向二次压栈的返回值地址</p>
+<h5 id="push-ecx"><code>push    ecx</code></h5>
+<p>ecx存放的是第一个参数的地址,现在又把他压栈,相当于这个值前后一共压栈3次</p>
+<p>推测这里是保存ecx寄存器值后来再还给他</p>
+<h5 id="sub-esp-24h"><code>sub     esp, 24h</code></h5>
+<p>栈顶下移0x24h个字节,为main函数申请栈帧空间,一次性申请全</p>
+<p>到此函数开端完毕</p>
+<h4 id="main初始化">main初始化</h4>
+<h5 id="call-___main"><code>call    ___main</code></h5>
+<p>这个函数进行了一些初始化,它先判断是否已经初始化过了,如果初始化过了则返回</p>
+<p>否则记录一下已经初始化过了,然后执行<code>___do_global_ctors</code>这个函数,推测是对全局位置的对象实例化调用构造函数</p>
+<figure>
+<img
+src="https://raw.githubusercontent.com/DeutschBall/test/master/image-20220726190345716.png"
+alt="image-20220726190345716" />
+<figcaption aria-hidden="true">image-20220726190345716</figcaption>
+</figure>
+<p>奇怪的是,调用函数应该使用call指令,但是<code>____main</code>中调用<code>___do_global_ctors</code>使用的是<code>jmp short</code>跳转指令,使用jmp不会参数压栈,可以认为<code>___do_global_ctors</code>不需要参数,但是返回地址也没有压栈,<code>___do_global_ctors</code>执行完毕之后,控制应该交给谁呢?</p>
+<p><code>___main</code>函数如果jz跳转实现,再loc_40BC70中也是没有返回值的,但是<code>___main</code>在调用的时候已经把返回到<code>__main</code>的地址压栈,因此可以推测,<code>___do_global_ctors</code>相当于<code>___main</code>的延续,它将会返回到<code>___main</code>栈帧一开始压入的返回地址</p>
+<p>这个<code>__do_global_ctors</code>干了啥呢?</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br></pre></td><td class="code"><pre><span class="line"><span class="type">void</span> __do_global_ctors()</span><br><span class="line">&#123;</span><br><span class="line">  func_ptr v0; <span class="comment">// ebx</span></span><br><span class="line">  func_ptr v1; <span class="comment">// eax</span></span><br><span class="line"></span><br><span class="line">  v0 = __CTOR_LIST__[<span class="number">0</span>];</span><br><span class="line">  <span class="keyword">if</span> ( __CTOR_LIST__[<span class="number">0</span>] == (func_ptr)<span class="number">-1</span> )<span class="comment">//func_ptr是指针类型,(func_ptr)-1是将-1强制转换为指针类型,需要结合 __CTOR_LIST__[0] 来立即这里的判断条件</span></span><br><span class="line">  &#123;</span><br><span class="line">    v1 = <span class="number">0</span>;</span><br><span class="line">    <span class="keyword">do</span></span><br><span class="line">    &#123;</span><br><span class="line">      v0 = v1;<span class="comment">//v0指向上一个函数指针</span></span><br><span class="line">      v1 = (func_ptr)((<span class="type">char</span> *)v1 + <span class="number">1</span>);<span class="comment">//v1后移一个单位</span></span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">while</span> ( __CTOR_LIST__[(_DWORD)v1] );<span class="comment">//当v1遍历完整个函数指针表时,最后一项为全0,此时while条件不满足,跳出循环</span></span><br><span class="line">  &#125;</span><br><span class="line">  <span class="keyword">for</span> ( ; v0; v0 = (func_ptr)((<span class="type">char</span> *)v0 - <span class="number">1</span>) )<span class="comment">//v0逆序遍历整个函数指针表</span></span><br><span class="line">    __CTOR_LIST__[(_DWORD)v0]();<span class="comment">//后面加了小括号意思是当作函数执行了</span></span><br><span class="line">  atexit(__do_global_dtors);<span class="comment">//注册函数,当程序正常终止的时候,执行__do_global_dtors函数.</span></span><br><span class="line">    <span class="comment">//当程序执行到此时并不会执行执行__do_global_dtors函数,而是当整个exe程序执行完毕才会执行__do_global_dtors函数</span></span><br><span class="line">    <span class="comment">//atexit只是起到注册作用</span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p><code>__CTOR_LIST__</code>表是一个函数指针表</p>
+<p>第零个函数指针<code>__CTOR_LIST__[0]</code>的值为<code>0xFFFFFFFFh=-1</code>,这个值总是-1,表征函数指针表的开始,并且填了第0个元素的空,使得真正的函数指针下标从1开始</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line">.text:004CA335 90 90 90 90 90 90 90 90 90 90+                align 10h</span><br><span class="line">.text:004CA340                                               public ___CTOR_LIST__</span><br><span class="line">.text:004CA340                               ; func_ptr __CTOR_LIST__[]</span><br><span class="line">.text:004CA340 FF FF FF FF                   ___CTOR_LIST__  dd 0FFFFFFFFh           ; DATA XREF: ___do_global_ctors+4↑r</span><br><span class="line">.text:004CA340                                                                       ; ___do_global_ctors:loc_40BC18↑r ...</span><br><span class="line">.text:004CA344 3C 16 40 00                                   dd offset __GLOBAL__sub_I_main</span><br><span class="line">.text:004CA348 00 96 4C 00                                   dd offset __GLOBAL__sub_I__ZNSt12ctype_bynameIcEC2ERKNSt7__cxx1112basic_stringIcSt11char_traitsIcESaIcEEEj</span><br><span class="line">.text:004CA34C 90 96 4C 00                                   dd offset __GLOBAL__sub_I__ZNSt12ctype_bynameIwEC2ERKNSt7__cxx1112basic_stringIcSt11char_traitsIcESaIcEEEj</span><br><span class="line">.text:004CA350 60 9D 4C 00                                   dd offset __GLOBAL__sub_I__ZNSt12ctype_bynameIcEC2ERKSsj</span><br><span class="line">.text:004CA354 30 9E 4C 00                                   dd offset __GLOBAL__sub_I__ZNSt12ctype_bynameIwEC2ERKSsj</span><br><span class="line">.text:004CA358 00 9F 4C 00                                   dd offset __GLOBAL__sub_I__ZN9__gnu_cxx9__freeresEv</span><br><span class="line">.text:004CA35C 50 A2 4C 00                                   dd offset __GLOBAL__sub_I__ZSt20__throw_system_errori</span><br><span class="line">.text:004CA360 30 A3 4C 00                                   dd offset _register_frame_ctor</span><br><span class="line">.text:004CA364 00 00 00 00                                   align 8</span><br></pre></td></tr></table></figure>
+<p><code>__do_global_dtors</code>干了啥呢?</p>
+<p>推测是遍历了析构函数表,挨个执行每个函数指针</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line"><span class="type">void</span> __cdecl __do_global_dtors()</span><br><span class="line">&#123;</span><br><span class="line">  <span class="type">void</span> (*i)(<span class="type">void</span>); <span class="comment">// eax</span></span><br><span class="line"></span><br><span class="line">  <span class="keyword">for</span> ( i = *p_63984; i; ++p_63984 )</span><br><span class="line">  &#123;</span><br><span class="line">    i();</span><br><span class="line">    i = p_63984[<span class="number">1</span>];</span><br><span class="line">  &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>这个<code>p_63984</code>是指向全局析构函数表的指针</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">.data:004CD004 6C A3 4C 00                   _p_63984        dd offset dword_4CA36C  ; </span><br></pre></td></tr></table></figure>
+<p><code>dword_4CA36C</code>就是<code>__DTOR_LIST_</code>表的基地址</p>
+<p>这个表很长,怎么运作的现在不想操心</p>
+<p>现在回到main函数中</p>
+<h5 id="lea-eax-ebpvar_10"><code>lea     eax, [ebp+var_10]</code></h5>
+<p>将栈中var_10的地址放到eax中,这里var_10作用不是狠清晰,前面都没有提到var_10,</p>
+<p>可以猜测一下,主函数下面就开了一个局部的LinkedStack对象,var_10会不会是该对象呢</p>
+<p>联系后面调用LinkedStack构造函数,<code>var_10</code>十有八九是该对象</p>
+<h5 id="mov-ecx-eax"><code>mov     ecx, eax</code></h5>
+<p>再转手交给ecx</p>
+<h5
+id="call-__zn11linkedstackc1ev"><code>call    __ZN11LinkedStackC1Ev</code></h5>
+<p>调用LinkedStack类的构造函数</p>
+<p>跟踪一下这个函数</p>
+<h4
+id="调用linkedstack实例化一个链栈对象">调用LinkedStack实例化一个链栈对象</h4>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br></pre></td><td class="code"><pre><span class="line">.text:00422334 ; Attributes: bp-based frame</span><br><span class="line">.text:00422334</span><br><span class="line">.text:00422334 ; LinkedStack *LinkedStack::LinkedStack(LinkedStack *__hidden this)</span><br><span class="line">.text:00422334 public __ZN11LinkedStackC1Ev</span><br><span class="line">.text:00422334 __ZN11LinkedStackC1Ev proc near</span><br><span class="line">.text:00422334</span><br><span class="line">.text:00422334 var_C= dword ptr -0Ch</span><br><span class="line">.text:00422334 var_4= dword ptr -4</span><br><span class="line">.text:00422334 this= dword ptr  8</span><br><span class="line">.text:00422334</span><br><span class="line">.text:00422334 push    ebp</span><br><span class="line">.text:00422335 mov     ebp, esp</span><br><span class="line">.text:00422337 push    ebx</span><br><span class="line">.text:00422338 sub     esp, 24h</span><br><span class="line">.text:0042233B mov     [ebp+var_C], ecx</span><br><span class="line">.text:0042233E mov     eax, [ebp+var_C]</span><br><span class="line">.text:00422341 mov     ecx, eax</span><br><span class="line">.text:00422343 call    __ZN5StackC2Ev  ; Stack::Stack(void)</span><br><span class="line">.text:00422348 mov     dword ptr [esp], 8 ; size_t</span><br><span class="line">.text:0042234F call    __Znwj          ; operator new(uint)</span><br><span class="line">.text:00422354 mov     ebx, eax</span><br><span class="line">.text:00422356 mov     dword ptr [esp+4], 0</span><br><span class="line">.text:0042235E mov     dword ptr [esp], 0</span><br><span class="line">.text:00422365 mov     ecx, ebx</span><br><span class="line">.text:00422367 call    __ZN10LinkedNodeC1EiPS_ ; LinkedNode::LinkedNode(int,LinkedNode*)</span><br><span class="line">.text:0042236C sub     esp, 8</span><br><span class="line">.text:0042236F mov     eax, [ebp+var_C]</span><br><span class="line">.text:00422372 mov     [eax+4], ebx</span><br><span class="line">.text:00422375 nop</span><br><span class="line">.text:00422376 mov     ebx, [ebp+var_4]</span><br><span class="line">.text:00422379 leave</span><br><span class="line">.text:0042237A retn</span><br><span class="line">.text:0042237A __ZN11LinkedStackC1Ev endp</span><br></pre></td></tr></table></figure>
+<p>ecx-&gt;var_C-&gt;eax-&gt;ecx,兜兜转转还是ecx,这就很乖,为啥要用var_C捯饬?</p>
+<p>再看后面的<code>.text:00422343 call    __ZN5StackC2Ev  ; Stack::Stack(void)</code>恍然大悟</p>
+<p>又要使用当前对象调用父类构造函数了,那么ecx中啃腚还是要存放当前对象</p>
+<p>只不过编译器没有优化这件事了</p>
+<p>跟踪一下父类构造函数Stack()</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br></pre></td><td class="code"><pre><span class="line">.text:00422910 ; Attributes: bp-based frame</span><br><span class="line">.text:00422910</span><br><span class="line">.text:00422910 ; Stack *Stack::Stack(Stack *__hidden this)</span><br><span class="line">.text:00422910 public __ZN5StackC2Ev</span><br><span class="line">.text:00422910 __ZN5StackC2Ev proc near</span><br><span class="line">.text:00422910</span><br><span class="line">.text:00422910 var_4= dword ptr -4</span><br><span class="line">.text:00422910 this= dword ptr  8</span><br><span class="line">.text:00422910</span><br><span class="line">.text:00422910 push    ebp</span><br><span class="line">.text:00422911 mov     ebp, esp</span><br><span class="line">.text:00422913 sub     esp, 4</span><br><span class="line">.text:00422916 mov     [ebp+var_4], ecx</span><br><span class="line">.text:00422919 mov     eax, [ebp+var_4]</span><br><span class="line">.text:0042291C mov     dword ptr [eax], 0</span><br><span class="line">.text:00422922 nop</span><br><span class="line">.text:00422923 leave</span><br><span class="line">.text:00422924 retn</span><br><span class="line">.text:00422924 __ZN5StackC2Ev endp</span><br></pre></td></tr></table></figure>
+<p>当前对象的栈中<strong>地址</strong>-&gt;ecx-&gt;var_4-&gt;eax</p>
+<p>0-&gt;[eax]=当前对象=当前对象的第一个成员</p>
+<p>也就是当前对象的第一个双字置0,而Stack对象的第一个成员正好是一个双字的<code>int len</code></p>
+<p>因此这就做了<code>len = 0;</code>这么一件事</p>
+<p>为啥要费六条汇编指令呢?这是调用约定固定的结构</p>
+<p>ecx传递的当前对象的栈中地址必须先压入栈中然后eax从栈中获得该对象的地址,</p>
+<p>后面使用eax寄存器相对寻址对栈上的对象进行内存读写</p>
+<p>这样看直接从ecx交给eax不行吗?不需要压栈中转啊</p>
+<p>显然是可以的,但是没有开启编译优化就得这样来</p>
+<p><strong>回到LinkedStack()</strong></p>
+<h5
+id="mov-dword-ptr-esp-8-size_t"><code>mov     dword ptr [esp], 8 ; size_t</code></h5>
+<p>栈顶上放一个8,貌似要调用函数了,但是很奇怪的是,后面要调用的是operator
+new,它怎么会有参数呢?</p>
+<p>还有就是,LinkedStack()构造函数中只有一个句柄head,没有一个int类型的局部变量,为啥现在要再栈上放一个8?</p>
+<p><strong>联系后文可知,这个8将作为new开辟空间的大小Size</strong></p>
+<p><strong>8临时占用了head句柄的位置,后面开出对象来之后再写回这个位置,节省了空间</strong></p>
+<p>LinkedNode就两个成员变量并且都是4个字节,那么一个LinkedNode实例的大小也就是sizeof(LinkedNode)=8</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="type">int</span> value;</span><br><span class="line">LinkedNode *next;</span><br></pre></td></tr></table></figure>
+<p>因此这里把8临时放到head的位置</p>
+<h5
+id="call-__znwj-operator-newuint"><code>call    __Znwj          ; operator new(uint)</code></h5>
+<p>调用new运算符(_Znwj这名字是真tm抽象)</p>
+<p>根据源代码的逻辑,此处应该是new一个LinkedNode类实例作为链栈的附加头节点head</p>
+<p>这个new干了啥呢?</p>
+<figure>
+<img
+src="https://raw.githubusercontent.com/DeutschBall/test/master/image-20220726213033815.png"
+alt="image-20220726213033815" />
+<figcaption aria-hidden="true">image-20220726213033815</figcaption>
+</figure>
+<p>ebx是被调用者保存寄存器,也就是Znwj要维护其值前后不变</p>
+<p>ebx压栈保存后被赋予新值1,然后申请了18h=24字节的栈帧空间</p>
+<p><code>mov     eax, [esp+1Ch+arg_0]</code></p>
+<p>这里esp=77fe50,arg_0=4</p>
+<p>加起来指向77fe70,栈中这个位置</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">0077FE6C  00422354  LinkedStack::LinkedStack(void)+20</span><br><span class="line">0077FE70  00000008  </span><br></pre></td></tr></table></figure>
+<p>这个位置是LinkedStack函数局部变量的起始位置</p>
+<blockquote>
+<p>也就是刚才<code>mov     dword ptr [esp], 8 ; size_t</code>这条指令的目的位置</p>
+</blockquote>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">LinkedStack() : Stack()</span><br><span class="line">&#123;</span><br><span class="line">    head = new LinkedNode();</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>而LinkedStack的局部变量只有一个head</p>
+<p>那么这里eax将会是head这个句柄的值,刚才已经被临时置为8表征对象大小,因此现在用ebx保存这个大小,为head的真值让路</p>
+<p>再往下到<code>log_4C7F12</code>中,</p>
+<p>上来就把ebx放到栈上作为Size,准备调用malloc,而ebx经过前面的分析可以得知,就是LinkedNode的大小</p>
+<p>这是循环的开始,可以看到循环调用了<code>_malloc</code>函数,推测是,如果堆上申请空间失败则一直重复申请,直到申请成功</p>
+<p>怎么判断的?</p>
+<p>malloc的返回值用eax承载,如果申请成功则eax承载的是堆上地址,否则eax=0</p>
+<p>当eax不为0则<code>jz      short loc_4C7F23</code>跳转失败,执行</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">.text:004C7F1E add     esp, 18h</span><br><span class="line">.text:004C7F21 pop     ebx</span><br><span class="line">.text:004C7F22 retn</span><br></pre></td></tr></table></figure>
+<p>函数就返回了,eax承载返回值</p>
+<p>当eax为0则<code>jz      short loc_4C7F23</code>后面继续循环</p>
+<p>继续循环并没有立刻重新调用malloc函数,而是做了一些手续,具体干了啥呢?</p>
+<figure>
+<img
+src="https://raw.githubusercontent.com/DeutschBall/test/master/image-20220726215953952.png"
+alt="image-20220726215953952" />
+<figcaption aria-hidden="true">image-20220726215953952</figcaption>
+</figure>
+<p>下到<code>loc_4C7F23</code>中,首先调用了一个无参函数<code>get_new_handler</code></p>
+<p>这个函数就干了一个事<code>mov     eax, __ZN12_GLOBAL__N_113__new_handlerE ;</code>其中<code>__ZN12_GLOBAL__N_113__new_handlerE =0</code></p>
+<p><code>new_handler</code>是我们应当人为设置的函数,即使用<code>set_new_handler</code>设置的函数,作用是在operator
+new中,malloc开不出堆空间时,应该执行的函数</p>
+<p>显然我们之前并没有使用set_new_handler设置这么一个纠错函数,这种情况下<code>get_new_handler</code>将返回NULL</p>
+<p>显然<code>__ZN12_GLOBAL__N_113__new_handlerE</code>这个值应该存放的是一个函数地址,我们没有设置<code>set_new_handler</code>当然这个位置存放的是0,这也就是<code>get_new_handler</code>返回NULL的原因</p>
+<p>说他是一个函数地址,还可以在后文看出,使用<code>get_new_handler</code>之后eax理论上承载的是函数地址,程序先检查一下eax是否有效,如果有效(即非零)则直接<code>call eax</code>说明eax中就是函数地址,即<code>__ZN12_GLOBAL__N_113__new_handlerE</code>理应存放函数地址</p>
+<p>如果我们调用<code>set_new_handler</code>设置过处理函数,则直接跳转<code>loc_4C7F12</code>重新调用malloc</p>
+<blockquote>
+<p>这可以做一个实验</p>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;iostream&gt;</span></span></span><br><span class="line"><span class="keyword">using</span> <span class="keyword">namespace</span> std;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="type">void</span> <span class="title">flag</span><span class="params">()</span></span>&#123;</span><br><span class="line">    cout&lt;&lt;<span class="string">&quot;flag&#123;dustball&#125;&quot;</span>;</span><br><span class="line">    <span class="built_in">exit</span>(<span class="number">0</span>);</span><br><span class="line">&#125;</span><br><span class="line"><span class="type">const</span> <span class="type">int</span> maxn=<span class="number">10000000</span>;</span><br><span class="line"><span class="function"><span class="type">int</span> <span class="title">main</span><span class="params">()</span></span></span><br><span class="line"><span class="function"></span>&#123;</span><br><span class="line">    <span class="built_in">set_new_handler</span>(flag);</span><br><span class="line">    </span><br><span class="line">    <span class="keyword">while</span>(<span class="literal">true</span>)&#123;</span><br><span class="line">        <span class="type">int</span> *p=<span class="keyword">new</span> <span class="type">int</span>[maxn];</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">return</span> <span class="number">0</span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>如果堆爆了,开不出来,理应执行flag函数,而主函数中我们丧心病狂地一直索取堆空间,必然会导致堆满</p>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">PS C:\Users\<span class="number">86135</span>\Desktop\test&gt; g++ test.cpp -O0 -o test -m32</span><br><span class="line">PS C:\Users\<span class="number">86135</span>\Desktop\test&gt; ./test</span><br><span class="line">flag&#123;dustball&#125;</span><br></pre></td></tr></table></figure>
+<p>可以看到确实执行了<code>set_new_handler</code>设置的flag函数</p>
+<p>如果把main中的死循环去掉,只索要一个1e7的int数组,显然不会爆堆,此时就不会执行flag函数</p>
+<p>至于堆空间有多大呢?</p>
+<p>这个在PE头-&gt;NT头-&gt;附加头-&gt;SizeOfHeapReserve</p>
+<p>用010editor打开<code>main.exe</code>观察这个位置</p>
+<figure>
+<img
+src="https://raw.githubusercontent.com/DeutschBall/test/master/image-20220726222343978.png"
+alt="image-20220726222343978" />
+<figcaption aria-hidden="true">image-20220726222343978</figcaption>
+</figure>
+<p>发现给堆预留的空间是100000h=1MB</p>
+</blockquote>
+<p>如果我们没有设置过处理函数,则执行<code>loc_4C7F30</code>缺省处理过程.该处理过程干了啥呢?</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line">.text:004C7F30</span><br><span class="line">.text:004C7F30 loc_4C7F30:             ; thrown_size</span><br><span class="line">.text:004C7F30 mov     [esp+1Ch+Size], 4</span><br><span class="line">.text:004C7F37 call    ___cxa_allocate_exception</span><br><span class="line">.text:004C7F3C mov     dword ptr [eax], offset off_4D8C80</span><br><span class="line">.text:004C7F42 mov     [esp+1Ch+var_14], offset __ZNSt9bad_allocD1Ev ; void (__cdecl *)(void *)</span><br><span class="line">.text:004C7F4A mov     [esp+1Ch+lptinfo], offset __ZTISt9bad_alloc ; lptinfo</span><br><span class="line">.text:004C7F52 mov     [esp+1Ch+Size], eax ; void *</span><br><span class="line">.text:004C7F55 call    ___cxa_throw</span><br><span class="line">.text:004C7F55 __Znwj endp</span><br></pre></td></tr></table></figure>
+<p>这个结构并没有返回到loc_4C7F12重新尝试malloc,</p>
+<p>一开始调用了<code>___cxa_allocate_exception</code></p>
+<figure>
+<img
+src="https://raw.githubusercontent.com/DeutschBall/test/master/image-20220726223944814.png"
+alt="image-20220726223944814" />
+<figcaption aria-hidden="true">image-20220726223944814</figcaption>
+</figure>
+<p>发生了什么事呢?先看结局,</p>
+<p>要么左下GE,函数返回了,其效果就相当于<code>malloc</code>一开始就开出来然后返回了</p>
+<p>要么右下BE,还是开不出来,直接调用了<code>terminate()</code>终止了程序</p>
+<p>GE结局有两种达成情况,一个是<code>___cxa_allocate_exception</code>又尝试了一次malloc,这次开出来了,直接GE</p>
+<p>另一种达成清空是,这次又没开出来,两次malloc都没开出来,这时候进入了<code>loc_4C805C</code>,关键调用了一个<code>__ZN12_GLOBAL__N_14pool8allocateEj_constprop_0</code></p>
+<p>反汇编这个函数看看吧,好家伙都用到了互斥锁,涉及进程安全性了,上网搜一下<code>pool_allocate</code>吧,说是内存池之类的东西.</p>
+<p>这就需要学了CSAPP实现<code>malloc</code>和<strong>STL源码剖析</strong>再说了</p>
+<p>本次对<code>operator new</code>的炎鸠就到此位置吧</p>
+<p>回到<code>LinkedStack()</code>函数中</p>
+<h5 id="mov-ebx-eax"><code>mov     ebx, eax</code></h5>
+<p>如果能回来,说明new没有寄,那么eax中就是new在堆上开辟的对象的地址</p>
+<p>这里eax将堆上对象的地址交给了ebx</p>
+<h5
+id="mov-dword-ptr-esp4-0"><code>mov     dword ptr [esp+4], 0</code></h5>
+<p>本条指令以及后面的<code>mov     dword ptr [esp], 0</code>参数压栈,马上要调用函数了</p>
+<p><code>mov     ecx, ebx</code></p>
+<p>ebx将堆上对象的地址交给ecx,</p>
+<p>可是不应该放在栈上head的地方吗?为啥要给ecx呢?</p>
+<p>之前我们已经知道,ecx是用来存放当前对象的,其作用也就是this指针</p>
+<p>那么后面啃腚要调用一个作用于当前对象的函数</p>
+<p>刚才我们从<code>new</code>的逻辑中只能看到分配了空间,可是这片对空间并没有初始化,而<code>head = new LinkedNode();</code>这里调用了构造函数.</p>
+<p>那么可以推测,马上就要调用<code>LinkedNode</code>的构造函数了</p>
+<h5
+id="call-__zn10linkednodec1eips_-linkednodelinkednodeintlinkednode"><code>call    __ZN10LinkedNodeC1EiPS_ ; LinkedNode::LinkedNode(int,LinkedNode*)</code></h5>
+<p>果然如此,调用了LinkedNode构造函数,他有两个参数,都是4字节类型</p>
+<p>并且我们没有在源代码显式地给他传参,而是使用的缺省参数(默认为0)</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">head = new LinkedNode();</span><br></pre></td></tr></table></figure>
+<p>这也就解释了刚才压栈两个0是为啥了</p>
+<p>跟踪一下<code>LinkedNode()</code>干了啥</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br></pre></td><td class="code"><pre><span class="line">.text:00421FE8 ; Attributes: bp-based frame</span><br><span class="line">.text:00421FE8</span><br><span class="line">.text:00421FE8 ; LinkedNode::LinkedNode(int, LinkedNode*)</span><br><span class="line">.text:00421FE8 public __ZN10LinkedNodeC1EiPS_</span><br><span class="line">.text:00421FE8 __ZN10LinkedNodeC1EiPS_ proc near</span><br><span class="line">.text:00421FE8</span><br><span class="line">.text:00421FE8 var_4= dword ptr -4</span><br><span class="line">.text:00421FE8 arg_0= dword ptr  8</span><br><span class="line">.text:00421FE8 arg_4= dword ptr  0Ch</span><br><span class="line">.text:00421FE8</span><br><span class="line">.text:00421FE8 push    ebp</span><br><span class="line">.text:00421FE9 mov     ebp, esp</span><br><span class="line">.text:00421FEB sub     esp, 4</span><br><span class="line">.text:00421FEE mov     [ebp+var_4], ecx</span><br><span class="line">.text:00421FF1 mov     eax, [ebp+var_4]</span><br><span class="line">.text:00421FF4 mov     edx, [ebp+arg_0]</span><br><span class="line">.text:00421FF7 mov     [eax], edx</span><br><span class="line">.text:00421FF9 mov     eax, [ebp+var_4]</span><br><span class="line">.text:00421FFC mov     edx, [ebp+arg_4]</span><br><span class="line">.text:00421FFF mov     [eax+4], edx</span><br><span class="line">.text:00422002 nop</span><br><span class="line">.text:00422003 leave</span><br><span class="line">.text:00422004 retn    8</span><br><span class="line">.text:00422004 __ZN10LinkedNodeC1EiPS_ endp</span><br></pre></td></tr></table></figure>
+<p>esp-4在栈上申请了4字节空间,然后存放ecx中的对象地址,然后过继给eax</p>
+<p>arg_0是左边第一个参数,经过edx中转放到[eax]上,这个寄存器寻址,也就是对象的起始位置,也就是<code>int value</code>的位置</p>
+<p>arg_4,第二个参数,经过edx中转放到[eax+4],也就是对象起始地址偏上4个字节,即第二个成员<code>LinkedNode *next</code>的地址</p>
+<p><code>retn 8</code>相当于</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">add esp, 8h</span><br><span class="line">ret</span><br></pre></td></tr></table></figure>
+<p>即函数尾声</p>
+<blockquote>
+<p>函数的局部变量就一个当前对象地址的拷贝,4个字节,这里为啥要退栈8字节呢?</p>
+<p>退栈之前的栈帧状态:</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">LinkedStack的栈帧</span><br><span class="line">...</span><br><span class="line">参数2</span><br><span class="line">参数1</span><br><span class="line">LinkedNode()的栈帧</span><br><span class="line">返回值地址&lt;-ebp</span><br><span class="line">局部变量</span><br></pre></td></tr></table></figure>
+<p>退栈后</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">参数2</span><br><span class="line">参数1</span><br></pre></td></tr></table></figure>
+<p>显然是合理的,调用者LinkedStack清理参数</p>
+</blockquote>
+<p>也就是说LinkedNode()将堆上LinkedNode对象两个成员都置零</p>
+<p>回到LinkedStack中</p>
+<h5 id="sub-esp-8"><code>sub     esp, 8</code></h5>
+<p>又申请了8字节的空间</p>
+<h5 id="eax-ebpvar_c"><code>eax, [ebp+var_C]</code></h5>
+<p>var_C是存放的LinkedStack对象的堆地址</p>
+<p>这里将它交给eax,看来是马上对他读写了</p>
+<h5 id="eax4-ebx"><code>[eax+4], ebx</code></h5>
+<p>ebx是LinkedNode对象的堆地址,[eax+4]寄存器相对寻址,解引用之后是<code>LinkedStack</code>对象的第二个成员,即<code>LinkedNode *head</code></p>
+<p>这里就是将head句柄落实了,让他指向了堆上的一片空间</p>
+<h5 id="mov-ebx-ebpvar_4"><code>mov     ebx, [ebp+var_4]</code></h5>
+<p>var_4是函数开端时被调用者保存的上级函数的ebx值</p>
+<p>见函数开端</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">.text:00422334 push    ebp</span><br><span class="line">.text:00422335 mov     ebp, esp</span><br><span class="line">.text:00422337 push    ebx</span><br></pre></td></tr></table></figure>
+<p>现在本函数进入尾声了,要归还上级函数的ebx寄存器了,于是从栈里把他弹出来</p>
+<h5 id="leave"><code>leave</code></h5>
+<p>栈顶指针退回到本函数的帧指针处,帧指针重新指向上级函数的帧底</p>
+<figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">movq esp, ebp    # 使 rsp 和 rbp 指向同一位置，即子栈帧的起始处</span><br><span class="line">popq ebp	#弹出开端时压栈保存的上级函数帧指针</span><br></pre></td></tr></table></figure>
+<h5 id="retn"><code>retn</code></h5>
+<p>相当于</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">add esp, 0h</span><br><span class="line">ret</span><br></pre></td></tr></table></figure>
+<p>函数返回了</p>
+<h4 id="从linkedstack回到main">从LinkedStack()回到main()</h4>
+<p>从LinkedStack回来时标绿的部分执行完毕</p>
+<figure>
+<img
+src="https://raw.githubusercontent.com/DeutschBall/test/master/image-20220727002010882.png"
+alt="image-20220727002010882" />
+<figcaption aria-hidden="true">image-20220727002010882</figcaption>
+</figure>
+<h5 id="loc_401557"><code>loc_401557</code></h5>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">.text:00401557 loc_401557:</span><br><span class="line">.text:00401557 mov     eax, [ebp+var_14]</span><br><span class="line">.text:0040155A cmp     eax, 0Ah</span><br><span class="line">.text:0040155D jg      short loc_40157D</span><br></pre></td></tr></table></figure>
+<p>这里做了一个判断<code>var_14</code>是否为10</p>
+<p>如果var_14&gt;10则跳转<code>loc_40157D</code></p>
+<p>也就是右侧</p>
+<figure>
+<img
+src="https://raw.githubusercontent.com/DeutschBall/test/master/image-20220727002224727.png"
+alt="image-20220727002224727" />
+<figcaption aria-hidden="true">image-20220727002224727</figcaption>
+</figure>
+<p>否则执行左侧循环</p>
+<figure>
+<img
+src="https://raw.githubusercontent.com/DeutschBall/test/master/image-20220727002247712.png"
+alt="image-20220727002247712" />
+<figcaption aria-hidden="true">image-20220727002247712</figcaption>
+</figure>
+<p>左侧循环体中,<code>var_14</code>每次+1,显然是作为循环变量用的</p>
+<p>对应到源代码是</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">for</span> (<span class="type">int</span> i = <span class="number">1</span>; i &lt;= <span class="number">10</span>; ++i)</span><br><span class="line">&#123;</span><br><span class="line">    sta.push(i);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>这里var_14就是i,判断条件就是10</p>
+<h5 id="循环体">循环体</h5>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line">.text:0040155F lea     eax, [ebp+var_10]</span><br><span class="line">.text:00401562 lea     edx, [ebp+var_14]</span><br><span class="line">.text:00401565 mov     [esp], edx      ; this</span><br><span class="line">.text:00401568 mov     ecx, eax</span><br><span class="line">.text:0040156A call    __ZN11LinkedStack4pushERKi ; LinkedStack::push(int const&amp;)</span><br><span class="line">.text:0040156F sub     esp, 4</span><br><span class="line">.text:00401572 mov     eax, [ebp+var_14]</span><br><span class="line">.text:00401575 add     eax, 1</span><br><span class="line">.text:00401578 mov     [ebp+var_14], eax</span><br><span class="line">.text:0040157B jmp     short loc_401557</span><br></pre></td></tr></table></figure>
+<p>var_10的地址放到eax中,var_10中存放的是什么,在调用LinkedStack()之前该值被作为唯一的参数传递给LinkedStack,显然是this指针,那么var_10存放的就是LinkedStack对象的首地址</p>
+<p>var_14的地址放到edx中,var_14是循环变量,也是每次循环时将要被压入LinkedStack的值</p>
+<p><code>mov     [esp], edx</code>将要压入LinkedStack的值先放到栈顶,作为参数传递</p>
+<p><code>ecx, eax</code>用ecx承载LinkedStack对象地址,这是调用约定,马上就要调用成员函数了</p>
+<p><code>call    __ZN11LinkedStack4pushERKi ; LinkedStack::push(int const&amp;)</code></p>
+<p>该函数的唯一一个参数已经被刚才<code>mov     [esp], edx</code>放到栈顶了</p>
+<p>该函数的细节就不需要步入跟踪了,放一张截图,反汇编写的已经很明白了</p>
+<figure>
+<img
+src="https://raw.githubusercontent.com/DeutschBall/test/master/image-20220727003212521.png"
+alt="image-20220727003212521" />
+<figcaption aria-hidden="true">image-20220727003212521</figcaption>
+</figure>
+<h5 id="跳出循环体">跳出循环体</h5>
+<p>当var_14也就是i=11,超过10的时候,跳出了循环</p>
+<p>进入<code>loc_40157D</code></p>
+<figure>
+<img
+src="https://raw.githubusercontent.com/DeutschBall/test/master/image-20220727004848001.png"
+alt="image-20220727004848001" />
+<figcaption aria-hidden="true">image-20220727004848001</figcaption>
+</figure>
+<p>这里面大多数逻辑或者类似逻辑都已经炎鸠过了还差一个<code>cout&lt;&lt;</code>这个玩意儿</p>
+<p>下面炎鸠一下这个怎么实现的</p>
+<h5 id="stdcout">std::cout</h5>
+<p>源代码</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">cout &lt;&lt; sta.length() &lt;&lt; endl;</span><br></pre></td></tr></table></figure>
+<p>反汇编</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">.text:0040157D lea     eax, [ebp+var_10]	;var_10,LinkedStack对象</span><br><span class="line">.text:00401580 mov     ecx, eax				;var_10经过eax中转放到ecx,为了遵守调用约定</span><br><span class="line">.text:00401582 call    __ZNK5Stack6lengthEv ; Stack::length(void)</span><br><span class="line">.text:00401587 mov     [esp], eax</span><br><span class="line">.text:0040158A mov     ecx, offset __ZSt4cout ; std::cout</span><br><span class="line">.text:0040158F call    __ZNSolsEi      ; std::ostream::operator&lt;&lt;(int)</span><br></pre></td></tr></table></figure>
+<p>length函数的返回值放在eax中然后放到栈顶,准备参数</p>
+<p>然后把<code>__ZSt4cout</code>的地址放到ecx中,显然作为对象传递</p>
+<p>然后调用了__ZNSolsEi,即operator&lt;&lt;函数,打印了length</p>
+<p>本函数执行之后,终端上已经打印出10了</p>
+<p>可是后来貌似还打印了一些东西</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">.text:00401594 sub     esp, 4</span><br><span class="line">.text:00401597 mov     dword ptr [esp], offset __ZSt4endlIcSt11char_traitsIcEERSt13basic_ostreamIT_T0_ES6_ ; this</span><br><span class="line">.text:0040159E mov     ecx, eax</span><br><span class="line">.text:004015A0 call    __ZNSolsEPFRSoS_E ; std::ostream::operator&lt;&lt;(std::ostream &amp; (*)(std::ostream &amp;))</span><br></pre></td></tr></table></figure>
+<p>又压栈了一个<code>__ZSt4endlIcSt11char_traitsIcEERSt13basic_ostreamIT_T0_ES6_</code>的地址作为参数</p>
+<p>这是个啥呢?跟踪它,IDA给出的注释是</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="built_in">std</span>::ostream *__cdecl <span class="built_in">std</span>::<span class="built_in">endl</span>&lt;<span class="type">char</span>,<span class="built_in">std</span>::char_traits&lt;<span class="type">char</span>&gt;&gt;(<span class="built_in">std</span>::ostream *__os)</span><br></pre></td></tr></table></figure>
+<p>原来是endl,它原来是个函数(函数模板)</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br></pre></td><td class="code"><pre><span class="line"><span class="built_in">std</span>::ostream *__cdecl <span class="built_in">std</span>::<span class="built_in">endl</span>&lt;<span class="type">char</span>,<span class="built_in">std</span>::char_traits&lt;<span class="type">char</span>&gt;&gt;(<span class="built_in">std</span>::ostream *__os)</span><br><span class="line">&#123;</span><br><span class="line">  <span class="type">int</span> v1; <span class="comment">// eax</span></span><br><span class="line">  _BYTE *v2; <span class="comment">// ebx</span></span><br><span class="line">  <span class="type">int</span> v3; <span class="comment">// eax</span></span><br><span class="line">  <span class="type">int</span> (__stdcall *v5)(<span class="type">char</span>); <span class="comment">// edx</span></span><br><span class="line">  <span class="type">char</span> v6; <span class="comment">// [esp+4h] [ebp-18h]</span></span><br><span class="line"></span><br><span class="line">  v1 = *(_DWORD *)(*(_DWORD *)__os - <span class="number">12</span>);</span><br><span class="line">  v2 = *(_BYTE **)((<span class="type">char</span> *)__os + v1 + <span class="number">124</span>);</span><br><span class="line">  <span class="keyword">if</span> ( !v2 )</span><br><span class="line">    <span class="built_in">std</span>::__throw_bad_cast();</span><br><span class="line">  <span class="keyword">if</span> ( v2[<span class="number">28</span>] )</span><br><span class="line">  &#123;</span><br><span class="line">    v3 = (<span class="type">char</span>)v2[<span class="number">39</span>];</span><br><span class="line">  &#125;</span><br><span class="line">  <span class="keyword">else</span></span><br><span class="line">  &#123;</span><br><span class="line">    <span class="built_in">std</span>::ctype&lt;<span class="type">char</span>&gt;::_M_widen_init(*(_DWORD *)((<span class="type">char</span> *)__os + v1 + <span class="number">124</span>));</span><br><span class="line">    v5 = *(<span class="type">int</span> (__stdcall **)(<span class="type">char</span>))(*(_DWORD *)v2 + <span class="number">24</span>);</span><br><span class="line">    v3 = <span class="number">10</span>;</span><br><span class="line">    <span class="keyword">if</span> ( v5 != <span class="built_in">std</span>::ctype&lt;<span class="type">char</span>&gt;::do_widen )</span><br><span class="line">      v3 = ((<span class="type">char</span> (__thiscall *)(_BYTE *, <span class="type">int</span>))v5)(v2, <span class="number">10</span>);</span><br><span class="line">  &#125;</span><br><span class="line">  <span class="built_in">std</span>::ostream::put((<span class="built_in">std</span>::ostream *)v3, v6);</span><br><span class="line">  <span class="keyword">return</span> <span class="built_in">std</span>::ostream::flush(__os);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>该函数的参数类型为<code>std::ostream *__os</code>,此os不是操作系统的缩写,而是ostream唯一的一个标准输出对象<code>cout</code></p>
+<p>至于cout,endl,ostream都长啥样,干了啥,现在不做炎鸠,留作后话吧</p>
+<p><a
+target="_blank" rel="noopener" href="https://blog.csdn.net/xiaofei0859/article/details/78452510">C++中endl的本质是什么_xiaofei0859的博客-CSDN博客_c++
+endl</a></p>
+<p>为啥可以<code>cout.operator&lt;&lt;(endl);</code>这样调用,endl不是一个函数吗?</p>
+<p>显然ostream类中有对<code>operator&lt;&lt;(endl)</code>的重载函数,咋重载的现在不想了解</p>
+<h2 id="总结">总结</h2>
+<h4 id="调用约定">调用约定</h4>
+<p>参数使用栈传递,从右向左压栈,栈顶是最左的参数</p>
+<p>this指针使用ecx寄存器传递,成员函数的其他参数使用栈传递</p>
+<p>成员函数返回值使用eax传递</p>
+<p>成员函数的 调用和普通函数几乎没有区别,就多一个一个ecx传递对象指针</p>
+<h4 id="new和构造函数的关系">new和构造函数的关系</h4>
+<p>它俩不存在谁调用谁的关系,调用者函数首先调用operator
+new函数在堆上申请空间,然后调用者接着调用构造函数初始化这片空间</p>
+<h4 id="new的工作细节">new的工作细节</h4>
+<p>在operator
+new执行之前,调用者会把new应当申请多大空间,写到栈上,这个位置后来还得存放new返回的句柄</p>
+<p>new不需要知道开辟空间是为了干什么,只需要一个大小参数</p>
+<p>new会调用malloc函数,如果malloc开不出来则尝试调用get_new_handle即用户自定义的处理函数.</p>
+<p>如果用户没有定义该函数则走默认的流程,</p>
+<p>这个默认的流程还没有全炎鸠明白</p>
+<h4 id="构造函数的工作细节">构造函数的工作细节</h4>
+<p>反汇编视角下的构造函数和普通的成员函数没有区别,都是使用ecx表示当前对象地址,或者说new在堆上开出的地址</p>
+<p>构造函数通过ecx拿到堆上的一片地址后,构造函数就认为这里就是我要进行初始化的对象,构造函数才不会管这片空间够不够大</p>
+<p>因此</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line">class Test&#123;</span><br><span class="line">    int x;</span><br><span class="line">    int y;</span><br><span class="line">&#125;;</span><br><span class="line">int main()</span><br><span class="line">&#123;</span><br><span class="line">    Test *a=(Test*)new int;</span><br><span class="line">    return 0;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>这种代码也是可以通过编译的,但是new只在堆上开了一个int的大小即4字节,显然放不开一个8字节的Test</p>
+<p>但是编译器不知道,程序运行的时候也不知道,这就发生了类似数组访问越界的行为.Test.y成员写到堆上的位置是没有申请的空间,下一次申请堆空间就会覆盖掉这个地址</p>
+<h2 id="mrctf2020-ezcpp">MRCTF2020-EzCPP</h2>
+<h3 id="main函数">main函数</h3>
+<p>ida给出的反编译伪代码真的是老太太的裹脚--又臭又长</p>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br><span class="line">75</span><br><span class="line">76</span><br><span class="line">77</span><br><span class="line">78</span><br><span class="line">79</span><br><span class="line">80</span><br><span class="line">81</span><br><span class="line">82</span><br><span class="line">83</span><br><span class="line">84</span><br><span class="line">85</span><br><span class="line">86</span><br><span class="line">87</span><br><span class="line">88</span><br><span class="line">89</span><br><span class="line">90</span><br><span class="line">91</span><br><span class="line">92</span><br><span class="line">93</span><br><span class="line">94</span><br><span class="line">95</span><br><span class="line">96</span><br><span class="line">97</span><br><span class="line">98</span><br><span class="line">99</span><br><span class="line">100</span><br><span class="line">101</span><br><span class="line">102</span><br><span class="line">103</span><br><span class="line">104</span><br><span class="line">105</span><br><span class="line">106</span><br><span class="line">107</span><br><span class="line">108</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="type">int</span> __cdecl <span class="title">main</span><span class="params">(<span class="type">int</span> argc, <span class="type">const</span> <span class="type">char</span> **argv, <span class="type">const</span> <span class="type">char</span> **envp)</span></span></span><br><span class="line"><span class="function"></span>&#123;</span><br><span class="line">  __int64 v3; <span class="comment">// rax</span></span><br><span class="line">  __int64 v4; <span class="comment">// rbx</span></span><br><span class="line">  __int64 v5; <span class="comment">// rax</span></span><br><span class="line">  <span class="type">bool</span> v6; <span class="comment">// bl</span></span><br><span class="line">  __int64 v7; <span class="comment">// rax</span></span><br><span class="line">  __int64 v8; <span class="comment">// rax</span></span><br><span class="line">  __int64 v9; <span class="comment">// rax</span></span><br><span class="line">  __int64 v10; <span class="comment">// rax</span></span><br><span class="line">  __int64 v11; <span class="comment">// rax</span></span><br><span class="line">  __int64 v12; <span class="comment">// rax</span></span><br><span class="line">  <span class="type">char</span> v14[<span class="number">40</span>]; <span class="comment">// [rsp+0h] [rbp-140h] BYREF</span></span><br><span class="line">  __int64 v15; <span class="comment">// [rsp+28h] [rbp-118h] BYREF</span></span><br><span class="line">  __int64 v16; <span class="comment">// [rsp+30h] [rbp-110h] BYREF</span></span><br><span class="line">  <span class="type">int</span> v17; <span class="comment">// [rsp+3Ch] [rbp-104h] BYREF</span></span><br><span class="line">  <span class="type">char</span> v18[<span class="number">32</span>]; <span class="comment">// [rsp+40h] [rbp-100h] BYREF</span></span><br><span class="line">  <span class="type">char</span> v19[<span class="number">48</span>]; <span class="comment">// [rsp+60h] [rbp-E0h] BYREF</span></span><br><span class="line">  <span class="type">char</span> v20[<span class="number">31</span>]; <span class="comment">// [rsp+90h] [rbp-B0h] BYREF</span></span><br><span class="line">  <span class="type">char</span> v21; <span class="comment">// [rsp+AFh] [rbp-91h] BYREF</span></span><br><span class="line">  <span class="type">char</span> v22[<span class="number">47</span>]; <span class="comment">// [rsp+B0h] [rbp-90h] BYREF</span></span><br><span class="line">  <span class="type">char</span> v23; <span class="comment">// [rsp+DFh] [rbp-61h] BYREF</span></span><br><span class="line">  <span class="type">char</span> v24[<span class="number">36</span>]; <span class="comment">// [rsp+E0h] [rbp-60h] BYREF</span></span><br><span class="line">  <span class="type">int</span> v25; <span class="comment">// [rsp+104h] [rbp-3Ch]</span></span><br><span class="line">  <span class="type">char</span> *v26; <span class="comment">// [rsp+108h] [rbp-38h]</span></span><br><span class="line">  <span class="type">int</span> *v27; <span class="comment">// [rsp+110h] [rbp-30h]</span></span><br><span class="line">  _DWORD *v28; <span class="comment">// [rsp+118h] [rbp-28h]</span></span><br><span class="line">  <span class="type">int</span> *v29; <span class="comment">// [rsp+120h] [rbp-20h]</span></span><br><span class="line">  <span class="type">int</span> i; <span class="comment">// [rsp+128h] [rbp-18h]</span></span><br><span class="line">  <span class="type">int</span> v31; <span class="comment">// [rsp+12Ch] [rbp-14h]</span></span><br><span class="line"></span><br><span class="line">  v31 = <span class="number">0</span>;</span><br><span class="line">  std::vector&lt;<span class="type">int</span>&gt;::<span class="built_in">vector</span>(v20, argv, envp);</span><br><span class="line">  std::vector&lt;<span class="type">bool</span>&gt;::<span class="built_in">vector</span>(v19);</span><br><span class="line">  std::allocator&lt;<span class="type">char</span>&gt;::<span class="built_in">allocator</span>(&amp;v21);</span><br><span class="line">  std::__cxx11::basic_string&lt;<span class="type">char</span>,std::char_traits&lt;<span class="type">char</span>&gt;,std::allocator&lt;<span class="type">char</span>&gt;&gt;::<span class="built_in">basic_string</span>(v18, &amp;unk_500E, &amp;v21);</span><br><span class="line">  std::allocator&lt;<span class="type">char</span>&gt;::~<span class="built_in">allocator</span>(&amp;v21);</span><br><span class="line">  v3 = std::<span class="keyword">operator</span>&lt;&lt;&lt;std::char_traits&lt;<span class="type">char</span>&gt;&gt;(&amp;std::cout, <span class="string">&quot;give me your key!&quot;</span>);</span><br><span class="line">  std::ostream::<span class="keyword">operator</span>&lt;&lt;(v3, &amp;std::endl&lt;<span class="type">char</span>,std::char_traits&lt;<span class="type">char</span>&gt;&gt;);</span><br><span class="line">  <span class="keyword">for</span> ( i = <span class="number">0</span>; i &lt;= <span class="number">8</span>; ++i )</span><br><span class="line">  &#123;</span><br><span class="line">    std::istream::<span class="keyword">operator</span>&gt;&gt;(&amp;std::cin, &amp;keys[i]);</span><br><span class="line">    std::__cxx11::<span class="built_in">to_string</span>((std::__cxx11 *)v22, keys[i]);</span><br><span class="line">    std::__cxx11::basic_string&lt;<span class="type">char</span>,std::char_traits&lt;<span class="type">char</span>&gt;,std::allocator&lt;<span class="type">char</span>&gt;&gt;::<span class="keyword">operator</span>+=(v18, v22);</span><br><span class="line">    std::__cxx11::basic_string&lt;<span class="type">char</span>,std::char_traits&lt;<span class="type">char</span>&gt;,std::allocator&lt;<span class="type">char</span>&gt;&gt;::~<span class="built_in">basic_string</span>(v22);</span><br><span class="line">  &#125;</span><br><span class="line">  v28 = keys;</span><br><span class="line">  v29 = keys;</span><br><span class="line">  v27 = (<span class="type">int</span> *)&amp;unk_<span class="number">83E4</span>;</span><br><span class="line">  <span class="keyword">while</span> ( v29 != v27 )</span><br><span class="line">  &#123;</span><br><span class="line">    v17 = *v29;</span><br><span class="line">    std::vector&lt;<span class="type">int</span>&gt;::<span class="built_in">push_back</span>(v20, &amp;v17);</span><br><span class="line">    ++v29;</span><br><span class="line">  &#125;</span><br><span class="line">  v4 = std::vector&lt;std::shared_ptr&lt;SQLStorage::AddUpdateTable&gt;&gt;::<span class="built_in">end</span>(v20);</span><br><span class="line">  v5 = fmt::v6::internal::get_container&lt;fmt::v6::internal::buffer&lt;<span class="type">char</span>&gt;&gt;(v20);</span><br><span class="line">  std::for_each&lt;__gnu_cxx::__normal_iterator&lt;<span class="type">char</span> *,std::__cxx11::basic_string&lt;<span class="type">char</span>,std::char_traits&lt;<span class="type">char</span>&gt;,std::allocator&lt;<span class="type">char</span>&gt;&gt;&gt;,boost::unit_test::output::s_replace_chars&gt;(</span><br><span class="line">    v5,</span><br><span class="line">    v4);</span><br><span class="line">  v26 = v20;</span><br><span class="line">  v16 = fmt::v6::internal::get_container&lt;fmt::v6::internal::buffer&lt;<span class="type">char</span>&gt;&gt;(v20);</span><br><span class="line">  v15 = std::vector&lt;std::shared_ptr&lt;SQLStorage::AddUpdateTable&gt;&gt;::<span class="built_in">end</span>(v26);</span><br><span class="line">  <span class="keyword">while</span> ( __gnu_cxx::<span class="keyword">operator</span>!=&lt;spdlog::details::log_msg_buffer <span class="type">const</span>*,std::vector&lt;spdlog::details::log_msg_buffer&gt;&gt;(</span><br><span class="line">            (<span class="type">const</span> __gnu_cxx::__normal_iterator&lt;<span class="type">const</span> std::shared_ptr&lt;sio::message&gt;*,std::vector&lt;std::shared_ptr&lt;sio::message&gt;&gt; &gt; *)&amp;v16,</span><br><span class="line">            (<span class="type">const</span> __gnu_cxx::__normal_iterator&lt;<span class="type">const</span> std::shared_ptr&lt;sio::message&gt;*,std::vector&lt;std::shared_ptr&lt;sio::message&gt;&gt; &gt; *)&amp;v15) )</span><br><span class="line">  &#123;</span><br><span class="line">    v25 = *(_DWORD *)__gnu_cxx::__normal_iterator&lt;<span class="type">int</span> *,std::vector&lt;<span class="type">int</span>&gt;&gt;::<span class="keyword">operator</span>*(&amp;v16);</span><br><span class="line">    std::allocator&lt;<span class="type">char</span>&gt;::<span class="built_in">allocator</span>(&amp;v23);</span><br><span class="line">    std::__cxx11::basic_string&lt;<span class="type">char</span>,std::char_traits&lt;<span class="type">char</span>&gt;,std::allocator&lt;<span class="type">char</span>&gt;&gt;::<span class="built_in">basic_string</span>(v14, &amp;unk_500E, &amp;v23);</span><br><span class="line">    std::allocator&lt;<span class="type">char</span>&gt;::~<span class="built_in">allocator</span>(&amp;v23);</span><br><span class="line">    <span class="built_in">depart</span>(v25, (__int64)v14);</span><br><span class="line">    &#123;<span class="built_in">lambda</span>(std::__cxx11::basic_string&lt;<span class="type">char</span>,std::char_traits&lt;<span class="type">char</span>&gt;,std::allocator&lt;<span class="type">char</span>&gt;&gt; &amp;)#<span class="number">1</span>&#125;::<span class="built_in">operator</span>()(</span><br><span class="line">      (__int64)&amp;func,</span><br><span class="line">      (__int64)v14);</span><br><span class="line">    std::__cxx11::basic_string&lt;<span class="type">char</span>,std::char_traits&lt;<span class="type">char</span>&gt;,std::allocator&lt;<span class="type">char</span>&gt;&gt;::<span class="built_in">basic_string</span>(v24, v14);</span><br><span class="line">    v6 = !&#123;<span class="built_in">lambda</span>(std::__cxx11::basic_string&lt;<span class="type">char</span>,std::char_traits&lt;<span class="type">char</span>&gt;,std::allocator&lt;<span class="type">char</span>&gt;&gt;,<span class="type">int</span>)#<span class="number">2</span>&#125;::<span class="built_in">operator</span>()(</span><br><span class="line">            (__int64)&amp;check,</span><br><span class="line">            (__int64)v24,</span><br><span class="line">            v31);</span><br><span class="line">    std::__cxx11::basic_string&lt;<span class="type">char</span>,std::char_traits&lt;<span class="type">char</span>&gt;,std::allocator&lt;<span class="type">char</span>&gt;&gt;::~<span class="built_in">basic_string</span>(v24);</span><br><span class="line">    <span class="keyword">if</span> ( v6 )</span><br><span class="line">    &#123;</span><br><span class="line">      v7 = std::<span class="keyword">operator</span>&lt;&lt;&lt;std::char_traits&lt;<span class="type">char</span>&gt;&gt;(&amp;std::cout, <span class="string">&quot;Wrong password!&quot;</span>);</span><br><span class="line">      std::ostream::<span class="keyword">operator</span>&lt;&lt;(v7, &amp;std::endl&lt;<span class="type">char</span>,std::char_traits&lt;<span class="type">char</span>&gt;&gt;);</span><br><span class="line">      <span class="built_in">system</span>(<span class="string">&quot;pause&quot;</span>);</span><br><span class="line">      <span class="built_in">exit</span>(<span class="number">0</span>);</span><br><span class="line">    &#125;</span><br><span class="line">    ++v31;</span><br><span class="line">    std::__cxx11::basic_string&lt;<span class="type">char</span>,std::char_traits&lt;<span class="type">char</span>&gt;,std::allocator&lt;<span class="type">char</span>&gt;&gt;::~<span class="built_in">basic_string</span>(v14);</span><br><span class="line">    __gnu_cxx::__normal_iterator&lt;<span class="type">unsigned</span> <span class="type">int</span> *,std::vector&lt;<span class="type">unsigned</span> <span class="type">int</span>&gt;&gt;::<span class="keyword">operator</span>++(&amp;v16);</span><br><span class="line">  &#125;</span><br><span class="line">  v8 = std::<span class="keyword">operator</span>&lt;&lt;&lt;std::char_traits&lt;<span class="type">char</span>&gt;&gt;(&amp;std::cout, <span class="string">&quot;right!&quot;</span>);</span><br><span class="line">  std::ostream::<span class="keyword">operator</span>&lt;&lt;(v8, &amp;std::endl&lt;<span class="type">char</span>,std::char_traits&lt;<span class="type">char</span>&gt;&gt;);</span><br><span class="line">  v9 = std::<span class="keyword">operator</span>&lt;&lt;&lt;std::char_traits&lt;<span class="type">char</span>&gt;&gt;(&amp;std::cout, <span class="string">&quot;flag:MRCTF&#123;md5(&quot;</span>);</span><br><span class="line">  v10 = std::<span class="keyword">operator</span>&lt;&lt;&lt;<span class="type">char</span>&gt;(v9, v18);</span><br><span class="line">  v11 = std::<span class="keyword">operator</span>&lt;&lt;&lt;std::char_traits&lt;<span class="type">char</span>&gt;&gt;(v10, <span class="string">&quot;)&#125;&quot;</span>);</span><br><span class="line">  std::ostream::<span class="keyword">operator</span>&lt;&lt;(v11, &amp;std::endl&lt;<span class="type">char</span>,std::char_traits&lt;<span class="type">char</span>&gt;&gt;);</span><br><span class="line">  v12 = std::<span class="keyword">operator</span>&lt;&lt;&lt;std::char_traits&lt;<span class="type">char</span>&gt;&gt;(</span><br><span class="line">          &amp;std::cout,</span><br><span class="line">          <span class="string">&quot;md5()-&gt;&#123;32/upper case/put the string into the function and transform into md5 hash&#125;&quot;</span>);</span><br><span class="line">  std::ostream::<span class="keyword">operator</span>&lt;&lt;(v12, &amp;std::endl&lt;<span class="type">char</span>,std::char_traits&lt;<span class="type">char</span>&gt;&gt;);</span><br><span class="line">  <span class="built_in">system</span>(<span class="string">&quot;pause&quot;</span>);</span><br><span class="line">  std::__cxx11::basic_string&lt;<span class="type">char</span>,std::char_traits&lt;<span class="type">char</span>&gt;,std::allocator&lt;<span class="type">char</span>&gt;&gt;::~<span class="built_in">basic_string</span>(v18);</span><br><span class="line">  std::vector&lt;<span class="type">bool</span>&gt;::~<span class="built_in">vector</span>(v19);</span><br><span class="line">  std::__cxx1998::vector&lt;<span class="type">double</span>,std::allocator&lt;<span class="type">double</span>&gt;&gt;::~<span class="built_in">vector</span>((std::vector&lt;std::shared_ptr&lt;sio::message&gt;&gt; *<span class="type">const</span>)v20);</span><br><span class="line">  <span class="keyword">return</span> <span class="number">0</span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>其中甚至都有分配器allocator实例的创建,还有析构函数的调用,真的是废话</p>
+<p>ida有时候为同一对象创建了好多副本,但是实际上都是只读访问的副本,根本没有必要创建</p>
+<p>甚至有的副本创建了根本不访问</p>
+<p>为啥ida有时候显得很呆?</p>
+<p>他只是刻板地按照堆栈中存在过的局部变量,决定创建或者不创建一个对象,它没法确定后来有没有使用这个对象,或者是否只是只读访问这个对象</p>
+<h4 id="main翻译成人话">main翻译成人话</h4>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="type">int</span> <span class="title">main</span><span class="params">()</span></span></span><br><span class="line"><span class="function"></span>&#123;</span><br><span class="line">    vector&lt;<span class="type">int</span>&gt; v;</span><br><span class="line">    string <span class="keyword">final</span>;</span><br><span class="line">    cout &lt;&lt; <span class="string">&quot;give me your key!&quot;</span> &lt;&lt; endl;</span><br><span class="line">    <span class="keyword">for</span> (<span class="type">int</span> i = <span class="number">0</span>; i &lt;= <span class="number">8</span>; ++i)</span><br><span class="line">    &#123;</span><br><span class="line">        cin &gt;&gt; keys[i];</span><br><span class="line">        <span class="keyword">final</span> += <span class="built_in">to_string</span>(keys[i]);</span><br><span class="line">        v.<span class="built_in">push_back</span>(keys[i] ^ <span class="number">1</span>);<span class="comment">//放到向量v里面的是输入与1的按位异或</span></span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">for</span> (<span class="type">int</span> i = <span class="number">0</span>; i &lt; v.<span class="built_in">length</span>(); ++i)</span><br><span class="line">    &#123;</span><br><span class="line">        string temp;</span><br><span class="line">        <span class="built_in">depart</span>(v[i], temp);</span><br><span class="line"></span><br><span class="line">        将temp中的一些字符换掉</span><br><span class="line"></span><br><span class="line">            <span class="keyword">if</span> (temp和ans[i] 字符串不相同)</span><br><span class="line">        &#123;</span><br><span class="line">            cout &lt;&lt; <span class="string">&quot;wrong password!&quot;</span> &lt;&lt; endl;</span><br><span class="line">            <span class="built_in">system</span>(<span class="string">&quot;pause&quot;</span>);</span><br><span class="line">            <span class="built_in">exit</span>(<span class="number">0</span>);</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    cout &lt;&lt; <span class="string">&quot;right!&quot;</span> &lt;&lt; endl;</span><br><span class="line">    cout &lt;&lt; <span class="string">&quot;flag:MRCTF&#123;md5(&quot;</span> &lt;&lt; <span class="keyword">final</span> &lt;&lt; <span class="string">&quot;)&#125;&quot;</span> &lt;&lt; endl;</span><br><span class="line">    cout &lt;&lt; <span class="string">&quot;md5()-&gt;&#123;32/upper case/put the string into the function and transform into md5 hash&#125;&quot;</span> &lt;&lt; endl;</span><br><span class="line">    <span class="built_in">system</span>(<span class="string">&quot;pause&quot;</span>);</span><br><span class="line"></span><br><span class="line">    <span class="keyword">return</span> <span class="number">0</span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>关键点在于三个<code>lambda</code>和一个<code>depart</code></p>
+<h4
+id="第一个lambda已经翻译成人话了就是一个keysi1">第一个lambda已经翻译成人话了,就是一个<code>keys[i]^1</code></h4>
+<h4
+id="第二个lambda已经翻译成汉字了将temp中的一些字符换掉">第二个lambda已经翻译成汉字了,"将temp中的一些字符换掉"</h4>
+<blockquote>
+<p>具体的更换规则</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><span class="line">__int64 __fastcall &#123;lambda(<span class="built_in">std</span>::__cxx11::basic_string&lt;<span class="type">char</span>,<span class="built_in">std</span>::char_traits&lt;<span class="type">char</span>&gt;,<span class="built_in">std</span>::allocator&lt;<span class="type">char</span>&gt;&gt; &amp;)#<span class="number">1</span>&#125;::operator()(__int64 a1, __int64 a2)</span><br><span class="line">&#123;</span><br><span class="line">	将a2中的原数-&gt;新数</span><br><span class="line">	<span class="number">48</span>-&gt;<span class="number">79</span> 		<span class="number">0</span>-&gt;O</span><br><span class="line"> 	<span class="number">49</span>-&gt;<span class="number">108</span>		 <span class="number">1</span>-&gt;l</span><br><span class="line">  	<span class="number">50</span>-&gt;<span class="number">122</span>		<span class="number">2</span>-&gt;z</span><br><span class="line">	<span class="number">51</span>-&gt;<span class="number">69</span> 		<span class="number">3</span>-&gt;E</span><br><span class="line"> 	<span class="number">52</span>-&gt;<span class="number">65</span> 		<span class="number">4</span>-&gt;A</span><br><span class="line"> 	<span class="number">53</span>-&gt;<span class="number">115</span>		 <span class="number">5</span>-&gt;s</span><br><span class="line">	<span class="number">54</span>-&gt;<span class="number">71</span> 		<span class="number">6</span>-&gt;G</span><br><span class="line">	<span class="number">55</span>-&gt;<span class="number">84</span> 		<span class="number">7</span>-&gt;T</span><br><span class="line">	<span class="number">56</span>-&gt;<span class="number">66</span> 		<span class="number">8</span>-&gt;B</span><br><span class="line">	<span class="number">57</span>-&gt;<span class="number">113</span> 		<span class="number">9</span>-&gt;q</span><br><span class="line">	<span class="number">32</span>-&gt;<span class="number">61</span> 		空格-&gt;等号=</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+</blockquote>
+<p>第三个<code>lambda</code>也翻译成汉字了"<code>temp</code>和<code>ans[i]</code>字符串不相同",这个就是判断条件</p>
+<blockquote>
+<p><code>ans[i]</code>是程序每次都会自动初始化好的,应该是全局位置的string数组,</p>
+<p>这个数组的初始化在哪里看呢?</p>
+<p>跟踪这个lambda表达式</p>
+<figure>
+<img
+src="https://raw.githubusercontent.com/DeutschBall/test/master/image-20220727215518968.png"
+alt="image-20220727215518968" />
+<figcaption aria-hidden="true">image-20220727215518968</figcaption>
+</figure>
+<p>继续跟踪这个ans数组</p>
+<figure>
+<img
+src="https://raw.githubusercontent.com/DeutschBall/test/master/image-20220727215551499.png"
+alt="image-20220727215551499" />
+<figcaption aria-hidden="true">image-20220727215551499</figcaption>
+</figure>
+<p>发现他在bss段,按下ctrl+x观察交叉引用,发现有一个<code>__static_initialization_and_destruction_0</code>函数引用过该数组,追踪该函数,其中有:</p>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br></pre></td><td class="code"><pre><span class="line">std::ios_base::Init::<span class="built_in">Init</span>((std::ios_base::Init *)&amp;std::__ioinit);</span><br><span class="line">    __cxa_atexit((<span class="built_in">void</span> (__fastcall *)(<span class="type">void</span> *))&amp;std::ios_base::Init::~Init, &amp;std::__ioinit, &amp;_dso_handle);</span><br><span class="line">    std::allocator&lt;<span class="type">char</span>&gt;::<span class="built_in">allocator</span>(&amp;v3);</span><br><span class="line">    std::__cxx11::basic_string&lt;<span class="type">char</span>,std::char_traits&lt;<span class="type">char</span>&gt;,std::allocator&lt;<span class="type">char</span>&gt;&gt;::<span class="built_in">basic_string</span>(</span><br><span class="line">      &amp;ans[abi:cxx11],</span><br><span class="line">      <span class="string">&quot;=zqE=z=z=z&quot;</span>,</span><br><span class="line">      &amp;v3);</span><br><span class="line">    std::allocator&lt;<span class="type">char</span>&gt;::~<span class="built_in">allocator</span>(&amp;v3);</span><br><span class="line">    std::allocator&lt;<span class="type">char</span>&gt;::<span class="built_in">allocator</span>(&amp;v4);</span><br><span class="line">    std::__cxx11::basic_string&lt;<span class="type">char</span>,std::char_traits&lt;<span class="type">char</span>&gt;,std::allocator&lt;<span class="type">char</span>&gt;&gt;::<span class="built_in">basic_string</span>(</span><br><span class="line">      (<span class="type">char</span> *)&amp;ans[abi:cxx11] + <span class="number">32</span>,</span><br><span class="line">      <span class="string">&quot;=lzzE&quot;</span>,</span><br><span class="line">      &amp;v4)</span><br><span class="line">    std::allocator&lt;<span class="type">char</span>&gt;::~<span class="built_in">allocator</span>(&amp;v4);</span><br><span class="line">    std::allocator&lt;<span class="type">char</span>&gt;::<span class="built_in">allocator</span>(&amp;v5);</span><br><span class="line">    std::__cxx11::basic_string&lt;<span class="type">char</span>,std::char_traits&lt;<span class="type">char</span>&gt;,std::allocator&lt;<span class="type">char</span>&gt;&gt;::<span class="built_in">basic_string</span>(</span><br><span class="line">      (<span class="type">char</span> *)&amp;ans[abi:cxx11] + <span class="number">64</span>,</span><br><span class="line">      <span class="string">&quot;=ll=T=s=s=E&quot;</span>,</span><br><span class="line">      &amp;v5);</span><br><span class="line">...</span><br></pre></td></tr></table></figure>
+<p>相当于</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br></pre></td><td class="code"><pre><span class="line"><span class="built_in">string</span> ans[<span class="number">9</span>] = &#123;</span><br><span class="line"> <span class="string">&quot;=zqE=z=z=z&quot;</span>,</span><br><span class="line"></span><br><span class="line"> <span class="string">&quot;=lzzE&quot;</span>,</span><br><span class="line"></span><br><span class="line"> <span class="string">&quot;=ll=T=s=s=E&quot;</span>,</span><br><span class="line"></span><br><span class="line"> <span class="string">&quot;=zATT&quot;</span>,</span><br><span class="line"></span><br><span class="line"> <span class="string">&quot;=s=s=s=E=E=E&quot;</span>,</span><br><span class="line"></span><br><span class="line"> <span class="string">&quot;=EOll=E&quot;</span>,</span><br><span class="line"></span><br><span class="line"> <span class="string">&quot;=lE=T=E=E=E&quot;</span>,</span><br><span class="line"></span><br><span class="line"> <span class="string">&quot;=EsE=s=z&quot;</span>,</span><br><span class="line"></span><br><span class="line"> <span class="string">&quot;=AT=lE=ll&quot;</span></span><br><span class="line">&#125;;</span><br></pre></td></tr></table></figure>
+<p>于是就得到了ans数组,后面的工作就是从ans数组开始反回去</p>
+</blockquote>
+<h4 id="departvi-temp"><code>depart(v[i], temp);</code></h4>
+<p><code>depart</code>函数干了啥事呢?将<code>v[i]</code>分解质因数,然后按照从大到小的顺序,放到<code>temp</code>字符串里</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line"><span class="type">void</span> <span class="title function_">depart</span><span class="params">(<span class="type">int</span> a1, <span class="built_in">string</span> &amp;s)</span></span><br><span class="line">&#123;</span><br><span class="line">    <span class="keyword">for</span> (<span class="type">int</span> i = <span class="number">2</span>; <span class="built_in">sqrt</span>(a1) &gt;= i; ++i) <span class="comment">// i从2根号a1,遍历求a1的乘法因子</span></span><br><span class="line">    &#123;</span><br><span class="line">        <span class="keyword">if</span> ((a1 % i) == <span class="number">0</span>)</span><br><span class="line">        &#123;                      <span class="comment">//当a1%i能够除开则i是a1的除法因子</span></span><br><span class="line">            depart(a1 / i, s); <span class="comment">// a1中去掉刚刚找到的乘法因子i,然后继续寻找剩下的乘法银子</span></span><br><span class="line">            <span class="keyword">break</span>;</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">    s = s + <span class="string">&quot; &quot;</span> + to_string(v6); <span class="comment">//由于最深处的递归函数首先执行本行,因此,最大的因子最先添加到a2上</span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<h3 id="解密脚本">解密脚本</h3>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br><span class="line">75</span><br><span class="line">76</span><br><span class="line">77</span><br><span class="line">78</span><br><span class="line">79</span><br><span class="line">80</span><br><span class="line">81</span><br><span class="line">82</span><br><span class="line">83</span><br><span class="line">84</span><br><span class="line">85</span><br><span class="line">86</span><br><span class="line">87</span><br><span class="line">88</span><br><span class="line">89</span><br><span class="line">90</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;iostream&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;vector&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;string&gt;</span></span></span><br><span class="line"><span class="keyword">using</span> <span class="keyword">namespace</span> std;</span><br><span class="line">string ans[<span class="number">11</span>] = &#123;</span><br><span class="line">    <span class="string">&quot;=zqE=z=z=z&quot;</span>,</span><br><span class="line"></span><br><span class="line">    <span class="string">&quot;=lzzE&quot;</span>,</span><br><span class="line"></span><br><span class="line">    <span class="string">&quot;=ll=T=s=s=E&quot;</span>,</span><br><span class="line"></span><br><span class="line">    <span class="string">&quot;=zATT&quot;</span>,</span><br><span class="line"></span><br><span class="line">    <span class="string">&quot;=s=s=s=E=E=E&quot;</span>,</span><br><span class="line"></span><br><span class="line">    <span class="string">&quot;=EOll=E&quot;</span>,</span><br><span class="line"></span><br><span class="line">    <span class="string">&quot;=lE=T=E=E=E&quot;</span>,</span><br><span class="line"></span><br><span class="line">    <span class="string">&quot;=EsE=s=z&quot;</span>,</span><br><span class="line"></span><br><span class="line">    <span class="string">&quot;=AT=lE=ll&quot;</span></span><br><span class="line">&#125;;</span><br><span class="line"><span class="function"><span class="type">void</span> <span class="title">change</span><span class="params">(string &amp;str)</span></span></span><br><span class="line"><span class="function"></span>&#123;</span><br><span class="line">    <span class="keyword">for</span> (<span class="type">int</span> i = <span class="number">0</span>; i &lt; str.<span class="built_in">length</span>(); ++i)</span><br><span class="line">    &#123;</span><br><span class="line">        <span class="keyword">switch</span> (str[i])</span><br><span class="line">        &#123;</span><br><span class="line">        <span class="keyword">case</span> <span class="string">&#x27;O&#x27;</span>:</span><br><span class="line">            str[i] = <span class="string">&#x27;0&#x27;</span>;</span><br><span class="line">            <span class="keyword">break</span>;</span><br><span class="line">        <span class="keyword">case</span> <span class="string">&#x27;l&#x27;</span>:</span><br><span class="line">            str[i] = <span class="string">&#x27;1&#x27;</span>;</span><br><span class="line">            <span class="keyword">break</span>;</span><br><span class="line">        <span class="keyword">case</span> <span class="string">&#x27;z&#x27;</span>:</span><br><span class="line">            str[i] = <span class="string">&#x27;2&#x27;</span>;</span><br><span class="line">            <span class="keyword">break</span>;</span><br><span class="line">        <span class="keyword">case</span> <span class="string">&#x27;E&#x27;</span>:</span><br><span class="line">            str[i] = <span class="string">&#x27;3&#x27;</span>;</span><br><span class="line">            <span class="keyword">break</span>;</span><br><span class="line">        <span class="keyword">case</span> <span class="string">&#x27;A&#x27;</span>:</span><br><span class="line">            str[i] = <span class="string">&#x27;4&#x27;</span>;</span><br><span class="line">            <span class="keyword">break</span>;</span><br><span class="line">        <span class="keyword">case</span> <span class="string">&#x27;s&#x27;</span>:</span><br><span class="line">            str[i] = <span class="string">&#x27;5&#x27;</span>;</span><br><span class="line">            <span class="keyword">break</span>;</span><br><span class="line">        <span class="keyword">case</span> <span class="string">&#x27;G&#x27;</span>:</span><br><span class="line">            str[i] = <span class="string">&#x27;6&#x27;</span>;</span><br><span class="line">            <span class="keyword">break</span>;</span><br><span class="line">        <span class="keyword">case</span> <span class="string">&#x27;T&#x27;</span>:</span><br><span class="line">            str[i] = <span class="string">&#x27;7&#x27;</span>;</span><br><span class="line">            <span class="keyword">break</span>;</span><br><span class="line"></span><br><span class="line">        <span class="keyword">case</span> <span class="string">&#x27;B&#x27;</span>:</span><br><span class="line">            str[i] = <span class="string">&#x27;8&#x27;</span>;</span><br><span class="line">            <span class="keyword">break</span>;</span><br><span class="line">        <span class="keyword">case</span> <span class="string">&#x27;q&#x27;</span>:</span><br><span class="line">            str[i] = <span class="string">&#x27;9&#x27;</span>;</span><br><span class="line">            <span class="keyword">break</span>;</span><br><span class="line">        <span class="keyword">case</span> <span class="string">&#x27;=&#x27;</span>:</span><br><span class="line">            str[i] = <span class="string">&#x27; &#x27;</span>;</span><br><span class="line">            <span class="keyword">break</span>;</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br><span class="line"><span class="function"><span class="type">int</span> <span class="title">calc</span><span class="params">(<span class="type">const</span> string &amp;str)</span></span>&#123;</span><br><span class="line">    string temp;</span><br><span class="line">    <span class="type">int</span> ans=<span class="number">1</span>;</span><br><span class="line">    <span class="keyword">for</span>(<span class="type">int</span> i=<span class="number">1</span>;i&lt;str.<span class="built_in">length</span>();++i)&#123;</span><br><span class="line">        <span class="keyword">if</span>(str[i]==<span class="string">&#x27; &#x27;</span>)&#123;</span><br><span class="line">            ans*=<span class="built_in">stoi</span>(temp);</span><br><span class="line">            temp=<span class="string">&quot;&quot;</span>;</span><br><span class="line">        &#125;</span><br><span class="line">        <span class="keyword">else</span>&#123;</span><br><span class="line">            temp+=str[i];</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">    ans*=<span class="built_in">stoi</span>(temp);</span><br><span class="line">    <span class="keyword">return</span> ans;</span><br><span class="line">&#125;</span><br><span class="line"><span class="function"><span class="type">int</span> <span class="title">main</span><span class="params">(<span class="type">int</span> argc, <span class="type">char</span> **argv, <span class="type">char</span> **envp)</span></span></span><br><span class="line"><span class="function"></span>&#123;</span><br><span class="line">    <span class="keyword">for</span> (<span class="type">int</span> i = <span class="number">0</span>; i &lt; <span class="number">11</span>; ++i)</span><br><span class="line">    &#123;</span><br><span class="line">        <span class="built_in">change</span>(ans[i]);</span><br><span class="line">        cout&lt;&lt;(<span class="built_in">calc</span>(ans[i])^<span class="number">1</span>)&lt;&lt;endl;</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">return</span> <span class="number">0</span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>运行结果</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line">PS C:\Users\<span class="number">86135</span>\Desktop\MRCTF2020\EzCPP&gt; ./test</span><br><span class="line"><span class="number">2345</span></span><br><span class="line"><span class="number">1222</span></span><br><span class="line"><span class="number">5774</span></span><br><span class="line"><span class="number">2476</span></span><br><span class="line"><span class="number">3374</span></span><br><span class="line"><span class="number">9032</span></span><br><span class="line"><span class="number">2456</span></span><br><span class="line"><span class="number">3531</span></span><br><span class="line"><span class="number">6720</span></span><br></pre></td></tr></table></figure>
+<p>Linux虚拟机或者wsl上运行EasyCPP然后把keys乎进去</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br></pre></td><td class="code"><pre><span class="line">┌──(root㉿Executor)-[/mnt/c/Users/<span class="number">86135</span>/Desktop/MRCTF2020/EzCPP]</span><br><span class="line">└─# ./EasyCPP</span><br><span class="line">give me your key!</span><br><span class="line"><span class="number">2345</span></span><br><span class="line"><span class="number">1222</span></span><br><span class="line"><span class="number">5774</span></span><br><span class="line"><span class="number">2476</span></span><br><span class="line"><span class="number">3374</span></span><br><span class="line"><span class="number">9032</span></span><br><span class="line"><span class="number">2456</span></span><br><span class="line"><span class="number">3531</span></span><br><span class="line"><span class="number">6720</span></span><br><span class="line">right!</span><br><span class="line">flag:MRCTF&#123;md5(<span class="number">234512225774247633749032245635316720</span>)&#125;</span><br><span class="line">md5()-&gt;&#123;<span class="number">32</span>/upper <span class="keyword">case</span>/put the <span class="built_in">string</span> into the function and transform into md5 hash&#125;</span><br><span class="line">sh: <span class="number">1</span>: pause: not found</span><br></pre></td></tr></table></figure>
+<p>32位大写的md5加密:</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="number">4367F</span>B5F42C6E46B2AF79BF409FB84D3</span><br></pre></td></tr></table></figure>
+<p>因此flag是</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">MRCTF&#123;4367FB5F42C6E46B2AF79BF409FB84D3&#125;</span><br></pre></td></tr></table></figure>
+<p>交到buuctf上是</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">flag&#123;4367FB5F42C6E46B2AF79BF409FB84D3&#125;</span><br></pre></td></tr></table></figure>
+<h3 id="胡思乱想">胡思乱想</h3>
+<p>为什么ida会多此一举地创建多个副本呢?</p>
+<p>以ida在main函数刚开始时创建的两个vector对象为例</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">std::vector&lt;int&gt;::vector(v20, argv, envp);</span><br><span class="line">std::vector&lt;bool&gt;::vector(v19);</span><br></pre></td></tr></table></figure>
+<p>显然v20和v19是作为句柄用的,两句话实际上相当于</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">vector&lt;int&gt; v20(argv,envp);</span><br><span class="line">vector&lt;bool&gt; v19;</span><br></pre></td></tr></table></figure>
+<p>然而我从来也没有见过传递两个字符串数组指针给vector的构造函数</p>
+<blockquote>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="built_in">vector</span>():<span class="comment">//创建一个空vector</span></span><br><span class="line"><span class="built_in">vector</span>(<span class="type">int</span> nSize):<span class="comment">//创建一个vector,元素个数为nSize</span></span><br><span class="line"><span class="built_in">vector</span>(<span class="type">int</span> nSize,<span class="type">const</span> t&amp; t):<span class="comment">//创建一个vector，元素个数为nSize,且值均为t</span></span><br><span class="line"><span class="built_in">vector</span>(<span class="type">const</span> vector&amp;):<span class="comment">//复制构造函数</span></span><br><span class="line"><span class="built_in">vector</span>(begin,end)<span class="comment">//:复制[begin,end)区间内另一个数组的元素到vector</span></span><br></pre></td></tr></table></figure>
+</blockquote>
+<p>后面这个<code>vector&lt;bool&gt; v19</code>更离谱,自从创建了它,后面从来没有使用过,在main函数结尾处调用了它的析构函数</p>
+<p>为什么会发生这种诡异的情况呢?只能做一个推测</p>
+<p>看一下main函数的开端</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line">push    rbp</span><br><span class="line">mov     rbp, rsp</span><br><span class="line">push    rbx</span><br><span class="line">sub     rsp, 138h</span><br><span class="line">mov     [rbp+var_14], 0</span><br><span class="line">lea     rax, [rbp+var_B0]</span><br><span class="line">mov     rdi, rax</span><br><span class="line">call    _ZNSt6vectorIiSaIiEEC2Ev ; std::vector&lt;int&gt;::vector(void)</span><br><span class="line">lea     rax, [rbp+var_E0]</span><br><span class="line">mov     rdi, rax</span><br><span class="line">call    _ZNSt6vectorIbSaIbEEC2Ev ; std::vector&lt;bool&gt;::vector(void)</span><br><span class="line">lea     rax, [rbp+var_91]</span><br><span class="line">mov     rdi, rax</span><br></pre></td></tr></table></figure>
+<p>本来创建一个vector容器的结构应该是</p>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">lea     rax, [rbp+var_B0]</span><br><span class="line">mov     rdi, rax</span><br><span class="line">call    _ZNSt6vectorIiSaIiEEC2Ev</span><br></pre></td></tr></table></figure>
+<p>栈上var_B0应该是句柄的位置,通过rax中转将var_B0的地址放到rdi里,rdi用来传递参数给<code>_ZNSt6vectorIiSaIiEEC2Ev</code></p>
+<p>可是这只是交代了vector对象的句柄应该放在哪,并没有指明参数,这意味着只是创建了一个vector<int>对象,没有传递参数</p>
+<p>但是ida不认为它没有参数.</p>
+<p>他看见前面有两个push压栈,认为是在准备参数,也没管中间还有sub指令导致的栈变化</p>
+<p>(因为正常函数调用的时候,准备参数过程中啃腚不会瞎改栈顶指针,可能ida就直接寻找push指令了,根本不管其他指令的事情)</p>
+<p>ida认为,在执行<code>call _ZNSt6vectorIiSaIiEEC2Ev</code>时,刚才压栈的push
+rbp和push rbx是保存的调用者main函数的寄存器</p>
+<p>一下可能是ida在想什么:</p>
+<p>rbp是main函数的栈帧指针,它指向的正是<code>main</code>的最后一个参数<code>envp</code></p>
+<p>rbx也不知道ida是怎么认为它存放的是<code>argc</code>数组的</p>
+<p>反正它就这样认为的,两个push是在为<code>vector</code>准备参数</p>
+<p>于是F5反编译的时候他就堂而皇之地写了一个</p>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">std::vector&lt;<span class="type">int</span>&gt;::<span class="built_in">vector</span>(v20, argv, envp);</span><br></pre></td></tr></table></figure>
+<p>那为啥第二次<code>vector&lt;bool&gt;</code>的时候就没有乱写参数呢?</p>
+<p>推测因为ida从最近刚调用函数开始计算当前函数的参数是啥,而两次函数调用之间没有压栈操作</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">call    _ZNSt6vectorIiSaIiEEC2Ev ; std::vector&lt;int&gt;::vector(void)</span><br><span class="line">lea     rax, [rbp+var_E0]</span><br><span class="line">mov     rdi, rax</span><br><span class="line">call    _ZNSt6vectorIbSaIbEEC2Ev ; std::vector&lt;bool&gt;::vector(void)</span><br></pre></td></tr></table></figure>
+<p>因此ida认为后来这个vector是无参的</p>
+<blockquote>
+<p>看雪论坛上大佬的解释是</p>
+<figure>
+<img
+src="https://raw.githubusercontent.com/DeutschBall/test/master/image-20220727213433217.png"
+alt="image-20220727213433217" />
+<figcaption aria-hidden="true">image-20220727213433217</figcaption>
+</figure>
+<p>我猜ida有时判断不准要几个参数,有可能是调用者和被调用者的调用约定不同,比如cdecl的main函数调用thiscall的构造函数.</p>
+<p>学了堆栈平衡再回来看吧</p>
+</blockquote>
+<p>那为啥有一个<code>vector&lt;bool&gt;</code>后来却从来不用他?</p>
+<p>从反汇编得到的指令来看,确实是有调用<code>vector&lt;bool&gt;</code>的构造函数的,可能是出题的为了混淆视听吧</p>
+
+      
+    </div>
+
+    
+    
+    
+      <footer class="post-footer">
+        <div class="post-eof"></div>
+      </footer>
+  </article>
+  
+  
+  
+
+      
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="en">
     <link itemprop="mainEntityOfPage" href="http://deutschball.github.io/2022/07/24/Docker/">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
@@ -7289,1173 +7869,6 @@ alt="image-20220614235435725" />
 </figure>
 <p>台湾人把它翻译成"虚拟文件系统",实际上和VFS不是一个东西</p>
 <p>到此,操作系统就起来了,后面操作系统(kernel)会检查各种硬件,然后启动各种服务</p>
-
-      
-    </div>
-
-    
-    
-    
-      <footer class="post-footer">
-        <div class="post-eof"></div>
-      </footer>
-  </article>
-  
-  
-  
-
-      
-  
-  
-  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="en">
-    <link itemprop="mainEntityOfPage" href="http://deutschball.github.io/2022/06/12/%E8%99%9A%E6%8B%9F%E5%86%85%E5%AD%98/">
-
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="image" content="https://raw.githubusercontent.com/DeutschBall/picbed/main/dustball.png">
-      <meta itemprop="name" content="dustball">
-      <meta itemprop="description" content="dustland">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="dustland">
-    </span>
-      <header class="post-header">
-        <h2 class="post-title" itemprop="name headline">
-          
-            <a href="/2022/06/12/%E8%99%9A%E6%8B%9F%E5%86%85%E5%AD%98/" class="post-title-link" itemprop="url">CSAPP-chapter9 内存管理</a>
-        </h2>
-
-        <div class="post-meta">
-            <span class="post-meta-item">
-              <span class="post-meta-item-icon">
-                <i class="far fa-calendar"></i>
-              </span>
-              <span class="post-meta-item-text">Posted on</span>
-
-              <time title="Created: 2022-06-12 11:18:00" itemprop="dateCreated datePublished" datetime="2022-06-12T11:18:00+08:00">2022-06-12</time>
-            </span>
-              <span class="post-meta-item">
-                <span class="post-meta-item-icon">
-                  <i class="far fa-calendar-check"></i>
-                </span>
-                <span class="post-meta-item-text">Edited on</span>
-                <time title="Modified: 2023-09-25 19:38:13" itemprop="dateModified" datetime="2023-09-25T19:38:13+08:00">2023-09-25</time>
-              </span>
-
-          
-
-        </div>
-      </header>
-
-    
-    
-    
-    <div class="post-body" itemprop="articleBody">
-
-      
-          <h1 id="内存管理">内存管理</h1>
-<figure>
-<img
-src="https://raw.githubusercontent.com/DeutschBall/test/master/image-20220612081358649.png"
-alt="image-20220612081358649" />
-<figcaption aria-hidden="true">image-20220612081358649</figcaption>
-</figure>
-<h2 id="纯分段">纯分段</h2>
-<p>最初分段的目的是实现各段可以随意增长</p>
-<blockquote>
-<p>啥意思呢?在既没有分段也没有分页的年代,程序装载进入内存是紧挨着放的,一条指令或数据紧挨着一条指令或数据.这就导致一个啥后果呢?</p>
-<p>我想使用malloc获取一些堆空间,但是堆已经被左右两个块夹住了,大小固定了,找不到想要的空闲空间</p>
-<p>分段之后,各段在内存中任意位置存放,一个程序在内存中可能被分割成几块,不必连续存放,两个程序可能交叉着在内存中存放</p>
-<p>如果堆就放在一个堆段,堆顶指针指向该段的一头,如果该方向上紧挨着没有其他段,那么堆就可以变大了</p>
-</blockquote>
-<p>分段还实现了,代码和数据的分离,代码放在一个段,数据放在一个段</p>
-<blockquote>
-<p>可以简单意淫一下分段是啥样的:</p>
-<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">segment Code:</span><br><span class="line">	<span class="type">int</span> <span class="title function_">main</span><span class="params">()</span>&#123;</span><br><span class="line">		<span class="built_in">printf</span>(<span class="string">&quot;%s&quot;</span>,Data:buffer);</span><br><span class="line">		<span class="keyword">return</span> <span class="number">0</span>;</span><br><span class="line">	&#125;</span><br><span class="line">segment Data:</span><br><span class="line">	<span class="type">char</span> buffer[]=<span class="string">&quot;helloworld&quot;</span></span><br></pre></td></tr></table></figure>
-<p>只是意淫,因为x86-64上已经废除分段了,我也不知道真的分段程序怎么写</p>
-<p>但是计组书上讲的老古董8086上的汇编语言是有明确的分段的</p>
-<figure>
-<img
-src="https://raw.githubusercontent.com/DeutschBall/test/master/image-20220612074034741.png"
-alt="image-20220612074034741" />
-<figcaption aria-hidden="true">image-20220612074034741</figcaption>
-</figure>
-<figure>
-<img
-src="https://raw.githubusercontent.com/DeutschBall/test/master/image-20220612074118371.png"
-alt="image-20220612074118371" />
-<figcaption aria-hidden="true">image-20220612074118371</figcaption>
-</figure>
-</blockquote>
-<p>分段使得段权限管理很方便</p>
-<p>段的功能是由程序员指定的,程序员可以把只读代码都放一个Code段,可读写数据都放在Data段,只读数据都放在Rodata段等等,每个段都指定一下访问权限rwx就可以限定怎么访问它了,违反了指定好的权限的访问,操作系统会报告段错误</p>
-<p>纯分段中是没有甚么"虚拟内存"概念的,因为虚拟内存的实现要分页,那么内存条子多大,地址空间就有多大,即物理内存</p>
-<p>画个图意思意思纯分段系统上程序在内存中的存储状态:</p>
-<figure>
-<img
-src="https://raw.githubusercontent.com/DeutschBall/test/master/image-20220611090810424.png"
-alt="image-20220611090810424" />
-<figcaption aria-hidden="true">image-20220611090810424</figcaption>
-</figure>
-<h3 id="段表">段表</h3>
-<p>作战时一个师下辖三个团,那么师部就得维护这三个团的信息,包括:</p>
-<p>1.团部人员信息,这方便师部联系团指挥员,这可能在师部里有一个电话本本</p>
-<p>2.该团当前所在位置,这方便师部部署战术任务<del>(注意战术动作)</del>,这可能在师部里有一个沙盘</p>
-<p>3.该团当前人员数量,这方便师部进行伤亡统计和兵员补给,这可能师部里有一个专门记录的本本</p>
-<p>同样,一个进程被分成若干段,每个段都是大小可变的,每个段可以被安排在内存的任意地址,每个段是甚么访问属性,这也需要一个数据结构维护</p>
-<p>每个段占用一个表项,现在我们可以想到,该表项至少应该有的内容</p>
-<p>1.段地址,进程访问该段必须</p>
-<p>2.段大小,检查访问越界错误必须</p>
-<p>3.段访问权限,段保护必须</p>
-<p>想不出还需要维护段的啥信息了,是时候看看权威怎么想这个事情的了</p>
-<figure>
-<img
-src="https://raw.githubusercontent.com/DeutschBall/test/master/image-20220611091807512.png"
-alt="image-20220611091807512" />
-<figcaption aria-hidden="true">image-20220611091807512</figcaption>
-</figure>
-<p>他的段表包括了三个项目:段号,段长,基址</p>
-<p>段号是啥呢?程序员编程的时候会指定段名,比如Code,Data等,但是计算机并不喜欢这么长的信息,一个英文字母用ASCII编码都需要一个字节,那么一个"Code"就得编4字节,32位</p>
-<p>如果程序员的程序就分了两个段,Data和Code,那么只用一个符号位就可以表示两种状态,分三段则需要2位</p>
-<p>编译器会无视所有段名,将所有段从上到下顺次编号,这应该可以说是离散化的思想<a
-target="_blank" rel="noopener" href="https://www.luogu.com.cn/problem/P1496">P1496 火烧赤壁 - 洛谷 |
-计算机科学教育新生态 (luogu.com.cn)</a></p>
-<p>把名字都映射成顺次增加的整数还有一个好处就是,段号还需要存储在段表中吗?</p>
-<p>段表第一项存第一段,段表第二项存第二段...</p>
-<p>段表也只需要把编译器翻译成的0,1,2,...n号段按顺序存起来</p>
-<p>那么实际上段表项只有段长和基址两个信息,而这些我们都想到了,我们甚至想到了保护措施</p>
-<p><strong>在纯分段的系统上,段表被放在哪里呢?</strong></p>
-<p>操作系统是常驻内存的,进程控制块PCB由操作系统维护,每个进程又只有一个段表,</p>
-<p>那么很自然的就会想到,段表放在进程PCB中,由操作系统维护</p>
-<p>果真如此吗?</p>
-<p>非也,诚如是则PCB过于臃肿,操作系统占用的内存空间会因为段表变的非常大</p>
-<p>实际上PCB只需要维护一个指向段表内存地址的指针和段表的长度</p>
-<p>在进程被调度运行时,段表地址和段表长度会被放到硬件段表寄存器中</p>
-<h3 id="地址翻译">地址翻译</h3>
-<figure>
-<img
-src="https://raw.githubusercontent.com/DeutschBall/test/master/image-20220611092650927.png"
-alt="image-20220611092650927" />
-<figcaption aria-hidden="true">image-20220611092650927</figcaption>
-</figure>
-<p>加入纯分段系统上,给出一个32位的内存地址,</p>
-<p>高16位为段号,低16位为段内偏移</p>
-<p>高位地址为<code>0x0002h</code>,即段号,首先要和段表长度进行比较,如果段号大于等于段表长度则产生越界中断</p>
-<p>如果段号小于段表长度,那么用段表地址+段号相当于一个基址变址寻址,去查2号段即段表里面从上往下数第三条记录,发现基址为<code>40K</code>,段长6K</p>
-<p>低16位为<code>0x0100h=0.25K&lt;6K</code>因此该段内偏移量是合法的,不会发生越界中断</p>
-<p>最终基址+段内偏移=<code>1010 0000 0000 0000+1 0000 0000=1010 0001 0000 0000=0xA100</code>即物理地址</p>
-<h3 id="地址空间维度">地址空间维度</h3>
-<p>纯分页系统中用户进程地址空间是一维的,直接给出一个物理地址就可以寻址</p>
-<p>纯分段系统中用户进程地址空间是二维的,需要通过<code>段:段内偏移</code>指定一个物理地址</p>
-<figure>
-<img
-src="https://raw.githubusercontent.com/DeutschBall/test/master/image-20220612080803151.png"
-alt="image-20220612080803151" />
-<figcaption aria-hidden="true">image-20220612080803151</figcaption>
-</figure>
-<p>每个段内都是从0开始开始编址</p>
-<h3 id="分段的好处">分段的好处</h3>
-<p>1.方便共享</p>
-<figure>
-<img
-src="https://raw.githubusercontent.com/DeutschBall/test/master/image-20220612081026860.png"
-alt="image-20220612081026860" />
-<figcaption aria-hidden="true">image-20220612081026860</figcaption>
-</figure>
-<p>代码和只读数据可以在物理内存中只有一个段,但被多个进程的段表项目指向</p>
-<p>实际上后来的段页式中,共享库就是这样用的</p>
-<h3 id="碎片">碎片</h3>
-<p>外部碎片:</p>
-<p>画个图立刻清楚</p>
-<figure>
-<img
-src="https://raw.githubusercontent.com/DeutschBall/test/master/image-20220612083115693.png"
-alt="image-20220612083115693" />
-<figcaption aria-hidden="true">image-20220612083115693</figcaption>
-</figure>
-<figure>
-<img
-src="https://raw.githubusercontent.com/DeutschBall/test/master/image-20220612083039864.png"
-alt="image-20220612083039864" />
-<figcaption aria-hidden="true">image-20220612083039864</figcaption>
-</figure>
-<p>内部碎片:</p>
-<p>在内存分段系统上没有内部碎片问题</p>
-<p>在分页系统上,假设一个页是4KB,一个进程的地址空间要33KB,那么前32K正好8页,第九页上只用了1KB,剩下这3KB就是内部碎片</p>
-<h2 id="段页式">段页式</h2>
-<figure>
-<img
-src="https://raw.githubusercontent.com/DeutschBall/test/master/image-20220612083740271.png"
-alt="image-20220612083740271" />
-<figcaption aria-hidden="true">image-20220612083740271</figcaption>
-</figure>
-<p>段页式结构,对用户来说,可以感受到的是分段,实际使用的时候和纯分段几乎相同</p>
-<p>操作系统负责分页工作,对用户不可见</p>
-<p>一个段可能由多个页组成,比如一个8K的段就有可能由两个4k的页组成,这个段就管理两个页</p>
-<p>一个进程对应一个段表,每个段维护一个表,因此一个有多个段的进程对应多个页表</p>
-<p>纯分段结构中,段表存放的是段基址和段长度,而段页式结构中,段表中存放的是页表长度,页表存放块号,页表存放的是内存块号</p>
-<h2 id="从物理寻址到虚拟寻址">从物理寻址到虚拟寻址</h2>
-<p>虚拟内存是一伙子异想天开的人造出来的巧夺天工,在虚拟内存之前,是符合普通人认知的物理内存</p>
-<p>计算机主存(目前可以直接认为成内存条)可以看成是一个巨大的数组,他有M个连续的单元,每个单元大小是一个字节,各个单元线性分布</p>
-<figure>
-<img
-src="https://raw.githubusercontent.com/DeutschBall/test/master/image-20220516182449307.png"
-alt="image-20220516182449307" />
-<figcaption aria-hidden="true">image-20220516182449307</figcaption>
-</figure>
-<p>物理寻址就是直接在内存条上寻址,CPU想要读写哪个单元的内容,只需要指定该单元的编号,或者说下标</p>
-<blockquote>
-<p>物理寻址的一个相对完整的过程:</p>
-<p>1.CPU指定物理地址,将该地址信息送到地址总线</p>
-<p>2.CPU指定对该地址是读还是写操作,将该控制信息发往控制总线</p>
-<p>3.CPU从数据总线上对相应内存单元进行读写操作</p>
-</blockquote>
-<p>既然物理寻址方法如此自然易懂,为什么还要引入一个相对晦涩的虚拟寻址呢?</p>
-<p>其中的一个原因是,内存条太小了,想要把一些磁盘空间也乔装打扮一下当成内存使用</p>
-<p>还有更高级的原因,比如更方便地管理内存</p>
-<p>虚拟空间是对上层而言的概念,而物理空间是对下层而言的,</p>
-<p>用户感到的是虚拟空间,有限的内存上似乎可以运行无限多的进程,开无限多的进程独立地址空间,</p>
-<p>而对操作系统来说,实际上的"资源"就只有内存条那固定死的地址空间.</p>
-<p>操作系统通过及时地将用户暂时不用的进程的物理空间换给其他进程的虚拟空间使用,让用户产生错觉认为内存很大.</p>
-<p>当用户又要继续使用刚才暂时不用的进程时,此时该进程占用的"资源"刚才被操作系统从内存中搬到磁盘中,然后交给了别的进程.</p>
-<p>因此操作系统又会启动缺页处理,把磁盘中该进程的信息重新搬回来放到内存中使用.</p>
-<p>这就好比用工荒,又好比小学时做过的一道数学题</p>
-<blockquote>
-<p>400个士兵守一个方形的城池,每时每刻都有士兵阵亡.</p>
-<p>如何保证敌人每时每刻看到每面墙上都有至少100个士兵在防守的假象?</p>
-<p>400个士兵均分4组站在4个角楼上就可以造成每面城墙有200名士兵的假象</p>
-<p>东北角的士兵就同时起到忽悠东面和北面两个方向敌人的作用</p>
-<p>在虚拟内存概念中,主存就起到了这个东北角士兵的作用</p>
-</blockquote>
-<p>虚拟寻址相对于物理寻址多了一个硬件MMU(内存管理单元)和一个步骤即地址翻译.</p>
-<p>并且CPU指定的虚拟地址有可能并不放在主存中,而是放在磁盘中,这就发生了缺页,操作系统会一系列操作给他整的不缺喽然后继续执行,这都是后话了</p>
-<p>最简化的虚拟寻址模型:</p>
-<figure>
-<img
-src="https://raw.githubusercontent.com/DeutschBall/test/master/image-20220516182852208.png"
-alt="image-20220516182852208" />
-<figcaption aria-hidden="true">image-20220516182852208</figcaption>
-</figure>
-<blockquote>
-<p>一个相对完整的虚拟寻址过程:</p>
-<p>1.CPU指定一个虚拟地址,发往MMU内存管理单元(MMU也是CPU中集成的一部分)</p>
-<p>2.MMU将虚拟地址翻译成物理地址,送往地址总线(由于MMU是CPU的一部分,因此还是CPU将该物理地址送往地址总线)</p>
-<p>3.CPU指定对该物理地址的读或者写操作,将控制信息送往控制总线</p>
-<p>4.CPU通过数据总线对该内存单元进行读或者写操作</p>
-</blockquote>
-<h2 id="地址空间">地址空间</h2>
-<h3 id="物理地址空间和虚拟地址空间">物理地址空间和虚拟地址空间</h3>
-<p>一个512MB的内存条上的地址空间即物理地址空间是多大?</p>
-<p>一个单元一个字节,<span
-class="math inline">\(512MB=512*2^{10}KB=512*2^{20}B=2^{29}B\)</span>即物理地址空间编号范围为:<span
-class="math inline">\([0,2^{29})\)</span></p>
-<p>物理地址空间就是内存条上的地址空间数</p>
-<p>虚拟地址空间是指想要给用户造成的假象中,让用户感觉出来的内存大小,实际上是磁盘上的一个连续巨大数组</p>
-<blockquote>
-<p>还是以士兵守城举例,一共400个活人,每面墙上分100个士兵,不可能再多了,这就是物理地址空间</p>
-<p>但是士兵都站在角楼可以造成每面墙都有200个士兵的假象,这就是虚拟空间</p>
-</blockquote>
-<p>通常虚拟地址空间会比物理空间大,否则虚拟空间没有存在的意义</p>
-<blockquote>
-<p>绷不住了</p>
-<p><img
-src="https://raw.githubusercontent.com/DeutschBall/test/master/image-20220516204149979.png" /></p>
-</blockquote>
-<p>为什么不直接把物理空间做大?物理空间即内存条,相对磁盘贵得多.如果有钱自然可以整一个不用磁盘,只用内存(还涉及到断点是否能保存的问题)的计算机,现在对于私人电脑而言,比如联想拯救者y9000p2021h,显然不现实</p>
-<h3 id="数据对象和地址空间的关系">数据对象和地址空间的关系</h3>
-<p>数据对象就是存放在地址空间上的数据,其在地址空间中的位置或者说下标就是其属性</p>
-<p>比如一个char一个字节,存放在一个内存单元中,</p>
-<p>一个int四个i直接,存放在四个连续的内存单元中,</p>
-<p>每个数据对象都会有一个虚拟地址空间地址,当其所在进程被实际运行时,它有可能在物理空间中有一个物理空间地址</p>
-<h2 id="虚拟内存作为缓存工具">虚拟内存作为缓存工具</h2>
-<h3 id="分页">分页</h3>
-<p>虚拟空间比物理空间大,自然不能一股脑塞进物理空间里.</p>
-<p>应该是用到虚拟空间的某一块就从虚拟空间中把这一块搬到物理空间中</p>
-<blockquote>
-<p>这就好比一个有5个坑的厕所但是有20个人要扔炸弹,自然要挑最急或者最先排队的5个人去扔炸弹,20个人一起扔炸弹有很大可能把炸弹扔别人身上或者扔外边</p>
-</blockquote>
-<p>这里选5个人一组去扔炸弹就好比从虚拟空间中选出一部分块放到物理内存中接收CPU的访问</p>
-<blockquote>
-<p>为什么CPU不能直接去磁盘访问?</p>
-<p>这从量上举例</p>
-<p>就好比中国有13亿人口就要挖13个上厕所的坑,</p>
-<p>其一正常人不是每时每刻都在扔炸弹,就好比磁盘中的数据不是每时每刻都要被CPU访问</p>
-<p>其二建13亿个厕所走到路上得随处可见的坑(我密恐犯了),类比计算机中就需要从CPU到磁盘之间部署总线,磁盘一般比较大,比如1个T,那么地址总线宽度就得<span
-class="math inline">\(log_2 1T\)</span></p>
-<p>从质上举例子,内存速度远快于磁盘,</p>
-<p>CPU去访问内存,然后内存去访问磁盘,就好比师长向团长下达命令,团长去团里下命令,要找士兵许三多,</p>
-<p>但是CPU去访问磁盘就好比师长直接向师广大士兵下达命令,找许三多这个人.</p>
-</blockquote>
-<p>规范的术语:</p>
-<p>虚拟内存(Virtual memory,VM)</p>
-<p>物理内存分割成的块叫做物理页(Physical Page,PP)</p>
-<p>虚拟内存分割成的块叫做虚拟页(Virtual Page,VP)</p>
-<p>虚拟内存分割成块是因为物理内存放不下,那为什么物理内存也要分块?</p>
-<blockquote>
-<p>这就好比20个人去一个10个坑厕所扔炸弹,20个人里有10男10女,扔炸弹这种事做不到男女搭配干活不累,需要5个坑放在男厕所,5个坑放在女厕所,然后10男分两组去男厕扔炸弹,女同理</p>
-<p>都是人但是因为性别就得分开扔炸弹</p>
-<p>有些连续虚拟内存块就得分开了放到物理内存里</p>
-</blockquote>
-<p>虚拟内存中的一个虚拟页在被使用的时候要搬到物理内存中,复制到一个物理页上,</p>
-<p>用不到的虚拟页其对应的物理页有可能就被让给其他虚拟页使用</p>
-<p>可以说某一时刻一个正在被使用的物理页是一个虚拟页的快照,</p>
-<p>当然物理页可以修改,这会导致物理页和其对应的虚拟页内容有差异,这种情况下应该怎么办呢?当该物理页将要被让给其他虚拟页时需要将改动写回其对应的虚拟页</p>
-<h3 id="页属性">页属性</h3>
-<p>页属性:物理页和虚拟页有相同的大小<span
-class="math inline">\(P=2^p\)</span>字节</p>
-<p>由于物理地址空间比虚拟地址空间小,因此显然物理页数量比虚拟页数量少</p>
-<p>根据虚拟页是否被使用以及是否正在被使用,虚拟页可以分成三种</p>
-<figure>
-<img
-src="https://raw.githubusercontent.com/DeutschBall/test/master/image-20220516193505725.png"
-alt="image-20220516193505725" />
-<figcaption aria-hidden="true">image-20220516193505725</figcaption>
-</figure>
-<p>分配与否就是指该虚拟页是否存储了信息</p>
-<p>缓存与否就是该虚拟页是否被复制到物理页供CPU访问</p>
-<figure>
-<img
-src="https://raw.githubusercontent.com/DeutschBall/test/master/image-20220516193749579.png"
-alt="image-20220516193749579" />
-<figcaption aria-hidden="true">image-20220516193749579</figcaption>
-</figure>
-<blockquote>
-<p>什么是缓存?</p>
-<p>看电影的时候也会遇到"缓存"这个概念,缓存有点一劳永逸的概念,第一次加载需要花费一些时间,但是以后对相同内容的重复访问就快得多了</p>
-<p>什么叫"缓存在DRAM中",就是指虚拟页已经拷贝到内存上建立了物理页,方便CPU直接访问内存而不用与磁盘打交道</p>
-<p>因此内存条在存储系统中可以看成是CPU和磁盘之间的缓存器,就好比cache是CPU和磁盘之间的缓存器,只不过内存比cache大得多慢得多</p>
-</blockquote>
-<p>显然VP数量多与PP,VP的二进制地址编号更长</p>
-<h3 id="幼年的页表">幼年的页表</h3>
-<p>CPU或者说虚拟内存系统怎么知道它想要访问的虚拟页是否已经被拷贝到内存条上成为物理页了呢?</p>
-<blockquote>
-<p>这就好比班主任要约谈某个倒霉蛋,但是班主任怎么知道这个倒霉蛋有没有来学校呢?班主任会先看一下签到表判断一下倒霉蛋来没来,来了则直接约谈,没来则先从家里叫到学校然后再约谈</p>
-</blockquote>
-<p>让虚拟内存系统掌握目前有哪些虚拟页拷贝成了物理页,要在==主存上==放一个页表(Page
-Table,PT)</p>
-<blockquote>
-<p>为什么要放到主存上?</p>
-<p>还能放到哪里呢?CPU的寄存器里?磁盘里?</p>
-<p>寄存器稀松了了的几个,每一个最多存放一个64位数4字节,而一个页表表项数成千上万,每个表项都是以字节为单位.显然CPU寄存器放不开?</p>
-<p>放磁盘里那和CPU直接访问磁盘上的数据有啥区别?</p>
-<p>也只能放在内存里了</p>
-</blockquote>
-<p>页表项(PTE)数是根据虚拟内存确定的,虚拟页有几个,就有多少个页表项</p>
-<figure>
-<img
-src="https://raw.githubusercontent.com/DeutschBall/test/master/image-20220516194906654.png"
-alt="image-20220516194906654" />
-<figcaption aria-hidden="true">image-20220516194906654</figcaption>
-</figure>
-<p>页表项按照顺序表方式排列,下标从0到<code>虚拟页数-1</code>,与虚拟页一一对应</p>
-<p>有效位表明该虚拟页是否已经在物理内存中创建了物理页,</p>
-<p>页表项剩下的部分是物理页号,光知道一个虚拟页创建了一个物理页还不够,还得知道这个物理页在哪里</p>
-<blockquote>
-<p>这就好比20个爷们去只有5个坑的男厕扔炸弹,厕所所长为了方便惩罚扔不准炸弹的爷们,给五个坑标上0,1,2,3,4,然后让每个人扔炸弹的时候报告自己对哪个坑输出,</p>
-<p>然后厕所所长记录一张如厕表,<code>坑[0]=老八,坑[1]=张三...</code>就能根据坑号责任到人,</p>
-<p>如果1号坑的爷们占着坑不扔炸弹,所长就则给外面的人说1号坑闲置,来个爷们把上一个爷们给挤掉</p>
-<p>如果1号坑的爷们快速地扔完炸弹走了,所长就把1号坑标记为闲置状态</p>
-</blockquote>
-<p>之所以说"幼年的页表",是因为实际上的页表项目还要记录很多信息,这里只是最简化的页表</p>
-<h3 id="页命中">页命中</h3>
-<p>CPU想要访问某个虚拟地址,但是这个虚拟地址对应的页是否已经被缓存到内存中了呢?</p>
-<p>如果是则"命中"</p>
-<blockquote>
-<p>这就好比20个爷们去一个5坑男厕,一个找茬想让老八表演绝活,但是绝活只能靠在厕所中食用炸弹完成,于是找茬的去问所长,老八是否正在坑上,</p>
-<p>所长也挺好奇的,查了一下如厕表,发现<code>坑[0]=老八</code>,老八确实正在扔炸弹,这就命中了</p>
-<p>否则所长就要让外面的老八挤掉一个站着茅坑不扔炸弹的张三然后表演绝活</p>
-</blockquote>
-<p>在计算机上怎么判定是不是呢?</p>
-<figure>
-<img
-src="https://raw.githubusercontent.com/DeutschBall/test/master/image-20220516200840582.png"
-alt="image-20220516200840582" />
-<figcaption aria-hidden="true">image-20220516200840582</figcaption>
-</figure>
-<p>根据CPU给出的虚拟地址首先查虚拟页表,先看有效位,如果为1则命中,根据页表项后面的物理页号去物理内存中去访问物理页</p>
-<p>如果有效位为0则表明该虚拟地址对应的页还没有拷贝到物理内存里,触发缺页异常,这都是后话了</p>
-<blockquote>
-<p>虚拟地址和虚拟页的关系?</p>
-<p>虚拟页是一个虚拟单元集合,一个虚拟页集合了一些连续的虚拟单元,每个虚拟单元都有一个虚拟地址</p>
-<p>虚拟页的地址就是第一个虚拟单元的虚拟地址</p>
-<p>因此给定一个虚拟地址查页表的时候应该是查询该虚拟地址是否属于某个虚拟页的<strong>辖区</strong></p>
-</blockquote>
-<h3 id="缺页">缺页</h3>
-<p>没有命中的情况就是缺页</p>
-<p><strong>什么情况下判定为缺页?</strong></p>
-<figure>
-<img
-src="https://raw.githubusercontent.com/DeutschBall/test/master/image-20220516201903715.png"
-alt="image-20220516201903715" />
-<figcaption aria-hidden="true">image-20220516201903715</figcaption>
-</figure>
-<p>cpu指定的虚拟地址查页表后发现有效位为0,立刻引发缺页中断</p>
-<p><strong>缺页了怎么整才能让它不缺?</strong></p>
-<p>我原来认为缺页了CPU就直接越俎代庖地去访问磁盘了,这经过前文的学习显然是想当然</p>
-<p>缺页之后选择一个"不是很重要"的物理页(比如PP3)给他扬了,修改指向该物理页PP3的页表项PTE4,有效位置0,</p>
-<blockquote>
-<p>此举的目的是当先前的虚拟页VP4再次使用时,需要重新拷贝到物理页.如果此时不即使修改PTE4的有效位则再次使用VP4时一查表,发现已经缓存好了,直接访问PP3了,可是PP3实际上是VP3的拷贝</p>
-</blockquote>
-<blockquote>
-<p>这里"选择一个不是很重要的物理页"涉及到页面调度算法,这是另一本黑叔叔,&lt;<现代操作系统>&gt;中的内容</p>
-</blockquote>
-<p>然后用需要用到的虚拟页VP3拷贝到该物理页PP3位置,挤掉VP4,</p>
-<p>修改对应的页表项PP4,有效位
-置1然后物理页表地址写上刚才拷贝到的物理页的地址PP3</p>
-<figure>
-<img
-src="https://raw.githubusercontent.com/DeutschBall/test/master/image-20220516202424662.png"
-alt="image-20220516202424662" />
-<figcaption aria-hidden="true">image-20220516202424662</figcaption>
-</figure>
-<p>都改完之后,重新执行刚才的指令,此时虚拟地址就已经被缓存了,不会再发生缺页了</p>
-<p>一些规范术语:</p>
-<p>交换或者页面调度:再内存和磁盘之间传送页</p>
-<p>页面调入或者磁盘换入,页从磁盘传送到内存,方向都是相对于内存而言的,</p>
-<blockquote>
-<p>方向总是相对于更靠近CPU的器件而言的</p>
-</blockquote>
-<p>按需页面调度:只有不得不进行页面调度即发生了缺页时,才进行页面调度的调度方式</p>
-<blockquote>
-<p>现代操作系统一般使用按需页面调度</p>
-</blockquote>
-<h2 id="虚拟内存作为内存管理工具">虚拟内存作为内存管理工具</h2>
-<p>每个进程都有自己独立的==虚拟==地址空间,注意不是物理地址空间</p>
-<p>这就要求每个进程都有独立的页表</p>
-<p>物理空间只有一个,就是内存条,或者说主存</p>
-<p>进程的虚拟地址空间看似是连续地开了一大片,实际上有可能在物理内存上东一块西一块.</p>
-<p>不同的进程可以有共享的物理页,这时动态库的物质基础</p>
-<figure>
-<img
-src="https://raw.githubusercontent.com/DeutschBall/test/master/image-20220516205620915.png"
-alt="image-20220516205620915" />
-<figcaption aria-hidden="true">image-20220516205620915</figcaption>
-</figure>
-<blockquote>
-<p>这里有一个问题,如果两个进程的代码段都是从虚拟地址的<code>0x400000</code>开始,岂不是对应了磁盘上的同一虚拟页?</p>
-<p>==可以提出一种猜想==</p>
-<p>进程的虚拟地址空间是要小于磁盘上全部的虚拟地址空间的</p>
-<p>进程的虚拟地址并不是磁盘上的虚拟地址空间的下标,</p>
-<p>而是相对于磁盘上几个连续的页面组成的一个子虚拟地址空间而言的</p>
-<p>该子虚拟空间从0开始重新编号</p>
-</blockquote>
-<h2 id="虚拟内存作为内存保护工具">虚拟内存作为内存保护工具</h2>
-<p>啥是内存保护?</p>
-<p>比如用户不允许修改内核的数据</p>
-<p>只读数据无法被修改,代码段也不许被修改</p>
-<p>不允许修改其他内存的虚拟地址空间</p>
-<blockquote>
-<p>进程的虚拟地址空间独立,很自然的就保证了进程不允许修改其他内存的虚拟地址空间,</p>
-<p>这就好比让两个在水上步行球中的人打架,两个球距离最近也就是相切,不会相互嵌入</p>
-<p>这个球就好比进程独立的虚拟地址空间</p>
-</blockquote>
-<p>...</p>
-<p>幼年的页表成熟了一些,成了带许可位的页表</p>
-<figure>
-<img
-src="https://raw.githubusercontent.com/DeutschBall/test/master/image-20220516210523521.png"
-alt="image-20220516210523521" />
-<figcaption aria-hidden="true">image-20220516210523521</figcaption>
-</figure>
-<p>在页表项中加上许可位,就可以限制进程对该页读写访问,</p>
-<p>sup许可位限制普通用户和管理员的区别</p>
-<p>违反这些许可条件的指令将会导致段错误</p>
-<h2 id="地址翻译-1">地址翻译</h2>
-<p>符号约定</p>
-<figure>
-<img
-src="https://raw.githubusercontent.com/DeutschBall/test/master/image-20220516225933019.png"
-alt="image-20220516225933019" />
-<figcaption aria-hidden="true">image-20220516225933019</figcaption>
-</figure>
-<p>地址翻译就是从虚拟地址计算出物理地址的过程</p>
-<figure>
-<img
-src="https://raw.githubusercontent.com/DeutschBall/test/master/image-20220516214911937.png"
-alt="image-20220516214911937" />
-<figcaption aria-hidden="true">image-20220516214911937</figcaption>
-</figure>
-<blockquote>
-<p>咱就是说这个MAP函数这么抽象有必要这样写一下吗</p>
-</blockquote>
-<p>这个映射是在MMU中完成的</p>
-<h3 id="最简单的地址翻译">最简单的地址翻译</h3>
-<figure>
-<img
-src="https://raw.githubusercontent.com/DeutschBall/test/master/image-20220516220103992.png"
-alt="image-20220516220103992" />
-<figcaption aria-hidden="true">image-20220516220103992</figcaption>
-</figure>
-<p>每个进程可以有自己的独立页表,需要一个页表基址寄存器指向页表基地址,作用类似于段寄存器</p>
-<blockquote>
-<p>一个精确到存储单元的虚拟地址分成虚拟页号和虚拟页偏移量两部分</p>
-<p>确定到页用到页号,确定到页上的一个单元需要页偏移量</p>
-<p>由于物理页大小和虚拟页大小相同,因此物理页偏移量和虚拟页偏移量是相同的</p>
-<p>虚拟页数量一般会大于物理页数量,因此虚拟页号长度一般长于物理页号,即<span
-class="math inline">\(n&gt;m\)</span></p>
-</blockquote>
-<p>翻译过程:</p>
-<p>1.CPU指定一个虚拟地址给MMU</p>
-<p>2.MMU将该虚拟地址的<span
-class="math inline">\([p,n-1]\)</span>位作为虚拟页号去查页表,剩下<span
-class="math inline">\([0,p-1]\)</span>位作为页偏移量</p>
-<p>3.虚拟页号查页表对应项,如果有效位是0则缺页中断,否则命中,如果命中则:</p>
-<p>4.从页表中读取物理页号<span
-class="math inline">\([p,m-1]\)</span>,和页偏移量<span
-class="math inline">\([0,p-1]\)</span>拼成物理地址</p>
-<p>5.CPU将该物理地址放到地址总线上,准备访问内存</p>
-<h3 id="考虑高速缓存的地址翻译">考虑高速缓存的地址翻译</h3>
-<p>原来的地址翻译,CPU直接访问内存,现在在CPU和内存之间再加一级缓存,L1高速缓存</p>
-<figure>
-<img
-src="https://raw.githubusercontent.com/DeutschBall/test/master/image-20220516221624510.png"
-alt="image-20220516221624510" />
-<figcaption aria-hidden="true">image-20220516221624510</figcaption>
-</figure>
-<p>处理器只能发出虚拟地址,MMU翻译成物理地址,处理器不能直接发出物理地址</p>
-<p>页表还是存放在内存中,高速缓存存放的是很少一部分的<strong>页表项目</strong>还有<strong>数据</strong></p>
-<p>1.处理器发出虚拟地址VA之后进入MMU进行翻译,得到一个虚拟页号</p>
-<p>2.如果没有L1则下一步要根据虚拟页号,到内存中访问页表了,而现在有L1,要先检查L1中有没有该虚拟页号对应的页表条目.</p>
-<p>3.如果L1命中,并且对应页表条目有效位为1,则不再访问内存,直接从L1中取出该页表条目的<strong>物理页号</strong>给MMU.</p>
-<p>4.如果L1不命中,则还需访问内存,从真正的页表中找到该虚拟页号对应的页表条目,然后根据有效位判断是否缺页,</p>
-<p>如果内存也命中即有效位为1则不缺页,将该<strong>页表条目</strong>返回L1,从L1中挤出一条相对不重要的记录.</p>
-<p>然后MMU再访问L1获得页表条目的物理页号,(这次L1必然命中),然后拼成物理地址</p>
-<p>如果发生缺页,也是内存和磁盘之间页的传递,与L1没有关系,无需讨论</p>
-<p><strong>然后CPU访问物理地址也因L1有所变化</strong></p>
-<p>在没有L1时,MMU拿到物理地址之后会加到地址总线上,但是现在MMU拿到物理地址后还是会先查L1,如果L1命中,则直接取出数据通过内部总线传递给CPU,免去了访问内存和外总线的过程</p>
-<p>当L1不命中时才会查内存上的物理地址,然后取出其上的地址,然后在L1中挤掉一个相对不重要的记录,存入该物理地址及其数据的键值对</p>
-<h3 id="tlb加速翻译的地址翻译">TLB加速翻译的地址翻译</h3>
-<p>TLB:翻译后备缓冲器(Translation Lookaside Buffer)</p>
-<p>这个玩意儿是加速翻译的,啥意思呢.</p>
-<blockquote>
-<p>如果五秒前我问了别人,"你好"用英语怎么说并获得了回答,</p>
-<p>五秒后我要对一个米国人打招呼,这时需要翻译</p>
-<p>但凡比鱼聪明点的人都还记得"你好"用英语怎么说,这就是TLB命中</p>
-<p>但是如果五秒前我尝试寄了十个甚至更多的英语单词,其中即使包括"你好",五秒后我也不一定能想起来,这就是后来的翻译挤掉了前面翻译的缓存,然后TLB不命中</p>
-<p>此时想不起来就应该再问懂哥儿,"你好"用英语怎么说,然后记住,方便奉承下一个米国人用,这就是TLB不命中之后干的事</p>
-</blockquote>
-<figure>
-<img
-src="https://raw.githubusercontent.com/DeutschBall/test/master/image-20220516224400351.png"
-alt="image-20220516224400351" />
-<figcaption aria-hidden="true">image-20220516224400351</figcaption>
-</figure>
-<p>处理器指定一个虚拟地址交给MMU,MMU首先不会尝试查L1或者内存中的页表进行翻译,而是首先访问TLB,看看刚才是不是已经翻译过并且还记得,如果命中则直接用刚才记住的翻译得到物理地址</p>
-<p>如果TLB没有命中则老老实实去查高速缓存页表项,要是再不命中则老老实实去查内存页表,要是还不命中则缺页</p>
-<p>可气的是,总有一伙子人能设计地这些缓冲几乎百发百中</p>
-<h3 id="手工模拟地址翻译">手工模拟地址翻译</h3>
-<h4 id="题目环境">题目环境</h4>
-<p>考虑上TLB,L1缓存,手工模拟一个地址翻译过程</p>
-<p>系统参数:</p>
-<figure>
-<img
-src="https://raw.githubusercontent.com/DeutschBall/test/master/image-20220516232636330.png"
-alt="image-20220516232636330" />
-<figcaption aria-hidden="true">image-20220516232636330</figcaption>
-</figure>
-<p>这里几路相联,几个组实际上就是将线性的缓存器改成了阵列,按照行列存储</p>
-<blockquote>
-<p>每个页面大小<span
-class="math inline">\(64Bytes=2^6Bytes\)</span>,一个内存单元<span
-class="math inline">\(1Bytes\)</span>,因此一个页管理<span
-class="math inline">\(2^6\)</span>个地址,页内偏移量就得是一个6位二进制数,剩下的高位才是页号</p>
-<figure>
-<img
-src="https://raw.githubusercontent.com/DeutschBall/test/master/image-20220516232919987.png"
-alt="image-20220516232919987" />
-<figcaption aria-hidden="true">image-20220516232919987</figcaption>
-</figure>
-</blockquote>
-<blockquote>
-<p>TLB中缓存的是刚才查过的翻译,可以认为是<code>[VPN,PPN]</code>键值对,MMU给出一个VPN,如果TLB中有键为该VPN的键值对,则TLB给出PPN值,此时TLB命中,</p>
-<p>否则TLB不命中则需要查L1或者内存页表进行地址翻译</p>
-<p>这里给出了一个假定的TLB缓存情况</p>
-<figure>
-<img
-src="https://raw.githubusercontent.com/DeutschBall/test/master/image-20220516233348777.png"
-alt="image-20220516233348777" />
-<figcaption aria-hidden="true">image-20220516233348777</figcaption>
-</figure>
-</blockquote>
-<blockquote>
-<p>页表是单级结构,这里给出了假定的页表的情况</p>
-<figure>
-<img
-src="https://raw.githubusercontent.com/DeutschBall/test/master/image-20220516233340796.png"
-alt="image-20220516233340796" />
-<figcaption aria-hidden="true">image-20220516233340796</figcaption>
-</figure>
-</blockquote>
-<blockquote>
-<p>高速缓存L1通过物理地址字段进行寻址,这里给出了假定的缓存情况</p>
-<figure>
-<img
-src="https://raw.githubusercontent.com/DeutschBall/test/master/image-20220516233523416.png"
-alt="image-20220516233523416" />
-<figcaption aria-hidden="true">image-20220516233523416</figcaption>
-</figure>
-</blockquote>
-<h4
-id="将虚拟地址0x03d7翻译成物理地址">将虚拟地址<code>0x03d7</code>翻译成物理地址</h4>
-<h5 id="xa虚拟地址格式">0xA虚拟地址格式</h5>
-<figure>
-<img
-src="https://raw.githubusercontent.com/DeutschBall/test/master/image-20220516235021410.png"
-alt="image-20220516235021410" />
-<figcaption aria-hidden="true">image-20220516235021410</figcaption>
-</figure>
-<h5 id="xb地址翻译">0xB地址翻译</h5>
-<figure>
-<img
-src="https://raw.githubusercontent.com/DeutschBall/test/master/image-20220516235143678.png"
-alt="image-20220516235143678" />
-<figcaption aria-hidden="true">image-20220516235143678</figcaption>
-</figure>
-<p>TLB命中,物理页号<code>0x0D</code>拼接页偏移得到物理地址</p>
-<figure>
-<img
-src="https://raw.githubusercontent.com/DeutschBall/test/master/image-20220516235504854.png"
-alt="image-20220516235504854" />
-<figcaption aria-hidden="true">image-20220516235504854</figcaption>
-</figure>
-<p>只要是TLB中能找到的记录,都不会缺页,这是因为,最近的记忆会挤掉老的记忆,TLB中只要能找到,说明最近被翻译过</p>
-<table>
-<thead>
-<tr>
-<th>参数</th>
-<th>值</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td>VPN</td>
-<td><code>0xf</code></td>
-</tr>
-<tr>
-<td>TLB索引(TLBi)</td>
-<td><code>0x3</code></td>
-</tr>
-<tr>
-<td>TLB标记(TLBt)</td>
-<td><code>0x3</code></td>
-</tr>
-<tr>
-<td>TLB命中?</td>
-<td>是</td>
-</tr>
-<tr>
-<td>缺页</td>
-<td>否</td>
-</tr>
-<tr>
-<td>PPN</td>
-<td><code>0xd</code></td>
-</tr>
-</tbody>
-</table>
-<h5 id="xc物理地址格式">0xC物理地址格式</h5>
-<table>
-<colgroup>
-<col style="width: 8%" />
-<col style="width: 8%" />
-<col style="width: 8%" />
-<col style="width: 8%" />
-<col style="width: 8%" />
-<col style="width: 8%" />
-<col style="width: 8%" />
-<col style="width: 8%" />
-<col style="width: 8%" />
-<col style="width: 8%" />
-<col style="width: 8%" />
-<col style="width: 8%" />
-</colgroup>
-<thead>
-<tr>
-<th>0</th>
-<th>0</th>
-<th>1</th>
-<th>1</th>
-<th>0</th>
-<th>1</th>
-<th>0</th>
-<th>1</th>
-<th>0</th>
-<th>1</th>
-<th>1</th>
-<th>1</th>
-</tr>
-</thead>
-<tbody>
-</tbody>
-</table>
-<h5 id="xd物理内存引用">0xD物理内存引用</h5>
-<figure>
-<img
-src="https://raw.githubusercontent.com/DeutschBall/test/master/image-20220517000150935.png"
-alt="image-20220517000150935" />
-<figcaption aria-hidden="true">image-20220517000150935</figcaption>
-</figure>
-<figure>
-<img
-src="https://raw.githubusercontent.com/DeutschBall/test/master/image-20220517000501697.png"
-alt="image-20220517000501697" />
-<figcaption aria-hidden="true">image-20220517000501697</figcaption>
-</figure>
-<p>缓存命中</p>
-<table>
-<thead>
-<tr>
-<th>参数</th>
-<th>值</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td>字节偏移CO</td>
-<td><code>0x3</code></td>
-</tr>
-<tr>
-<td>缓存索引CI</td>
-<td><code>0x5</code></td>
-</tr>
-<tr>
-<td>缓存标记CT</td>
-<td><code>0xD</code></td>
-</tr>
-<tr>
-<td>缓存命中</td>
-<td>是</td>
-</tr>
-<tr>
-<td>返回的缓存字节</td>
-<td><code>0x1D</code></td>
-</tr>
-</tbody>
-</table>
-<h3 id="多级页表的地址翻译">多级页表的地址翻译</h3>
-<h4 id="以两级页表为例">以两级页表为例</h4>
-<p>单级页表
-的时候,一条页表项对应一个虚拟页,一张页表就可以管理整个虚拟内存的页</p>
-<p>如果虚拟地址空间更大,页更多,则页表项目更多,而页表也是存放在内存中的,如果页表也大到内存装不下该当如何?</p>
-<blockquote>
-<p>这就好比刚上大学的时候所有的<strong>学习资料</strong>都可以放在一个文件夹里</p>
-<p>但是日积月累,学习资料文件夹变得臃肿,想要找到一个文件就像大海捞针</p>
-<p>因此应该建立子文件夹,比如<code>/reverse</code>,<code>/pwn</code>,<code>/web</code>等等</p>
-<p>时间长了每个子文件夹又会臃肿,又可以根据时间或者难易程度建立子子文件夹</p>
-</blockquote>
-<p>高级页表的表项是低级页表的索引</p>
-<figure>
-<img
-src="https://raw.githubusercontent.com/DeutschBall/test/master/image-20220516231018326.png"
-alt="image-20220516231018326" />
-<figcaption aria-hidden="true">image-20220516231018326</figcaption>
-</figure>
-<p>这里二级页表和前面的单级页表作用类似,直接索引虚拟页,但是也有些许区别</p>
-<blockquote>
-<p>单级页表结构中只有一个页表,第i个页表项就指向第i个虚拟页</p>
-</blockquote>
-<p>这里二级页表有多个,每个二级页表只对应虚拟内存中的连续的1024个虚拟页,二级页表的表项都是从0开始编号的但是虚拟内存中的页是统一编号的</p>
-<p>一级页表的作用是索引二级页表</p>
-<p>一级页表的表项,其有效位标志着对应二级页表对应的1024个虚拟页都没有被缓存过</p>
-<blockquote>
-<p>但凡这1024个虚拟页中有一个被缓存,其在二级页表中的表项的有效位为1,则该二级页表对应一级页表中的表项有效位就得是1</p>
-</blockquote>
-<p>只有一级页表是常驻内存的,只有有效位为1表项对应的二级页表才会被搬进内存,不用的时候还得被挤出去</p>
-<h4 id="k级页表的地址翻译">k级页表的地址翻译</h4>
-<figure>
-<img
-src="https://raw.githubusercontent.com/DeutschBall/test/master/image-20220516231949258.png"
-alt="image-20220516231949258" />
-<figcaption aria-hidden="true">image-20220516231949258</figcaption>
-</figure>
-<p>一级页表表项中存放的是二级页表的索引,二级页表表项中存放的是三级页表的索引,以此类推,直到最低级页表,其表项才是物理地址,</p>
-<p>从高级页表一直索引到低级页表的过程中,但凡有一个页表项的有效位为0则引发缺页</p>
-<p>缺页也是逐级修复的,</p>
-<p>只有最低级页表项才存放实际的物理页号,然后物理页号和页偏移拼起来组成物理地址</p>
-<p>可气的是,虽然有这么多级,但是总有人能设计得它的速度能和单级页表媲美</p>
-<h3
-id="英特尔酷睿i7linux内存系统地址翻译">英特尔酷睿i7/Linux内存系统地址翻译</h3>
-<p>多级页表结构,每个进程允许有自己私有的页表层次结构</p>
-<p>页大小采用4KB,四级页表结构</p>
-<p>这里第一次见到"CR3控制寄存器",其作用是指向一级页表的起始位置,CR3是每个进程上下文的一部分,每个进程都有自己独立的页表结构,执行A进程时CR3就应该指向A进程的一级页表起始位置</p>
-<blockquote>
-<p>一级页表可以有多个吗?</p>
-<p>还是说只有一个一级页表,管理所有的二级页表,然后进程从二级页表开始有自己的独立地址空间</p>
-</blockquote>
-<figure>
-<img
-src="https://raw.githubusercontent.com/DeutschBall/test/master/image-20220517073701065.png"
-alt="image-20220517073701065" />
-<figcaption aria-hidden="true">image-20220517073701065</figcaption>
-</figure>
-<p>高级页表(除了直接管理虚拟内存的最低级页表),其结构如下:</p>
-<figure>
-<img
-src="https://raw.githubusercontent.com/DeutschBall/test/master/image-20220517073820824.png"
-alt="image-20220517073820824" />
-<figcaption aria-hidden="true">image-20220517073820824</figcaption>
-</figure>
-<p>最低级页表结构如下</p>
-<figure>
-<img
-src="https://raw.githubusercontent.com/DeutschBall/test/master/image-20220517073849861.png"
-alt="image-20220517073849861" />
-<figcaption aria-hidden="true">image-20220517073849861</figcaption>
-</figure>
-<h2 id="linux虚拟内存系统">Linux虚拟内存系统</h2>
-<p>进程的虚拟内存</p>
-<figure>
-<img
-src="https://raw.githubusercontent.com/DeutschBall/test/master/image-20220517074643634.png"
-alt="image-20220517074643634" />
-<figcaption aria-hidden="true">image-20220517074643634</figcaption>
-</figure>
-<p>进程虚拟内存部分(用户栈向下)是进程的独立的虚拟地址空间,</p>
-<p>内核虚拟空间被所有进程共享,共享的实现是通过页表的一些表项指向相同的物理地址,然后页表项上标明内核虚拟内存只读</p>
-<p>共享库等技术的实现也是基于虚拟内存的,但都是后话了</p>
-<h3 id="linux虚拟内存区域组成">Linux虚拟内存区域组成</h3>
-<p>虚拟内存分段,被分段的虚拟内存区域就一定已经被分配了</p>
-<p>只要是存在的虚拟页就一定属于某个段,</p>
-<p>未使用的虚拟页不会被记录,没有页表指向该位置</p>
-<figure>
-<img
-src="https://raw.githubusercontent.com/DeutschBall/test/master/image-20220517080056415.png"
-alt="image-20220517080056415" />
-<figcaption aria-hidden="true">image-20220517080056415</figcaption>
-</figure>
-<p><code>task_struct</code>指向内核运行该进程的所有信息</p>
-<blockquote>
-<p>PID,指向用户栈的指针rsp,可执行目标文件名字,程序计数器rip</p>
-</blockquote>
-<p><code>mm_struct</code>描述虚拟内存的当前状态,其中的两个字段<code>pgd,mmap</code></p>
-<p><code>pgd</code>指向一级页表的基址</p>
-<p><code>mmap</code>指向<code>vm_area_structs</code>链表,该链表的每一个链表项都描述了当前虚拟内存地址空间的一个段.</p>
-<blockquote>
-<p>每个<code>vm_area_struct</code>链表项都有五部分组成</p>
-<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">vm_start:段起始地址</span><br><span class="line">vm_end:段结束地址</span><br><span class="line">vm_prot:段的读写权限</span><br><span class="line">vm_flags:段共享或者进程私有标志等信息</span><br><span class="line">vm_next:指向下一个段</span><br></pre></td></tr></table></figure>
-</blockquote>
-<p>当该进程被执行的时候,pgd会被放到<code>CR3</code>寄存器中</p>
-<h3 id="linux缺页异常处理">Linux缺页异常处理</h3>
-<figure>
-<img
-src="https://raw.githubusercontent.com/DeutschBall/test/master/image-20220517081116670.png"
-alt="image-20220517081116670" />
-<figcaption aria-hidden="true">image-20220517081116670</figcaption>
-</figure>
-<p>CPU指定一个虚拟地址,然后去<code>vm_area_struct</code>各个表项去查该虚拟地址是否属于<span
-class="math inline">\([vm_{start},vm_{end}]\)</span>之间,如果各个链表项都不包含该地址则说明该地址没有被分配,发生段错误</p>
-<p>如果没有发生段错误则检查该内存访问的性质,是读还是写,如果对只读区域进行写入则报告保护异常</p>
-<p>上述两种情况都通过了则表明这是真的缺页了,使用某种页调度算法牺牲一个物理页,用这个缺页挤掉</p>
-<h2 id="内存映射">内存映射</h2>
-<p>啥是内存映射呢?</p>
-<p>以共享虚拟内存举例</p>
-<p>两个进程的页表相互独立,但是可以指向物理内存中的同一区域,比如共享库</p>
-<p><strong>通过将一个虚拟内存区与磁盘上一个对象关联起来,以初始化这个虚拟内存区域的内容,这个过程称为内存映射</strong></p>
-<h3 id="共享对象">共享对象</h3>
-<p>如果同时打开多个终端bash,它们会共享同一块只读代码区.多个程序调用库函数printf,但是实际最后调用到的printf只在物理内存中唯一存在</p>
-<p>通过一个例子说明共享对象的过程</p>
-<p>一开始时共享对象也只是虚拟内存上的一些页或者说段,尚未被任何进程映射.</p>
-<p>现在进程1将共享对象映射到自己虚拟内存中的某个位置,并在物理内存中建立了物理页</p>
-<figure>
-<img
-src="https://raw.githubusercontent.com/DeutschBall/test/master/image-20220517083739843.png"
-alt="image-20220517083739843" />
-<figcaption aria-hidden="true">image-20220517083739843</figcaption>
-</figure>
-<p>现在进程2也想映射共享对象,内核判断进程1已经映射过该共享对象,即共享对象已经存在于物理内存中,那么只需让进程2的相关页表项指向该共享对象在内存中快照的物理页</p>
-<figure>
-<img
-src="https://raw.githubusercontent.com/DeutschBall/test/master/image-20220517084031704.png"
-alt="image-20220517084031704" />
-<figcaption aria-hidden="true">image-20220517084031704</figcaption>
-</figure>
-<p><strong>私有写时复制对象</strong></p>
-<p>什么时候一个对象不得不每个进程分别映射到不同的物理内存了,什么时候才会真的在物理内存上开两个对象的空间</p>
-<p>在两个进程都没有尝试向私有对象写东西时,私有对象表现得和共享对象没有区别,物理内存中也只存在一份拷贝,因为这足以满足读的要求</p>
-<figure>
-<img
-src="https://raw.githubusercontent.com/DeutschBall/test/master/image-20220517084442357.png"
-alt="image-20220517084442357" />
-<figcaption aria-hidden="true">image-20220517084442357</figcaption>
-</figure>
-<p>当其中一个进程试图写私有对象时,由于要保证进程的虚拟地址空间独立,因此不得不将该私有对象做一个拷贝,在内存中存放两个私有对象,两个进程的页表项目各自挑一个指向</p>
-<figure>
-<img
-src="https://raw.githubusercontent.com/DeutschBall/test/master/image-20220517084658157.png"
-alt="image-20220517084658157" />
-<figcaption aria-hidden="true">image-20220517084658157</figcaption>
-</figure>
-<h3 id="fork函数">fork函数</h3>
-<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">pid_t fork(void);//子进程返回0,父进程返回子进程的pid,出错返回-1</span><br></pre></td></tr></table></figure>
-<blockquote>
-<p>1.子进程获得一个pid</p>
-<p>2.子进程得到与父进程<strong>一模一样</strong>的<strong>用户级</strong>虚拟地址空间<strong>拷贝</strong></p>
-<blockquote>
-<p>用户级虚拟地址空间包括</p>
-<p>代码段</p>
-<p>数据段</p>
-<p>堆</p>
-<p>共享库</p>
-<p>用户栈</p>
-</blockquote>
-<p>3.子进程获得与父进程任何打开的文件描述符的副本</p>
-</blockquote>
-<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;unistd.h&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;stdio.h&gt;</span></span></span><br><span class="line"><span class="type">int</span> global=<span class="number">10</span>;<span class="comment">//观察父子进程是否有相同的.data节拷贝</span></span><br><span class="line"><span class="type">int</span> <span class="title function_">main</span><span class="params">()</span>&#123;</span><br><span class="line">    <span class="type">int</span> local=<span class="number">20</span>;<span class="comment">//观察父子进程是否有相同的栈区拷贝</span></span><br><span class="line">    <span class="built_in">printf</span>(<span class="string">&quot;actived\n&quot;</span>);<span class="comment">//观察fork前的部分是否会被子进程执行</span></span><br><span class="line">    <span class="type">pid_t</span> pid=fork();</span><br><span class="line">    </span><br><span class="line">    <span class="keyword">if</span>(pid==<span class="number">0</span>)&#123;<span class="comment">//根据pid判断是父进程还是子进程,fork对父进程返回子进程的pid,不为0,如果为0则说明当前进程为子进程</span></span><br><span class="line">        <span class="built_in">printf</span>(<span class="string">&quot;child process,%d,%d\n&quot;</span>,global++,local++);<span class="comment">//打印后自增的目的是观察父子进程是否有独立的虚拟地址空间</span></span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">else</span>&#123;</span><br><span class="line">        <span class="built_in">printf</span>(<span class="string">&quot;father process,%d,%d\n&quot;</span>,global++,local++);</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">return</span> <span class="number">0</span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-<p>运行结果:</p>
-<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">actived					<span class="comment">#fork函数前只有父进程,fork之后才会两个进程都执行</span></span><br><span class="line">father process,10,20	 </span><br><span class="line">child process,10,20		<span class="comment">#子进程获得父进程虚拟地址空间的拷贝,但是两者独立,父进程地址空间内的变量自增不会影响子进程的地址空间</span></span><br></pre></td></tr></table></figure>
-<p>子进程和父进程都打印到控制台表明两者共享文件描述符1(标准输出)</p>
-<figure>
-<img
-src="https://raw.githubusercontent.com/DeutschBall/test/master/image-20220517091716338.png"
-alt="image-20220517091716338" />
-<figcaption aria-hidden="true">image-20220517091716338</figcaption>
-</figure>
-<h2 id="内存动态分配">内存动态分配</h2>
-<p>动态内存分配器(dynamic memory allocator),维护进程的堆区</p>
-<figure>
-<img
-src="https://raw.githubusercontent.com/DeutschBall/test/master/image-20220517093706745.png"
-alt="image-20220517093706745" />
-<figcaption aria-hidden="true">image-20220517093706745</figcaption>
-</figure>
-<p>堆顶指针为brk,堆的生长方向与栈相反,堆从低地址向高地址生长,栈从高地址向低地址生长</p>
-<p>都是小端模式</p>
-<p>分配器将堆看成一组大小不同的块集合,每个块是一个连续的虚拟内存片</p>
-<p>已分配的块就是正在被使用的块,空闲块就是尚未被使用的块,可以被分配</p>
-<p>根据<strong>谁来释放分配块</strong>,分配器可以分成两种</p>
-<p><strong>显式分配器</strong>:比如C语言的malloc和free,C++的new和delete,要求程序员手动释放分配块</p>
-<p><strong>隐式分配器</strong>:分配器自动回收不再使用的分配块,因此隐式分配器又叫垃圾收集器,比如Java中的分配器</p>
-<p>关于分配器的实现,这个实验是一定要做到的,但不是现在</p>
-<h2 id="习题订正">习题订正</h2>
-<h3 id="section">1.</h3>
-<figure>
-<img
-src="https://raw.githubusercontent.com/DeutschBall/test/master/image-20220612094124007.png"
-alt="image-20220612094124007" />
-<figcaption aria-hidden="true">image-20220612094124007</figcaption>
-</figure>
-<p>这个题的问法太屑了,相当于给你说已知a是b他老子,问a他爹是谁</p>
-<p>需要注意的是逻辑地址和物理地址是啥</p>
-<p>逻辑地址就是磁盘交换分区,虚拟地址空间中的一个地址,</p>
-<p>物理地址就是内存条子,物理地址空间中的一个地址</p>
-<p>每个.c源程序编译成.o可重定位目标文件之后,其虚拟地址空间都是从0开始编址</p>
-<p>然后多个.o(也有可能有.a静态库文件)链接成.out可执行目标文件,其虚拟地址空间还是从0开始编址的,比如<span
-class="math inline">\([0,0x100)\)</span></p>
-<p>在装载时(shell调用execve函数将进程加载进入物理地址空间),有可能将该.out虚拟地址空间的0号字节装载进入内存条子这个物理地址空间的0x100处,那么该进程对应的物理地址空间就可能是<span
-class="math inline">\([0x100,0x200)\)</span>(不考虑分页),如果考虑分页,那么虚拟地址空间可能被划分成多个虚拟页,在用到时被拷贝到一个物理页.</p>
-<p>综上,形成逻辑地址的阶段是链接阶段</p>
-<p>翻译成物理地址的阶段是装载</p>
-<h3 id="section-1">4.</h3>
-<figure>
-<img
-src="https://raw.githubusercontent.com/DeutschBall/test/master/image-20220612095053544.png"
-alt="image-20220612095053544" />
-<figcaption aria-hidden="true">image-20220612095053544</figcaption>
-</figure>
-<p>本题我选的B,纯粹是瞎选,选的时候就知道必定不对</p>
-<p>出错是因为没有重视覆盖与交换技术,在此做一个复习</p>
-<p>覆盖:</p>
-<figure>
-<img
-src="https://raw.githubusercontent.com/DeutschBall/test/master/image-20220612095244447.png"
-alt="image-20220612095244447" />
-<figcaption aria-hidden="true">image-20220612095244447</figcaption>
-</figure>
-<p>铁打的固定区,流水的覆盖区,用到谁就先把覆盖区存一下,然后把需要的从外存中拎出来,直接盖在先前的覆盖区上</p>
-<p>算法竞赛中使用滚动数组,感觉也是覆盖的思想</p>
-<p>交换:</p>
-<figure>
-<img
-src="https://raw.githubusercontent.com/DeutschBall/test/master/image-20220612095647336.png"
-alt="image-20220612095647336" />
-<figcaption aria-hidden="true">image-20220612095647336</figcaption>
-</figure>
-<p>在CSAPP上我们学过虚拟内存,缺页时发生替换的思想就是交换思想</p>
-<p>这样看覆盖和交换都是新的替换旧的,好像说的是一个事情,但是区别:</p>
-<figure>
-<img
-src="https://raw.githubusercontent.com/DeutschBall/test/master/image-20220612095842607.png"
-alt="image-20220612095842607" />
-<figcaption aria-hidden="true">image-20220612095842607</figcaption>
-</figure>
-<p>只有虚拟内存技术可以物理上拓展主存容量,而覆盖和交换技术在虚存之前就存在了</p>
-<p>覆盖和交换还是在有限大的内存条子上做文章,只能通过扔掉当前用不到的,实现节省主存空间的作用</p>
-<h3 id="section-2">9.</h3>
-<figure>
-<img
-src="https://raw.githubusercontent.com/DeutschBall/test/master/image-20220612100250957.png"
-alt="image-20220612100250957" />
-<figcaption aria-hidden="true">image-20220612100250957</figcaption>
-</figure>
-<p>这个题A,B选项都不太熟悉,借机了解一下存储管理方式吧</p>
-<p>存储管理方式从进程地址空间的连续性上分为连续方式和非连续方式</p>
-<p><strong>连续方式,不行</strong></p>
-<p>​
-连续方式包括单一连续分配(单道连续分配),固定分区分配(多道固定连续分配),连续动态分配(多道可变连续分配)</p>
-<p>单道连续分配是最早最low逼的方式,整个内存条子上最多允许一个进程独占</p>
-<p>多道固定连续分配意思是内存条子上划出几个块,每个块让一个进程独占,各个进程老死不相往来</p>
-<figure>
-<img
-src="https://raw.githubusercontent.com/DeutschBall/test/master/image-20220612100928491.png"
-alt="image-20220612100928491" />
-<figcaption aria-hidden="true">image-20220612100928491</figcaption>
-</figure>
-<p><strong>非连续方式,行</strong></p>
-<p>​
-非连续方式包括分段,分页,段页,都是比较近或者最近的操作系统正在使用的技术,比较熟悉</p>
-<p>​ 比如x86上使用段页式结构,x86-64上使用分页结构</p>
-<h3 id="section-3">14.</h3>
-<figure>
-<img
-src="https://raw.githubusercontent.com/DeutschBall/test/master/image-20220612101143722.png"
-alt="image-20220612101143722" />
-<figcaption aria-hidden="true">image-20220612101143722</figcaption>
-</figure>
-<p>这个题要清晰重定位的各种类型,谁来负责重定位,什么时候重定位</p>
-<p>什么是重定位?<strong>装入时</strong>对目标程序中指令和数据的修改过程</p>
-<p>一定要重定位吗?不一定,早期low逼程序和low逼内存系统上,程序编译完成之后一个各个变量指令的物理地址就知道了,不存在逻辑地址一说,比如在单道连续分配的内存系统上,一共就只有一个进程执行,整什么逻辑地址真是多次一举</p>
-<p>凡是需要重定位的,一定有逻辑地址和物理地址的区分,重定位的过程就是将逻辑地址翻译成物理地址这个地址变换的过程</p>
-<p>本题中A和B,都是连续存储方式,只要确定好程序在物理内存中的基地址,那么程序所有指令数据的地址就都确定了,根本不需要重定位,编译时决定物理地址即可</p>
-<p>重定位的类型?静态重定位和动态重定位</p>
-<p>​ 静态重定位指地址变换在<strong>装载时</strong>一次完成</p>
-<p>​ 本题中D,段式结构就是静态重定位</p>
-<p>​ 动态重定位指地址变换在<strong>运行时</strong>才会进行</p>
-<p>​
-用于分页系统,因为虚拟页实际加载进入哪一个物理页,这由操作系统页面置换算法决定,不到运行时,是不知道虚拟页到底被加载到哪里的,该虚拟页上的数据和指令自然无法被重定位</p>
-<h3 id="section-4">18.</h3>
-<figure>
-<img
-src="https://raw.githubusercontent.com/DeutschBall/test/master/image-20220612102551429.png"
-alt="image-20220612102551429" />
-<figcaption aria-hidden="true">image-20220612102551429</figcaption>
-</figure>
-<p>我一开始选的是地址映射,我是这样考虑的</p>
-<p>x86-64上任何进程都是从<code>0x400000</code>这个地址开始的,通过地址映射,该虚拟地址被翻译成不同的物理地址,因此不会出现两个进程虚拟地址空间指向同一块物理地址空间的情况,即避免了进程的相互干扰</p>
-<p>我选的D,但是答案是B</p>
-<p>意思是一个进程有一个基址寄存器和边界寄存器,该进程内任意内存访问不得超过两个寄存器规定的范围,因此由内存保护实现</p>
-<h3 id="section-5">21.</h3>
-<figure>
-<img
-src="https://raw.githubusercontent.com/DeutschBall/test/master/image-20220612103002978.png"
-alt="image-20220612103002978" />
-<figcaption aria-hidden="true">image-20220612103002978</figcaption>
-</figure>
-<p>感觉这种题没有什么意义,让学生考虑段表和页表的大小,</p>
-<p>用户物理地址空间=总空间-页表或段表表占的空间</p>
-<p>你直接问页表大还是段表大不就行了?</p>
-<p>你直接问页和段谁大小可变不就行了?</p>
-<p>非得绕着弯说,根考察三年级学生两年后你和你老子谁年龄大一样.</p>
-<p>你不就是想考察段大小可变,页大小固定这个事儿吗</p>
-<h3 id="section-6">24.</h3>
-<figure>
-<img
-src="https://raw.githubusercontent.com/DeutschBall/test/master/image-20220612103815223.png"
-alt="image-20220612103815223" />
-<figcaption aria-hidden="true">image-20220612103815223</figcaption>
-</figure>
-<p>单道系统上某一时刻只有一个程序在运行,只需要维护一个重定位寄存器,谁在执行就把谁的基地址放到重定位寄存器上</p>
-<h3 id="section-7">26.</h3>
-<figure>
-<img
-src="https://raw.githubusercontent.com/DeutschBall/test/master/image-20220612104001176.png"
-alt="image-20220612104001176" />
-<figcaption aria-hidden="true">image-20220612104001176</figcaption>
-</figure>
-<p>还是考察对四个选项概念是不是认识</p>
-<p>"可变分区"实际上还是连续内存的low逼方法</p>
-<p>前面14题已经分析过了,分页存储管理是动态链接的</p>
-<p>"有利于动态链接"不如说"必须动态链接"</p>
-<h3 id="section-8">28.</h3>
-<figure>
-<img
-src="https://raw.githubusercontent.com/DeutschBall/test/master/image-20220612104157764.png"
-alt="image-20220612104157764" />
-<figcaption aria-hidden="true">image-20220612104157764</figcaption>
-</figure>
-<p>考察对"可重入"的理解</p>
-<p>CSAPP上我们学过"可重入"函数,就是不访问临界区的线程安全函数</p>
-<p>既然不访问临界区,那么多个进程共享这一块也是没问题的,</p>
-<p>只需要将共享区放在内存上,让有需要的进程引用本共享区,不需要每个进程分别拷贝一份</p>
-<p>怎么就减少对换数量了呢?</p>
-<p>啥叫"兑换"?不是缺页置换</p>
-<p>不需要每个进程都加载共享区,一共加载一次就可以</p>
-<h3 id="section-9">29.</h3>
-<figure>
-<img
-src="https://raw.githubusercontent.com/DeutschBall/test/master/image-20220612104605803.png"
-alt="image-20220612104605803" />
-<figcaption aria-hidden="true">image-20220612104605803</figcaption>
-</figure>
-<p>这里"代价"是啥呢?</p>
-<p>分段时需要操作系统维护段表,分页时需要维护页表</p>
-<p>段表和页表也要占用内存,这就是代价</p>
-<p>知道的越少,人越觉得自己厉害,叫什么穷开心不是吗?</p>
-<p>分区是最早的内存管理方式,只需要维护有几个区,每个区放了啥.并且区相对于页和段大得多,操作系统维护的区表相对于页表段表会小很多,因此代价少</p>
-<h3 id="section-10">34.</h3>
-<figure>
-<img
-src="https://raw.githubusercontent.com/DeutschBall/test/master/image-20220612104843836.png"
-alt="image-20220612104843836" />
-<figcaption aria-hidden="true">image-20220612104843836</figcaption>
-</figure>
-<p>前两条说的是真对,需要注意的是内碎片和外碎片是啥</p>
-<p>第三条,影响磁盘访问时间的主要因素是啥呢?页面多大则需要从磁盘中拷贝出相应大小的页面,拷贝的越多用时越长,怎么就"主要因素通常不是页面大小了",III项纯粹故意说很长的假话吓唬人</p>
-<p>那么影响磁盘访问时间的主要因素是啥呢?</p>
-<p>寻道时间、旋转延迟、数据传输时间</p>
-<p>页面大小会影响数据传输时间,当然是主要因素</p>
-<h3 id="section-11">35.</h3>
-<figure>
-<img
-src="https://raw.githubusercontent.com/DeutschBall/test/master/image-20220612105228600.png"
-alt="image-20220612105228600" />
-<figcaption aria-hidden="true">image-20220612105228600</figcaption>
-</figure>
-<p>这个题的ACD三要都是白给</p>
-<p>这让我想到高三做过的一道化学题</p>
-<figure>
-<img
-src="https://raw.githubusercontent.com/DeutschBall/test/master/image-20220612105424208.png"
-alt="image-20220612105424208" />
-<figcaption aria-hidden="true">image-20220612105424208</figcaption>
-</figure>
-<p>"取10.00ml稀释液的过程中,酸式滴定管的初始页面为0.20ml,左手控制活塞向锥形瓶中加稀释液,此时眼睛应该<code>____</code>"</p>
-<p>你说写"睁着"吧,理论上也对,闭着眼儿万一倒手上把手烧个窝儿,还必须得睁着眼儿</p>
-<p>那为啥不能写"睁着"呢?这睁着不是废话吗.这个题就想考察会不会说滴定流程的套话</p>
-<p>在本题中我一开始选的A,这也是废话,页面大小一定得依据内存大小确定啊,要是内存4G,你整一个8G大小的页面有个锤子用呢?</p>
-<p>本题就想考察"页面大小固定"这个事儿</p>
-<p>但是D一定是不对的,外存就是一群乌合之众没有排面,内存少而精,外存一定是为内存服务的</p>
-<p>C对不对呢?也有道理,比如如果数据总线宽度为64位,那么页面大小就1Byte占8位,都不够cpu拿来塞牙缝的.但是出题的认为这都不用说,是废话</p>
-<h3 id="section-12">36.</h3>
-<figure>
-<img
-src="https://raw.githubusercontent.com/DeutschBall/test/master/image-20220612110227309.png"
-alt="image-20220612110227309" />
-<figcaption aria-hidden="true">image-20220612110227309</figcaption>
-</figure>
-<p>什么叫不懂装懂啊?</p>
-<p>"方便操作",怎么操作,什么操作?你把"操作"去掉也是一个意思</p>
-<p>就说"A.方便"</p>
-<p>不妨把话说的更明白一点</p>
-<p>"A.好"</p>
-<p>好个球子啊</p>
-<p>因为BCD这些优点显而易见,出题的实在想不到说个啥缺点,就整了一个"A.方便操作"</p>
-<p>实际上这个答案啥也没说,就好比让你评价一下学校对卢雷事件的处理,你说了个"好!",怎么好了?给校风学风带来啥影响?给其他学生有啥影响?给外界啥影响?你是一个字不说,因为现在的处理方式吐不出象牙来</p>
-<h3 id="section-13">39.</h3>
-<figure>
-<img
-src="https://raw.githubusercontent.com/DeutschBall/test/master/image-20220612110742608.png"
-alt="image-20220612110742608" />
-<figcaption aria-hidden="true">image-20220612110742608</figcaption>
-</figure>
-<p>14题复习了重定位之后显然这个题选B,但是C和D我怎么没在教材上见到过</p>
-<p>因为压根就没这两个概念.</p>
-<p>这不就是某些政治家某些上级以及某些令人恶心的文科学科的口头禅吗</p>
-<blockquote>
-<p>正确的，直接的，中肯的，雅致的，客观的，完整的，立体的，全面的，辩证的，形而上学的，雅俗共赏的，一针见血的，直击要害的，错误的，间接的，虚假的，庸俗的，主观的，残缺的，平面的，片面的，孤立的，辩证法的..</p>
-<p>落实,夯实,搞好,坚持,推进,改善,提高....</p>
-<p>美国化,本土化,最大化,冲国化...</p>
-</blockquote>
-<p>政治跨考计算机的是不是就要选C了</p>
 
       
     </div>
