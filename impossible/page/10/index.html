@@ -167,6 +167,1053 @@
   
   
   <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="en">
+    <link itemprop="mainEntityOfPage" href="http://deutschball.github.io/2022/05/23/%E6%B1%87%E7%BC%96%E8%AF%AD%E8%A8%80/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="https://raw.githubusercontent.com/DeutschBall/picbed/main/dustball.png">
+      <meta itemprop="name" content="dustball">
+      <meta itemprop="description" content="dustland">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="dustland">
+    </span>
+      <header class="post-header">
+        <h2 class="post-title" itemprop="name headline">
+          
+            <a href="/2022/05/23/%E6%B1%87%E7%BC%96%E8%AF%AD%E8%A8%80/" class="post-title-link" itemprop="url">CSAPP-chapter3 x86-64汇编语言</a>
+        </h2>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-calendar"></i>
+              </span>
+              <span class="post-meta-item-text">Posted on</span>
+              
+
+              <time title="Created: 2022-05-23 19:30:00 / Modified: 19:37:19" itemprop="dateCreated datePublished" datetime="2022-05-23T19:30:00+08:00">2022-05-23</time>
+            </span>
+
+          
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+          <h1 id="csapp-chapter3-x86-64-assembly">CSAPP-chapter3 x86-64
+Assembly</h1>
+<h2 id="汇编变种后缀的应用场景">汇编变种后缀的应用场景</h2>
+<h3 id="前置知识">前置知识:</h3>
+<h4 id="c语言数据格式">0.C语言数据格式</h4>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;iostream&gt;</span></span></span><br><span class="line"><span class="keyword">using</span> <span class="keyword">namespace</span> std;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="type">int</span> <span class="title">main</span><span class="params">()</span> </span>&#123;</span><br><span class="line">	cout &lt;&lt; <span class="string">&quot;sizeof(char)=&quot;</span> &lt;&lt; <span class="built_in">sizeof</span>(<span class="type">char</span>) &lt;&lt; endl;</span><br><span class="line">	cout &lt;&lt; <span class="string">&quot;sizeof(short)=&quot;</span> &lt;&lt; <span class="built_in">sizeof</span>(<span class="type">short</span>) &lt;&lt; endl;</span><br><span class="line">	cout &lt;&lt; <span class="string">&quot;sizeof(int)=&quot;</span> &lt;&lt; <span class="built_in">sizeof</span>(<span class="type">int</span>) &lt;&lt; endl;</span><br><span class="line">	cout &lt;&lt; <span class="string">&quot;sizeof(long)=&quot;</span> &lt;&lt; <span class="built_in">sizeof</span>(<span class="type">long</span>) &lt;&lt; endl;</span><br><span class="line">	cout &lt;&lt; <span class="string">&quot;sizeof(long long)=&quot;</span> &lt;&lt; <span class="built_in">sizeof</span>(<span class="type">long</span> <span class="type">long</span>) &lt;&lt; endl;</span><br><span class="line">	cout &lt;&lt; <span class="string">&quot;sizeof(void*)=&quot;</span> &lt;&lt; <span class="built_in">sizeof</span>(<span class="type">void</span> *) &lt;&lt; endl;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>在64位ubuntu上的运行结果</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">root@deutschball-virtual-machine:/home/deutschball/mydir# g++ test.cpp -o test.out</span><br><span class="line">root@deutschball-virtual-machine:/home/deutschball/mydir# ./test.out</span><br><span class="line">sizeof(char)=1</span><br><span class="line">sizeof(short)=2</span><br><span class="line">sizeof(int)=4</span><br><span class="line">sizeof(long)=8</span><br><span class="line">sizeof(long long)=8</span><br><span class="line">sizeof(void*)=8</span><br></pre></td></tr></table></figure>
+<blockquote>
+<p>在64位windows上的运行结果稍有不同</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">sizeof(char)=1</span><br><span class="line">sizeof(short)=2</span><br><span class="line">sizeof(int)=4</span><br><span class="line">sizeof(long)=4</span><br><span class="line">sizeof(long long)=8</span><br><span class="line">sizeof(void*)=8</span><br></pre></td></tr></table></figure>
+<p>在32位windows上的运行结果</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">sizeof(char)=1</span><br><span class="line">sizeof(short)=2</span><br><span class="line">sizeof(int)=4</span><br><span class="line">sizeof(long)=4</span><br><span class="line">sizeof(long long)=8</span><br><span class="line">sizeof(void*)=4</span><br></pre></td></tr></table></figure>
+</blockquote>
+<table>
+<thead>
+<tr>
+<th>操作系统(字节)</th>
+<th>char</th>
+<th>short</th>
+<th>int</th>
+<th>long</th>
+<th>long long</th>
+<th>void*</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>linux64位</td>
+<td>1</td>
+<td>2</td>
+<td>4</td>
+<td>8</td>
+<td>8</td>
+<td>8</td>
+</tr>
+<tr>
+<td>windows64位</td>
+<td>1</td>
+<td>2</td>
+<td>4</td>
+<td>4</td>
+<td>8</td>
+<td>8</td>
+</tr>
+<tr>
+<td>windows32位</td>
+<td>1</td>
+<td>2</td>
+<td>4</td>
+<td>4</td>
+<td>8</td>
+<td>4</td>
+</tr>
+</tbody>
+</table>
+<h4 id="寄存器规格">1.寄存器规格</h4>
+<p>大多数的后缀都与寄存器规格有关,下图将会被多次用到</p>
+<figure>
+<img
+src="https://raw.githubusercontent.com/DeutschBall/test/master/image-20220406175644150.png"
+alt="image-20220406175644150" />
+<figcaption aria-hidden="true">image-20220406175644150</figcaption>
+</figure>
+<h4 id="寻址方式">2.寻址方式</h4>
+<figure>
+<img
+src="https://raw.githubusercontent.com/DeutschBall/test/master/image-20220406180238442.png"
+alt="image-20220406180238442" />
+<figcaption aria-hidden="true">image-20220406180238442</figcaption>
+</figure>
+<h3 id="mov类">mov类</h3>
+<h4 id="操作数长度相关后缀bwlq">操作数长度相关后缀b,w,l,q</h4>
+<p>mov类命令的<strong>数据流动方向</strong>有五种,</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">立即数-&gt;寄存器</span><br><span class="line">寄存器-&gt;寄存器</span><br><span class="line">主存  -&gt;寄存器</span><br><span class="line">立即数-&gt;主存</span><br><span class="line">寄存器-&gt;主存</span><br></pre></td></tr></table></figure>
+<p>显然<code>立即数-&gt;立即数</code>是不可能的,这里立即数相当于右值,就好比说把5存到6上</p>
+<p>并且规定不能从主存直接到主存即<code>主存-&gt;主存</code>,必须经过寄存器</p>
+<p>与<strong>数据长度有关的后缀</strong>有</p>
+<figure>
+<img
+src="https://raw.githubusercontent.com/DeutschBall/test/master/image-20220406174739043.png"
+alt="image-20220406174739043" />
+<figcaption aria-hidden="true">image-20220406174739043</figcaption>
+</figure>
+<blockquote>
+<p>这里两个字节等于一个字</p>
+<p>便于记忆,可以了解后缀的含义:</p>
+<p>b:byte,一个字节</p>
+<p>w:word,一个字(两个字节)</p>
+</blockquote>
+<p>使用哪种后缀需要与数据流动方向一起决定,具体规则是:</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">1.主存没有决定后缀的权利</span><br><span class="line"></span><br><span class="line">2.如果源或者目的其一是寄存器则根据寄存器大小决定,如果使用的是`%al,%spl`这种单字节寄存器则mov命令用b后缀,</span><br><span class="line">同理如果使 `%rax,%rsp`这种8个字节寄存器则mov命令用q后缀.</span><br><span class="line">如果源和目的都是寄存器则跟随目的寄存器规格</span><br><span class="line"></span><br><span class="line">3.寄存器比立即字的优先级高</span><br></pre></td></tr></table></figure>
+<p>记住这三条规则才能完成3.2</p>
+<figure>
+<img
+src="https://raw.githubusercontent.com/DeutschBall/test/master/image-20220406175452026.png"
+alt="image-20220406175452026" />
+<figcaption aria-hidden="true">image-20220406175452026</figcaption>
+</figure>
+<p><strong>1.<code>movl %eax,(%rsp)</code></strong></p>
+<figure>
+<img
+src="https://raw.githubusercontent.com/DeutschBall/test/master/image-20220406175737319.png"
+alt="image-20220406175737319" />
+<figcaption aria-hidden="true">image-20220406175737319</figcaption>
+</figure>
+<p>源<code>%eax</code>为32位(=4字节=2字)寄存器,</p>
+<p>目的<code>(%rsp)</code>是采用简介寻址,实际地址位于内存中,没有发言权,</p>
+<p>因此<code>mov</code>的后缀跟随<code>%eav</code>即传送双字,使用l后缀</p>
+<p><strong>2.<code>movw (%rax),%dx</code></strong></p>
+<figure>
+<img
+src="https://raw.githubusercontent.com/DeutschBall/test/master/image-20220406180020141.png"
+alt="image-20220406180020141" />
+<figcaption aria-hidden="true">image-20220406180020141</figcaption>
+</figure>
+<p>源<code>(%rax)</code>在内存中,没有发言权,</p>
+<p>目的<code>%dx</code>是一个16位(=2字节=1字)寄存器</p>
+<p>因此<code>mov</code>的后缀跟随<code>%dx</code>即传送单字,使用w后缀</p>
+<p><strong>3.<code>movb $0xFF %bl</code></strong></p>
+<figure>
+<img
+src="https://raw.githubusercontent.com/DeutschBall/test/master/image-20220406180630017.png"
+alt="image-20220406180630017" />
+<figcaption aria-hidden="true">image-20220406180630017</figcaption>
+</figure>
+<p>源<code>$0xFF</code>是一个立即字,优先级低</p>
+<p>目的<code>%bl</code>是一个字节寄存器,优先级高</p>
+<p><code>mov</code>后缀跟随<code>%bl</code>使用b</p>
+<p><strong>4.<code>movb (%rsp,%rdx,4) %dl</code></strong></p>
+<figure>
+<img
+src="https://raw.githubusercontent.com/DeutschBall/test/master/image-20220406180836564.png"
+alt="image-20220406180836564" />
+<figcaption aria-hidden="true">image-20220406180836564</figcaption>
+</figure>
+<p>源<code>(%rsp,%rdx,4)</code>在内存上,没有发言权</p>
+<p>目的<code>%dl</code>是一个字节寄存器</p>
+<p><code>mov</code>后缀跟随<code>%dl</code>使用b</p>
+<p><strong>5.<code>movq (%rdx),%rax</code></strong></p>
+<figure>
+<img
+src="https://raw.githubusercontent.com/DeutschBall/test/master/image-20220406181217813.png"
+alt="image-20220406181217813" />
+<figcaption aria-hidden="true">image-20220406181217813</figcaption>
+</figure>
+<p>源<code>(%rdx)</code>在内存上,没有发言权</p>
+<p>目的<code>%rax</code>是一个四字寄存器</p>
+<p><code>mov</code>后缀跟随<code>%rax</code>使用q</p>
+<p><strong>6.<code>movw %dx,(%rax)</code></strong></p>
+<figure>
+<img
+src="https://raw.githubusercontent.com/DeutschBall/test/master/image-20220406181231776.png"
+alt="image-20220406181231776" />
+<figcaption aria-hidden="true">image-20220406181231776</figcaption>
+</figure>
+<p>源<code>%dx</code>是一个单字寄存器</p>
+<p>目的<code>(%rax)</code>在内存上,没有发言权</p>
+<p>因此<code>mov</code>后缀跟随<code>%dx</code>用w</p>
+<h5 id="长度类后缀的其他细节差异">长度类后缀的其他细节差异</h5>
+<figure>
+<img
+src="https://raw.githubusercontent.com/DeutschBall/test/master/image-20220406191326874.png"
+alt="image-20220406191326874" />
+<figcaption aria-hidden="true">image-20220406191326874</figcaption>
+</figure>
+<p>1.<code>movb,movw</code>只会修改目标寄存器的对应低位</p>
+<p>2.<code>movl</code>不光会修改目标寄存器的对应低位,并且会将高位全部置零</p>
+<p>3.对于64位的立即数,1.只能用<code>movabsq</code>2.将其存到寄存器中,<code>movq</code>只能处理32位的立即数</p>
+<h4 id="数据拓展相关后缀zs">数据拓展相关后缀z,s</h4>
+<figure>
+<img
+src="https://raw.githubusercontent.com/DeutschBall/test/master/image-20220406193244989.png"
+alt="image-20220406193244989" />
+<figcaption aria-hidden="true">image-20220406193244989</figcaption>
+</figure>
+<blockquote>
+<p>零拓展和符号拓展的区别:</p>
+<figure>
+<img
+src="https://raw.githubusercontent.com/DeutschBall/test/master/image-20220406194028869.png"
+alt="image-20220406194028869" />
+<figcaption aria-hidden="true">image-20220406194028869</figcaption>
+</figure>
+<p><code>R(%dl)=AA=10101010</code>符号位为1</p>
+<p>第4行符号拓展直接将高位全都置1得到一串F</p>
+<p>第5行零拓展直接将高位全都置0得到一串0</p>
+<p>有符号数拓展时使用符号拓展</p>
+<p>无符号数拓展时使用0拓展,可以理解为无符号拓展</p>
+</blockquote>
+<figure>
+<img
+src="https://raw.githubusercontent.com/DeutschBall/test/master/image-20220406200228709.png"
+alt="image-20220406200228709" />
+<figcaption aria-hidden="true">image-20220406200228709</figcaption>
+</figure>
+<p>1.首先,使用指针的目的是,使实际操作的地址在内存中,如此需要在寄存器中过度一次,将转型分成两个阶段,即<code>源内存-&gt;寄存器</code>和<code>寄存器-&gt;目的内存</code>两个阶段</p>
+<p>2.然后一定注意"==当执行强制类型转换即涉及大小变化又涉及C语言中的符号变化时,操作应该先改变大小=="</p>
+<blockquote>
+<p>这里"先改变大小"的意思是,无符号源用z,有符号源用s,然后决定大小的后缀看目的的大小</p>
+</blockquote>
+<p><strong>1.long到long</strong></p>
+<p>不涉及大小变化,不涉及符号变化,只需要使用传送四字指令<code>movq</code>,两个阶段相同</p>
+<p><strong>2.char到int</strong></p>
+<p>只涉及大小变化,首先从字节内存到双字寄存器需要符号拓展指令<code>movsbl</code>
+然后从双字寄存器到内存根据寄存器规格决定使用双字传送指令<code>movl</code></p>
+<p><strong>3.char到unsigned</strong></p>
+<p>既涉及大小变化,又涉及符号变化</p>
+<p>首先改变大小,从有符号字节内存到双字寄存器需要符号拓展指令<code>movsbl</code></p>
+<p>然后从双字寄存器到双字内存根据寄存器规格决定使用双字传送指令<code>movl</code>,即目的符号不起作用</p>
+<blockquote>
+<p>char到unsigned int和char到int形成的汇编语言是相同的</p>
+</blockquote>
+<blockquote>
+<p>这一点可以实验验证</p>
+<p>对于char的最小值-128=0x80,如果强制转型到unsigned,可能的结果:</p>
+<p>1.首先变化符号,然后变化大小,即首先使用<code>movzbl</code>,然后<code>movl</code>,这样unsigned的值为<code>0x00000080=128</code></p>
+<p>2.首先变化大小,然后变化符号,即首先使用<code>movsbl</code>,然后<code>movl</code>,这样unsigned值为<code>0xFFFFFF80=4294967168</code></p>
+<p>基于上述两种猜想,可以写如下程序验证</p>
+<figure>
+<img
+src="https://raw.githubusercontent.com/DeutschBall/test/master/image-20220406201752965.png"
+alt="image-20220406201752965" />
+<figcaption aria-hidden="true">image-20220406201752965</figcaption>
+</figure>
+<p>证明猜想2是正确的</p>
+</blockquote>
+<p><strong>4.unsigned char到long</strong></p>
+<p>既涉及大小变化,又涉及符号变化</p>
+<p>首先改变大小,从无符号字节内存到四字寄存器,要使用无符号拓展指令<code>movzbq</code></p>
+<p>然后从四字寄存器到内存,使用四字传送指令<code>movq</code></p>
+<p>然而实际上首先使用的是<code>movzbl</code></p>
+<p><a target="_blank" rel="noopener" href="https://www.zhihu.com/question/291651098">查阅了知乎</a></p>
+<p>然后官方给出的解释:</p>
+<blockquote>
+<p>(Clarification, not an erratum) Figure 3.5.</p>
+<p>Although there is an instruction movzbq, the GCC compiler typically
+generates the instruction movzbl for this purpose, relying on the
+property that an instruction generating a 4-byte with a register as
+destination will fill the upper 4 bytes of the register with zeros.</p>
+<p>尽管应该使用movzbq指令,但是GCC编译器通常使用movzbl指令来达到相同的目的,</p>
+<p>==这是因为只要是以寄存器为目的并且生成低位4字节的指令都会将高位的4字节置零==</p>
+</blockquote>
+<p>博客上其他人的解释</p>
+<figure>
+<img
+src="https://raw.githubusercontent.com/DeutschBall/test/master/image-20220406203013260.png"
+alt="image-20220406203013260" />
+<figcaption aria-hidden="true">image-20220406203013260</figcaption>
+</figure>
+<p>这就很明白了</p>
+<p><strong>5.int到char</strong></p>
+<p>只涉及大小转换,大变小直接截取</p>
+<p>直接从内存中取出双字数据放到寄存器里然后截取低8位传送给内存</p>
+<p>即首先使用<code>movl</code>然后<code>movb</code></p>
+<p><strong>6.unsigned到unsigned char</strong></p>
+<p>只涉及大小转换,大变小直接截取</p>
+<p>直接从内存中取出双字数据放到双字寄存器然后截取低8位传送给内存</p>
+<p>即首先使用<code>movl</code>然后<code>movb</code></p>
+<p><strong>7.char到short</strong></p>
+<p>只涉及大小变换,小变大需要拓展</p>
+<p>首先使用有符号拓展<code>movsbw</code>将字节数据传送到单字寄存器</p>
+<p>然后使用<code>movw</code>从单字寄存器传送到内存</p>
+<h2 id="汇编语言特殊算术操作">汇编语言特殊算术操作</h2>
+<p>首先纠错</p>
+<figure>
+<img
+src="https://raw.githubusercontent.com/DeutschBall/test/master/image-20220407195514558.png"
+alt="image-20220407195514558" />
+<figcaption aria-hidden="true">image-20220407195514558</figcaption>
+</figure>
+<p>书上除法这里是有错误的,商和余数都放在了<code>R[%rdx]</code>这显然是不合理的,我觉得应该写为:</p>
+<figure>
+<img
+src="https://raw.githubusercontent.com/DeutschBall/test/master/image-20220407210130248.png"
+alt="image-20220407210130248" />
+<figcaption aria-hidden="true">image-20220407210130248</figcaption>
+</figure>
+<h3 id="乘法">乘法</h3>
+<p>c源文件</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;inttypes.h&gt;</span></span></span><br><span class="line"><span class="keyword">typedef</span> <span class="type">unsigned</span> __int128 <span class="type">uint128_t</span>;</span><br><span class="line"><span class="comment">//此处改名的目的是让128位整数能够类似64位整数使用</span></span><br><span class="line"><span class="type">void</span> <span class="title function_">store_uprod</span><span class="params">(<span class="type">uint128_t</span> *dest,<span class="type">uint64_t</span> x,<span class="type">uint64_t</span> y)</span>&#123;</span><br><span class="line">                *dest=x*(<span class="type">uint128_t</span>) y;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>汇编语言</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">movq    %rsi, %rax</span><br><span class="line">mulq    %rdx</span><br><span class="line">movq    %rax, (%rdi)</span><br><span class="line">movq    %rdx, 8(%rdi)</span><br><span class="line">ret</span><br></pre></td></tr></table></figure>
+<p>逻辑分析:</p>
+<p>首先三个参数分别存放在</p>
+<figure>
+<img
+src="https://raw.githubusercontent.com/DeutschBall/test/master/image-20220407195244614.png"
+alt="image-20220407195244614" />
+<figcaption aria-hidden="true">image-20220407195244614</figcaption>
+</figure>
+<p>即</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">R[%rdi]=dest//这里%rdi寄存器中存放的是dest这个位置 dest这个位置 dest这个位置</span><br><span class="line">R[%rsi]=x</span><br><span class="line">R[%rdx]=y</span><br></pre></td></tr></table></figure>
+<p><strong>1.<code>movq    %rsi, %rax</code></strong></p>
+<p>即令<code>R[%rax]=R[%rsi]=x</code>将x放在了<code>%rax</code>寄存器中</p>
+<p><strong>2.<code>mulq    %rdx</code></strong></p>
+<p><code>R[%rdx]=y</code></p>
+<figure>
+<img
+src="https://raw.githubusercontent.com/DeutschBall/test/master/image-20220407195537665.png"
+alt="image-20220407195537665" />
+<figcaption aria-hidden="true">image-20220407195537665</figcaption>
+</figure>
+<p>看似只有一个操作数,实际上隐含着另一个操作数在<code>%rax</code>寄存器中</p>
+<p>即令<code>R[%rdx]*R[%rax]</code>,两个64位数的计算机结果是一个128位数,显然单独一个64位寄存器是放不下的,因此计算结果被分成两部分</p>
+<p>低64位放在<code>%rax</code>寄存器,高64位放在<code>%rdx</code>寄存器</p>
+<p><strong>3.<code>movq    %rax, (%rdi)</code></strong></p>
+<p><code>R[%rdi]=dest</code>这是指针指向内存中的位置</p>
+<p><code>M[R[%rdi]]=M[dest]</code>对内存中的位置dest应用解引用函数<span
+class="math inline">\(M[dest]\)</span>得到的是该地址上的实际数值</p>
+<p>令<code>M[R[%rdi]]=R[%rax]</code>,将<code>%rax</code>寄存器中刚刚算出的低64位结果放在内存中,位置为<code>R[%rdi]</code>(间接寻址)</p>
+<p><strong>4.<code>movq    %rdx, 8(%rdi)</code></strong></p>
+<p>刚才在第3步时存放了低64位,那么此时应该做到就是存放高64位</p>
+<p>令<code>M[R(%rdi)+8]=R[%rdx]</code>,将<code>%rdx</code>寄存器中刚刚算出的高64位结果放在内存中,位置为<code>R(%rdi)+8</code>(基址+偏移量寻址)</p>
+<p>此处的+8为偏移8个字节,因为低地址恰好占用这8个字节</p>
+<p>在小端机器上低地址存放低位,高地址存放高位</p>
+<p>到此乘法的计算结果已经被分成两个64位数存进了一个<code>uint128_t *</code>指针指向的地址</p>
+<h3 id="除法">除法</h3>
+<p>c源文件</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="type">void</span> <span class="title function_">remdiv</span><span class="params">(<span class="type">long</span> x,<span class="type">long</span> y,<span class="type">long</span> *qp,<span class="type">long</span> *rp)</span>&#123;<span class="comment">//希望计算x/y将商存到指针qp指向的地址,将余数存到指针rp指向的地址</span></span><br><span class="line">        <span class="type">long</span> q=x/y;</span><br><span class="line">        <span class="type">long</span> r=x%y;</span><br><span class="line">        *qp=q;</span><br><span class="line">        *rp=r;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>汇编语言</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">movq    %rdi, %rax</span><br><span class="line">movq    %rdx, %r8</span><br><span class="line">cqto</span><br><span class="line">idivq   %rsi</span><br><span class="line">movq    %rax, (%r8)</span><br><span class="line">movq    %rdx, (%rcx)</span><br><span class="line">ret</span><br></pre></td></tr></table></figure>
+<figure>
+<img
+src="https://raw.githubusercontent.com/DeutschBall/test/master/image-20220407201308477.png"
+alt="image-20220407201308477" />
+<figcaption aria-hidden="true">image-20220407201308477</figcaption>
+</figure>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">R[%rdi]=x</span><br><span class="line">R[%rsi]=y</span><br><span class="line">R[%rdx]=qp</span><br><span class="line">R[%rcx]=rp</span><br></pre></td></tr></table></figure>
+<p><strong>1.<code>movq    %rdi, %rax</code></strong></p>
+<p>令<code>R[%rax]=R[%rdi]=x</code>将x存放在<code>%rax</code>寄存器里</p>
+<p><strong>2.<code>movq    %rdx, %r8</code></strong></p>
+<p>令<code>R[%r8]=R[%rdx]=qp</code>将商==在内存中的地址==存放在<code>%r8</code>寄存器里</p>
+<figure>
+<img
+src="https://raw.githubusercontent.com/DeutschBall/test/master/image-20220407210300140.png"
+alt="image-20220407210300140" />
+<figcaption aria-hidden="true">image-20220407210300140</figcaption>
+</figure>
+<p>对于一个128位数的除法运算,被除数的低64位存放在<code>%rax</code>寄存器中,高64位存放在<code>%rdx</code>寄存器中</p>
+<p>刚才在第1步时已经将64位数x放在<code>%rax</code>寄存器中了,但是高64位所在的<code>%rdx</code>现在被第三个参数<code>qp</code>占用,因此将<code>qp</code>放在另一个寄存器<code>%r8</code>中,然后将<code>%rdx</code>腾出来方便存放高64位</p>
+<p><strong>3.<code>cqto</code></strong></p>
+<figure>
+<img
+src="https://raw.githubusercontent.com/DeutschBall/test/master/image-20220407205028742.png"
+alt="image-20220407205028742" />
+<figcaption aria-hidden="true">image-20220407205028742</figcaption>
+</figure>
+<p>为什么要进行符号拓展?</p>
+<p>被除数应该是一个128位数,但是目前我们只是确定了其低64位为x,高64位还是第三个参数的值没有修改,如果此时直接计算则高64位的值可以认为是乱码,那么怎么消除高64位的乱码呢?置零或者置符号,我们将要进行符号除法,因此高64位置符号</p>
+<p>即高64位按照<code>R[%rax]=x</code>的符号位拓展</p>
+<p><strong>4.<code>idivq   %rsi</code></strong></p>
+<p><code>R[%rsi]=y</code></p>
+<p><img
+src="https://raw.githubusercontent.com/DeutschBall/test/master/image-20220407210300140.png" /></p>
+<p><code>R[%rdx]=x mod y</code></p>
+<p><code>R[%rax]=x/y</code></p>
+<p><strong>5.<code>movq    %rax, (%r8)</code></strong></p>
+<p><code>R[%r8]=qp</code></p>
+<p><code>M[R[%r8]]=M[qp]=*qp=R[%rax]=x/y</code></p>
+<p><strong>6.<code>movq    %rdx, (%rcx)</code></strong></p>
+<p><code>R[%rcx]=rp</code></p>
+<p><code>M[R[%rcx]]=M[rp]=*rp=R[%rdx]=x mod y</code></p>
+<h3 id="习题3.12">习题3.12</h3>
+<p><img
+src="https://raw.githubusercontent.com/DeutschBall/test/master/image-20220407210655421.png" /></p>
+<p>首先四个参数的存放位置为:</p>
+<figure>
+<img
+src="https://raw.githubusercontent.com/DeutschBall/test/master/image-20220407201308477.png"
+alt="image-20220407201308477" />
+<figcaption aria-hidden="true">image-20220407201308477</figcaption>
+</figure>
+<p>执行除法的时候只会提供一个操作数S作为除数,表示被除数的另两个操作数是隐含的<code>%rax,%rdx</code></p>
+<figure>
+<img
+src="https://raw.githubusercontent.com/DeutschBall/test/master/image-20220407210829932.png"
+alt="image-20220407210829932" />
+<figcaption aria-hidden="true">image-20220407210829932</figcaption>
+</figure>
+<p>那么在执行除法命令之前,应该把被除数先安置好</p>
+<p>1.首先128位被除数的低64位存放在<code>%rax</code>中,即<code>R[%rax]=x</code>
+2.然后高64位存放在<code>%rdx</code>中,无符号除法时应当全置0,</p>
+<p>但是由于第三个参数qp已经占据了<code>%rdx</code>,因此在将其全都置零之前应当请三个参数挪个地方,比如<code>%r8</code></p>
+<p><code>movq %rdx,%r8</code></p>
+<p>3.此时就可以将被除数的高64位<code>%rdx</code>寄存器置0了,最直接的置零方法是<code>movq $0,%rdx</code>,还可以利用异或的性质<code>xorq %rdx,%rdx</code></p>
+<p>至于应该选择哪一个?应该选择二进制长度最短的指令</p>
+<blockquote>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">0000000000000000 &lt;.text&gt;:</span><br><span class="line">0:   48 c7 c2 00 00 00 00    mov    $0x0,%rdx</span><br><span class="line">7:   48 99                   cqto</span><br><span class="line">9:   48 31 d2                xor    %rdx,%rdx</span><br></pre></td></tr></table></figure>
+<p>由此可见为什么刚才有符号除法时要用cqto,因为其长度最短</p>
+<p>然后xor也是不错的选择</p>
+<p>最迫不得已才会选择movq指令</p>
+<p>当发现实际编译器使用的命令与我们理想的不一样时,可以写一个.s文件然后将自己理想的汇编指令和实际的汇编指令各写一行</p>
+<p>然后使用<code>gcc -Og -c</code>命令,使其编译成为.o文件,注意必须指定<code>-c</code>选项,否则直接编译成.exe或者.out会发生链接错误,因为刚才我门写的.s文件是非常不完整的,连main函数都没有</p>
+<p>然后对.o文件使用objdump命令反编译
+,就可以观察指令及其二进制编码长度了</p>
+<p>一般理想与现实不同都是由于有更加短但是可以完成同样目的的指令我们没有考虑到</p>
+</blockquote>
+<p>在本题中我不知道类似<code>cqto</code>但是是无符号拓展的指令,可以先用异或指令达到相同的目的</p>
+<p>4.被除数在3中已经准备好了,可以进行除法了</p>
+<figure>
+<img
+src="https://raw.githubusercontent.com/DeutschBall/test/master/image-20220407212434845.png"
+alt="image-20220407212434845" />
+<figcaption aria-hidden="true">image-20220407212434845</figcaption>
+</figure>
+<p>这里S是除数,本题中除数是第二个参数y存放在<code>%rsi</code>寄存器中,即<code>R[%rsi]=y</code></p>
+<p>那么除法指令为<code>divq %rsi</code></p>
+<p>5.除法进行完毕,瓜分商和余数</p>
+<p>商位于<code>%rax</code>寄存器中,希望传送到内存中的qp位置,而内存中的qp位置存放在寄存器<code>%r8</code>中(即<code>R[%r8]=qp,M[R[%r8]]=*qp</code>)因此使用指令<code>movq %rax,(%r8)</code></p>
+<p>余数位于<code>%rdx</code>寄存器中,希望传送到内存中的rp位置,而内存中的rp位置存放在寄存器<code>%rcx</code>中(即<code>R[%rcx]=rp,M[R[%rcx]]=*rp</code>)因此使用指令<code>movq %rdx,(%rcx)</code></p>
+<h2 id="标志与条件控制">标志与条件控制</h2>
+<h3 id="标志位">标志位</h3>
+<p>标志位的作用都是为了表征刚刚进行过的算术运算的结果,比如是否有溢出,是否有进位,结果是否为0等等,</p>
+<p>设置这些标志的目的之一是方便判断错误</p>
+<p>之二是决定后面的程序走向,是实现条件,==循环等控制语句的基础==</p>
+<figure>
+<img
+src="http://raw.githubusercontent.com/DeutschBall/test/master/image-20220408152343527.png"
+alt="image-20220408152343527" />
+<figcaption aria-hidden="true">image-20220408152343527</figcaption>
+</figure>
+<p>其中常用的标志位有:</p>
+<figure>
+<img
+src="http://raw.githubusercontent.com/DeutschBall/test/master/image-20220408152408112.png"
+alt="image-20220408152408112" />
+<figcaption aria-hidden="true">image-20220408152408112</figcaption>
+</figure>
+<p>作用:</p>
+<h4 id="cf">CF</h4>
+<p>进位标志</p>
+<p>作用于无符号数,比如对于八位无符号数</p>
+<p>加法结果进位溢出:<code>0xFF+0x01=0x100</code>溢出了,此时<code>CF=1</code>表明刚才的算术运算有溢出</p>
+<p>减法借位溢出:<code>0x00-0x01=0x100-0x01=0xFF</code>,被减数需要向他不存在的高位借位,此时<code>CF=1</code>表示被减数不够减的</p>
+<p>对于有符号整数的加减法,忽略进位标志<code>CF</code></p>
+<p>比如有符号整数<code>0x00-0x01=0x00+0xFF=0xFF</code>表示的是<code>0-1=-1</code>,</p>
+<p><code>0xFF</code>为-1的补码表示.显然这是合乎情理的</p>
+<p>同样的两个数如果是无符号数则计算结果为<code>0xFF=255</code>这两个正数相减越减越多显然不合理,因此<code>CF=1</code>标志有进位溢出</p>
+<h4 id="of">OF</h4>
+<p>溢出标志</p>
+<p>对有符号整数(即补码)运算有效,比如</p>
+<p>两个八位二进制数正数<code>01000000(B)=0x40(H)=64</code>相加,</p>
+<p><code>0x40+0x40=0x80(H)=10000000(B)=</code>怎么就成了一个负数<code>-128</code>?</p>
+<p>这显然不符合情理,此时<code>OF=1</code>标志有符号数溢出</p>
+<p>又或者:</p>
+<p>两个八位二进制负数<code>10000000=0x80=-128</code>相加</p>
+<p><code>0x80+0x80=0x100=0x00=0</code>怎么就成了0?</p>
+<p>这也是不符合情理的,此时<code>OF=1</code></p>
+<blockquote>
+<p>怎样检验有符号数加减是否有溢出?</p>
+<p>计组上我们学过双标志位法,计算结果的两个符号位如果不同则说明有溢出</p>
+</blockquote>
+<p><code>OF</code>标志对于无符号整数运算无效</p>
+<h4 id="zf">ZF</h4>
+<p>零标志</p>
+<p>如果运算结果为0则<code>ZF=1</code></p>
+<h4 id="sf">SF</h4>
+<p>符号标志</p>
+<p>如果运算结果为负数则<code>SF=1</code></p>
+<h3 id="可以修改标志位的指令">可以修改标志位的指令</h3>
+<h4 id="除了leaq外的逻辑运算指令">除了leaq外的逻辑运算指令</h4>
+<figure>
+<img
+src="http://raw.githubusercontent.com/DeutschBall/test/master/image-20220408155420102.png"
+alt="image-20220408155420102" />
+<figcaption aria-hidden="true">image-20220408155420102</figcaption>
+</figure>
+<h4 id="比较和测试指令">比较和测试指令</h4>
+<figure>
+<img
+src="http://raw.githubusercontent.com/DeutschBall/test/master/image-20220408155446113.png"
+alt="image-20220408155446113" />
+<figcaption aria-hidden="true">image-20220408155446113</figcaption>
+</figure>
+<h4
+id="一条指令可能会修改多个标志位具体规则为">一条指令可能会修改多个标志位,具体规则为:</h4>
+<blockquote>
+<p><strong>MOV NOT JMP</strong>*</p>
+<p>does not affect flags</p>
+<p>MOV,NOT,JMP指令不会修改标志位</p>
+<p><strong>NEG</strong></p>
+<p>The CF flag set to 0 if the source operand is 0; otherwise it is set
+to 1. The OF, SF, ZF, AF, and PF</p>
+<p>flags are set according to the result.</p>
+<p>NEG取反指令:如果NEG的操作数是0则CF=1,否则CF=0.</p>
+<p>OF,SF,ZF,AF,PF标志根据结果设定</p>
+<p><strong>AND OR</strong></p>
+<p>The OF and CF flags are cleared; the SF, ZF, and PF flags are set
+according to the result. The state</p>
+<p>of the AF flag is undefined</p>
+<p>AND,OR指令的OF和CF前面已经给出;SF,ZF,PF根据结果而定,AF状态无所谓</p>
+<p><strong>DEC INC</strong></p>
+<p>The CF flag is not affected. The OF, SF, ZF, AF, and PF flags are set
+according to the result</p>
+<p>DEC,INC自增自减指令的CF位不受影响,其他标志位都视结果而定</p>
+<p><strong>ADD ADC SUB SBB</strong></p>
+<p>The OF, SF, ZF, AF, PF, and CF flags are set according to the
+result.</p>
+<p>ADD,ADC,SUB,SBB指令的所有标志位都视结果而定</p>
+<p><strong>CMP</strong></p>
+<p>Modify status flags in the same manner as the SUB instruction</p>
+<p>CMP与SUB指令对于标志位的效果相同</p>
+<p>以两个有符号八位2进制数运算为例子</p>
+<p><code>0x00-0x01=0x00+0xFF=0xFF</code>,<code>OF=0</code>无溢出</p>
+<p><code>0x40+0x40=0x80=10000000=-128</code>,<code>OF=1</code>有溢出</p>
+<p>减法也有可能溢出,一个负数减去一个正数时</p>
+<p><code>0x80-0x7F=0x80+0x81=0x101=0x01</code>成了一个正数,此时<code>OF=1</code></p>
+</blockquote>
+<h3 id="比较指令">比较指令</h3>
+<figure>
+<img
+src="http://raw.githubusercontent.com/DeutschBall/test/master/image-20220408154303941.png"
+alt="image-20220408154303941" />
+<figcaption aria-hidden="true">image-20220408154303941</figcaption>
+</figure>
+<h4
+id="执行比较指令后通过标志位组合判断比较结果">执行比较指令后通过==标志位组合==判断比较结果</h4>
+<p><code>cmp s1,s2</code>指令基于<code>S2-S1</code>,意思是首先对<code>S2-S1</code>求值,然后结果放在<code>s2</code>原来的地方</p>
+<p>如果为负数则<code>SF=1</code>,否则(非负数)<code>SF=0</code>,</p>
+<p>后面的程序只需要访问一下Flag
+Register中的<code>SF</code>值就"可以????"知道<code>S2,S1</code>谁大谁小了</p>
+<blockquote>
+<p>==注意这里"可以"是假的==,</p>
+<p>因为如果结果是一个比较大的负数,造成溢出,截断之后成了一个正数,此时<code>SF=0</code>,此时只凭借SF值会造成误判,就比如</p>
+<p><code>0x80-0x7F=0x80+0x81=0x101=0x01</code>结果成了一个正数,那么符号标志位<code>SF=0</code>只凭SF值就会认为<code>0x80&gt;=0x7F</code></p>
+<p>而<code>0x80=-128&lt;0x7F=127</code></p>
+<p>因此只凭借SF标志位是无法判断两个操作数的大小的,==还应当考虑是否有溢出==.</p>
+<p>==考虑什么时候会发生溢出?==</p>
+<p>两个正数相减显然结果绝对值小于两者中的任何一个,不会溢出</p>
+<p>两个负数相减同样</p>
+<p>两个正数相加显然可以,比如<code>0x7F+0x01=0x80</code>成了负数</p>
+<p>两个负数相加也可以,比如<code>0x80+0x80=0x100=0x00</code>成了0</p>
+<p>正数-负数也可以,比如<code>0x7F-0xFF=0x7F+0x01=0x80</code>成了负数</p>
+<p>负数-正数也可以,比如<code>0x80-0x7F=0x80+0x81=0x101=0x01</code>成了正数</p>
+<p>==现在考虑如何完善判断两个数的大小==</p>
+<p>两个数做差有四种情况</p>
+<p>1.正-正</p>
+<p>2.负-负</p>
+<p>3.正-负</p>
+<p>4.负-正</p>
+<p>前两种情况没有溢出,<code>OF=0</code>,直接看<code>SF</code></p>
+<p>后两种可能有溢出,如果没有溢出则看<code>SF</code>,如果有溢出则<code>SF</code>取反</p>
+<p>而区分前两种和后两种的方法也很容易观察得出,即两个操作数的符号是否一致</p>
+<p>令<code>F=[A-B]</code>,<code>A</code>为被减数,<code>B</code>为减数,<code>[X]</code>表示对<code>X</code>取符号,<code>X≥0</code>则<code>[X]=0</code>,否则<code>[X]=1</code></p>
+<p>列出真值表</p>
+<figure>
+<img
+src="http://raw.githubusercontent.com/DeutschBall/test/master/image-20220408164041343.png"
+alt="image-20220408164041343" />
+<figcaption aria-hidden="true">image-20220408164041343</figcaption>
+</figure>
+</blockquote>
+<blockquote>
+<p>我们想要得到F的值,并且我们已经知道<code>OF</code>和<code>SF</code>的值,而大小判断与A,B无关,只与Flag
+Register中的标志位组合有关,那么问题转化为</p>
+<figure>
+<img
+src="http://raw.githubusercontent.com/DeutschBall/test/master/image-20220408164147132.png"
+alt="image-20220408164147132" />
+<figcaption aria-hidden="true">image-20220408164147132</figcaption>
+</figure>
+<p>从真值表上我们可以观察得出,当OF=0时,F和SF是一致的,当OF=1时,F和SF是相反的</p>
+<p>那么怎么用一条表达式写出F与OF,SF的关系呢?</p>
+<p>根据F=1的项可以立刻得到</p>
+<p><span class="math inline">\(F=\overline {OF}SF+OF\overline
+{SF}=OF\oplus SF\)</span></p>
+<p>到此可以总结如何判断两个有符号数的大小了</p>
+<p>如果<span class="math inline">\(OF\oplus
+SF\)</span>异或值为1则前小后大,否则前大后小</p>
+</blockquote>
+<p><code>test S1,S2</code>指令基于<code>S1&amp;S2</code>,意思是首先对<code>S1&amp;S2</code>求值,按位与只有两个操作数一模一样才会是真,否则为假.如果为假即0,则<code>ZF=1</code>,否则<code>ZF=0</code>,后面的程序只需要访问一下Flag
+Register中的<code>ZF</code>值就可以知道<code>S2,S1</code>是否相同了</p>
+<h3 id="访问条件码的方式">访问条件码的方式</h3>
+<p>在刚刚进行完一次逻辑运算之后,此时Flag
+Register的各个标志位已经设置完毕,下面就要根据其中一个或者几个标志位的组合进行决策,选择执行或者不执行一些命令</p>
+<blockquote>
+<p>1)可以根据条件码的某种组合, 将一个字节设置为0或者1</p>
+<p>2)可以条件跳转到程序的某个其他的部分</p>
+<p>3)可以有条件地传送数据</p>
+</blockquote>
+<h4
+id="根据flagregister的情况将一个字节设置为0或者1">1.根据FlagRegister的情况将一个字节设置为0或者1</h4>
+<p>SET指令</p>
+<figure>
+<img
+src="http://raw.githubusercontent.com/DeutschBall/test/master/image-20220408202821368.png"
+alt="image-20220408202821368" />
+<figcaption aria-hidden="true">image-20220408202821368</figcaption>
+</figure>
+<p>这种指令怎么发挥作用呢?</p>
+<p>以<code>sete</code>为例子,</p>
+<p>假设刚刚进行的运算是<code>a-a=0</code>,此时<code>ZF=1</code>表示刚才的计算结果为<code>0</code>,</p>
+<p>此时使用<code>sete 目标寄存器</code>,满足设置条件(相等/零),于是向目标寄存器存放<code>ZF</code>值即<code>1</code></p>
+<p><strong>练习3.13</strong></p>
+<figure>
+<img
+src="http://raw.githubusercontent.com/DeutschBall/test/master/image-20220408204021860.png"
+alt="image-20220408204021860" />
+<figcaption aria-hidden="true">image-20220408204021860</figcaption>
+</figure>
+<blockquote>
+<figure>
+<img
+src="http://raw.githubusercontent.com/DeutschBall/test/master/image-20220408204354747.png"
+alt="image-20220408204354747" />
+<figcaption aria-hidden="true">image-20220408204354747</figcaption>
+</figure>
+</blockquote>
+<p>A项第一行使用了cmpl比较双字命令,说明两个操作数都是双字(int,unsigned),第二行使用setl有符号小于运算,因此操作数只能是int类型</p>
+<p>B项第一行使用cmpw比较字命令,说明两个操作数都是字(short,unsigned
+short),第二行使用setge有符号大于等于,因此操作数只能是short</p>
+<p>C项第一行使用了cmpb比较字节命令,说明两个操作数都是字节(char,unsigned
+char),第二行使用setbe无符号小于等于,因此操作数只能是unsigned char</p>
+<p>D项第一行使用了cmpq比较四字命令,说明两个操作数都是四字(long,unsigned
+long),第二行
+使用setne不等/非零,因此操作数无法确定有无符号,long或者unsigned
+long均可</p>
+<h4 id="条件跳转">2.条件跳转</h4>
+<h5 id="条件跳转表">条件跳转表</h5>
+<p>该表在后来会经常用到</p>
+<figure>
+<img
+src="http://raw.githubusercontent.com/DeutschBall/test/master/image-20220408155109547.png"
+alt="image-20220408155109547" />
+<figcaption aria-hidden="true">image-20220408155109547</figcaption>
+</figure>
+<h5 id="条件跳转指令实现if-else语句">条件跳转指令实现if-else语句</h5>
+<p>c源代码:</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line"><span class="type">long</span> <span class="title function_">absdiff_se</span><span class="params">(<span class="type">long</span> x,<span class="type">long</span> y)</span>&#123;</span><br><span class="line">        <span class="type">long</span> result;</span><br><span class="line">        <span class="keyword">if</span>(x&lt;y)&#123;</span><br><span class="line">                result=y-x;</span><br><span class="line">        &#125;</span><br><span class="line">        <span class="keyword">else</span> &#123;</span><br><span class="line">                result=x-y;</span><br><span class="line">        &#125;</span><br><span class="line">        <span class="keyword">return</span> result;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>给定参数x,y如果x&lt;y,则返回y-x,否则返回x-y,即返回两个数的差的绝对值</p>
+<p>汇编代码</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line">absdiff_se:</span><br><span class="line">.LFB0:</span><br><span class="line">        movq    %rsi, %rax</span><br><span class="line">        cmpq    %rsi, %rdi</span><br><span class="line">        jge     .L2</span><br><span class="line">        subq    %rdi, %rax</span><br><span class="line">        ret</span><br><span class="line">.L2:</span><br><span class="line">        subq    %rsi, %rdi</span><br><span class="line">        movq    %rdi, %rax</span><br><span class="line">        ret</span><br></pre></td></tr></table></figure>
+<p>分析其汇编语言都干了什么</p>
+<p>首先两个参数的位置</p>
+<figure>
+<img
+src="http://raw.githubusercontent.com/DeutschBall/test/master/image-20220408154047128.png"
+alt="image-20220408154047128" />
+<figcaption aria-hidden="true">image-20220408154047128</figcaption>
+</figure>
+<p>即</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">R[%rdi]=x</span><br><span class="line">R[%rsi]=y</span><br></pre></td></tr></table></figure>
+<p><strong>1.<code>movq    %rsi, %rax</code></strong></p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">R[%rax]=R[%rsi]=x</span><br></pre></td></tr></table></figure>
+<figure>
+<img
+src="http://raw.githubusercontent.com/DeutschBall/test/master/image-20220408154223239.png"
+alt="image-20220408154223239" />
+<figcaption aria-hidden="true">image-20220408154223239</figcaption>
+</figure>
+<p>将x搬到<code>%rax</code>寄存器中,猜测有可能以后的变化都在x身上进行最后返回<code>%rax</code>寄存器中的值</p>
+<p><strong>2.<code>cmpq    %rsi, %rdi</code></strong></p>
+<p>注意是==后减前==</p>
+<p>做差<code>R[%rdi]-R[%rsi]</code>,(一定注意是后减前)SF和OF标志位根据结果确定</p>
+<p><strong>3.<code>jge     .L2</code></strong></p>
+<figure>
+<img
+src="http://raw.githubusercontent.com/DeutschBall/test/master/image-20220408155127559.png"
+alt="image-20220408155127559" />
+<figcaption aria-hidden="true">image-20220408155127559</figcaption>
+</figure>
+<p>根据刚才我们推导的<code>R[%rdi]-R[%rsi]&lt;0</code>时<span
+class="math inline">\(OF\oplus
+SF=1\)</span>,那么<code>R[%rdi]-R[%rsi]≥0</code>就应该有<span
+class="math inline">\(!(OF\oplus SF)=1\)</span></p>
+<p>这里<code>jge=jump if greater</code>即<code>R[%rdi]-R[%rsi]≥0</code>的情况</p>
+<p>联系前两句,第三句可以理解为:如果<span
+class="math inline">\(R[\%rdi]-R[\%rsi]=y-x≥0\)</span>则跳转到<code>.L2</code></p>
+<p>此后程序分叉了,如果3没有满足执行没有跳转则顺序执行<code>subq    %rdi, %rax</code>即<code>R[%rdi]=R[%rax]-R[%rdi]=x-y</code></p>
+<p>如果3满足条件并且跳转则跳到.L2执行<code>subq    %rsi, %rdi</code>即<code>R[%rsi]=R[%rdi]-R[%rsi]=y-x</code>一定是非负的</p>
+<p>不管是否跳转,3保证了后面的减法一定是大数-小数</p>
+<p>汇编语言的程序结构类似于</p>
+<figure>
+<img
+src="http://raw.githubusercontent.com/DeutschBall/test/master/image-20220408170852710.png"
+alt="image-20220408170852710" />
+<figcaption aria-hidden="true">image-20220408170852710</figcaption>
+</figure>
+<p>而c源程序的结构类似于</p>
+<figure>
+<img
+src="http://raw.githubusercontent.com/DeutschBall/test/master/image-20220408170946086.png"
+alt="image-20220408170946086" />
+<figcaption aria-hidden="true">image-20220408170946086</figcaption>
+</figure>
+<h5 id="条件跳转指令实现循环">条件跳转指令实现循环</h5>
+<p>求一个数n的阶乘,c源文件用while和for分别这样写</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br></pre></td><td class="code"><pre><span class="line"><span class="type">int</span> <span class="title function_">fact_while</span><span class="params">(<span class="type">int</span> n)</span>&#123;</span><br><span class="line">        <span class="type">int</span> ans=<span class="number">1</span>;</span><br><span class="line">        <span class="type">int</span> i=<span class="number">1</span>;</span><br><span class="line">        <span class="keyword">while</span>(i&lt;=n)&#123;</span><br><span class="line">                ans*=i;</span><br><span class="line">                ++i;</span><br><span class="line">        &#125;</span><br><span class="line">        <span class="keyword">return</span> ans;</span><br><span class="line"></span><br><span class="line">&#125;</span><br><span class="line"><span class="type">int</span> <span class="title function_">fact_for</span><span class="params">(<span class="type">int</span> n)</span>&#123;</span><br><span class="line">        <span class="type">int</span> ans=<span class="number">1</span>;</span><br><span class="line">        <span class="keyword">for</span>(<span class="type">int</span> i=<span class="number">1</span>;i&lt;=n;++i)&#123;</span><br><span class="line">                ans*=i;</span><br><span class="line">        &#125;</span><br><span class="line">        <span class="keyword">return</span> ans;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<blockquote>
+<p>根据前面学过的标志位的用法,大体可以推测一下汇编语言可能怎么写</p>
+<p>参数<code>int n</code>放在<code>edi</code>寄存器</p>
+<p><img
+src="http://raw.githubusercontent.com/DeutschBall/test/master/image-20220409151147527.png" /></p>
+<p>一开始<code>int ans=1;</code>要从一个寄存器里放一个1,由于最后返回的也是ans,因此可以直接用<code>eax</code>(int32位,需要双字寄存器eax,不用四字寄存器rax)寄存器方便返回</p>
+<p>然后循环临时变量i也需要一个寄存器存储其值,用<code>edx</code></p>
+<p>循环判断就是i和n的大小判断<code>cmp %edx,%edi</code>,这个式子基于<code>R[%edi]-R[%edx]=n-i</code></p>
+<p>当i&lt;=n时,cmp指令执行完毕之后<code>SF=0</code>恒成立,表示cmp运算结果非负</p>
+<p>然后进入循环体<code>ans*=i;</code>,其中<code>R[%eax]=ans,R[%edx]=i</code>,翻译成汇编语言,</p>
+<figure>
+<img
+src="http://raw.githubusercontent.com/DeutschBall/test/master/image-20220409152257759.png"
+alt="image-20220409152257759" />
+<figcaption aria-hidden="true">image-20220409152257759</figcaption>
+</figure>
+<p><code>imul %eax,%edx</code>计算<code>R[%eax]*R[%edx]</code>然后将结果存放到<code>%eax</code></p>
+<p>循环体执行完毕,下面应该循环变量i自增</p>
+<figure>
+<img
+src="http://raw.githubusercontent.com/DeutschBall/test/master/image-20220409152802338.png"
+alt="image-20220409152802338" />
+<figcaption aria-hidden="true">image-20220409152802338</figcaption>
+</figure>
+<p><code>inc %edx</code></p>
+<p>下面要回头执行下一次循环,此处应当使用无条件跳转命令,跳到循环判断语句</p>
+<p>考虑当循环判断语句不满足时,应当跳转到何处?</p>
+<p>使用条件跳转到循环下面的语句</p>
+<p><strong>总的来说,推测的汇编逻辑是这样的:</strong></p>
+<p>1.安置好形参n,ans,临时变量i在寄存器中的位置</p>
+<p>2.循环判断</p>
+<p>3.根据刚才的循环判断,决定是否条件跳转出循环</p>
+<p>如果没有出循环则执行循环体(乘法),然后自增临时变量i,然后无条件跳转到2</p>
+<p>如果跳出了循环则继续执行后面的语句,循环不再考虑</p>
+</blockquote>
+<p>下面实验观察汇编器是如何做的</p>
+<p>编译成.o文件之后用objdump反汇编得到</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br></pre></td><td class="code"><pre><span class="line">Disassembly of section .text:</span><br><span class="line"></span><br><span class="line">0000000000000000 &lt;fact_while&gt;:</span><br><span class="line">   0:   f3 0f 1e fa             endbr64</span><br><span class="line">   4:   b8 01 00 00 00          mov    $0x1,%eax</span><br><span class="line">   9:   ba 01 00 00 00          mov    $0x1,%edx</span><br><span class="line">   e:   39 f8                   cmp    %edi,%eax</span><br><span class="line">  10:   7f 08                   jg     1a &lt;fact_while+0x1a&gt;</span><br><span class="line">  12:   0f af d0                imul   %eax,%edx</span><br><span class="line">  15:   83 c0 01                add    $0x1,%eax</span><br><span class="line">  18:   eb f4                   jmp    e &lt;fact_while+0xe&gt;</span><br><span class="line">  1a:   89 d0                   mov    %edx,%eax</span><br><span class="line">  1c:   c3                      retq</span><br><span class="line"></span><br><span class="line">000000000000001d &lt;fact_for&gt;:</span><br><span class="line">  1d:   f3 0f 1e fa             endbr64</span><br><span class="line">  21:   b8 01 00 00 00          mov    $0x1,%eax</span><br><span class="line">  26:   ba 01 00 00 00          mov    $0x1,%edx</span><br><span class="line">  2b:   39 f8                   cmp    %edi,%eax</span><br><span class="line">  2d:   7f 08                   jg     37 &lt;fact_for+0x1a&gt;</span><br><span class="line">  2f:   0f af d0                imul   %eax,%edx</span><br><span class="line">  32:   83 c0 01                add    $0x1,%eax</span><br><span class="line">  35:   eb f4                   jmp    2b &lt;fact_for+0xe&gt;</span><br><span class="line">  37:   89 d0                   mov    %edx,%eax</span><br><span class="line">  39:   c3                      retq</span><br></pre></td></tr></table></figure>
+<p>这样两种循环的写法在机器层面是一模一样的.现在研究其汇编语言的逻辑,以fact_while的汇编语言为例分析其汇编语言的逻辑</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line">0000000000000000 &lt;fact_while&gt;:</span><br><span class="line">   0:   f3 0f 1e fa             endbr64</span><br><span class="line">   4:   b8 01 00 00 00          mov    $0x1,%eax</span><br><span class="line">   9:   ba 01 00 00 00          mov    $0x1,%edx</span><br><span class="line">   e:   39 f8                   cmp    %edi,%eax</span><br><span class="line">  10:   7f 08                   jg     1a &lt;fact_while+0x1a&gt;</span><br><span class="line">  12:   0f af d0                imul   %eax,%edx</span><br><span class="line">  15:   83 c0 01                add    $0x1,%eax</span><br><span class="line">  18:   eb f4                   jmp    e &lt;fact_while+0xe&gt;</span><br><span class="line">  1a:   89 d0                   mov    %edx,%eax</span><br><span class="line">  1c:   c3                      retq</span><br></pre></td></tr></table></figure>
+<p><strong>1.<code>mov    $0x1,%eax</code></strong></p>
+<p><code>R[%eax]=0x1</code></p>
+<p>这里我们可能会这样分析:eax寄存器是返回值的一部分,因此可以推断,这一句对应c源代码中的<code>int ans=1;</code></p>
+<p>但是实际上这里对应的是<code>int i=1</code></p>
+<p>==这一点可以从下文中分析得出==</p>
+<p><strong>2.<code>mov    $0x1,%edx</code></strong></p>
+<p><code>R[%edx]=0x1</code>,对应的是<code>int ans=1</code></p>
+<p><strong>3.<code>cmp    %edi,%eax</code></strong></p>
+<p>这里就可以看出1和2中,或者说<code>%edx,%eax</code>中到底谁放了ans,谁放了i</p>
+<p>比较指令,基于<code>R[%eax]-R[%edi]</code>,如果与c源程序<code>while(i&lt;=n)</code>对应的话</p>
+<p><code>R[%edi]=n</code>是可以肯定的,因为第一个参数放在<code>edi</code>中</p>
+<p>那么<code>R[%eax]=i</code>随之确定了</p>
+<p>(感觉可以把i和ans的寄存器换一换,这样返回的时候可以直接返回rax,其中正好存放ans,但是当前不知道为啥,编译器没有这样做,而是在最后将edx拷贝到eax)</p>
+<p><strong>4.<code>jg     1a &lt;fact_while+0x1a&gt;</code></strong></p>
+<p><code>jg:jump if greater</code>,</p>
+<p><img
+src="http://raw.githubusercontent.com/DeutschBall/test/master/image-20220409154729279.png" /></p>
+<p>如果<code>!(i&lt;=n)即i&gt;n</code>,则<code>cmp %edi,%edx=R[%edx]-R[%edi]=i-n&gt;0</code>,<code>ZF=0</code>,并且显然这里没有溢出和进位,即满足<code>~(SF^OF)&amp;~SF</code>,jg跳转条件成立,发生条抓</p>
+<p>这里和<code>while(i&lt;=n)</code>成立的条件是相同的,都是在进入循环之前首先进行条件判断</p>
+<p>注意跳转位置:<code>1a &lt;fact_while+0x1a&gt;</code></p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">18:   eb f4                   jmp    e &lt;fact_while+0xe&gt;</span><br><span class="line">1a:   89 d0                   mov    %edx,%eax</span><br></pre></td></tr></table></figure>
+<p><code>1a</code>位置恰好为无条件跳转的下一句,表明出了循环</p>
+<p><strong>5.<code>imul   %eax,%edx</code></strong></p>
+<p>==注意后者为目的==</p>
+<p><code>R[%edx]=R[%eax]*R[%edx]</code></p>
+<p>对应循环体<code>ans*=i</code></p>
+<p><strong>6.<code>add    $0x1,%eax</code></strong></p>
+<p><code>R[%eax]=R[%eax]+0x1</code></p>
+<p>对应临时变量i自增</p>
+<p><strong>7.<code>jmp    e &lt;fact_while+0xe&gt;</code></strong></p>
+<p>无条件跳转,跳转位置是fact_while开始向后偏移0xe字节</p>
+<figure>
+<img
+src="http://raw.githubusercontent.com/DeutschBall/test/master/image-20220409155811948.png"
+alt="image-20220409155811948" />
+<figcaption aria-hidden="true">image-20220409155811948</figcaption>
+</figure>
+<p>实际跳转到判断指令cmp,意思是重新进行循环</p>
+<p><strong>8.<code>mov    %edx,%eax</code></strong></p>
+<p>如果程序执行到此句,它上一句又是无条件跳转,说明程序是从更早的条件跳转过来的,对应<code>jg     1a &lt;fact_while+0x1a&gt;</code></p>
+<p>这一句的逻辑是把<code>edx</code>寄存器中的东西拷贝给<code>eax</code>一份</p>
+<p>edx我们分析过存放的是ans</p>
+<p>eax我们分析过存放的是i</p>
+<p>然而函数希望返回ans,并且返回值是以eax寄存器为准</p>
+<p>因此这里需要把ans搬到eax中</p>
+<p><strong>9.<code>retq</code></strong></p>
+<p>函数返回</p>
+<h4 id="条件传送数据">3.条件传送数据</h4>
+<figure>
+<img
+src="http://raw.githubusercontent.com/DeutschBall/test/master/image-20220409163206775.png"
+alt="image-20220409163206775" />
+<figcaption aria-hidden="true">image-20220409163206775</figcaption>
+</figure>
+<p>条件传送数据指令,意思就是当满足某些条件时,才会将数据从哪里拷贝到哪里,还是比较容易理解的</p>
+<h2 id="跳转指令">跳转指令</h2>
+<figure>
+<img
+src="https://raw.githubusercontent.com/DeutschBall/test/master/image-20220410230358338.png"
+alt="image-20220410230358338" />
+<figcaption aria-hidden="true">image-20220410230358338</figcaption>
+</figure>
+<h3 id="pc相对寻址跳转">PC相对寻址跳转</h3>
+<p>首先分析CSAPP给出的例子</p>
+<figure>
+<img
+src="https://raw.githubusercontent.com/DeutschBall/test/master/image-20220410230546880.png"
+alt="image-20220410230546880" />
+<figcaption aria-hidden="true">image-20220410230546880</figcaption>
+</figure>
+<p>1.<code>movq %rdi,%rdx</code></p>
+<p><code>R[%rdx]=R[%rdi]=x</code>将传入的参数放进<code>rax</code>寄存器</p>
+<p>2.<code>jmp  .L2</code></p>
+<p>无条件跳转到<code>.L2</code></p>
+<p>.L2:</p>
+<p>首先<code>testq %rax,%rax</code>作用是置符号标志,方便判断<code>R[%rax]</code>是负数还是非负数</p>
+<p>然后<code>jg .L3</code> ,jump if greater
+即如果<code>R[%rax]&gt;0</code>则跳转.L3</p>
+<p>.L3:</p>
+<p><code>sarq %rax</code>,寄存器<code>%rax</code>中的值右移一位,即除以二下取整</p>
+<p>显然当<code>R[%rax]=0</code>时.L2中的jg不再满足条件,执行第八行
+的返回语句</p>
+<p>因此可以推断,源c程序是这样写的:</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="type">void</span> <span class="title function_">func</span><span class="params">(<span class="type">int</span> x)</span>&#123;</span><br><span class="line">	<span class="keyword">while</span>(x&gt;<span class="number">0</span>)&#123;</span><br><span class="line">		x&gt;&gt;=<span class="number">1</span>;</span><br><span class="line">	&#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>对.o文件使用objdump反汇编得到</p>
+<figure>
+<img
+src="https://raw.githubusercontent.com/DeutschBall/test/master/image-20220410231054590.png"
+alt="image-20220410231054590" />
+<figcaption aria-hidden="true">image-20220410231054590</figcaption>
+</figure>
+<p>第一行和刚才相同</p>
+<p>第二行<code>jmp 8</code>这里8怎么来的?左侧的机器码为<code>eb 03</code>,即实际操作数是0x03,然后程序进行到loop+0x3位置即该指令时,首先要做的就是程序计数器移动到下一条指令的位置,即移动loop+0x03这条指令的长度2,此时PC=5,然后jmp
+8的8就是PC+0x03=5+3=8,这样得到的</p>
+<p><strong>习题3.15</strong></p>
+<figure>
+<img
+src="https://raw.githubusercontent.com/DeutschBall/test/master/image-20220410231355967.png"
+alt="image-20220410231355967" />
+<figcaption aria-hidden="true">image-20220410231355967</figcaption>
+</figure>
+<p>A.当执行4003fa条指令时,PC=4003fc,然后<code>74 02</code>表明要跳转的位置是<code>PC+0x02=0x4003fc+0x02=0x4003fe</code>,即<code>je 0x4003fe</code></p>
+<p>B.当执行40042f条指令时,PC=400431,然后<code>74 f4</code>表明要跳转的位置时<code>PC-0x0C=0x400431-0x0C=0x400425</code>,即<code>je 0x400425</code></p>
+<p>C.执行前一条指令的时候,程序计数器指示下一行的指令位置,即为PC,<code>0x400547=PC+0x02</code>得到<code>PC=0x400545</code>,则第一行的指令地址为<code>0x400545-2=0x400543</code></p>
+<p>D.执行4005e8条指令时,PC=4005ed,字节按照从最低位到最高位的顺序列出为<code>0xff ff ff 73=-141=-0x00 00 00 8D</code></p>
+<p><code>PC-0x8D=0x4005ed-0x8d=0x400560</code></p>
+<p>因此<code>jmpq 0x400560</code></p>
+<h3 id="习题3.18">习题3.18</h3>
+<figure>
+<img
+src="https://raw.githubusercontent.com/DeutschBall/test/master/image-20220410233232652.png"
+alt="image-20220410233232652" />
+<figcaption aria-hidden="true">image-20220410233232652</figcaption>
+</figure>
+<p>程序逻辑分析如下:</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br></pre></td><td class="code"><pre><span class="line">R[%rax]=R[%rdi]+R[%rsi]=x+y</span><br><span class="line">R[%rax]=R[%rax]+R[%rdx]=x+y+z</span><br><span class="line">计算R[%rdi]-(-3)=R[%rdi]+3=x+3,根据结果置符号位SF和溢出位OF</span><br><span class="line">如果刚才的值大于等于0即x+3&gt;=0,x&gt;=-3则跳转到.L2</span><br><span class="line">否则计算R[%rsi]-R[%rdx]=y-z</span><br><span class="line">如果刚才的值大于0即y-z=&gt;0即y&gt;=z则跳转.L3</span><br><span class="line">否则R[%rax]=R[%rdi]=z</span><br><span class="line">R[%rax]=R[%rax]*R[%rdi]=x*z;</span><br><span class="line">return R[%rax]=x*z;</span><br><span class="line"></span><br><span class="line">.L3:</span><br><span class="line">R[%rax]=R[%rsi]=y</span><br><span class="line">R[%rax]=R[%rax]*R[%rdx]=y*z</span><br><span class="line">return R[%rax]=y*z;</span><br><span class="line"></span><br><span class="line">.L2:</span><br><span class="line">计算R[%rdi]-2,g,根据结果置符号位SF和溢出位OF</span><br><span class="line">不考虑溢出,则当SF=1或者ZF=1即刚才的结果小于等于0即R[%rdi]-2&lt;=0即R[%rdi]=x&lt;=2,则跳转.L4</span><br><span class="line">否则R[%rax]=R[%rdi]=x</span><br><span class="line">R[%rax]=R[%rax]*R[%rdx]=x*z</span><br><span class="line"></span><br><span class="line">.L4</span><br><span class="line">return R[%rax]</span><br><span class="line"></span><br></pre></td></tr></table></figure>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br></pre></td><td class="code"><pre><span class="line">int func(int x,int y,int z)&#123;</span><br><span class="line">	int temp=x+y+z;</span><br><span class="line">	if(x&gt;=-3)&#123;</span><br><span class="line">		if(x&lt;=2)&#123;</span><br><span class="line">			return temp;</span><br><span class="line">		&#125;</span><br><span class="line">		else&#123;</span><br><span class="line">			return x*z;</span><br><span class="line">		&#125;</span><br><span class="line">	&#125;</span><br><span class="line">	else if(y&gt;=z)&#123;</span><br><span class="line">		return y*z;</span><br><span class="line">	&#125;</span><br><span class="line">	else</span><br><span class="line">		return x*y;</span><br><span class="line">&#125;</span><br><span class="line"></span><br></pre></td></tr></table></figure>
+<p>但是这样写会有4条return语句,答案只有一条return语句,在完成所有条件判断之后返回val</p>
+<figure>
+<img
+src="https://raw.githubusercontent.com/DeutschBall/test/master/image-20220411082058654.png"
+alt="image-20220411082058654" />
+<figcaption aria-hidden="true">image-20220411082058654</figcaption>
+</figure>
+<p>首先改写成:</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br></pre></td><td class="code"><pre><span class="line">int func(int x,int y,int z)&#123;</span><br><span class="line">	int temp=x+y+z;</span><br><span class="line">	if(x&gt;=-3)&#123;</span><br><span class="line">		if(x&lt;=2)&#123;</span><br><span class="line">			//啥也不干</span><br><span class="line">		&#125;</span><br><span class="line">		else&#123;</span><br><span class="line">			temp=x*z;</span><br><span class="line">		&#125;</span><br><span class="line">	&#125;</span><br><span class="line">	else if(y&gt;=z)&#123;</span><br><span class="line">		temp= y*z;</span><br><span class="line">	&#125;</span><br><span class="line">	else</span><br><span class="line">		temp= x*y;</span><br><span class="line">&#125;</span><br><span class="line"></span><br></pre></td></tr></table></figure>
+<p>然后<code>x&gt;=-3,x&lt;=2</code>下面是没有东西的,考虑不写这一条</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">if(x&gt;=-3)&#123;</span><br><span class="line">	if(x&gt;2)temp=x*z;</span><br><span class="line">&#125;</span><br><span class="line">else if(y&gt;=z)&#123;</span><br><span class="line">	temp=y*z;</span><br><span class="line">&#125;</span><br><span class="line">else temp=x*y;</span><br><span class="line">return temp;</span><br></pre></td></tr></table></figure>
+<p>这样写还是与给定的格式不一样</p>
+<p>第一个if下面应该有一个if,有一个else,最后不应该有else</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">if(x&lt;-3)&#123;</span><br><span class="line">	if(y&gt;=z)temp=y*z;</span><br><span class="line">	else temp=x*y;</span><br><span class="line">&#125;</span><br><span class="line">else if(x&gt;2)temp=x*z;</span><br><span class="line">return temp;</span><br></pre></td></tr></table></figure>
+<p>此时就和给定的格式相同了</p>
+<figure>
+<img
+src="https://raw.githubusercontent.com/DeutschBall/test/master/image-20220411082631746.png"
+alt="image-20220411082631746" />
+<figcaption aria-hidden="true">image-20220411082631746</figcaption>
+</figure>
+<p>testq %rsi之后各标志位的情况</p>
+<table>
+<thead>
+<tr>
+<th><code>R[%rsi]</code></th>
+<th><code>testq %rsi=R[%rsi]+R[%rsi]</code></th>
+<th>SF</th>
+<th>ZF</th>
+<th>OF</th>
+<th>CF</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>正数</td>
+<td>无溢出</td>
+<td>0</td>
+<td>0</td>
+<td>0</td>
+<td>0</td>
+</tr>
+<tr>
+<td>0</td>
+<td>无溢出</td>
+<td>0</td>
+<td>1</td>
+<td>0</td>
+<td>0</td>
+</tr>
+<tr>
+<td>负数</td>
+<td>无溢出</td>
+<td>1</td>
+<td>0</td>
+<td>0</td>
+<td>0</td>
+</tr>
+<tr>
+<td>正数</td>
+<td>溢出</td>
+<td>1</td>
+<td>0</td>
+<td>1</td>
+<td></td>
+</tr>
+<tr>
+<td>负数</td>
+<td>溢出</td>
+<td>0</td>
+<td>0</td>
+<td>1</td>
+<td></td>
+</tr>
+</tbody>
+</table>
+<p>用testq如何判断一个数是正数还是负数?</p>
+<p>正数时<code>SF^OF=0andZF=0</code></p>
+<p>负数时<code>SF^OF=1</code></p>
+<p>0时<code>ZF=1</code></p>
+<p>非负数<code>SF^OF=0</code></p>
+<p>那么配合<code>jge</code></p>
+<figure>
+<img
+src="https://raw.githubusercontent.com/DeutschBall/test/master/image-20220411085309367.png"
+alt="image-20220411085309367" />
+<figcaption aria-hidden="true">image-20220411085309367</figcaption>
+</figure>
+<p>跳转成立条件即<span class="math inline">\(!(SF\oplus
+OF)=1\)</span>即<span class="math inline">\(SF\oplus OF =0\)</span></p>
+<figure>
+<img
+src="https://raw.githubusercontent.com/DeutschBall/test/master/image-20220411085754492.png"
+alt="image-20220411085754492" />
+<figcaption aria-hidden="true">image-20220411085754492</figcaption>
+</figure>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line">long loop_while2(long a,long b)&#123;</span><br><span class="line">	if(b&lt;=0)&#123;</span><br><span class="line">		return b;</span><br><span class="line">	&#125;</span><br><span class="line">	else&#123;</span><br><span class="line">		int temp=b;</span><br><span class="line">		while(b&gt;0)&#123;</span><br><span class="line">			temp*=a;</span><br><span class="line">			b-=a;</span><br><span class="line">		&#125;</span><br><span class="line">		return temp;</span><br><span class="line">	&#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<figure>
+<img
+src="https://raw.githubusercontent.com/DeutschBall/test/master/image-20220411090237810.png"
+alt="image-20220411090237810" />
+<figcaption aria-hidden="true">image-20220411090237810</figcaption>
+</figure>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">long loop_while2(long a,long b)&#123;</span><br><span class="line">	long result=b;</span><br><span class="line">	while(b&gt;0)&#123;</span><br><span class="line">		result=result*a;</span><br><span class="line">		b=b-a;</span><br><span class="line">	&#125;</span><br><span class="line">	return result;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<h2 id="递归过程">递归过程</h2>
+<p>需要了解一下过程,调用约定</p>
+<figure>
+<img
+src="https://raw.githubusercontent.com/DeutschBall/test/master/image-20220420205909645.png"
+alt="image-20220420205909645" />
+<figcaption aria-hidden="true">image-20220420205909645</figcaption>
+</figure>
+<figure>
+<img
+src="https://raw.githubusercontent.com/DeutschBall/test/master/image-20220420205922083.png"
+alt="image-20220420205922083" />
+<figcaption aria-hidden="true">image-20220420205922083</figcaption>
+</figure>
+<p>汇编第6行如果跳转实现的话(<code>rdi</code>中存放的<code>x=0</code>)则到11行将被调用者保存的rbx还原,之前又把<code>eax</code>置0,因此返回0,相当于啥也没干</p>
+<p>对应<code>rfun</code>函数中的条件判断</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">if(x==0)return 0;</span><br></pre></td></tr></table></figure>
+<p>c程序下面的递归过程对应汇编中不满足条件跳转的语句(7到12行)</p>
+<p>第7行将<code>rdi</code>中存放的x右移两位</p>
+<p>第8行就调用<code>rfun</code>了,<code>rdi</code>是调用者保存的,用来给<code>rfun</code>传递参数,</p>
+<p><code>rfun(x)</code>将会调用<code>rfun(x&gt;&gt;2)</code></p>
+<p>这样一直递归调用到最内层的函数时<code>x==0</code>不满足跳转条件了,返回<code>0,rbx</code>值不变,还是调用者给的值,</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br></pre></td><td class="code"><pre><span class="line">假设上级函数rbx=y</span><br><span class="line">rfun(x)<span class="comment">//x放到rdi里</span></span><br><span class="line">	把rbx中的y存一下</span><br><span class="line">	x放到rbx里</span><br><span class="line">	eax归零</span><br><span class="line">	<span class="keyword">if</span>(x==<span class="number">0</span>)&#123;</span><br><span class="line">		把刚才放起来y重新放回rbx里</span><br><span class="line">		<span class="keyword">return</span> <span class="number">0</span>;</span><br><span class="line">	&#125;</span><br><span class="line">	rdi中的x右移两位成为x1</span><br><span class="line">	<span class="title function_">rfun</span><span class="params">(x1)</span>&#123;&#125;</span><br><span class="line">		...</span><br><span class="line">		rdi中的x1右移两位成为x2</span><br><span class="line">		<span class="title function_">rfun</span><span class="params">(x2)</span>&#123;</span><br><span class="line">			...</span><br><span class="line">		&#125;</span><br><span class="line">		rbx中的x1加到rax上</span><br><span class="line">		返回rax</span><br><span class="line">	&#125;</span><br><span class="line">	rbx中的x加到rax上</span><br><span class="line">	返回rax</span><br><span class="line">	</span><br></pre></td></tr></table></figure>
+<p>rax中累计的是历次x的值</p>
+<p>rbx保存"本次"x 的值</p>
+<blockquote>
+<p><code>rdi</code>也是本次x的值啊?为什么还要<code>rbx</code>保存一下?</p>
+<p>在将本次的x累加到<code>rax</code>中之前<code>rdi</code>中的x已经右移两位了,应该用<code>rbx</code>记住x之后再右移</p>
+<p><code>rbx</code>的作用就是记住本次本次本次的x值,</p>
+<p>可以这样理解:</p>
+<p>如果不用<code>rbx</code>,可以开一个数组,</p>
+<p>比如第一层函数的参数x放到数组第一位</p>
+<p>第二层函数的参数x1放到数组的第二位</p>
+<p>...</p>
+<p>然后在返回的时候只需要将下一层函数的返回值与本层在数组中存放的参数值乘起来然后返回</p>
+<p>但是实际上寄存器很有限,被调用者寄存器只有六个,如果递归层数很多了则这种数组是不现实的</p>
+<p>只用一个的话就是滚动数组的思想了</p>
+<p>在返回之前,由于要返回的值已经用完了,rbx的暂时存放使命完成,可以还给上一层函数了,继续承担上一层函数的暂时存放使命</p>
+</blockquote>
+
+      
+    </div>
+
+    
+    
+    
+      <footer class="post-footer">
+        <div class="post-eof"></div>
+      </footer>
+  </article>
+  
+  
+  
+
+      
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="en">
     <link itemprop="mainEntityOfPage" href="http://deutschball.github.io/2022/05/23/%E5%BC%82%E5%B8%B8/">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
