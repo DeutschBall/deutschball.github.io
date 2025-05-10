@@ -167,6 +167,444 @@
   
   
   <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="en">
+    <link itemprop="mainEntityOfPage" href="http://deutschball.github.io/2022/08/27/x86-%E4%B8%BB%E5%BC%95%E5%AF%BC%E8%AE%B0%E5%BD%95/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="https://raw.githubusercontent.com/DeutschBall/picbed/main/dustball.png">
+      <meta itemprop="name" content="dustball">
+      <meta itemprop="description" content="dustland">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="dustland">
+    </span>
+      <header class="post-header">
+        <h2 class="post-title" itemprop="name headline">
+          
+            <a href="/2022/08/27/x86-%E4%B8%BB%E5%BC%95%E5%AF%BC%E8%AE%B0%E5%BD%95/" class="post-title-link" itemprop="url">x86汇编语言 chapter 5 主引导记录</a>
+        </h2>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-calendar"></i>
+              </span>
+              <span class="post-meta-item-text">Posted on</span>
+
+              <time title="Created: 2022-08-27 17:23:00" itemprop="dateCreated datePublished" datetime="2022-08-27T17:23:00+08:00">2022-08-27</time>
+            </span>
+              <span class="post-meta-item">
+                <span class="post-meta-item-icon">
+                  <i class="far fa-calendar-check"></i>
+                </span>
+                <span class="post-meta-item-text">Edited on</span>
+                <time title="Modified: 2022-08-30 00:31:02" itemprop="dateModified" datetime="2022-08-30T00:31:02+08:00">2022-08-30</time>
+              </span>
+
+          
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+          <h1 id="主引导记录">主引导记录</h1>
+<p>书上借助主引导扇区的例子,讲解了实模式下分段机制,显存的使用等等基本原理</p>
+<p>为啥要借助主引导扇区呢?</p>
+<p>因为虚拟机开机之后BIOS自动将磁盘的前512字节作为主引导记录装载进入内存的0x7c00位置并从0x7c00处开始执行.</p>
+<p>我们的代码直接写到主引导记录中就可以顺理成章地执行了</p>
+<h2 id="自举过程">自举过程</h2>
+<p>计算机上电之后,如果设置硬盘位首选的启动设备,则ROM-BIOS将视图读取硬盘的逻辑0号扇区,即物理上的0面0道1扇区.这里就是主引导扇区的位置</p>
+<p>ROM-BIOS会把这个扇区的512字节搬到内存的0x7c00处,后面就是对内存中的拷贝进行的一系列操作</p>
+<p>ROM-BIOS检查这512字节的最后两个字节是否是0x55,0xAA,这是主引导扇区魔数</p>
+<p>如果主引导扇区有效则跳转打0x7c00继续执行</p>
+<p>主引导扇区的内容一般是检测操作系统在硬盘上的位置,把grub代码加载道内存,跳转grub举起操作系统来</p>
+<h2 id="显示">显示</h2>
+<h3 id="显卡与显示器">显卡与显示器</h3>
+<p>显卡负责给显示器提供内容</p>
+<p>显示器负责显式</p>
+<p>显示器接到显卡上,显卡接到主板上</p>
+<p>显卡控制显示器的最小单位是像素,每个像素点需要24比特存储颜色(RGB各8比特).显卡使用字节的显式存储器(显存,video
+RAM,VRAM)存放像素点的颜色.要显式啥就把啥信息放到显存里.</p>
+<p>显示器是一个二维平面,儿显存就是一个内存条子的存储器,它是线性的,这就涉及到一维数组到二维数组的映射关系了</p>
+<p>显存相当于一个缓冲区,CPU把想要输出到屏幕的东西放到显存里.显卡周期性地从显存拿出来按顺序显式到屏幕上.</p>
+<h3 id="显卡工作模式">显卡工作模式</h3>
+<p>显卡的工作模式分为文本模式和图形模式</p>
+<p>图形模式下操作的确实是像素点</p>
+<p>文本模式下只需要在显存中写入指定的字符的ASCII码,显卡内部经过字符发生器,就可以翻译成一些像素点的组合输出到屏幕上,也就是代替人干了计算每个像素点位置的事,人只需要指定第几行第几列写哪个字符就可以了</p>
+<p>一般个人电脑显卡加电自检之后都会把自己初始化为80×25的文本模式</p>
+<p>每行可以显示80个字符,一共可以显示25行.满屏是2000个字符</p>
+<h3 id="端口映射内存">端口映射内存</h3>
+<p>如果正儿八经地论起来,除了内存条子,其他的设备都是IO外设,CPU和内存条子打交道的速度得是外设的成千上万倍,如果想要实现细致流畅的游戏画面体验,经过IO访问显存是办不到的.于是把显存也和内存统一编址,这就绕开了IO直接让CPU像访问内存一样访问显存.</p>
+<p>对于8086来说,其CPU宽20位,可以寻址1M的内存空间0x0到0x9FFFF,</p>
+<p>那从0xA0000到0xFFFFF就不是内存条子的事了,比如</p>
+<p>0xB8000到0xBFFFF这32KB的地址空间映射给显存</p>
+<p>0xF0000到0xFFFFF这64K的地址空间映射给ROM-BIOS</p>
+<figure>
+<img
+src="https://raw.githubusercontent.com/DeutschBall/DeutschBall/main/image-20220825153008702.png"
+alt="image-20220825153008702" />
+<figcaption aria-hidden="true">image-20220825153008702</figcaption>
+</figure>
+<h3 id="段寄存器">段寄存器</h3>
+<p>显存入乡随俗,怎么访问内存就得怎么访问显存</p>
+<p>访问内存使用段地址:偏移量,</p>
+<p>物理地址=段地址×16+偏移量</p>
+<p>那么如果要访问显存,就得根据显存的起始地址设置段地址,由于显存起始地址是0xB8000,因此段地址就是0xB800,寻址的时候CPU会自动把0xB800乘16的</p>
+<p>怎样让段寄存器等于0xB800呢?</p>
+<p><code>mov es,0xB800</code>这样写吗?不可以,Intel的处理器规定不允许将立即数传递给段寄存器,必须使用通用寄存器或者内存单元中转一下,也就是说</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">mov ax,<span class="number">0xb800</span>                 ;指向文本模式的显示缓冲区</span><br><span class="line">mov es,ax</span><br></pre></td></tr></table></figure>
+<h3 id="字符模式下一个表示字符">字符模式下一个表示字符</h3>
+<p>字符模式下每个字符需要占据连续的两个字节,低字节是该字符的ASCII代码,高字节是该字符的颜色特征</p>
+<figure>
+<img
+src="https://raw.githubusercontent.com/DeutschBall/DeutschBall/main/image-20220825162813158.png"
+alt="image-20220825162813158" />
+<figcaption aria-hidden="true">image-20220825162813158</figcaption>
+</figure>
+<p>比如这里0xB8000开始的连续两个字节,</p>
+<p>低字节0x48是'H'的ASCII码,</p>
+<p>高字节0x07=00000111B表示黑背景色不闪烁,白前景色</p>
+<h3 id="显示字符">显示字符</h3>
+<p>例子中想要显示一串字符串"Label offset:"</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br></pre></td><td class="code"><pre><span class="line">      mov ax,<span class="number">0xb800</span>                 <span class="comment">//es段设置为显存地址起始位置</span></span><br><span class="line">      mov es,ax	</span><br><span class="line">mov byte [es:<span class="number">0x00</span>],<span class="string">&#x27;L&#x27;</span></span><br><span class="line">      mov byte [es:<span class="number">0x01</span>],<span class="number">0x07</span></span><br><span class="line">      mov byte [es:<span class="number">0x02</span>],<span class="string">&#x27;a&#x27;</span></span><br><span class="line">      mov byte [es:<span class="number">0x03</span>],<span class="number">0x07</span></span><br><span class="line">      mov byte [es:<span class="number">0x04</span>],<span class="string">&#x27;b&#x27;</span></span><br><span class="line">      mov byte [es:<span class="number">0x05</span>],<span class="number">0x07</span></span><br><span class="line">      mov byte [es:<span class="number">0x06</span>],<span class="string">&#x27;e&#x27;</span></span><br><span class="line">      mov byte [es:<span class="number">0x07</span>],<span class="number">0x07</span></span><br><span class="line">      mov byte [es:<span class="number">0x08</span>],<span class="string">&#x27;l&#x27;</span></span><br><span class="line">      mov byte [es:<span class="number">0x09</span>],<span class="number">0x07</span></span><br><span class="line">      mov byte [es:<span class="number">0x0a</span>],<span class="string">&#x27; &#x27;</span></span><br><span class="line">      mov byte [es:<span class="number">0x0b</span>],<span class="number">0x07</span></span><br><span class="line">      mov byte [es:<span class="number">0x0c</span>],<span class="string">&quot;o&quot;</span></span><br><span class="line">      mov byte [es:<span class="number">0x0d</span>],<span class="number">0x07</span></span><br><span class="line">      mov byte [es:<span class="number">0x0e</span>],<span class="string">&#x27;f&#x27;</span></span><br><span class="line">      mov byte [es:<span class="number">0x0f</span>],<span class="number">0x07</span></span><br><span class="line">      mov byte [es:<span class="number">0x10</span>],<span class="string">&#x27;f&#x27;</span></span><br><span class="line">      mov byte [es:<span class="number">0x11</span>],<span class="number">0x07</span></span><br><span class="line">      mov byte [es:<span class="number">0x12</span>],<span class="string">&#x27;s&#x27;</span></span><br><span class="line">      mov byte [es:<span class="number">0x13</span>],<span class="number">0x07</span></span><br><span class="line">      mov byte [es:<span class="number">0x14</span>],<span class="string">&#x27;e&#x27;</span></span><br><span class="line">      mov byte [es:<span class="number">0x15</span>],<span class="number">0x07</span></span><br><span class="line">      mov byte [es:<span class="number">0x16</span>],<span class="string">&#x27;t&#x27;</span></span><br><span class="line">      mov byte [es:<span class="number">0x17</span>],<span class="number">0x07</span></span><br><span class="line">      mov byte [es:<span class="number">0x18</span>],<span class="string">&#x27;:&#x27;</span></span><br><span class="line">      mov byte [es:<span class="number">0x19</span>],<span class="number">0x07</span></span><br></pre></td></tr></table></figure>
+<p>每两个相邻字节的低字节放字符ASCII代码,高字节调制颜色,都是不闪烁的黑背景,白前景</p>
+<p>寻址的时候使用的是<code>[es:0x00]</code>,转换成物理地址就是</p>
+<p><code>es*16+0x00</code>,为啥要写es呢?因为段寄存器默认是ds,这里需要段超越前缀指定使用es段</p>
+<p>而es=0x8b00,乘以16之后恰好就是显存映射地址的起始位置</p>
+<p>用byte关键字来修饰操作数的范围</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">mov byte [es:<span class="number">0x00</span>],<span class="string">&#x27;L&#x27;</span></span><br></pre></td></tr></table></figure>
+<p>意思是'L'顶多占用一个字节,不能再多了,这条指令只会把0x4C放到es:00上</p>
+<blockquote>
+<p>如果这样写</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">mov word [es:0x00],&#x27;L&#x27;</span><br></pre></td></tr></table></figure>
+<p>则把0x4C放到es:0x00,把0x00放到es:0x01</p>
+</blockquote>
+<p>如果是把寄存器的值放到内存上则不用byte或者word修饰操作数的范围,因为寄存器已经自带宽度了</p>
+<h2 id="指令地址">指令地址</h2>
+<h3 id="汇编地址">汇编地址</h3>
+<p>前面字句过程中也已经提到过,BIOS会把MBR这个512个字节放到内存条的0x7c00上.也就是说代码是从0x7c00开始的</p>
+<blockquote>
+<p>刚才显存扯了一大堆,但是都是相当于往数据段放东西,这个数据段位于0xB8000</p>
+</blockquote>
+<p>汇编地址:</p>
+<p>编译器会把0x7c00开始的MBR代码作为一个独立的段处理</p>
+<p>这样每条指令相对于段地址都有一个汇编地址(段内),在lst文件中可以看到这个汇编地址</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"> 行号 段内偏移 指令								汇编                                    </span><br><span class="line"> <span class="number">6</span> <span class="number">00000000</span> B800B8                           mov ax,<span class="number">0xb800</span>                 ;指向文本模式的显示缓冲区</span><br><span class="line"> <span class="number">7</span> <span class="number">00000003</span> <span class="number">8</span>EC0                             mov es,ax</span><br><span class="line"> <span class="number">8</span>                                  </span><br><span class="line"> <span class="number">9</span>                                           ;以下显示字符串<span class="string">&quot;Label offset:&quot;</span></span><br><span class="line"><span class="number">10</span> <span class="number">00000005</span> <span class="number">26</span>C60600004C                     mov byte [es:<span class="number">0x00</span>],<span class="string">&#x27;L&#x27;</span></span><br><span class="line"><span class="number">11</span> <span class="number">0000000B</span> <span class="number">26</span>C606010007                     mov byte [es:<span class="number">0x01</span>],<span class="number">0x07</span></span><br><span class="line"><span class="number">12</span> <span class="number">00000011</span> <span class="number">26</span>C606020061                     mov byte [es:<span class="number">0x02</span>],<span class="string">&#x27;a&#x27;</span></span><br></pre></td></tr></table></figure>
+<p>第一条有意义的指令是在第6行,段内偏移量为0,指令内容是0xB800B8,翻译成汇编语言就是<code>mov ax,0xb800</code>,由于这条指令长3字节,因此可以计算得到下一条指令的段内偏移量就是3</p>
+<p>第七行指令的段内偏移量就是3</p>
+<h3 id="标号">标号</h3>
+<p>如果要在汇编语言中写出跳转功能,就得从一个地址转到另一个地址.</p>
+<p>怎么指定目标地址呢?让人手工计算目标地址然后写到jmp后面吗?显然人工计算指令地址不显示,比如一段千八行的汇编语言,有好多指令都是跳转或者调用指令,现在第一行的指令发现错了要改,假设原来两个字节的指令改成了一个字节,那么后面的所有指令地址就都减1,这就需要所有的跳转和调用指令重定位.让人手工一行一行改太慢了</p>
+<p>于是就发明了标号这种东西,类似于一个变量符号,作用是记录一个地址,编译器会自动计算该标号的地址,在生成二进制码的时候自动把标号翻译成地址,根宏定义展开一样</p>
+<p>比如主引导记录中有这么一句:</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">infi: jmp near infi                 ;无限循环</span><br></pre></td></tr></table></figure>
+<p>infi标号的这条指令要跳转到infi标号处的指令,也就是自己跳转到自己的开始,这就形成了无线循环</p>
+<p>标号还可以直接写到汇编指令里:</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">dividnd dw 0x3f0</span><br><span class="line">divisor db 0x3f</span><br><span class="line">mov ax,[dividnd]</span><br><span class="line">div byte [divisor]</span><br></pre></td></tr></table></figure>
+<p>这里dividnd标号是0x3f0的地址,divisor是0x3f的地址</p>
+<p>在编译时就像宏定义展开一样,mov
+ax,[dividnd]这里的标号就会自动转化成地址</p>
+<h2 id="声明并初始化数据">声明并初始化数据</h2>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">number db <span class="number">0</span>,<span class="number">0</span>,<span class="number">0</span>,<span class="number">0</span>,<span class="number">0</span></span><br></pre></td></tr></table></figure>
+<p>这里number是标号,db是定义字节的伪指令,后面定义了五个字节,都初始化为0,相邻两个字节之间用逗号隔开.6</p>
+<blockquote>
+<p>这里定义的五个字节就在当前代码段中</p>
+<p>但是标注的做法应该是代码数据分离,数据专门放在数据段中,使用段超越方法寻址</p>
+<p>byte [ds:00]就表示数据段的最开始的字节</p>
+</blockquote>
+<p>意思是从number开始的五个字节都是0</p>
+<p>dw声明字,dd声明双字,dq声明四字</p>
+<p>db,dw,dd,dq都是伪指令,当编译完成时就找不到影子了</p>
+<blockquote>
+<p>编译完成后的样子,就是5个0</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="number">100</span> <span class="number">0000012</span>E <span class="number">0000000000</span>                number db <span class="number">0</span>,<span class="number">0</span>,<span class="number">0</span>,<span class="number">0</span>,<span class="number">0</span></span><br></pre></td></tr></table></figure>
+</blockquote>
+<p>用db声明的变量就必须在字节大小范围内,最小是0x00,最大是0xFF,如果比这还大就会截断高位</p>
+<p>比如db 0xFF00,编译之后保留低字节0x00</p>
+<h2 id="段超越前缀">段超越前缀</h2>
+<p>如果这样写mov al,[0x00]</p>
+<p>意思是把内存中0x00位置的数据搬到al寄存器中,问题是,这个0x00是相对于哪个段的偏移量呢?</p>
+<p>DS?CS?</p>
+<p>默认的数据段是DS,因此如果不指明段超越前缀,就是访问的数据段</p>
+<p>但是如果要访问ES段寄存器指向的段,应该怎么写呢?</p>
+<p>mov al,[es:0x00]</p>
+<p>这里es:就是段超越前缀</p>
+<h2 id="除法指令">除法指令</h2>
+<p>除法指令div只有一个操作数作为除数</p>
+<p>被除数默认是AX寄存器</p>
+<p>8086允许两种类型的整数除法,</p>
+<p>其一是16位被除数除以8位除数由于8086的寄存器宽度为8,因此一个AX就可以放开被除数.除完了商放到AL,余数放到AH</p>
+<p>其二是32位被除数除以16位除数</p>
+<p>此时除数刚好占用一个寄存器,但是被除数就需要放到两个寄存器中了,即DX放高16位,AX放低16位,除完了商放在AX,余数放在DX</p>
+<p>处理器怎么区分两种除法应该用哪种呢?看除数的格式,如果除数是一个字寄存器,比如div
+cx,就得是32位除被数除以16位除数.如果是div
+cl,就是16位被除数除以8位除数</p>
+<p>在主引导扇区代码的第37到47行是这样写的</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line">mov ax,number ;这里number是一个地址标号</span><br><span class="line">mov bx,10	;被除数置为10</span><br><span class="line"></span><br><span class="line">mov cx,cs		</span><br><span class="line">mov ds,cx		;ds寄存器指向当前cx寄存器的段地址</span><br><span class="line"></span><br><span class="line">mov dx,0	;被除数高位置0</span><br><span class="line">div bx	;DX:AX/BX</span><br><span class="line">       </span><br><span class="line">mov [0x7c00+number+0x00],dl		;dl放的是余数的低字节,也就是number这个地址的个位数字,放到0x7c00+number+0x00这个位置上</span><br></pre></td></tr></table></figure>
+<p>主引导记录中一直重复该过程,意思是十进制分解被除数number标号地址的各位,放到0x7c00+number开始的五个字节上</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br></pre></td><td class="code"><pre><span class="line">mov ax,number                 ;?????number???????</span><br><span class="line">mov bx,<span class="number">10</span></span><br><span class="line"></span><br><span class="line"></span><br><span class="line">mov cx,cs</span><br><span class="line">mov ds,cx</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">mov dx,<span class="number">0</span></span><br><span class="line">div bx</span><br><span class="line">mov [<span class="number">0x7c00</span>+number+<span class="number">0x00</span>],dl   </span><br><span class="line"></span><br><span class="line"></span><br><span class="line">xor dx,dx</span><br><span class="line">div bx</span><br><span class="line">mov [<span class="number">0x7c00</span>+number+<span class="number">0x01</span>],dl  </span><br><span class="line"></span><br><span class="line"></span><br><span class="line">xor dx,dx</span><br><span class="line">div bx</span><br><span class="line">mov [<span class="number">0x7c00</span>+number+<span class="number">0x02</span>],dl   </span><br><span class="line"></span><br><span class="line"></span><br><span class="line">xor dx,dx</span><br><span class="line">div bx</span><br><span class="line">mov [<span class="number">0x7c00</span>+number+<span class="number">0x03</span>],dl   </span><br><span class="line"></span><br><span class="line">;????位??????? </span><br><span class="line">xor dx,dx</span><br><span class="line">div bx</span><br><span class="line">mov [<span class="number">0x7c00</span>+number+<span class="number">0x04</span>],dl  </span><br><span class="line"></span><br></pre></td></tr></table></figure>
+<p><code>mov [0x7c00+number+0x00],dl</code>这就很诡异了,0x7c00是怎么来的?</p>
+<h3 id="偏移量换算">偏移量换算</h3>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">mov [<span class="number">0x7c00</span>+number+<span class="number">0x00</span>],dl</span><br></pre></td></tr></table></figure>
+<p>这里多了一个0x7c00,而不是直接mov [number+0x00],dl</p>
+<p>这是因为,主引导扇区会被bios装载到内存的0x7c00处</p>
+<p>此时CS=0x0000,IP=0x7c00</p>
+<p>number是相对于mbr.asm这个文件的偏移量12E.</p>
+<p>如果写mov [number+0x00],dl.实际上就是mov [0x12E],dl</p>
+<p>放到了内存条上的0x12E位置,直接出了主引导区了</p>
+<figure>
+<img
+src="https://raw.githubusercontent.com/DeutschBall/DeutschBall/main/image-20220827151725554.png"
+alt="image-20220827151725554" />
+<figcaption aria-hidden="true">image-20220827151725554</figcaption>
+</figure>
+<p>mbr.asm程序自始至终没有修改过cs的值,那么这个值就是BIOS设置的,一直是0x0000不变</p>
+<h2 id="显示分解出来的各个数位">显示分解出来的各个数位</h2>
+<p>分解的各个数位按照个十百千万的顺序放到0x7c00+number+0x00到0x7c00+number+0x04的五个字节中</p>
+<p>对于万位上的数字,mbr程序是这样写的:</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">mov al,[<span class="number">0x7c00</span>+number+<span class="number">0x04</span>]</span><br><span class="line">add al,<span class="number">0x30</span></span><br><span class="line">mov [es:<span class="number">0x1a</span>],al</span><br><span class="line">mov byte [es:<span class="number">0x1b</span>],<span class="number">0x04</span></span><br></pre></td></tr></table></figure>
+<p>把万位数字拿出来放到al里,加上0x30转化成这个数字的ASCII码,然后放到es:0x1a位置,由于es早已设置为0xb800,即显存的起始位置,因此es:0x1a就是第一行的第1a个字符</p>
+<p>在es:0x1b位置设置的是该字符的显示样式,设置为0x04意思是无背景不闪烁,红色前景</p>
+<p><img
+src="https://raw.githubusercontent.com/DeutschBall/DeutschBall/main/image-20220825162813158.png" /></p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br></pre></td><td class="code"><pre><span class="line">mov al,[0x7c00+number+0x04]</span><br><span class="line">add al,0x30</span><br><span class="line">mov [es:0x1a],al</span><br><span class="line">mov byte [es:0x1b],0x04</span><br><span class="line"></span><br><span class="line">mov al,[0x7c00+number+0x03]</span><br><span class="line">add al,0x30</span><br><span class="line">mov [es:0x1c],al</span><br><span class="line">mov byte [es:0x1d],0x04</span><br><span class="line"></span><br><span class="line">mov al,[0x7c00+number+0x02]</span><br><span class="line">add al,0x30</span><br><span class="line">mov [es:0x1e],al</span><br><span class="line">mov byte [es:0x1f],0x04</span><br><span class="line"></span><br><span class="line">mov al,[0x7c00+number+0x01]</span><br><span class="line">add al,0x30</span><br><span class="line">mov [es:0x20],al</span><br><span class="line">mov byte [es:0x21],0x04</span><br><span class="line"></span><br><span class="line">mov al,[0x7c00+number+0x00]</span><br><span class="line">add al,0x30</span><br><span class="line">mov [es:0x22],al</span><br><span class="line">mov byte [es:0x23],0x04</span><br><span class="line"></span><br><span class="line">mov byte [es:0x24],&#x27;D&#x27;</span><br><span class="line">mov byte [es:0x25],0x07</span><br></pre></td></tr></table></figure>
+<p>最后另外放了一个黑底不闪烁白字'D',意思是十进制的缩写(Decimal)</p>
+<p>因此打印效果为</p>
+<figure>
+<img
+src="https://raw.githubusercontent.com/DeutschBall/DeutschBall/main/image-20220827154928612.png"
+alt="image-20220827154928612" />
+<figcaption aria-hidden="true">image-20220827154928612</figcaption>
+</figure>
+<h2 id="无限循环">无限循环</h2>
+<p>在主引导记录中打印了number的数位分解之后,立刻进入无线循环</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">infi: jmp near infi  </span><br></pre></td></tr></table></figure>
+<p>为啥要这样写呢?</p>
+<p>因为如果不写无线循环,那么虚拟机就直接寄了,主引导记录并没有抛砖引玉地加载操作系统,这512个字节跑完之后,后面就全是0了,不存在指令了</p>
+<h3 id="段内跳转near">段内跳转near</h3>
+<p>jmp
+near意思是跳转到当前段内的一个地址,也就是不改变CS段寄存器地址,只改变ip的地址,因此操作数只是infi这个标号,不需要cs:infi指定跳转到哪个段的infi</p>
+<h2 id="填充与魔数">填充与魔数</h2>
+<p>前面的代码和数据都写完了也远远达不到512个字节,主引导记录需要最后两个字符是0xAA55才有效.因此中间的字节需要说一些废话填充</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">times <span class="number">203</span> db <span class="number">0</span></span><br><span class="line">          db <span class="number">0x55</span>,<span class="number">0xaa</span></span><br></pre></td></tr></table></figure>
+<p>连着定义了203个字节都置0,最后两个字节是0xAA55魔数</p>
+<p>到此主引导记录才有效</p>
+<h2 id="bochs调试">Bochs调试</h2>
+<p>之前我们一直使用的都是virtualBox虚拟机,只能运行不能调试,唯一能够调试运行的虚拟机就是Bochs</p>
+<h3 id="bochs配置">bochs配置</h3>
+<p>将主引导记录写入虚拟磁盘vhd文件之后启动bochs,需要在开始菜单上进行一些设置</p>
+<figure>
+<img
+src="https://raw.githubusercontent.com/DeutschBall/DeutschBall/main/image-20220827161343625.png"
+alt="image-20220827161343625" />
+<figcaption aria-hidden="true">image-20220827161343625</figcaption>
+</figure>
+<h4 id="diskboot">Disk&amp;Boot</h4>
+<figure>
+<img
+src="https://raw.githubusercontent.com/DeutschBall/DeutschBall/main/image-20220827161537279.png"
+alt="image-20220827161537279" />
+<figcaption aria-hidden="true">image-20220827161537279</figcaption>
+</figure>
+<p>都2202年了,不会还有人用软盘吧</p>
+<p>ATA,硬盘接口标准,PATA是以前的IDE接口,SATA是当前使用的接口标准</p>
+<p>每个计算机有多个ATA通道,允许加多块磁盘</p>
+<p>ATA channel 0 是必须的,将nobody.vhd挂到ATA channel0上即可</p>
+<h4 id="ata-channel-0">ATA channel 0</h4>
+<figure>
+<img
+src="https://raw.githubusercontent.com/DeutschBall/DeutschBall/main/image-20220827162047232.png"
+alt="image-20220827162047232" />
+<figcaption aria-hidden="true">image-20220827162047232</figcaption>
+</figure>
+<figure>
+<img
+src="https://raw.githubusercontent.com/DeutschBall/DeutschBall/main/image-20220827162545217.png"
+alt="image-20220827162545217" />
+<figcaption aria-hidden="true">image-20220827162545217</figcaption>
+</figure>
+<p>这里Cylinders,Heads等参数不是乱写的,需要填虚拟磁盘的实际情况,可以手工分析最后512个字节的几何参数,也可以使用教材配套软件fixvhdwr.exe</p>
+<figure>
+<img
+src="https://raw.githubusercontent.com/DeutschBall/DeutschBall/main/image-20220827162429565.png"
+alt="image-20220827162429565" />
+<figcaption aria-hidden="true">image-20220827162429565</figcaption>
+</figure>
+<h4 id="boot-options">Boot Options</h4>
+<figure>
+<img
+src="https://raw.githubusercontent.com/DeutschBall/DeutschBall/main/image-20220827162851643.png"
+alt="image-20220827162851643" />
+<figcaption aria-hidden="true">image-20220827162851643</figcaption>
+</figure>
+<h4 id="保存">保存</h4>
+<figure>
+<img
+src="https://raw.githubusercontent.com/DeutschBall/DeutschBall/main/image-20220827162908917.png"
+alt="image-20220827162908917" />
+<figcaption aria-hidden="true">image-20220827162908917</figcaption>
+</figure>
+<p>前面两个设置完毕之后Save保存设置,下一次开Bochs的时候就不用重新设置了</p>
+<p>保存一个bochsrc.bxrc文件,找一个牢稳的地方保存,比如bochs的根目录,或者虚拟机根目录,反正就是下一次启动bochs需要手动load该文件,能找到就行</p>
+<h3 id="bochs运行主引导记录">bochs运行主引导记录</h3>
+<p>设置好之后就可以从bochs启动了</p>
+<p>可以看到第一行打印出了"Label offset:00302D"</p>
+<figure>
+<img
+src="https://raw.githubusercontent.com/DeutschBall/DeutschBall/main/image-20220827163212152.png"
+alt="image-20220827163212152" />
+<figcaption aria-hidden="true">image-20220827163212152</figcaption>
+</figure>
+<h3 id="bochs调试-1">bochs调试</h3>
+<p>使用bochsdbg启动虚拟机,此时除了模拟虚拟机屏幕窗口之外,还有一个终端窗口用于调试</p>
+<figure>
+<img
+src="https://raw.githubusercontent.com/DeutschBall/DeutschBall/main/image-20220827163659611.png"
+alt="image-20220827163659611" />
+<figcaption aria-hidden="true">image-20220827163659611</figcaption>
+</figure>
+<p>bochs在执行第一条指令前停下来等待调试命令</p>
+<p>此时第一条指令位于f000:fff0,指令内容是</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">jmp far 0xf000:e05b</span><br></pre></td></tr></table></figure>
+<p>这个cs:ip指向的地址翻译成物理地址就是0xfe05b</p>
+<p>而BIOS映射到内存的地址是[0xF0000,0xFFFFF],显然第一条指令跳转到了BIOS中</p>
+<p>此后在这个调试终端中就可以输入命令进行调试了</p>
+<h4 id="断点">断点</h4>
+<p>如果想在主引导记录开始下断点,由于主引导记录将被bios装载进入内存的0x7c00位置,</p>
+<p>因此可以在调试终端中这样写</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">b 0x7c00</span><br></pre></td></tr></table></figure>
+<p>这样就在0x7c00出下拉一个断点,处理器将在执行0x7c00的指令之前停下</p>
+<h4 id="执行到断点">执行到断点</h4>
+<p>在0x7c00下断点后,命令c,一直执行直到遇到断点</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">(<span class="number">0</span>) [<span class="number">0x000000007c00</span>] <span class="number">0000</span>:<span class="number">7</span>c00 (unk. ctxt): mov ax, <span class="number">0xb800</span>            ; b800b8</span><br></pre></td></tr></table></figure>
+<p>确实是主引导记录的第一条指令,将要通过ax中转设置es为显存基地址</p>
+<p>分号后面的十六进制数是该条指令的机器码</p>
+<h4 id="查看寄存器">查看寄存器</h4>
+<p>使用r命令查看所有通用寄存器内容</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br></pre></td><td class="code"><pre><span class="line">&lt;bochs:<span class="number">5</span>&gt; r</span><br><span class="line">rax: <span class="number">00000000</span>_0000aa55</span><br><span class="line">rbx: <span class="number">00000000</span>_00000000</span><br><span class="line">rcx: <span class="number">00000000</span>_00090000</span><br><span class="line">rdx: <span class="number">00000000</span>_00000080</span><br><span class="line">rsp: <span class="number">00000000</span>_0000ffd6</span><br><span class="line">rbp: <span class="number">00000000</span>_00000000</span><br><span class="line">rsi: <span class="number">00000000</span>_000e0000</span><br><span class="line">rdi: <span class="number">00000000</span>_0000ffac</span><br><span class="line">r8 : <span class="number">00000000</span>_00000000</span><br><span class="line">r9 : <span class="number">00000000</span>_00000000</span><br><span class="line">r10: <span class="number">00000000</span>_00000000</span><br><span class="line">r11: <span class="number">00000000</span>_00000000</span><br><span class="line">r12: <span class="number">00000000</span>_00000000</span><br><span class="line">r13: <span class="number">00000000</span>_00000000</span><br><span class="line">r14: <span class="number">00000000</span>_00000000</span><br><span class="line">r15: <span class="number">00000000</span>_00000000</span><br><span class="line">rip: <span class="number">00000000</span>_00007c00</span><br><span class="line">eflags <span class="number">0x00000082</span>: id vip vif ac vm rf nt IOPL=<span class="number">0</span> of df <span class="keyword">if</span> tf SF zf af pf cf</span><br></pre></td></tr></table></figure>
+<p>此时rax存放的是0xAA55,估计是BIOS检查主引导记录有效性时留下的</p>
+<p>rip程序计数器此时指向0x7c00</p>
+<h4 id="单步执行">单步执行</h4>
+<p>单步执行之后,程序停在0x7c03位置,此处的指令是mov es,ax.</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">&lt;bochs:<span class="number">6</span>&gt; s</span><br><span class="line">Next at t=<span class="number">17178999</span></span><br><span class="line">(<span class="number">0</span>) [<span class="number">0x000000007c03</span>] <span class="number">0000</span>:<span class="number">7</span>c03 (unk. ctxt): mov es, ax                ; <span class="number">8</span>ec0</span><br></pre></td></tr></table></figure>
+<p>那么此时第一条指令已经执行完毕了,ax的值应该是0xb800,r打印一下</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">&lt;bochs:<span class="number">7</span>&gt; r</span><br><span class="line">rax: <span class="number">00000000</span>_0000b800</span><br></pre></td></tr></table></figure>
+<p>确实如此</p>
+<h4 id="查看段寄存器">查看段寄存器</h4>
+<p>单步执行第二条指令mov es,ax.</p>
+<p>之后es应该被赋值为0xb800</p>
+<p>使用sreg打印所有段寄存器</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br></pre></td><td class="code"><pre><span class="line">&lt;bochs:<span class="number">17</span>&gt; sreg</span><br><span class="line">es:<span class="number">0xb800</span>, dh=<span class="number">0x0000930b</span>, dl=<span class="number">0x8000ffff</span>, valid=<span class="number">1</span></span><br><span class="line">        Data segment, base=<span class="number">0x000b8000</span>, limit=<span class="number">0x0000ffff</span>, Read/Write, Accessed</span><br><span class="line">cs:<span class="number">0x0000</span>, dh=<span class="number">0x00009300</span>, dl=<span class="number">0x0000ffff</span>, valid=<span class="number">1</span></span><br><span class="line">        Data segment, base=<span class="number">0x00000000</span>, limit=<span class="number">0x0000ffff</span>, Read/Write, Accessed</span><br><span class="line">ss:<span class="number">0x0000</span>, dh=<span class="number">0x00009300</span>, dl=<span class="number">0x0000ffff</span>, valid=<span class="number">7</span></span><br><span class="line">        Data segment, base=<span class="number">0x00000000</span>, limit=<span class="number">0x0000ffff</span>, Read/Write, Accessed</span><br><span class="line">ds:<span class="number">0x0000</span>, dh=<span class="number">0x00009300</span>, dl=<span class="number">0x0000ffff</span>, valid=<span class="number">1</span></span><br><span class="line">        Data segment, base=<span class="number">0x00000000</span>, limit=<span class="number">0x0000ffff</span>, Read/Write, Accessed</span><br><span class="line">fs:<span class="number">0x0000</span>, dh=<span class="number">0x00009300</span>, dl=<span class="number">0x0000ffff</span>, valid=<span class="number">1</span></span><br><span class="line">        Data segment, base=<span class="number">0x00000000</span>, limit=<span class="number">0x0000ffff</span>, Read/Write, Accessed</span><br><span class="line">gs:<span class="number">0x0000</span>, dh=<span class="number">0x00009300</span>, dl=<span class="number">0x0000ffff</span>, valid=<span class="number">1</span></span><br><span class="line">        Data segment, base=<span class="number">0x00000000</span>, limit=<span class="number">0x0000ffff</span>, Read/Write, Accessed</span><br><span class="line">ldtr:<span class="number">0x0000</span>, dh=<span class="number">0x00008200</span>, dl=<span class="number">0x0000ffff</span>, valid=<span class="number">1</span></span><br><span class="line">tr:<span class="number">0x0000</span>, dh=<span class="number">0x00008b00</span>, dl=<span class="number">0x0000ffff</span>, valid=<span class="number">1</span></span><br><span class="line">gdtr:base=<span class="number">0x00000000000f9ad7</span>, limit=<span class="number">0x30</span></span><br><span class="line">idtr:base=<span class="number">0x0000000000000000</span>, limit=<span class="number">0x3ff</span></span><br></pre></td></tr></table></figure>
+<p>sreg不但打印了段寄存器内容,还打印了段寄存器隐藏的高速缓存器的内容,这是ollydbg做不到的</p>
+<p>高速缓存器还有ldtr,gdtr等寄存器都是在保护模式才会用到,现在不管</p>
+<h4 id="查看内存">查看内存</h4>
+<p>再连续执行两步,写入显存映射区域</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">(<span class="number">0</span>) [<span class="number">0x000000007c05</span>] <span class="number">0000</span>:<span class="number">7</span>c05 (unk. ctxt): mov byte ptr es:<span class="number">0x0000</span>, <span class="number">0x4c</span> ; <span class="number">26</span>c60600004c</span><br><span class="line">&lt;bochs:<span class="number">18</span>&gt; s</span><br><span class="line">Next at t=<span class="number">17179001</span></span><br><span class="line">(<span class="number">0</span>) [<span class="number">0x000000007c0b</span>] <span class="number">0000</span>:<span class="number">7</span>c0b (unk. ctxt): mov byte ptr es:<span class="number">0x0001</span>, <span class="number">0x07</span> ; <span class="number">26</span>c606010007</span><br><span class="line">&lt;bochs:<span class="number">19</span>&gt; s</span><br><span class="line">Next at t=<span class="number">17179002</span></span><br><span class="line">(<span class="number">0</span>) [<span class="number">0x000000007c11</span>] <span class="number">0000</span>:<span class="number">7</span>c11 (unk. ctxt): mov byte ptr es:<span class="number">0x0002</span>, <span class="number">0x61</span> ; <span class="number">26</span>c606020061</span><br></pre></td></tr></table></figure>
+<p>使用xp(examine memory at physical address),显示指定物理内存处内容</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">xp (/数量) &lt;物理地址&gt;</span><br></pre></td></tr></table></figure>
+<p>xp默认情况下一次显示一个双字,xp /n就是显示n个双字</p>
+<p>使用xp命令观察0xb8000开始的第一个双字</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">&lt;bochs:24&gt; xp 0xb8000</span><br><span class="line">[bochs]:</span><br><span class="line">0x00000000000b8000 &lt;bogus+       0&gt;:    0x0b6f074c</span><br></pre></td></tr></table></figure>
+<p>低两个字节是0x074c,正好对应</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">mov byte ptr es:0x0000, 0x4c</span><br><span class="line">mov byte ptr es:0x0001, 0x07</span><br></pre></td></tr></table></figure>
+<h4 id="退出调试">退出调试</h4>
+<p>命令q退出</p>
+<h2 id="初始化段地址">初始化段地址</h2>
+<p>汇编地址和物理地址</p>
+<p>汇编地址就是文件偏移量</p>
+<p>实际加载到内存中时的地址不一定是汇编地址,有可能需要重定位基地址</p>
+<p>mbr.asm被BIOS加载到内存的0x7c00处时,所有的汇编地址都需要再加上0x7c00才是其准确的物理地址,这是因为,此时的段寄存器是0,</p>
+<p>如果想要在寻址的时候不写这个看上去很奇怪的0x7c00,可以将段寄存器改成0x7c0</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">mov ax,<span class="number">0x7c0</span>                  ;设置数据段基地址 </span><br><span class="line">mov ds,ax</span><br></pre></td></tr></table></figure>
+<p>此后任何汇编地址A就代表了物理地址<code>A+0x7c0*16</code>也就是准确的物理地址</p>
+<p>实际上就是从0000:A+0x7c00转变成0x7c00:A</p>
+<figure>
+<img
+src="https://raw.githubusercontent.com/DeutschBall/DeutschBall/main/image-20220829151300719.png"
+alt="image-20220829151300719" />
+<figcaption aria-hidden="true">image-20220829151300719</figcaption>
+</figure>
+<h2 id="段间数据传送">段间数据传送</h2>
+<p>在机组课本上这叫做"串操作指令"</p>
+<p>movs/movsb/movsw</p>
+<p>数据流DS:SI-&gt;ES:DI</p>
+<p>由cld和std两条指令置正方向还是反方向</p>
+<p>cld之后DF=0,正向拷贝,movsb每次si和di加一,movsw每次si和di加二</p>
+<p>std之后DF=1,反向拷贝,movsw每次si和di减一,movsw每次si和di减二</p>
+<p>rep 重复执行,每次cx-1直到cx减为0,cx相当于循环变量</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br></pre></td><td class="code"><pre><span class="line">       jmp near start;跳过数据区</span><br><span class="line">       </span><br><span class="line">mytext db &#x27;L&#x27;,0x07,&#x27;a&#x27;,0x07,&#x27;b&#x27;,0x07,&#x27;e&#x27;,0x07,&#x27;l&#x27;,0x07,&#x27; &#x27;,0x07,&#x27;o&#x27;,0x07,\</span><br><span class="line">          &#x27;f&#x27;,0x07,&#x27;f&#x27;,0x07,&#x27;s&#x27;,0x07,&#x27;e&#x27;,0x07,&#x27;t&#x27;,0x07,&#x27;:&#x27;,0x07</span><br><span class="line">number db 0,0,0,0,0</span><br><span class="line"></span><br><span class="line">start:</span><br><span class="line">       mov ax,0x7c0                  ;设置数据段基地址 </span><br><span class="line">       mov ds,ax</span><br><span class="line">       </span><br><span class="line">       </span><br><span class="line">       mov ax,0xb800                 ;设置附加段基地址 </span><br><span class="line">       mov es,ax</span><br><span class="line">       </span><br><span class="line">       cld  ;拷贝方向标志清零,正向传送</span><br><span class="line">       mov si,mytext                 </span><br><span class="line">       mov di,0</span><br><span class="line">       mov cx,(number-mytext)/2      ;实际上等于 13</span><br><span class="line">       rep movsw   ;重复cx次,每次重复cx-1,直到为0</span><br></pre></td></tr></table></figure>
+<p>将当前数据段的mytext标号开始处的(number-mytext)/2个字,正方向拷贝到0xb800:0000开始的内存区域中,</p>
+<p>这恰好把mytext完全拷贝到显存区域</p>
+<h2 id="使用循环">使用循环</h2>
+<h3 id="loop循环">loop循环</h3>
+<p>loop 标号,重复执行标号开始的代码,每次cx-1,如果cx降为0则跳出循环</p>
+<p>由于loop指令位于循环的末尾,标号开始的代码无论如何和都要执行至少一次,因此实际上相当于do-while循环</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line">       ;得到标号所代表的偏移地址</span><br><span class="line">       mov ax,number</span><br><span class="line">       </span><br><span class="line">       ;计算各个数位</span><br><span class="line">       mov bx,ax				</span><br><span class="line">       mov cx,5                      ;循环次数5次 </span><br><span class="line">       mov si,10                     ;除数 </span><br><span class="line">digit: </span><br><span class="line">       xor dx,dx</span><br><span class="line">       div si						;dx:ax/si</span><br><span class="line">       mov [bx],dl                ;保存数位,就写入number标号的内存区域</span><br><span class="line">       inc bx 					;下一次要写入的位置</span><br><span class="line">       loop digit</span><br></pre></td></tr></table></figure>
+<h3 id="条件跳转循环">条件跳转循环</h3>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line">      ;显示各个数位</span><br><span class="line">      mov bx,number </span><br><span class="line">      mov si,4                      </span><br><span class="line">show:</span><br><span class="line">      mov al,[bx+si]</span><br><span class="line">      add al,0x30</span><br><span class="line">      mov ah,0x04</span><br><span class="line">      mov [es:di],ax</span><br><span class="line">      add di,2</span><br><span class="line">      dec si</span><br><span class="line">      jns show</span><br><span class="line">      </span><br><span class="line">     mov word [es:di],0x0744</span><br></pre></td></tr></table></figure>
+<p>把number标号地址放到bx上,也就是分解number地址的十位得到的数字的地址</p>
+<p>si作为偏移量,实际上bx[si]就构成了一个数组,si每次减1,直到0.</p>
+<p>每次将[bx+si]放到al再加上0x30成为该数字的ASCII码,ah放上0x04即显示样式</p>
+<p>然后ax整个两个字节被放到es:di上,就放到了显存中</p>
+<p>然后di-2给下一个字符腾地方</p>
+<p>每次si-1,直到减为-1是jns不满足跳转条件,跳出循环,执行下一条,即mov指令</p>
+<p>跳出循环后的第一条指令是把0x0744这个字放到es:di上,即把'D'及其显示样式放到显存上</p>
+<h2 id="美元标记">美元标记</h2>
+<p>NASM提供两个想美元符号的标记</p>
+<p><code>$</code>:单个美元符号,表示当前行的行首汇编地址</p>
+<p><code>$$</code>:双美元符号,表示当前段的起始汇编地址</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">       jmp near $;当前行首隐藏标号</span><br><span class="line"></span><br><span class="line">times 510-($-$$) db 0;当前行首隐藏标号减去从头到次的字节数,</span><br><span class="line">;510是去掉0xAA55之后的字节数</span><br><span class="line">;再去掉前面已经占用的字节数,就是还需要填充的字节数</span><br><span class="line">                 db 0x55,0xaa</span><br></pre></td></tr></table></figure>
+<p><code>jmp near $</code>就是跳转到本行行首,陷入死循环</p>
+<p><code>times 510-($-$$) db 0</code>重复db 0这条指令若干次,</p>
+<p>具体次数是510-程序到本指令之前已经有的字节数</p>
+<p>也就是空闲的地方填满0</p>
+<p>最后两个字节放0x55,0xaa,有效魔数</p>
+<h2 id="调试运行">调试运行</h2>
+<p>还是在0x7c00下断点,然后c一直运行到该断点处停下</p>
+<p>然后一直s单步执行到rep movsw指令</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">&lt;bochs:<span class="number">11</span>&gt; s</span><br><span class="line">Next at t=<span class="number">17179007</span></span><br><span class="line">(<span class="number">0</span>) [<span class="number">0x000000007c36</span>] <span class="number">0000</span>:<span class="number">7</span>c36 (unk. ctxt): rep movsw word ptr es:[di], word ptr ds:[si] ; f3a5</span><br></pre></td></tr></table></figure>
+<p>此时用r命令观察一下各个寄存器的情况</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br></pre></td><td class="code"><pre><span class="line">&lt;bochs:12&gt; r</span><br><span class="line">rax: 00000000_0000b800</span><br><span class="line">rbx: 00000000_00000000</span><br><span class="line">rcx: 00000000_0009000d</span><br><span class="line">rdx: 00000000_00000080</span><br><span class="line">rsp: 00000000_0000ffd6</span><br><span class="line">rbp: 00000000_00000000</span><br><span class="line">rsi: 00000000_000e0003</span><br><span class="line">rdi: 00000000_00000000</span><br><span class="line">r8 : 00000000_00000000</span><br><span class="line">r9 : 00000000_00000000</span><br><span class="line">r10: 00000000_00000000</span><br><span class="line">r11: 00000000_00000000</span><br><span class="line">r12: 00000000_00000000</span><br><span class="line">r13: 00000000_00000000</span><br><span class="line">r14: 00000000_00000000</span><br><span class="line">r15: 00000000_00000000</span><br><span class="line">rip: 00000000_00007c36</span><br><span class="line">eflags 0x00000082: id vip vif ac vm rf nt IOPL=0 of df if tf SF zf af pf cf</span><br></pre></td></tr></table></figure>
+<p>rcx=0x9000d,cx=0x000d,实模式下只用到cx寄存器,高位这个9没有作用</p>
+<p>用sreg观察一下段寄存器</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br></pre></td><td class="code"><pre><span class="line">&lt;bochs:13&gt; sreg</span><br><span class="line">es:0xb800, dh=0x0000930b, dl=0x8000ffff, valid=1</span><br><span class="line">        Data segment, base=0x000b8000, limit=0x0000ffff, Read/Write, Accessed</span><br><span class="line">cs:0x0000, dh=0x00009300, dl=0x0000ffff, valid=1</span><br><span class="line">        Data segment, base=0x00000000, limit=0x0000ffff, Read/Write, Accessed</span><br><span class="line">ss:0x0000, dh=0x00009300, dl=0x0000ffff, valid=7</span><br><span class="line">        Data segment, base=0x00000000, limit=0x0000ffff, Read/Write, Accessed</span><br><span class="line">ds:0x07c0, dh=0x00009300, dl=0x7c00ffff, valid=1</span><br><span class="line">        Data segment, base=0x00007c00, limit=0x0000ffff, Read/Write, Accessed</span><br><span class="line">fs:0x0000, dh=0x00009300, dl=0x0000ffff, valid=1</span><br><span class="line">        Data segment, base=0x00000000, limit=0x0000ffff, Read/Write, Accessed</span><br><span class="line">gs:0x0000, dh=0x00009300, dl=0x0000ffff, valid=1</span><br><span class="line">        Data segment, base=0x00000000, limit=0x0000ffff, Read/Write, Accessed</span><br><span class="line">ldtr:0x0000, dh=0x00008200, dl=0x0000ffff, valid=1</span><br><span class="line">tr:0x0000, dh=0x00008b00, dl=0x0000ffff, valid=1</span><br><span class="line">gdtr:base=0x00000000000f9ad7, limit=0x30</span><br><span class="line">idtr:base=0x0000000000000000, limit=0x3ff</span><br></pre></td></tr></table></figure>
+<p>es和ds已经设置好了</p>
+<h3 id="跳出reploop循环n">跳出rep,loop循环n</h3>
+<p>现在马上要执行rep movsw指令了</p>
+<p>如果使用s则会进入循环,如果想步过循环到循环外面的第一条指令,使用n指令</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">&lt;bochs:14&gt; n</span><br><span class="line">Next at t=17179020</span><br><span class="line">(0) [0x000000007c38] 0000:7c38 (unk. ctxt): mov ax, 0x001d            ; b81d00</span><br></pre></td></tr></table></figure>
+<p>此时使用xp指令观察显存区域是否已经获得拷贝</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">&lt;bochs:15&gt; xp /4 0xb8000</span><br><span class="line">[bochs]:</span><br><span class="line">0x00000000000b8000 &lt;bogus+       0&gt;:    0x0761074c      0x07650762      0x0720076c    0x0766076f</span><br></pre></td></tr></table></figure>
+<p>能够使用n跳出的循环有个特点,就是cx作为循环变量,啥时候跳出循环是很清晰的</p>
+<p>如果是跳出循环的条件判断在循环体中,比如一个if条件判断,则n指令就行不通了,此时可以使用u+b+c三种指令实现</p>
+<h3 id="反汇编u">反汇编u</h3>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">u/&lt;行数&gt;</span><br></pre></td></tr></table></figure>
+<p>从当前行开始反汇编若干行指令</p>
+<p>在需要跳出条件循环时,可以反汇编若干行,然后在循环外面设置一个断点,然后使用c一直执行到断点停下</p>
+
+      
+    </div>
+
+    
+    
+    
+      <footer class="post-footer">
+        <div class="post-eof"></div>
+      </footer>
+  </article>
+  
+  
+  
+
+      
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="en">
     <link itemprop="mainEntityOfPage" href="http://deutschball.github.io/2022/08/25/%E8%99%9A%E6%8B%9F%E7%A1%AC%E7%9B%98vhd/">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
@@ -3909,923 +4347,6 @@ alt="image-20220811105858318" />
 <h4 id="dumpbin-summary-打印段名段长">dumpbin /SUMMARY 打印段名段长</h4>
 <h4 id="dump-all-打印全部信息">dump /ALL 打印全部信息</h4>
 <p>效果类似于010editor 的模板</p>
-
-      
-    </div>
-
-    
-    
-    
-      <footer class="post-footer">
-        <div class="post-eof"></div>
-      </footer>
-  </article>
-  
-  
-  
-
-      
-  
-  
-  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="en">
-    <link itemprop="mainEntityOfPage" href="http://deutschball.github.io/2022/08/08/%E7%9B%AE%E6%A0%87%E6%96%87%E4%BB%B6/">
-
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="image" content="https://raw.githubusercontent.com/DeutschBall/picbed/main/dustball.png">
-      <meta itemprop="name" content="dustball">
-      <meta itemprop="description" content="dustland">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="dustland">
-    </span>
-      <header class="post-header">
-        <h2 class="post-title" itemprop="name headline">
-          
-            <a href="/2022/08/08/%E7%9B%AE%E6%A0%87%E6%96%87%E4%BB%B6/" class="post-title-link" itemprop="url">程序员的自我修养 chapter3 ELF文件格式</a>
-        </h2>
-
-        <div class="post-meta">
-            <span class="post-meta-item">
-              <span class="post-meta-item-icon">
-                <i class="far fa-calendar"></i>
-              </span>
-              <span class="post-meta-item-text">Posted on</span>
-              
-
-              <time title="Created: 2022-08-08 15:14:00 / Modified: 15:14:53" itemprop="dateCreated datePublished" datetime="2022-08-08T15:14:00+08:00">2022-08-08</time>
-            </span>
-
-          
-
-        </div>
-      </header>
-
-    
-    
-    
-    <div class="post-body" itemprop="articleBody">
-
-      
-          <h1 id="chapter3-elf精灵">chapter3-ELF精灵</h1>
-<p>可以先看CSAPP chapter 7链接然后看程序员自我修养这本书</p>
-<h2 id="历史与简介">历史与简介</h2>
-<blockquote>
-<p>一个程序的编译链接全过程</p>
-<p><img
-src="https://raw.githubusercontent.com/DeutschBall/test/master/image-20220805144230118.png" /></p>
-</blockquote>
-<p><strong>分类:</strong></p>
-<p>目标文件可以分为两种,可重定位目标文件,和可执行目标文件</p>
-<p>其中可重定位目标模块在linux上是.o,在windows上是.obj.源代码只经过编译,不通过链接得到可重定位目标模块.其中的代码数据从0开始编址,只具有相对意义,无绝对意义</p>
-<p>一个或者多个可重定位目标模块,与库文件链接后,形成可执行目标文件,在windows上是.exe,在linux上是.out</p>
-<p>库文件,包括动态库和静态库,也是按照目标文件的结构存储的</p>
-<blockquote>
-<p>COFF分类</p>
-<figure>
-<img
-src="https://raw.githubusercontent.com/DeutschBall/test/master/image-20220805145133735.png"
-alt="image-20220805145133735" />
-<figcaption aria-hidden="true">image-20220805145133735</figcaption>
-</figure>
-</blockquote>
-<p><strong>历史:</strong></p>
-<p>最初Unix上的可执行文件格式为COFF(common file format)</p>
-<p>从Unix进化而来的Windows,Linux分别有不同的变种</p>
-<p>Windows NT上是PE-COFF(portable executable)</p>
-<p>Linux上是ELF(Executable Linkable Format)</p>
-<h2 id="linux-elf格式">Linux ELF格式</h2>
-<figure>
-<img
-src="https://raw.githubusercontent.com/DeutschBall/test/master/ELF.png"
-alt="ELF" />
-<figcaption aria-hidden="true">ELF</figcaption>
-</figure>
-<figure>
-<img
-src="https://raw.githubusercontent.com/DeutschBall/test/master/image-20220805153055752.png"
-alt="image-20220805153055752" />
-<figcaption aria-hidden="true">image-20220805153055752</figcaption>
-</figure>
-<p>linux源码中ELF格式定义在<code>elf.h</code>中</p>
-<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">┌──(root㉿Executor)-[/mnt/c/Users/<span class="number">86135</span>/desktop/COFF]</span><br><span class="line">└─<span class="meta"># whereis elf.h</span></span><br><span class="line">elf.h: /usr/include/elf.h</span><br></pre></td></tr></table></figure>
-<p>关于该<code>elf.h</code>中的基本数据类型,没有直接使用诸如<code>int,char</code>等类型,而是使用<code>typedef</code>重新包装了一下</p>
-<figure>
-<img
-src="https://raw.githubusercontent.com/DeutschBall/test/master/image-20220805154752930.png"
-alt="image-20220805154752930" />
-<figcaption aria-hidden="true">image-20220805154752930</figcaption>
-</figure>
-<p>就一个Half类型需要注意,不管是32位系统还是64位系统上该值都是2字节</p>
-<h3 id="elf头">ELF头</h3>
-<p>使用<code>readelf -h main</code>即可观察elf头</p>
-<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br></pre></td><td class="code"><pre><span class="line">┌──(root㉿Executor)-[/mnt/c/Users/86135/desktop/COFF]</span><br><span class="line">└─# readelf -h main</span><br><span class="line">ELF Header:</span><br><span class="line">  Magic:   7f 45 4c 46 02 01 01 00 00 00 00 00 00 00 00 00</span><br><span class="line">  Class:                             ELF64</span><br><span class="line">  Data:                              2&#x27;s complement, little endian</span><br><span class="line">  Version:                           1 (current)</span><br><span class="line">  OS/ABI:                            UNIX - System V</span><br><span class="line">  ABI Version:                       0</span><br><span class="line">  Type:                              DYN (Position-Independent Executable file)</span><br><span class="line">  Machine:                           Advanced Micro Devices X86-64</span><br><span class="line">  Version:                           0x1</span><br><span class="line">  Entry point address:               0x1040</span><br><span class="line">  Start of program headers:          64 (bytes into file)</span><br><span class="line">  Start of section headers:          14080 (bytes into file)</span><br><span class="line">  Flags:                             0x0</span><br><span class="line">  Size of this header:               64 (bytes)</span><br><span class="line">  Size of program headers:           56 (bytes)</span><br><span class="line">  Number of program headers:         13</span><br><span class="line">  Size of section headers:           64 (bytes)</span><br><span class="line">  Number of section headers:         30</span><br><span class="line">  Section header string table index: 29</span><br></pre></td></tr></table></figure>
-<p>64位elf头格式:</p>
-<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#<span class="keyword">define</span> EI_NIDENT (16)</span></span><br><span class="line"></span><br><span class="line"><span class="keyword">typedef</span> <span class="class"><span class="keyword">struct</span></span></span><br><span class="line"><span class="class">&#123;</span></span><br><span class="line">  <span class="type">unsigned</span> <span class="type">char</span>	e_ident[EI_NIDENT];	<span class="comment">/* Magic number and other info */</span></span><br><span class="line">  Elf64_Half	e_type;			<span class="comment">/* Object file type */</span></span><br><span class="line">  Elf64_Half	e_machine;		<span class="comment">/* Architecture */</span></span><br><span class="line">  Elf64_Word	e_version;		<span class="comment">/* Object file version */</span></span><br><span class="line">  Elf64_Addr	e_entry;		<span class="comment">/* Entry point virtual address */</span></span><br><span class="line">  Elf64_Off	e_phoff;		<span class="comment">/* Program header table file offset */</span></span><br><span class="line">  Elf64_Off	e_shoff;		<span class="comment">/* Section header table file offset */</span></span><br><span class="line">  Elf64_Word	e_flags;		<span class="comment">/* Processor-specific flags */</span></span><br><span class="line">  Elf64_Half	e_ehsize;		<span class="comment">/* ELF header size in bytes */</span></span><br><span class="line">  Elf64_Half	e_phentsize;		<span class="comment">/* Program header table entry size */</span></span><br><span class="line">  Elf64_Half	e_phnum;		<span class="comment">/* Program header table entry count */</span></span><br><span class="line">  Elf64_Half	e_shentsize;		<span class="comment">/* Section header table entry size */</span></span><br><span class="line">  Elf64_Half	e_shnum;		<span class="comment">/* Section header table entry count */</span></span><br><span class="line">  Elf64_Half	e_shstrndx;		<span class="comment">/* Section header string table index */</span></span><br><span class="line">&#125; Elf64_Ehdr;</span><br></pre></td></tr></table></figure>
-<h4 id="e_ident">e_ident</h4>
-<p>整个ELF文件开头的十六个无符号字符类型,作用是表征文件魔数以及其他信息</p>
-<p><code>7F 45 4C 46 02 01 01 00 00 00 00 00 00 00 00 00</code></p>
-<blockquote>
-<p>前16个字节翻译成人话:4位 ELF version1 小端存储文件</p>
-</blockquote>
-<figure>
-<img
-src="https://raw.githubusercontent.com/DeutschBall/test/master/image-20220805153933915.png"
-alt="image-20220805153933915" />
-<figcaption aria-hidden="true">image-20220805153933915</figcaption>
-</figure>
-<p>这16个字符分别代表的信息在<code>elf.h</code>中给出了宏定义</p>
-<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br></pre></td><td class="code"><pre><span class="line"></span><br><span class="line"><span class="comment">/* Fields in the e_ident array.  The EI_* macros are indices into the</span></span><br><span class="line"><span class="comment">   array.  The macros under each EI_* macro are the values the byte</span></span><br><span class="line"><span class="comment">   may have.  */</span></span><br><span class="line"></span><br><span class="line"><span class="meta">#<span class="keyword">define</span> EI_MAG0		0		<span class="comment">/* File identification byte 0 index */</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">define</span> ELFMAG0		0x7f		<span class="comment">/* Magic number byte 0 */</span></span></span><br><span class="line"></span><br><span class="line"><span class="meta">#<span class="keyword">define</span> EI_MAG1		1		<span class="comment">/* File identification byte 1 index */</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">define</span> ELFMAG1		<span class="string">&#x27;E&#x27;</span>		<span class="comment">/* Magic number byte 1 */</span></span></span><br><span class="line"></span><br><span class="line"><span class="meta">#<span class="keyword">define</span> EI_MAG2		2		<span class="comment">/* File identification byte 2 index */</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">define</span> ELFMAG2		<span class="string">&#x27;L&#x27;</span>		<span class="comment">/* Magic number byte 2 */</span></span></span><br><span class="line"></span><br><span class="line"><span class="meta">#<span class="keyword">define</span> EI_MAG3		3		<span class="comment">/* File identification byte 3 index */</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">define</span> ELFMAG3		<span class="string">&#x27;F&#x27;</span>		<span class="comment">/* Magic number byte 3 */</span></span></span><br><span class="line"></span><br><span class="line"><span class="comment">/* Conglomeration of the identification bytes, for easy testing as a word.  */</span></span><br><span class="line"><span class="meta">#<span class="keyword">define</span>	ELFMAG		<span class="string">&quot;\177ELF&quot;</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">define</span>	SELFMAG		4</span></span><br><span class="line"></span><br><span class="line"><span class="meta">#<span class="keyword">define</span> EI_CLASS	4		<span class="comment">/* File class byte index */</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">define</span> ELFCLASSNONE	0		<span class="comment">/* Invalid class */</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">define</span> ELFCLASS32	1		<span class="comment">/* 32-bit objects */</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">define</span> ELFCLASS64	2		<span class="comment">/* 64-bit objects */</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">define</span> ELFCLASSNUM	3</span></span><br><span class="line">....</span><br></pre></td></tr></table></figure>
-<h5
-id="前四字符e_identei_mag0e_identei_mag3">前四字符<code>e_ident[EI_MAG0]~e_ident[EI_MAG3]</code></h5>
-<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#<span class="keyword">define</span> EI_MAG0		0		<span class="comment">/* File identification byte 0 index */</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">define</span> ELFMAG0		0x7f		<span class="comment">/* Magic number byte 0 */</span></span></span><br><span class="line"></span><br><span class="line"><span class="meta">#<span class="keyword">define</span> EI_MAG1		1		<span class="comment">/* File identification byte 1 index */</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">define</span> ELFMAG1		<span class="string">&#x27;E&#x27;</span>		<span class="comment">/* Magic number byte 1 */</span></span></span><br><span class="line"></span><br><span class="line"><span class="meta">#<span class="keyword">define</span> EI_MAG2		2		<span class="comment">/* File identification byte 2 index */</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">define</span> ELFMAG2		<span class="string">&#x27;L&#x27;</span>		<span class="comment">/* Magic number byte 2 */</span></span></span><br><span class="line"></span><br><span class="line"><span class="meta">#<span class="keyword">define</span> EI_MAG3		3		<span class="comment">/* File identification byte 3 index */</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">define</span> ELFMAG3		<span class="string">&#x27;F&#x27;</span>		<span class="comment">/* Magic number byte 3 */</span></span></span><br></pre></td></tr></table></figure>
-<p>前四个字符<code>7F454C46</code>的ASCII码是<code>[DEL]ELF</code>,ELF魔数前面有一个DEL删除符,不是ASCII可打印字符</p>
-<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">/* Conglomeration of the identification bytes, for easy testing as a word.  */</span></span><br><span class="line"><span class="meta">#<span class="keyword">define</span>	ELFMAG		<span class="string">&quot;\177ELF&quot;</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">define</span>	SELFMAG		4</span></span><br></pre></td></tr></table></figure>
-<h5
-id="第五个字符e_identei_class">第五个字符<code>e_ident[EI_CLASS]</code></h5>
-<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#<span class="keyword">define</span> EI_CLASS	4		<span class="comment">/* File class byte index */</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">define</span> ELFCLASSNONE	0		<span class="comment">/* Invalid class */</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">define</span> ELFCLASS32	1		<span class="comment">/* 32-bit objects */</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">define</span> ELFCLASS64	2		<span class="comment">/* 64-bit objects */</span></span></span><br></pre></td></tr></table></figure>
-<p>0表示无效elf文件</p>
-<p>1表示32位elf文件</p>
-<p>2表示64位elf文件</p>
-<h5
-id="第六个字符e_identei_data">第六个字符<code>e_ident[EI_DATA]</code></h5>
-<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#<span class="keyword">define</span> EI_DATA		5		<span class="comment">/* Data encoding byte index */</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">define</span> ELFDATANONE	0		<span class="comment">/* Invalid data encoding */</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">define</span> ELFDATA2LSB	1		<span class="comment">/* 2&#x27;s complement, little endian */</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">define</span> ELFDATA2MSB	2		<span class="comment">/* 2&#x27;s complement, big endian */</span></span></span><br></pre></td></tr></table></figure>
-<p>规定数据大小端顺序</p>
-<p>0无效格式</p>
-<p>1小端格式</p>
-<p>2大端格式</p>
-<h5
-id="第七个字符e_identei_version">第七个字符<code>e_ident[EI_VERSION]</code></h5>
-<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#<span class="keyword">define</span> EI_VERSION	6		<span class="comment">/* File version byte index */</span></span></span><br><span class="line">					<span class="comment">/* Value must be EV_CURRENT */</span></span><br></pre></td></tr></table></figure>
-<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">/* Legal values for e_version (version).  */</span></span><br><span class="line"></span><br><span class="line"><span class="meta">#<span class="keyword">define</span> EV_NONE		0		<span class="comment">/* Invalid ELF version */</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">define</span> EV_CURRENT	1		<span class="comment">/* Current version */</span></span></span><br></pre></td></tr></table></figure>
-<p>注释中写道,该值必须为<code>EV_CURRENT(1)</code></p>
-<p>其意义是ELF的主版本号,为啥一定是1呢?</p>
-<p>因为ELF最新版本是1.2,之后没有更新,因此最新版本也就是先行版本,就是1</p>
-<p>后面9个字符elf标准没有要求,一般置0,但是elf.h中是有意义的</p>
-<h5
-id="第八个字符e_identei_osabi">第八个字符<code>e_ident[EI_OSABI]</code></h5>
-<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#<span class="keyword">define</span> EI_OSABI	7		<span class="comment">/* OS ABI identification */</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">define</span> ELFOSABI_NONE		0	<span class="comment">/* UNIX System V ABI */</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">define</span> ELFOSABI_SYSV		0	<span class="comment">/* Alias.  */</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">define</span> ELFOSABI_HPUX		1	<span class="comment">/* HP-UX */</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">define</span> ELFOSABI_NETBSD		2	<span class="comment">/* NetBSD.  */</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">define</span> ELFOSABI_GNU		3	<span class="comment">/* Object uses GNU ELF extensions.  */</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">define</span> ELFOSABI_LINUX		ELFOSABI_GNU <span class="comment">/* Compatibility alias.  */</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">define</span> ELFOSABI_SOLARIS	6	<span class="comment">/* Sun Solaris.  */</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">define</span> ELFOSABI_AIX		7	<span class="comment">/* IBM AIX.  */</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">define</span> ELFOSABI_IRIX		8	<span class="comment">/* SGI Irix.  */</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">define</span> ELFOSABI_FREEBSD	9	<span class="comment">/* FreeBSD.  */</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">define</span> ELFOSABI_TRU64		10	<span class="comment">/* Compaq TRU64 UNIX.  */</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">define</span> ELFOSABI_MODESTO	11	<span class="comment">/* Novell Modesto.  */</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">define</span> ELFOSABI_OPENBSD	12	<span class="comment">/* OpenBSD.  */</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">define</span> ELFOSABI_ARM_AEABI	64	<span class="comment">/* ARM EABI */</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">define</span> ELFOSABI_ARM		97	<span class="comment">/* ARM */</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">define</span> ELFOSABI_STANDALONE	255	<span class="comment">/* Standalone (embedded) application */</span></span></span><br></pre></td></tr></table></figure>
-<p>OS ABI identification,操作系统 应用 二进制 接口 标识</p>
-<blockquote>
-<p>关于ABI,参考了<a
-target="_blank" rel="noopener" href="https://www.zhihu.com/question/381069847">你们说的ABI，Application
-Binary Interface到底是什么东西？ - 知乎 (zhihu.com)</a></p>
-<p>关键点:</p>
-<p><strong>ABI实际上讨论的是什么?</strong></p>
-<p>那么当人们提到 ABI
-的时候，到底在说什么？以我个人的经验来看，当人们提及 ABI
-时，一般主要是在说 Binary-compatible 即二进制兼容性。</p>
-<p><strong>什么是二进制兼容性?</strong></p>
-<p>一个库在 VC9 上完成编译并以 DLL
-形式发布，如果该库要求使用它的应用程序也必须在 VC9
-上编译，那么说这个库不是二进制兼容的；反之，如果任意版本的 VC
-乃至其它编译器例如 gcc、clang
-都可以使用这个库，那么说这个库是二进制兼容的。</p>
-<p>二进制兼容性包括调用约定,命名管理</p>
-</blockquote>
-<blockquote>
-<p>ABI（Application Binary
-Interface）：应用程序二进制接口，描述了应用程序和操作系统之间，一个应用和它的库之间，或者应用的组成部分之间的低接口。ABI涵盖了各种细节，如：</p>
-<ul>
-<li>数据类型的大小、布局和对齐；</li>
-<li>调用约定（控制着函数的参数如何传送以及如何接受返回值），例如，是所有的参数都通过栈传递，还是部分参数通过寄存器传递；哪个寄存器用于哪个函数参数；通过栈传递的第一个函数参数是最先push到栈上还是最后；</li>
-<li><a
-target="_blank" rel="noopener" href="https://baike.baidu.com/item/系统调用">系统调用</a>的编码和一个应用如何向操作系统进行系统调用；</li>
-<li>以及在一个完整的操作系统ABI中，<a
-target="_blank" rel="noopener" href="https://baike.baidu.com/item/目标文件">目标文件</a>的<a
-target="_blank" rel="noopener" href="https://baike.baidu.com/item/二进制/361457">二进制</a>格式、程序库等等。</li>
-</ul>
-</blockquote>
-<p><code>ELFOSABI_NONE(0)</code>表明本文件满足<code>UNIX System V ABI</code>规范,已成为主要的Unix操作系统（例如Linux，BSD系统和许多其他操作系统）使用的标准ABI</p>
-<blockquote>
-<p>那么调用约定就得查UNIX System
-V,查stdcall,fastcall,cdecl等等没有没用</p>
-<p><img
-src="https://raw.githubusercontent.com/DeutschBall/test/master/image-20220428152425649.png" /></p>
-</blockquote>
-<h5
-id="第九个字符e_identei_abiversion">第九个字符<code>e_ident[EI_ABIVERSION]</code></h5>
-<p>ABI版本号,然而实际上都是0</p>
-<h5 id="剩下七个字符">剩下七个字符</h5>
-<p>全是<del>胸垫</del>,目前没有作用</p>
-<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">#define EI_PAD		9		/* Byte index of padding bytes */</span><br></pre></td></tr></table></figure>
-<h4 id="e_type">e_type</h4>
-<p>目标文件类型,区分库文件,可重定位目标模块,可执行目标文件等等</p>
-<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">/* Legal values for e_type (object file type).  */</span></span><br><span class="line"></span><br><span class="line"><span class="meta">#<span class="keyword">define</span> ET_NONE		0		<span class="comment">/* No file type */</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">define</span> ET_REL		1		<span class="comment">/* Relocatable file 可重定位.o文件*/</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">define</span> ET_EXEC		2		<span class="comment">/* Executable file 可执行.out文件*/</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">define</span> ET_DYN		3		<span class="comment">/* Shared object file 动态库.so文件*/</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">define</span> ET_CORE		4		<span class="comment">/* Core file 核心文件*/</span></span></span><br></pre></td></tr></table></figure>
-<h4 id="e_machine">e_machine</h4>
-<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br></pre></td><td class="code"><pre><span class="line"></span><br><span class="line"><span class="comment">/* Legal values for e_machine (architecture).  */</span></span><br><span class="line"></span><br><span class="line"><span class="meta">#<span class="keyword">define</span> EM_NONE		 0	<span class="comment">/* No machine */</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">define</span> EM_M32		 1	<span class="comment">/* AT&amp;T WE 32100 */</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">define</span> EM_SPARC	 2	<span class="comment">/* SUN SPARC */</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">define</span> EM_386		 3	<span class="comment">/* Intel 80386 */</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">define</span> EM_68K		 4	<span class="comment">/* Motorola m68k family */</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">define</span> EM_88K		 5	<span class="comment">/* Motorola m88k family */</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">define</span> EM_IAMCU	 6	<span class="comment">/* Intel MCU */</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">define</span> EM_860		 7	<span class="comment">/* Intel 80860 */</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">define</span> EM_MIPS		 8	<span class="comment">/* MIPS R3000 big-endian */</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">define</span> EM_S370		 9	<span class="comment">/* IBM System/370 */</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">define</span> EM_MIPS_RS3_LE	10	<span class="comment">/* MIPS R3000 little-endian */</span></span></span><br><span class="line">...</span><br><span class="line"><span class="meta">#<span class="keyword">define</span> EM_X86_64	62	<span class="comment">/* AMD x86-64 architecture */</span></span></span><br><span class="line">...</span><br><span class="line"><span class="meta">#<span class="keyword">define</span> EM_NUM		253</span></span><br></pre></td></tr></table></figure>
-<p><code>e_machine</code>的有效值总共有253个,每一个代表一种机器类型</p>
-<p>可执行目标文件<code>main</code>中该值为<code>EM_X86_64(62)</code>,意思是本程序只能在x86_64体系上执行,</p>
-<p>在x86_32上或者MIPS等等都不行</p>
-<h4 id="e_version">e_version</h4>
-<p>elf版本号,有效值只有1,也就是先行ELF文件版本,作用和<code>e_ident[EI_VERSION]</code>相同</p>
-<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">/* Legal values for e_version (version).  */</span></span><br><span class="line"></span><br><span class="line"><span class="meta">#<span class="keyword">define</span> EV_NONE		0		<span class="comment">/* Invalid ELF version */</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">define</span> EV_CURRENT	1		<span class="comment">/* Current version */</span></span></span><br></pre></td></tr></table></figure>
-<h4 id="e_entry">e_entry</h4>
-<p>ELF文件的入口点,如果没有入口点,比如库文件,则该值默认为0</p>
-<p>main文件中该值为<code>0x1040</code></p>
-<figure>
-<img
-src="https://raw.githubusercontent.com/DeutschBall/test/master/image-20220805164912919.png"
-alt="image-20220805164912919" />
-<figcaption aria-hidden="true">image-20220805164912919</figcaption>
-</figure>
-<p>本文件开始运行后,操作系统将控制转移给该位置的指令</p>
-<p>用ida64打开main按下g跳转0x1040,发现是<code>start</code>的RVA(虚拟内存相对偏移量)地址</p>
-<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br></pre></td><td class="code"><pre><span class="line">.text:0000000000001040                 public start</span><br><span class="line">.text:0000000000001040 start           proc near               ; DATA XREF: LOAD:0000000000000018↑o</span><br><span class="line">.text:0000000000001040 ; __unwind &#123;</span><br><span class="line">.text:0000000000001040                 xor     ebp, ebp</span><br><span class="line">.text:0000000000001042                 mov     r9, rdx         ; rtld_fini</span><br><span class="line">.text:0000000000001045                 pop     rsi             ; argc</span><br><span class="line">.text:0000000000001046                 mov     rdx, rsp        ; ubp_av</span><br><span class="line">.text:0000000000001049                 and     rsp, 0FFFFFFFFFFFFFFF0h</span><br><span class="line">.text:000000000000104D                 push    rax</span><br><span class="line">.text:000000000000104E                 push    rsp             ; stack_end</span><br><span class="line">.text:000000000000104F                 lea     r8, __libc_csu_fini ; fini</span><br><span class="line">.text:0000000000001056                 lea     rcx, __libc_csu_init ; init</span><br><span class="line">.text:000000000000105D                 lea     rdi, main       ; main</span><br><span class="line">.text:0000000000001064                 call    cs:__libc_start_main_ptr</span><br><span class="line">.text:000000000000106A                 hlt</span><br><span class="line">.text:000000000000106A ; &#125; // starts at 1040</span><br><span class="line">.text:000000000000106A start           endp</span><br></pre></td></tr></table></figure>
-<p>即装载器装载该文件进入内存之后,控制转移到进程映像相对映像基址的偏移量为0x1040的地方</p>
-<p>该值可以在链接时修改,<code>gcc -e</code>指定入口函数</p>
-<h4 id="e_phoff">e_phoff</h4>
-<p>program headeer table offset</p>
-<p>程序头部表在文件中的字节偏移量,如果没有程序头部表则该值为0</p>
-<figure>
-<img
-src="https://raw.githubusercontent.com/DeutschBall/test/master/image-20220805170202544.png"
-alt="image-20220805170202544" />
-<figcaption aria-hidden="true">image-20220805170202544</figcaption>
-</figure>
-<p>main中该值为64D=40H</p>
-<figure>
-<img
-src="https://raw.githubusercontent.com/DeutschBall/test/master/image-20220805170330203.png"
-alt="image-20220805170330203" />
-<figcaption aria-hidden="true">image-20220805170330203</figcaption>
-</figure>
-<p>而本文件的0x40位置确实是程序头部表的基地址</p>
-<h4 id="e_shoff">e_shoff</h4>
-<p>section header table offset</p>
-<p>节头部表在文件中的字节偏移量,如果没有节头表则该值为0</p>
-<figure>
-<img
-src="https://raw.githubusercontent.com/DeutschBall/test/master/image-20220805170506360.png"
-alt="image-20220805170506360" />
-<figcaption aria-hidden="true">image-20220805170506360</figcaption>
-</figure>
-<p>main中该值为14090D=3700h</p>
-<figure>
-<img
-src="https://raw.githubusercontent.com/DeutschBall/test/master/image-20220805170723100.png"
-alt="image-20220805170723100" />
-<figcaption aria-hidden="true">image-20220805170723100</figcaption>
-</figure>
-<p>本文件的0x3700位置确实是节头表</p>
-<h4 id="e_flags">e_flags</h4>
-<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line">/* Values for Elf64_Ehdr.e_flags.  */</span><br><span class="line"></span><br><span class="line">#define EF_SPARCV9_MM		3</span><br><span class="line">#define EF_SPARCV9_TSO		0</span><br><span class="line">#define EF_SPARCV9_PSO		1</span><br><span class="line">#define EF_SPARCV9_RMO		2</span><br><span class="line">#define EF_SPARC_LEDATA		0x800000 /* little endian data */</span><br><span class="line">#define EF_SPARC_EXT_MASK	0xFFFF00</span><br><span class="line">#define EF_SPARC_32PLUS		0x000100 /* generic V8+ features */</span><br><span class="line">#define EF_SPARC_SUN_US1	0x000200 /* Sun UltraSPARC1 extensions */</span><br><span class="line">#define EF_SPARC_HAL_R1		0x000400 /* HAL R1 extensions */</span><br><span class="line">#define EF_SPARC_SUN_US3	0x000800 /* Sun UltraSPARCIII extensions */</span><br></pre></td></tr></table></figure>
-<p>处理器相关标志</p>
-<h4 id="e_ehsize">e_ehsize</h4>
-<p>ELF文件头的大小</p>
-<figure>
-<img
-src="https://raw.githubusercontent.com/DeutschBall/test/master/image-20220805171525758.png"
-alt="image-20220805171525758" />
-<figcaption aria-hidden="true">image-20220805171525758</figcaption>
-</figure>
-<p>main中该值为64D=40H</p>
-<p>即前64个字节是ELF header,后面紧接着是程序头表(如果存在的话)</p>
-<h4 id="e_phentsize">e_phentsize</h4>
-<p>程序头表中表项的大小(每个表项一样大)</p>
-<figure>
-<img
-src="https://raw.githubusercontent.com/DeutschBall/test/master/image-20220805172137637.png"
-alt="image-20220805172137637" />
-<figcaption aria-hidden="true">image-20220805172137637</figcaption>
-</figure>
-<p>main中该值为56D</p>
-<h4 id="e_phnum">e_phnum</h4>
-<p>程序头项数</p>
-<figure>
-<img
-src="https://raw.githubusercontent.com/DeutschBall/test/master/image-20220805174430352.png"
-alt="image-20220805174430352" />
-<figcaption aria-hidden="true">image-20220805174430352</figcaption>
-</figure>
-<p>main中该值为23D</p>
-<p>程序头项数乘以每项大小就可以计算得到程序头总大小56*23=1288字节</p>
-<h4 id="e_shentsize">e_shentsize</h4>
-<p>section header entry size</p>
-<p>节头表表项大小</p>
-<figure>
-<img
-src="https://raw.githubusercontent.com/DeutschBall/test/master/image-20220805174753025.png"
-alt="image-20220805174753025" />
-<figcaption aria-hidden="true">image-20220805174753025</figcaption>
-</figure>
-<p>main中该值为64D=40h</p>
-<h4 id="e_shnum">e_shnum</h4>
-<p>节头表项数</p>
-<h4 id="e_shstrndx">e_shstrndx</h4>
-<p>section header string table
-index,节名字符串表(.shstrtab)<strong>的表头</strong>在节头表中的下标</p>
-<figure>
-<img
-src="https://raw.githubusercontent.com/DeutschBall/test/master/image-20220806102105072.png"
-alt="image-20220806102105072" />
-<figcaption aria-hidden="true">image-20220806102105072</figcaption>
-</figure>
-<p>记录这么一个东西的目的是,方便获取各个节的名称,ELF头大小固定,节头表的基址在ELF头中已经给出,e_shoff,节头表表项大小业已给出e_shentsize,那么<code>e_shoff+e_shentsize*e_shstrndx</code>就索引到了节名字符串表,方便获取节名</p>
-<h3 id="程序头表">程序头表</h3>
-<p>Program Header Table
-,是Elf64_Phdr结构体数组,描述<strong>段信息</strong>或者准备程序执行所需要的信息</p>
-<blockquote>
-<p>一个段可能包含多个节.</p>
-<p>程序运行时才会把多个性质相同的节合并成段,因此段表只对可执行目标文件有意义</p>
-<p>可重定位目标文件中没有程序头表</p>
-</blockquote>
-<figure>
-<img
-src="https://raw.githubusercontent.com/DeutschBall/test/master/image-20220806081713545.png"
-alt="image-20220806081713545" />
-<figcaption aria-hidden="true">image-20220806081713545</figcaption>
-</figure>
-<p>main的程序头表中有13项,下标从0到12</p>
-<p>程序头表项结构体<code>struct Elf64_Phdr</code>(program header
-descriptor)</p>
-<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">typedef</span> <span class="class"><span class="keyword">struct</span></span></span><br><span class="line"><span class="class">&#123;</span></span><br><span class="line">  Elf64_Word	p_type;			<span class="comment">/* Segment type */</span></span><br><span class="line">  Elf64_Word	p_flags;		<span class="comment">/* Segment flags */</span></span><br><span class="line">  Elf64_Off	p_offset;		<span class="comment">/* Segment file offset */</span></span><br><span class="line">  Elf64_Addr	p_vaddr;		<span class="comment">/* Segment virtual address */</span></span><br><span class="line">  Elf64_Addr	p_paddr;		<span class="comment">/* Segment physical address */</span></span><br><span class="line">  Elf64_Xword	p_filesz;		<span class="comment">/* Segment size in file */</span></span><br><span class="line">  Elf64_Xword	p_memsz;		<span class="comment">/* Segment size in memory */</span></span><br><span class="line">  Elf64_Xword	p_align;		<span class="comment">/* Segment alignment */</span></span><br><span class="line">&#125; Elf64_Phdr;</span><br></pre></td></tr></table></figure>
-<p>以栈段为例子,炎鸠一下段表项各成员的含义</p>
-<figure>
-<img
-src="https://raw.githubusercontent.com/DeutschBall/test/master/image-20220806082000923.png"
-alt="image-20220806082000923" />
-<figcaption aria-hidden="true">image-20220806082000923</figcaption>
-</figure>
-<h4 id="p_type">p_type</h4>
-<p>段类型,枚举类型</p>
-<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">/* Legal values for p_type (segment type).  */</span></span><br><span class="line"></span><br><span class="line"><span class="meta">#<span class="keyword">define</span>	PT_NULL		0		<span class="comment">/* Program header table entry unused */</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">define</span> PT_LOAD		1		<span class="comment">/* Loadable program segment */</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">define</span> PT_DYNAMIC	2		<span class="comment">/* Dynamic linking information */</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">define</span> PT_INTERP	3		<span class="comment">/* Program interpreter */</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">define</span> PT_NOTE		4		<span class="comment">/* Auxiliary information */</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">define</span> PT_SHLIB	5		<span class="comment">/* Reserved */</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">define</span> PT_PHDR		6		<span class="comment">/* Entry for header table itself */</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">define</span> PT_TLS		7		<span class="comment">/* Thread-local storage segment */</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">define</span>	PT_NUM		8		<span class="comment">/* Number of defined types */</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">define</span> PT_LOOS		0x60000000	<span class="comment">/* Start of OS-specific */</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">define</span> PT_GNU_EH_FRAME	0x6474e550	<span class="comment">/* GCC .eh_frame_hdr segment */</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">define</span> PT_GNU_STACK	0x6474e551	<span class="comment">/* Indicates stack executability */</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">define</span> PT_GNU_RELRO	0x6474e552	<span class="comment">/* Read-only after relocation */</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">define</span> PT_GNU_PROPERTY	0x6474e553	<span class="comment">/* GNU property */</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">define</span> PT_LOSUNW	0x6ffffffa</span></span><br><span class="line"><span class="meta">#<span class="keyword">define</span> PT_SUNWBSS	0x6ffffffa	<span class="comment">/* Sun Specific segment */</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">define</span> PT_SUNWSTACK	0x6ffffffb	<span class="comment">/* Stack segment */</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">define</span> PT_HISUNW	0x6fffffff</span></span><br><span class="line"><span class="meta">#<span class="keyword">define</span> PT_HIOS		0x6fffffff	<span class="comment">/* End of OS-specific */</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">define</span> PT_LOPROC	0x70000000	<span class="comment">/* Start of processor-specific */</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">define</span> PT_HIPROC	0x7fffffff	<span class="comment">/* End of processor-specific */</span></span></span><br></pre></td></tr></table></figure>
-<blockquote>
-<p><code>PT_NULL(0)</code>表明该段未使用,对应程序头表项其他成员均没有定义</p>
-</blockquote>
-<h4 id="p_flags">p_flags</h4>
-<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">/* Legal values for p_flags (segment flags).  */</span></span><br><span class="line"></span><br><span class="line"><span class="meta">#<span class="keyword">define</span> PF_X		(1 &lt;&lt; 0)	<span class="comment">/* Segment is executable */</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">define</span> PF_W		(1 &lt;&lt; 1)	<span class="comment">/* Segment is writable */</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">define</span> PF_R		(1 &lt;&lt; 2)	<span class="comment">/* Segment is readable */</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">define</span> PF_MASKOS	0x0ff00000	<span class="comment">/* OS-specific */</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">define</span> PF_MASKPROC	0xf0000000	<span class="comment">/* Processor-specific */</span></span></span><br></pre></td></tr></table></figure>
-<p>段权限,主要是RWX属性</p>
-<p>比如使用最简单的gcc命令编译成的main栈段的权限:</p>
-<figure>
-<img
-src="https://raw.githubusercontent.com/DeutschBall/test/master/image-20220806083553366.png"
-alt="image-20220806083553366" />
-<figcaption aria-hidden="true">image-20220806083553366</figcaption>
-</figure>
-<p>此时栈是没有执行权限</p>
-<p>如果编译时禁用NX保护<code>gcc -z execstack main.c -o main</code>,此时栈就可以读写执行了</p>
-<figure>
-<img
-src="https://raw.githubusercontent.com/DeutschBall/test/master/image-20220806084047470.png"
-alt="image-20220806084047470" />
-<figcaption aria-hidden="true">image-20220806084047470</figcaption>
-</figure>
-<blockquote>
-<p>默认情况下是开启NX保护的</p>
-<p><code>gcc -z execstack</code> 关闭NX保护</p>
-<p><code>gcc -z noexecstack</code>开启NX保护</p>
-</blockquote>
-<h4 id="p_offset">p_offset</h4>
-<p>文件偏移量,如果该段是程序运行时才会建立,比如堆栈,则该值为0</p>
-<h4 id="p_vaddr">p_vaddr</h4>
-<p>相对虚拟地址</p>
-<h4 id="p_paddr">p_paddr</h4>
-<p>物理地址,该值只在直接使用物理内存的机器和系统上使用</p>
-<h4 id="p_filesz">p_filesz</h4>
-<p>文件中该段的大小</p>
-<h4 id="p_memsz">p_memsz</h4>
-<p>内存镜像中该段的大小</p>
-<h4 id="p_align">p_align</h4>
-<p>该段的对齐要求</p>
-<p>该值为0或者1表示不用对齐,否则按照2的幂次对齐</p>
-<p>要求<code>p_vaddr</code>和<code>p_offset</code>模<code>p_align</code>要相等</p>
-<h3 id="节头表">节头表</h3>
-<p>main中节头表有30项</p>
-<p><img
-src="https://raw.githubusercontent.com/DeutschBall/test/master/image-20220806084931736.png" /></p>
-<p>每一项都是<code>Elf64_Shdr</code>结构体</p>
-<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">typedef</span> <span class="class"><span class="keyword">struct</span></span></span><br><span class="line"><span class="class">&#123;</span></span><br><span class="line">  Elf64_Word	sh_name;		<span class="comment">/* Section name (string tbl index) */</span></span><br><span class="line">  Elf64_Word	sh_type;		<span class="comment">/* Section type */</span></span><br><span class="line">  Elf64_Xword	sh_flags;		<span class="comment">/* Section flags */</span></span><br><span class="line">  Elf64_Addr	sh_addr;		<span class="comment">/* Section virtual addr at execution */</span></span><br><span class="line">  Elf64_Off	sh_offset;		<span class="comment">/* Section file offset */</span></span><br><span class="line">  Elf64_Xword	sh_size;		<span class="comment">/* Section size in bytes */</span></span><br><span class="line">  Elf64_Word	sh_link;		<span class="comment">/* Link to another section */</span></span><br><span class="line">  Elf64_Word	sh_info;		<span class="comment">/* Additional section information */</span></span><br><span class="line">  Elf64_Xword	sh_addralign;		<span class="comment">/* Section alignment */</span></span><br><span class="line">  Elf64_Xword	sh_entsize;		<span class="comment">/* Entry size if section holds table */</span></span><br><span class="line">&#125; Elf64_Shdr;</span><br></pre></td></tr></table></figure>
-<h4 id="sh_name">sh_name</h4>
-<p>这里name不是直接的ASCII码表示的字符串,而是.shstrtab这个节中的偏移</p>
-<blockquote>
-<p>一个<code>Elf64_Word</code>即<code>uint_32</code>,就四个字节,但是节名显然可以更长,比如<code>.got.plt</code></p>
-</blockquote>
-<p>比如.data节节名的下标就是FCh</p>
-<figure>
-<img
-src="https://raw.githubusercontent.com/DeutschBall/test/master/image-20220806085921448.png"
-alt="image-20220806085921448" />
-<figcaption aria-hidden="true">image-20220806085921448</figcaption>
-</figure>
-<p>到shstrtab的节头看看</p>
-<figure>
-<img
-src="https://raw.githubusercontent.com/DeutschBall/test/master/image-20220806090138926.png"
-alt="image-20220806090138926" />
-<figcaption aria-hidden="true">image-20220806090138926</figcaption>
-</figure>
-<p>发现该节在文件中的偏移量为35ED,到该节中看看</p>
-<figure>
-<img
-src="https://raw.githubusercontent.com/DeutschBall/test/master/image-20220806090231225.png"
-alt="image-20220806090231225" />
-<figcaption aria-hidden="true">image-20220806090231225</figcaption>
-</figure>
-<p>该位置正是所有节名字符串的起点,所有的节名都是一块存放的,均以NULL结尾.那么划分节名的时候就是从本节区初,预见NULL则划分一个字符串作为一个节名</p>
-<p>可以发现节区初<code>0x35ED</code>就有一个NULL,这对应一个无名的节区(SHN_UNDEF)</p>
-<figure>
-<img
-src="https://raw.githubusercontent.com/DeutschBall/test/master/image-20220806090713731.png"
-alt="image-20220806090713731" />
-<figcaption aria-hidden="true">image-20220806090713731</figcaption>
-</figure>
-<p>35ED+FC=36E9</p>
-<figure>
-<img
-src="https://raw.githubusercontent.com/DeutschBall/test/master/image-20220806090419728.png"
-alt="image-20220806090419728" />
-<figcaption aria-hidden="true">image-20220806090419728</figcaption>
-</figure>
-<p>这个位置正是".data"字符串的起始位置</p>
-<h4 id="sh_type">sh_type</h4>
-<p>节类型</p>
-<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">/* Legal values for sh_type (section type).  */</span></span><br><span class="line"></span><br><span class="line"><span class="meta">#<span class="keyword">define</span> SHT_NULL	  0		<span class="comment">/* Section header table entry unused */</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">define</span> SHT_PROGBITS	  1		<span class="comment">/* Program data */</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">define</span> SHT_SYMTAB	  2		<span class="comment">/* Symbol table */</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">define</span> SHT_STRTAB	  3		<span class="comment">/* String table */</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">define</span> SHT_RELA	  4		<span class="comment">/* Relocation entries with addends */</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">define</span> SHT_HASH	  5		<span class="comment">/* Symbol hash table */</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">define</span> SHT_DYNAMIC	  6		<span class="comment">/* Dynamic linking information */</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">define</span> SHT_NOTE	  7		<span class="comment">/* Notes */</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">define</span> SHT_NOBITS	  8		<span class="comment">/* Program space with no data (bss) */</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">define</span> SHT_REL		  9		<span class="comment">/* Relocation entries, no addends */</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">define</span> SHT_SHLIB	  10		<span class="comment">/* Reserved */</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">define</span> SHT_DYNSYM	  11		<span class="comment">/* Dynamic linker symbol table */</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">define</span> SHT_INIT_ARRAY	  14		<span class="comment">/* Array of constructors */</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">define</span> SHT_FINI_ARRAY	  15		<span class="comment">/* Array of destructors */</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">define</span> SHT_PREINIT_ARRAY 16		<span class="comment">/* Array of pre-constructors */</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">define</span> SHT_GROUP	  17		<span class="comment">/* Section group */</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">define</span> SHT_SYMTAB_SHNDX  18		<span class="comment">/* Extended section indices */</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">define</span>	SHT_NUM		  19		<span class="comment">/* Number of defined types.  */</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">define</span> SHT_LOOS	  0x60000000	<span class="comment">/* Start OS-specific.  */</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">define</span> SHT_GNU_ATTRIBUTES 0x6ffffff5	<span class="comment">/* Object attributes.  */</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">define</span> SHT_GNU_HASH	  0x6ffffff6	<span class="comment">/* GNU-style hash table.  */</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">define</span> SHT_GNU_LIBLIST	  0x6ffffff7	<span class="comment">/* Prelink library list */</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">define</span> SHT_CHECKSUM	  0x6ffffff8	<span class="comment">/* Checksum for DSO content.  */</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">define</span> SHT_LOSUNW	  0x6ffffffa	<span class="comment">/* Sun-specific low bound.  */</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">define</span> SHT_SUNW_move	  0x6ffffffa</span></span><br><span class="line"><span class="meta">#<span class="keyword">define</span> SHT_SUNW_COMDAT   0x6ffffffb</span></span><br><span class="line"><span class="meta">#<span class="keyword">define</span> SHT_SUNW_syminfo  0x6ffffffc</span></span><br><span class="line"><span class="meta">#<span class="keyword">define</span> SHT_GNU_verdef	  0x6ffffffd	<span class="comment">/* Version definition section.  */</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">define</span> SHT_GNU_verneed	  0x6ffffffe	<span class="comment">/* Version needs section.  */</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">define</span> SHT_GNU_versym	  0x6fffffff	<span class="comment">/* Version symbol table.  */</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">define</span> SHT_HISUNW	  0x6fffffff	<span class="comment">/* Sun-specific high bound.  */</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">define</span> SHT_HIOS	  0x6fffffff	<span class="comment">/* End OS-specific type */</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">define</span> SHT_LOPROC	  0x70000000	<span class="comment">/* Start of processor-specific */</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">define</span> SHT_HIPROC	  0x7fffffff	<span class="comment">/* End of processor-specific */</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">define</span> SHT_LOUSER	  0x80000000	<span class="comment">/* Start of application-specific */</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">define</span> SHT_HIUSER	  0x8fffffff	<span class="comment">/* End of application-specific */</span></span></span><br></pre></td></tr></table></figure>
-<figure>
-<img
-src="https://raw.githubusercontent.com/DeutschBall/test/master/image-20220806090940795.png"
-alt="image-20220806090940795" />
-<figcaption aria-hidden="true">image-20220806090940795</figcaption>
-</figure>
-<p>data节的类型为<code>SHT_PROGBITS(1)</code>,意思是程序数据</p>
-<p>bss节的类型是<code>SHT_NOBITS(8)</code>,专门给bss节设置的节类型</p>
-<h4 id="sh_flags">sh_flags</h4>
-<p>节标志位</p>
-<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">/* Legal values for sh_flags (section flags).  */</span></span><br><span class="line"></span><br><span class="line"><span class="meta">#<span class="keyword">define</span> SHF_WRITE	     (1 &lt;&lt; 0)	<span class="comment">/* Writable */</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">define</span> SHF_ALLOC	     (1 &lt;&lt; 1)	<span class="comment">/* Occupies memory during execution */</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">define</span> SHF_EXECINSTR	     (1 &lt;&lt; 2)	<span class="comment">/* Executable */</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">define</span> SHF_MERGE	     (1 &lt;&lt; 4)	<span class="comment">/* Might be merged */</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">define</span> SHF_STRINGS	     (1 &lt;&lt; 5)	<span class="comment">/* Contains nul-terminated strings */</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">define</span> SHF_INFO_LINK	     (1 &lt;&lt; 6)	<span class="comment">/* `sh_info&#x27; contains SHT index */</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">define</span> SHF_LINK_ORDER	     (1 &lt;&lt; 7)	<span class="comment">/* Preserve order after combining */</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">define</span> SHF_OS_NONCONFORMING (1 &lt;&lt; 8)	<span class="comment">/* Non-standard OS specific handling</span></span></span><br><span class="line"><span class="comment"><span class="meta">					   required */</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">define</span> SHF_GROUP	     (1 &lt;&lt; 9)	<span class="comment">/* Section is member of a group.  */</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">define</span> SHF_TLS		     (1 &lt;&lt; 10)	<span class="comment">/* Section hold thread-local data.  */</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">define</span> SHF_COMPRESSED	     (1 &lt;&lt; 11)	<span class="comment">/* Section with compressed data. */</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">define</span> SHF_MASKOS	     0x0ff00000	<span class="comment">/* OS-specific.  */</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">define</span> SHF_MASKPROC	     0xf0000000	<span class="comment">/* Processor-specific */</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">define</span> SHF_GNU_RETAIN	     (1 &lt;&lt; 21)  <span class="comment">/* Not to be GCed by linker.  */</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">define</span> SHF_ORDERED	     (1 &lt;&lt; 30)	<span class="comment">/* Special ordering requirement</span></span></span><br><span class="line"><span class="comment"><span class="meta">					   (Solaris).  */</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">define</span> SHF_EXCLUDE	     (1U &lt;&lt; 31)	<span class="comment">/* Section is excluded unless</span></span></span><br><span class="line"><span class="comment"><span class="meta">					   referenced or allocated (Solaris).*/</span></span></span><br><span class="line"></span><br></pre></td></tr></table></figure>
-<blockquote>
-<p>SHF_WRITE:该节在进程虚拟空间中可写</p>
-<p>SHF_ALLOC:该节在进程虚拟内存中需要分配空间,比如text,data,bss节</p>
-<p>SHF_EXECINSTR:该节在进程虚拟空间中可执行,比如text</p>
-</blockquote>
-<p>都是2的幂次,多个属性按位或</p>
-<p>.data节的标志是3,意味着可以分配,可以执行</p>
-<h4 id="sh_addr">sh_addr</h4>
-<p>节虚拟地址,如果该节会被加载,则该值为节在虚拟内存中的地址</p>
-<h4 id="sh_offset">sh_offset</h4>
-<p>节文件偏移,不是本节头的文件偏移,而是本节头指向对应的节的偏移量</p>
-<p>为啥要节和节头分家?</p>
-<p>每个节的大小固定,如果有额外信息,比如shrstrtab需要额外保存字符数组,则用该成员作为指针另外指向一片区域</p>
-<p>这样加载时读取节头不用担心有大有小,直接读取整个节头表即可</p>
-<h4 id="sh_size">sh_size</h4>
-<p>节区大小,不是节头大小,而是节头指向的对应节区的大小</p>
-<h4 id="sh_linksh_info">sh_link&amp;sh_info</h4>
-<p>节链接信息,这两个成员的意义视sh_type而定</p>
-<blockquote>
-<p>来自CTF wiki:</p>
-<table>
-<colgroup>
-<col style="width: 19%" />
-<col style="width: 56%" />
-<col style="width: 24%" />
-</colgroup>
-<thead>
-<tr>
-<th style="text-align: left;">sh_type</th>
-<th style="text-align: left;">sh_link</th>
-<th style="text-align: left;">sh_info</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td style="text-align: left;">SHT_DYNAMIC</td>
-<td style="text-align: left;">节区中使用的字符串表的节头索引</td>
-<td style="text-align: left;">0</td>
-</tr>
-<tr>
-<td style="text-align: left;">SHT_HASH</td>
-<td style="text-align: left;">此哈希表所使用的符号表的节头索引</td>
-<td style="text-align: left;">0</td>
-</tr>
-<tr>
-<td style="text-align: left;">SHT_REL/SHT_RELA</td>
-<td style="text-align: left;">与符号表相关的节头索引</td>
-<td style="text-align: left;">重定位应用到的节的节头索引</td>
-</tr>
-<tr>
-<td style="text-align: left;">SHT_SYMTAB/SHT_DYNSYM</td>
-<td style="text-align: left;">操作系统特定信息，Linux 中的 ELF
-文件中该项指向符号表中符号所对应的字符串节区在 Section Header Table
-中的偏移。</td>
-<td style="text-align: left;">操作系统特定信息</td>
-</tr>
-<tr>
-<td style="text-align: left;">other</td>
-<td style="text-align: left;"><code>SHN_UNDEF</code></td>
-<td style="text-align: left;">0</td>
-</tr>
-</tbody>
-</table>
-</blockquote>
-<h4 id="sh_addralign">sh_addralign</h4>
-<p>节虚拟地址对齐要求</p>
-<h4 id="sh_entsize">sh_entsize</h4>
-<p>如果本节也是一个数组,则本项目表征的是数组元素大小</p>
-<p>比如got表</p>
-<figure>
-<img
-src="https://raw.githubusercontent.com/DeutschBall/test/master/image-20220806092014449.png"
-alt="image-20220806092014449" />
-<figcaption aria-hidden="true">image-20220806092014449</figcaption>
-</figure>
-<p>其表项就是一个动态库中的实际虚拟地址,在64位系统上,8字节即可寻址整个虚拟地址空间,因此got节头中该值为8</p>
-<h3 id="节区">节区</h3>
-<p>程序员的自我修养P77给了一张SimpleSection.o的文件视图</p>
-<figure>
-<img
-src="https://raw.githubusercontent.com/DeutschBall/test/master/image-20220806094931783.png"
-alt="image-20220806094931783" />
-<figcaption aria-hidden="true">image-20220806094931783</figcaption>
-</figure>
-<p>越看越不对劲,最后发现不对劲是因为,.o文件不需要程序头表也就罢了,节头表section
-Table为啥没有紧挨着ELF头?而是夹在一些节区中间?</p>
-<p>ELF头后面紧跟着的是text节</p>
-<p>推测,Section Table后面的是链接需要用到的节,前面链接用不到</p>
-<figure>
-<img
-src="https://raw.githubusercontent.com/DeutschBall/test/master/image-20220806095428497.png"
-alt="image-20220806095428497" />
-<figcaption aria-hidden="true">image-20220806095428497</figcaption>
-</figure>
-<p>010editor将符号表和动态符号表与节区头表,程序头表,elf头并列分析了</p>
-<p>而实际上symbol_table和dynamic_symbol_table都是节区,只不过这两个节区都是表</p>
-<h4 id="字符串表">字符串表</h4>
-<p>对应节头是这样的:</p>
-<figure>
-<img
-src="https://raw.githubusercontent.com/DeutschBall/test/master/image-20220806100917610.png"
-alt="image-20220806100917610" />
-<figcaption aria-hidden="true">image-20220806100917610</figcaption>
-</figure>
-<p>s_offset表明字符串表的文件偏移为0x33F0</p>
-<p>s_size表明字符串表的大小是509字节</p>
-<p>那么字符串表在文件中的位置就是<code>[33F0h,35F9h]</code></p>
-<figure>
-<img
-src="https://raw.githubusercontent.com/DeutschBall/test/master/image-20220806101143997.png"
-alt="image-20220806101143997" />
-<figcaption aria-hidden="true">image-20220806101143997</figcaption>
-</figure>
-<p>其中的字符串均以NULL结尾,那么需要引用其中的字符串时,只需要给出相应字符串在字符串表中的下标或者偏移量,不需要再给出长度或者结尾的偏移</p>
-<p>找到NULL就意味着字符串结束</p>
-<h4 id="节名字符串表">节名字符串表</h4>
-<p>作用类似于字符串表,都是字符数组,只不过节名字符串表专门存放节名字符串</p>
-<p>本节对应节头是这样写的:</p>
-<figure>
-<img
-src="https://raw.githubusercontent.com/DeutschBall/test/master/image-20220806101528306.png"
-alt="image-20220806101528306" />
-<figcaption aria-hidden="true">image-20220806101528306</figcaption>
-</figure>
-<p>最下面这个<code>char data[272]</code>是010editor故意把节直接放到这里观察了,就是节名字符串表</p>
-<figure>
-<img
-src="https://raw.githubusercontent.com/DeutschBall/test/master/image-20220806101712880.png"
-alt="image-20220806101712880" />
-<figcaption aria-hidden="true">image-20220806101712880</figcaption>
-</figure>
-<p>各个节头中的<code>Elf32_Shdr.sh_name</code>成员,就是本表中的字符串偏移量</p>
-<h4 id="符号表">符号表</h4>
-<p>符号:函数和变量统称符号</p>
-<p>为了更清晰地观察符号表写一个<code>test.c</code>并编译成可重定位目标模块</p>
-<p><code>test.c</code></p>
-<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;stdio.h&gt;</span></span></span><br><span class="line"><span class="type">int</span> global_initialized=<span class="number">10</span>;</span><br><span class="line"><span class="type">int</span> global_uninitialized;</span><br><span class="line"><span class="type">static</span> <span class="type">int</span> static_initialized=<span class="number">20</span>;</span><br><span class="line"><span class="type">static</span> <span class="type">int</span> static_uninitialized;</span><br><span class="line"><span class="type">int</span> <span class="title function_">main</span><span class="params">()</span>&#123;</span><br><span class="line">    <span class="type">int</span> local;</span><br><span class="line">    <span class="built_in">printf</span>(<span class="string">&quot;%d,%d,%d,%d,%d&quot;</span>,global_initialized,global_uninitialized,static_initialized,static_uninitialized,local);</span><br><span class="line">    <span class="keyword">return</span> <span class="number">0</span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">gcc test.c -O0 -c -o test.o</span><br></pre></td></tr></table></figure>
-<p>符号表对应的节头是这样写的:</p>
-<figure>
-<img
-src="https://raw.githubusercontent.com/DeutschBall/test/master/image-20220806103614207.png"
-alt="image-20220806103614207" />
-<figcaption aria-hidden="true">image-20220806103614207</figcaption>
-</figure>
-<p>s_offset表明符号表的基地址在文件中的F8h</p>
-<figure>
-<img
-src="https://raw.githubusercontent.com/DeutschBall/test/master/image-20220806103655607.png"
-alt="image-20220806103655607" />
-<figcaption aria-hidden="true">image-20220806103655607</figcaption>
-</figure>
-<p>确实是一个表,有12项,其中就包括<code>static_initialized</code>等全局或者静态变量,<code>main</code>,<code>printf</code>等函数名</p>
-<p>每个表项的结构相同</p>
-<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">typedef</span> <span class="class"><span class="keyword">struct</span></span></span><br><span class="line"><span class="class">&#123;</span></span><br><span class="line">  Elf32_Word	st_name;		<span class="comment">/* Symbol name (string tbl index) */</span></span><br><span class="line">  Elf32_Addr	st_value;		<span class="comment">/* Symbol value */</span></span><br><span class="line">  Elf32_Word	st_size;		<span class="comment">/* Symbol size */</span></span><br><span class="line">  <span class="type">unsigned</span> <span class="type">char</span>	st_info;		<span class="comment">/* Symbol type and binding */</span></span><br><span class="line">  <span class="type">unsigned</span> <span class="type">char</span>	st_other;		<span class="comment">/* Symbol visibility */</span></span><br><span class="line">  Elf32_Section	st_shndx;		<span class="comment">/* Section index */</span></span><br><span class="line">&#125; Elf32_Sym;</span><br><span class="line"></span><br><span class="line"><span class="keyword">typedef</span> <span class="class"><span class="keyword">struct</span></span></span><br><span class="line"><span class="class">&#123;</span></span><br><span class="line">  Elf64_Word	st_name;		<span class="comment">/* Symbol name (string tbl index) */</span></span><br><span class="line">  <span class="type">unsigned</span> <span class="type">char</span>	st_info;		<span class="comment">/* Symbol type and binding */</span></span><br><span class="line">  <span class="type">unsigned</span> <span class="type">char</span> st_other;		<span class="comment">/* Symbol visibility */</span></span><br><span class="line">  Elf64_Section	st_shndx;		<span class="comment">/* Section index */</span></span><br><span class="line">  Elf64_Addr	st_value;		<span class="comment">/* Symbol value */</span></span><br><span class="line">  Elf64_Xword	st_size;		<span class="comment">/* Symbol size */</span></span><br><span class="line">&#125; Elf64_Sym;</span><br></pre></td></tr></table></figure>
-<blockquote>
-<p>注意64位和32位的结构体成员顺序不一样</p>
-</blockquote>
-<h5 id="st_name">st_name</h5>
-<p>本符号名字符串在strtab字符串表中的偏移量</p>
-<p>比如<code>static_initialized</code>这一项中,该值为8h</p>
-<figure>
-<img
-src="https://raw.githubusercontent.com/DeutschBall/test/master/image-20220806103940309.png"
-alt="image-20220806103940309" />
-<figcaption aria-hidden="true">image-20220806103940309</figcaption>
-</figure>
-<p>去查strtab表,对应strtab表头的sh_offset表明strtab表在0x218,那么<code>static_initialized</code>字符串就应该是从0x220开始一直到NULL结尾</p>
-<figure>
-<img
-src="https://raw.githubusercontent.com/DeutschBall/test/master/image-20220806104112403.png"
-alt="image-20220806104112403" />
-<figcaption aria-hidden="true">image-20220806104112403</figcaption>
-</figure>
-<p>确实如此</p>
-<h5 id="st_info">st_info</h5>
-<p>符号类型和绑定信息</p>
-<p>st_info为unsigned
-char类型,8位,高四位和低四位分别表示符号绑定信息和符号类型</p>
-<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">//低四位表示符号类型</span></span><br><span class="line"><span class="comment">/* Legal values for ST_BIND subfield of st_info (symbol binding).  */</span></span><br><span class="line"></span><br><span class="line"><span class="meta">#<span class="keyword">define</span> STB_LOCAL	0		<span class="comment">/* Local symbol,局部符号 */</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">define</span> STB_GLOBAL	1		<span class="comment">/* Global symbol,全局符号 */</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">define</span> STB_WEAK	2		<span class="comment">/* Weak symbol,弱引用 */</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">define</span>	STB_NUM		3		<span class="comment">/* Number of defined types.  一共就三种符号,0,1,2*/</span></span></span><br><span class="line"><span class="comment">//STB_NUM表明一共就三种符号</span></span><br><span class="line"></span><br><span class="line"><span class="comment">//高四位表示符号绑定信息</span></span><br><span class="line"><span class="comment">/* Legal values for ST_TYPE subfield of st_info (symbol type).  */</span></span><br><span class="line"></span><br><span class="line"><span class="meta">#<span class="keyword">define</span> STT_NOTYPE	0		<span class="comment">/* Symbol type is unspecified ,未知类型符号*/</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">define</span> STT_OBJECT	1		<span class="comment">/* Symbol is a data object ,数据对象,数组,变量,对象*/</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">define</span> STT_FUNC	2		<span class="comment">/* Symbol is a code object ,函数*/</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">define</span> STT_SECTION	3		<span class="comment">/* Symbol associated with a section ,节*/</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">define</span> STT_FILE	4		<span class="comment">/* Symbol&#x27;s name is file name ,文件名*/</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">define</span> STT_COMMON	5		<span class="comment">/* Symbol is a common data object */</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">define</span> STT_TLS		6		<span class="comment">/* Symbol is thread-local data object*/</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">define</span>	STT_NUM		7		<span class="comment">/* Number of defined types.  */</span></span></span><br><span class="line"><span class="comment">//STT_NUM表明一共就7种符号绑定信息</span></span><br></pre></td></tr></table></figure>
-<p>比如<code>global_initialized</code>这个符号,是一个全局的数据对象</p>
-<figure>
-<img
-src="https://raw.githubusercontent.com/DeutschBall/test/master/image-20220806105817155.png"
-alt="image-20220806105817155" />
-<figcaption aria-hidden="true">image-20220806105817155</figcaption>
-</figure>
-<p>又比如<code>test.c</code>这个符号</p>
-<figure>
-<img
-src="https://raw.githubusercontent.com/DeutschBall/test/master/image-20220806105930937.png"
-alt="image-20220806105930937" />
-<figcaption aria-hidden="true">image-20220806105930937</figcaption>
-</figure>
-<p>是一个局部文件名符号</p>
-<h5 id="st_other">st_other</h5>
-<p>预留的成员,目前没用</p>
-<h5 id="st_shndx">st_shndx</h5>
-<p>符号所在节的下标</p>
-<p>比如<code>main</code>这个符号,不用想啃腚是在text节</p>
-<figure>
-<img
-src="https://raw.githubusercontent.com/DeutschBall/test/master/image-20220806104544566.png"
-alt="image-20220806104544566" />
-<figcaption aria-hidden="true">image-20220806104544566</figcaption>
-</figure>
-<p>该值为1,去查节头表</p>
-<figure>
-<img
-src="https://raw.githubusercontent.com/DeutschBall/test/master/image-20220806104627621.png"
-alt="image-20220806104627621" />
-<figcaption aria-hidden="true">image-20220806104627621</figcaption>
-</figure>
-<p>下标为1的节就是.text</p>
-<p>对于不在本文件中定义的符号或者一些特殊符号,该值有特殊意义</p>
-<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">/* Special section indices.  */</span></span><br><span class="line"></span><br><span class="line"><span class="meta">#<span class="keyword">define</span> SHN_UNDEF	0		<span class="comment">/* Undefined section ,本符号未在本文件定义,只在本文件中被引用,可能定义在其他文件中*/</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">define</span> SHN_LORESERVE	0xff00		<span class="comment">/* Start of reserved indices */</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">define</span> SHN_LOPROC	0xff00		<span class="comment">/* Start of processor-specific */</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">define</span> SHN_BEFORE	0xff00		<span class="comment">/* Order section before all others</span></span></span><br><span class="line"><span class="comment"><span class="meta">					   (Solaris).  */</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">define</span> SHN_AFTER	0xff01		<span class="comment">/* Order section after all others</span></span></span><br><span class="line"><span class="comment"><span class="meta">					   (Solaris).  */</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">define</span> SHN_HIPROC	0xff1f		<span class="comment">/* End of processor-specific */</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">define</span> SHN_LOOS	0xff20		<span class="comment">/* Start of OS-specific */</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">define</span> SHN_HIOS	0xff3f		<span class="comment">/* End of OS-specific */</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">define</span> SHN_ABS		0xfff1		<span class="comment">/* Associated symbol is absolute ,一个绝对的值*/</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">define</span> SHN_COMMON	0xfff2		<span class="comment">/* Associated symbol is common ,该符号是一个COMMON伪节中的符号,未初始化的全局符号*/</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">define</span> SHN_XINDEX	0xffff		<span class="comment">/* Index is in extra table.  */</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">define</span> SHN_HIRESERVE	0xffff		<span class="comment">/* End of reserved indices */</span></span></span><br></pre></td></tr></table></figure>
-<p>比如<code>test.c</code>这个符号</p>
-<figure>
-<img
-src="https://raw.githubusercontent.com/DeutschBall/test/master/image-20220806110254225.png"
-alt="image-20220806110254225" />
-<figcaption aria-hidden="true">image-20220806110254225</figcaption>
-</figure>
-<p>该值为65521D=FFF1H,表示该符号包含了一个绝对的值</p>
-<h5 id="st_value">st_value</h5>
-<p>符号对应值,不同类型的文件中该值意义不同</p>
-<p><strong>在可执行目标文件中</strong></p>
-<p>该值表示符号的虚拟地址</p>
-<blockquote>
-<p>比如main这个符号,其st_value值为0x1129</p>
-<figure>
-<img
-src="https://raw.githubusercontent.com/DeutschBall/test/master/image-20220806110947749.png"
-alt="image-20220806110947749" />
-<figcaption aria-hidden="true">image-20220806110947749</figcaption>
-</figure>
-<p>用ida64加载观察之</p>
-<figure>
-<img
-src="https://raw.githubusercontent.com/DeutschBall/test/master/image-20220806111114579.png"
-alt="image-20220806111114579" />
-<figcaption aria-hidden="true">image-20220806111114579</figcaption>
-</figure>
-<p>main确实在1129位置</p>
-</blockquote>
-<p><strong>在可重定位目标模块中</strong></p>
-<p><strong>如果该符号是一个定义</strong>(不是引用,即<code>st_shndx</code>的值不是<code>SHN_UNDEF</code>),并且不是未初始化的全局变量(即不在<code>COMMON</code>伪节,即<code>st_shndx</code>不为<code>SHN_COMMON</code>),则该值表示的是该符号在对应节中的偏移量,这个节就是<code>st_shndx</code>指定的节</p>
-<p>比如静态未初始化变量,</p>
-<figure>
-<img
-src="https://raw.githubusercontent.com/DeutschBall/test/master/image-20220806111635430.png"
-alt="image-20220806111635430" />
-<figcaption aria-hidden="true">image-20220806111635430</figcaption>
-</figure>
-<p><code>st_shndx=4</code>表明他在bss段</p>
-<blockquote>
-<figure>
-<img
-src="https://raw.githubusercontent.com/DeutschBall/test/master/image-20220806111719286.png"
-alt="image-20220806111719286" />
-<figcaption aria-hidden="true">image-20220806111719286</figcaption>
-</figure>
-</blockquote>
-<p><code>st_value=0x4</code>表明它的偏移量为4,即bss段的第五个字节,那么前四个字节是谁?global_uninitialized</p>
-<figure>
-<img
-src="https://raw.githubusercontent.com/DeutschBall/test/master/image-20220806111854194.png"
-alt="image-20220806111854194" />
-<figcaption aria-hidden="true">image-20220806111854194</figcaption>
-</figure>
-<p>如果该符号在COMMON块,则st_value表示的是该符号的对齐要求</p>
-<h5 id="st_size">st_size</h5>
-<p>该符号表的大小</p>
-<h4 id="重定位表">重定位表</h4>
-<p>重定位表可以有多个,如果text节需要重定位,则会有一个.rel.text,如果data节需要重定位,则会有一个.rel.data</p>
-<p><code>test.c</code></p>
-<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;stdio.h&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;stdlib.h&gt;</span></span></span><br><span class="line"><span class="keyword">extern</span> <span class="type">int</span> value;<span class="comment">//外部变量</span></span><br><span class="line"><span class="type">int</span> <span class="title function_">add</span><span class="params">(<span class="type">int</span>,<span class="type">int</span>)</span>;<span class="comment">//外部函数</span></span><br><span class="line"></span><br><span class="line"><span class="type">int</span> <span class="title function_">main</span><span class="params">()</span>&#123;</span><br><span class="line">        <span class="built_in">printf</span>(<span class="string">&quot;test Link\n&quot;</span>);</span><br><span class="line">        <span class="built_in">printf</span>(<span class="string">&quot;sum=%d\n&quot;</span>,add(<span class="number">5</span>,<span class="number">6</span>));</span><br><span class="line">        <span class="built_in">printf</span>(<span class="string">&quot;value=%d&quot;</span>,value);</span><br><span class="line">        <span class="keyword">return</span> <span class="number">0</span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">gcc test.c -c</span><br></pre></td></tr></table></figure>
-<p>对于只编译不链接得到的test.o,使用objdump反汇编观察其main函数</p>
-<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br></pre></td><td class="code"><pre><span class="line">┌──(root㉿Executor)-[/mnt/c/Users/<span class="number">86135</span>/desktop/COFF]</span><br><span class="line">└─<span class="meta"># objdump -d test.o</span></span><br><span class="line"></span><br><span class="line">test.o:     file format elf64-x86<span class="number">-64</span></span><br><span class="line"></span><br><span class="line"></span><br><span class="line">Disassembly of section .text:</span><br><span class="line"></span><br><span class="line"><span class="number">0000000000000000</span> &lt;main&gt;:</span><br><span class="line">   <span class="number">0</span>:   <span class="number">55</span>                      push   %rbp</span><br><span class="line">   <span class="number">1</span>:   <span class="number">48</span> <span class="number">89</span> e5                mov    %rsp,%rbp</span><br><span class="line">   <span class="number">4</span>:   <span class="number">48</span> <span class="number">8</span>d <span class="number">05</span> <span class="number">00</span> <span class="number">00</span> <span class="number">00</span> <span class="number">00</span>    lea    <span class="number">0x0</span>(%rip),%rax        <span class="meta"># b <span class="string">&lt;main+0xb&gt;</span></span></span><br><span class="line">   b:   <span class="number">48</span> <span class="number">89</span> c7                mov    %rax,%rdi</span><br><span class="line">   e:   e8 <span class="number">00</span> <span class="number">00</span> <span class="number">00</span> <span class="number">00</span>          call   <span class="number">13</span> &lt;main+<span class="number">0x13</span>&gt;</span><br><span class="line">  <span class="number">13</span>:   be <span class="number">06</span> <span class="number">00</span> <span class="number">00</span> <span class="number">00</span>          mov    $<span class="number">0x6</span>,%esi</span><br><span class="line">  <span class="number">18</span>:   bf <span class="number">05</span> <span class="number">00</span> <span class="number">00</span> <span class="number">00</span>          mov    $<span class="number">0x5</span>,%edi</span><br><span class="line">  <span class="number">1</span>d:   e8 <span class="number">00</span> <span class="number">00</span> <span class="number">00</span> <span class="number">00</span>          call   <span class="number">22</span> &lt;main+<span class="number">0x22</span>&gt;</span><br><span class="line">  <span class="number">22</span>:   <span class="number">89</span> c6                   mov    %eax,%esi</span><br><span class="line">  <span class="number">24</span>:   <span class="number">48</span> <span class="number">8</span>d <span class="number">05</span> <span class="number">00</span> <span class="number">00</span> <span class="number">00</span> <span class="number">00</span>    lea    <span class="number">0x0</span>(%rip),%rax        # <span class="number">2b</span> &lt;main+<span class="number">0x2b</span>&gt;</span><br><span class="line">  <span class="number">2b</span>:   <span class="number">48</span> <span class="number">89</span> c7                mov    %rax,%rdi</span><br><span class="line">  <span class="number">2</span>e:   b8 <span class="number">00</span> <span class="number">00</span> <span class="number">00</span> <span class="number">00</span>          mov    $<span class="number">0x0</span>,%eax</span><br><span class="line">  <span class="number">33</span>:   e8 <span class="number">00</span> <span class="number">00</span> <span class="number">00</span> <span class="number">00</span>          call   <span class="number">38</span> &lt;main+<span class="number">0x38</span>&gt;</span><br><span class="line">  <span class="number">38</span>:   <span class="number">8b</span> <span class="number">05</span> <span class="number">00</span> <span class="number">00</span> <span class="number">00</span> <span class="number">00</span>       mov    <span class="number">0x0</span>(%rip),%eax        # <span class="number">3</span>e &lt;main+<span class="number">0x3e</span>&gt;</span><br><span class="line">  <span class="number">3</span>e:   <span class="number">89</span> c6                   mov    %eax,%esi</span><br><span class="line">  <span class="number">40</span>:   <span class="number">48</span> <span class="number">8</span>d <span class="number">05</span> <span class="number">00</span> <span class="number">00</span> <span class="number">00</span> <span class="number">00</span>    lea    <span class="number">0x0</span>(%rip),%rax        # <span class="number">47</span> &lt;main+<span class="number">0x47</span>&gt;</span><br><span class="line">  <span class="number">47</span>:   <span class="number">48</span> <span class="number">89</span> c7                mov    %rax,%rdi</span><br><span class="line">  <span class="number">4</span>a:   b8 <span class="number">00</span> <span class="number">00</span> <span class="number">00</span> <span class="number">00</span>          mov    $<span class="number">0x0</span>,%eax</span><br><span class="line">  <span class="number">4f</span>:   e8 <span class="number">00</span> <span class="number">00</span> <span class="number">00</span> <span class="number">00</span>          call   <span class="number">54</span> &lt;main+<span class="number">0x54</span>&gt;</span><br><span class="line">  <span class="number">54</span>:   b8 <span class="number">00</span> <span class="number">00</span> <span class="number">00</span> <span class="number">00</span>          mov    $<span class="number">0x0</span>,%eax</span><br><span class="line">  <span class="number">59</span>:   <span class="number">5</span>d                      pop    %rbp</span><br><span class="line">  <span class="number">5</span>a:   c3                      ret</span><br></pre></td></tr></table></figure>
-<p>可以发现其中main+4,main+e,main+1d等等处的指令中有四个字节的0</p>
-<p>实际上是由于,编译器对于<code>__main</code>函数,<code>add</code>函数,<code>value</code>外部变量无法解析其位置,于是全都置零等待链接器填坑</p>
-<p>观察其重定位表</p>
-<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br></pre></td><td class="code"><pre><span class="line">┌──(root㉿Executor)-[/mnt/c/Users/<span class="number">86135</span>/desktop/COFF]</span><br><span class="line">└─<span class="meta"># objdump -r test.o</span></span><br><span class="line"></span><br><span class="line">test.o:     file format elf64-x86<span class="number">-64</span></span><br><span class="line"></span><br><span class="line">RELOCATION RECORDS FOR [.text]:</span><br><span class="line">OFFSET           TYPE              VALUE</span><br><span class="line"><span class="number">0000000000000007</span> R_X86_64_PC32     .rodata<span class="number">-0x0000000000000004</span></span><br><span class="line"><span class="number">000000000000000f</span> R_X86_64_PLT32    <span class="built_in">puts</span><span class="number">-0x0000000000000004</span>		;此处的<span class="built_in">puts</span>是编译器将<span class="built_in">printf</span>优化成了<span class="built_in">puts</span></span><br><span class="line"><span class="number">000000000000001</span>e R_X86_64_PLT32    add<span class="number">-0x0000000000000004</span></span><br><span class="line"><span class="number">0000000000000027</span> R_X86_64_PC32     .rodata+<span class="number">0x0000000000000006</span></span><br><span class="line"><span class="number">0000000000000034</span> R_X86_64_PLT32    <span class="built_in">printf</span><span class="number">-0x0000000000000004</span></span><br><span class="line"><span class="number">000000000000003</span>a R_X86_64_PC32     value<span class="number">-0x0000000000000004</span></span><br><span class="line"><span class="number">0000000000000043</span> R_X86_64_PC32     .rodata+<span class="number">0x000000000000000e</span></span><br><span class="line"><span class="number">0000000000000050</span> R_X86_64_PLT32    <span class="built_in">printf</span><span class="number">-0x0000000000000004</span></span><br><span class="line"></span><br><span class="line"></span><br><span class="line">RELOCATION RECORDS FOR [.eh_frame]:</span><br><span class="line">OFFSET           TYPE              VALUE</span><br><span class="line"><span class="number">0000000000000020</span> R_X86_64_PC32     .text</span><br></pre></td></tr></table></figure>
-<p><code>RELOCATION RECORDS FOR [.text]:</code>这表示紧跟在后面是text节的符号的重定位条目</p>
-<table>
-<colgroup>
-<col style="width: 9%" />
-<col style="width: 90%" />
-</colgroup>
-<thead>
-<tr>
-<th>栏目</th>
-<th>意义</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td>OFFSET</td>
-<td>该符号在其对应段中的偏移量</td>
-</tr>
-<tr>
-<td>TYPE</td>
-<td>重定位方式,这里有两种,PLT或者PC,是最常见的两种,PC重定位适用于变量的引用,PLT重定位适用于函数的重定位</td>
-</tr>
-<tr>
-<td>VALUE</td>
-<td>需要重定位的符号</td>
-</tr>
-</tbody>
-</table>
-<p>比如<code>0000000000000034 R_X86_64_PLT32    printf-0x0000000000000004</code>这一条,</p>
-<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="number">33</span>:   e8 <span class="number">00</span> <span class="number">00</span> <span class="number">00</span> <span class="number">00</span>          call   <span class="number">38</span> &lt;main+<span class="number">0x38</span>&gt;</span><br><span class="line"><span class="number">38</span>:   <span class="number">8b</span> <span class="number">05</span> <span class="number">00</span> <span class="number">00</span> <span class="number">00</span> <span class="number">00</span>       mov    <span class="number">0x0</span>(%rip),%eax        # <span class="number">3</span>e &lt;main+<span class="number">0x3e</span>&gt;</span><br></pre></td></tr></table></figure>
-<p>它恰好是main+33处的call的操作数(0xe8为call指令的操作码,后面的00就是main+34)</p>
-<p>编译器会给每个需要重定位的符号建立一个<strong>重定位条目</strong>(然而自我修养上作者将Relocation
-Entry翻译成了重定位入口,感觉此处的Entry不如翻译成条目)</p>
-<p>重定位条目是一个结构体:</p>
-<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">/* The following, at least, is used on Sparc v9, MIPS, and Alpha.  */</span></span><br><span class="line"></span><br><span class="line"><span class="keyword">typedef</span> <span class="class"><span class="keyword">struct</span></span></span><br><span class="line"><span class="class">&#123;</span></span><br><span class="line">  Elf64_Addr	r_offset;		<span class="comment">/* Address */</span></span><br><span class="line">  Elf64_Xword	r_info;			<span class="comment">/* Relocation type and symbol index */</span></span><br><span class="line">&#125; Elf64_Rel;</span><br></pre></td></tr></table></figure>
-<h5 id="r_offset">r_offset</h5>
-<p>需要修正的位置,相对于该符号所在节的偏移量</p>
-<p>就是objdump -r之后的OFFSET栏目</p>
-<h5 id="r_info">r_info</h5>
-<p>重定位条目的类型和符号</p>
-<h2 id="工具">工具</h2>
-<h3 id="linux-elf">Linux ELF</h3>
-<h4 id="gcc编译链接">gcc编译链接</h4>
-<h5 id="只编译不链接">只编译不链接</h5>
-<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">gcc -c main.c -o main.o</span><br></pre></td></tr></table></figure>
-<h5 id="编译链接">编译链接</h5>
-<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">gcc main.c -o main</span><br></pre></td></tr></table></figure>
-<h4 id="file查看文件格式">file查看文件格式</h4>
-<p>lilnux上<code>file</code>的参数可以为任何文件,其作用是报告该文件的基本信息</p>
-<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line">┌──(root㉿Executor)-[/mnt/c/Users/86135/desktop/COFF]</span><br><span class="line">└─# file main.c</span><br><span class="line">main.c: C source, ASCII text, with CRLF line terminators</span><br><span class="line"></span><br><span class="line">┌──(root㉿Executor)-[/mnt/c/Users/86135/desktop/COFF]</span><br><span class="line">└─# file main.exe</span><br><span class="line">main.exe: PE32+ executable (console) x86-64, for MS Windows</span><br><span class="line"></span><br><span class="line">┌──(root㉿Executor)-[/mnt/c/Users/86135/desktop/COFF]</span><br><span class="line">└─# file main</span><br><span class="line">main: ELF 64-bit LSB pie executable, x86-64, version 1 (SYSV), dynamically linked, interpreter /lib64/ld-linux-x86-64.so.2, BuildID[sha1]=45f82af9109c5336fc17e25b88c4ce4def86b6e2, for GNU/Linux 3.2.0, not stripped</span><br></pre></td></tr></table></figure>
-<h4 id="objdump-观察结构">objdump 观察结构</h4>
-<h5 id="objdump--h观察节区基本信息">objdump -h观察节区基本信息</h5>
-<table>
-<colgroup>
-<col style="width: 11%" />
-<col style="width: 88%" />
-</colgroup>
-<thead>
-<tr>
-<th style="text-align: left;">栏目</th>
-<th>意义</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td style="text-align: left;">Idx</td>
-<td>节区在节区表中的顺序编号</td>
-</tr>
-<tr>
-<td style="text-align: left;">Name</td>
-<td>节区名</td>
-</tr>
-<tr>
-<td style="text-align: left;">Size</td>
-<td>本节区大小</td>
-</tr>
-<tr>
-<td style="text-align: left;">VMA</td>
-<td></td>
-</tr>
-<tr>
-<td style="text-align: left;">LMA</td>
-<td></td>
-</tr>
-<tr>
-<td style="text-align: left;">File off</td>
-<td>本节区在文件中的偏移量</td>
-</tr>
-<tr>
-<td style="text-align: left;">Align</td>
-<td>本节区的对齐要求,<code>2**n</code>意思是<span
-class="math inline">\(2^n\)</span>字节对齐,节区首地址必须是<span
-class="math inline">\(2^n\)</span>的倍数</td>
-</tr>
-<tr>
-<td style="text-align: left;">节区属性</td>
-<td>CONTENTS</td>
-</tr>
-<tr>
-<td style="text-align: left;"></td>
-<td></td>
-</tr>
-</tbody>
-</table>
-<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br></pre></td><td class="code"><pre><span class="line">┌──(root㉿Executor)-[/mnt/c/Users/86135/desktop/COFF]</span><br><span class="line">└─# objdump -h main</span><br><span class="line"></span><br><span class="line">main:     file format elf64-x86-64</span><br><span class="line"></span><br><span class="line">Sections:</span><br><span class="line">Idx Name          Size      VMA               LMA               File off  Algn</span><br><span class="line">  0 .interp       0000001c  0000000000000318  0000000000000318  00000318  2**0</span><br><span class="line">                  CONTENTS, ALLOC, LOAD, READONLY, DATA</span><br><span class="line">  1 .note.gnu.property 00000020  0000000000000338  0000000000000338  00000338  2**3</span><br><span class="line">                  CONTENTS, ALLOC, LOAD, READONLY, DATA</span><br><span class="line">  2 .note.gnu.build-id 00000024  0000000000000358  0000000000000358  00000358  2**2</span><br><span class="line">                  CONTENTS, ALLOC, LOAD, READONLY, DATA</span><br><span class="line">  3 .note.ABI-tag 00000020  000000000000037c  000000000000037c  0000037c  2**2</span><br><span class="line">                  CONTENTS, ALLOC, LOAD, READONLY, DATA</span><br><span class="line">  4 .gnu.hash     00000024  00000000000003a0  00000000000003a0  000003a0  2**3</span><br><span class="line">                  CONTENTS, ALLOC, LOAD, READONLY, DATA</span><br><span class="line">  5 .dynsym       00000090  00000000000003c8  00000000000003c8  000003c8  2**3</span><br><span class="line">                  CONTENTS, ALLOC, LOAD, READONLY, DATA</span><br><span class="line">  6 .dynstr       0000007d  0000000000000458  0000000000000458  00000458  2**0</span><br><span class="line">                  CONTENTS, ALLOC, LOAD, READONLY, DATA</span><br><span class="line">  7 .gnu.version  0000000c  00000000000004d6  00000000000004d6  000004d6  2**1</span><br><span class="line">                  CONTENTS, ALLOC, LOAD, READONLY, DATA</span><br><span class="line">  8 .gnu.version_r 00000020  00000000000004e8  00000000000004e8  000004e8  2**3</span><br><span class="line">                  CONTENTS, ALLOC, LOAD, READONLY, DATA</span><br><span class="line">  9 .rela.dyn     000000c0  0000000000000508  0000000000000508  00000508  2**3</span><br><span class="line">                  CONTENTS, ALLOC, LOAD, READONLY, DATA</span><br><span class="line"> 10 .init         00000017  0000000000001000  0000000000001000  00001000  2**2</span><br><span class="line">                  CONTENTS, ALLOC, LOAD, READONLY, CODE</span><br><span class="line"> 11 .plt          00000010  0000000000001020  0000000000001020  00001020  2**4</span><br><span class="line">                  CONTENTS, ALLOC, LOAD, READONLY, CODE</span><br><span class="line"> 12 .plt.got      00000008  0000000000001030  0000000000001030  00001030  2**3</span><br><span class="line">                  CONTENTS, ALLOC, LOAD, READONLY, CODE</span><br><span class="line"> 13 .text         00000161  0000000000001040  0000000000001040  00001040  2**4</span><br><span class="line">                  CONTENTS, ALLOC, LOAD, READONLY, CODE</span><br><span class="line"> 14 .fini         00000009  00000000000011a4  00000000000011a4  000011a4  2**2</span><br><span class="line">                  CONTENTS, ALLOC, LOAD, READONLY, CODE</span><br><span class="line"> 15 .rodata       00000004  0000000000002000  0000000000002000  00002000  2**2</span><br><span class="line">                  CONTENTS, ALLOC, LOAD, READONLY, DATA</span><br><span class="line"> 16 .eh_frame_hdr 0000003c  0000000000002004  0000000000002004  00002004  2**2</span><br><span class="line">                  CONTENTS, ALLOC, LOAD, READONLY, DATA</span><br><span class="line"> 17 .eh_frame     00000108  0000000000002040  0000000000002040  00002040  2**3</span><br><span class="line">                  CONTENTS, ALLOC, LOAD, READONLY, DATA</span><br><span class="line"> 18 .init_array   00000008  0000000000003e18  0000000000003e18  00002e18  2**3</span><br><span class="line">                  CONTENTS, ALLOC, LOAD, DATA</span><br><span class="line"> 19 .fini_array   00000008  0000000000003e20  0000000000003e20  00002e20  2**3</span><br><span class="line">                  CONTENTS, ALLOC, LOAD, DATA</span><br><span class="line"> 20 .dynamic      000001b0  0000000000003e28  0000000000003e28  00002e28  2**3</span><br><span class="line">                  CONTENTS, ALLOC, LOAD, DATA</span><br><span class="line"> 21 .got          00000028  0000000000003fd8  0000000000003fd8  00002fd8  2**3</span><br><span class="line">                  CONTENTS, ALLOC, LOAD, DATA</span><br><span class="line"> 22 .got.plt      00000018  0000000000004000  0000000000004000  00003000  2**3</span><br><span class="line">                  CONTENTS, ALLOC, LOAD, DATA</span><br><span class="line"> 23 .data         00000010  0000000000004018  0000000000004018  00003018  2**3</span><br><span class="line">                  CONTENTS, ALLOC, LOAD, DATA</span><br><span class="line"> 24 .bss          00000008  0000000000004028  0000000000004028  00003028  2**0</span><br><span class="line">                  ALLOC</span><br><span class="line"> 25 .comment      0000001e  0000000000000000  0000000000000000  00003028  2**0</span><br><span class="line">                  CONTENTS, READONLY</span><br></pre></td></tr></table></figure>
-<blockquote>
-<p>各段作用</p>
-<figure>
-<img
-src="https://raw.githubusercontent.com/DeutschBall/test/master/image-20220805152931491.png"
-alt="image-20220805152931491" />
-<figcaption aria-hidden="true">image-20220805152931491</figcaption>
-</figure>
-</blockquote>
-<h5 id="objdump--s-以16进制打印各节内容">objdump -s
-以16进制打印各节内容</h5>
-<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br></pre></td><td class="code"><pre><span class="line">┌──(root㉿Executor)-[/mnt/c/Users/86135/desktop/COFF]</span><br><span class="line">└─# objdump -s main</span><br><span class="line"></span><br><span class="line">main:     file format elf64-x86-64</span><br><span class="line"></span><br><span class="line">...</span><br><span class="line">Contents of section .init:</span><br><span class="line"> 1000 4883ec08 488b05dd 2f000048 85c07402  H...H.../..H..t.</span><br><span class="line"> 1010 ffd04883 c408c3                      ..H....</span><br><span class="line">Contents of section .plt:</span><br><span class="line"> 1020 ff35e22f 0000ff25 e42f0000 0f1f4000  .5./...%./....@.</span><br><span class="line">Contents of section .plt.got:</span><br><span class="line"> 1030 ff25c22f 00006690                    .%./..f.</span><br><span class="line">Contents of section .text:</span><br><span class="line"> 1040 31ed4989 d15e4889 e24883e4 f050544c  1.I..^H..H...PTL</span><br><span class="line"> 1050 8d054a01 0000488d 0de30000 00488d3d  ..J...H......H.=</span><br><span class="line"> 1060 c5000000 ff15762f 0000f40f 1f440000  ......v/.....D..</span><br><span class="line"> 1070 488d3db1 2f000048 8d05aa2f 00004839  H.=./..H.../..H9</span><br><span class="line"> 1080 f8741548 8b054e2f 00004885 c07409ff  .t.H..N/..H..t..</span><br><span class="line"> 1090 e00f1f80 00000000 c30f1f80 00000000  ................</span><br><span class="line"> 10a0 488d3d81 2f000048 8d357a2f 00004829  H.=./..H.5z/..H)</span><br><span class="line"> 10b0 fe4889f0 48c1ee3f 48c1f803 4801c648  .H..H..?H...H..H</span><br><span class="line"> 10c0 d1fe7414 488b0525 2f000048 85c07408  ..t.H..%/..H..t.</span><br><span class="line"> 10d0 ffe0660f 1f440000 c30f1f80 00000000  ..f..D..........</span><br><span class="line"> 10e0 f30f1efa 803d3d2f 00000075 2b554883  .....==/...u+UH.</span><br><span class="line"> 10f0 3d022f00 00004889 e5740c48 8b3d1e2f  =./...H..t.H.=./</span><br><span class="line"> 1100 0000e829 ffffffe8 64ffffff c605152f  ...)....d....../</span><br><span class="line"> 1110 0000015d c30f1f00 c30f1f80 00000000  ...]............</span><br><span class="line"> 1120 f30f1efa e977ffff ff554889 e5b80000  .....w...UH.....</span><br><span class="line"> 1130 00005dc3 662e0f1f 84000000 00006690  ..].f.........f.</span><br><span class="line"> 1140 41574c8d 3dcf2c00 00415649 89d64155  AWL.=.,..AVI..AU</span><br><span class="line"> 1150 4989f541 544189fc 55488d2d c02c0000  I..ATA..UH.-.,..</span><br><span class="line"> 1160 534c29fd 4883ec08 e893feff ff48c1fd  SL).H........H..</span><br><span class="line"> 1170 03741b31 db0f1f00 4c89f24c 89ee4489  .t.1....L..L..D.</span><br><span class="line"> 1180 e741ff14 df4883c3 014839dd 75ea4883  .A...H...H9.u.H.</span><br><span class="line"> 1190 c4085b5d 415c415d 415e415f c30f1f00  ..[]A\A]A^A_....</span><br><span class="line"> 11a0 c3                                   .</span><br><span class="line">Contents of section .fini:</span><br><span class="line">...</span><br></pre></td></tr></table></figure>
-<h5 id="objdump--d-反汇编包含指令的段">objdump -d
-反汇编包含指令的段</h5>
-<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br></pre></td><td class="code"><pre><span class="line">┌──(root㉿Executor)-[/mnt/c/Users/86135/desktop/COFF]</span><br><span class="line">└─# objdump -d main</span><br><span class="line"></span><br><span class="line">main:     file format elf64-x86-64</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">Disassembly of section .init:</span><br><span class="line"></span><br><span class="line">0000000000001000 &lt;_init&gt;:</span><br><span class="line">    1000:       48 83 ec 08             sub    $0x8,%rsp</span><br><span class="line">    1004:       48 8b 05 dd 2f 00 00    mov    0x2fdd(%rip),%rax        # 3fe8 &lt;__gmon_start__@Base&gt;</span><br><span class="line">    100b:       48 85 c0                test   %rax,%rax</span><br><span class="line">    100e:       74 02                   je     1012 &lt;_init+0x12&gt;</span><br><span class="line">    1010:       ff d0                   call   *%rax</span><br><span class="line">    1012:       48 83 c4 08             add    $0x8,%rsp</span><br><span class="line">    1016:       c3                      ret</span><br><span class="line">....</span><br><span class="line">0000000000001129 &lt;main&gt;:</span><br><span class="line">    1129:       55                      push   %rbp</span><br><span class="line">    112a:       48 89 e5                mov    %rsp,%rbp</span><br><span class="line">    112d:       b8 00 00 00 00          mov    $0x0,%eax</span><br><span class="line">    1132:       5d                      pop    %rbp</span><br><span class="line">    1133:       c3                      ret</span><br><span class="line">    1134:       66 2e 0f 1f 84 00 00    cs nopw 0x0(%rax,%rax,1)</span><br><span class="line">    113b:       00 00 00</span><br><span class="line">    113e:       66 90                   xchg   %ax,%ax</span><br><span class="line"></span><br><span class="line">...</span><br></pre></td></tr></table></figure>
-<h5 id="objdump--r-观察重定位表">objdump -r 观察重定位表</h5>
-<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br></pre></td><td class="code"><pre><span class="line">┌──(root㉿Executor)-[/mnt/c/Users/86135/desktop/COFF]</span><br><span class="line">└─# objdump -r test.o</span><br><span class="line"></span><br><span class="line">test.o:     file format elf64-x86-64</span><br><span class="line"></span><br><span class="line">RELOCATION RECORDS FOR [.text]:</span><br><span class="line">OFFSET           TYPE              VALUE</span><br><span class="line">0000000000000007 R_X86_64_PC32     .rodata-0x0000000000000004</span><br><span class="line">000000000000000f R_X86_64_PLT32    puts-0x0000000000000004</span><br><span class="line">000000000000001e R_X86_64_PLT32    add-0x0000000000000004</span><br><span class="line">0000000000000027 R_X86_64_PC32     .rodata+0x0000000000000006</span><br><span class="line">0000000000000034 R_X86_64_PLT32    printf-0x0000000000000004</span><br><span class="line">000000000000003a R_X86_64_PC32     value-0x0000000000000004</span><br><span class="line">0000000000000043 R_X86_64_PC32     .rodata+0x000000000000000e</span><br><span class="line">0000000000000050 R_X86_64_PLT32    printf-0x0000000000000004</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">RELOCATION RECORDS FOR [.eh_frame]:</span><br><span class="line">OFFSET           TYPE              VALUE</span><br><span class="line">0000000000000020 R_X86_64_PC32     .text</span><br></pre></td></tr></table></figure>
-<h4 id="size观察代码数据段的长度">size观察代码数据段的长度</h4>
-<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">┌──(root㉿Executor)-[/mnt/c/Users/<span class="number">86135</span>/desktop/COFF]</span><br><span class="line">└─<span class="meta"># size main</span></span><br><span class="line">   text    data     bss     dec     hex filename</span><br><span class="line">   <span class="number">1406</span>     <span class="number">528</span>       <span class="number">8</span>    <span class="number">1942</span>     <span class="number">796</span> main</span><br><span class="line">   ;text代码段长度(<span class="number">10</span>进制)	data数据段长度(<span class="number">10</span>进制)	bss未初始化数据段(<span class="number">10</span>进制) dec这三个段长度和(<span class="number">10</span>进制) hex这三个段的长度和(<span class="number">16</span>进制)</span><br></pre></td></tr></table></figure>
-<h4 id="readelf观察elf格式">readelf观察ELF格式</h4>
-<h5 id="readelf--h观察elf头">readelf -h观察ELF头</h5>
-<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br></pre></td><td class="code"><pre><span class="line">┌──(root㉿Executor)-[/mnt/c/Users/86135/desktop/COFF]</span><br><span class="line">└─# readelf -h main</span><br><span class="line">ELF Header:</span><br><span class="line">  Magic:   7f 45 4c 46 02 01 01 00 00 00 00 00 00 00 00 00</span><br><span class="line">  Class:                             ELF64</span><br><span class="line">  Data:                              2&#x27;s complement, little endian</span><br><span class="line">  Version:                           1 (current)</span><br><span class="line">  OS/ABI:                            UNIX - System V</span><br><span class="line">  ABI Version:                       0</span><br><span class="line">  Type:                              DYN (Position-Independent Executable file)</span><br><span class="line">  Machine:                           Advanced Micro Devices X86-64</span><br><span class="line">  Version:                           0x1</span><br><span class="line">  Entry point address:               0x1040</span><br><span class="line">  Start of program headers:          64 (bytes into file)</span><br><span class="line">  Start of section headers:          14080 (bytes into file)</span><br><span class="line">  Flags:                             0x0</span><br><span class="line">  Size of this header:               64 (bytes)</span><br><span class="line">  Size of program headers:           56 (bytes)</span><br><span class="line">  Number of program headers:         13</span><br><span class="line">  Size of section headers:           64 (bytes)</span><br><span class="line">  Number of section headers:         30</span><br><span class="line">  Section header string table index: 29</span><br></pre></td></tr></table></figure>
-<h5 id="readelf--s观察各节区">readelf -S观察各节区</h5>
-<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br></pre></td><td class="code"><pre><span class="line">┌──(root㉿Executor)-[/mnt/c/Users/86135/desktop/COFF]</span><br><span class="line">└─# readelf -S main</span><br><span class="line">There are 30 section headers, starting at offset 0x3700:</span><br><span class="line"></span><br><span class="line">Section Headers:</span><br><span class="line">  [Nr] Name              Type             Address           Offset</span><br><span class="line">       Size              EntSize          Flags  Link  Info  Align</span><br><span class="line">  [ 0]                   NULL             0000000000000000  00000000</span><br><span class="line">       0000000000000000  0000000000000000           0     0     0</span><br><span class="line">  [ 1] .interp           PROGBITS         0000000000000318  00000318</span><br><span class="line">       000000000000001c  0000000000000000   A       0     0     1</span><br><span class="line">  [ 2] .note.gnu.pr[...] NOTE             0000000000000338  00000338</span><br><span class="line">       0000000000000020  0000000000000000   A       0     0     8</span><br><span class="line">  [ 3] .note.gnu.bu[...] NOTE             0000000000000358  00000358</span><br><span class="line">       0000000000000024  0000000000000000   A       0     0     4</span><br><span class="line">  [ 4] .note.ABI-tag     NOTE             000000000000037c  0000037c</span><br><span class="line">       0000000000000020  0000000000000000   A       0     0     4</span><br><span class="line">  [ 5] .gnu.hash         GNU_HASH         00000000000003a0  000003a0</span><br><span class="line">       0000000000000024  0000000000000000   A       6     0     8</span><br><span class="line">  [ 6] .dynsym           DYNSYM           00000000000003c8  000003c8</span><br><span class="line">       0000000000000090  0000000000000018   A       7     1     8</span><br><span class="line">  [ 7] .dynstr           STRTAB           0000000000000458  00000458</span><br><span class="line">       000000000000007d  0000000000000000   A       0     0     1</span><br><span class="line">  [ 8] .gnu.version      VERSYM           00000000000004d6  000004d6</span><br><span class="line">       000000000000000c  0000000000000002   A       6     0     2</span><br><span class="line">  [ 9] .gnu.version_r    VERNEED          00000000000004e8  000004e8</span><br><span class="line">       0000000000000020  0000000000000000   A       7     1     8</span><br><span class="line">  [10] .rela.dyn         RELA             0000000000000508  00000508</span><br><span class="line">       00000000000000c0  0000000000000018   A       6     0     8</span><br><span class="line">  [11] .init             PROGBITS         0000000000001000  00001000</span><br><span class="line">       0000000000000017  0000000000000000  AX       0     0     4</span><br><span class="line">  [12] .plt              PROGBITS         0000000000001020  00001020</span><br><span class="line">       0000000000000010  0000000000000010  AX       0     0     16</span><br><span class="line">  [13] .plt.got          PROGBITS         0000000000001030  00001030</span><br><span class="line">       0000000000000008  0000000000000008  AX       0     0     8</span><br><span class="line">  [14] .text             PROGBITS         0000000000001040  00001040</span><br><span class="line">       0000000000000161  0000000000000000  AX       0     0     16</span><br><span class="line">  [15] .fini             PROGBITS         00000000000011a4  000011a4</span><br><span class="line">       0000000000000009  0000000000000000  AX       0     0     4</span><br><span class="line">  [16] .rodata           PROGBITS         0000000000002000  00002000</span><br><span class="line">       0000000000000004  0000000000000004  AM       0     0     4</span><br><span class="line">  [17] .eh_frame_hdr     PROGBITS         0000000000002004  00002004</span><br><span class="line">       000000000000003c  0000000000000000   A       0     0     4</span><br><span class="line">  [18] .eh_frame         PROGBITS         0000000000002040  00002040</span><br><span class="line">       0000000000000108  0000000000000000   A       0     0     8</span><br><span class="line">  [19] .init_array       INIT_ARRAY       0000000000003e18  00002e18</span><br><span class="line">       0000000000000008  0000000000000008  WA       0     0     8</span><br><span class="line">  [20] .fini_array       FINI_ARRAY       0000000000003e20  00002e20</span><br><span class="line">       0000000000000008  0000000000000008  WA       0     0     8</span><br><span class="line">  [21] .dynamic          DYNAMIC          0000000000003e28  00002e28</span><br><span class="line">       00000000000001b0  0000000000000010  WA       7     0     8</span><br><span class="line">  [22] .got              PROGBITS         0000000000003fd8  00002fd8</span><br><span class="line">       0000000000000028  0000000000000008  WA       0     0     8</span><br><span class="line">  [23] .got.plt          PROGBITS         0000000000004000  00003000</span><br><span class="line">       0000000000000018  0000000000000008  WA       0     0     8</span><br><span class="line">  [24] .data             PROGBITS         0000000000004018  00003018</span><br><span class="line">       0000000000000010  0000000000000000  WA       0     0     8</span><br><span class="line">  [25] .bss              NOBITS           0000000000004028  00003028</span><br><span class="line">       0000000000000008  0000000000000000  WA       0     0     1</span><br><span class="line">  [26] .comment          PROGBITS         0000000000000000  00003028</span><br><span class="line">       000000000000001e  0000000000000001  MS       0     0     1</span><br><span class="line">  [27] .symtab           SYMTAB           0000000000000000  00003048</span><br><span class="line">       00000000000003a8  0000000000000018          28    21     8</span><br><span class="line">  [28] .strtab           STRTAB           0000000000000000  000033f0</span><br><span class="line">       00000000000001fd  0000000000000000           0     0     1</span><br><span class="line">  [29] .shstrtab         STRTAB           0000000000000000  000035ed</span><br><span class="line">       0000000000000110  0000000000000000           0     0     1</span><br><span class="line">Key to Flags:</span><br><span class="line">  W (write), A (alloc), X (execute), M (merge), S (strings), I (info),</span><br><span class="line">  L (link order), O (extra OS processing required), G (group), T (TLS),</span><br><span class="line">  C (compressed), x (unknown), o (OS specific), E (exclude),</span><br><span class="line">  D (mbind), l (large), p (processor specific)</span><br></pre></td></tr></table></figure>
-<p>Nr:下标</p>
-<p>Name:节名字符串在<code>.shstrtab</code>字符串表中的偏移量</p>
-<p>Type:节类型</p>
-<p>Address:节虚拟地址</p>
-<p>Offset:节文件偏移</p>
-<p>Size:节大小</p>
-<p>EntSize:节项目(如果节是一个表的话)大小</p>
-<p>Flags:节属性</p>
-<p>Link&amp;Info:节链接信息</p>
-<p>Align:节对齐要求</p>
-<h5 id="readelf--s观察符号">readelf -s观察符号</h5>
-<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br></pre></td><td class="code"><pre><span class="line">┌──(root㉿Executor)-[/mnt/c/Users/86135/desktop/COFF]</span><br><span class="line">└─# readelf -s test.o</span><br><span class="line"></span><br><span class="line">Symbol table &#x27;.symtab&#x27; contains 12 entries:</span><br><span class="line">   Num:    Value          Size Type    Bind   Vis      Ndx Name</span><br><span class="line">     0: 0000000000000000     0 NOTYPE  LOCAL  DEFAULT  UND</span><br><span class="line">     1: 0000000000000000     0 FILE    LOCAL  DEFAULT  ABS test.c</span><br><span class="line">     2: 0000000000000000     0 SECTION LOCAL  DEFAULT    1 .text</span><br><span class="line">     3: 0000000000000000     0 SECTION LOCAL  DEFAULT    3 .data</span><br><span class="line">     4: 0000000000000000     0 SECTION LOCAL  DEFAULT    4 .bss</span><br><span class="line">     5: 0000000000000004     4 OBJECT  LOCAL  DEFAULT    3 static_initialized</span><br><span class="line">     6: 0000000000000004     4 OBJECT  LOCAL  DEFAULT    4 static_uninitialized</span><br><span class="line">     7: 0000000000000000     0 SECTION LOCAL  DEFAULT    5 .rodata</span><br><span class="line">     8: 0000000000000000     4 OBJECT  GLOBAL DEFAULT    3 global_initialized</span><br><span class="line">     9: 0000000000000000     4 OBJECT  GLOBAL DEFAULT    4 global_uninitialized</span><br><span class="line">    10: 0000000000000000    70 FUNC    GLOBAL DEFAULT    1 main</span><br><span class="line">    11: 0000000000000000     0 NOTYPE  GLOBAL DEFAULT  UND printf</span><br></pre></td></tr></table></figure>
-<table>
-<thead>
-<tr>
-<th>栏目</th>
-<th>意义</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td>Num</td>
-<td>符号表数组中的下标</td>
-</tr>
-<tr>
-<td>Value</td>
-<td>st_value符号值</td>
-</tr>
-<tr>
-<td>Size</td>
-<td>st_size符号大小</td>
-</tr>
-<tr>
-<td>Type</td>
-<td>st_info低四位符号类型</td>
-</tr>
-<tr>
-<td>Bind</td>
-<td>st_info高四位符号绑定信息</td>
-</tr>
-<tr>
-<td>Vis</td>
-<td>st_other尚未使用,都是DEFAULT</td>
-</tr>
-<tr>
-<td>Ndx</td>
-<td>st_shndx</td>
-</tr>
-<tr>
-<td>Name</td>
-<td>符号名称</td>
-</tr>
-</tbody>
-</table>
-<h4 id="nm观察符号表">nm观察符号表</h4>
-<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line">┌──(root㉿Executor)-[/mnt/c/Users/86135/desktop/COFF]</span><br><span class="line">└─# nm -a test.o</span><br><span class="line">0000000000000000 b .bss</span><br><span class="line">0000000000000000 d .data</span><br><span class="line">0000000000000000 D global_initialized</span><br><span class="line">0000000000000000 B global_uninitialized</span><br><span class="line">0000000000000000 T main</span><br><span class="line">                 U printf</span><br><span class="line">0000000000000000 r .rodata</span><br><span class="line">0000000000000004 d static_initialized</span><br><span class="line">0000000000000004 b static_uninitialized</span><br><span class="line">0000000000000000 a test.c</span><br><span class="line">0000000000000000 t .text</span><br></pre></td></tr></table></figure>
-<h4 id="ar处理静态库">ar处理静态库</h4>
-<h5 id="ar--t查看归档文件包括的目标模块">ar
--t查看归档文件包括的目标模块</h5>
-<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line">┌──(root㉿Executor)-[/mnt/c/Users/86135/desktop/COFF]</span><br><span class="line">└─# ar -t /usr/lib32/libc.a</span><br><span class="line">init-first.o</span><br><span class="line">libc-start.o</span><br><span class="line">sysdep.o</span><br><span class="line">version.o</span><br><span class="line">check_fds.o</span><br><span class="line">libc-tls.o</span><br><span class="line">elf-init.o</span><br><span class="line">...</span><br></pre></td></tr></table></figure>
-<h5 id="ar--x将归档文件解包释放所有.o目标模块">ar
--x将归档文件解包,释放所有.o目标模块</h5>
 
       
     </div>
