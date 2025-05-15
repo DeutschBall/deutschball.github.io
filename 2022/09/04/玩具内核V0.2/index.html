@@ -20,18 +20,47 @@
     var CONFIG = {"hostname":"deutschball.github.io","root":"/","scheme":"Pisces","version":"7.8.0","exturl":false,"sidebar":{"position":"right","width":500,"display":"always","padding":18,"offset":12,"onmobile":false},"copycode":{"enable":true,"show_result":true,"style":"mac"},"back2top":{"enable":true,"sidebar":true,"scrollpercent":true},"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":false,"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"algolia":{"hits":{"per_page":10},"labels":{"input_placeholder":"万一找到了呢","hits_empty":"你说的 ${query} 我怎么找不着呢 ","hits_stats":"找到了 ${hits} 个结果，用时 ${time} 毫秒"}},"localsearch":{"enable":true,"trigger":"auto","top_n_per_article":-1,"unescape":false,"preload":false},"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}}};
   </script>
 
-  <meta name="description" content="玩具内核V0.2 LDT和TSS 0.1内核版本时内核只用到了GDT,没有用到LDT. 这就导致内核和所有用户任务占用的内存空间是放到一起存储的 内核当然不愿意和肤浅的用户程序在同一层上 于是使用LDT让用户任务成为人下人   image-20220902150426682  TSS:Task Segment State,任务状态表,当任务被切换时,本次执行到最后的堆栈指针,">
+  <meta name="description" content="玩具内核V0.2LDT和TSS0.1内核版本时内核只用到了GDT,没有用到LDT. 这就导致内核和所有用户任务占用的内存空间是放到一起存储的 内核当然不愿意和肤浅的用户程序在同一层上 于是使用LDT让用户任务成为人下人  TSS:Task Segment State,任务状态表,当任务被切换时,本次执行到最后的堆栈指针,程序计数器,各种通用寄存器等都要保存,方便下一次继续执行本任务的时候恢复状态">
 <meta property="og:type" content="article">
 <meta property="og:title" content="玩具内核V0.2">
 <meta property="og:url" content="http://deutschball.github.io/2022/09/04/%E7%8E%A9%E5%85%B7%E5%86%85%E6%A0%B8V0.2/index.html">
 <meta property="og:site_name" content="dustland">
-<meta property="og:description" content="玩具内核V0.2 LDT和TSS 0.1内核版本时内核只用到了GDT,没有用到LDT. 这就导致内核和所有用户任务占用的内存空间是放到一起存储的 内核当然不愿意和肤浅的用户程序在同一层上 于是使用LDT让用户任务成为人下人   image-20220902150426682  TSS:Task Segment State,任务状态表,当任务被切换时,本次执行到最后的堆栈指针,">
+<meta property="og:description" content="玩具内核V0.2LDT和TSS0.1内核版本时内核只用到了GDT,没有用到LDT. 这就导致内核和所有用户任务占用的内存空间是放到一起存储的 内核当然不愿意和肤浅的用户程序在同一层上 于是使用LDT让用户任务成为人下人  TSS:Task Segment State,任务状态表,当任务被切换时,本次执行到最后的堆栈指针,程序计数器,各种通用寄存器等都要保存,方便下一次继续执行本任务的时候恢复状态">
 <meta property="og:locale" content="en_US">
+<meta property="og:image" content="https://raw.githubusercontent.com/DeutschBall/DeutschBall/main/image-20220902150426682.png">
+<meta property="og:image" content="https://raw.githubusercontent.com/DeutschBall/DeutschBall/main/image-20220902160852184.png">
+<meta property="og:image" content="https://raw.githubusercontent.com/DeutschBall/DeutschBall/main/image-20220902160111155.png">
+<meta property="og:image" content="https://raw.githubusercontent.com/DeutschBall/DeutschBall/main/image-20220902161503214.png">
+<meta property="og:image" content="https://raw.githubusercontent.com/DeutschBall/DeutschBall/main/image-20220902162251067.png">
+<meta property="og:image" content="https://raw.githubusercontent.com/DeutschBall/DeutschBall/main/image-20220902164920415.png">
+<meta property="og:image" content="https://raw.githubusercontent.com/DeutschBall/DeutschBall/main/image-20220902171216715.png">
+<meta property="og:image" content="https://raw.githubusercontent.com/DeutschBall/DeutschBall/main/image-20220902211011686.png">
+<meta property="og:image" content="https://raw.githubusercontent.com/DeutschBall/DeutschBall/main/image-20220902213223828.png">
+<meta property="og:image" content="https://raw.githubusercontent.com/DeutschBall/DeutschBall/main/image-20220902175958013.png">
+<meta property="og:image" content="https://raw.githubusercontent.com/DeutschBall/DeutschBall/main/image-20220902180334115.png">
+<meta property="og:image" content="https://raw.githubusercontent.com/DeutschBall/DeutschBall/main/image-20220902202919564.png">
+<meta property="og:image" content="https://raw.githubusercontent.com/DeutschBall/DeutschBall/main/image-20220830192340336.png">
+<meta property="og:image" content="https://raw.githubusercontent.com/DeutschBall/DeutschBall/main/image-20220903215205939.png">
+<meta property="og:image" content="https://raw.githubusercontent.com/DeutschBall/DeutschBall/main/image-20220903215749487.png">
+<meta property="og:image" content="https://raw.githubusercontent.com/DeutschBall/DeutschBall/main/image-20220903215916565.png">
+<meta property="og:image" content="https://raw.githubusercontent.com/DeutschBall/DeutschBall/main/image-20220903221859132.png">
+<meta property="og:image" content="https://raw.githubusercontent.com/DeutschBall/DeutschBall/main/image-20220903223350815.png">
+<meta property="og:image" content="https://raw.githubusercontent.com/DeutschBall/DeutschBall/main/image-20220903225454843.png">
+<meta property="og:image" content="https://raw.githubusercontent.com/DeutschBall/DeutschBall/main/image-20220903215749487.png">
+<meta property="og:image" content="https://raw.githubusercontent.com/DeutschBall/DeutschBall/main/image-20220903230748207.png">
+<meta property="og:image" content="https://raw.githubusercontent.com/DeutschBall/DeutschBall/main/image-20220904205759673.png">
+<meta property="og:image" content="https://raw.githubusercontent.com/DeutschBall/DeutschBall/main/image-20220904211634293.png">
+<meta property="og:image" content="https://raw.githubusercontent.com/DeutschBall/DeutschBall/main/image-20220904213805641.png">
+<meta property="og:image" content="https://raw.githubusercontent.com/DeutschBall/DeutschBall/main/image-20220904215017068.png">
+<meta property="og:image" content="https://raw.githubusercontent.com/DeutschBall/DeutschBall/main/image-20220904215323965.png">
+<meta property="og:image" content="https://raw.githubusercontent.com/DeutschBall/DeutschBall/main/image-20220904220346418.png">
+<meta property="og:image" content="https://pic.stackoverflow.wiki/uploadImages/27/200/196/155/2022/09/04/23/24/0235c2ba-c267-4c8f-a419-41996a5634c2.svg">
 <meta property="article:published_time" content="2022-09-04T15:28:00.000Z">
 <meta property="article:modified_time" content="2022-09-04T15:28:12.962Z">
 <meta property="article:author" content="dustball">
 <meta property="article:tag" content="x86汇编语言从实模式到保护模式">
 <meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://raw.githubusercontent.com/DeutschBall/DeutschBall/main/image-20220902150426682.png">
 
 <link rel="canonical" href="http://deutschball.github.io/2022/09/04/%E7%8E%A9%E5%85%B7%E5%86%85%E6%A0%B8V0.2/">
 
@@ -216,28 +245,15 @@
     <div class="post-body" itemprop="articleBody">
 
       
-        <h1 id="玩具内核v0.2">玩具内核V0.2</h1>
-<h2 id="ldt和tss">LDT和TSS</h2>
-<p>0.1内核版本时内核只用到了GDT,没有用到LDT.</p>
+        <h1 id="玩具内核V0-2"><a href="#玩具内核V0-2" class="headerlink" title="玩具内核V0.2"></a>玩具内核V0.2</h1><h2 id="LDT和TSS"><a href="#LDT和TSS" class="headerlink" title="LDT和TSS"></a>LDT和TSS</h2><p>0.1内核版本时内核只用到了GDT,没有用到LDT.</p>
 <p>这就导致内核和所有用户任务占用的内存空间是放到一起存储的</p>
 <p>内核当然不愿意和肤浅的用户程序在同一层上</p>
 <p>于是使用LDT让用户任务成为人下人</p>
-<figure>
-<img
-src="https://raw.githubusercontent.com/DeutschBall/DeutschBall/main/image-20220902150426682.png"
-alt="image-20220902150426682" />
-<figcaption aria-hidden="true">image-20220902150426682</figcaption>
-</figure>
-<p>TSS:Task Segment
-State,任务状态表,当任务被切换时,本次执行到最后的堆栈指针,程序计数器,各种通用寄存器等都要保存,方便下一次继续执行本任务的时候恢复状态</p>
+<p><img src="https://raw.githubusercontent.com/DeutschBall/DeutschBall/main/image-20220902150426682.png" alt="image-20220902150426682"></p>
+<p>TSS:Task Segment State,任务状态表,当任务被切换时,本次执行到最后的堆栈指针,程序计数器,各种通用寄存器等都要保存,方便下一次继续执行本任务的时候恢复状态</p>
 <blockquote>
 <p>TSS结构</p>
-<figure>
-<img
-src="https://raw.githubusercontent.com/DeutschBall/DeutschBall/main/image-20220902160852184.png"
-alt="image-20220902160852184" />
-<figcaption aria-hidden="true">image-20220902160852184</figcaption>
-</figure>
+<p><img src="https://raw.githubusercontent.com/DeutschBall/DeutschBall/main/image-20220902160852184.png" alt="image-20220902160852184"></p>
 <p>这里除了ESP指向的堆栈,还额外定义了三个堆栈,即ESP0,1,2分别指向的堆栈</p>
 <p>这是因为堆栈段的权限必须始终保持和当前代码段权限相同</p>
 <p>用户程序权限最低,它可能调用2,1,0环上的代码,那么就得跟着切换堆栈</p>
@@ -247,26 +263,13 @@ alt="image-20220902160852184" />
 <p>LDTR:LDT寄存器,负责记录当前正在执行的任务的LDT基地址,LDTR只有一个,哪个任务正在执行就用LDTR记录哪一个的LDT基址</p>
 <p>TR:任务状态表寄存器,也是只有一个,指向当前正在执行的任务</p>
 <p>在段选择子中第三位(位2)</p>
-<figure>
-<img
-src="https://raw.githubusercontent.com/DeutschBall/DeutschBall/main/image-20220902160111155.png"
-alt="image-20220902160111155" />
-<figcaption aria-hidden="true">image-20220902160111155</figcaption>
-</figure>
+<p><img src="https://raw.githubusercontent.com/DeutschBall/DeutschBall/main/image-20220902160111155.png" alt="image-20220902160111155"></p>
 <p>就是区分该索引是指向GDT的还是LDT的,由于这个段选择子是当前任务给出的,因此此时的LDT必然是当前任务的LDT,此时LDTR必然爆粗的是当前任务的LDT基地址,只需要拿着索引去查LDT就可以获得段地址了</p>
 <p>LDT和GDT还有一点不同是,GDT[0]是空的不使用,但是LDT[0]是可用的</p>
-<h2 id="私有空间和公有空间">私有空间和公有空间</h2>
-<figure>
-<img
-src="https://raw.githubusercontent.com/DeutschBall/DeutschBall/main/image-20220902161503214.png"
-alt="image-20220902161503214" />
-<figcaption aria-hidden="true">image-20220902161503214</figcaption>
-</figure>
+<h2 id="私有空间和公有空间"><a href="#私有空间和公有空间" class="headerlink" title="私有空间和公有空间"></a>私有空间和公有空间</h2><p><img src="https://raw.githubusercontent.com/DeutschBall/DeutschBall/main/image-20220902161503214.png" alt="image-20220902161503214"></p>
 <p>每个程序都有自己的代码段数据段堆栈段等私有空间,多个程序共享内核的系统调用还有运行库,这属于公有空间</p>
 <p>一般情况下程序运行在私有空间,只有需要系统调用的时候或者需要调用库函数的时候,才会转到公有空间去执行</p>
-<h2 id="特权级">特权级</h2>
-<h3 id="特权级定义">特权级定义</h3>
-<p>CPL:当前正在执行的代码的权限</p>
+<h2 id="特权级"><a href="#特权级" class="headerlink" title="特权级"></a>特权级</h2><h3 id="特权级定义"><a href="#特权级定义" class="headerlink" title="特权级定义"></a>特权级定义</h3><p>CPL:当前正在执行的代码的权限</p>
 <p>RPL:段选择子权限</p>
 <blockquote>
 <p>实际由于CS总是指向当前正在执行的代码段你,大多数时候RPL和CPL是一个东西</p>
@@ -275,37 +278,25 @@ alt="image-20220902161503214" />
 <p>DPL:段描述符权限</p>
 <p>IOPL:IO当前代码段你得IO特权级</p>
 <p>权限占用两位,能够标识的特权级就是0,1,2,3,数字越大则权限越低,0环为最高权限.</p>
-<figure>
-<img
-src="https://raw.githubusercontent.com/DeutschBall/DeutschBall/main/image-20220902162251067.png"
-alt="image-20220902162251067" />
-<figcaption aria-hidden="true">image-20220902162251067</figcaption>
-</figure>
+<p><img src="https://raw.githubusercontent.com/DeutschBall/DeutschBall/main/image-20220902162251067.png" alt="image-20220902162251067"></p>
 <p>操作系统内核一般运行在0环,权限最高.</p>
 <p>用户程序的权限最低,在3环</p>
 <p>一个位于三环的用户程序,不管访问什么段,其设置的段选择子中RPL只能是3</p>
 <blockquote>
 <p>比如</p>
-<p>如果其使用系统调用则cs中Index设置为操作系统代码段,RPL=3</p>
-<p>如果其引用了运行库的一个全局数据,则ds中的Index设置为运行库数据段,RPL=3</p>
+<p>如果其使用系统调用则cs中Index设置为操作系统代码段,RPL&#x3D;3</p>
+<p>如果其引用了运行库的一个全局数据,则ds中的Index设置为运行库数据段,RPL&#x3D;3</p>
 </blockquote>
 <p>而一个位于0环的段,其段描述符中的DPL就是0</p>
 <p>特权指令:只能由特权级0的代码执行的指令,比如停机指令HLT,还有对控制寄存器CR0的写操作的指令,lgdt,lldt,ltr等等</p>
 <p>IOPL:IOPL是处理器中程序状态字的两位,用来表征当前正在执行的代码段的IO权限</p>
-<figure>
-<img
-src="https://raw.githubusercontent.com/DeutschBall/DeutschBall/main/image-20220902164920415.png"
-alt="image-20220902164920415" />
-<figcaption aria-hidden="true">image-20220902164920415</figcaption>
-</figure>
-<h3 id="严禁低级代码段访问高级数据段">严禁低级代码段访问高级数据段</h3>
-<p>数据段的特权级规则</p>
+<p><img src="https://raw.githubusercontent.com/DeutschBall/DeutschBall/main/image-20220902164920415.png" alt="image-20220902164920415"></p>
+<h3 id="严禁低级代码段访问高级数据段"><a href="#严禁低级代码段访问高级数据段" class="headerlink" title="严禁低级代码段访问高级数据段"></a>严禁低级代码段访问高级数据段</h3><p>数据段的特权级规则</p>
 <p>数据段的DPL决定了其最低访问权限,只允许权限至少相同或者更高的代码段访问</p>
 <p>0环的数据段只能被0环的代码段访问(门当户对)</p>
-<p>3环的数据段可以被0,1,2,3环的代码段访问(DPL=3,RPL=0,1,2,3)</p>
+<p>3环的数据段可以被0,1,2,3环的代码段访问(DPL&#x3D;3,RPL&#x3D;0,1,2,3)</p>
 <p>内核数据段是在0环上的,用户程序的代码段是在3环上的,显然用户程序是没法访问内核数据段的</p>
-<h3 id="严禁控制向低特权级转移">严禁控制向低特权级转移</h3>
-<p>代码段的特权级规则</p>
+<h3 id="严禁控制向低特权级转移"><a href="#严禁控制向低特权级转移" class="headerlink" title="严禁控制向低特权级转移"></a>严禁控制向低特权级转移</h3><p>代码段的特权级规则</p>
 <p>代码段有依从的和非依从的之分</p>
 <p>非依从的代码段讲究一个门当户对,2环的代码段只允许被2环的代码段啊调用,0,1,3都不行.也就是权限高的不行,权限低的也不行</p>
 <p>依从的代码段还允许被<strong>特权低的</strong>代码段调用,即2环的依从的代码段可以被2,3环的代码段调用,不允许被0,1环的代码段调用.这是因为特权级越高的代码段,其安全性越高,0环的代码段基本都是写死的不会出事.从3环调用0环是系统调用的方向,安全性只能是越来越高</p>
@@ -320,14 +311,9 @@ alt="image-20220902164920415" />
 </blockquote>
 <p>如何区分一个代码段是不是依从的呢?</p>
 <p>代码段描述符的TYPE字段有一个C位,</p>
-<p>如果C=0则是非依从的,只能被同级调用.</p>
-<p>如果C=1则是依从的,允许同级和下级调用</p>
-<figure>
-<img
-src="https://raw.githubusercontent.com/DeutschBall/DeutschBall/main/image-20220902171216715.png"
-alt="image-20220902171216715" />
-<figcaption aria-hidden="true">image-20220902171216715</figcaption>
-</figure>
+<p>如果C&#x3D;0则是非依从的,只能被同级调用.</p>
+<p>如果C&#x3D;1则是依从的,允许同级和下级调用</p>
+<p><img src="https://raw.githubusercontent.com/DeutschBall/DeutschBall/main/image-20220902171216715.png" alt="image-20220902171216715"></p>
 <p>严禁控制向低特权级转移</p>
 <p>严禁控制向低特权级转移</p>
 <p>严禁控制向低特权级转移</p>
@@ -337,39 +323,31 @@ alt="image-20220902171216715" />
 <p>二是,win32程序设计时,操作系统是可以主动调用窗口过程回调函数的,这种情况是否属于0环的操作系统调用了3环的用户函数?有了茬一的解释,茬二也可以解释</p>
 <p>消息循环</p>
 <figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">while</span> (GetMessage(&amp;msg, <span class="literal">NULL</span>, <span class="number">0</span>, <span class="number">0</span>))</span><br><span class="line">&#123;</span><br><span class="line">	TranslateMessage(&amp;msg);</span><br><span class="line">	DispatchMessage(&amp;msg);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
 <p>DispatchMessage是被3环程序调用的3环API,往后即使调用0环的依存内核函数,CPL也一直保持3环不变.回调函数wndproc是在啥时候调用的呢?可以理解为:</p>
-<p>用户程序,with
-CPL=3-&gt;DispatchMessage-&gt;内核高DPL函数-&gt;回调函数wndproc-&gt;返回</p>
-<p>从一开始用户程序,CPL就是3了,这条链上一直是3,因此没有违背"严禁控制向低特权级转移"这条规则</p>
+<p>用户程序,with CPL&#x3D;3-&gt;DispatchMessage-&gt;内核高DPL函数-&gt;回调函数wndproc-&gt;返回</p>
+<p>从一开始用户程序,CPL就是3了,这条链上一直是3,因此没有违背”严禁控制向低特权级转移”这条规则</p>
 </blockquote>
-<h3 id="门描述符">门描述符</h3>
-<p>在特权级之间转移控制的另一种方法,即使用门</p>
-<p>每一个符号都需要一个调用门,之所以叫做"门"是因为它确实就像一个门,在调用一个符号之前需要先经过它的门,让门来检测第一关,能否调用该符号</p>
+<h3 id="门描述符"><a href="#门描述符" class="headerlink" title="门描述符"></a>门描述符</h3><p>在特权级之间转移控制的另一种方法,即使用门</p>
+<p>每一个符号都需要一个调用门,之所以叫做”门”是因为它确实就像一个门,在调用一个符号之前需要先经过它的门,让门来检测第一关,能否调用该符号</p>
 <p>调用门:</p>
 <p>jmp far 将控制转移到高级代码段,不改变CPL</p>
 <p>call far 将控制转移到高级代码段,改变CPL</p>
-<p>也是不允许从将控制从高级转移到低级,但是允许从高级返回到低级,即call
-far之后的返回是从高级转移到低级的</p>
+<p>也是不允许从将控制从高级转移到低级,但是允许从高级返回到低级,即call far之后的返回是从高级转移到低级的</p>
 <p>IO操作比如访问硬盘,必须使用调用门</p>
 <p>门实际上是一个段描述符,在LDT或者GDT中,占用的大小和普通的段描述符一样,都是32字节,但是每一位的意义和普通的段描述符不同</p>
-<p><img
-src="https://raw.githubusercontent.com/DeutschBall/DeutschBall/main/image-20220902211011686.png" /></p>
+<p><img src="https://raw.githubusercontent.com/DeutschBall/DeutschBall/main/image-20220902211011686.png"></p>
 <p>最低和最高的两个字是段内偏移量的低字和高字</p>
 <p>第二个字是例程所在代码段的选择子</p>
 <p>第三个字是属性</p>
 <table>
-<colgroup>
-<col style="width: 21%" />
-<col style="width: 78%" />
-</colgroup>
 <thead>
 <tr>
 <th>属性</th>
 <th>意义</th>
 </tr>
 </thead>
-<tbody>
-<tr>
+<tbody><tr>
 <td>P</td>
 <td>1有效,如果是0则调用该门导致处理器异常中断</td>
 </tr>
@@ -393,103 +371,75 @@ src="https://raw.githubusercontent.com/DeutschBall/DeutschBall/main/image-202209
 <td>栈传递的参数个数</td>
 <td>存放该门对应的代码调用需要几个函数,<br />方便切换堆栈的时候把参数从老栈搬到新栈上来<br />由于参数个数一共有5位,因此最多可以传31个参数</td>
 </tr>
-</tbody>
-</table>
+</tbody></table>
 <p>当栈切换时,SS:ESP会被自动更新成新的堆栈,然后根据调用门的栈传递参数个数从老栈顶上取下相同字节数来拷贝到新栈上作为参数.这个事是处理器自动干的,程序员不用管</p>
 <blockquote>
 <p>如果是用寄存器传递参数则根本不需要拷贝</p>
 </blockquote>
 <p>关于</p>
-<figure>
-<img
-src="https://raw.githubusercontent.com/DeutschBall/DeutschBall/main/image-20220902213223828.png"
-alt="image-20220902213223828" />
-<figcaption aria-hidden="true">image-20220902213223828</figcaption>
-</figure>
-<p>如果一个调用门的DPL=2,这是一个下限,那么只有同级或者更高权限的特权级为0,1,2的代码可以通过该门.</p>
-<h3 id="钻法律空子">钻法律空子</h3>
-<p>现在已经有了一些游戏规定</p>
+<p><img src="https://raw.githubusercontent.com/DeutschBall/DeutschBall/main/image-20220902213223828.png" alt="image-20220902213223828"></p>
+<p>如果一个调用门的DPL&#x3D;2,这是一个下限,那么只有同级或者更高权限的特权级为0,1,2的代码可以通过该门.</p>
+<h3 id="钻法律空子"><a href="#钻法律空子" class="headerlink" title="钻法律空子"></a>钻法律空子</h3><p>现在已经有了一些游戏规定</p>
 <p><strong>1.在不使用调用门时</strong></p>
 <p>数据段只能被同级或者高级代码段访问</p>
 <p>代码段只能被同级或者低级代码段调用,但是CPL不变</p>
 <p><strong>2.在使用调用门时</strong></p>
-<p>call
-far将控制转移到高级代码段时,会将CPL从低级改成高级,并且允许从高级返回到低级并再修改CPL为低级</p>
+<p>call far将控制转移到高级代码段时,会将CPL从低级改成高级,并且允许从高级返回到低级并再修改CPL为低级</p>
 <p><strong>3.有一个0环的系统调用read_hard_disk(logicalnumber,selector,offset),为用户程序提供读取磁盘到内存的服务</strong></p>
 <p>它接收三个参数,逻辑扇区号logicalnumber,写入内存的段选择子selector,写入内存的段偏移量offset</p>
 <p>意思是读取指定logicalnumber扇区,拷贝到内存的selector:offset这个位置</p>
 <p>上述游戏规则看似完备,实际上还是存在漏洞,这样想:</p>
 <p>操作系统开发者希望的用户这样使用该系统调用:</p>
 <figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">read_hard_disk(逻辑扇区号,用户程序数据段选择子,用户程序数据段偏移量);</span><br></pre></td></tr></table></figure>
+
 <p>翻译到图上就是</p>
-<figure>
-<img
-src="https://raw.githubusercontent.com/DeutschBall/DeutschBall/main/image-20220902175958013.png"
-alt="正确用法" />
-<figcaption aria-hidden="true">正确用法</figcaption>
-</figure>
+<p><img src="https://raw.githubusercontent.com/DeutschBall/DeutschBall/main/image-20220902175958013.png" alt="正确用法"></p>
 <p>但是还有外门邪道的用法,如果用户通过一些手段知道了内核数据段的选择子,比如通过wingdb内核调试等方式,反正只要想,就能获取,它这样使用该系统调用</p>
 <figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">read_hard_disk(逻辑扇区号,内核数据段选择子,内核数据段偏移量);</span><br></pre></td></tr></table></figure>
+
 <p>画到图上</p>
-<figure>
-<img
-src="https://raw.githubusercontent.com/DeutschBall/DeutschBall/main/image-20220902180334115.png"
-alt="image-20220902180334115" />
-<figcaption aria-hidden="true">image-20220902180334115</figcaption>
-</figure>
+<p><img src="https://raw.githubusercontent.com/DeutschBall/DeutschBall/main/image-20220902180334115.png" alt="image-20220902180334115"></p>
 <p>你不是不允许3环上的用户程序访问0环上的内核数据段吗?</p>
 <p>我想办法让0环上的代码访问0环的内核数据段不就可以了吗?</p>
-<p>我得先想办法让我的CPL从3环的用户应用提升到0环,怎么提升呢?显然只有一个call
-far可以做到</p>
+<p>我得先想办法让我的CPL从3环的用户应用提升到0环,怎么提升呢?显然只有一个call far可以做到</p>
 <p>而该系统调用恰好就是<code>call far</code>调用的,自然而然就把CPL提升到0了,<strong>此时0环上的内核例程代替3环上的用户程序,向0环的内核数据段写入了磁盘扇区数据</strong></p>
 <p>如果该用户提前将恶意数据写到该扇区,或者说用一个没用的扇区覆盖了该内核数据段的所有,如果该数据段是比较重要的比如内核堆栈,内核就寄了</p>
 <blockquote>
-<p>那么能否禁用<code>call far</code>呢?使用jmp
-far调用不行吗?还真不行,</p>
-<p>如果可以使用jmp
-far,就意味着CPL一直在3环保持不变,内核例程去访问磁盘时还是在3环上,</p>
+<p>那么能否禁用<code>call far</code>呢?使用jmp far调用不行吗?还真不行,</p>
+<p>如果可以使用jmp far,就意味着CPL一直在3环保持不变,内核例程去访问磁盘时还是在3环上,</p>
 <p>显然这是不可以的,因为访问磁盘的函数必须是非依存0环权限的,</p>
 <p>否则如果是0环依存权限,则用户程序可以不通过系统调用,而是直接调用该访问磁盘的函数了,这样0环就没有存在的意义了</p>
 </blockquote>
-<h3 id="完善法律">完善法律</h3>
-<p>可以先用<code>jmp far</code>跳转到依存的内核检查例程,</p>
+<h3 id="完善法律"><a href="#完善法律" class="headerlink" title="完善法律"></a>完善法律</h3><p>可以先用<code>jmp far</code>跳转到依存的内核检查例程,</p>
 <p>该检查例程作为入口在<code>call far</code>进入0环的访问磁盘例程呢,</p>
 <p>访问磁盘例程把数据先读到内核入口例程的缓冲区,</p>
 <p>等磁盘例程返回后,内核例程回复到3环权限再把缓冲区尝试写到目标内存中.</p>
 <p>这样在3环上是不可能往0环的内核数据段写东西的</p>
-<p>这个猜想正是现行的解决方案,即"再增加一道门卫",这个检查例程就是门卫</p>
+<p>这个猜想正是现行的解决方案,即”再增加一道门卫”,这个检查例程就是门卫</p>
 <figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line">graph LR</span><br><span class="line">B(ring0检查例程,依存)</span><br><span class="line">	C(ring0磁盘读写例程,非依存)</span><br><span class="line">	D(ring0内存读写例程,依存)</span><br><span class="line">	A(调用者,可能是用户函数,也可能是系统函数)</span><br><span class="line">	A--&quot;jmp far,CPL=0&quot;--&gt;B</span><br><span class="line">	subgraph 系统调用</span><br><span class="line">		</span><br><span class="line">			B--&quot;1.call far&quot;--&gt;C</span><br><span class="line">	C--&quot;2.return&quot;--&gt;B</span><br><span class="line">	B--&quot;3.jmp far&quot;---&gt;D</span><br><span class="line">	end</span><br></pre></td></tr></table></figure>
-<p>如果是应用程序调用该系统调用,则读写内存的时候一定CPL=3,如果参数selector是一个内核段的选择子,则CPL=3显然是无法访问的</p>
+
+
+
+<p>如果是应用程序调用该系统调用,则读写内存的时候一定CPL&#x3D;3,如果参数selector是一个内核段的选择子,则CPL&#x3D;3显然是无法访问的</p>
 <figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br></pre></td><td class="code"><pre><span class="line">graph LR</span><br><span class="line">	A(ring3应用程序)</span><br><span class="line">	B(ring0检查例程,依存)</span><br><span class="line">	C(ring0磁盘读写例程,非依存)</span><br><span class="line">	D(ring0内存读写例程,依存)</span><br><span class="line">	</span><br><span class="line">	subgraph ring 3</span><br><span class="line">		A--&quot;jmp far,CPL=3&quot;--&gt;B</span><br><span class="line">		D</span><br><span class="line">	end</span><br><span class="line">	subgraph ring 0</span><br><span class="line">	B--&quot;1.call far,CPL=0&quot;--&gt;C</span><br><span class="line">	C--&quot;2.return,CPL=3&quot;--&gt;B</span><br><span class="line">	B--&quot;3.jmp far,CPL=3&quot;---&gt;D</span><br><span class="line">	end</span><br><span class="line"></span><br></pre></td></tr></table></figure>
+
 <p>如果是系统函数调用该系统调用则全程在ring0,不需担心任何问题</p>
 <figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line">graph LR</span><br><span class="line">	A(ring0系统函数)</span><br><span class="line">	B(ring0检查例程,依存)</span><br><span class="line">	C(ring0磁盘读写例程,非依存)</span><br><span class="line">	D(ring0内存读写例程,依存)</span><br><span class="line">	</span><br><span class="line">	subgraph ring 0</span><br><span class="line">		A--&quot;jmp far,CPL=0&quot;--&gt;B</span><br><span class="line">			B--&quot;1.call far,CPL=0&quot;--&gt;C</span><br><span class="line">	C--&quot;2.return,CPL=0&quot;--&gt;B</span><br><span class="line">	B--&quot;3.jmp far,CPL=0&quot;---&gt;D</span><br><span class="line">	end</span><br><span class="line">	</span><br></pre></td></tr></table></figure>
-<p>也就是说,调用者调用该系统调用的时候,操作系统会根据调用者的段选择子中的RPL设置CPL,每当发生mov
-ds,ax这种指令的时候,处理器就会检查</p>
-<figure>
-<img
-src="https://raw.githubusercontent.com/DeutschBall/DeutschBall/main/image-20220902202919564.png"
-alt="image-20220902202919564" />
-<figcaption aria-hidden="true">image-20220902202919564</figcaption>
-</figure>
-<h2 id="编程实现">编程实现</h2>
-<p>主引导扇区和上一个内核时相同,内核的头部也是相同的,这属于内核和主引导扇区之间的协议,理论上是永远不变的</p>
+
+<p>也就是说,调用者调用该系统调用的时候,操作系统会根据调用者的段选择子中的RPL设置CPL,每当发生mov ds,ax这种指令的时候,处理器就会检查</p>
+<p><img src="https://raw.githubusercontent.com/DeutschBall/DeutschBall/main/image-20220902202919564.png" alt="image-20220902202919564"></p>
+<h2 id="编程实现"><a href="#编程实现" class="headerlink" title="编程实现"></a>编程实现</h2><p>主引导扇区和上一个内核时相同,内核的头部也是相同的,这属于内核和主引导扇区之间的协议,理论上是永远不变的</p>
 <p>两个内核都是从start标号处开始执行,内核开始执行时,主引导扇区中已经给内核准备好了代码段,数据段,堆栈段,并且处理器也运行在保护模式了</p>
 <p>然后两个内核都打印了CPU信息,之后的逻辑就不同了</p>
 <p>在进入内核start之前,GDT是这样的</p>
-<figure>
-<img
-src="https://raw.githubusercontent.com/DeutschBall/DeutschBall/main/image-20220830192340336.png"
-alt="image-20220830192340336" />
-<figcaption aria-hidden="true">image-20220830192340336</figcaption>
-</figure>
-<h3 id="start">start</h3>
-<p>内核开始的标号</p>
+<p><img src="https://raw.githubusercontent.com/DeutschBall/DeutschBall/main/image-20220830192340336.png" alt="image-20220830192340336"></p>
+<h3 id="start"><a href="#start" class="headerlink" title="start"></a>start</h3><p>内核开始的标号</p>
 <p>上来先打印字符串还有CPU信息,不再分析了</p>
-<h4 id="安装调用门">安装调用门</h4>
-<p>遍历符号表,给<strong>每个符号</strong>(不管是函数还是变量符号)都在GDT中建立一个门描述符</p>
+<h4 id="安装调用门"><a href="#安装调用门" class="headerlink" title="安装调用门"></a>安装调用门</h4><p>遍历符号表,给<strong>每个符号</strong>(不管是函数还是变量符号)都在GDT中建立一个门描述符</p>
 <p>为啥要建立门描述符?</p>
 <p>内核中公用例程段的符号权限都是0,也就相当于系统调用,如果想让用户程序也使用他们,那就必须安装调用门</p>
 <figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br></pre></td><td class="code"><pre><span class="line">       mov ecx,core_data_seg_sel          ;使ds指向核心数据段 </span><br><span class="line">       mov ds,ecx</span><br><span class="line">       </span><br><span class="line">                ;以下开始安装为整个系统服务的调用门。特权级之间的控制转移必须使用门</span><br><span class="line">       mov edi,salt                       ;C-SALT表的起始位置 </span><br><span class="line">       mov ecx,salt_items                 ;C-SALT表的条目数量 </span><br><span class="line">.b3:</span><br><span class="line">       push ecx   	;保存循环变量</span><br><span class="line">       mov eax,[edi+256]                  ;该条目入口点的32位偏移地址 ;每个条目的前256个字符是符号名,然后紧跟着符号地址</span><br><span class="line">       mov bx,[edi+260]                   ;该条目入口点的段选择子 	;符号地址后面紧跟着段选择子</span><br><span class="line">       mov cx,1_11_0_1100_000_00000B      ;特权级3的调用门(3以上的特权级才	;gdt属性</span><br><span class="line">                                          ;允许访问)，0个参数(因为用寄存器</span><br><span class="line">                                          ;传递参数，而没有用栈) </span><br><span class="line">       call sys_routine_seg_sel:make_gate_descriptor		;构造门描述符</span><br><span class="line">       call sys_routine_seg_sel:set_up_gdt_descriptor		;写入全局段描述符表</span><br><span class="line">       mov [edi+260],cx                   ;将返回的门描述符选择子回填</span><br><span class="line">       add edi,salt_item_len              ;指向下一个C-SALT条目 </span><br><span class="line">       pop ecx	;还原循环变量</span><br><span class="line">       loop .b3</span><br></pre></td></tr></table></figure>
+
 <p>这里调用了<code>sys_routine_seg_sel:make_gate_descriptor</code>函数,该函数的调用约定是:</p>
 <p>eax存放门代码的段偏移量</p>
 <p>bx存放门代码的段选择子</p>
@@ -504,13 +454,6 @@ alt="image-20220830192340336" />
 </blockquote>
 <p>内核符号表表项的变化:</p>
 <table>
-<colgroup>
-<col style="width: 17%" />
-<col style="width: 20%" />
-<col style="width: 11%" />
-<col style="width: 23%" />
-<col style="width: 26%" />
-</colgroup>
 <thead>
 <tr>
 <th>符号成员</th>
@@ -520,20 +463,19 @@ alt="image-20220830192340336" />
 <th>新意义</th>
 </tr>
 </thead>
-<tbody>
-<tr>
+<tbody><tr>
 <td>符号名</td>
 <td>0(edi指向该处)</td>
 <td>256Bytes</td>
 <td>符号名</td>
-<td>--</td>
+<td>–</td>
 </tr>
 <tr>
 <td>符号偏移量</td>
 <td>256</td>
 <td>4Bytes</td>
 <td>符号段内偏移量</td>
-<td>--</td>
+<td>–</td>
 </tr>
 <tr>
 <td>符号段选择子</td>
@@ -542,129 +484,75 @@ alt="image-20220830192340336" />
 <td>符号所在段选择子</td>
 <td>符号调用门的选择子</td>
 </tr>
-</tbody>
-</table>
+</tbody></table>
 <p>现在要调用一个符号,查符号表获得的是其调用门选择子,</p>
 <p>用该调用门选择子查GDT获得的是调用门描述符</p>
 <p>用调用门描述符中的段选择子查GDT获得符号所在段地址</p>
 <p>加上调用门描述符中的符号段内偏移才得到符号的线性地址</p>
 <p>循环为每一个内核符号建立调用门后,GDT表长这样</p>
-<figure>
-<img
-src="https://raw.githubusercontent.com/DeutschBall/DeutschBall/main/image-20220903215205939.png"
-alt="image-20220903215205939" />
-<figcaption aria-hidden="true">image-20220903215205939</figcaption>
-</figure>
-<h4 id="测试调用门">测试调用门</h4>
-<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">;对门进行测试 </span><br><span class="line">mov ebx,message_2</span><br><span class="line">call far [salt_1+256]              ;通过门显示信息(偏移量将被忽略) </span><br><span class="line">      </span><br><span class="line">mov ebx,message_3                    </span><br><span class="line">call sys_routine_seg_sel:put_string ;在内核中调用例程不需要通过门</span><br><span class="line">      </span><br></pre></td></tr></table></figure>
+<p><img src="https://raw.githubusercontent.com/DeutschBall/DeutschBall/main/image-20220903215205939.png" alt="image-20220903215205939"></p>
+<h4 id="测试调用门"><a href="#测试调用门" class="headerlink" title="测试调用门"></a>测试调用门</h4><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">;对门进行测试 </span><br><span class="line">mov ebx,message_2</span><br><span class="line">call far [salt_1+256]              ;通过门显示信息(偏移量将被忽略) </span><br><span class="line">      </span><br><span class="line">mov ebx,message_3                    </span><br><span class="line">call sys_routine_seg_sel:put_string ;在内核中调用例程不需要通过门</span><br><span class="line">      </span><br></pre></td></tr></table></figure>
+
 <p>如果想要使用调用门,要么是jmp far,要么是call far</p>
-<p>打印message_2时,使用call far调用[salt_1+256]
-这个位置,正好是put_string符号的段内偏移量起始地址</p>
-<p>call
-far会将其目的操作数开始的低32个字节作为段内偏移量,将高16字节作为段选择子,如果这是个调用门则忽略段内偏移量,因为调用门描述符中还会记录这个符号的段内偏移量</p>
-<p>打印message_3时,没有使用call far或者jmp
-far指令,也就是说不会使用调用门.实际上确实如此,这里直接用段选择子:段内偏移量进行调用,<strong>根本没有访问符号表</strong>.因为内核代码本来就是最高权限0环,内核代码调用内核公用例程段是门当户对的</p>
+<p>打印message_2时,使用call far调用[salt_1+256] 这个位置,正好是put_string符号的段内偏移量起始地址</p>
+<p>call far会将其目的操作数开始的低32个字节作为段内偏移量,将高16字节作为段选择子,如果这是个调用门则忽略段内偏移量,因为调用门描述符中还会记录这个符号的段内偏移量</p>
+<p>打印message_3时,没有使用call far或者jmp far指令,也就是说不会使用调用门.实际上确实如此,这里直接用段选择子:段内偏移量进行调用,<strong>根本没有访问符号表</strong>.因为内核代码本来就是最高权限0环,内核代码调用内核公用例程段是门当户对的</p>
 <blockquote>
 <p>这里提示我们即使一个符号有调用门,也不一定非要使用调用门调用该符号,老方法对于内核代码调用内核代码还是可用的</p>
 </blockquote>
-<h4 id="创建任务控制块">创建任务控制块</h4>
-<p>TCB,Task control
-Block,任务控制块(可以理解为进程控制块),这个玩意纯粹是我们为了维护程序执行状态,比如各种通用寄存器,堆栈指针,程序计数器等设置的,不是处理器的硬性要求.</p>
+<h4 id="创建任务控制块"><a href="#创建任务控制块" class="headerlink" title="创建任务控制块"></a>创建任务控制块</h4><p>TCB,Task control Block,任务控制块(可以理解为进程控制块),这个玩意纯粹是我们为了维护程序执行状态,比如各种通用寄存器,堆栈指针,程序计数器等设置的,不是处理器的硬性要求.</p>
 <p>对于一个允许多任务轮转的操作系统,必须要有数据结构维护任务执行上下文,方便下一次调度到该任务的时候可以继续执行下去</p>
 <figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">;创建任务控制块。这不是处理器的要求，而是我们自己为了方便而设立的</span><br><span class="line">mov ecx,0x46</span><br><span class="line">call sys_routine_seg_sel:allocate_memory</span><br><span class="line">call append_to_tcb_link            ;将任务控制块追加到TCB链表 </span><br><span class="line">      </span><br></pre></td></tr></table></figure>
+
 <p>allocate_memory函数使用ecx作为希望分配的字节数,使用ecx返回申请地址空间的线性首地址</p>
 <p>这里申请了0x46字节的内存空间,接着给append_to_tcb_link注册为TCB</p>
-<p>append_to_tcb_link是一个近函数,它使用ecx作为TCB(Task control
-Block)的线性地址,将该TCB加到已有任务链上</p>
+<p>append_to_tcb_link是一个近函数,它使用ecx作为TCB(Task control Block)的线性地址,将该TCB加到已有任务链上</p>
 <p>这个玩具内核使用链表维护所有的TCB数据,每个TCB的最开始的4个字节是指向下一个TCB的指针,剩下0x42个字节是存放本任务控制信息的</p>
-<figure>
-<img
-src="https://raw.githubusercontent.com/DeutschBall/DeutschBall/main/image-20220903215749487.png"
-alt="image-20220903215749487" />
-<figcaption aria-hidden="true">image-20220903215749487</figcaption>
-</figure>
+<p><img src="https://raw.githubusercontent.com/DeutschBall/DeutschBall/main/image-20220903215749487.png" alt="image-20220903215749487"></p>
 <p>多个TCB以链表形式连接,这就是append_to_tcb_link函数的工作了</p>
-<figure>
-<img
-src="https://raw.githubusercontent.com/DeutschBall/DeutschBall/main/image-20220903215916565.png"
-alt="image-20220903215916565" />
-<figcaption aria-hidden="true">image-20220903215916565</figcaption>
-</figure>
+<p><img src="https://raw.githubusercontent.com/DeutschBall/DeutschBall/main/image-20220903215916565.png" alt="image-20220903215916565"></p>
 <p>下面详细研究一下append_to_tcb_link干了啥</p>
 <figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br></pre></td><td class="code"><pre><span class="line"> tcb_chain        dd  0	;内核数据段定义的TCB链条首地址指针</span><br><span class="line">...</span><br><span class="line">append_to_tcb_link:                         ;在TCB链上追加任务控制块</span><br><span class="line">                                            ;输入：ECX=TCB线性基地址</span><br><span class="line">         push eax</span><br><span class="line">         push edx</span><br><span class="line">         push ds</span><br><span class="line">         push es</span><br><span class="line">         </span><br><span class="line">         mov eax,core_data_seg_sel          ;令DS指向内核数据段 ;这里有两种寻址方式,tcb_chain是定义在内核数据段的,只能使用内核数据段:偏移量的方式进行寻址</span><br><span class="line">         mov ds,eax</span><br><span class="line">         mov eax,mem_0_4_gb_seg_sel         ;令ES指向0..4GB段;每一个TCB都是allocate_memory申请的地址,使用线性地址寻址,这里4G地址空间段的段地址为0,就相当于线性地址了</span><br><span class="line">         mov es,eax</span><br><span class="line">         </span><br><span class="line">         mov dword [es: ecx+0x00],0         ;当前TCB指针域清零，以指示这是最后一个TCB</span><br><span class="line">                                            ;显然要进行尾插法了</span><br><span class="line">                                             </span><br><span class="line">         mov eax,[tcb_chain]                ;TCB表头指针,在没有插入任何任务之前,[tcb_chain]=0</span><br><span class="line">         or eax,eax                         ;链表为空？</span><br><span class="line">         jz .notcb 							;如果链表为空则跳转notcb(没有tcb)</span><br><span class="line">         </span><br><span class="line">  .searc:			;否则,即链表不空,需要首先遍历到链表尾,searc就是干这个事的</span><br><span class="line">         mov edx,eax				;如果链表非空则tcb_chain这个头节点指针是会指向第一个TCB的</span><br><span class="line">         mov eax,[es: edx+0x00]		;每个TCB的第一个双字都是下一个TCB的地址,如果该值为0说明找到了最后一个TCB,否则还得继续往后遍历</span><br><span class="line">         or eax,eax               	;判断下一个TCB的指针是否是0</span><br><span class="line">         jnz .searc					;如果不是则继续向后遍历</span><br><span class="line">         </span><br><span class="line">         mov [es: edx+0x00],ecx	;刚找到的&quot;最后一个TCB&quot;的指针域指向要新加入的TCB,完成尾插法</span><br><span class="line">         jmp .retpc	;跳转函数尾声</span><br><span class="line">         </span><br><span class="line">  .notcb:       </span><br><span class="line">         mov [tcb_chain],ecx                ;若为空表，直接令表头指针指向TCB</span><br><span class="line">         </span><br><span class="line">  .retpc:</span><br><span class="line">         pop es</span><br><span class="line">         pop ds</span><br><span class="line">         pop edx</span><br><span class="line">         pop eax</span><br><span class="line">         </span><br><span class="line">         ret</span><br></pre></td></tr></table></figure>
+
 <p>教材上把这个过程总结成了流程图</p>
-<figure>
-<img
-src="https://raw.githubusercontent.com/DeutschBall/DeutschBall/main/image-20220903221859132.png"
-alt="image-20220903221859132" />
-<figcaption aria-hidden="true">image-20220903221859132</figcaption>
-</figure>
-<h4 id="加载器加载用户程序">加载器加载用户程序</h4>
-<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">push dword 50                      ;用户程序位于逻辑50扇区 ;栈次顶函数</span><br><span class="line">push ecx                           ;压入任务控制块起始线性地址 ;栈顶参数</span><br><span class="line">       </span><br><span class="line">call load_relocate_program</span><br><span class="line"></span><br><span class="line">mov ebx,do_status</span><br><span class="line">call sys_routine_seg_sel:put_string</span><br></pre></td></tr></table></figure>
+<p><img src="https://raw.githubusercontent.com/DeutschBall/DeutschBall/main/image-20220903221859132.png" alt="image-20220903221859132"></p>
+<h4 id="加载器加载用户程序"><a href="#加载器加载用户程序" class="headerlink" title="加载器加载用户程序"></a>加载器加载用户程序</h4><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">push dword 50                      ;用户程序位于逻辑50扇区 ;栈次顶函数</span><br><span class="line">push ecx                           ;压入任务控制块起始线性地址 ;栈顶参数</span><br><span class="line">       </span><br><span class="line">call load_relocate_program</span><br><span class="line"></span><br><span class="line">mov ebx,do_status</span><br><span class="line">call sys_routine_seg_sel:put_string</span><br></pre></td></tr></table></figure>
+
 <p>加载器使用栈传递参数,栈顶作为加载目标地址,栈次顶作为用户程序所在的逻辑扇区号</p>
 <p>由于加载器要给用户程序建立LDT,而原来的加载器只是将用户程序的各段一并注册到GDT,</p>
 <p>因此两章的加载器会有较大不同,下面研究一下本章的加载器干了啥</p>
-<h5 id="栈传参数">栈传参数</h5>
-<p>加载器使用栈传递参数,执行call命令之后,栈上是这样的</p>
-<figure>
-<img
-src="https://raw.githubusercontent.com/DeutschBall/DeutschBall/main/image-20220903223350815.png"
-alt="image-20220903223350815" />
-<figcaption aria-hidden="true">image-20220903223350815</figcaption>
-</figure>
-<h5 id="开端">开端</h5>
-<p>函数开端时又压栈保护调用者寄存器</p>
+<h5 id="栈传参数"><a href="#栈传参数" class="headerlink" title="栈传参数"></a>栈传参数</h5><p>加载器使用栈传递参数,执行call命令之后,栈上是这样的</p>
+<p><img src="https://raw.githubusercontent.com/DeutschBall/DeutschBall/main/image-20220903223350815.png" alt="image-20220903223350815"></p>
+<h5 id="开端"><a href="#开端" class="headerlink" title="开端"></a>开端</h5><p>函数开端时又压栈保护调用者寄存器</p>
 <figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">pushad</span><br><span class="line">      </span><br><span class="line">push ds		;即使压栈的是16位的寄存器,栈顶依然下降4字节</span><br><span class="line">push es</span><br><span class="line"></span><br><span class="line">mov ebp,esp                        ;为访问通过堆栈传递的参数做准备</span><br></pre></td></tr></table></figure>
+
 <p>这三步执行完毕之后,栈的状态</p>
-<figure>
-<img
-src="https://raw.githubusercontent.com/DeutschBall/DeutschBall/main/image-20220903225454843.png"
-alt="image-20220903225454843" />
-<figcaption aria-hidden="true">image-20220903225454843</figcaption>
-</figure>
+<p><img src="https://raw.githubusercontent.com/DeutschBall/DeutschBall/main/image-20220903225454843.png" alt="image-20220903225454843"></p>
 <p>在加载器返回直线,ebp就一直指向调用者寄存器的最顶上,局部变量的最底下的位置,也就是加载器正儿八经的栈帧底部</p>
-<h5 id="设置es段选择子">设置es段选择子</h5>
-<p>设置es段选择子指向4G数据段</p>
+<h5 id="设置es段选择子"><a href="#设置es段选择子" class="headerlink" title="设置es段选择子"></a>设置es段选择子</h5><p>设置es段选择子指向4G数据段</p>
 <figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">mov ecx,mem_0_4_gb_seg_sel</span><br><span class="line">mov es,ecx</span><br></pre></td></tr></table></figure>
-<h5 id="申请ldt空间写入tcb">申请LDT空间,写入TCB</h5>
-<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">mov esi,[ebp+11*4]                 ;从堆栈中取得TCB的基地址</span><br><span class="line"></span><br><span class="line">;以下申请创建LDT所需要的内存</span><br><span class="line">mov ecx,160                        ;允许安装20个LDT描述符</span><br><span class="line">call sys_routine_seg_sel:allocate_memory</span><br><span class="line">mov [es:esi+0x0c],ecx              ;登记LDT基地址到TCB中</span><br><span class="line">mov word [es:esi+0x0a],0xffff      ;登记LDT初始的界限到TCB中 </span><br></pre></td></tr></table></figure>
-<p>ecx=160向allocate_memory申请160字节的内存空间,用于存放本任务的LDT表,由于一个LDT表项占用8字节,并且0号表项可用,因此该LDT表最多放20个描述符</p>
+
+<h5 id="申请LDT空间-写入TCB"><a href="#申请LDT空间-写入TCB" class="headerlink" title="申请LDT空间,写入TCB"></a>申请LDT空间,写入TCB</h5><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">mov esi,[ebp+11*4]                 ;从堆栈中取得TCB的基地址</span><br><span class="line"></span><br><span class="line">;以下申请创建LDT所需要的内存</span><br><span class="line">mov ecx,160                        ;允许安装20个LDT描述符</span><br><span class="line">call sys_routine_seg_sel:allocate_memory</span><br><span class="line">mov [es:esi+0x0c],ecx              ;登记LDT基地址到TCB中</span><br><span class="line">mov word [es:esi+0x0a],0xffff      ;登记LDT初始的界限到TCB中 </span><br></pre></td></tr></table></figure>
+
+<p>ecx&#x3D;160向allocate_memory申请160字节的内存空间,用于存放本任务的LDT表,由于一个LDT表项占用8字节,并且0号表项可用,因此该LDT表最多放20个描述符</p>
 <p>返回该内存空间的首地址放到[es:esi+0x0c],实际上是一个线性寻址,es段基址为0</p>
 <p>es:esi保存的是TCB的内存基地址</p>
 <p>[es:esi+0x0c]即TCB的0x0c偏移处,LDT基地址</p>
 <p>[es:esi+0x0a]即TCB的0x0a偏移处,LDT当前界限值</p>
-<figure>
-<img
-src="https://raw.githubusercontent.com/DeutschBall/DeutschBall/main/image-20220903215749487.png"
-alt="image-20220903215749487" />
-<figcaption aria-hidden="true">image-20220903215749487</figcaption>
-</figure>
+<p><img src="https://raw.githubusercontent.com/DeutschBall/DeutschBall/main/image-20220903215749487.png" alt="image-20220903215749487"></p>
 <p>也就是说把allocate_memory申请的空间作为LDT,然后将其基地址写到TCB中.并且将LDT当前界限值设为最大0xffff</p>
-<h5 id="读取用户程序头">读取用户程序头</h5>
-<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">;以下开始加载用户程序 </span><br><span class="line">mov eax,core_data_seg_sel</span><br><span class="line">mov ds,eax                         ;切换DS到内核数据段</span><br><span class="line">       </span><br><span class="line">mov eax,[ebp+12*4]                 ;从堆栈中取出用户程序起始扇区号 </span><br><span class="line">mov ebx,core_buf                   ;读取程序头部数据     </span><br><span class="line">call sys_routine_seg_sel:read_hard_disk_0</span><br></pre></td></tr></table></figure>
+<h5 id="读取用户程序头"><a href="#读取用户程序头" class="headerlink" title="读取用户程序头"></a>读取用户程序头</h5><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">;以下开始加载用户程序 </span><br><span class="line">mov eax,core_data_seg_sel</span><br><span class="line">mov ds,eax                         ;切换DS到内核数据段</span><br><span class="line">       </span><br><span class="line">mov eax,[ebp+12*4]                 ;从堆栈中取出用户程序起始扇区号 </span><br><span class="line">mov ebx,core_buf                   ;读取程序头部数据     </span><br><span class="line">call sys_routine_seg_sel:read_hard_disk_0</span><br></pre></td></tr></table></figure>
+
 <p>ds指向内核数据段</p>
 <p>ebp+12*4指向之前作为加载器的参数压栈的逻辑扇区号</p>
-<figure>
-<img
-src="https://raw.githubusercontent.com/DeutschBall/DeutschBall/main/image-20220903230748207.png"
-alt="image-20220903230748207" />
-<figcaption aria-hidden="true">image-20220903230748207</figcaption>
-</figure>
+<p><img src="https://raw.githubusercontent.com/DeutschBall/DeutschBall/main/image-20220903230748207.png" alt="image-20220903230748207"></p>
 <p>将逻辑扇区号放到eax,将core_buf内核缓冲区地址放到ebx,作为参数调用read_hard_disk_0函数</p>
 <p>该函数读取eax指定的逻辑扇区,将数据拷贝到ds:ebx指定的内内存地址上</p>
-<h5 id="判断程序大小">判断程序大小</h5>
-<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">;以下判断整个程序有多大</span><br><span class="line">mov eax,[core_buf]                 ;程序尺寸</span><br><span class="line">mov ebx,eax</span><br><span class="line">and ebx,0xfffffe00                 ;使之512字节对齐（能被512整除的数低 </span><br><span class="line">add ebx,512                        ;9位都为0 </span><br><span class="line">test eax,0x000001ff                ;程序的大小正好是512的倍数吗? </span><br><span class="line">cmovnz eax,ebx                     ;不是。使用凑整的结果</span><br></pre></td></tr></table></figure>
+<h5 id="判断程序大小"><a href="#判断程序大小" class="headerlink" title="判断程序大小"></a>判断程序大小</h5><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">;以下判断整个程序有多大</span><br><span class="line">mov eax,[core_buf]                 ;程序尺寸</span><br><span class="line">mov ebx,eax</span><br><span class="line">and ebx,0xfffffe00                 ;使之512字节对齐（能被512整除的数低 </span><br><span class="line">add ebx,512                        ;9位都为0 </span><br><span class="line">test eax,0x000001ff                ;程序的大小正好是512的倍数吗? </span><br><span class="line">cmovnz eax,ebx                     ;不是。使用凑整的结果</span><br></pre></td></tr></table></figure>
+
 <p>效果是获取程序占用的扇区对应的总内存数,最后一个扇区如果占不满则向上取整为一个扇区</p>
 <p>由于刚才已经将程序头512字节放到了core_buf指向的内核缓冲区上,现在core_buf指向的就是用户程序头的基地址,用户程序头上是啥又涉及到协议了</p>
 <table>
-<colgroup>
-<col style="width: 15%" />
-<col style="width: 24%" />
-<col style="width: 10%" />
-<col style="width: 14%" />
-<col style="width: 17%" />
-<col style="width: 15%" />
-</colgroup>
 <thead>
 <tr>
 <th>项目</th>
@@ -675,14 +563,13 @@ alt="image-20220903230748207" />
 <th>新意义</th>
 </tr>
 </thead>
-<tbody>
-<tr>
+<tbody><tr>
 <td><em>program_length</em></td>
 <td><em>program_end</em></td>
 <td>4</td>
 <td>0</td>
 <td>程序总大小</td>
-<td>--</td>
+<td>–</td>
 </tr>
 <tr>
 <td><em>head_len</em></td>
@@ -694,7 +581,7 @@ alt="image-20220903230748207" />
 </tr>
 <tr>
 <td><em>stack_seg</em></td>
-<td>--</td>
+<td>–</td>
 <td>4</td>
 <td>8</td>
 <td>接收栈段选择子</td>
@@ -702,11 +589,11 @@ alt="image-20220903230748207" />
 </tr>
 <tr>
 <td><em>stack_len</em></td>
-<td>--</td>
+<td>–</td>
 <td>4</td>
 <td>12</td>
 <td>程序建议的栈长度</td>
-<td>--</td>
+<td>–</td>
 </tr>
 <tr>
 <td><em>prgentry</em></td>
@@ -714,7 +601,7 @@ alt="image-20220903230748207" />
 <td>4</td>
 <td>16</td>
 <td>入口点文件文件偏移</td>
-<td>--</td>
+<td>–</td>
 </tr>
 <tr>
 <td><em>code_seg</em></td>
@@ -730,7 +617,7 @@ alt="image-20220903230748207" />
 <td>4</td>
 <td>24</td>
 <td>代码段长度</td>
-<td>--</td>
+<td>–</td>
 </tr>
 <tr>
 <td><em>data_seg</em></td>
@@ -746,7 +633,7 @@ alt="image-20220903230748207" />
 <td>4</td>
 <td>32</td>
 <td>数据单长度</td>
-<td>--</td>
+<td>–</td>
 </tr>
 <tr>
 <td></td>
@@ -758,30 +645,30 @@ alt="image-20220903230748207" />
 </tr>
 <tr>
 <td><em>salt_items</em></td>
-<td>(<em>header_end</em>-<em>salt</em>)/256</td>
+<td>(<em>header_end</em>-<em>salt</em>)&#x2F;256</td>
 <td>4</td>
 <td>36</td>
 <td>符号表项数</td>
-<td>--</td>
+<td>–</td>
 </tr>
 <tr>
-<td>符号1...</td>
+<td>符号1…</td>
 <td>符号值(字面量)</td>
 <td>256Bytes</td>
 <td>40</td>
 <td>第一个符号</td>
-<td>--</td>
+<td>–</td>
 </tr>
 <tr>
-<td>符号2...</td>
+<td>符号2…</td>
 <td>符号值(字面量)</td>
 <td>256Bytes</td>
 <td>40+256</td>
 <td>第二个符号</td>
-<td>--</td>
+<td>–</td>
 </tr>
 <tr>
-<td>...</td>
+<td>…</td>
 <td></td>
 <td></td>
 <td></td>
@@ -796,27 +683,27 @@ alt="image-20220903230748207" />
 <td></td>
 <td></td>
 </tr>
-</tbody>
-</table>
+</tbody></table>
 <p>[core_buf+0x00]即程序总大小</p>
-<h5 id="为整个程序申请空间并注册">为整个程序申请空间并注册</h5>
-<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">mov ecx,eax                        ;实际需要申请的内存数量</span><br><span class="line">call sys_routine_seg_sel:allocate_memory</span><br><span class="line">mov [es:esi+0x06],ecx              ;登记程序加载基地址到TCB中</span><br></pre></td></tr></table></figure>
+<h5 id="为整个程序申请空间并注册"><a href="#为整个程序申请空间并注册" class="headerlink" title="为整个程序申请空间并注册"></a>为整个程序申请空间并注册</h5><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">mov ecx,eax                        ;实际需要申请的内存数量</span><br><span class="line">call sys_routine_seg_sel:allocate_memory</span><br><span class="line">mov [es:esi+0x06],ecx              ;登记程序加载基地址到TCB中</span><br></pre></td></tr></table></figure>
+
 <p>eax中放的是向上取整之后的程序总大小字节数,通过ecx传递给allocate_memory申请相应大小的内存,</p>
 <p>然将该内存基地址后写到[es:esi+0x06],即TCB的程序加载基地址处</p>
-<h5 id="读取整个程序">读取整个程序</h5>
-<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line">       mov ebx,ecx                        ;ebx -&gt; 申请到的内存首地址</span><br><span class="line">       xor edx,edx</span><br><span class="line">       mov ecx,512</span><br><span class="line">       div ecx</span><br><span class="line">       mov ecx,eax                        ;总扇区数 </span><br><span class="line">    </span><br><span class="line">       mov eax,mem_0_4_gb_seg_sel         ;切换DS到0-4GB的段</span><br><span class="line">       mov ds,eax</span><br><span class="line"></span><br><span class="line">       mov eax,[ebp+12*4]                 ;起始扇区号 </span><br><span class="line">.b1:</span><br><span class="line">       call sys_routine_seg_sel:read_hard_disk_0</span><br><span class="line">       inc eax</span><br><span class="line">       loop .b1                           ;循环读，直到读完整个用户程序</span><br></pre></td></tr></table></figure>
+<h5 id="读取整个程序"><a href="#读取整个程序" class="headerlink" title="读取整个程序"></a>读取整个程序</h5><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line">       mov ebx,ecx                        ;ebx -&gt; 申请到的内存首地址</span><br><span class="line">       xor edx,edx</span><br><span class="line">       mov ecx,512</span><br><span class="line">       div ecx</span><br><span class="line">       mov ecx,eax                        ;总扇区数 </span><br><span class="line">    </span><br><span class="line">       mov eax,mem_0_4_gb_seg_sel         ;切换DS到0-4GB的段</span><br><span class="line">       mov ds,eax</span><br><span class="line"></span><br><span class="line">       mov eax,[ebp+12*4]                 ;起始扇区号 </span><br><span class="line">.b1:</span><br><span class="line">       call sys_routine_seg_sel:read_hard_disk_0</span><br><span class="line">       inc eax</span><br><span class="line">       loop .b1                           ;循环读，直到读完整个用户程序</span><br></pre></td></tr></table></figure>
+
+
+
 <p>edx:eax除以512得到总扇区数放到ecx作为循环变量,下面要循环读入这些扇区</p>
 <p>起始扇区号还是使用压栈传递给加载器的参数</p>
 <p>循环读入这些扇区到ebx指定的内存中</p>
-<h5 id="获取程序基地址">获取程序基地址</h5>
-<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">mov edi,[es:esi+0x06]              ;获得程序加载基地址</span><br></pre></td></tr></table></figure>
+<h5 id="获取程序基地址"><a href="#获取程序基地址" class="headerlink" title="获取程序基地址"></a>获取程序基地址</h5><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">mov edi,[es:esi+0x06]              ;获得程序加载基地址</span><br></pre></td></tr></table></figure>
+
 <p>[es:esi+0x06] 是之前给整个程序申请空间之后写到TCB中的</p>
-<h5 id="建立程序头部段描述符">建立程序头部段描述符</h5>
-<p>edi指向程序基地址</p>
+<h5 id="建立程序头部段描述符"><a href="#建立程序头部段描述符" class="headerlink" title="建立程序头部段描述符"></a>建立程序头部段描述符</h5><p>edi指向程序基地址</p>
 <figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line">;建立程序头部段描述符</span><br><span class="line">mov eax,edi                        ;程序头部起始线性地址</span><br><span class="line">mov ebx,[edi+0x04]                 ;段长度</span><br><span class="line">dec ebx                            ;段界限</span><br><span class="line">mov ecx,0x0040f200                 ;字节粒度的数据段描述符，特权级3 </span><br><span class="line">call sys_routine_seg_sel:make_seg_descriptor</span><br><span class="line">      </span><br><span class="line">;安装头部段描述符到LDT中 </span><br><span class="line">mov ebx,esi                        ;TCB的基地址</span><br><span class="line">call fill_descriptor_in_ldt</span><br><span class="line"></span><br><span class="line">or cx,0000_0000_0000_0011B         ;设置选择子的特权级为3</span><br><span class="line">mov [es:esi+0x44],cx               ;登记程序头部段选择子到TCB </span><br><span class="line">mov [edi+0x04],cx                  ;和头部内 </span><br></pre></td></tr></table></figure>
+
 <p>程序头部段基地址放到eax</p>
-<p>[edi+0x04]在协议中一开始是程序头段长度(后来被改成程序头段选择子)
-段长度-1得到段界限放到ebx</p>
+<p>[edi+0x04]在协议中一开始是程序头段长度(后来被改成程序头段选择子)<br>段长度-1得到段界限放到ebx</p>
 <p>属性0x40f200放到ecx</p>
 <p>调用make_seg_descriptor,eax,ebx,ecx作为参数传递</p>
 <p>edx:eax作为返回值,返回完整的段描述符</p>
@@ -824,26 +711,25 @@ alt="image-20220903230748207" />
 <p>调用<em>fill_descriptor_in_ldt</em>,它使用edx:eax作为描述符,ebx作为TCB基地址,该函数将描述符安装在LDT中(LDT基地址通过查TCB表得知),更新LDT界限.返回CX作为描述符选择子.</p>
 <p>注意fill_descriptor_in_ldt并没有lldt,即没有更新ldtr,其更新需要等整个LDT建立完毕之后</p>
 <p>将cx返回的段选择子加上特权级3,分别写到TCB和程序头部的程序头部段选择子中</p>
-<h5 id="建立程序代码段描述符">建立程序代码段描述符</h5>
-<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line">;建立程序代码段描述符</span><br><span class="line">mov eax,edi</span><br><span class="line">add eax,[edi+0x14]                 ;代码起始线性地址</span><br><span class="line">mov ebx,[edi+0x18]                 ;段长度</span><br><span class="line">dec ebx                            ;段界限</span><br><span class="line">mov ecx,0x0040f800                 ;字节粒度的代码段描述符，特权级3</span><br><span class="line">call sys_routine_seg_sel:make_seg_descriptor</span><br><span class="line">mov ebx,esi                        ;TCB的基地址</span><br><span class="line">call fill_descriptor_in_ldt</span><br><span class="line">or cx,0000_0000_0000_0011B         ;设置选择子的特权级为3</span><br><span class="line">mov [edi+0x14],cx                  ;登记代码段选择子到头部</span><br></pre></td></tr></table></figure>
+<h5 id="建立程序代码段描述符"><a href="#建立程序代码段描述符" class="headerlink" title="建立程序代码段描述符"></a>建立程序代码段描述符</h5><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line">;建立程序代码段描述符</span><br><span class="line">mov eax,edi</span><br><span class="line">add eax,[edi+0x14]                 ;代码起始线性地址</span><br><span class="line">mov ebx,[edi+0x18]                 ;段长度</span><br><span class="line">dec ebx                            ;段界限</span><br><span class="line">mov ecx,0x0040f800                 ;字节粒度的代码段描述符，特权级3</span><br><span class="line">call sys_routine_seg_sel:make_seg_descriptor</span><br><span class="line">mov ebx,esi                        ;TCB的基地址</span><br><span class="line">call fill_descriptor_in_ldt</span><br><span class="line">or cx,0000_0000_0000_0011B         ;设置选择子的特权级为3</span><br><span class="line">mov [edi+0x14],cx                  ;登记代码段选择子到头部</span><br></pre></td></tr></table></figure>
+
 <p>过程类似建立程序头部段描述符,但是最后没有将代码段写到TCB中,因为TCB不需要记录,这是TSS需要干的,而对于TSS的设置还在后面</p>
-<h5 id="建立程序数据段描述符">建立程序数据段描述符</h5>
-<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line">;建立程序数据段描述符</span><br><span class="line">mov eax,edi</span><br><span class="line">add eax,[edi+0x1c]                 ;数据段起始线性地址</span><br><span class="line">mov ebx,[edi+0x20]                 ;段长度</span><br><span class="line">dec ebx                            ;段界限 </span><br><span class="line">mov ecx,0x0040f200                 ;字节粒度的数据段描述符，特权级3</span><br><span class="line">call sys_routine_seg_sel:make_seg_descriptor</span><br><span class="line">mov ebx,esi                        ;TCB的基地址</span><br><span class="line">call fill_descriptor_in_ldt</span><br><span class="line">or cx,0000_0000_0000_0011B         ;设置选择子的特权级为3</span><br><span class="line">mov [edi+0x1c],cx                  ;登记数据段选择子到头部</span><br></pre></td></tr></table></figure>
-<h5 id="建立程序堆栈段描述符">建立程序堆栈段描述符</h5>
-<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><span class="line">;建立程序堆栈段描述符</span><br><span class="line">mov ecx,[edi+0x0c]                 ;4KB的倍率 </span><br><span class="line">mov ebx,0x000fffff</span><br><span class="line">sub ebx,ecx                        ;得到段界限</span><br><span class="line">mov eax,4096                        </span><br><span class="line">mul ecx                         </span><br><span class="line">mov ecx,eax                        ;准备为堆栈分配内存 </span><br><span class="line">call sys_routine_seg_sel:allocate_memory</span><br><span class="line">add eax,ecx                        ;得到堆栈的高端物理地址 </span><br><span class="line">mov ecx,0x00c0f600                 ;字节粒度的堆栈段描述符，特权级3</span><br><span class="line">call sys_routine_seg_sel:make_seg_descriptor</span><br><span class="line">mov ebx,esi                        ;TCB的基地址</span><br><span class="line">call fill_descriptor_in_ldt</span><br><span class="line">or cx,0000_0000_0000_0011B         ;设置选择子的特权级为3</span><br><span class="line">mov [edi+0x08],cx                  ;登记堆栈段选择子到头部</span><br></pre></td></tr></table></figure>
+<h5 id="建立程序数据段描述符"><a href="#建立程序数据段描述符" class="headerlink" title="建立程序数据段描述符"></a>建立程序数据段描述符</h5><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line">;建立程序数据段描述符</span><br><span class="line">mov eax,edi</span><br><span class="line">add eax,[edi+0x1c]                 ;数据段起始线性地址</span><br><span class="line">mov ebx,[edi+0x20]                 ;段长度</span><br><span class="line">dec ebx                            ;段界限 </span><br><span class="line">mov ecx,0x0040f200                 ;字节粒度的数据段描述符，特权级3</span><br><span class="line">call sys_routine_seg_sel:make_seg_descriptor</span><br><span class="line">mov ebx,esi                        ;TCB的基地址</span><br><span class="line">call fill_descriptor_in_ldt</span><br><span class="line">or cx,0000_0000_0000_0011B         ;设置选择子的特权级为3</span><br><span class="line">mov [edi+0x1c],cx                  ;登记数据段选择子到头部</span><br></pre></td></tr></table></figure>
+
+<h5 id="建立程序堆栈段描述符"><a href="#建立程序堆栈段描述符" class="headerlink" title="建立程序堆栈段描述符"></a>建立程序堆栈段描述符</h5><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><span class="line">;建立程序堆栈段描述符</span><br><span class="line">mov ecx,[edi+0x0c]                 ;4KB的倍率 </span><br><span class="line">mov ebx,0x000fffff</span><br><span class="line">sub ebx,ecx                        ;得到段界限</span><br><span class="line">mov eax,4096                        </span><br><span class="line">mul ecx                         </span><br><span class="line">mov ecx,eax                        ;准备为堆栈分配内存 </span><br><span class="line">call sys_routine_seg_sel:allocate_memory</span><br><span class="line">add eax,ecx                        ;得到堆栈的高端物理地址 </span><br><span class="line">mov ecx,0x00c0f600                 ;字节粒度的堆栈段描述符，特权级3</span><br><span class="line">call sys_routine_seg_sel:make_seg_descriptor</span><br><span class="line">mov ebx,esi                        ;TCB的基地址</span><br><span class="line">call fill_descriptor_in_ldt</span><br><span class="line">or cx,0000_0000_0000_0011B         ;设置选择子的特权级为3</span><br><span class="line">mov [edi+0x08],cx                  ;登记堆栈段选择子到头部</span><br></pre></td></tr></table></figure>
+
 <p>与前面的段不同的是,程序堆栈段是需要另申请空间的</p>
-<h5 id="重定位用户程序符号">重定位用户程序符号</h5>
-<p>用户程序的符号表,在链接之前保存的是符号名,现在遍历用户程序符号表,将用户符号引用解析到内核符号</p>
+<h5 id="重定位用户程序符号"><a href="#重定位用户程序符号" class="headerlink" title="重定位用户程序符号"></a>重定位用户程序符号</h5><p>用户程序的符号表,在链接之前保存的是符号名,现在遍历用户程序符号表,将用户符号引用解析到内核符号</p>
 <p>算法和上一章相同,对于每个用户程序符号,遍历整个内核符号表</p>
 <figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br></pre></td><td class="code"><pre><span class="line">       ;重定位SALT </span><br><span class="line">       mov eax,mem_0_4_gb_seg_sel         ;这里和前一章不同，头部段描述符</span><br><span class="line">       mov es,eax                         ;已安装，但还没有生效，故只能通</span><br><span class="line">                                          ;过4GB段访问用户程序头部      ;es指向整个4G内存地址空间    </span><br><span class="line">       mov eax,core_data_seg_sel	;ds指向内核数据区</span><br><span class="line">       mov ds,eax</span><br><span class="line">    </span><br><span class="line">       cld</span><br><span class="line"></span><br><span class="line">       mov ecx,[es:edi+0x24]              ;U-SALT条目数(通过访问4GB段取得) ,edi是程序基址的线性地址,配合es使用</span><br><span class="line">       add edi,0x28                       ;U-SALT在4GB段内的偏移 </span><br><span class="line">.b2: 	;外圈循环</span><br><span class="line">       push ecx</span><br><span class="line">       push edi</span><br><span class="line">    </span><br><span class="line">       mov ecx,salt_items			;内核符号每次都从最头上开始</span><br><span class="line">       mov esi,salt</span><br><span class="line">.b3:</span><br><span class="line">       push edi	;中圈循环需要使用,因此将外圈循环变量压栈保存</span><br><span class="line">       push esi</span><br><span class="line">       push ecx</span><br><span class="line"></span><br><span class="line">       mov ecx,64                         ;检索表中，每条目的比较次数 </span><br><span class="line">       repe cmpsd                         ;每次比较4字节 ,esi随着移动</span><br><span class="line">       jnz .b4		;符号不匹配,跳转b4</span><br><span class="line">       mov eax,[esi]                      ;若匹配，则esi恰好指向其后的地址,即符号的偏移地址</span><br><span class="line">       mov [es:edi-256],eax               ;将字符串改写成偏移地址 ,原符号名处改成符号的偏移地址</span><br><span class="line">       mov ax,[esi+4]			;esi再加4指向段选择子</span><br><span class="line">       or ax,0000000000000011B            ;以用户程序自己的特权级使用调用门</span><br><span class="line">                                          ;故RPL=3 </span><br><span class="line">       mov [es:edi-252],ax                ;回填调用门选择子 </span><br><span class="line">.b4:</span><br><span class="line">    </span><br><span class="line">       pop ecx</span><br><span class="line">       pop esi</span><br><span class="line">       add esi,salt_item_len	;esi循环变量后移一个符号</span><br><span class="line">       pop edi                            ;从头比较 </span><br><span class="line">       loop .b3	;固定用户程序中的符号,遍历内核符号</span><br><span class="line">    </span><br><span class="line">       pop edi</span><br><span class="line">       add edi,256</span><br><span class="line">       pop ecx</span><br><span class="line">       loop .b2</span><br></pre></td></tr></table></figure>
-<h5 id="建立并注册各特权级堆栈">建立并注册各特权级堆栈</h5>
-<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br></pre></td><td class="code"><pre><span class="line">mov esi,[ebp+11*4]                 ;从堆栈中取得TCB的基地址</span><br><span class="line"></span><br><span class="line">;创建0特权级堆栈</span><br><span class="line">mov ecx,4096</span><br><span class="line">mov eax,ecx                        ;为生成堆栈高端地址做准备 </span><br><span class="line">mov [es:esi+0x1a],ecx</span><br><span class="line">shr dword [es:esi+0x1a],12         ;登记0特权级堆栈尺寸到TCB </span><br><span class="line">call sys_routine_seg_sel:allocate_memory</span><br><span class="line">add eax,ecx                        ;堆栈必须使用高端地址为基地址</span><br><span class="line">mov [es:esi+0x1e],eax              ;登记0特权级堆栈基地址到TCB </span><br><span class="line">mov ebx,0xffffe                    ;段长度（界限）</span><br><span class="line">mov ecx,0x00c09600                 ;4KB粒度，读写，特权级0</span><br><span class="line">call sys_routine_seg_sel:make_seg_descriptor</span><br><span class="line">mov ebx,esi                        ;TCB的基地址</span><br><span class="line">call fill_descriptor_in_ldt</span><br><span class="line">or cx,0000_0000_0000_0000          ;设置选择子的特权级为0</span><br><span class="line">mov [es:esi+0x22],cx               ;登记0特权级堆栈选择子到TCB</span><br><span class="line">mov dword [es:esi+0x24],0          ;登记0特权级堆栈初始ESP到TCB</span><br><span class="line">      </span><br></pre></td></tr></table></figure>
+
+<h5 id="建立并注册各特权级堆栈"><a href="#建立并注册各特权级堆栈" class="headerlink" title="建立并注册各特权级堆栈"></a>建立并注册各特权级堆栈</h5><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br></pre></td><td class="code"><pre><span class="line">mov esi,[ebp+11*4]                 ;从堆栈中取得TCB的基地址</span><br><span class="line"></span><br><span class="line">;创建0特权级堆栈</span><br><span class="line">mov ecx,4096</span><br><span class="line">mov eax,ecx                        ;为生成堆栈高端地址做准备 </span><br><span class="line">mov [es:esi+0x1a],ecx</span><br><span class="line">shr dword [es:esi+0x1a],12         ;登记0特权级堆栈尺寸到TCB </span><br><span class="line">call sys_routine_seg_sel:allocate_memory</span><br><span class="line">add eax,ecx                        ;堆栈必须使用高端地址为基地址</span><br><span class="line">mov [es:esi+0x1e],eax              ;登记0特权级堆栈基地址到TCB </span><br><span class="line">mov ebx,0xffffe                    ;段长度（界限）</span><br><span class="line">mov ecx,0x00c09600                 ;4KB粒度，读写，特权级0</span><br><span class="line">call sys_routine_seg_sel:make_seg_descriptor</span><br><span class="line">mov ebx,esi                        ;TCB的基地址</span><br><span class="line">call fill_descriptor_in_ldt</span><br><span class="line">or cx,0000_0000_0000_0000          ;设置选择子的特权级为0</span><br><span class="line">mov [es:esi+0x22],cx               ;登记0特权级堆栈选择子到TCB</span><br><span class="line">mov dword [es:esi+0x24],0          ;登记0特权级堆栈初始ESP到TCB</span><br><span class="line">      </span><br></pre></td></tr></table></figure>
+
 <p>esi指向TCB基地址</p>
 <p>esi+0x1a指向的0环栈以4KB为单位的长度</p>
-<p><img
-src="https://raw.githubusercontent.com/DeutschBall/DeutschBall/main/image-20220904205759673.png" /></p>
+<p><img src="https://raw.githubusercontent.com/DeutschBall/DeutschBall/main/image-20220904205759673.png"></p>
 <p>这里将4096放到该位置,然后右移12位,意思是4096右移12位得到1,即0环栈的大小是1×4K</p>
-<p>ecx=4096B交给<code>allocate_memory</code>,为该堆栈申请空间</p>
+<p>ecx&#x3D;4096B交给<code>allocate_memory</code>,为该堆栈申请空间</p>
 <p>然后ecx保存返回地址,加上eax先前保存的空间大小,达到该空间的最大地址,由于堆栈往小地址生长,因此该地址就作为基地址了</p>
 <p>写到esi+0x1e位置,即0特权级堆栈基地址</p>
 <p>段大小是4KB那么段界限就是0xffffe</p>
@@ -854,19 +740,16 @@ src="https://raw.githubusercontent.com/DeutschBall/DeutschBall/main/image-202209
 <p>然后将0环栈初始esp置为0</p>
 <p>这就建立好了0环栈,下面1,2环栈类似</p>
 <figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br></pre></td><td class="code"><pre><span class="line">	</span><br><span class="line">;创建1特权级堆栈</span><br><span class="line">mov ecx,4096</span><br><span class="line">mov eax,ecx                        ;为生成堆栈高端地址做准备</span><br><span class="line">mov [es:esi+0x28],ecx</span><br><span class="line">shr [es:esi+0x28],12               ;登记1特权级堆栈尺寸到TCB</span><br><span class="line">call sys_routine_seg_sel:allocate_memory</span><br><span class="line">add eax,ecx                        ;堆栈必须使用高端地址为基地址</span><br><span class="line">mov [es:esi+0x2c],eax              ;登记1特权级堆栈基地址到TCB</span><br><span class="line">mov ebx,0xffffe                    ;段长度（界限）</span><br><span class="line">mov ecx,0x00c0b600                 ;4KB粒度，读写，特权级1</span><br><span class="line">call sys_routine_seg_sel:make_seg_descriptor</span><br><span class="line">mov ebx,esi                        ;TCB的基地址</span><br><span class="line">call fill_descriptor_in_ldt</span><br><span class="line">or cx,0000_0000_0000_0001          ;设置选择子的特权级为1</span><br><span class="line">mov [es:esi+0x30],cx               ;登记1特权级堆栈选择子到TCB</span><br><span class="line">mov dword [es:esi+0x32],0          ;登记1特权级堆栈初始ESP到TCB</span><br><span class="line"></span><br><span class="line">;创建2特权级堆栈</span><br><span class="line">mov ecx,4096</span><br><span class="line">mov eax,ecx                        ;为生成堆栈高端地址做准备</span><br><span class="line">mov [es:esi+0x36],ecx</span><br><span class="line">shr [es:esi+0x36],12               ;登记2特权级堆栈尺寸到TCB</span><br><span class="line">call sys_routine_seg_sel:allocate_memory</span><br><span class="line">add eax,ecx                        ;堆栈必须使用高端地址为基地址</span><br><span class="line">mov [es:esi+0x3a],ecx              ;登记2特权级堆栈基地址到TCB</span><br><span class="line">mov ebx,0xffffe                    ;段长度（界限）</span><br><span class="line">mov ecx,0x00c0d600                 ;4KB粒度，读写，特权级2</span><br><span class="line">call sys_routine_seg_sel:make_seg_descriptor</span><br><span class="line">mov ebx,esi                        ;TCB的基地址</span><br><span class="line">call fill_descriptor_in_ldt</span><br><span class="line">or cx,0000_0000_0000_0010          ;设置选择子的特权级为2</span><br><span class="line">mov [es:esi+0x3e],cx               ;登记2特权级堆栈选择子到TCB</span><br><span class="line"></span><br></pre></td></tr></table></figure>
-<h5 id="gdt中注册ldt">GDT中注册LDT</h5>
-<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">;在GDT中登记LDT描述符</span><br><span class="line">mov eax,[es:esi+0x0c]              ;LDT的起始线性地址</span><br><span class="line">movzx ebx,word [es:esi+0x0a]       ;LDT段界限</span><br><span class="line">mov ecx,0x00408200                 ;LDT描述符，特权级0</span><br><span class="line">call sys_routine_seg_sel:make_seg_descriptor</span><br><span class="line">call sys_routine_seg_sel:set_up_gdt_descriptor</span><br><span class="line">mov [es:esi+0x10],cx               ;登记LDT选择子到TCB中</span><br></pre></td></tr></table></figure>
+
+
+
+<h5 id="GDT中注册LDT"><a href="#GDT中注册LDT" class="headerlink" title="GDT中注册LDT"></a>GDT中注册LDT</h5><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">;在GDT中登记LDT描述符</span><br><span class="line">mov eax,[es:esi+0x0c]              ;LDT的起始线性地址</span><br><span class="line">movzx ebx,word [es:esi+0x0a]       ;LDT段界限</span><br><span class="line">mov ecx,0x00408200                 ;LDT描述符，特权级0</span><br><span class="line">call sys_routine_seg_sel:make_seg_descriptor</span><br><span class="line">call sys_routine_seg_sel:set_up_gdt_descriptor</span><br><span class="line">mov [es:esi+0x10],cx               ;登记LDT选择子到TCB中</span><br></pre></td></tr></table></figure>
+
 <p>TCB+0x0c指向LDT线性基地址,放到eax</p>
 <p>TCB+0x0a指向LDT当前界限值,放到ebx</p>
 <p>0x00408200作为属性,放到ecx</p>
 <p>调用make_seg_descriptor,set_up_gdt_descriptor将LDT描述符注册到GDT,并将该LDT的选择子写到TCB+0x10位置</p>
-<h5 id="创建tss">创建TSS</h5>
-<figure>
-<img
-src="https://raw.githubusercontent.com/DeutschBall/DeutschBall/main/image-20220904211634293.png"
-alt="image-20220904211634293" />
-<figcaption aria-hidden="true">image-20220904211634293</figcaption>
-</figure>
+<h5 id="创建TSS"><a href="#创建TSS" class="headerlink" title="创建TSS"></a>创建TSS</h5><p><img src="https://raw.githubusercontent.com/DeutschBall/DeutschBall/main/image-20220904211634293.png" alt="image-20220904211634293"></p>
 <p>TSS是一个大块头,详细保存了程序上下文,共需要占用104字节</p>
 <blockquote>
 <p>貌似TCB和TSS有很多重复保存的地方</p>
@@ -875,34 +758,32 @@ alt="image-20220904211634293" />
 <p>TSS中的各种寄存器都是会随着进程的执行发生变化</p>
 </blockquote>
 <figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">;创建用户程序的TSS</span><br><span class="line">mov ecx,104                        ;tss的基本尺寸</span><br><span class="line">mov [es:esi+0x12],cx              </span><br><span class="line">dec word [es:esi+0x12]             ;登记TSS界限值到TCB </span><br><span class="line">call sys_routine_seg_sel:allocate_memory</span><br><span class="line">mov [es:esi+0x14],ecx              ;登记TSS基地址到TCB</span><br></pre></td></tr></table></figure>
+
 <p>esi还是指向TCB基地址</p>
-<p>esi+0x12是TSS界限,设为104-1=103</p>
+<p>esi+0x12是TSS界限,设为104-1&#x3D;103</p>
 <p>然后调用allocate_memory给TSS申请104字节空间,将该空间的首地址放到TCB+0x14即TSS基地址上</p>
-<h5 id="登记基本tss内容">登记基本TSS内容</h5>
-<p>由于进程开始执行之前,TSS和TCB中的很多内容都是重复的,因此TSS建立时,可以从TCB抄作业</p>
+<h5 id="登记基本TSS内容"><a href="#登记基本TSS内容" class="headerlink" title="登记基本TSS内容"></a>登记基本TSS内容</h5><p>由于进程开始执行之前,TSS和TCB中的很多内容都是重复的,因此TSS建立时,可以从TCB抄作业</p>
 <figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br></pre></td><td class="code"><pre><span class="line">;登记基本的TSS表格内容</span><br><span class="line">mov word [es:ecx+0],0              ;反向链=0</span><br><span class="line">      </span><br><span class="line">mov edx,[es:esi+0x24]              ;登记0特权级堆栈初始ESP</span><br><span class="line">mov [es:ecx+4],edx                 ;到TSS中</span><br><span class="line">      </span><br><span class="line">mov dx,[es:esi+0x22]               ;登记0特权级堆栈段选择子</span><br><span class="line">mov [es:ecx+8],dx                  ;到TSS中</span><br><span class="line">      </span><br><span class="line">mov edx,[es:esi+0x32]              ;登记1特权级堆栈初始ESP</span><br><span class="line">mov [es:ecx+12],edx                ;到TSS中</span><br><span class="line"></span><br><span class="line">mov dx,[es:esi+0x30]               ;登记1特权级堆栈段选择子</span><br><span class="line">mov [es:ecx+16],dx                 ;到TSS中</span><br><span class="line"></span><br><span class="line">mov edx,[es:esi+0x40]              ;登记2特权级堆栈初始ESP</span><br><span class="line">mov [es:ecx+20],edx                ;到TSS中</span><br><span class="line"></span><br><span class="line">mov dx,[es:esi+0x3e]               ;登记2特权级堆栈段选择子</span><br><span class="line">mov [es:ecx+24],dx                 ;到TSS中</span><br><span class="line"></span><br><span class="line">mov dx,[es:esi+0x10]               ;登记任务的LDT选择子</span><br><span class="line">mov [es:ecx+96],dx                 ;到TSS中</span><br><span class="line">      </span><br><span class="line">mov dx,[es:esi+0x12]               ;登记任务的I/O位图偏移</span><br><span class="line">mov [es:ecx+102],dx                ;到TSS中 </span><br><span class="line">      </span><br><span class="line">mov word [es:ecx+100],0            ;T=0</span><br><span class="line">       </span><br></pre></td></tr></table></figure>
-<h5 id="gdt中注册tss">GDT中注册TSS</h5>
-<p>为啥要在GDT中注册TSS?</p>
+
+
+
+<h5 id="GDT中注册TSS"><a href="#GDT中注册TSS" class="headerlink" title="GDT中注册TSS"></a>GDT中注册TSS</h5><p>为啥要在GDT中注册TSS?</p>
 <p>TSS也是一块内存区域,在保护模式下,每块内存区域都需要现在GDT或者LDT中注册之后才能访问.在内核中可以使用4G的数据段访问全部内存,但是控制切换到用户程序之后就不能使用4G数据段了,要想还能访问TSS,内核就必须给用户程序准备好TSS</p>
 <p>TSS描述符长这样</p>
-<figure>
-<img
-src="https://raw.githubusercontent.com/DeutschBall/DeutschBall/main/image-20220904213805641.png"
-alt="image-20220904213805641" />
-<figcaption aria-hidden="true">image-20220904213805641</figcaption>
-</figure>
-<p>其中TYPE.B位,表征任务当前状态,是"忙"还是"不忙",忙就是正在执行或者挂起,处理器会自动修改该位</p>
+<p><img src="https://raw.githubusercontent.com/DeutschBall/DeutschBall/main/image-20220904213805641.png" alt="image-20220904213805641"></p>
+<p>其中TYPE.B位,表征任务当前状态,是”忙”还是”不忙”,忙就是正在执行或者挂起,处理器会自动修改该位</p>
 <figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">;在GDT中登记TSS描述符</span><br><span class="line">mov eax,[es:esi+0x14]              ;TSS的起始线性地址</span><br><span class="line">movzx ebx,word [es:esi+0x12]       ;段长度（界限）</span><br><span class="line">mov ecx,0x00408900                 ;TSS描述符，特权级0</span><br><span class="line">call sys_routine_seg_sel:make_seg_descriptor</span><br><span class="line">call sys_routine_seg_sel:set_up_gdt_descriptor</span><br><span class="line">mov [es:esi+0x18],cx               ;登记TSS选择子到TCB</span><br></pre></td></tr></table></figure>
+
 <p>注册TSS时用到的基址和界限信息还是从TCB中抄来的</p>
-<h5 id="加载器函数尾声">加载器函数尾声</h5>
-<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">pop es                             ;恢复到调用此过程前的es段 </span><br><span class="line">pop ds                             ;恢复到调用此过程前的ds段</span><br><span class="line">      </span><br><span class="line">popad</span><br><span class="line">      </span><br><span class="line">ret 8                              ;丢弃调用本过程前压入的参数 </span><br></pre></td></tr></table></figure>
+<h5 id="加载器函数尾声"><a href="#加载器函数尾声" class="headerlink" title="加载器函数尾声"></a>加载器函数尾声</h5><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">pop es                             ;恢复到调用此过程前的es段 </span><br><span class="line">pop ds                             ;恢复到调用此过程前的ds段</span><br><span class="line">      </span><br><span class="line">popad</span><br><span class="line">      </span><br><span class="line">ret 8                              ;丢弃调用本过程前压入的参数 </span><br></pre></td></tr></table></figure>
+
 <p>ret 8退栈8个字节,正好给加载器传递参数时是两个4字节参数</p>
 <p>这样加载器返回后堆栈平衡</p>
-<h4 id="加载ldtrtr寄存器ds段寄存器">加载ldtr,tr寄存器,ds段寄存器</h4>
-<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line">mov ebx,do_status</span><br><span class="line">call sys_routine_seg_sel:put_string</span><br><span class="line">      </span><br><span class="line">mov eax,mem_0_4_gb_seg_sel       ;ds指向4G全内存段,后面要用线性地址</span><br><span class="line">mov ds,eax</span><br><span class="line">      </span><br><span class="line">ltr [ecx+0x18]                     ;加载任务状态段 ;ecx指向TCB,TCB+0x18是TSS选择子</span><br><span class="line">lldt [ecx+0x10]                    ;加载LDT,TCB+0x10是LDT选择子</span><br><span class="line">      </span><br><span class="line">mov eax,[ecx+0x44] ;ecx+0x44是用户程序头选择子</span><br><span class="line">mov ds,eax                         ;切换到用户程序头部段 </span><br></pre></td></tr></table></figure>
-<h4 id="假装从调用门返回">假装从调用门返回</h4>
-<p>我们之前一直是在0环的内核上工作的
-,而现在竟然让我们将控制放权给一个三环上的应用程序,显然正常情况下这是不可容忍的.</p>
+<h4 id="加载ldtr-tr寄存器-ds段寄存器"><a href="#加载ldtr-tr寄存器-ds段寄存器" class="headerlink" title="加载ldtr,tr寄存器,ds段寄存器"></a>加载ldtr,tr寄存器,ds段寄存器</h4><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line">mov ebx,do_status</span><br><span class="line">call sys_routine_seg_sel:put_string</span><br><span class="line">      </span><br><span class="line">mov eax,mem_0_4_gb_seg_sel       ;ds指向4G全内存段,后面要用线性地址</span><br><span class="line">mov ds,eax</span><br><span class="line">      </span><br><span class="line">ltr [ecx+0x18]                     ;加载任务状态段 ;ecx指向TCB,TCB+0x18是TSS选择子</span><br><span class="line">lldt [ecx+0x10]                    ;加载LDT,TCB+0x10是LDT选择子</span><br><span class="line">      </span><br><span class="line">mov eax,[ecx+0x44] ;ecx+0x44是用户程序头选择子</span><br><span class="line">mov ds,eax                         ;切换到用户程序头部段 </span><br></pre></td></tr></table></figure>
+
+
+
+<h4 id="假装从调用门返回"><a href="#假装从调用门返回" class="headerlink" title="假装从调用门返回"></a>假装从调用门返回</h4><p>我们之前一直是在0环的内核上工作的 ,而现在竟然让我们将控制放权给一个三环上的应用程序,显然正常情况下这是不可容忍的.</p>
 <p>不使用调用门时,即使是依存的代码段也只允许从3环代码段调用0环代码</p>
 <p>使用调用门时,也只允许控制向高级代码段转移,顶多有一个改不改CPI的区别</p>
 <p>貌似各种情况都不允许控制从0环向3环转移</p>
@@ -910,40 +791,24 @@ alt="image-20220904213805641" />
 <p>即虽然不允许0环主动调用3环,但是<strong>允许从0环返回3环</strong></p>
 <p>这就是下面retf的作用</p>
 <figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">;以下假装是从调用门返回。摹仿处理器压入返回参数 </span><br><span class="line">push dword [0x08]                  ;调用前的堆栈段选择子</span><br><span class="line">push dword 0                       ;调用前的esp</span><br><span class="line"></span><br><span class="line">push dword [0x14]                  ;调用前的代码段选择子 </span><br><span class="line">push dword [0x10]                  ;调用前的eip</span><br><span class="line">      </span><br><span class="line">retf</span><br></pre></td></tr></table></figure>
+
+
+
+
+
 <p>压栈时操作数的段寄存器ds指向用户程序头段</p>
 <p>ds:0x08指向用户程序段选择子</p>
 <p>ds:0x14指向用户程序代码段选择子</p>
 <p>ds:0x10指向用户程序入口点</p>
-<figure>
-<img
-src="https://raw.githubusercontent.com/DeutschBall/DeutschBall/main/image-20220904215017068.png"
-alt="image-20220904215017068" />
-<figcaption aria-hidden="true">image-20220904215017068</figcaption>
-</figure>
+<p><img src="https://raw.githubusercontent.com/DeutschBall/DeutschBall/main/image-20220904215017068.png" alt="image-20220904215017068"></p>
 <p>retf指令干了啥呢?</p>
 <p>retf用于段间返回,将此时栈顶低32位作为段内偏移量,高32位作为段选择子(实际只使用了高16位,再高16位置零忽略)</p>
 <p>retf执行之后会将栈顶的入口点段内偏移退栈交给eip,将程序段选择子退栈交给cs</p>
-<figure>
-<img
-src="https://raw.githubusercontent.com/DeutschBall/DeutschBall/main/image-20220904215323965.png"
-alt="image-20220904215323965" />
-<figcaption aria-hidden="true">image-20220904215323965</figcaption>
-</figure>
-<p>然后接着处理器就根据eip取指令继续执行了,就相当于从内核"返回"到用户程序了,虽然这是用户程序的第一次执行</p>
+<p><img src="https://raw.githubusercontent.com/DeutschBall/DeutschBall/main/image-20220904215323965.png" alt="image-20220904215323965"></p>
+<p>然后接着处理器就根据eip取指令继续执行了,就相当于从内核”返回”到用户程序了,虽然这是用户程序的第一次执行</p>
 <p>此时栈顶是程序堆栈段,自然而然地被作为程序的</p>
-<h2 id="图解tsstcbldt">图解TSS,TCB,LDT</h2>
-<figure>
-<img
-src="https://raw.githubusercontent.com/DeutschBall/DeutschBall/main/image-20220904220346418.png"
-alt="简略" />
-<figcaption aria-hidden="true">简略</figcaption>
-</figure>
-<figure>
-<img
-src="https://pic.stackoverflow.wiki/uploadImages/27/200/196/155/2022/09/04/23/24/0235c2ba-c267-4c8f-a419-41996a5634c2.svg"
-alt="详细?" />
-<figcaption aria-hidden="true">详细?</figcaption>
-</figure>
+<h2 id="图解TSS-TCB-LDT"><a href="#图解TSS-TCB-LDT" class="headerlink" title="图解TSS,TCB,LDT"></a>图解TSS,TCB,LDT</h2><p><img src="https://raw.githubusercontent.com/DeutschBall/DeutschBall/main/image-20220904220346418.png" alt="简略"></p>
+<p><img src="https://pic.stackoverflow.wiki/uploadImages/27/200/196/155/2022/09/04/23/24/0235c2ba-c267-4c8f-a419-41996a5634c2.svg" alt="详细?"></p>
 <p>有些地方还是没有彻底明白</p>
 
     </div>
@@ -1045,7 +910,7 @@ alt="详细?" />
 
       <!--noindex-->
       <div class="post-toc-wrap sidebar-panel">
-          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#%E7%8E%A9%E5%85%B7%E5%86%85%E6%A0%B8v0.2"><span class="nav-number">1.</span> <span class="nav-text">玩具内核V0.2</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#ldt%E5%92%8Ctss"><span class="nav-number">1.1.</span> <span class="nav-text">LDT和TSS</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E7%A7%81%E6%9C%89%E7%A9%BA%E9%97%B4%E5%92%8C%E5%85%AC%E6%9C%89%E7%A9%BA%E9%97%B4"><span class="nav-number">1.2.</span> <span class="nav-text">私有空间和公有空间</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E7%89%B9%E6%9D%83%E7%BA%A7"><span class="nav-number">1.3.</span> <span class="nav-text">特权级</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E7%89%B9%E6%9D%83%E7%BA%A7%E5%AE%9A%E4%B9%89"><span class="nav-number">1.3.1.</span> <span class="nav-text">特权级定义</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E4%B8%A5%E7%A6%81%E4%BD%8E%E7%BA%A7%E4%BB%A3%E7%A0%81%E6%AE%B5%E8%AE%BF%E9%97%AE%E9%AB%98%E7%BA%A7%E6%95%B0%E6%8D%AE%E6%AE%B5"><span class="nav-number">1.3.2.</span> <span class="nav-text">严禁低级代码段访问高级数据段</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E4%B8%A5%E7%A6%81%E6%8E%A7%E5%88%B6%E5%90%91%E4%BD%8E%E7%89%B9%E6%9D%83%E7%BA%A7%E8%BD%AC%E7%A7%BB"><span class="nav-number">1.3.3.</span> <span class="nav-text">严禁控制向低特权级转移</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E9%97%A8%E6%8F%8F%E8%BF%B0%E7%AC%A6"><span class="nav-number">1.3.4.</span> <span class="nav-text">门描述符</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E9%92%BB%E6%B3%95%E5%BE%8B%E7%A9%BA%E5%AD%90"><span class="nav-number">1.3.5.</span> <span class="nav-text">钻法律空子</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%AE%8C%E5%96%84%E6%B3%95%E5%BE%8B"><span class="nav-number">1.3.6.</span> <span class="nav-text">完善法律</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E7%BC%96%E7%A8%8B%E5%AE%9E%E7%8E%B0"><span class="nav-number">1.4.</span> <span class="nav-text">编程实现</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#start"><span class="nav-number">1.4.1.</span> <span class="nav-text">start</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#%E5%AE%89%E8%A3%85%E8%B0%83%E7%94%A8%E9%97%A8"><span class="nav-number">1.4.1.1.</span> <span class="nav-text">安装调用门</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E6%B5%8B%E8%AF%95%E8%B0%83%E7%94%A8%E9%97%A8"><span class="nav-number">1.4.1.2.</span> <span class="nav-text">测试调用门</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E5%88%9B%E5%BB%BA%E4%BB%BB%E5%8A%A1%E6%8E%A7%E5%88%B6%E5%9D%97"><span class="nav-number">1.4.1.3.</span> <span class="nav-text">创建任务控制块</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E5%8A%A0%E8%BD%BD%E5%99%A8%E5%8A%A0%E8%BD%BD%E7%94%A8%E6%88%B7%E7%A8%8B%E5%BA%8F"><span class="nav-number">1.4.1.4.</span> <span class="nav-text">加载器加载用户程序</span></a><ol class="nav-child"><li class="nav-item nav-level-5"><a class="nav-link" href="#%E6%A0%88%E4%BC%A0%E5%8F%82%E6%95%B0"><span class="nav-number">1.4.1.4.1.</span> <span class="nav-text">栈传参数</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#%E5%BC%80%E7%AB%AF"><span class="nav-number">1.4.1.4.2.</span> <span class="nav-text">开端</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#%E8%AE%BE%E7%BD%AEes%E6%AE%B5%E9%80%89%E6%8B%A9%E5%AD%90"><span class="nav-number">1.4.1.4.3.</span> <span class="nav-text">设置es段选择子</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#%E7%94%B3%E8%AF%B7ldt%E7%A9%BA%E9%97%B4%E5%86%99%E5%85%A5tcb"><span class="nav-number">1.4.1.4.4.</span> <span class="nav-text">申请LDT空间,写入TCB</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#%E8%AF%BB%E5%8F%96%E7%94%A8%E6%88%B7%E7%A8%8B%E5%BA%8F%E5%A4%B4"><span class="nav-number">1.4.1.4.5.</span> <span class="nav-text">读取用户程序头</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#%E5%88%A4%E6%96%AD%E7%A8%8B%E5%BA%8F%E5%A4%A7%E5%B0%8F"><span class="nav-number">1.4.1.4.6.</span> <span class="nav-text">判断程序大小</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#%E4%B8%BA%E6%95%B4%E4%B8%AA%E7%A8%8B%E5%BA%8F%E7%94%B3%E8%AF%B7%E7%A9%BA%E9%97%B4%E5%B9%B6%E6%B3%A8%E5%86%8C"><span class="nav-number">1.4.1.4.7.</span> <span class="nav-text">为整个程序申请空间并注册</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#%E8%AF%BB%E5%8F%96%E6%95%B4%E4%B8%AA%E7%A8%8B%E5%BA%8F"><span class="nav-number">1.4.1.4.8.</span> <span class="nav-text">读取整个程序</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#%E8%8E%B7%E5%8F%96%E7%A8%8B%E5%BA%8F%E5%9F%BA%E5%9C%B0%E5%9D%80"><span class="nav-number">1.4.1.4.9.</span> <span class="nav-text">获取程序基地址</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#%E5%BB%BA%E7%AB%8B%E7%A8%8B%E5%BA%8F%E5%A4%B4%E9%83%A8%E6%AE%B5%E6%8F%8F%E8%BF%B0%E7%AC%A6"><span class="nav-number">1.4.1.4.10.</span> <span class="nav-text">建立程序头部段描述符</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#%E5%BB%BA%E7%AB%8B%E7%A8%8B%E5%BA%8F%E4%BB%A3%E7%A0%81%E6%AE%B5%E6%8F%8F%E8%BF%B0%E7%AC%A6"><span class="nav-number">1.4.1.4.11.</span> <span class="nav-text">建立程序代码段描述符</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#%E5%BB%BA%E7%AB%8B%E7%A8%8B%E5%BA%8F%E6%95%B0%E6%8D%AE%E6%AE%B5%E6%8F%8F%E8%BF%B0%E7%AC%A6"><span class="nav-number">1.4.1.4.12.</span> <span class="nav-text">建立程序数据段描述符</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#%E5%BB%BA%E7%AB%8B%E7%A8%8B%E5%BA%8F%E5%A0%86%E6%A0%88%E6%AE%B5%E6%8F%8F%E8%BF%B0%E7%AC%A6"><span class="nav-number">1.4.1.4.13.</span> <span class="nav-text">建立程序堆栈段描述符</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#%E9%87%8D%E5%AE%9A%E4%BD%8D%E7%94%A8%E6%88%B7%E7%A8%8B%E5%BA%8F%E7%AC%A6%E5%8F%B7"><span class="nav-number">1.4.1.4.14.</span> <span class="nav-text">重定位用户程序符号</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#%E5%BB%BA%E7%AB%8B%E5%B9%B6%E6%B3%A8%E5%86%8C%E5%90%84%E7%89%B9%E6%9D%83%E7%BA%A7%E5%A0%86%E6%A0%88"><span class="nav-number">1.4.1.4.15.</span> <span class="nav-text">建立并注册各特权级堆栈</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#gdt%E4%B8%AD%E6%B3%A8%E5%86%8Cldt"><span class="nav-number">1.4.1.4.16.</span> <span class="nav-text">GDT中注册LDT</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#%E5%88%9B%E5%BB%BAtss"><span class="nav-number">1.4.1.4.17.</span> <span class="nav-text">创建TSS</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#%E7%99%BB%E8%AE%B0%E5%9F%BA%E6%9C%ACtss%E5%86%85%E5%AE%B9"><span class="nav-number">1.4.1.4.18.</span> <span class="nav-text">登记基本TSS内容</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#gdt%E4%B8%AD%E6%B3%A8%E5%86%8Ctss"><span class="nav-number">1.4.1.4.19.</span> <span class="nav-text">GDT中注册TSS</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#%E5%8A%A0%E8%BD%BD%E5%99%A8%E5%87%BD%E6%95%B0%E5%B0%BE%E5%A3%B0"><span class="nav-number">1.4.1.4.20.</span> <span class="nav-text">加载器函数尾声</span></a></li></ol></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E5%8A%A0%E8%BD%BDldtrtr%E5%AF%84%E5%AD%98%E5%99%A8ds%E6%AE%B5%E5%AF%84%E5%AD%98%E5%99%A8"><span class="nav-number">1.4.1.5.</span> <span class="nav-text">加载ldtr,tr寄存器,ds段寄存器</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E5%81%87%E8%A3%85%E4%BB%8E%E8%B0%83%E7%94%A8%E9%97%A8%E8%BF%94%E5%9B%9E"><span class="nav-number">1.4.1.6.</span> <span class="nav-text">假装从调用门返回</span></a></li></ol></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%9B%BE%E8%A7%A3tsstcbldt"><span class="nav-number">1.5.</span> <span class="nav-text">图解TSS,TCB,LDT</span></a></li></ol></li></ol></div>
+          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#%E7%8E%A9%E5%85%B7%E5%86%85%E6%A0%B8V0-2"><span class="nav-number">1.</span> <span class="nav-text">玩具内核V0.2</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#LDT%E5%92%8CTSS"><span class="nav-number">1.1.</span> <span class="nav-text">LDT和TSS</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E7%A7%81%E6%9C%89%E7%A9%BA%E9%97%B4%E5%92%8C%E5%85%AC%E6%9C%89%E7%A9%BA%E9%97%B4"><span class="nav-number">1.2.</span> <span class="nav-text">私有空间和公有空间</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E7%89%B9%E6%9D%83%E7%BA%A7"><span class="nav-number">1.3.</span> <span class="nav-text">特权级</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E7%89%B9%E6%9D%83%E7%BA%A7%E5%AE%9A%E4%B9%89"><span class="nav-number">1.3.1.</span> <span class="nav-text">特权级定义</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E4%B8%A5%E7%A6%81%E4%BD%8E%E7%BA%A7%E4%BB%A3%E7%A0%81%E6%AE%B5%E8%AE%BF%E9%97%AE%E9%AB%98%E7%BA%A7%E6%95%B0%E6%8D%AE%E6%AE%B5"><span class="nav-number">1.3.2.</span> <span class="nav-text">严禁低级代码段访问高级数据段</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E4%B8%A5%E7%A6%81%E6%8E%A7%E5%88%B6%E5%90%91%E4%BD%8E%E7%89%B9%E6%9D%83%E7%BA%A7%E8%BD%AC%E7%A7%BB"><span class="nav-number">1.3.3.</span> <span class="nav-text">严禁控制向低特权级转移</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E9%97%A8%E6%8F%8F%E8%BF%B0%E7%AC%A6"><span class="nav-number">1.3.4.</span> <span class="nav-text">门描述符</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E9%92%BB%E6%B3%95%E5%BE%8B%E7%A9%BA%E5%AD%90"><span class="nav-number">1.3.5.</span> <span class="nav-text">钻法律空子</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%AE%8C%E5%96%84%E6%B3%95%E5%BE%8B"><span class="nav-number">1.3.6.</span> <span class="nav-text">完善法律</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E7%BC%96%E7%A8%8B%E5%AE%9E%E7%8E%B0"><span class="nav-number">1.4.</span> <span class="nav-text">编程实现</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#start"><span class="nav-number">1.4.1.</span> <span class="nav-text">start</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#%E5%AE%89%E8%A3%85%E8%B0%83%E7%94%A8%E9%97%A8"><span class="nav-number">1.4.1.1.</span> <span class="nav-text">安装调用门</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E6%B5%8B%E8%AF%95%E8%B0%83%E7%94%A8%E9%97%A8"><span class="nav-number">1.4.1.2.</span> <span class="nav-text">测试调用门</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E5%88%9B%E5%BB%BA%E4%BB%BB%E5%8A%A1%E6%8E%A7%E5%88%B6%E5%9D%97"><span class="nav-number">1.4.1.3.</span> <span class="nav-text">创建任务控制块</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E5%8A%A0%E8%BD%BD%E5%99%A8%E5%8A%A0%E8%BD%BD%E7%94%A8%E6%88%B7%E7%A8%8B%E5%BA%8F"><span class="nav-number">1.4.1.4.</span> <span class="nav-text">加载器加载用户程序</span></a><ol class="nav-child"><li class="nav-item nav-level-5"><a class="nav-link" href="#%E6%A0%88%E4%BC%A0%E5%8F%82%E6%95%B0"><span class="nav-number">1.4.1.4.1.</span> <span class="nav-text">栈传参数</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#%E5%BC%80%E7%AB%AF"><span class="nav-number">1.4.1.4.2.</span> <span class="nav-text">开端</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#%E8%AE%BE%E7%BD%AEes%E6%AE%B5%E9%80%89%E6%8B%A9%E5%AD%90"><span class="nav-number">1.4.1.4.3.</span> <span class="nav-text">设置es段选择子</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#%E7%94%B3%E8%AF%B7LDT%E7%A9%BA%E9%97%B4-%E5%86%99%E5%85%A5TCB"><span class="nav-number">1.4.1.4.4.</span> <span class="nav-text">申请LDT空间,写入TCB</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#%E8%AF%BB%E5%8F%96%E7%94%A8%E6%88%B7%E7%A8%8B%E5%BA%8F%E5%A4%B4"><span class="nav-number">1.4.1.4.5.</span> <span class="nav-text">读取用户程序头</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#%E5%88%A4%E6%96%AD%E7%A8%8B%E5%BA%8F%E5%A4%A7%E5%B0%8F"><span class="nav-number">1.4.1.4.6.</span> <span class="nav-text">判断程序大小</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#%E4%B8%BA%E6%95%B4%E4%B8%AA%E7%A8%8B%E5%BA%8F%E7%94%B3%E8%AF%B7%E7%A9%BA%E9%97%B4%E5%B9%B6%E6%B3%A8%E5%86%8C"><span class="nav-number">1.4.1.4.7.</span> <span class="nav-text">为整个程序申请空间并注册</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#%E8%AF%BB%E5%8F%96%E6%95%B4%E4%B8%AA%E7%A8%8B%E5%BA%8F"><span class="nav-number">1.4.1.4.8.</span> <span class="nav-text">读取整个程序</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#%E8%8E%B7%E5%8F%96%E7%A8%8B%E5%BA%8F%E5%9F%BA%E5%9C%B0%E5%9D%80"><span class="nav-number">1.4.1.4.9.</span> <span class="nav-text">获取程序基地址</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#%E5%BB%BA%E7%AB%8B%E7%A8%8B%E5%BA%8F%E5%A4%B4%E9%83%A8%E6%AE%B5%E6%8F%8F%E8%BF%B0%E7%AC%A6"><span class="nav-number">1.4.1.4.10.</span> <span class="nav-text">建立程序头部段描述符</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#%E5%BB%BA%E7%AB%8B%E7%A8%8B%E5%BA%8F%E4%BB%A3%E7%A0%81%E6%AE%B5%E6%8F%8F%E8%BF%B0%E7%AC%A6"><span class="nav-number">1.4.1.4.11.</span> <span class="nav-text">建立程序代码段描述符</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#%E5%BB%BA%E7%AB%8B%E7%A8%8B%E5%BA%8F%E6%95%B0%E6%8D%AE%E6%AE%B5%E6%8F%8F%E8%BF%B0%E7%AC%A6"><span class="nav-number">1.4.1.4.12.</span> <span class="nav-text">建立程序数据段描述符</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#%E5%BB%BA%E7%AB%8B%E7%A8%8B%E5%BA%8F%E5%A0%86%E6%A0%88%E6%AE%B5%E6%8F%8F%E8%BF%B0%E7%AC%A6"><span class="nav-number">1.4.1.4.13.</span> <span class="nav-text">建立程序堆栈段描述符</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#%E9%87%8D%E5%AE%9A%E4%BD%8D%E7%94%A8%E6%88%B7%E7%A8%8B%E5%BA%8F%E7%AC%A6%E5%8F%B7"><span class="nav-number">1.4.1.4.14.</span> <span class="nav-text">重定位用户程序符号</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#%E5%BB%BA%E7%AB%8B%E5%B9%B6%E6%B3%A8%E5%86%8C%E5%90%84%E7%89%B9%E6%9D%83%E7%BA%A7%E5%A0%86%E6%A0%88"><span class="nav-number">1.4.1.4.15.</span> <span class="nav-text">建立并注册各特权级堆栈</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#GDT%E4%B8%AD%E6%B3%A8%E5%86%8CLDT"><span class="nav-number">1.4.1.4.16.</span> <span class="nav-text">GDT中注册LDT</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#%E5%88%9B%E5%BB%BATSS"><span class="nav-number">1.4.1.4.17.</span> <span class="nav-text">创建TSS</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#%E7%99%BB%E8%AE%B0%E5%9F%BA%E6%9C%ACTSS%E5%86%85%E5%AE%B9"><span class="nav-number">1.4.1.4.18.</span> <span class="nav-text">登记基本TSS内容</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#GDT%E4%B8%AD%E6%B3%A8%E5%86%8CTSS"><span class="nav-number">1.4.1.4.19.</span> <span class="nav-text">GDT中注册TSS</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#%E5%8A%A0%E8%BD%BD%E5%99%A8%E5%87%BD%E6%95%B0%E5%B0%BE%E5%A3%B0"><span class="nav-number">1.4.1.4.20.</span> <span class="nav-text">加载器函数尾声</span></a></li></ol></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E5%8A%A0%E8%BD%BDldtr-tr%E5%AF%84%E5%AD%98%E5%99%A8-ds%E6%AE%B5%E5%AF%84%E5%AD%98%E5%99%A8"><span class="nav-number">1.4.1.5.</span> <span class="nav-text">加载ldtr,tr寄存器,ds段寄存器</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E5%81%87%E8%A3%85%E4%BB%8E%E8%B0%83%E7%94%A8%E9%97%A8%E8%BF%94%E5%9B%9E"><span class="nav-number">1.4.1.6.</span> <span class="nav-text">假装从调用门返回</span></a></li></ol></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%9B%BE%E8%A7%A3TSS-TCB-LDT"><span class="nav-number">1.5.</span> <span class="nav-text">图解TSS,TCB,LDT</span></a></li></ol></li></ol></div>
       </div>
       <!--/noindex-->
 

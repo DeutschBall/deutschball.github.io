@@ -20,18 +20,20 @@
     var CONFIG = {"hostname":"deutschball.github.io","root":"/","scheme":"Pisces","version":"7.8.0","exturl":false,"sidebar":{"position":"right","width":500,"display":"always","padding":18,"offset":12,"onmobile":false},"copycode":{"enable":true,"show_result":true,"style":"mac"},"back2top":{"enable":true,"sidebar":true,"scrollpercent":true},"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":false,"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"algolia":{"hits":{"per_page":10},"labels":{"input_placeholder":"万一找到了呢","hits_empty":"你说的 ${query} 我怎么找不着呢 ","hits_stats":"找到了 ${hits} 个结果，用时 ${time} 毫秒"}},"localsearch":{"enable":true,"trigger":"auto","top_n_per_article":-1,"unescape":false,"preload":false},"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}}};
   </script>
 
-  <meta name="description" content="源码调试Glibc 系统自带glibc的缺点 在我们尝试观察延迟绑定机制时, 需要观察_dl_runtime_resolve和dl_fixup这两个函数 这两个函数都位于ld-linux.so.2 动态库中 默认情况下使用gcc编译程序时,动态链接的glibc动态库文件,都在&#x2F;lib下 12345678root@Destroyer:&#x2F;usr&#x2F;src&#x2F;CTF-All-In-One&#x2F;src">
+  <meta name="description" content="源码调试Glibc系统自带glibc的缺点在我们尝试观察延迟绑定机制时, 需要观察_dl_runtime_resolve和dl_fixup这两个函数 这两个函数都位于ld-linux.so.2 动态库中 默认情况下使用gcc编译程序时,动态链接的glibc动态库文件,都在&#x2F;lib下 12345678root@Destroyer:&#x2F;usr&#x2F;src&#x2F;CTF-All-In-One&#x2F;src&#x2F;wr">
 <meta property="og:type" content="article">
 <meta property="og:title" content="glibc 相关备忘">
 <meta property="og:url" content="http://deutschball.github.io/2024/10/17/%E8%B0%83%E8%AF%95Glibc/index.html">
 <meta property="og:site_name" content="dustland">
-<meta property="og:description" content="源码调试Glibc 系统自带glibc的缺点 在我们尝试观察延迟绑定机制时, 需要观察_dl_runtime_resolve和dl_fixup这两个函数 这两个函数都位于ld-linux.so.2 动态库中 默认情况下使用gcc编译程序时,动态链接的glibc动态库文件,都在&#x2F;lib下 12345678root@Destroyer:&#x2F;usr&#x2F;src&#x2F;CTF-All-In-One&#x2F;src">
+<meta property="og:description" content="源码调试Glibc系统自带glibc的缺点在我们尝试观察延迟绑定机制时, 需要观察_dl_runtime_resolve和dl_fixup这两个函数 这两个函数都位于ld-linux.so.2 动态库中 默认情况下使用gcc编译程序时,动态链接的glibc动态库文件,都在&#x2F;lib下 12345678root@Destroyer:&#x2F;usr&#x2F;src&#x2F;CTF-All-In-One&#x2F;src&#x2F;wr">
 <meta property="og:locale" content="en_US">
+<meta property="og:image" content="https://raw.githubusercontent.com/DeutschBall/VideoBed/main/image-20240813215802807.png">
 <meta property="article:published_time" content="2024-10-17T15:20:00.000Z">
 <meta property="article:modified_time" content="2024-10-17T15:25:26.743Z">
 <meta property="article:author" content="dustball">
 <meta property="article:tag" content="heap exploit">
 <meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://raw.githubusercontent.com/DeutschBall/VideoBed/main/image-20240813215802807.png">
 
 <link rel="canonical" href="http://deutschball.github.io/2024/10/17/%E8%B0%83%E8%AF%95Glibc/">
 
@@ -216,19 +218,13 @@
     <div class="post-body" itemprop="articleBody">
 
       
-        <h1 id="源码调试glibc">源码调试Glibc</h1>
-<h2 id="系统自带glibc的缺点">系统自带glibc的缺点</h2>
-<p>在我们尝试观察延迟绑定机制时,</p>
+        <h1 id="源码调试Glibc"><a href="#源码调试Glibc" class="headerlink" title="源码调试Glibc"></a>源码调试Glibc</h1><h2 id="系统自带glibc的缺点"><a href="#系统自带glibc的缺点" class="headerlink" title="系统自带glibc的缺点"></a>系统自带glibc的缺点</h2><p>在我们尝试观察延迟绑定机制时,</p>
 <p>需要观察_dl_runtime_resolve和dl_fixup这两个函数</p>
 <p>这两个函数都位于ld-linux.so.2 动态库中</p>
-<p>默认情况下使用gcc编译程序时,动态链接的glibc动态库文件,都在/lib下</p>
+<p>默认情况下使用gcc编译程序时,动态链接的glibc动态库文件,都在&#x2F;lib下</p>
 <figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">root@Destroyer:/usr/src/CTF-All-In-One/src/writeup/<span class="number">6.1</span><span class="number">.3</span>_pwn_xdctf2015_pwn200<span class="meta"># ldd /bin/cat</span></span><br><span class="line">        linux-vdso.so<span class="number">.1</span> (<span class="number">0x00007fffee15a000</span>)</span><br><span class="line">        libc.so<span class="number">.6</span> =&gt; /lib/x86_64-linux-gnu/libc.so<span class="number">.6</span> (<span class="number">0x00007f36b527b000</span>)</span><br><span class="line">        /lib64/ld-linux-x86<span class="number">-64.</span>so<span class="number">.2</span> (<span class="number">0x00007f36b5875000</span>)</span><br><span class="line">root@Destroyer:/usr/src/CTF-All-In-One/src/writeup/<span class="number">6.1</span><span class="number">.3</span>_pwn_xdctf2015_pwn200<span class="meta"># ldd ./test</span></span><br><span class="line">        linux-gate.so<span class="number">.1</span> (<span class="number">0xf7f33000</span>)</span><br><span class="line">        libc.so<span class="number">.6</span> =&gt; /lib/i386-linux-gnu/libc.so<span class="number">.6</span> (<span class="number">0xf7d3b000</span>)</span><br><span class="line">        /lib/ld-linux.so<span class="number">.2</span> (<span class="number">0xf7f35000</span>)</span><br></pre></td></tr></table></figure>
+
 <table>
-<colgroup>
-<col style="width: 12%" />
-<col style="width: 46%" />
-<col style="width: 40%" />
-</colgroup>
 <thead>
 <tr>
 <th></th>
@@ -236,124 +232,191 @@
 <th>ld</th>
 </tr>
 </thead>
-<tbody>
-<tr>
+<tbody><tr>
 <td>32位程序</td>
-<td>/lib/i386-linux-gnu/libc.so.6</td>
-<td>/lib/ld-linux.so.2</td>
+<td>&#x2F;lib&#x2F;i386-linux-gnu&#x2F;libc.so.6</td>
+<td>&#x2F;lib&#x2F;ld-linux.so.2</td>
 </tr>
 <tr>
 <td>64位程序</td>
-<td>/lib/x86_64-linux-gnu/libc.so.6</td>
-<td>/lib64/ld-linux-x86-64.so.2</td>
+<td>&#x2F;lib&#x2F;x86_64-linux-gnu&#x2F;libc.so.6</td>
+<td>&#x2F;lib64&#x2F;ld-linux-x86-64.so.2</td>
 </tr>
-</tbody>
-</table>
+</tbody></table>
 <p>这是安装ubuntu这种发行版时系统自带的glibc-release版</p>
 <figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">root@Destroyer:/lib/i386-linux-gnu<span class="meta"># file ld-2.27.so</span></span><br><span class="line">ld<span class="number">-2.27</span>.so: ELF <span class="number">32</span>-bit LSB shared object, Intel <span class="number">80386</span>, version <span class="number">1</span> (SYSV), dynamically linked, BuildID[sha1]=<span class="number">8</span>da666988713e9bb88f4eb5d27dc35d815cf006b, stripped</span><br></pre></td></tr></table></figure>
+
 <p>可以看到调试符号信息已经被strip了</p>
 <p>就算我们编译一个c程序时加入了-g选项,也只是保留了程序领空内的所有符号信息,该程序链接的glibc照样是没有调试符号的</p>
 <figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">gef➤  info sharedlibrary</span><br><span class="line">From        To          Syms Read   Shared Object Library</span><br><span class="line"><span class="number">0xf7fd6ab0</span>  <span class="number">0xf7ff18bb</span>  Yes (*)     /lib/ld-linux.so<span class="number">.2</span></span><br><span class="line"><span class="number">0xf7df4690</span>  <span class="number">0xf7f414b6</span>  Yes (*)     /lib/i386-linux-gnu/libc.so<span class="number">.6</span></span><br><span class="line">(*): Shared library is missing debugging information.</span><br></pre></td></tr></table></figure>
+
 <p>两个库都标着*,意思是缺乏调试信息</p>
 <p>如果我们想要调试glibc,或者说能够保留glibc中的符号,比如函数名,变量名之类,需要带有符号的glibc</p>
 <p>可以自己编译一个玩</p>
 <p>以我的wsl kali-linux为例,装机自带的libc版本号是2.38</p>
 <figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">┌──(dustball㉿Destroyer)-[~]</span><br><span class="line">└─$ ldd --version</span><br><span class="line"><span class="title function_">ldd</span> <span class="params">(Debian GLIBC <span class="number">2.38</span><span class="number">-13</span>)</span> 2.38</span><br><span class="line"><span class="title function_">Copyright</span> <span class="params">(C)</span> 2023 Free Software Foundation, Inc.</span><br><span class="line">This is <span class="built_in">free</span> software; see the source <span class="keyword">for</span> copying conditions.  There is NO</span><br><span class="line">warranty; not even <span class="keyword">for</span> MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.</span><br><span class="line">Written by Roland McGrath and Ulrich Drepper.</span><br></pre></td></tr></table></figure>
+
 <p>下面我们编译一个新的带有调试符号的2.38版本的glibc</p>
-<h2 id="编译64位glibc">编译64位glibc</h2>
-<h3 id="下载glibc">下载glibc</h3>
-<p>首先下载glibc源码</p>
+<h2 id="编译64位glibc"><a href="#编译64位glibc" class="headerlink" title="编译64位glibc"></a>编译64位glibc</h2><h3 id="下载glibc"><a href="#下载glibc" class="headerlink" title="下载glibc"></a>下载glibc</h3><p>首先下载glibc源码</p>
 <figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">apt install glibc-source</span><br></pre></td></tr></table></figure>
-<p>执行完后会在/usr/src下面生成glibc目录</p>
+
+<p>执行完后会在&#x2F;usr&#x2F;src下面生成glibc目录</p>
 <figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">┌──(root㉿Destroyer)-[/usr/src/glibc]</span><br><span class="line">└─# ls</span><br><span class="line">debian  glibc-2.38.tar.xz</span><br></pre></td></tr></table></figure>
+
 <blockquote>
 <p>这个方法不太靠谱，我在另一台机器的wsl上这样整，缺少texinfo源代码</p>
 <p>还是到仓库下载源代码稳妥</p>
 </blockquote>
-<p>或者到glibc仓库<a
-target="_blank" rel="noopener" href="http://ftp.gnu.org/gnu/glibc/">http://ftp.gnu.org/gnu/glibc/</a>挑一个下载</p>
-<p>或者到镜像仓库下载https://mirrors.aliyun.com/gnu/glibc/</p>
+<p>或者到glibc仓库<a target="_blank" rel="noopener" href="http://ftp.gnu.org/gnu/glibc/">http://ftp.gnu.org/gnu/glibc/</a>挑一个下载</p>
+<p>或者到镜像仓库下载<a target="_blank" rel="noopener" href="https://mirrors.aliyun.com/gnu/glibc/">https://mirrors.aliyun.com/gnu/glibc/</a></p>
 <p>比如</p>
 <figure class="highlight sh"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">curl http://ftp.gnu.org/gnu/glibc/glibc-2.38.tar.xz -o glibc-2.38.tar.xz</span><br></pre></td></tr></table></figure>
-<h3 id="解压glibc">解压glibc</h3>
-<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">tar -xf glibc<span class="number">-2.38</span>.tar.xz</span><br></pre></td></tr></table></figure>
-<h3 id="建立bulid目录">建立bulid目录</h3>
-<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">cd glibc-2.38</span><br><span class="line">mkdir build</span><br><span class="line">cd build</span><br></pre></td></tr></table></figure>
-<h3 id="配置编译选项">配置编译选项</h3>
-<p>在build路径下</p>
+
+<h3 id="解压glibc"><a href="#解压glibc" class="headerlink" title="解压glibc"></a>解压glibc</h3><figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">tar -xf glibc<span class="number">-2.38</span>.tar.xz</span><br></pre></td></tr></table></figure>
+
+<h3 id="建立bulid目录"><a href="#建立bulid目录" class="headerlink" title="建立bulid目录"></a>建立bulid目录</h3><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">cd glibc-2.38</span><br><span class="line">mkdir build</span><br><span class="line">cd build</span><br></pre></td></tr></table></figure>
+
+<h3 id="配置编译选项"><a href="#配置编译选项" class="headerlink" title="配置编译选项"></a>配置编译选项</h3><p>在build路径下</p>
 <figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">../configure --prefix=/home/glibc/ --enable-add-ons=nptl --with-tls --with-__thread --enable-kernel=2.6.32 --enable-debug --disable-werror </span><br></pre></td></tr></table></figure>
+
 <figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">../configure --prefix=/home/glibc32/glibc-2.38 --enable-add-ons=nptl --with-tls --with-__thread --enable-kernel=2.6.32 --enable-debug --disable-werror </span><br></pre></td></tr></table></figure>
+
+
+
 <figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">../configure --prefix=/home/dustball/glibc/glibc-2.35 --enable-add-ons=nptl --with-tls --with-__thread --enable-kernel=2.6.32 --enable-debug --disable-werror</span><br></pre></td></tr></table></figure>
+
+
+
 <figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">../configure --prefix=/home/dustball/glibc/glibc-2.27 --enable-add-ons=nptl --with-tls --with-__thread --enable-kernel=2.6.32 --enable-debug --disable-werror</span><br></pre></td></tr></table></figure>
+
+
+
 <figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">../configure --prefix=/home/dustball/glibc/glibc-2.31 --enable-add-ons=nptl --with-tls --with-__thread --enable-kernel=2.6.32 --enable-debug --disable-werror</span><br></pre></td></tr></table></figure>
+
 <figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">../configure --prefix=/home/dustball/glibc/glibc-2.35 --enable-add-ons=nptl --with-tls --with-__thread --enable-kernel=2.6.32 --enable-debug --disable-werror</span><br></pre></td></tr></table></figure>
+
+
+
+
+
+
+
 <p>这里<code>--prefix=/home/glibc</code>是决定<code>make install</code>的安装地址</p>
 <p><code>–-enable-debug</code>允许调试,实际上就是给gcc传递-g编译选项</p>
-<h3 id="编译安装">编译&amp;安装</h3>
-<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">make -j `nproc`</span><br><span class="line">make install</span><br></pre></td></tr></table></figure>
+<h3 id="编译-安装"><a href="#编译-安装" class="headerlink" title="编译&amp;安装"></a>编译&amp;安装</h3><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">make -j `nproc`</span><br><span class="line">make install</span><br></pre></td></tr></table></figure>
+
 <blockquote>
 <p>如果配置编译选项时prefix没有写或者写错了也没关系</p>
 <figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">make install DESTDIR=/home/glibc/</span><br></pre></td></tr></table></figure>
+
 <p>这样安装也可以</p>
 </blockquote>
 <p>如果编译和安装都没有错误,会在<code>/home/glibc/</code>下生成我们的货</p>
 <figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">┌──(root㉿Destroyer)-[/home/glibc]</span><br><span class="line">└─<span class="meta"># ls</span></span><br><span class="line">bin  etc  include  lib  libexec  sbin  share  var</span><br></pre></td></tr></table></figure>
+
 <p>动态库在lib下面放着了</p>
 <figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">┌──(root㉿Destroyer)-[/home/glibc/lib]</span><br><span class="line">└─<span class="meta"># file libc.so.6</span></span><br><span class="line">libc.so<span class="number">.6</span>: ELF <span class="number">64</span>-bit LSB shared object, x86<span class="number">-64</span>, version <span class="number">1</span> (GNU/Linux), dynamically linked, interpreter /home/glibc/lib/ld-linux-x86<span class="number">-64.</span>so<span class="number">.2</span>, BuildID[sha1]=a8ebdd4a75fecb70ba9fe1dc5765fcd87c77742e, <span class="keyword">for</span> GNU/Linux <span class="number">3.2</span><span class="number">.0</span>, with debug_info, not stripped</span><br></pre></td></tr></table></figure>
+
 <p>非常滴漂亮</p>
-<h2 id="交叉编译32位glibc可选">交叉编译32位glibc(可选)</h2>
-<p>在x86_64 linux上,也兼容32位的程序</p>
+<h2 id="交叉编译32位glibc-可选"><a href="#交叉编译32位glibc-可选" class="headerlink" title="交叉编译32位glibc(可选)"></a>交叉编译32位glibc(可选)</h2><p>在x86_64 linux上,也兼容32位的程序</p>
 <p>如果想要32位带符号glibc的支持,需要再编译一个32位的glibc</p>
 <p>下载和解压不用做了,还是利用之前编译64位glibc时的源码即可</p>
-<h3 id="建立build32目录">建立build32目录</h3>
-<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">cd glibc<span class="number">-2.38</span></span><br><span class="line">mkdir build32</span><br><span class="line">cd build32</span><br></pre></td></tr></table></figure>
-<h3 id="配置32位编译选项">配置32位编译选项</h3>
-<p>首先让gcc能够编译32位程序,需要安装一些依赖</p>
+<h3 id="建立build32目录"><a href="#建立build32目录" class="headerlink" title="建立build32目录"></a>建立build32目录</h3><figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">cd glibc<span class="number">-2.38</span></span><br><span class="line">mkdir build32</span><br><span class="line">cd build32</span><br></pre></td></tr></table></figure>
+
+<h3 id="配置32位编译选项"><a href="#配置32位编译选项" class="headerlink" title="配置32位编译选项"></a>配置32位编译选项</h3><p>首先让gcc能够编译32位程序,需要安装一些依赖</p>
 <figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">apt-get install build-essential module-assistant gcc-multilib g++-multilib </span><br></pre></td></tr></table></figure>
+
 <p>然后配置编译选项</p>
 <figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">../configure --prefix=/home/glibc32 --host=i686-pc-linux-gnu --enable-add-ons=nptl --with-tls --with-__thread --enable-kernel=2.6.32 --with-binutils=/usr/bin --with-headers=/usr/include --build=i686-linux-gnu CC=&quot;gcc -m32&quot; CXX=&quot;g++ -m32&quot;</span><br></pre></td></tr></table></figure>
-<h3 id="编译安装-1">编译&amp;安装</h3>
-<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">make -j`nproc`</span><br><span class="line">make install</span><br></pre></td></tr></table></figure>
-<p>如果编译安装都没有错误,会在/home/glibc32下面生成我们的货</p>
+
+<h3 id="编译-安装-1"><a href="#编译-安装-1" class="headerlink" title="编译&amp;安装"></a>编译&amp;安装</h3><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">make -j`nproc`</span><br><span class="line">make install</span><br></pre></td></tr></table></figure>
+
+<p>如果编译安装都没有错误,会在&#x2F;home&#x2F;glibc32下面生成我们的货</p>
 <figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">┌──(root㉿Destroyer)-[/home]</span><br><span class="line">└─# ls</span><br><span class="line">dustball  glibc  glibc32</span><br></pre></td></tr></table></figure>
+
 <figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">┌──(root㉿Destroyer)-[/home/glibc32/lib]</span><br><span class="line">└─<span class="meta"># file libc.so.6</span></span><br><span class="line">libc.so<span class="number">.6</span>: ELF <span class="number">32</span>-bit LSB shared object, Intel <span class="number">80386</span>, version <span class="number">1</span> (GNU/Linux), dynamically linked, interpreter /lib/ld-linux.so<span class="number">.2</span>, BuildID[sha1]=<span class="number">3</span>d4a2e7c0e16c8cc778b5bd574a59eb4988e2d96, <span class="keyword">for</span> GNU/Linux <span class="number">3.2</span><span class="number">.0</span>, with debug_info, not stripped</span><br></pre></td></tr></table></figure>
+
 <p>漂亮滴很</p>
-<h2 id="编译链接glibc">编译链接glibc</h2>
-<p>现在系统里面有两个glibc</p>
-<p>一个系统自带的没有调试符号的glibc在/lib下面</p>
-<p>一个我们自己编译的有调试符号的glibc在/home/glibc下面</p>
-<p>但是天无二日,程序只能链接一个glibc,并且程序默认链接到/lib下的老太阳</p>
+<h2 id="编译链接glibc"><a href="#编译链接glibc" class="headerlink" title="编译链接glibc"></a>编译链接glibc</h2><p>现在系统里面有两个glibc</p>
+<p>一个系统自带的没有调试符号的glibc在&#x2F;lib下面</p>
+<p>一个我们自己编译的有调试符号的glibc在&#x2F;home&#x2F;glibc下面</p>
+<p>但是天无二日,程序只能链接一个glibc,并且程序默认链接到&#x2F;lib下的老太阳</p>
 <figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">┌──(root㉿Destroyer)-[/home/glibc-test]</span><br><span class="line">└─<span class="meta"># ldd main</span></span><br><span class="line">        linux-vdso.so<span class="number">.1</span> (<span class="number">0x00007fff451fb000</span>)</span><br><span class="line">        libc.so<span class="number">.6</span> =&gt; /lib/x86_64-linux-gnu/libc.so<span class="number">.6</span> (<span class="number">0x00007f93106d0000</span>)</span><br><span class="line">        /lib64/ld-linux-x86<span class="number">-64.</span>so<span class="number">.2</span> (<span class="number">0x00007f93108c0000</span>)</span><br></pre></td></tr></table></figure>
+
 <p>如何让程序链接到我们自己编译的glibc呢?</p>
 <p>gcc有一个编译选项可以指定链接libc的位置</p>
 <figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">gcc main.c -o main -Wl,--rpath=/home/glibc/lib -Wl,--dynamic-linker=/home/glibc/lib/ld-linux-x86-64.so.2   -I/home/glibc/include -g -no-pie</span><br></pre></td></tr></table></figure>
+
 <p><code>-Wl,--rpath=/home/glibc/lib</code>指定glibc路径</p>
 <p><code>-Wl,--dynamic-linker=/home/glibc/lib/ld-linux-x86-64.so.2</code>指定动态链接器的路径</p>
 <p><code>-I/home/glibc/include</code>指定头文件路径</p>
 <figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line">┌──(root㉿Destroyer)-[/home/glibc-test]</span><br><span class="line">└─# ./main</span><br><span class="line">Hello, world!</span><br><span class="line"></span><br><span class="line">┌──(root㉿Destroyer)-[/home/glibc-test]</span><br><span class="line">└─<span class="meta"># file main</span></span><br><span class="line">main: ELF <span class="number">64</span>-bit LSB executable, x86<span class="number">-64</span>, version <span class="number">1</span> (SYSV), dynamically linked, interpreter /home/glibc/lib/ld-linux-x86<span class="number">-64.</span>so<span class="number">.2</span>, BuildID[sha1]=<span class="number">27284e24</span>ab02fa64103591192dd8b3b006ae20f5, <span class="keyword">for</span> GNU/Linux <span class="number">3.2</span><span class="number">.0</span>, with debug_info, not stripped</span><br><span class="line"></span><br><span class="line">┌──(root㉿Destroyer)-[/home/glibc-test]</span><br><span class="line">└─<span class="meta"># ldd main</span></span><br><span class="line">        linux-vdso.so<span class="number">.1</span> (<span class="number">0x00007ffe18b9d000</span>)</span><br><span class="line">        libc.so<span class="number">.6</span> =&gt; /home/glibc/lib/libc.so<span class="number">.6</span> (<span class="number">0x00007f1a6a9ec000</span>)</span><br><span class="line">        /home/glibc/lib/ld-linux-x86<span class="number">-64.</span>so<span class="number">.2</span> =&gt; /lib64/ld-linux-x86<span class="number">-64.</span>so<span class="number">.2</span> (<span class="number">0x00007f1a6abc6000</span>)</span><br></pre></td></tr></table></figure>
+
 <p>libc和动态链接器都改好了</p>
 <p>如果想要编译成32位程序</p>
 <figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">gcc main.c -o main -Wl,--rpath=/home/glibc32/lib -Wl,--dynamic-linker=/home/glibc32/lib/ld-linux.so.2   -I/home/glibc/include -g -no-pie -m32</span><br></pre></td></tr></table></figure>
+
 <figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line">┌──(root㉿Destroyer)-[/home/glibc-test]</span><br><span class="line">└─# ./main</span><br><span class="line">Hello, world!</span><br><span class="line"></span><br><span class="line">┌──(root㉿Destroyer)-[/home/glibc-test]</span><br><span class="line">└─# ┌──(root㉿Destroyer)-[/home/glibc-test]</span><br><span class="line">└─<span class="meta"># file main</span></span><br><span class="line">main: ELF <span class="number">32</span>-bit LSB executable, Intel <span class="number">80386</span>, version <span class="number">1</span> (SYSV), dynamically linked, interpreter /home/glibc32/lib/ld-linux.so<span class="number">.2</span>, BuildID[sha1]=c2629c0f00b91e2caa60e88d0d27198bc71ff49c, <span class="keyword">for</span> GNU/Linux <span class="number">3.2</span><span class="number">.0</span>, with debug_info, not stripped</span><br><span class="line"></span><br><span class="line">┌──(root㉿Destroyer)-[/home/glibc-test]</span><br><span class="line">└─<span class="meta"># ldd main</span></span><br><span class="line">        linux-gate.so<span class="number">.1</span> (<span class="number">0xf7ef7000</span>)</span><br><span class="line">        libc.so<span class="number">.6</span> =&gt; /home/glibc32/lib/libc.so<span class="number">.6</span> (<span class="number">0xf7cd0000</span>)</span><br><span class="line">        /home/glibc32/lib/ld-linux.so<span class="number">.2</span> =&gt; /lib/ld-linux.so<span class="number">.2</span> (<span class="number">0xf7ef9000</span>)</span><br></pre></td></tr></table></figure>
+
 <p>libc和动态链接器都改好了</p>
 <p>此时使用gdb调试程序也是可以看到动态链接器的源码的</p>
-<figure>
-<img
-src="https://raw.githubusercontent.com/DeutschBall/VideoBed/main/image-20240813215802807.png"
-alt="image-20240813215802807" />
-<figcaption aria-hidden="true">image-20240813215802807</figcaption>
-</figure>
+<p><img src="https://raw.githubusercontent.com/DeutschBall/VideoBed/main/image-20240813215802807.png" alt="image-20240813215802807"></p>
 <p>也可以看到ld中的符号<code>link_map</code></p>
 <figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><span class="line">pwndbg&gt; info types link_map</span><br><span class="line">All types matching regular expression <span class="string">&quot;link_map&quot;</span>:</span><br><span class="line"></span><br><span class="line">File ../elf/link.h:</span><br><span class="line"><span class="number">101</span>:    <span class="class"><span class="keyword">struct</span> <span class="title">link_map_public</span>;</span></span><br><span class="line"></span><br><span class="line">File ../include/link.h:</span><br><span class="line"><span class="number">95</span>:     <span class="class"><span class="keyword">struct</span> <span class="title">link_map</span>;</span></span><br><span class="line"><span class="number">286</span>:    <span class="class"><span class="keyword">struct</span> <span class="title">link_map_reldeps</span>;</span></span><br><span class="line"></span><br><span class="line">File ../nptl_db/db_info.c:</span><br><span class="line"><span class="number">40</span>:     <span class="keyword">typedef</span> <span class="class"><span class="keyword">struct</span> <span class="title">link_map</span> <span class="title">link_map</span>;</span></span><br><span class="line"></span><br><span class="line">File ../sysdeps/x86/linkmap.h:</span><br><span class="line"><span class="number">10</span>:     <span class="class"><span class="keyword">struct</span> <span class="title">link_map_machine</span>;</span></span><br></pre></td></tr></table></figure>
-<h2 id="patch-elf修改程序链接glibc">patch-elf修改程序链接glibc</h2>
-<p>对于一个已经编译链接完毕,默认链接系统自带glibc的程序,如何让它使用我们编译的glibc呢</p>
+
+
+
+
+
+<h2 id="patch-elf修改程序链接glibc"><a href="#patch-elf修改程序链接glibc" class="headerlink" title="patch-elf修改程序链接glibc"></a>patch-elf修改程序链接glibc</h2><p>对于一个已经编译链接完毕,默认链接系统自带glibc的程序,如何让它使用我们编译的glibc呢</p>
 <p>可以使用patch-elf修改程序，一是修改libc所在目录的位置，二是修改使用的链接器的绝对地址</p>
 <figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">patchelf --<span class="built_in">set</span>-rpath /home/glibc/lib/ --<span class="built_in">set</span>-interpreter /home/glibc/lib/ld-linux-x86<span class="number">-64.</span>so<span class="number">.2</span> main</span><br></pre></td></tr></table></figure>
+
 <figure class="highlight sh"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br></pre></td><td class="code"><pre><span class="line">┌──(root㉿Executor)-[/home/glibc-test]</span><br><span class="line">└─# make main</span><br><span class="line">gcc main.c -o main -no-pie -g -O0</span><br><span class="line"></span><br><span class="line">┌──(root㉿Executor)-[/home/glibc-test]</span><br><span class="line">└─# make ldd</span><br><span class="line">ldd main</span><br><span class="line">        linux-vdso.so.1 (0x00007fff8e1b2000)</span><br><span class="line">        libc.so.6 =&gt; /lib/x86_64-linux-gnu/libc.so.6 (0x00007f02aebae000)</span><br><span class="line">        /lib64/ld-linux-x86-64.so.2 (0x00007f02aedb3000)</span><br><span class="line"></span><br><span class="line">┌──(root㉿Executor)-[/home/glibc-test]</span><br><span class="line">└─# make patch</span><br><span class="line">patchelf --set-rpath /home/glibc/lib/ --set-interpreter /home/glibc/lib/ld-linux-x86-64.so.2 main</span><br><span class="line"></span><br><span class="line">┌──(root㉿Executor)-[/home/glibc-test]</span><br><span class="line">└─# make ldd</span><br><span class="line">ldd main</span><br><span class="line">        linux-vdso.so.1 (0x00007fff70bfc000)</span><br><span class="line">        libc.so.6 =&gt; /home/glibc/lib/libc.so.6 (0x00007f8ab9eef000)</span><br><span class="line">        /home/glibc/lib/ld-linux-x86-64.so.2 =&gt; /lib64/ld-linux-x86-64.so.2 (0x00007f8aba126000)</span><br><span class="line">        </span><br><span class="line">┌──(root㉿Executor)-[/home/glibc-test]</span><br><span class="line">└─# ./main</span><br><span class="line">helloworld</span><br></pre></td></tr></table></figure>
+
 <p>改完了之后ldd观察结果和在编译链接时指定我们的glibc效果是一样的</p>
 <p>虽然改完了ld的地址看上去还是指向原来那个<code>/home/glibc/lib/ld-linux-x86-64.so.2 =&gt; /lib64/ld-linux-x86-64.so.2</code></p>
 <p>但是调试观察实际上已经改过了</p>
 <figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">gef➤  info sharedlibrary </span><br><span class="line">From                To                  Syms Read   Shared Object Library</span><br><span class="line">0x00007f5aff5a5000  0x00007f5aff5c8f91  Yes         /home/glibc/lib/ld-linux-x86-64.so.2</span><br><span class="line">0x00007f5aff38f3c0  0x00007f5aff4d8c9d  Yes         /home/glibc/lib/libc.so.6</span><br></pre></td></tr></table></figure>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
     </div>
 
@@ -454,7 +517,7 @@ alt="image-20240813215802807" />
 
       <!--noindex-->
       <div class="post-toc-wrap sidebar-panel">
-          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#%E6%BA%90%E7%A0%81%E8%B0%83%E8%AF%95glibc"><span class="nav-number">1.</span> <span class="nav-text">源码调试Glibc</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#%E7%B3%BB%E7%BB%9F%E8%87%AA%E5%B8%A6glibc%E7%9A%84%E7%BC%BA%E7%82%B9"><span class="nav-number">1.1.</span> <span class="nav-text">系统自带glibc的缺点</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E7%BC%96%E8%AF%9164%E4%BD%8Dglibc"><span class="nav-number">1.2.</span> <span class="nav-text">编译64位glibc</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E4%B8%8B%E8%BD%BDglibc"><span class="nav-number">1.2.1.</span> <span class="nav-text">下载glibc</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E8%A7%A3%E5%8E%8Bglibc"><span class="nav-number">1.2.2.</span> <span class="nav-text">解压glibc</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%BB%BA%E7%AB%8Bbulid%E7%9B%AE%E5%BD%95"><span class="nav-number">1.2.3.</span> <span class="nav-text">建立bulid目录</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E9%85%8D%E7%BD%AE%E7%BC%96%E8%AF%91%E9%80%89%E9%A1%B9"><span class="nav-number">1.2.4.</span> <span class="nav-text">配置编译选项</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E7%BC%96%E8%AF%91%E5%AE%89%E8%A3%85"><span class="nav-number">1.2.5.</span> <span class="nav-text">编译&amp;安装</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E4%BA%A4%E5%8F%89%E7%BC%96%E8%AF%9132%E4%BD%8Dglibc%E5%8F%AF%E9%80%89"><span class="nav-number">1.3.</span> <span class="nav-text">交叉编译32位glibc(可选)</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%BB%BA%E7%AB%8Bbuild32%E7%9B%AE%E5%BD%95"><span class="nav-number">1.3.1.</span> <span class="nav-text">建立build32目录</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E9%85%8D%E7%BD%AE32%E4%BD%8D%E7%BC%96%E8%AF%91%E9%80%89%E9%A1%B9"><span class="nav-number">1.3.2.</span> <span class="nav-text">配置32位编译选项</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E7%BC%96%E8%AF%91%E5%AE%89%E8%A3%85-1"><span class="nav-number">1.3.3.</span> <span class="nav-text">编译&amp;安装</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E7%BC%96%E8%AF%91%E9%93%BE%E6%8E%A5glibc"><span class="nav-number">1.4.</span> <span class="nav-text">编译链接glibc</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#patch-elf%E4%BF%AE%E6%94%B9%E7%A8%8B%E5%BA%8F%E9%93%BE%E6%8E%A5glibc"><span class="nav-number">1.5.</span> <span class="nav-text">patch-elf修改程序链接glibc</span></a></li></ol></li></ol></div>
+          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#%E6%BA%90%E7%A0%81%E8%B0%83%E8%AF%95Glibc"><span class="nav-number">1.</span> <span class="nav-text">源码调试Glibc</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#%E7%B3%BB%E7%BB%9F%E8%87%AA%E5%B8%A6glibc%E7%9A%84%E7%BC%BA%E7%82%B9"><span class="nav-number">1.1.</span> <span class="nav-text">系统自带glibc的缺点</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E7%BC%96%E8%AF%9164%E4%BD%8Dglibc"><span class="nav-number">1.2.</span> <span class="nav-text">编译64位glibc</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E4%B8%8B%E8%BD%BDglibc"><span class="nav-number">1.2.1.</span> <span class="nav-text">下载glibc</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E8%A7%A3%E5%8E%8Bglibc"><span class="nav-number">1.2.2.</span> <span class="nav-text">解压glibc</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%BB%BA%E7%AB%8Bbulid%E7%9B%AE%E5%BD%95"><span class="nav-number">1.2.3.</span> <span class="nav-text">建立bulid目录</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E9%85%8D%E7%BD%AE%E7%BC%96%E8%AF%91%E9%80%89%E9%A1%B9"><span class="nav-number">1.2.4.</span> <span class="nav-text">配置编译选项</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E7%BC%96%E8%AF%91-%E5%AE%89%E8%A3%85"><span class="nav-number">1.2.5.</span> <span class="nav-text">编译&amp;安装</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E4%BA%A4%E5%8F%89%E7%BC%96%E8%AF%9132%E4%BD%8Dglibc-%E5%8F%AF%E9%80%89"><span class="nav-number">1.3.</span> <span class="nav-text">交叉编译32位glibc(可选)</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%BB%BA%E7%AB%8Bbuild32%E7%9B%AE%E5%BD%95"><span class="nav-number">1.3.1.</span> <span class="nav-text">建立build32目录</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E9%85%8D%E7%BD%AE32%E4%BD%8D%E7%BC%96%E8%AF%91%E9%80%89%E9%A1%B9"><span class="nav-number">1.3.2.</span> <span class="nav-text">配置32位编译选项</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E7%BC%96%E8%AF%91-%E5%AE%89%E8%A3%85-1"><span class="nav-number">1.3.3.</span> <span class="nav-text">编译&amp;安装</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E7%BC%96%E8%AF%91%E9%93%BE%E6%8E%A5glibc"><span class="nav-number">1.4.</span> <span class="nav-text">编译链接glibc</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#patch-elf%E4%BF%AE%E6%94%B9%E7%A8%8B%E5%BA%8F%E9%93%BE%E6%8E%A5glibc"><span class="nav-number">1.5.</span> <span class="nav-text">patch-elf修改程序链接glibc</span></a></li></ol></li></ol></div>
       </div>
       <!--/noindex-->
 
