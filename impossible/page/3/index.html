@@ -167,6 +167,515 @@
   
   
   <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="en">
+    <link itemprop="mainEntityOfPage" href="http://deutschball.github.io/2024/10/17/ret2dl-resolve/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="https://raw.githubusercontent.com/DeutschBall/picbed/main/dustball.png">
+      <meta itemprop="name" content="dustball">
+      <meta itemprop="description" content="dustland">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="dustland">
+    </span>
+      <header class="post-header">
+        <h2 class="post-title" itemprop="name headline">
+          
+            <a href="/2024/10/17/ret2dl-resolve/" class="post-title-link" itemprop="url">ret2dl-resolve</a>
+        </h2>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-calendar"></i>
+              </span>
+              <span class="post-meta-item-text">Posted on</span>
+
+              <time title="Created: 2024-10-17 23:19:00" itemprop="dateCreated datePublished" datetime="2024-10-17T23:19:00+08:00">2024-10-17</time>
+            </span>
+              <span class="post-meta-item">
+                <span class="post-meta-item-icon">
+                  <i class="far fa-calendar-check"></i>
+                </span>
+                <span class="post-meta-item-text">Edited on</span>
+                <time title="Modified: 2024-11-23 21:32:09" itemprop="dateModified" datetime="2024-11-23T21:32:09+08:00">2024-11-23</time>
+              </span>
+
+          
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+          <h1 id="ret2dl-resolve"><a href="#ret2dl-resolve" class="headerlink" title="ret2dl-resolve"></a>ret2dl-resolve</h1><p>在学习这部分之前，最好有带调试符号的libc和ld,</p>
+<p>也就是说自己编译一个待调试符号的glibc</p>
+<p>然后编译链接程序时指定使用我们的glibc,不用系统自带那个</p>
+<p>或者用patchelf把程序链接的glibc调包</p>
+<p>然而调试版和发行版调用的函数好像不太一样</p>
+<h2 id="延迟绑定"><a href="#延迟绑定" class="headerlink" title="延迟绑定"></a>延迟绑定</h2><p>假设有程序</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">//test.c</span></span><br><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;stdio.h&gt;</span></span></span><br><span class="line"><span class="type">int</span> <span class="title function_">main</span><span class="params">()</span>&#123;</span><br><span class="line">    write(<span class="number">1</span>, <span class="string">&quot;Hello, world!\n&quot;</span>, <span class="number">14</span>);</span><br><span class="line">    <span class="keyword">return</span> <span class="number">0</span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">gcc test.c -O0 -g -no-pie -m32 -o test</span><br></pre></td></tr></table></figure>
+
+<p>write函数位于libc.so中，main程序是如何与write符号链接的呢？</p>
+<p>这个过程叫做延迟绑定，又叫做懒加载，意思是我们的程序第一次调用动态库中的符号时，动态连接器ld才会解析write函数</p>
+<p>这个解析过程如下</p>
+<p><img src="https://raw.githubusercontent.com/DeutschBall/VideoBed/main/%E5%BB%B6%E8%BF%9F%E7%BB%91%E5%AE%9A1.png" alt="第一次解析"></p>
+<p>经过第一次解析,write@got被填充了正确的write地址,此后的write调用将如图所示</p>
+<p><img src="https://raw.githubusercontent.com/DeutschBall/VideoBed/main/%E5%BB%B6%E8%BF%9F%E7%BB%91%E5%AE%9A2.png" alt="此后的调用"></p>
+<p>这里面提到了两个表，PLT表，GOT表</p>
+<p>如果gdb加了pwndbg插件，可以使用plt和got命令观察两者</p>
+<figure class="highlight sh"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br></pre></td><td class="code"><pre><span class="line">pwndbg&gt; elfheader</span><br><span class="line">0x8048194 - 0x80481b4  .interp</span><br><span class="line">0x80481b4 - 0x80481d8  .note.gnu.build-id</span><br><span class="line">0x80481d8 - 0x80481f8  .note.ABI-tag</span><br><span class="line">0x80481f8 - 0x8048218  .gnu.hash</span><br><span class="line">0x8048218 - 0x8048268  .dynsym</span><br><span class="line">0x8048268 - 0x80482d1  .dynstr</span><br><span class="line">0x80482d2 - 0x80482dc  .gnu.version</span><br><span class="line">0x80482dc - 0x804830c  .gnu.version_r</span><br><span class="line">0x804830c - 0x8048314  .rel.dyn</span><br><span class="line">0x8048314 - 0x8048324  .rel.plt</span><br><span class="line">0x8049000 - 0x8049020  .init</span><br><span class="line">0x8049020 - 0x8049050  .plt</span><br><span class="line">0x8049050 - 0x80491a6  .text</span><br><span class="line">0x80491a8 - 0x80491bc  .fini</span><br><span class="line">0x804a000 - 0x804a013  .rodata</span><br><span class="line">0x804a014 - 0x804a048  .eh_frame_hdr</span><br><span class="line">0x804a048 - 0x804a110  .eh_frame</span><br><span class="line">0x804bef8 - 0x804befc  .init_array</span><br><span class="line">0x804befc - 0x804bf00  .fini_array</span><br><span class="line">0x804bf00 - 0x804bff0  .dynamic</span><br><span class="line">0x804bff0 - 0x804bff4  .got</span><br><span class="line">0x804bff4 - 0x804c008  .got.plt</span><br><span class="line">0x804c008 - 0x804c010  .data</span><br><span class="line">0x804c010 - 0x804c014  .bss</span><br><span class="line"></span><br><span class="line">pwndbg&gt; plt</span><br><span class="line">0x8049030: __libc_start_main@plt</span><br><span class="line">0x8049040: <span class="built_in">printf</span>@plt</span><br><span class="line">pwndbg&gt; got</span><br><span class="line"></span><br><span class="line">GOT protection: Partial RELRO | GOT <span class="built_in">functions</span>: 2</span><br><span class="line"></span><br><span class="line">[0x804c000] __libc_start_main@GLIBC_2.34 -&gt; 0xf7cf8cf0 (__libc_start_main_impl) ◂— push   ebp</span><br><span class="line">[0x804c004] <span class="built_in">printf</span>@GLIBC_2.0 -&gt; 0x8049046 (<span class="built_in">printf</span>@plt+6) ◂— push   8</span><br></pre></td></tr></table></figure>
+
+
+
+<h3 id="PLT的作用"><a href="#PLT的作用" class="headerlink" title="PLT的作用"></a>PLT的作用</h3><p>对每一个glibc中的函数func,都会有一个plt表项</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">jmp * func@got</span><br><span class="line">push index</span><br><span class="line">jmp * _dl_runtime_resolve@got</span><br></pre></td></tr></table></figure>
+
+<p>如果got中填写了正确的函数地址,则会直接调用该函数</p>
+<p>如果got中填写了push index的地址,则调用_dl_runtime_resolve解析符号</p>
+<p>解析符号的依据就是这个index,导入函数下标</p>
+<p>.plt(procedure Linkage Table，过程链接表)</p>
+<p>.plt.got专门用于存放<code>__cxa_finalize</code>函数的plt条目</p>
+<h3 id="GOT的作用"><a href="#GOT的作用" class="headerlink" title="GOT的作用"></a>GOT的作用</h3><p>存放函数地址</p>
+<p>如果尚未解析则存放对应函数plt中的下一条指令地址</p>
+<p>GOT表分成两部分</p>
+<p>.got和.got.plt</p>
+<p>.got(Global Offset Table),全局变量地址表</p>
+<p>.got.plt是全局函数地址表</p>
+<p>前面我们所说的write@got实际上是<a href="mailto:&#119;&#x72;&#x69;&#116;&#101;&#x40;&#x67;&#x6f;&#x74;&#46;&#x70;&#108;&#x74;">&#119;&#x72;&#x69;&#116;&#101;&#x40;&#x67;&#x6f;&#x74;&#46;&#x70;&#108;&#x74;</a></p>
+<p>.got表纯纯存放全局变量地址,有一个算一个,没有特别之处</p>
+<p>.got.plt的前三个表项存放了特殊地址,其后的表项就是全局函数地址了</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line">.got.plt:0804A000 14 9F 04 08                   _GLOBAL_OFFSET_TABLE_ dd offset _DYNAMIC</span><br><span class="line">.got.plt:0804A000                                                                       ; DATA XREF: _init_proc+9↑o</span><br><span class="line">.got.plt:0804A000                                                                       ; _start+10↑o ...</span><br><span class="line">.got.plt:0804A004 00 00 00 00                   dword_804A004   dd 0                    ; DATA XREF: sub_80482D0↑r</span><br><span class="line">.got.plt:0804A008 00 00 00 00                   dword_804A008   dd 0                    ; DATA XREF: sub_80482D0+6↑r</span><br><span class="line">.got.plt:0804A00C 24 A0 04 08                   off_804A00C     dd offset __libc_start_main</span><br><span class="line">.got.plt:0804A00C                                                                       ; DATA XREF: ___libc_start_main↑r</span><br><span class="line">.got.plt:0804A010 28 A0 04 08                   off_804A010     dd offset write         ; DATA XREF: _write↑r</span><br><span class="line">.got.plt:0804A010                               _got_plt        ends</span><br></pre></td></tr></table></figure>
+
+<h4 id="GOT-PLT-0-dynamic"><a href="#GOT-PLT-0-dynamic" class="headerlink" title=".GOT.PLT[0]&#x3D;.dynamic"></a>.GOT.PLT[0]&#x3D;.dynamic</h4><p>.GOT.PLT[0]存放.dynamic节的地址,在节头表中可以查看</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line">root@Destroyer:/usr/src/CTF-All-In-One/src/writeup/6.1.3_pwn_xdctf2015_pwn200# readelf -S test</span><br><span class="line">There are 35 section headers, starting at offset 0x1fbc:</span><br><span class="line"></span><br><span class="line">Section Headers:</span><br><span class="line">  [Nr] Name              Type            Addr     Off    Size   ES Flg Lk Inf Al</span><br><span class="line">	...</span><br><span class="line">  [21] .dynamic          DYNAMIC         08049f14 000f14 0000e8 08  WA  6   0  4</span><br><span class="line">	...</span><br><span class="line">Key to Flags:</span><br><span class="line">  W (write), A (alloc), X (execute), M (merge), S (strings), I (info),</span><br><span class="line">  L (link order), O (extra OS processing required), G (group), T (TLS),</span><br><span class="line">  C (compressed), x (unknown), o (OS specific), E (exclude),</span><br><span class="line">  p (processor specific)</span><br></pre></td></tr></table></figure>
+
+<p>.dynamic节在0x08049f14,因此GOT[0]&#x3D;0x08049f14</p>
+<p>这个节的作用是什么呢?</p>
+<p>可以用readelf -d查看节内容</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br></pre></td><td class="code"><pre><span class="line">root@Destroyer:/usr/src/CTF-All-In-One/src/writeup/<span class="number">6.1</span><span class="number">.3</span>_pwn_xdctf2015_pwn200<span class="meta"># readelf -d test</span></span><br><span class="line"></span><br><span class="line">Dynamic section at offset <span class="number">0xf14</span> contains <span class="number">24</span> entries:</span><br><span class="line">  Tag        Type                         Name/Value</span><br><span class="line"> <span class="number">0x00000001</span> (NEEDED)                     Shared library: [libc.so<span class="number">.6</span>]</span><br><span class="line"> <span class="number">0x0000000c</span> (INIT)                       <span class="number">0x80482ac</span></span><br><span class="line"> <span class="number">0x0000000d</span> (FINI)                       <span class="number">0x80484d4</span></span><br><span class="line"> <span class="number">0x00000019</span> (INIT_ARRAY)                 <span class="number">0x8049f0c</span></span><br><span class="line"> <span class="number">0x0000001b</span> (INIT_ARRAYSZ)               <span class="number">4</span> (bytes)</span><br><span class="line"> <span class="number">0x0000001a</span> (FINI_ARRAY)                 <span class="number">0x8049f10</span></span><br><span class="line"> <span class="number">0x0000001c</span> (FINI_ARRAYSZ)               <span class="number">4</span> (bytes)</span><br><span class="line"> <span class="number">0x6ffffef5</span> (GNU_HASH)                   <span class="number">0x80481ac</span></span><br><span class="line"> <span class="number">0x00000005</span> (STRTAB)                     <span class="number">0x804821c</span></span><br><span class="line"> <span class="number">0x00000006</span> (SYMTAB)                     <span class="number">0x80481cc</span></span><br><span class="line"> <span class="number">0x0000000a</span> (STRSZ)                      <span class="number">75</span> (bytes)</span><br><span class="line"> <span class="number">0x0000000b</span> (SYMENT)                     <span class="number">16</span> (bytes)</span><br><span class="line"> <span class="number">0x00000015</span> (DEBUG)                      <span class="number">0x0</span></span><br><span class="line"> <span class="number">0x00000003</span> (PLTGOT)                     <span class="number">0x804a000</span></span><br><span class="line"> <span class="number">0x00000002</span> (PLTRELSZ)                   <span class="number">16</span> (bytes)</span><br><span class="line"> <span class="number">0x00000014</span> (PLTREL)                     REL</span><br><span class="line"> <span class="number">0x00000017</span> (JMPREL)                     <span class="number">0x804829c</span></span><br><span class="line"> <span class="number">0x00000011</span> (REL)                        <span class="number">0x8048294</span></span><br><span class="line"> <span class="number">0x00000012</span> (RELSZ)                      <span class="number">8</span> (bytes)</span><br><span class="line"> <span class="number">0x00000013</span> (RELENT)                     <span class="number">8</span> (bytes)</span><br><span class="line"> <span class="number">0x6ffffffe</span> (VERNEED)                    <span class="number">0x8048274</span></span><br><span class="line"> <span class="number">0x6fffffff</span> (VERNEEDNUM)                 <span class="number">1</span></span><br><span class="line"> <span class="number">0x6ffffff0</span> (VERSYM)                     <span class="number">0x8048268</span></span><br><span class="line"> <span class="number">0x00000000</span> (<span class="literal">NULL</span>)                       <span class="number">0x0</span></span><br></pre></td></tr></table></figure>
+
+<p>每一项都是一个<code>Elf32_Dyn</code></p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">typedef</span> <span class="class"><span class="keyword">struct</span> &#123;</span></span><br><span class="line">    Elf32_Sword d_tag;</span><br><span class="line">    <span class="class"><span class="keyword">union</span> &#123;</span></span><br><span class="line">        Elf32_Word d_val;</span><br><span class="line">        Elf32_Addr d_ptr;</span><br><span class="line">    &#125; d_un;</span><br><span class="line">&#125; Elf32_Dyn;</span><br></pre></td></tr></table></figure>
+
+<p>这是一个键值对,键是d_tag,值要么是d_val要么是d_ptr</p>
+<p>d_tag是一些枚举值</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#<span class="keyword">define</span> DT_NULL    0   <span class="comment">/* Marks end of dynamic section */</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">define</span> DT_NEEDED  1   <span class="comment">/* Name of needed library */</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">define</span> DT_PLTRELSZ 2  <span class="comment">/* Size in bytes of PLT relocs */</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">define</span> DT_PLTGOT  3   <span class="comment">/* Processor defined value */</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">define</span> DT_HASH    4   <span class="comment">/* Address of symbol hash table */</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">define</span> DT_STRTAB  5   <span class="comment">/* Address of string table */</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">define</span> DT_SYMTAB  6   <span class="comment">/* Address of symbol table */</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">define</span> DT_RELA    7   <span class="comment">/* Address of Rela relocs */</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">define</span> DT_RELASZ  8   <span class="comment">/* Total size of Rela relocs */</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">define</span> DT_STRSZ   10  <span class="comment">/* Size in bytes of string table */</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">define</span> DT_SYMENT  11  <span class="comment">/* Size of one symbol table entry */</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">define</span> DT_INIT    12  <span class="comment">/* Address of init function */</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">define</span> DT_FINI    13  <span class="comment">/* Address of termination function */</span></span></span><br></pre></td></tr></table></figure>
+
+
+
+<p>这个节指示了很多信息,比如init函数和init_array的地址</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="number">0x0000000c</span> (INIT)                       <span class="number">0x80482ac</span></span><br><span class="line"><span class="number">0x00000019</span> (INIT_ARRAY)                 <span class="number">0x8049f0c</span></span><br></pre></td></tr></table></figure>
+
+<p>比如符号表和字符串表地址</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">0x00000005 (STRTAB)                     0x804821c</span><br><span class="line">0x00000006 (SYMTAB)                     0x80481cc</span><br></pre></td></tr></table></figure>
+
+<p>比如重定位信息</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="number">0x00000011</span> (REL)                        <span class="number">0x8048294</span></span><br></pre></td></tr></table></figure>
+
+
+
+<p>这个表有何作用呢?</p>
+<p>一是指导动态链接器进行</p>
+<p>​	加载so</p>
+<p>​	解析符号</p>
+<p>​	重定位</p>
+<p>​	调用初始化函数</p>
+<p>二是运行时</p>
+<p>​	延迟绑定</p>
+<p>​	处理dlopen显示加载的函数</p>
+<blockquote>
+<p>关于重定位</p>
+<figure class="highlight sh"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line">root@Destroyer:/usr/src/CTF-All-In-One/src/writeup/6.1.3_pwn_xdctf2015_pwn200# readelf -r <span class="built_in">test</span></span><br><span class="line"></span><br><span class="line">Relocation section <span class="string">&#x27;.rel.dyn&#x27;</span> at offset 0x294 contains 1 entry:</span><br><span class="line"> Offset     Info    Type            Sym.Value  Sym. Name</span><br><span class="line">08049ffc  00000106 R_386_GLOB_DAT    00000000   __gmon_start__</span><br><span class="line"></span><br><span class="line">Relocation section <span class="string">&#x27;.rel.plt&#x27;</span> at offset 0x29c contains 2 entries:</span><br><span class="line"> Offset     Info    Type            Sym.Value  Sym. Name</span><br><span class="line">0804a00c  00000207 R_386_JUMP_SLOT   00000000   __libc_start_main@GLIBC_2.0</span><br><span class="line">0804a010  00000307 R_386_JUMP_SLOT   00000000   write@GLIBC_2.0</span><br></pre></td></tr></table></figure>
+
+<p>每一个重定位表项都对应一个<code>Elf32_Rel</code></p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">typedef</span> <span class="class"><span class="keyword">struct</span></span></span><br><span class="line"><span class="class">&#123;</span></span><br><span class="line">  Elf32_Addr    r_offset;       <span class="comment">/* Address */</span></span><br><span class="line">  Elf32_Word    r_info;         <span class="comment">/* Relocation type and symbol index */</span></span><br><span class="line">&#125; Elf32_Rel;</span><br></pre></td></tr></table></figure>
+
+<p>r_offset是符号got表项的虚拟地址</p>
+<p>r_info是符号的重定位类型和符号下标</p>
+<p>​	重定位类型最常见全局变量的R_386_GLOB_DAT和全局函数的R_386_JUMP_SLOT</p>
+<p>​	符号下标索引.dynsym节</p>
+<p>比如<code>write</code>的索引是3,</p>
+<p><code>libc_start_main</code>的索引是2</p>
+<p><code>__gmon_start__</code>的索引是1</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br></pre></td><td class="code"><pre><span class="line">root@Destroyer:/usr/src/CTF-All-In-One/src/writeup/<span class="number">6.1</span><span class="number">.3</span>_pwn_xdctf2015_pwn200<span class="meta"># readelf -s test</span></span><br><span class="line"></span><br><span class="line">Symbol table <span class="string">&#x27;.dynsym&#x27;</span> contains <span class="number">5</span> entries:</span><br><span class="line">   Num:    Value  Size Type    Bind   Vis      Ndx Name</span><br><span class="line">     <span class="number">0</span>: <span class="number">00000000</span>     <span class="number">0</span> NOTYPE  LOCAL  DEFAULT  UND</span><br><span class="line">     <span class="number">1</span>: <span class="number">00000000</span>     <span class="number">0</span> NOTYPE  WEAK   DEFAULT  UND __gmon_start__</span><br><span class="line">     <span class="number">2</span>: <span class="number">00000000</span>     <span class="number">0</span> FUNC    GLOBAL DEFAULT  UND __libc_start_main@GLIBC_2<span class="number">.0</span> (<span class="number">2</span>)</span><br><span class="line">     <span class="number">3</span>: <span class="number">00000000</span>     <span class="number">0</span> FUNC    GLOBAL DEFAULT  UND write@GLIBC_2<span class="number">.0</span> (<span class="number">2</span>)</span><br><span class="line">     <span class="number">4</span>: <span class="number">080484</span>ec     <span class="number">4</span> OBJECT  GLOBAL DEFAULT   <span class="number">16</span> _IO_stdin_used</span><br><span class="line"></span><br><span class="line">Symbol table <span class="string">&#x27;.symtab&#x27;</span> contains <span class="number">70</span> entries:</span><br><span class="line">   Num:    Value  Size Type    Bind   Vis      Ndx Name</span><br><span class="line">     <span class="number">0</span>: <span class="number">00000000</span>     <span class="number">0</span> NOTYPE  LOCAL  DEFAULT  UND</span><br><span class="line">		...</span><br><span class="line">    <span class="number">32</span>: <span class="number">00000000</span>     <span class="number">0</span> FILE    LOCAL  DEFAULT  ABS crtstuff.c</span><br><span class="line">    <span class="number">33</span>: <span class="number">08048370</span>     <span class="number">0</span> FUNC    LOCAL  DEFAULT   <span class="number">14</span> deregister_tm_clones</span><br><span class="line">    <span class="number">34</span>: <span class="number">080483b</span>0     <span class="number">0</span> FUNC    LOCAL  DEFAULT   <span class="number">14</span> register_tm_clones</span><br><span class="line">    <span class="number">35</span>: <span class="number">080483f</span>0     <span class="number">0</span> FUNC    LOCAL  DEFAULT   <span class="number">14</span> __do_global_dtors_aux</span><br><span class="line">    <span class="number">36</span>: <span class="number">0804</span>a01c     <span class="number">1</span> OBJECT  LOCAL  DEFAULT   <span class="number">25</span> completed<span class="number">.7283</span></span><br><span class="line">    <span class="number">37</span>: <span class="number">08049f</span>10     <span class="number">0</span> OBJECT  LOCAL  DEFAULT   <span class="number">20</span> __do_global_dtors_aux_fin</span><br><span class="line">    <span class="number">38</span>: <span class="number">08048420</span>     <span class="number">0</span> FUNC    LOCAL  DEFAULT   <span class="number">14</span> frame_dummy</span><br><span class="line">    <span class="number">39</span>: <span class="number">08049f</span>0c     <span class="number">0</span> OBJECT  LOCAL  DEFAULT   <span class="number">19</span> __frame_dummy_init_array_</span><br><span class="line">    <span class="number">40</span>: <span class="number">00000000</span>     <span class="number">0</span> FILE    LOCAL  DEFAULT  ABS test.c</span><br><span class="line">	...</span><br><span class="line">    <span class="number">66</span>: <span class="number">08048426</span>    <span class="number">64</span> FUNC    GLOBAL DEFAULT   <span class="number">14</span> main</span><br><span class="line">    <span class="number">67</span>: <span class="number">08048466</span>     <span class="number">0</span> FUNC    GLOBAL HIDDEN    <span class="number">14</span> __x86.get_pc_thunk.ax</span><br><span class="line">    <span class="number">68</span>: <span class="number">0804</span>a01c     <span class="number">0</span> OBJECT  GLOBAL HIDDEN    <span class="number">24</span> __TMC_END__</span><br><span class="line">    <span class="number">69</span>: <span class="number">080482</span>ac     <span class="number">0</span> FUNC    GLOBAL DEFAULT   <span class="number">11</span> _init</span><br></pre></td></tr></table></figure>
+
+<p>readelf -s会读取两个表,一个是本地符号表symtab,一个是链接符号表.dynsym</p>
+<p>这个symtab可以strip掉,不影响程序执行</p>
+<p>而实际上这两个符号表的表项中并没有Name数组,st_name是一个索引,索引字符串表.strtab</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line">typedef struct</span><br><span class="line">&#123;</span><br><span class="line">  Elf32_Word    st_name;        /* Symbol name (string tbl index) */</span><br><span class="line">  Elf32_Addr    st_value;       /* Symbol value */</span><br><span class="line">  Elf32_Word    st_size;        /* Symbol size */</span><br><span class="line">  unsigned char st_info;        /* Symbol type and binding */</span><br><span class="line">  unsigned char st_other;       /* Symbol visibility */</span><br><span class="line">  Elf32_Section st_shndx;       /* Section index */</span><br><span class="line">&#125; Elf32_Sym;</span><br></pre></td></tr></table></figure>
+
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">1C7Ch: 00 63 72 74 73 74 75 66 66 2E 63 00 64 65 72 65  .crtstuff.c.dere </span><br><span class="line">1C8Ch: 67 69 73 74 65 72 5F 74 6D 5F 63 6C 6F 6E 65 73  gister_tm_clones </span><br><span class="line">1C9Ch: 00 5F 5F 64 6F 5F 67 6C 6F 62 61 6C 5F 64 74 6F  .__do_global_dto </span><br><span class="line">...</span><br></pre></td></tr></table></figure>
+
+<p>比如crtstuff.c的符号表项Elf32_Sym中,st_name&#x3D;1,对应0x1c7c+1</p>
+<p>比如deregister_tm_clones的符号表项Elf32_Sym中,st_name&#x3D;c,对应0x1c7c+c</p>
+<p>这里0x1c7c是.strtab节在文件中的偏移量,可以使用readelf -S查看对应节区</p>
+</blockquote>
+<h4 id="GOT-PLT-1-link-map-ld"><a href="#GOT-PLT-1-link-map-ld" class="headerlink" title=".GOT.PLT[1]&#x3D;link_map @ ld"></a>.GOT.PLT[1]&#x3D;link_map @ ld</h4><p>.GOT.PLT[1]和.GOT.PLT[2]在编译链接时无法决定是啥，只有在运行时才会知道是什么</p>
+<p>.GOT.PLT[1]用于存放<strong>主模块的</strong>link_map数据结构的地址</p>
+<p>每个模块(主模块以及所有加载的动态库)都各自有一个link_map</p>
+<p>这个link_map保存了对应模块的诸多信息,比如各个节区的地址,elf头的地址,模块名等</p>
+<h4 id="GOT-PLT-2-dl-runtime-resolve-ld"><a href="#GOT-PLT-2-dl-runtime-resolve-ld" class="headerlink" title=".GOT.PLT[2]&#x3D;dl_runtime_resolve @ ld"></a>.GOT.PLT[2]&#x3D;dl_runtime_resolve @ ld</h4><p>存放dl_runtime_resolve的地址</p>
+<h4 id="GOT-PLT-3"><a href="#GOT-PLT-3" class="headerlink" title=".GOT.PLT[3+]"></a>.GOT.PLT[3+]</h4><p>第四项及之后,该表用于保存函数的虚拟地址</p>
+<h3 id="疑问"><a href="#疑问" class="headerlink" title="疑问"></a>疑问</h3><p>每个函数的plt表都有三项</p>
+<p>jmp</p>
+<p>push</p>
+<p>jmp</p>
+<p>这里第一个jmp调试观察是到push这行</p>
+<p>第二个jmp是到dl_runtime_resolve函数中</p>
+<p>那么中间push了什么呢?</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line">//____libc_start_main</span><br><span class="line">.plt:080482E0 FF 25 0C A0 04 08                             jmp     ds:off_804A00C</span><br><span class="line">.plt:080482E6 68 00 00 00 00                                push    0</span><br><span class="line">.plt:080482EB E9 E0 FF FF FF                                jmp     sub_80482D0</span><br><span class="line"></span><br><span class="line">//write</span><br><span class="line">.plt:080482F0 FF 25 10 A0 04 08                             jmp     ds:off_804A010</span><br><span class="line">.plt:080482F6 68 08 00 00 00                                push    8</span><br><span class="line">.plt:080482FB E9 D0 FF FF FF                                jmp     sub_80482D0</span><br></pre></td></tr></table></figure>
+
+<p>符号又到底是如何解析并且回填到GOT表的呢?</p>
+<p>为了解决这些问题,以及学习ret2dlresolve的原理,</p>
+<p>下面我们阅读<code>_dl_fixup</code>的源码寻找答案</p>
+<h2 id="dl-fixup"><a href="#dl-fixup" class="headerlink" title="_dl_fixup"></a>_dl_fixup</h2><p>以write为例，观察该符号是如何解析的</p>
+<p>解析符号发生在<code>_dl_fixup</code>函数中</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">_dl_fixup (<span class="keyword">struct</span> link_map *l, ElfW(Word) reloc_arg)</span><br></pre></td></tr></table></figure>
+
+<p>该函数有两个参数，其中<code>link_map *l</code>参数就是<code>.got.plt[1]</code>,</p>
+<p>参数reloc_arg是目标函数在.rel.plt中的偏移量</p>
+<p>reloc_arg在write@plt中被压入栈中</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="number">0x80483a0</span> &lt;write@plt&gt;:       jmp    DWORD PTR ds:<span class="number">0x80498d4</span></span><br><span class="line"><span class="number">0x80483a6</span> &lt;write@plt+<span class="number">6</span>&gt;:     push   <span class="number">0x20</span></span><br><span class="line"><span class="number">0x80483ab</span> &lt;write@plt+<span class="number">11</span>&gt;:    jmp    <span class="number">0x8048350</span></span><br></pre></td></tr></table></figure>
+
+<p>然后跳转到<code>plt[0]=0x8048350</code>，这是<code>_dl_runtime_resolve</code>的导火索，在这里首先将<code>link_map *l</code>压入栈中,然后跳转_<code>dl_runtime_resolve</code></p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">► <span class="number">0x8048350</span>                              push   dword ptr [<span class="number">0x80498bc</span>]</span><br><span class="line">  <span class="number">0x8048356</span>                              jmp    dword ptr [<span class="number">0x80498c0</span>]       &lt;_dl_runtime_resolve&gt;</span><br></pre></td></tr></table></figure>
+
+<p>在<code>_dl_runtime_resolve</code>中,这两个参数又改用<code>eax(link_map *l)</code>和<code>edx(reloc_arg)</code>传递,稍微违背了x86调用约定,但是问题不大</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line">_dl_runtime_resolve:</span><br><span class="line">	cfi_adjust_cfa_offset (<span class="number">8</span>)</span><br><span class="line">	_CET_ENDBR</span><br><span class="line">	pushl %eax		# Preserve registers otherwise clobbered.</span><br><span class="line">	cfi_adjust_cfa_offset (<span class="number">4</span>)</span><br><span class="line">	pushl %ecx</span><br><span class="line">	<span class="title function_">cfi_adjust_cfa_offset</span> <span class="params">(<span class="number">4</span>)</span></span><br><span class="line">	pushl %edx</span><br><span class="line">	<span class="title function_">cfi_adjust_cfa_offset</span> <span class="params">(<span class="number">4</span>)</span></span><br><span class="line">	movl 16<span class="params">(%esp)</span>, %edx	# Copy args pushed by PLT in <span class="keyword">register</span>.  Note</span><br><span class="line">	movl 12<span class="params">(%esp)</span>, %eax	<span class="meta"># that `fixup<span class="string">&#x27; takes its parameters in regs.</span></span></span><br><span class="line"><span class="string"><span class="meta">	call _dl_fixup		# Call resolver.</span></span></span><br></pre></td></tr></table></figure>
+
+
+
+<p><code>_dl_runtime_resolve</code>实际上只是一个包装函数,实际工作是<code>_dl_fixup</code>完成的</p>
+<p><code>_dl_fixup</code>干了啥呢?</p>
+<p><code>_dl_fixup</code>知道两件事,</p>
+<p>一个是主程序模块的<code>link_map</code>,这玩意儿保存了很多信息,包括它属于哪个模块,该模块的elf信息等等</p>
+<p>一个进程所有模块的<code>link_map</code>以双向链表连接</p>
+<blockquote>
+<p>每个模块(主程序和每个so库)各自有一个link_map</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line">pwndbg&gt; p/s l.l_name</span><br><span class="line">$<span class="number">8</span> = <span class="number">0xf7ffdd2c</span> <span class="string">&quot;&quot;</span></span><br><span class="line">pwndbg&gt; p/s l.l_next.l_name</span><br><span class="line">$<span class="number">9</span> = <span class="number">0xf7fc828c</span> <span class="string">&quot;linux-gate.so.1&quot;</span></span><br><span class="line">pwndbg&gt; p/s l.l_next.l_next.l_name</span><br><span class="line">$<span class="number">10</span> = <span class="number">0xf7fc2390</span> <span class="string">&quot;/home/glibc32/lib/libc.so.6&quot;</span></span><br><span class="line">pwndbg&gt; p/s l.l_next.l_next.l_next.l_name</span><br><span class="line">$<span class="number">11</span> = <span class="number">0x8046174</span> <span class="string">&quot;/home/glibc32/lib/ld-linux.so.2&quot;</span></span><br><span class="line">pwndbg&gt; p/s l.l_next.l_next.l_next.l_next.l_name</span><br><span class="line">Cannot access memory at address <span class="number">0x4</span></span><br></pre></td></tr></table></figure>
+</blockquote>
+<p>另一个就是reloc_arg,也就是他要解析的函数符号,在.rel.plt节区中的偏移</p>
+<p>显然抛开基地址谈偏移量是没有意义的,因此下面要做的第一件事是找到.rel.plt的基地址</p>
+<p>怎么找呢?</p>
+<p>大体步骤如下伪代码</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br></pre></td><td class="code"><pre><span class="line">_dl_fixup(<span class="keyword">struct</span> link_map *l,ElfW(Word) reloc_arg)</span><br><span class="line">&#123;</span><br><span class="line">    <span class="comment">// 1.找到dynamic节,1-&gt;1l_info就是dynamic节,</span></span><br><span class="line">    <span class="comment">//从dynamic节中找到.rel.plt节记为reloc</span></span><br><span class="line">    <span class="comment">//从dynamic节中找到符号表symtab,</span></span><br><span class="line">    <span class="comment">//从dynamic节中找到字符串表strtab</span></span><br><span class="line">    </span><br><span class="line">    </span><br><span class="line">	<span class="comment">// 2.使用reloc_arg配合reloc表找到该表中的具体项目Elf32_Rel</span></span><br><span class="line">    <span class="comment">//        typedef struct&#123;</span></span><br><span class="line">    <span class="comment">//            Elf32_Addr  r_offset;       //符号要填充的got表项的虚拟地址</span></span><br><span class="line">    <span class="comment">//            Elf32_Word  r_info;         //符号在符号表中的下标</span></span><br><span class="line">    <span class="comment">//        &#125; Elf32_Rel;</span></span><br><span class="line">	<span class="type">const</span> PLTREL *<span class="type">const</span> reloc = (<span class="type">const</span> <span class="type">void</span> *)(D_PTR(l, l_info[DT_JMPREL]) + reloc_offset);</span><br><span class="line">    </span><br><span class="line">    </span><br><span class="line">	<span class="comment">// 3.找到符号表对应表项</span></span><br><span class="line">    <span class="comment">//        typedef struct &#123;</span></span><br><span class="line">    <span class="comment">//            Elf32_Word	st_name;	//符号名字符串在字符串表中的偏移</span></span><br><span class="line">    <span class="comment">//            Elf32_Addr	st_value;	//符号在其所在模块中的偏移量</span></span><br><span class="line">    <span class="comment">//            Elf32_Word	st_size;</span></span><br><span class="line">    <span class="comment">//            unsigned char	st_info;</span></span><br><span class="line">    <span class="comment">//            unsigned char	st_other;</span></span><br><span class="line">    <span class="comment">//            Elf32_Half	st_shndx;</span></span><br><span class="line">    <span class="comment">//        &#125; Elf32_Sym;</span></span><br><span class="line">	<span class="type">const</span> <span class="title function_">ElfW</span><span class="params">(Sym)</span> *sym = &amp;symtab[ELFW(R_SYM) (reloc-&gt;r_info)];</span><br><span class="line">    </span><br><span class="line">	<span class="comment">// 4.解析符号</span></span><br><span class="line">    <span class="comment">//从strtab偏移Elf32_Sym.st_name处找到符号名,</span></span><br><span class="line">    <span class="comment">//从链表相接的各个模块的link_map入手,遍历各个模块,寻找该符号名,如果找到,result返回对应模块的link_map</span></span><br><span class="line">    <span class="comment">//同时sym废物利用,从对应模块的符号表中抄了同名的符号过来,但是这个符号是有虚拟地址的</span></span><br><span class="line">	result = _dl_lookup_symbol_x (strtab + sym -&gt;st_name, l, &amp;sym, l-&gt;l_scope, version, ELF_RTYPE_CLASS_PLT, flags, <span class="literal">NULL</span>);</span><br><span class="line">	<span class="comment">// result中保存着目标模块的基地址,加上目标符号的偏移量,得到该符号纯纯的虚拟地址,放到value里</span></span><br><span class="line">    <span class="comment">// 这里DL_FIXUP_MAKE_VALUE(map,addr) = addr,纯纯弱智</span></span><br><span class="line">	value = DL_FIXUP_MAKE_VALUE (result, sym ? (LOOKUP_VALUE_ADDRESS(result) + sym-&gt;st_value) : <span class="number">0</span>);</span><br><span class="line">	</span><br><span class="line">    </span><br><span class="line">    <span class="comment">// 5.回写GOT表</span></span><br><span class="line">    <span class="comment">//最后把value写入相应的GOT表条目中,rel_addr就是GOT地址</span></span><br><span class="line">	<span class="keyword">return</span> elf_machine_fixup_plt (l, result, reloc, rel_addr, value);	</span><br><span class="line">&#125;</span><br><span class="line"></span><br></pre></td></tr></table></figure>
+
+<p>在图上意思意思</p>
+<p><img src="https://raw.githubusercontent.com/DeutschBall/VideoBed/main/image-20240819193758449.png" alt="image-20240819193758449"></p>
+<p>下面详细说明每一步</p>
+<h3 id="1-由主模块link-map找dynamic节"><a href="#1-由主模块link-map找dynamic节" class="headerlink" title="1.由主模块link_map找dynamic节"></a>1.由主模块link_map找dynamic节</h3><p>这个<code>link_map</code>中有一个成员叫<code>l_info</code></p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br></pre></td><td class="code"><pre><span class="line"></span><br><span class="line"><span class="class"><span class="keyword">struct</span> <span class="title">link_map</span></span></span><br><span class="line"><span class="class">  &#123;</span></span><br><span class="line">	...</span><br><span class="line">    <span class="comment">/* Indexed pointers to dynamic section.		dynamic节的索引指针</span></span><br><span class="line"><span class="comment">       [0,DT_NUM) are indexed by the processor-independent tags.</span></span><br><span class="line"><span class="comment">       [DT_NUM,DT_NUM+DT_THISPROCNUM) are indexed by the tag minus DT_LOPROC.</span></span><br><span class="line"><span class="comment">       [DT_NUM+DT_THISPROCNUM,DT_NUM+DT_THISPROCNUM+DT_VERSIONTAGNUM) are</span></span><br><span class="line"><span class="comment">       indexed by DT_VERSIONTAGIDX(tagvalue).</span></span><br><span class="line"><span class="comment">       [DT_NUM+DT_THISPROCNUM+DT_VERSIONTAGNUM,</span></span><br><span class="line"><span class="comment">	DT_NUM+DT_THISPROCNUM+DT_VERSIONTAGNUM+DT_EXTRANUM) are indexed by</span></span><br><span class="line"><span class="comment">       DT_EXTRATAGIDX(tagvalue).</span></span><br><span class="line"><span class="comment">       [DT_NUM+DT_THISPROCNUM+DT_VERSIONTAGNUM+DT_EXTRANUM,</span></span><br><span class="line"><span class="comment">	DT_NUM+DT_THISPROCNUM+DT_VERSIONTAGNUM+DT_EXTRANUM+DT_VALNUM) are</span></span><br><span class="line"><span class="comment">       indexed by DT_VALTAGIDX(tagvalue) and</span></span><br><span class="line"><span class="comment">       [DT_NUM+DT_THISPROCNUM+DT_VERSIONTAGNUM+DT_EXTRANUM+DT_VALNUM,</span></span><br><span class="line"><span class="comment">	DT_NUM+DT_THISPROCNUM+DT_VERSIONTAGNUM+DT_EXTRANUM+DT_VALNUM+DT_ADDRNUM)</span></span><br><span class="line"><span class="comment">       are indexed by DT_ADDRTAGIDX(tagvalue), see &lt;elf.h&gt;.  */</span></span><br><span class="line"></span><br><span class="line">    ElfW(Dyn) *l_info[DT_NUM + DT_THISPROCNUM + DT_VERSIONTAGNUM</span><br><span class="line">		      + DT_EXTRANUM + DT_VALNUM + DT_ADDRNUM];</span><br><span class="line">   	...</span><br></pre></td></tr></table></figure>
+
+<p><code>l_info</code>的类型是<code>ElfW(Dyn)**</code>,也就是<code>Elf32_Dyn**</code>，这是一个二级指针，或者说数组指针</p>
+<p>意思是在内存某个地方有一个<code>dynamic</code>数组，然后这个指针指向数组的基地址</p>
+<p>在运行时<code>l_info</code>指向所在模块的的<code>dynamic</code>节</p>
+<p><code>dynamic</code>节加载进入内存的地址是确定的，比如本程序中在<code>0x080497c4</code>,可以使用<code>readelf -S</code>查看</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line">┌──(root㉿Executor)-[/home/dustball/ctf-challenges/pwn/stackoverflow/ret2dlresolve/<span class="number">2015</span>-xdctf-pwn200/<span class="number">32</span>/no-relro]</span><br><span class="line">└─<span class="meta"># readelf -S main_no_relro_32</span></span><br><span class="line">There are <span class="number">30</span> section headers, starting at offset <span class="number">0x10b0</span>:</span><br><span class="line"></span><br><span class="line">Section Headers:</span><br><span class="line">  [Nr] Name              Type            Addr     Off    Size   ES Flg Lk Inf Al</span><br><span class="line">	...</span><br><span class="line">  [<span class="number">21</span>] .dynamic          DYNAMIC         <span class="number">080497</span>c4 <span class="number">0007</span>c4 <span class="number">0000e8</span> <span class="number">08</span>  WA  <span class="number">6</span>   <span class="number">0</span>  <span class="number">4</span></span><br><span class="line">    ...</span><br></pre></td></tr></table></figure>
+
+<p>在<code>GOT.PLT</code>表的最头部,也保存着一个<code>_DYNAMIC</code>的指针</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">GOT.PLT[0] =&gt; _DYNAMIC</span><br><span class="line">GOT.PLT[1] =&gt; link_map</span><br><span class="line">GOT.PLT[2] =&gt; dl_runtime_resolve</span><br><span class="line">...</span><br></pre></td></tr></table></figure>
+
+
+
+<p>dynamic节中的内容可以用<code>readelf -d</code>查看</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br></pre></td><td class="code"><pre><span class="line">┌──(root㉿Executor)-[/home/dustball/ctf-challenges/pwn/stackoverflow/ret2dlresolve/<span class="number">2015</span>-xdctf-pwn200/<span class="number">32</span>/no-relro]</span><br><span class="line">└─<span class="meta"># readelf -d main_no_relro_32</span></span><br><span class="line"></span><br><span class="line">Dynamic section at offset <span class="number">0x7c4</span> contains <span class="number">24</span> entries:</span><br><span class="line">  Tag        Type                         Name/Value</span><br><span class="line"> <span class="number">0x00000001</span> (NEEDED)                     Shared library: [libc.so<span class="number">.6</span>]</span><br><span class="line"> <span class="number">0x0000000c</span> (INIT)                       <span class="number">0x804832c</span></span><br><span class="line"> <span class="number">0x0000000d</span> (FINI)                       <span class="number">0x8048634</span></span><br><span class="line"> <span class="number">0x00000019</span> (INIT_ARRAY)                 <span class="number">0x80497bc</span></span><br><span class="line"> <span class="number">0x0000001b</span> (INIT_ARRAYSZ)               <span class="number">4</span> (bytes)</span><br><span class="line"> <span class="number">0x0000001a</span> (FINI_ARRAY)                 <span class="number">0x80497c0</span></span><br><span class="line"> <span class="number">0x0000001c</span> (FINI_ARRAYSZ)               <span class="number">4</span> (bytes)</span><br><span class="line"> <span class="number">0x6ffffef5</span> (GNU_HASH)                   <span class="number">0x804818c</span></span><br><span class="line"> <span class="number">0x00000005</span> (STRTAB)                     <span class="number">0x804824c</span></span><br><span class="line"> <span class="number">0x00000006</span> (SYMTAB)                     <span class="number">0x80481ac</span></span><br><span class="line"> <span class="number">0x0000000a</span> (STRSZ)                      <span class="number">107</span> (bytes)</span><br><span class="line"> <span class="number">0x0000000b</span> (SYMENT)                     <span class="number">16</span> (bytes)</span><br><span class="line"> <span class="number">0x00000015</span> (DEBUG)                      <span class="number">0x0</span></span><br><span class="line"> <span class="number">0x00000003</span> (PLTGOT)                     <span class="number">0x80498b8</span></span><br><span class="line"> <span class="number">0x00000002</span> (PLTRELSZ)                   <span class="number">40</span> (bytes)</span><br><span class="line"> <span class="number">0x00000014</span> (PLTREL)                     REL</span><br><span class="line"> <span class="number">0x00000017</span> (JMPREL)                     <span class="number">0x8048304</span></span><br><span class="line"> <span class="number">0x00000011</span> (REL)                        <span class="number">0x80482ec</span></span><br><span class="line"> <span class="number">0x00000012</span> (RELSZ)                      <span class="number">24</span> (bytes)</span><br><span class="line"> <span class="number">0x00000013</span> (RELENT)                     <span class="number">8</span> (bytes)</span><br><span class="line"> <span class="number">0x6ffffffe</span> (VERNEED)                    <span class="number">0x80482cc</span></span><br><span class="line"> <span class="number">0x6fffffff</span> (VERNEEDNUM)                 <span class="number">1</span></span><br><span class="line"> <span class="number">0x6ffffff0</span> (VERSYM)                     <span class="number">0x80482b8</span></span><br><span class="line"> <span class="number">0x00000000</span> (<span class="literal">NULL</span>)                       <span class="number">0x0</span></span><br></pre></td></tr></table></figure>
+
+<p>每一项都是一个<code>Elf32_Dyn</code></p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br></pre></td><td class="code"><pre><span class="line">LOAD:080497C4 _DYNAMIC        Elf32_Dyn &lt;1, &lt;1&gt;&gt;      ; DATA XREF: LOAD:080480BC↑o</span><br><span class="line">LOAD:080497C4                                         ; .got.plt:_GLOBAL_OFFSET_TABLE_↓o</span><br><span class="line">LOAD:080497C4                                         ; DT_NEEDED libc.so.6</span><br><span class="line">LOAD:080497CC                 Elf32_Dyn &lt;0Ch, &lt;804832Ch&gt;&gt; ; DT_INIT</span><br><span class="line">LOAD:080497D4                 Elf32_Dyn &lt;0Dh, &lt;8048634h&gt;&gt; ; DT_FINI</span><br><span class="line">LOAD:080497DC                 Elf32_Dyn &lt;19h, &lt;80497BCh&gt;&gt; ; DT_INIT_ARRAY</span><br><span class="line">LOAD:080497E4                 Elf32_Dyn &lt;1Bh, &lt;4&gt;&gt;    ; DT_INIT_ARRAYSZ</span><br><span class="line">LOAD:080497EC                 Elf32_Dyn &lt;1Ah, &lt;80497C0h&gt;&gt; ; DT_FINI_ARRAY</span><br><span class="line">LOAD:080497F4                 Elf32_Dyn &lt;1Ch, &lt;4&gt;&gt;    ; DT_FINI_ARRAYSZ</span><br><span class="line">LOAD:080497FC                 Elf32_Dyn &lt;6FFFFEF5h, &lt;804818Ch&gt;&gt; ; DT_GNU_HASH</span><br><span class="line">LOAD:08049804                 Elf32_Dyn &lt;5, &lt;804824Ch&gt;&gt; ; DT_STRTAB</span><br><span class="line">LOAD:0804980C                 Elf32_Dyn &lt;6, &lt;80481ACh&gt;&gt; ; DT_SYMTAB</span><br><span class="line">LOAD:08049814                 Elf32_Dyn &lt;0Ah, &lt;6Bh&gt;&gt;  ; DT_STRSZ</span><br><span class="line">LOAD:0804981C                 Elf32_Dyn &lt;0Bh, &lt;10h&gt;&gt;  ; DT_SYMENT</span><br><span class="line">LOAD:08049824                 Elf32_Dyn &lt;15h, &lt;0&gt;&gt;    ; DT_DEBUG</span><br><span class="line">LOAD:0804982C                 Elf32_Dyn &lt;3, &lt;80498B8h&gt;&gt; ; DT_PLTGOT</span><br><span class="line">LOAD:08049834                 Elf32_Dyn &lt;2, &lt;28h&gt;&gt;    ; DT_PLTRELSZ</span><br><span class="line">LOAD:0804983C                 Elf32_Dyn &lt;14h, &lt;11h&gt;&gt;  ; DT_PLTREL</span><br><span class="line">LOAD:08049844                 Elf32_Dyn &lt;17h, &lt;8048304h&gt;&gt; ; DT_JMPREL</span><br><span class="line">LOAD:0804984C                 Elf32_Dyn &lt;11h, &lt;80482ECh&gt;&gt; ; DT_REL</span><br><span class="line">LOAD:08049854                 Elf32_Dyn &lt;12h, &lt;18h&gt;&gt;  ; DT_RELSZ</span><br><span class="line">LOAD:0804985C                 Elf32_Dyn &lt;13h, &lt;8&gt;&gt;    ; DT_RELENT</span><br><span class="line">LOAD:08049864                 Elf32_Dyn &lt;6FFFFFFEh, &lt;80482CCh&gt;&gt; ; DT_VERNEED</span><br><span class="line">LOAD:0804986C                 Elf32_Dyn &lt;6FFFFFFFh, &lt;1&gt;&gt; ; DT_VERNEEDNUM</span><br><span class="line">LOAD:08049874                 Elf32_Dyn &lt;6FFFFFF0h, &lt;80482B8h&gt;&gt; ; DT_VERSYM</span><br><span class="line">LOAD:0804987C                 Elf32_Dyn &lt;0&gt;           ; DT_NULL</span><br></pre></td></tr></table></figure>
+
+
+
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">pwndbg&gt; ptype Elf32_Dyn</span><br><span class="line">type = <span class="keyword">struct</span> &#123;</span><br><span class="line">    Elf32_Sword d_tag;</span><br><span class="line">    <span class="class"><span class="keyword">union</span> &#123;</span></span><br><span class="line">        Elf32_Word d_val;</span><br><span class="line">        Elf32_Addr d_ptr;</span><br><span class="line">    &#125; d_un;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+
+
+<h3 id="2-由dynamic节找其他各节"><a href="#2-由dynamic节找其他各节" class="headerlink" title="2.由dynamic节找其他各节"></a>2.由dynamic节找其他各节</h3><figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">symtab 	= (<span class="type">const</span> <span class="type">void</span> *) D_PTR (l, l_info[DT_SYMTAB]);</span><br><span class="line">strtab 	= (<span class="type">const</span> <span class="type">void</span> *) D_PTR (l, l_info[DT_STRTAB]);	</span><br><span class="line">pltgot 	= (<span class="type">uintptr_t</span>) D_PTR (l, l_info[DT_PLTGOT]);		<span class="comment">//实际上_dl_fixup中没有用到</span></span><br><span class="line">reloc 	= (<span class="type">const</span> <span class="type">void</span> *) (D_PTR (l, l_info[DT_JMPREL]) + reloc_offset (pltgot, reloc_arg));</span><br></pre></td></tr></table></figure>
+
+<p>这里有四个节,实际上每个节都是表</p>
+<table>
+<thead>
+<tr>
+<th>表名</th>
+<th>元素类型</th>
+<th>作用</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>symtab符号表</td>
+<td>struct Elf32_Sym</td>
+<td>保存符号名在strtab中的偏移,<br />保存符号在模块中的相对地址<br />…</td>
+</tr>
+<tr>
+<td>strtab字符串表</td>
+<td>char</td>
+<td>保存本模块中所有需要动态链接的符号名</td>
+</tr>
+<tr>
+<td>pltgot过程链接表</td>
+<td></td>
+<td>实际上<code>_dl_fixup</code>中没有用到</td>
+</tr>
+<tr>
+<td>jmprel重定位表</td>
+<td>struct Elf32_Rel</td>
+<td>保存符号的虚拟地址,<br />保存符号在符号表中的偏移</td>
+</tr>
+</tbody></table>
+<p>symtab符号表</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">typedef</span> <span class="class"><span class="keyword">struct</span></span></span><br><span class="line"><span class="class">&#123;</span></span><br><span class="line">  Elf32_Word	st_name;		<span class="comment">/* Symbol name (string tbl index) */</span><span class="comment">//符号名在strtab中的偏移</span></span><br><span class="line">  Elf32_Addr	st_value;		<span class="comment">/* Symbol value */</span>	<span class="comment">//符号在其模块中相对地址</span></span><br><span class="line">  Elf32_Word	st_size;		<span class="comment">/* Symbol size */</span></span><br><span class="line">  <span class="type">unsigned</span> <span class="type">char</span>	st_info;		<span class="comment">/* Symbol type and binding */</span></span><br><span class="line">  <span class="type">unsigned</span> <span class="type">char</span>	st_other;		<span class="comment">/* Symbol visibility */</span></span><br><span class="line">  Elf32_Section	st_shndx;		<span class="comment">/* Section index */</span></span><br><span class="line">&#125; Elf32_Sym;</span><br><span class="line"></span><br></pre></td></tr></table></figure>
+
+
+
+
+
+<p>jmprel重定位表</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">typedef</span> <span class="class"><span class="keyword">struct</span></span></span><br><span class="line"><span class="class">&#123;</span></span><br><span class="line">  Elf32_Addr	r_offset;		<span class="comment">/* Address */</span></span><br><span class="line">  Elf32_Word	r_info;			<span class="comment">/* Relocation type and symbol index */</span></span><br><span class="line">&#125; Elf32_Rel;</span><br></pre></td></tr></table></figure>
+
+
+
+
+
+
+
+<h3 id="3-在本模块符号表中找到对应表项"><a href="#3-在本模块符号表中找到对应表项" class="headerlink" title="3.在本模块符号表中找到对应表项"></a>3.在本模块符号表中找到对应表项</h3><figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">reloc = (<span class="type">const</span> <span class="type">void</span> *) (D_PTR (l, l_info[DT_JMPREL]) + reloc_offset (pltgot, reloc_arg));<span class="comment">//在重定位表中的表项</span></span><br><span class="line"><span class="type">const</span> <span class="title function_">ElfW</span><span class="params">(Sym)</span> *sym = &amp;symtab[ELFW(R_SYM) (reloc-&gt;r_info)];	<span class="comment">//在符号表中的表项</span></span><br><span class="line"><span class="type">const</span> <span class="title function_">ElfW</span><span class="params">(Sym)</span> *refsym = sym;	<span class="comment">//副本</span></span><br><span class="line"><span class="type">void</span> *<span class="type">const</span> rel_addr = (<span class="type">void</span> *)(l-&gt;l_addr + reloc-&gt;r_offset);	<span class="comment">//GOT表项地址,为后来回填做准备</span></span><br></pre></td></tr></table></figure>
+
+
+
+
+
+<p>下面到4之前是一些检查,忽略</p>
+<h3 id="4-解析符号"><a href="#4-解析符号" class="headerlink" title="4.解析符号"></a>4.解析符号</h3><figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br></pre></td><td class="code"><pre><span class="line"> 	<span class="class"><span class="keyword">struct</span> <span class="title">link_map</span>* <span class="title">result</span>;</span></span><br><span class="line"> 	Elf32_Addr value;</span><br><span class="line"></span><br><span class="line">result = _dl_lookup_symbol_x (</span><br><span class="line">         strtab + sym-&gt;st_name, 		<span class="comment">//符号名字符串</span></span><br><span class="line">         l, 							<span class="comment">//本模块的link_map</span></span><br><span class="line">         &amp;sym, 						<span class="comment">//返回值,如果在其他模块找到该符号则返回其符号表项</span></span><br><span class="line">         l-&gt;l_scope,</span><br><span class="line">         version, </span><br><span class="line">         ELF_RTYPE_CLASS_PLT, </span><br><span class="line">         flags, </span><br><span class="line">         <span class="literal">NULL</span></span><br><span class="line">     );<span class="comment">//返回值result是找到符号实现所在模块的link_map</span></span><br><span class="line"></span><br><span class="line">     value = DL_FIXUP_MAKE_VALUE (</span><br><span class="line">         result,</span><br><span class="line">         SYMBOL_ADDRESS (result, sym, <span class="literal">false</span>)<span class="comment">//从link_map *result中提取目标模块基地址,加上sym.st_value偏移量得到符号虚拟地址</span></span><br><span class="line">     );</span><br></pre></td></tr></table></figure>
+
+
+
+
+
+<h3 id="5-回填GOT表项"><a href="#5-回填GOT表项" class="headerlink" title="5.回填GOT表项"></a>5.回填GOT表项</h3><figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">return</span> elf_machine_fixup_plt (l, result, refsym, sym, reloc, rel_addr, value);</span><br></pre></td></tr></table></figure>
+
+<p>这里有一个压行,干了两个事情,</p>
+<p>一是调用elf_machine_fixup_plt把value回写到rel_addr上</p>
+<p>二是把value值,也就是已经解析出来的符号地址,放到eax寄存器上返回</p>
+<p>注意此时是在dl_fixup中返回到dl_runtime_resolve中</p>
+<p>下面的指令是这样的:</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">call _dl_fixup		# Call resolver.</span><br><span class="line">popl %edx		# Get <span class="keyword">register</span> content back.</span><br><span class="line">movl (%esp), %ecx</span><br><span class="line">movl %eax, (%esp)	# Store the function address.</span><br><span class="line">movl <span class="number">4</span>(%esp), %eax</span><br><span class="line">ret $<span class="number">12</span>			# Jump to function address.</span><br></pre></td></tr></table></figure>
+
+<p>注意到dl_runtime_resolve返回之前,栈顶是刚刚放入的eax,也就是刚解析出来的符号值</p>
+<p>也就是直接 ret2目标函数 了</p>
+<h2 id="ret2dl-resolve-1"><a href="#ret2dl-resolve-1" class="headerlink" title="ret2dl_resolve"></a>ret2dl_resolve</h2><p>能不能进行这种利用,得看RELRO✌的脸色</p>
+<p>RELRO保护:</p>
+<p>read only relocation,只读重定位</p>
+<p>鉴于攻击者可以篡改GOT表,填充危险函数,因此如果GOT表是只读的,攻击者就没法写了</p>
+<p>RELRO的目的是保护函数指针,防止篡改</p>
+<table>
+<thead>
+<tr>
+<th>保护程度</th>
+<th>效果</th>
+<th></th>
+<th>编译选项</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>NO_RELRO</td>
+<td>dynamic段可写<br />GOT表可写,允许延迟绑定</td>
+<td></td>
+<td>-z norelro</td>
+</tr>
+<tr>
+<td>PARTIAL_RELRO</td>
+<td>dynamic段只读,<br />但是GOT表还是可写的,允许延迟绑定</td>
+<td></td>
+<td>-z lazy</td>
+</tr>
+<tr>
+<td>FULL_RELRO</td>
+<td>dynamic段只读<br />GOT表只读,不允许延迟绑定,所有符号必须在加载程序时立刻解析</td>
+<td></td>
+<td>-z now</td>
+</tr>
+<tr>
+<td></td>
+<td></td>
+<td></td>
+<td></td>
+</tr>
+</tbody></table>
+<p>回顾<code>_dl_fixup</code>函数解析符号的过程</p>
+<p><img src="https://raw.githubusercontent.com/DeutschBall/VideoBed/main/image-20240819193758449.png" alt="image-20240819193758449"></p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br></pre></td><td class="code"><pre><span class="line">Algorithm _dl_fixup</span><br><span class="line">Input:	a Link_Map linkmap of the Main module, an index reloc_arg of the jmprel table </span><br><span class="line">Output:	virtual address of the target symbol</span><br><span class="line"></span><br><span class="line">dynamic = linkmap.l_info</span><br><span class="line">jmprel = dynamic[DT_JMPREL]</span><br><span class="line">strtab = dynamic[DT_STRTAB]</span><br><span class="line">symtab = dynamic[DT_SYMTAB]</span><br><span class="line"></span><br><span class="line">reloc = jmprel[reloc_arg]</span><br><span class="line">sym = symtab[reloc.r_info]</span><br><span class="line">str = strtab[sym.st_name]</span><br><span class="line"></span><br><span class="line"><span class="comment">//other_linkmap是其他模块的Link_Map结构</span></span><br><span class="line"><span class="comment">//_dl_lookup_symbol_x(str)从其他模块中寻找str符号,如果找到则返回该符号与其所在的link_map</span></span><br><span class="line">[sym,other_linkmap] = _dl_lookup_symbol_x(str)</span><br><span class="line"></span><br><span class="line"><span class="comment">//link_map中保存着目标模块的基地址,sym中保存着符号相对目标模块的偏移量,加起来得到符号的虚拟地址</span></span><br><span class="line">vaddr = other_linkmap.laddr + sym.st_info</span><br></pre></td></tr></table></figure>
+
+
+
+<h3 id="no-relro"><a href="#no-relro" class="headerlink" title="no_relro"></a>no_relro</h3><p>strtab节通常和text节加载到同一个只读段,因此在strtab上篡改函数名字符串是不可能的</p>
+<p>在no_relro保护下,dynamic节可写, 可以篡改dynamic.strtab指针指向fake strtab</p>
+<p><img src="https://raw.githubusercontent.com/DeutschBall/VideoBed/main/image-20240819193931068.png" alt="image-20240819193931068"></p>
+<h3 id="partial-relro"><a href="#partial-relro" class="headerlink" title="partial_relro"></a>partial_relro</h3><p>在no_relro保护中，可以通过篡改dynamic节中的指针指向假的strtab伪造假的函数名</p>
+<p>但是partial_relro保护使得dynamic节只读，无法篡改其中的字符串表指针</p>
+<h4 id="stage1"><a href="#stage1" class="headerlink" title="stage1"></a>stage1</h4><p>由于我们需要构造“&#x2F;bin&#x2F;sh”这种字符串,要么调用read函数往内存里写,要么溢出时写进去</p>
+<p>前者需要再构造read调用的rop链,并且还得给字符串找地方,找一个我们知道地址并且可写的地方,比如bss段</p>
+<p>后者由于栈地址不知道在哪,需要做一个栈迁移,首先把栈搬到bss段上</p>
+<p>后者更加方便,采取后者</p>
+<h4 id="stage2"><a href="#stage2" class="headerlink" title="stage2"></a>stage2</h4><p>在本阶段我们构造rop链条,手动调用</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">dl_runtime_resolve@.GOT.PLT[0](</span><br><span class="line">	link_map=.GOT.PLT[1]</span><br><span class="line">	reloc_arg=0x20</span><br><span class="line">)</span><br></pre></td></tr></table></figure>
+
+<p><strong>也就是再解析调用一下write函数,目的是验证一下,已经解析过的符号,使用rop方法能够再次触发解析过程,并且该过程是正确的</strong></p>
+<h4 id="stage3"><a href="#stage3" class="headerlink" title="stage3"></a>stage3</h4><p>在本阶段我们在bss段伪造一个重定位表项, 但是该表项的内容指向正确的symtab表</p>
+<p>为了使用这个假重定位表项,我们将dl_runtime_resolve的参数reloc_arg改成,该bss段假表项与真的重定位表的偏移量</p>
+<p>该偏移量显然会大的离谱,远远超出重定位表的范围,因为bss和relplt段相距甚远</p>
+<p><strong>此举目的是验证即使传递的reloc_arg超过重定位表范围,也没有任何安全检查阻拦,使得我们能够正确解析到符号</strong></p>
+<p><img src="https://raw.githubusercontent.com/DeutschBall/VideoBed/main/image-20240819195308717.png" alt="image-20240819195308717"></p>
+<h4 id="stage4"><a href="#stage4" class="headerlink" title="stage4"></a>stage4</h4><p>在本阶段我们既要构造假的重定位表项,又要构造假的符号表项</p>
+<p>此时假重定位表项不再指向正确的符号,而是指向我们构造的符号</p>
+<p>但是这个假符号依然索引正确的符号名称</p>
+<p>显然此时reloc_arg索引重定位表的偏移量远超重定位表范围,并且假重定位项索引假符号的偏移量也远超了符号表范围</p>
+<p><strong>此举目的是验证,即使符号表的索引越界,也没有任何安全检查阻拦,使得我们能够正确解析到符号</strong></p>
+<p><img src="C:\Users\xidian\AppData\Roaming\Typora\typora-user-images\image-20240819193641215.png" alt="image-20240819193641215"></p>
+<p>想法很好,然而在dl_runtime_resolve中,r_info不只会被用来索引符号表,还会索引versym符号版本表</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">if</span> (l-&gt;l_info[VERSYMIDX (DT_VERSYM)] != <span class="literal">NULL</span>)&#123;</span><br><span class="line">	  <span class="type">const</span> <span class="title function_">ElfW</span><span class="params">(Half)</span> *vernum = (<span class="type">const</span> <span class="type">void</span> *) D_PTR (l, l_info[VERSYMIDX (DT_VERSYM)]);</span><br><span class="line">	  ElfW(Half) ndx = vernum[ELFW(R_SYM) (reloc-&gt;r_info)] &amp; <span class="number">0x7fff</span>;</span><br><span class="line">	  version = &amp;l-&gt;l_versions[ndx];</span><br><span class="line">	  <span class="keyword">if</span> (version-&gt;hash == <span class="number">0</span>)</span><br><span class="line">	    	version = <span class="literal">NULL</span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p><img src="https://raw.githubusercontent.com/DeutschBall/VideoBed/main/image-20240819213749275.png" alt="image-20240819213749275"></p>
+<p>我们依据假符号与符号表的偏移量,计算出r_info,这保证了假重定位项可以索引假符号</p>
+<p>但是不能保证r_info索引versym表的什么地方</p>
+<p>实际运行时ndx&#x3D;0x442c</p>
+<p>&amp;l-&gt;l_versions&#x3D;0xf7f5a710</p>
+<p>然后versions表里面一项是0x10字节</p>
+<p>所以version &#x3D; &amp;l-&gt;l_versions[ndx]&#x3D;0xf7f9e9d4;</p>
+<p>下一条指令就要解引用了version-&gt;hash</p>
+<p>然而0xf7f9e9d4上并没有在任何一个内存映射区,是一个非法地址</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="number">0xf7f95000</span> <span class="number">0xf7f96000</span> rw-p     <span class="number">1000</span>  <span class="number">32000</span> /usr/lib/i386-linux-gnu/ld-linux.so<span class="number">.2</span></span><br><span class="line"><span class="number">0xffb01000</span> <span class="number">0xfff59000</span> rw-p   <span class="number">458000</span>      <span class="number">0</span> [<span class="built_in">stack</span>]</span><br></pre></td></tr></table></figure>
+
+<p>因此对非法地址解引用就段错误了</p>
+<p>怎么修复这个过程呢?</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">ElfW(Half) ndx = vernum[ELFW(R_SYM)(reloc-&gt;r_info)] &amp; <span class="number">0x7fff</span>;</span><br><span class="line">           version = &amp;l-&gt;l_versions[ndx];</span><br><span class="line">           <span class="keyword">if</span> (version-&gt;hash == <span class="number">0</span>)</span><br><span class="line">               version = <span class="literal">NULL</span>;</span><br></pre></td></tr></table></figure>
+
+<p>假重定位项的r_info既索引假符号表项,又索引假versym表项</p>
+<p>如果能控制假versym表项为空,则ndx就是0,此时l_versions[ndx]&#x3D;l_versions[0]就一定是合法的了</p>
+<p>也就是说,我们可以微操控制一下r_info的值</p>
+<p>如何控制呢?</p>
+<p>原本r_info&#x3D;0x26807,其中的索引值是0x268</p>
+<p>vernum基地址是0x80482d8</p>
+<p>vernum[ELFW(R_SYM)(reloc-&gt;r_info)]这个假表项,在0x80482d8+0x268*2&#x3D;0x080487A8上,使用ida观察这里是.eh_frame段</p>
+<p>往下翻找一个全零的假表项位置比如0x080487C2就很好</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">.eh_frame:080487A8 2C                                            db  2Ch ; ,</span><br><span class="line">	...</span><br><span class="line">.eh_frame:080487C2 00                                            db    0</span><br><span class="line">.eh_frame:080487C3 00                                            db    0</span><br></pre></td></tr></table></figure>
+
+<p>0x080487C2&#x3D;0x80482d8+index*2</p>
+<p>那么index&#x3D;0x275</p>
+<p>那么r_info就得是0x27507</p>
+<p>注意如果只修改假的重定位项,令其r_info&#x3D;0x27507,这样就又不能正确索引到假的符号表项了</p>
+<p>按下葫芦浮起瓢,因此还需要修正bss段伪造的假符号位置,在原位置基础上加一个<code>(0x275-0x268)*16</code>即可</p>
+<p>乘16的原因是,符号表项一个占用16字节</p>
+<h4 id="stage5"><a href="#stage5" class="headerlink" title="stage5"></a>stage5</h4><p>在本阶段,伪造假符号名字符串,并令假符号的st_name指向它,目的是证明即使st_name远超strtab范围,依然没有任何安全检查阻拦</p>
+<p><img src="https://raw.githubusercontent.com/DeutschBall/VideoBed/main/image-20240820103319870.png" alt="image-20240820103319870"></p>
+<h4 id="stage6"><a href="#stage6" class="headerlink" title="stage6"></a>stage6</h4><p>把stage5中的假符号名字符串改成“system”,并把write的参数(1,“&#x2F;bin&#x2F;sh”,“7”)改成system的参数(“&#x2F;bin&#x2F;sh”)</p>
+<p><img src="https://raw.githubusercontent.com/DeutschBall/VideoBed/main/image-20240820111602402.png" alt="image-20240820111602402"></p>
+<h2 id="在目标模块中阴暗地爬行"><a href="#在目标模块中阴暗地爬行" class="headerlink" title="在目标模块中阴暗地爬行"></a>在目标模块中阴暗地爬行</h2><p>分析了<code>_dl_fixup</code>的源码之后,已经能够理解ret2dl-resolve的原理了</p>
+<p>下面的问题是,<code>_dl_fixup</code>中调用的<code>_dl_lookup_symbol_x</code>函数,是如何查找符号的呢?</p>
+<p>可想而知的是,<code>glibc</code>中的符号成百上千,如果纯纯使用符号名字符串,进行模式匹配,那可真是慢了去了</p>
+<p>到底怎么在目标模块中解析符号的呢?</p>
+<p><a target="_blank" rel="noopener" href="https://blogs.oracle.com/solaris/post/gnu-hash-elf-sections">GNU Hash ELF Sections (oracle.com)</a></p>
+<p>[<a target="_blank" rel="noopener" href="https://bbs.kanxue.com/thread-223668.htm">翻译]GNU Hash ELF Sections-外文翻译-看雪-安全社区|安全招聘|kanxue.com</a></p>
+<h2 id="符号解析中的哈希算法"><a href="#符号解析中的哈希算法" class="headerlink" title="符号解析中的哈希算法"></a>符号解析中的哈希算法</h2><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">dl_runtime_resolve</span><br><span class="line">	_dl_fixup</span><br><span class="line">		_dl_lookup_symbol_x</span><br><span class="line">			do_lookup_x</span><br><span class="line">				do_lookup_unique</span><br><span class="line">					enter_unique_sym</span><br></pre></td></tr></table></figure>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+      
+    </div>
+
+    
+    
+    
+      <footer class="post-footer">
+        <div class="post-eof"></div>
+      </footer>
+  </article>
+  
+  
+  
+
+      
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="en">
     <link itemprop="mainEntityOfPage" href="http://deutschball.github.io/2024/10/17/IO%20FILE/">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
@@ -4354,642 +4863,6 @@
 <p>能够收到3ACK说明网络只是轻度拥塞</p>
 <p>此时直接ssthresh降为收到3ACK时cwnd的一半,然后设置cwnd&#x3D;ssthresh,然后重复加性增大阶段</p>
 <h5 id="状态转移图"><a href="#状态转移图" class="headerlink" title="状态转移图"></a>状态转移图</h5><p><img src="https://raw.githubusercontent.com/DeutschBall/VideoBed/main/image-20230208180715552.png" alt="image-20230208180715552"></p>
-
-      
-    </div>
-
-    
-    
-    
-      <footer class="post-footer">
-        <div class="post-eof"></div>
-      </footer>
-  </article>
-  
-  
-  
-
-      
-  
-  
-  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="en">
-    <link itemprop="mainEntityOfPage" href="http://deutschball.github.io/2023/02/08/%E6%95%B0%E6%8D%AE%E9%93%BE%E8%B7%AF%E5%B1%82/">
-
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="image" content="https://raw.githubusercontent.com/DeutschBall/picbed/main/dustball.png">
-      <meta itemprop="name" content="dustball">
-      <meta itemprop="description" content="dustland">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="dustland">
-    </span>
-      <header class="post-header">
-        <h2 class="post-title" itemprop="name headline">
-          
-            <a href="/2023/02/08/%E6%95%B0%E6%8D%AE%E9%93%BE%E8%B7%AF%E5%B1%82/" class="post-title-link" itemprop="url">计算机网络-数据链路层</a>
-        </h2>
-
-        <div class="post-meta">
-            <span class="post-meta-item">
-              <span class="post-meta-item-icon">
-                <i class="far fa-calendar"></i>
-              </span>
-              <span class="post-meta-item-text">Posted on</span>
-
-              <time title="Created: 2023-02-08 15:22:00" itemprop="dateCreated datePublished" datetime="2023-02-08T15:22:00+08:00">2023-02-08</time>
-            </span>
-              <span class="post-meta-item">
-                <span class="post-meta-item-icon">
-                  <i class="far fa-calendar-check"></i>
-                </span>
-                <span class="post-meta-item-text">Edited on</span>
-                <time title="Modified: 2023-02-12 18:43:43" itemprop="dateModified" datetime="2023-02-12T18:43:43+08:00">2023-02-12</time>
-              </span>
-
-          
-
-        </div>
-      </header>
-
-    
-    
-    
-    <div class="post-body" itemprop="articleBody">
-
-      
-          <h1 id="计算机网络-数据链路层"><a href="#计算机网络-数据链路层" class="headerlink" title="计算机网络-数据链路层"></a>计算机网络-数据链路层</h1><h2 id="数据链路层"><a href="#数据链路层" class="headerlink" title="数据链路层"></a>数据链路层</h2><h3 id="数据链路层的任务"><a href="#数据链路层的任务" class="headerlink" title="数据链路层的任务"></a>数据链路层的任务</h3><p>数据链路层的功能:成帧,流量控制,差错控制,通信</p>
-<p>成帧:多个数据帧之间如何区分?添加标志位,比如011111,如果接收方发现一个0后面连着5个1,就认为这和刚才接收到的数据不是一个帧的.</p>
-<p>流量控制用于,限制发送方在等到确认之前发送的数据数量</p>
-<p>差错控制指望重发,说官话就是”自动重复请求”(ARQ,Automatic Repeat Request)</p>
-<h3 id="冗余编码"><a href="#冗余编码" class="headerlink" title="冗余编码"></a>冗余编码</h3><p>冗余:Redundancy</p>
-<p>冗余本是多余的意思,在计算机中,冗余量和业务逻辑无关,没有冗余照样执行业务</p>
-<p>但是冗余可以增强非业务性能,比如信息论上的冗余可以提高发现错误和纠正错误的能力</p>
-<blockquote>
-<p>考虑8个工件有一个坏件,质量和其他的不同(具体重了还是清了不知道)</p>
-<p>最快多少次找到?这实际上就是尽量减少冗余,尽最大可能利用信息熵的问题</p>
-<p>采用二分需要单调性,即知道这个坏件轻了还是重了,现在不知道,没法二分</p>
-<p>三分?3v3v2,还是那个问题,3v3不知道哪个是标准</p>
-<p>四分?(2v2)v(2v2).其中必有一组2v2都是标准件,天平平衡</p>
-<p>不妨设前一个2v2平等,说明坏件一定在后面的2v2中,并且前面四个都是标准件,可以用来参考</p>
-<p>后面的2v2就不用称了,每个2直接和两个标准件比较</p>
-<p>必然有一组不平衡,这就意味着另一组必定平衡,从不平衡组任意拿出一个,和标准件对比</p>
-<p>如果是坏件则天平不平衡,否则如果是好件,则同组另一件必定坏件</p>
-</blockquote>
-<h4 id="块编码"><a href="#块编码" class="headerlink" title="块编码"></a>块编码</h4><blockquote>
-<p>数据字+冗余&#x3D;码字</p>
-<p>什么思想呢?</p>
-<p>假如原来要传输一个比特,要么是0要么是1</p>
-<p>但是路上可能发生各种变故导致1变成0.但是接收方不知道发生了变故,它认为人家就是发送的0,于是错误接收了0</p>
-<p>为了增加检错能力</p>
-<p>添加一位冗余,比如数据字为0,码字就为00.数据字为1,码字就为11</p>
-<p>这样如果有一位发生突变(认为两位同突变的概率低),会形成01或者10这种无效码字,发现错误</p>
-<p>那么问题又来了,如果接到01,怎么确定它是00还是11变来的?两者都只需要突变一位就能形成01,因而只添加一位冗余无法纠错</p>
-<p>于是再添加一位冗余,只有000和111合法</p>
-<p>那么接到100,认为它是000突变来的,这个概率要比他是从111突变来的大.</p>
-<p>于是就有了纠错能力.</p>
-</blockquote>
-<p>实际上的块编码,是多位为一个数据字</p>
-<p>整个报文划分为弱干块,每块k位,称为数据字</p>
-<p>每块中假如r个冗余位,块长度变为n&#x3D;k+r,形成这个n位的块叫做码字</p>
-<p>码字有$2^n$种,但是其中实际承载数据字的只有$2^k$种</p>
-<p>如果一个承载数据的码字,其中的一位或者几位发生突变,突变之后的码字:</p>
-<p>如果如果不承载数据,则可以被检错</p>
-<p>如果也是承载数据的码字,则无法检错</p>
-<p>比如4B&#x2F;5B编码(部分)中:</p>
-<p><img src="https://raw.githubusercontent.com/DeutschBall/VideoBed/main/image-20230208093738919.png" alt="image-20230208093738919"></p>
-<p>如果0100的编码01010最后一位发生突变,编程了01011,这是0101的编码.那么错误就检查不出来了,接收方会认为发送方一开始就是发的0101</p>
-<p>下面推导,检错能力和纠错能力的条件是什么</p>
-<h5 id="汉明距离"><a href="#汉明距离" class="headerlink" title="汉明距离"></a>汉明距离</h5><p>假设只有一位突变</p>
-<p>如果两个有效码字只有一位不同,这样不具备检错能力</p>
-<p>如果任何两个有效码字至少有两位不同.这样才具备检错能力,但是不具备纠错能力</p>
-<p>如果任何两个有效码字至少有三位不同.这样才具备纠错一位的能力,也可以检错两位</p>
-<p>定义两个长度相同的字x,y的汉明距离是对应位不同的数量,记作$d(x,y)$<br>$$<br>d(x,y)&#x3D;x\oplus y 结果中1的数量<br>$$<br>最小汉明距离:一组字所有对中最小的汉明距离</p>
-<h5 id="编码方案"><a href="#编码方案" class="headerlink" title="编码方案"></a>编码方案</h5><p>块编码方案记为$C(n,k)\ with\ d_{min}&#x3D;x$</p>
-<p>其中n是码字长度,k是数据字长度.$d_{min}$是<strong>有效</strong>码字的最小汉明距离</p>
-<p>当可以检错$s$个错误时,要求$d_{min}&#x3D;s+1$</p>
-<p>当可以纠错$s$个错误时,要求$d_{min}&gt; 2s$,也就是$d_{min}&#x3D;2s+1$</p>
-<blockquote>
-<p>因此最好采用奇数长度的码字</p>
-</blockquote>
-<p><img src="https://raw.githubusercontent.com/DeutschBall/VideoBed/main/image-20230208100459337.png" alt="image-20230208100459337"></p>
-<p>x和y两个有效码字,有相同的概率突变为同一个错误码字,因而无法纠错</p>
-<p><img src="https://raw.githubusercontent.com/DeutschBall/VideoBed/main/image-20230208101051053.png" alt="image-20230208101051053"></p>
-<p>x突变s位之后依然落在半径为s的圈里,而任意两个圈相离,也就是说一个错误码字一定有一个概率最大的突变来源.</p>
-<p>这就有了纠错能力</p>
-<h4 id="线性块编码"><a href="#线性块编码" class="headerlink" title="线性块编码"></a>线性块编码</h4><p>线性块编码:任何两个有效码字的异或生成另一个有效码字.比如:</p>
-<p><img src="https://raw.githubusercontent.com/DeutschBall/VideoBed/main/image-20230208101612648.png" alt="image-20230208101612648"></p>
-<h5 id="最小汉明距离"><a href="#最小汉明距离" class="headerlink" title="最小汉明距离"></a>最小汉明距离</h5><p>线性快编码的最小汉明距离:1的个数最少的非零有效码字中的1的个数</p>
-<p>还是以上图为例</p>
-<table>
-<thead>
-<tr>
-<th>非零码字</th>
-<th>1的个数</th>
-</tr>
-</thead>
-<tbody><tr>
-<td>01011</td>
-<td>3</td>
-</tr>
-<tr>
-<td>10101</td>
-<td>3</td>
-</tr>
-<tr>
-<td>11110</td>
-<td>4</td>
-</tr>
-</tbody></table>
-<p>因此$d_{min}&#x3D;3$</p>
-<h5 id="简单奇偶校验编码"><a href="#简单奇偶校验编码" class="headerlink" title="简单奇偶校验编码"></a>简单奇偶校验编码</h5><p>$n&#x3D;k+1,d_{min}&#x3D;2$</p>
-<p>只有一位校验位</p>
-<p>比如$C(5,4)$</p>
-<p><img src="https://raw.githubusercontent.com/DeutschBall/VideoBed/main/image-20230208102201761.png" alt="image-20230208102201761"></p>
-<p>突变奇数位可以被检查出</p>
-<p>突变偶数位不可以</p>
-<h5 id="二维奇偶校验"><a href="#二维奇偶校验" class="headerlink" title="二维奇偶校验"></a>二维奇偶校验</h5><p><img src="https://raw.githubusercontent.com/DeutschBall/VideoBed/main/image-20230208102627543.png" alt="image-20230208102627543"></p>
-<p>两维奇偶校验能检测出所有3位或3位以下的错误（因为此时至少在某一行或某一列上有一位错）、奇数位错以及很大一部分偶数位错。</p>
-<h4 id="汉明编码"><a href="#汉明编码" class="headerlink" title="汉明编码"></a>汉明编码</h4><p>对于汉明编码$C(n,k),d_{min}&#x3D;3$,有如下关系:<br>$$<br>\begin{cases}<br>n&#x3D;2^m-1\<br>k&#x3D;n-m\<br>r&#x3D;m<br>\end{cases}<br>$$<br>比如$C(7,4)$中,$n&#x3D;7&#x3D;2^m-1$得到m&#x3D;3</p>
-<p>$k&#x3D;n-m&#x3D;7-3&#x3D;4$即数据字位数</p>
-<p>$r&#x3D;m&#x3D;3$即冗余位数</p>
-<p><img src="https://raw.githubusercontent.com/DeutschBall/VideoBed/main/image-20230208103155013.png" alt="image-20230208103155013"></p>
-<p>如何检错?</p>
-<p>比如数据字0111,计算冗余校验位:<br>$$<br>\begin{cases}<br>r_0&#x3D;a_2+a_1+a_0&#x3D;1+1+1&#x3D;1\<br>r_1&#x3D;a_3+a_2+a_1&#x3D;0+1+1&#x3D;0\<br>r_2&#x3D;a_1+a_0+a_3&#x3D;1+1+0&#x3D;0</p>
-<p>\end{cases}<br>$$<br>得到码字$0111001$</p>
-<p>如果码字没有错误,那么接收方计算得到的q2q1q0应该全零</p>
-<p>如果码字有一位出现错误,变成$0110001$</p>
-<p>在接收方(接收方认为顶多有一位发生错误):<br>$$<br>q_0&#x3D;b_2+b_1+b_0+q_0&#x3D;1+1+0+1&#x3D;1<br>$$<br>此时已经发现错误了,但是不能确认是b2,b1,b0,q0这四位中的哪一位出现的差错</p>
-<p>然后又算得<br>$$<br>q_1&#x3D;b_3+b_2+b_1+q_1&#x3D;0+1+1+0&#x3D;0<br>$$<br>说明b3b2b1q1都没错误,那么只有b0,q0中有错误</p>
-<p>然后又算得<br>$$<br>q_2&#x3D;b_1+b_0+b_3+q_2&#x3D;1+0+0+0&#x3D;1<br>$$<br>可以肯定是$b_0$的错误了</p>
-<blockquote>
-<p>如果数据字至少是7位,计算满足一位检错条件的汉明编码方案<br>$$<br>\begin{cases}<br>n&#x3D;2^m-1\<br>k&#x3D;n-m\<br>r&#x3D;m<br>\end{cases}<br>$$</p>
-<p>$$<br>k&#x3D;n-m&#x3D;2^m-1-m\ge7<br>$$</p>
-<p>解得</p>
-<p>$m&#x3D;4,n&#x3D;15,k&#x3D;11$</p>
-<p>因此满足条件的编码方案是$C(15,11)$</p>
-</blockquote>
-<h4 id="循环冗余编码"><a href="#循环冗余编码" class="headerlink" title="循环冗余编码"></a>循环冗余编码</h4><p>Cyclic Redundancy Check,CRC</p>
-<p>$C(n,k)$</p>
-<p>n位的码字,其中k位数据字,最右边加上n-k个0作为校正子的初始值,这样n位传递给生成器</p>
-<p>生成器用长度n-k+1的除数去除码字</p>
-<p>得到n-k位余数,填到校正子上</p>
-<p>真码字(数据字:校正子)就计算完毕了,然后传输,然后被接收</p>
-<p>接收方校验器用相同除数除码字</p>
-<p>如果得到n-k位余数是0则无误,码字前k位就是数据字</p>
-<p>否则丢弃</p>
-<p><img src="https://raw.githubusercontent.com/DeutschBall/VideoBed/main/image-20230208110416498.png" alt="image-20230208110416498"></p>
-<p>计算过程</p>
-<p><img src="https://raw.githubusercontent.com/DeutschBall/VideoBed/main/image-20230208111036131.png" alt="image-20230208111036131"></p>
-<h5 id="多项式"><a href="#多项式" class="headerlink" title="多项式"></a>多项式</h5><p>CRC的除数称为生成多项式,简称生成子或者生成器$g(x)$</p>
-<p>码字$c(x)&#x3D;d(x):s(x)$,码字就是数据字和校正子的增广</p>
-<p>差错$e(x)$</p>
-<p>校验原理:</p>
-<p><img src="https://raw.githubusercontent.com/DeutschBall/VideoBed/main/image-20230208111438640.png" alt="image-20230208111438640"></p>
-<p>在发送端计算完的真码字一定满足$\frac{c(x)}{g(x)}&#x3D;0$</p>
-<p>因此对接收方的码字除以$g(x)$,如果不为零,说明一定存在$\frac{e(x)}{g(x)}$这一项,也就是说分子不为零,即存在$e(x)$这一项,即存在差错</p>
-<p>生成多项式的形式决定了检错能力</p>
-<h5 id="单个位差错"><a href="#单个位差错" class="headerlink" title="单个位差错"></a>单个位差错</h5><p>单个位差错是指$e(x)&#x3D;x^i$的情形</p>
-<p>检测单个位差错需要保证$e(x)$不能被$g(x)$整除</p>
-<p>比如如果设置$g(x)&#x3D;1$,则任何多项式都被$g(x)$整除,这就查不出任何错误来</p>
-<p>如果生成多项式至少有两项,并且有1这一项(也就是$x^0$这一项),那么所有单比特错误都可以检出</p>
-<p><strong>也就是说,$g(x)$的作用是,出现差错时,$e(x)$无法被$g(x)$整除</strong></p>
-<h5 id="两独立位差错"><a href="#两独立位差错" class="headerlink" title="两独立位差错"></a>两独立位差错</h5><p>两独立位差错指$e(x)&#x3D;x^i+x^j$的情形<br>$$<br>e(x)&#x3D;x^i+x^j&#x3D;x^i(x^{j-i}+1)&#x3D;x^i(x^t+1)<br>$$<br>如果生成多项式$g(x)$无法整除$x^t+1$则所有独立两位错误都可以检查出来</p>
-<p>比如$x+1$不能检查出两个相邻位的错误</p>
-<p>$x^4+1$无法检查出两个相隔4位的错误</p>
-<p>$x^3+x^2+1$就可以检查所有两个独立位错误</p>
-<h5 id="奇数个位差错"><a href="#奇数个位差错" class="headerlink" title="奇数个位差错"></a>奇数个位差错</h5><p>奇数个位错误指:<br>$$<br>e(x)&#x3D;x^{i1}+x^{i2}+…+x^{ik}<br>$$<br>其中k是奇数</p>
-<p>只要是$g(x)$包含$x+1$因式,就可以检查出$e(x)$,证明:</p>
-<p>假设检查不出来,即$g(x)|e(x)$<br>$$<br>g(x)|e(x),x+1|g(x)\rightarrow x+1|e(x)<br>$$<br>只需要证明$x+1|e(x)$不能成立</p>
-<p>如果任何一个偶数项多项式都可以被$x+1$整除,那么任何奇数项多项式,就可以拆成一个偶数项多项式加一个单独的多项式.那么问题转化为单个比特错误</p>
-<p>于是只需要证明任何偶数项多项式可以被$x+1$整除</p>
-<p>由于任何偶数项多项式,都可以转化为若干个这种形式的和<br>$$<br>x^a(x^t+1)<br>$$</p>
-<p>由于多项式系数在**模2域上,**因此上式又可以写为<br>$$<br>x^n(1-x+x^2-x^3+…)&#x3D;x^n\frac{1-(-x)^t}{1-(-x)}<br>$$<br>当t是奇数时由上式得到<br>$$<br>x^t+1&#x3D;(x+1)(x^{t-1}-x^{t-2}+x^{t-3}-…)<br>$$<br>当t不是奇数,是偶数比如$e(x)&#x3D;x^2+1$,此时t&#x3D;2是偶数</p>
-<p>这就可以利用系数在模2域上的性质了</p>
-<p>此时$e(x)&#x3D;x^2+1&#x3D;x^2+2x+1&#x3D;(x+1)^2$</p>
-<p>推广一下,可以得到$x^t+1&#x3D;(x+1)^t$其中t是偶数,并且系数在模2域上</p>
-<p>这就证明了$x+1$整除任何偶数项多项式</p>
-<h5 id="突发性错误"><a href="#突发性错误" class="headerlink" title="突发性错误"></a>突发性错误</h5><p>突发恶疾指接连几个bit位都可能发生错误<br>$$<br>e(x)&#x3D;x^j+…x^i&#x3D;x^j(1+…+x^{i-j})<br>$$<br>令$e’(x)&#x3D;1+…+x^{i-j}$</p>
-<p>意思时,起码两头的i,j两位是有错误的,中间的位可能有错误也可能无误,但是无所谓</p>
-<p>设$L&#x3D;i-j+1$,意思是突发性错误的长度</p>
-<p>这L位中,提出公因式$x^j$之后,最低次项是1,最高次项是$x^{i-j}$,这两项肯定得有</p>
-<p>设$g(x)&#x3D;x^r+…+1$表示生成多项式,它至少包含$x^r+1$两项,这保证了可以检测任何单比特错误.其他比r低次的项可有可无.</p>
-<p><strong>如果$g(x)$阶比$e’(x)$大</strong>,即r&gt;L-1,显然$\frac{e’(x)}{g(x)}$是有余数的,此时任何差错都可以检查出来</p>
-<p><strong>如果$g(x)$和$e’(x)$同阶</strong>,即r&#x3D;L-1,</p>
-<p>此时只有$e’(x)&#x3D;g(x)$只有这种情况没有余数,这个概率是多大呢?</p>
-<p>要求$g(x)$和$e’(x)$的每一项系数都相同,根据概率论独立事件乘法原则,这个概率是<br>$$<br>P(g(x)&#x3D;e’(x))&#x3D;(\frac{1}{2})^{L-2}&#x3D;(\frac{1}{2})^{r-1}<br>$$</p>
-<blockquote>
-<p>这里L-2的原因是,$g(x),e’(x)$最高次项和常数项1都已经是相同的了,只需要考虑中间各项的情况</p>
-</blockquote>
-<p>因此r&#x3D;L-1时,能够检查出错误的概率是$1-(\frac{1}{2})^{r-1}$</p>
-<p><strong>如果$g(x)$比$e’(x)$阶小</strong>,即L&gt;r+1时,考虑啥情况检查不出错误?</p>
-<p>比如$e(x)&#x3D;x^6+x^5+x+1$,$g(x)&#x3D;x^5+1$</p>
-<p>此时$\frac{e(x)}{g(x)}&#x3D;x+1$可以被整除,无法检查出错误</p>
-<p>考虑对于任意一个$g(x)$,只要是其阶比$e’(x)$小,一定存在$e’(x)$,使得$g(x)|e’(x)$吗?</p>
-<p>确实如此,只需要构造$e’(x)&#x3D;x^{L-1-r}g(x)+g(x)&#x3D;(x^{L-1-r}+1)g(x)$</p>
-<p>这是一个临界条件,保证了阶是L-1并且存在常数项1</p>
-<p>还可以往里随便加$x^kg(x),k\in(0,L-1-r)$项</p>
-<p>这样满足条件的构造共有$2^{L-2-r}$种</p>
-<p>而L-1阶含常数项1的多项式共有$2^{L-2}$个</p>
-<p>因此构造的出现概率就是$\frac{2^{L-2-r}}{2^{L-2}}&#x3D;(\frac{1}{2})^r$,也就是检不出错误的概率</p>
-<p>那么能够检查出错误的概率就是$1-(\frac{1}{2})^r$</p>
-<p>总结:</p>
-<p>所有$L ≤ r $的突发性差错均可被检测到。</p>
-<p>所有$L &#x3D; r + 1 $的突发性差错有$1 – (1&#x2F;2)r–1      $的概率被检测到。</p>
-<p>所有$L &gt; r + 1 $的突发性差错有$1 – (1&#x2F;2)r     $ 的概率被检测到。</p>
-<h5 id="高性能多项式特性"><a href="#高性能多项式特性" class="headerlink" title="高性能多项式特性"></a>高性能多项式特性</h5><ol>
-<li>至少有两项,要有常数项1,保证检查一位错误</li>
-<li>不能整除 $x^t + 1(2 ≤ t ≤ n − 1)$,保证检查两个独立位错误</li>
-<li>应当有因子 $x + 1$,保证检查所有奇数位数错误</li>
-</ol>
-<h4 id="校验和"><a href="#校验和" class="headerlink" title="校验和"></a>校验和</h4><p>脚丫子都知道怎么算,注意结果要取反</p>
-<h3 id="数据链路层协议"><a href="#数据链路层协议" class="headerlink" title="数据链路层协议:"></a>数据链路层协议:</h3><p><img src="https://raw.githubusercontent.com/DeutschBall/VideoBed/main/image-20230204191849501.png" alt="image-20230204191849501"></p>
-<p>只要带上ARQ的肯定有差错控制功能</p>
-<p>noiseless channel是没有噪声,不会丢包,不会重复,无损坏帧的理想信道,最简单协议和停止等待协议只是最初的一厢情愿</p>
-<table>
-<thead>
-<tr>
-<th>协议</th>
-<th>特点</th>
-<th></th>
-</tr>
-</thead>
-<tbody><tr>
-<td>simplest</td>
-<td>纯纯理想环境,<br />发送方不需要考虑丢包坏帧的情况,要说啥只说一遍,不多废话<br />接收方就洗耳恭听,也不需要回复收到</td>
-<td></td>
-</tr>
-<tr>
-<td>stop-and-wait</td>
-<td>发送方发<strong>一个</strong>帧,就等着接收方回复收到<br />如果没有收到回复,那么可能是网络阻塞或者接收方死球了<br />长时间没有收到回复就认为超时了,重发该帧<br />啥时候收到回复确认,啥时候发下一帧</td>
-<td></td>
-</tr>
-<tr>
-<td></td>
-<td></td>
-<td></td>
-</tr>
-<tr>
-<td>Stop-and-wait ARQ</td>
-<td>停等ARQ协议中,每个帧要么编号1要么编号0(原序号模2得到)<br />如果收到0号帧,则下一个期望的就是1号帧<br />如果接收方接收到的帧不是期望帧,回复自己期望的那一帧<br />已发送的帧会被保留副本,如果超时没有收到该帧的确认(或者说下一帧的期待)<br />则重发超时帧</td>
-<td><img src="https://raw.githubusercontent.com/DeutschBall/VideoBed/main/image-20230204193901028.png" alt="image-20230204193901028"></td>
-</tr>
-<tr>
-<td>Go-Back-N ARQ</td>
-<td>实际上是Stop-and-wait ARQ的增强版<br />Stop-and-wait ARQ协议中没发一个包都要确认一下<br />现在可以<strong>发一组</strong>包然后确认一下<br />让确认这种控制信息比重更少</td>
-<td></td>
-</tr>
-<tr>
-<td>Selective Repeat ARQ</td>
-<td>Go-Back-N ARQ的增强版<br />Go-Back-N ARQ中接收方窗口为1,<br />本算法中将接收方窗口增强到和发送方窗口一样大<br />但是窗口大小更小了,为$2^{m-1}$<br />(Go-Back-N ARQ中发送方窗口是$2^m-1$)</td>
-<td></td>
-</tr>
-</tbody></table>
-<h5 id="回退N帧自动重发请求"><a href="#回退N帧自动重发请求" class="headerlink" title="回退N帧自动重发请求"></a>回退N帧自动重发请求</h5><p>Go-Back-N Automatic Repeat Request</p>
-<p>在帧头部设置一个帧序号字段,假设这个字段使用m位,那么可以编号$[0,2^m)$,即帧序号是模$2^m$的</p>
-<p>发送窗口:</p>
-<p>发送方的发送窗口大小就设置为$S_{size}&#x3D;2^m-1$,</p>
-<blockquote>
-<p>为什么要设置成这个值呢?为什么不设置成$2^m$?留作后话</p>
-</blockquote>
-<p>比如帧序号字段占用4bit,那么发送方滑动窗口大小就是16-1&#x3D;15</p>
-<p>两个指针,</p>
-<p>其中$S_f$永远指向最早没有被确认的窗口</p>
-<p>$S_n$指向当前发送方应该发送的窗口位置</p>
-<p><img src="https://raw.githubusercontent.com/DeutschBall/VideoBed/main/image-20230204195038189.png" alt="发送窗口"></p>
-<p>接收窗口:</p>
-<p><img src="https://raw.githubusercontent.com/DeutschBall/VideoBed/main/image-20230204195932727.png" alt="image-20230204195932727"></p>
-<p>接收方只需要一个指针即可,只需要记录下一个期待接收的窗口</p>
-<p><strong>两个窗口如何交互?</strong></p>
-<p>假设发送方连续发了0到14帧,这几个帧是陆续到达的,接收方收到第n帧就会回复期待n+1帧.也可能一股脑收到了n,n+1,n+2这三帧,此时接收方直接回复一个累计确认,期望第n+3帧</p>
-<p>考虑有丢包,可能接收方对0到5帧的确认都丢了,但是对第6帧的确认没丢,被发送方收到了,这时发送方Sf指针直接移动到第7帧,也就是发送方窗口右移,此时发送方就可以继续发送第15,16,17等等帧了</p>
-<p>也可能发送方第0帧就在路上丢包了,第1,2,等等帧都到了,但是接收方不要,就要第一帧,于是接收方直接丢弃并保持沉默,</p>
-<p>发送方发现从第0帧往后,一直长时间没有收到回应,就要从第0帧这里开始重发0到14帧</p>
-<p>**发送方滑动窗口大小设为$2^m-1$**的目的</p>
-<blockquote>
-<p>假设m&#x3D;4,即帧的编号$\in[0,15]$</p>
-<p>并且假设滑动窗口大小大于等于$2^m&#x3D;16$,不妨就设置为16</p>
-<p>好,现在一个大文件成帧之后</p>
-<p>0 1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 0 1 2 3 4 5 6 7 8 9 10 11 12 13 14 15…</p>
-<p>滑动窗口要是16就会包含[0,15],假设发送方这16帧全都发出去了,但是网络太垃圾了,没有收到任何回复,而接收方实际上全都回复了,并且接收方已经准备接收下一个0号帧了</p>
-<p>此时发送方认为接收方本次[0,15]全都没有收到,于是从0开始重发,但是接收方期望的是下一个0号帧</p>
-<p>但是两个帧都是编号0,接收方无法发现错误,于是就错误地接受了</p>
-<p><img src="https://raw.githubusercontent.com/DeutschBall/VideoBed/main/image-20230204201039834.png" alt="image-20230204201039834"></p>
-</blockquote>
-<h5 id="选择性重传"><a href="#选择性重传" class="headerlink" title="选择性重传"></a>选择性重传</h5><p>在回退N帧自动重发中只有发送方会累计确认</p>
-<p>在选择性重传中,发送方和接收方都会累计确认</p>
-<p>解决了啥问题呢?</p>
-<p>发送方如果发送了$[0,14]$这些帧,接收方可能就得发送15个确认回复,回复太多这是其一</p>
-<p>其二是,如果发送方已经接到了[1,14],唯独0号帧路上丢包了,在回退N帧自动重发中,发送方就得从0开始重发[0,14]</p>
-<p>而实际上只需要重发一个0就足够了,但是接收方脑子太小了,只认一个数,[1,14]已经忘记了.</p>
-<p>于是就改进成<strong>选择性重传算法</strong></p>
-<p>接收方加上了窗口,就有了缓存的能力</p>
-<p><img src="https://raw.githubusercontent.com/DeutschBall/VideoBed/main/image-20230206220446089.png" alt="image-20230206220446089"></p>
-<p>关键注意1号帧在发送途中丢包,但是2号帧顺利抵达,此时接收方回复NAK1,意思是期望1.然而在发送方针对NAK1的回应到达之前,3号帧也顺利抵达了,此时接收方默默收下,但是啥回复都没有</p>
-<p>然后发送方的针对NAK1的回复1号帧到了,</p>
-<p>此时接收方回复的是ACK4,通知发送方,3之前已经都接收到了,可以发送4及之后的帧了,</p>
-<p>发送方接收到ACK4之后会调整自己的发送窗口,然后继续发送4,5,…号帧</p>
-<p>**为啥发送方和接收方的窗口都得是$2^{m-1}$**呢?</p>
-<p><img src="https://raw.githubusercontent.com/DeutschBall/VideoBed/main/image-20230204204344648.png" alt="image-20230204204344648"></p>
-<p>假设m&#x3D;2,那么帧编号就是$[0,3]$此时窗口大小最大为2,否则,假设是3</p>
-<p>发送方发送0,1,2三帧之后,都被接收方收到,但是所有回复都丢包了</p>
-<p>此时接收方已经后移了接收窗口,此时接收方窗口内的期待0号帧是下一个0号帧.</p>
-<p>但是发送方超时重发了刚才的0号帧</p>
-<p>于是接收方就把刚才的0号帧当成下一个0号帧错误接收了</p>
-<h5 id="带捎带的N步返回NRQ"><a href="#带捎带的N步返回NRQ" class="headerlink" title="带捎带的N步返回NRQ"></a>带捎带的N步返回NRQ</h5><p>捎带:将控制报文,比如NAK,ACK等等,附带到数据报文中一起发送</p>
-<h4 id="带宽利用率"><a href="#带宽利用率" class="headerlink" title="带宽利用率"></a>带宽利用率</h4><p>首先计算整个链路充满数据,能放开多少数据,也就是带宽时延积</p>
-<p>然后使用的协议在传播时间内最多能有多少帧,多少bit上到信道上传输</p>
-<p>做比即可</p>
-<p><img src="https://raw.githubusercontent.com/DeutschBall/VideoBed/main/image-20230206221303181.png" alt="image-20230206221303181"></p>
-<h3 id="多路访问"><a href="#多路访问" class="headerlink" title="多路访问"></a>多路访问</h3><p><img src="https://raw.githubusercontent.com/DeutschBall/VideoBed/main/image-20230206222507328.png" alt="image-20230206222507328"></p>
-<h4 id="随机访问协议"><a href="#随机访问协议" class="headerlink" title="随机访问协议"></a>随机访问协议</h4><p>所有站点低位相同,任何站点都不能组织其他站点说话</p>
-<p>有话要说就根据自己的协议说</p>
-<h5 id="AlOHA"><a href="#AlOHA" class="headerlink" title="AlOHA"></a>AlOHA</h5><p>任何站点,在任何时间,想说啥就说啥</p>
-<p><img src="https://raw.githubusercontent.com/DeutschBall/VideoBed/main/image-20230207093146683.png" alt="image-20230207093146683"></p>
-<p>只要同一时间在信道上有两个帧,就会造成冲突,发生冲突的帧都会废掉</p>
-<p>ALOHA协议流程:</p>
-<p><img src="https://raw.githubusercontent.com/DeutschBall/VideoBed/main/image-20230207093619308.png" alt="image-20230207093619308"></p>
-<p>最多重发$K_{max}$次,如果一直没有收到ACK回复则放弃</p>
-<p>每次发送之后等待$2\times T_{p}$,这是接收ACK的窗口期</p>
-<p>如果没有收到,则等待一个随机数的时间$T_{B}&#x3D; T_{p}\times R,r\in[0,2^k)$.然后再重发</p>
-<h6 id="传输和传播"><a href="#传输和传播" class="headerlink" title="传输和传播"></a>传输和传播</h6><p>传输,transmission,又可以翻译为发射,是发送方将信号全放到信道上用的时间<br>$$<br>传输时间&#x3D;\frac{帧长}{带宽}<br>$$</p>
-<p><img src="https://raw.githubusercontent.com/DeutschBall/VideoBed/main/image-20230207093935960.png" alt="image-20230207093935960"></p>
-<p>传播,propagation,信号的一位经过信道用时<br>$$<br>传播时间&#x3D;\frac{电缆长度}{信号速度(一般是光速)}<br>$$</p>
-<h6 id="冲突时间"><a href="#冲突时间" class="headerlink" title="冲突时间:"></a>冲突时间:</h6><p>假设各帧长度相同,ALOHA的冲突时间是传输时间的两倍</p>
-<p><img src="https://raw.githubusercontent.com/DeutschBall/VideoBed/main/image-20230207094413864.png" alt="image-20230207094413864"></p>
-<p>即在$[t-T_{fr},t+T_{fr}]$这期间,不允许有第二个帧</p>
-<h6 id="吞吐量"><a href="#吞吐量" class="headerlink" title="吞吐量"></a>吞吐量</h6><p>$$<br>S&#x3D;G\times e^{-2G}<br>$$</p>
-<p>单位:帧</p>
-<blockquote>
-<p>注意这里的吞吐量单位不是bps</p>
-</blockquote>
-<p>当且仅当$G&#x3D;\frac{1}{2}$,$S_{max}&#x3D;0.184$</p>
-<p>G是帧传输时间内系统平均产生帧的数量</p>
-<p>对于$G&#x3D;\frac{1}{2}$也好立即,因为冲突时间就是两个帧传输时间,如果整个系统在一个传输时间内产生的帧数均值是$G&#x3D;\frac{1}{2}$,则冲突事件内产生的帧数均值就是1</p>
-<p>如果$G&gt;\frac{1}{2}$则冲突的概率增大,一旦发生冲突,两个帧都是废物</p>
-<p>而吞吐量的定义是:单位时间内<strong>成功</strong>传送的数据量.</p>
-<p>两个废物帧都不是成功传送,因此导致了吞吐量降低</p>
-<blockquote>
-<p>推导$S&#x3D;G\times e^{-2G}$</p>
-<p>假设传输时间是T,当一个帧发射之后,在T时间内,系统中又发送帧数均值是G</p>
-<p>也就是说,T时间内系统又发送一帧的概率为$G$</p>
-<p>首先考虑吞吐量怎么计算</p>
-<p>定义吞吐量:传输时间内,能够成功传输的帧数,则有:<br>$$<br>S&#x3D;GP_0<br>$$<br>其中$P_0$为一帧发送成功的概率,也就是冲突时间内没有第二个帧的概率.</p>
-<p>$G$是T时间内系统发送帧数的<strong>均值</strong></p>
-<p>$P_0$是成功率</p>
-<p>那么$S&#x3D;GP_0$就计算了T时间内发送成功的帧数的<strong>均值</strong></p>
-<p>下面考虑$P_0$怎么算</p>
-<p>计算一帧成功传输的概率,也就是发送一帧之后2T时间内没有其他帧的概率</p>
-<p>假设T时间内有其他X个帧发射.显然$X\sim P(G)$泊松分布,则分布律为<br>$$<br>P(X&#x3D;k)&#x3D;\frac{G ^k}{k!}e^{-G}<br>$$</p>
-<p>在2T时间即冲突时间内,不发生冲突,意味着没有其他帧发送,其概率是<br>$$<br>P(X&#x3D;0)\times P(X&#x3D;0)&#x3D;(\frac{G^0}{0!}e^{-G})^2&#x3D;e^{-2G}<br>$$</p>
-<p>带入$P_0&#x3D;P(X&#x3D;0)\times P(X&#x3D;0)&#x3D;e^{-2G}$得到<br>$$<br>S&#x3D;GP_0&#x3D;Ge^{-2G}<br>$$</p>
-<p>如果定义吞吐量为:传输时间内成功传输的帧数.那么算到这里就结束了</p>
-<p>如果定义吞吐量为:单位时间内成功传输的帧数.那么$S&#x3D;\frac{G{e^{-2G}}}{T}$</p>
-<p>如果定义吞吐量为:单位时间内成功传输的bit数.那么$S&#x3D;\frac{G{e^{-2G}}}{T}\times 帧大小$</p>
-</blockquote>
-<h5 id="时隙ALOHA"><a href="#时隙ALOHA" class="headerlink" title="时隙ALOHA"></a>时隙ALOHA</h5><p><img src="https://raw.githubusercontent.com/DeutschBall/VideoBed/main/image-20230207102708453.png" alt="image-20230207102708453"></p>
-<p>规定只能在每个Slotn一开始发送,每个帧顶多占用一个Slot,不会影响其他Slot</p>
-<p>那么冲突只会发生在一个Slot之内,并且一旦发生冲突,一定是两个帧在时间上完全重合</p>
-<h6 id="吞吐量-1"><a href="#吞吐量-1" class="headerlink" title="吞吐量"></a>吞吐量</h6><p>假设每个Slot开始时,系统中传输帧的均值为G帧,则Slot时间内又发送的帧数还是满足泊松分布</p>
-<p>只不过冲突时间降为一个Slot,成功发送一帧的概率变为<br>$$<br>P_0&#x3D;P(X&#x3D;0)&#x3D;e^{-G}<br>$$<br>吞吐量就是$S&#x3D;GP_0&#x3D;Ge^{-G}$</p>
-<h5 id="CSMA"><a href="#CSMA" class="headerlink" title="CSMA"></a>CSMA</h5><p>Carrier Sense Multiple Access</p>
-<p>载波侦听 多路访问</p>
-<p>发送前首先侦听,看看有没有其他帧在发送,可以缓解冲突,但是不能解决冲突</p>
-<p>因为一个站点侦听时,可能另一个站点已经传输了信号,但是由于<strong>传播</strong>延迟,没有被本站点侦听到,如图所示:</p>
-<p><img src="https://raw.githubusercontent.com/DeutschBall/VideoBed/main/image-20230207103600938.png" alt="image-20230207103600938"></p>
-<p>B站点在t1时刻传输一个信号,C在t2时刻要发送一个信号,但是t2时刻信号尚未传播到C处,因此C在t2传输一个信号,就会和B传输的信号发生冲突</p>
-<h6 id="冲突时间-1"><a href="#冲突时间-1" class="headerlink" title="冲突时间"></a>冲突时间</h6><p>在B开始传输消息,到消息传播到其他站点之前,这段时间是不能有第二个消息传播的</p>
-<p>因此冲突时间就等于传播时间</p>
-<p><img src="https://raw.githubusercontent.com/DeutschBall/VideoBed/main/image-20230207104138197.png" alt="image-20230207104138197"></p>
-<h6 id="冲突缓解方法"><a href="#冲突缓解方法" class="headerlink" title="冲突缓解方法"></a>冲突缓解方法</h6><p><img src="https://raw.githubusercontent.com/DeutschBall/VideoBed/main/image-20230207104446245.png" alt="image-20230207104446245"></p>
-<h5 id="CSMA-CD"><a href="#CSMA-CD" class="headerlink" title="CSMA&#x2F;CD"></a>CSMA&#x2F;CD</h5><p>Carrier Sense Multiple Access with Collision Detection,带冲突检测的载波侦听多路访问</p>
-<p><img src="https://raw.githubusercontent.com/DeutschBall/VideoBed/main/image-20230207105245273.png" alt="image-20230207105245273"></p>
-<p>之前CSMA协议中,一个站点只会在发送前进行检查,如果信道空闲就发送</p>
-<p>现在CSMA&#x2F;CD在CSMA的基础上,一个站点会在发送时同时检查,如果侦测到信道中有其他信号,立刻终止发送</p>
-<p>因为起码顺着该信号的传播方向上,如果再发送信号肯定是冲突了,那就不如立刻闭嘴不发了</p>
-<h6 id="冲突检测时间"><a href="#冲突检测时间" class="headerlink" title="冲突检测时间"></a>冲突检测时间</h6><p>首先考虑如图所示情况</p>
-<p><img src="https://raw.githubusercontent.com/DeutschBall/VideoBed/main/image-20230207110344621.png" alt="image-20230207110344621"></p>
-<p>如果传输时间很短但是传播延迟很长,可能就存在双方均检测不到冲突或者只有一方能够检测到冲突的情形</p>
-<p>此时冲突废帧会被错误交付</p>
-<p>为了避免这种情况,就需要传输时间和传播时间有约束关系</p>
-<p>直接考虑距离最远的两个站点A,B的情况即可</p>
-<p><img src="https://raw.githubusercontent.com/DeutschBall/VideoBed/main/image-20230207111015408.png" alt="image-20230207111015408"></p>
-<p>如果B在A的信号马上就要发到时才开始发送,直到B的信号被A侦听到时,A必须仍在发送</p>
-<p>也就是说<strong>最小传输时间应为最大传播时间的两倍</strong>,如下图</p>
-<blockquote>
-<p>因为A,B是两个距离最远的站点,因此是最大传播时间</p>
-</blockquote>
-<p><img src="https://raw.githubusercontent.com/DeutschBall/VideoBed/main/image-20230207111728369.png" alt="image-20230207111728369"></p>
-<blockquote>
-<p>CSMA&#x2F;CD网络中，带宽10Mbps，最大传播时间为25.6us，那么最小帧长度是多少？</p>
-<p>假设帧长是x,则传输时间是$T_{fr}&#x3D;\frac{x}{10M}$</p>
-<p>由$T_{fr}\ge 2T_p$得到<br>$$<br>\frac{x}{10\times 10^6}\ge 25.6\times 10^{-6}\times 2<br>$$<br>即$x\ge 512bit$</p>
-<p>因此帧长最小为512比特</p>
-</blockquote>
-<h6 id="CSMA-CD算法流程"><a href="#CSMA-CD算法流程" class="headerlink" title="CSMA&#x2F;CD算法流程"></a>CSMA&#x2F;CD算法流程</h6><p><img src="https://raw.githubusercontent.com/DeutschBall/VideoBed/main/image-20230207112317356.png" alt="image-20230207112317356"></p>
-<h5 id="CSMA-CA"><a href="#CSMA-CA" class="headerlink" title="CSMA&#x2F;CA"></a>CSMA&#x2F;CA</h5><p>Carrier Sense Multiple Access with Collision Avoidance,带冲突避免的载波侦听多路访问</p>
-<p>这个协议挺有意思</p>
-<p><img src="https://raw.githubusercontent.com/DeutschBall/VideoBed/main/image-20230207151754370.png" alt="image-20230207151754370"></p>
-<p>IFS:Interframe Space,IFS 帧间间隔</p>
-<blockquote>
-<p>IFS用于定义一个站点的优先权,优先权高的站点,其IFS就短</p>
-<p>为啥IFS短了就意味着优先权高呢?这就需要了解协议如何工作的</p>
-</blockquote>
-<p>Contention Window 竞争窗口</p>
-<p>工作流程:</p>
-<img src="https://raw.githubusercontent.com/DeutschBall/VideoBed/main/image-20230207151820663.png" alt="CSMA/CA" style="zoom:25%;" />
-
-
-
-<p>1.首先检查信道是否空闲,如果不是,重新检查</p>
-<p>2.如果信道空闲,等待IFS时间</p>
-<p>3.等完了再检查一下信道是否空闲,如果忙,退回1.</p>
-<p>4.挑一个随机数$R\in[0,2^K)$,也就是在竞争窗口中抓阄</p>
-<p>5.等R个时间片,然后检查信道是否忙,如果忙,就等会不忙了再发送.如果不忙就发送</p>
-<p>6.发完了设置窗口期等待ACK回复,如果收到,则通信成功,否则K++,回头从1开始,如果K&gt;15则不再尝试,通信事变</p>
-<h3 id="以太网"><a href="#以太网" class="headerlink" title="以太网"></a>以太网</h3><p>低层协议的组成</p>
-<p><img src="https://raw.githubusercontent.com/DeutschBall/VideoBed/main/image-20230207155541312.png" alt="image-20230207155541312"></p>
-<p>OSI规定的数据链路层分成两个子层,一个是LLC层,一个是MAC层.前者承上后者启下</p>
-<p>以太网是MAC的一种实现方式,并且是目前最成功的实现方式</p>
-<h4 id="MAC地址"><a href="#MAC地址" class="headerlink" title="MAC地址"></a>MAC地址</h4><h5 id="MAC地址规定"><a href="#MAC地址规定" class="headerlink" title="MAC地址规定"></a>MAC地址规定</h5><p>以太网地址是一个6字节数,每个网卡都有一个固定的MAC地址</p>
-<p>一个计算机可能由多张网卡,因此计算机可以有多个MAC地址</p>
-<p><code>ipconfig /all</code>即可查看</p>
-<figure class="highlight sh"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line">以太网适配器 以太网:</span><br><span class="line"></span><br><span class="line">   媒体状态  . . . . . . . . . . . . : 媒体已断开连接</span><br><span class="line">   连接特定的 DNS 后缀 . . . . . . . :</span><br><span class="line">   描述. . . . . . . . . . . . . . . : Realtek PCIe GbE Family Controller</span><br><span class="line">   物理地址. . . . . . . . . . . . . : 84-A9-38-F4-9B-69</span><br><span class="line">...</span><br><span class="line">  </span><br><span class="line">无线局域网适配器 WLAN:</span><br><span class="line"></span><br><span class="line">   连接特定的 DNS 后缀 . . . . . . . :</span><br><span class="line">   描述. . . . . . . . . . . . . . . : Intel(R) Wi-Fi 6 AX201 160MHz</span><br><span class="line">   物理地址. . . . . . . . . . . . . : 2C-6D-C1-98-7D-03</span><br><span class="line">....</span><br></pre></td></tr></table></figure>
-
-<p>以<code>2C-6D-C1-98-7D-03</code>为例子,最左边是最高位,</p>
-<p>称”第一个字节”为最左边的0x2C,第二个就是0x6D</p>
-<h5 id="特殊地址"><a href="#特殊地址" class="headerlink" title="特殊地址"></a>特殊地址</h5><p>如果一个MAC地址第一个字节的最低为是0,则该地址是一个单播地址,是1则为多播地址</p>
-<p>特殊的,如果MAC addr&#x3D;FF:FF:FF:FF:FF:FF,则该地址是一个广播地址</p>
-<p>0x2C&#x3D;00101100b,显然所有的物理网卡地址必然是一个单播地址</p>
-<p>怎么观察广播地址呢?可以观察ARP协议需要在以太网中广播寻找目标IP地址的主机</p>
-<p><img src="https://raw.githubusercontent.com/DeutschBall/VideoBed/main/image-20230207160905292.png" alt="image-20230207160905292"></p>
-<p>源地址就是本机WLAN网卡的地址2C-6D-C1-98-7D-03,目的地址12个F,显然是一个广播</p>
-<p>wireshark已经自动根据本机WLAN网卡的<strong>前三个字节</strong>判断出本网卡产自Intel公司</p>
-<p>再一查好家伙made in 马来西亚</p>
-<p><img src="https://raw.githubusercontent.com/DeutschBall/VideoBed/main/image-20230207161145923.png" alt="image-20230207161145923"></p>
-<p>同理华为公司也会买下前三个字节用来标志自己公司的网卡</p>
-<p><img src="https://raw.githubusercontent.com/DeutschBall/VideoBed/main/image-20230207161443085.png" alt="image-20230207161443085"></p>
-<p>如果前三个字节是公司编号</p>
-<p>那么一个公司编号最多能够产$2^{24}\approx400万$张网卡</p>
-<p>如果一部手机使用一个wifi网卡,光中国就有13亿人,假设有1亿人用华为手机,显然一个公司编号是不够用的</p>
-<h5 id="网络序"><a href="#网络序" class="headerlink" title="网络序"></a>网络序</h5><p>字节序不变,但是每个字节内的比特位分别调转(不是取反,是前后调转)</p>
-<p><img src="https://raw.githubusercontent.com/DeutschBall/VideoBed/main/image-20230207161313727.png" alt="image-20230207161313727"></p>
-<h4 id="MAC帧格式"><a href="#MAC帧格式" class="headerlink" title="MAC帧格式"></a>MAC帧格式</h4><p>MAC帧有两种格式,</p>
-<p>不常用的802.2LLC帧,这是IEEE802工作组制定的答辩</p>
-<p>最常用的EthernetV2帧</p>
-<p><img src="https://raw.githubusercontent.com/DeutschBall/VideoBed/main/image-20230207162023980.png" alt="image-20230207162023980"></p>
-<p>MAC帧&#x3D;MAC头+MAC数据+FCS</p>
-<p>其中MAC头包括目的地址,源地址,MAC数据类型</p>
-<p>FCS就是校验和</p>
-<p>MAC数据一般是IP数据报,包括IPv4包或者IPv6数据包</p>
-<h5 id="不合法的MAC帧"><a href="#不合法的MAC帧" class="headerlink" title="不合法的MAC帧"></a>不合法的MAC帧</h5><p>以下有一则为不合法MAC帧</p>
-<p>数据字段的长度与长度字段的值不一致；</p>
-<p>帧的长度不是整数个字节；</p>
-<p>用收到的帧检验序列 FCS 查出有差错；</p>
-<p><strong>数据字段的长度不在 46 ~ 1500 字节之间；</strong></p>
-<p> <strong>MAC 帧长度不在64 ~ 1518 字节之间；</strong></p>
-<p>对于检查出的无效 MAC 帧就简单地丢弃，以太网<strong>不负责重传丢弃的帧。</strong> </p>
-<p>这里对帧长度有一个规定,[64,1518]为啥会有这两头的限制呢?</p>
-<h5 id="合法帧长度"><a href="#合法帧长度" class="headerlink" title="合法帧长度"></a>合法帧长度</h5><p>[64,1518]bytes</p>
-<p>由于有限以太网使用CSMA&#x2F;CD协议,因此需要保证最小传输时间大于等于两倍的最大传播时间</p>
-<p>而这两个时间的关系,关乎帧长度啥事呢?</p>
-<p>显然帧长越长,传输时间就越长,可以推测帧长为64bytes时达到临界值</p>
-<p>根据802.3规定,以太网最长2500米,带宽10Mbps,四个中继器,最坏情况下,往返时间(也就是两倍的最长传播时间)大约是50μs.</p>
-<p>那么传输速度应该大于50μs.</p>
-<p>又带宽是10Mbps,在50微妙内能够发送$50\times 10^{-6}s\times 10\times 10^6bps&#x3D;500bit$</p>
-<p>增加安全边际,往上取整到512bit&#x3D;64byte</p>
-<p>因此规定最小帧长就是64byte</p>
-<p>那么又为啥限制最长帧长为1500呢?</p>
-<p>因为网络是多台计算机共享的,如果一台主机一直喋喋不休地说,其他主机就得等着,因此一句话不能说太长</p>
-<p>于是人为规定为最长1518byte</p>
-<p>那么在以太网上的IP包长度就跟着被限制到[48,1500]字节</p>
-<p>这个1500字节也就是MTU,最大传输单元</p>
-<h3 id="网络连接"><a href="#网络连接" class="headerlink" title="网络连接"></a>网络连接</h3><h4 id="数据链路层设备"><a href="#数据链路层设备" class="headerlink" title="数据链路层设备"></a>数据链路层设备</h4><p>网桥,集线器,二层交换机都是链路层设备</p>
-<table>
-<thead>
-<tr>
-<th>一层设备</th>
-<th>结构</th>
-<th>作用</th>
-</tr>
-</thead>
-<tbody><tr>
-<td>中继器</td>
-<td><img src="https://raw.githubusercontent.com/DeutschBall/VideoBed/main/image-20230207210513001.png" alt="image-20230207210513001"></td>
-<td>再生信号(不是放大信号),延长通信距离</td>
-</tr>
-<tr>
-<td>集线器</td>
-<td><img src="https://raw.githubusercontent.com/DeutschBall/VideoBed/main/image-20230207210909500.png" alt="image-20230207210909500"><br />所有计算机同处于一个冲突域<br />集线器从一个端口进来的包会被无脑拷贝到所有的出端口</td>
-<td>只是把多个主机联通,<br />相当于多通水管<br />多端口的中继器</td>
-</tr>
-<tr>
-<td></td>
-<td></td>
-<td></td>
-</tr>
-</tbody></table>
-<table>
-<thead>
-<tr>
-<th>二层设备</th>
-<th>结构</th>
-<th>作用</th>
-</tr>
-</thead>
-<tbody><tr>
-<td>网桥</td>
-<td><img src="https://raw.githubusercontent.com/DeutschBall/VideoBed/main/image-20230207211056989.png" alt="image-20230207211056989" style="zoom:25%;" /><br />网桥可以检查目标地址,根据自己学习建立的转发表,决定从哪个端口转发,相对集线器聪明了不少</td>
-<td>减小冲突域,网桥的一个接口是一个冲突域<br />但是所有达到接口都在同一个广播域</td>
-</tr>
-<tr>
-<td>二层交换机</td>
-<td><img src="https://raw.githubusercontent.com/DeutschBall/VideoBed/main/image-20230207163904317.png" alt="image-20230207163904317" style="zoom:25%;" /></td>
-<td>消除冲突域,从此不再有冲突<br />相当于带阀门的多通水管<br />但是所有接口都在同一广播域</td>
-</tr>
-</tbody></table>
-<p>区分两个术语:广播域,冲突域</p>
-<p>广播域:能够接收广播帧的所有设备的集合</p>
-<p>冲突域:所有共享介质(比如电缆)都是冲突域</p>
-<p>显然广播域的范围要大于等于冲突域</p>
-<p><img src="https://raw.githubusercontent.com/DeutschBall/VideoBed/main/image-20230207213901157.png" alt="image-20230207213901157"></p>
-<p>以太网:有线局域网的一种实现,链路层使用CSMA&#x2F;CD技术</p>
-<h5 id="网桥"><a href="#网桥" class="headerlink" title="网桥"></a>网桥</h5><h6 id="爱学习の网桥"><a href="#爱学习の网桥" class="headerlink" title="爱学习の网桥"></a>爱学习の网桥</h6><p><img src="https://raw.githubusercontent.com/DeutschBall/VideoBed/main/image-20230207211927143.png" alt="image-20230207211927143"></p>
-<p>刚接入局域网的网桥是个傻子,啥也不知道,但是他很快就会知道</p>
-<p>一开始他的MAC:Port映射表是空的</p>
-<p>当A@LAN1 向 D@LAN2发送一个数据帧之后,这个帧显然必须从网桥的1号端口进入.网桥从帧中得知,源地址A在1端口对应的LAN上,于是将A:1写入映射表</p>
-<p>如果D回复A收到,立刻就会把D的MAC暴露给网桥,网桥就会记录D:2</p>
-<p>D不回复也没关系,反正D只要一说话立刻就会被网桥学会</p>
-<h6 id="环路问题"><a href="#环路问题" class="headerlink" title="环路问题"></a>环路问题</h6><p><img src="https://raw.githubusercontent.com/DeutschBall/VideoBed/main/image-20230207212358099.png" alt="image-20230207212358099"></p>
-<p>如果有两个网桥同时连接了两个LAN</p>
-<p>那么一个LAN发出的帧会同时被两个网桥转发,导致另一个LAN中出现两次该帧</p>
-<h6 id="生成树算法"><a href="#生成树算法" class="headerlink" title="生成树算法"></a>生成树算法</h6><p>生成树算法用于建立多个LAN的最优联通路径</p>
-<p>这里的最优可能是最小跳数,最小延迟,最大带宽等等</p>
-<p>假设从网桥到LAN跳数为1，从LAN到网桥跳数为0。</p>
-<blockquote>
-<p>为啥要这样假设呢?</p>
-<p>因为网桥不会主动向一个LAN发送帧,除非该帧的目的在这个LAN中</p>
-<p>而一个LAN的帧要想传送到另一个LAN,必须要经过网桥</p>
-<p>也就是说,网桥转发帧需要一定的代价,应该尽量减少转发量</p>
-<p>而LAN向网桥发送帧这是不可阻阻挡的,几乎没有代价</p>
-<p>因此有这么一个假设</p>
-</blockquote>
-<p>首先将网桥和LAN进行有向图建模,并标注边权</p>
-<p><img src="https://raw.githubusercontent.com/DeutschBall/VideoBed/main/image-20230207212859184.png" alt="image-20230207212859184"></p>
-<blockquote>
-<p>为啥没有两个网桥直接连接?或者两个LAN直接连接?</p>
-<p>这不废话吗</p>
-<p>两个网桥连接和只用一个网桥不一样吗?</p>
-<p>两个LAN连接就是一个LAN</p>
-<blockquote>
-<p>两个LAN连接也得使用网桥啊(</p>
-</blockquote>
-</blockquote>
-<p>生成树算法:</p>
-<p>spanning tree algorithm:</p>
-<p>1.每个网桥广播ID,选择最小的ID作为根网桥</p>
-<p><strong>2.找出从根网桥到其它网桥或LAN的最短路径</strong></p>
-<p>3.最短路径组合生成最短的树</p>
-<p>4.标记转发端口和阻塞端口</p>
-<p>注意生成树算法目的是,找出从根网桥到其他网桥和LAN的最短路,</p>
-<p>而不是为每个LAN找出到其他各个LAN的最短路</p>
-<p>使用生成树算法之后,阻塞端口不再使用,转发端口活跃</p>
-<h5 id="交换机"><a href="#交换机" class="headerlink" title="交换机"></a>交换机</h5><p>交换机相对于集线器的优点:</p>
-<p>1.每个端口是一个冲突域</p>
-<p>2.根据目标MAC地址查转发表,决定发往哪个端口</p>
-<p>3.全双工,由于没有冲突域,不需要CSMA&#x2F;CD协议</p>
-<p>4.有缓存,各个接口的带宽可以不同</p>
-<h4 id="网络层设备"><a href="#网络层设备" class="headerlink" title="网络层设备"></a>网络层设备</h4><p>链路层设备关心帧的MAC地址</p>
-<p>网络层设备关心包的IP地址</p>
-<p>三层设备就一个三层交换机和一个路由器</p>
-<p>这个三层交换机不伦不类,它既有二层交换机那个交换转发的功能,也有路由器的路由功能</p>
-<p>两者本身上的区别是,三层交换机主要是硬件驱动的,但是路由器是CPU+操作系统软件驱动的.这就导致三层交换机的效率远快于路由器</p>
-<p>两者功能上的区别是,三层交换机用于连接相同性质的网络,比如连接两个LAN:192.168.2.1&#x2F;24和192.168.1.1&#x2F;24</p>
-<p>但是路由器主要用于不同类型的网络连接,比如因特网和局域网的连接,入户网线可能给一个互联网的公网地址,需要使用一个路由器NAT转化为一个LAN.并且实际上的路由选择,负荷分担,链路备份,和其他网络交换路由信息,都是路由器实现的</p>
-<p>路由功能:当IP报文抵达路由器时,决定转发给哪一个下一跳路由器</p>
-<p>这个决策是基于路由器的路由表做出的</p>
-<p>路由表可以人工填写静态的,也可以让路由器自己学,就跟网桥交换机的转发表差不多</p>
-<h4 id="网关"><a href="#网关" class="headerlink" title="网关"></a>网关</h4><p>比较特殊的路由器</p>
-<p>一个LAN内的主机如果想要跨LAN访问另一个主机,只通过二层交换机是做不到的,因为二层交换机是连IP地址都不知道的傻子.网关就是一个LAN和外部网络连接的关口.LAN内的主机只要是想和外部通信,无脑往网关发包就可以了,网关负责决定这个包如何路由</p>
-<h4 id="虚拟局域网"><a href="#虚拟局域网" class="headerlink" title="虚拟局域网"></a>虚拟局域网</h4><p>交换机可以隔离冲突域但是无法隔离广播域</p>
-<p>划分虚拟局域网之后可以隔离冲突域和广播域</p>
-<p>在一个交换机上划分了VLAN,实际上相当于虚拟出多个交换机,每个交换机都分别连接到路由器上,形成多个LAN,并且这几个LAN互不连通.这个路由器就是各个LAN的网关</p>
-<h5 id="等效结构"><a href="#等效结构" class="headerlink" title="等效结构"></a>等效结构</h5><p>如图所示</p>
-<p><img src="https://raw.githubusercontent.com/DeutschBall/VideoBed/main/image-20230207220800643.png" alt="image-20230207220800643"></p>
-<p>这实际上就相当于</p>
-<p><img src="https://raw.githubusercontent.com/DeutschBall/VideoBed/main/image-20230207220913692.png" alt="image-20230207220913692"></p>
-<h5 id="如何实现"><a href="#如何实现" class="headerlink" title="如何实现"></a>如何实现</h5><p><img src="https://raw.githubusercontent.com/DeutschBall/VideoBed/main/image-20230207221014728.png" alt="image-20230207221014728"></p>
-<p>如果一个VLAN跨越了两个交换机,那么这个VLAN中两个计算机通过交换机通信时,交换机在发往另一个交换机之前,检查A计算机所处VLAN,然后在链路层帧后面加上VLAN标志,这样另一个交换机就知道把改帧转发给哪一个目标VLAN了</p>
-<p><img src="https://raw.githubusercontent.com/DeutschBall/VideoBed/main/image-20230207223219150.png" alt="image-20230207223219150"></p>
-<p>如图所示的拓扑中,经过实验,<a href="mailto:&#x50;&#x43;&#x39;&#64;&#49;&#57;&#50;&#x2e;&#49;&#x36;&#56;&#x2e;&#x31;&#48;&#x2e;&#x31;">&#x50;&#x43;&#x39;&#64;&#49;&#57;&#50;&#x2e;&#49;&#x36;&#56;&#x2e;&#x31;&#48;&#x2e;&#x31;</a> ping <a href="mailto:&#80;&#x43;&#49;&#51;&#64;&#49;&#57;&#x32;&#46;&#49;&#54;&#x38;&#x2e;&#49;&#48;&#x2e;&#51;">&#80;&#x43;&#49;&#51;&#64;&#49;&#57;&#x32;&#46;&#49;&#54;&#x38;&#x2e;&#49;&#48;&#x2e;&#51;</a>时,ICMP报文会被LSW5交换机准确地从GE0&#x2F;0&#x2F;4口转发到GE0&#x2F;0&#x2F;2端口,报文中也没有体现VLAN</p>
-<p><img src="https://raw.githubusercontent.com/DeutschBall/VideoBed/main/image-20230207223605022.png" alt="image-20230207223605022"></p>
-<p><a href="mailto:&#80;&#x43;&#x31;&#51;&#x40;&#49;&#x39;&#x32;&#x2e;&#49;&#54;&#x38;&#x2e;&#49;&#48;&#x2e;&#51;">&#80;&#x43;&#x31;&#51;&#x40;&#49;&#x39;&#x32;&#x2e;&#49;&#54;&#x38;&#x2e;&#49;&#48;&#x2e;&#51;</a> ping <a href="mailto:&#80;&#67;&#49;&#49;&#64;&#x31;&#57;&#x32;&#x2e;&#x31;&#54;&#56;&#46;&#x31;&#x30;&#46;&#50;">&#80;&#67;&#49;&#49;&#64;&#x31;&#57;&#x32;&#x2e;&#x31;&#54;&#56;&#46;&#x31;&#x30;&#46;&#50;</a>时会经过两个路由器的Trunk端口,其报文中,以太网头和IP头之间加上了VLAN编号,占用四个字节,这个玩意叫做tag(标签)</p>
-<p><img src="https://raw.githubusercontent.com/DeutschBall/VideoBed/main/image-20230207223506096.png" alt="image-20230207223506096"></p>
-<h5 id="交换机端口类型"><a href="#交换机端口类型" class="headerlink" title="交换机端口类型"></a>交换机端口类型</h5><p>access类型,只属于一个VLAN,用于连接计算机</p>
-<p>trunk类型,主干道,可以设置允许哪些VLAN通过,用于连接交换机</p>
-<p>hybrid类型,类似于trunk,但是hybrid允许通过改接口的帧不带VLAN tag,而trunk要求必须带VLAN tag(除了缺省VLAN,默认是VLAN 1,的帧不需要带tag)</p>
-<p>当端口接收到不带VLAN Tag的报文后，则将报文转发到<strong>属于缺省VLAN的端口</strong>(如果设置了端口的缺省VLAN ID,默认是VLAN 1)。</p>
-<p>当端口发送带有VLAN Tag的报文时，如果该报文的VLAN ID与端口缺省的VLAN ID相同，则系统将去掉报文的VLAN Tag，然后再发送该报文。</p>
 
       
     </div>

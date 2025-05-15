@@ -167,6 +167,642 @@
   
   
   <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="en">
+    <link itemprop="mainEntityOfPage" href="http://deutschball.github.io/2023/02/08/%E6%95%B0%E6%8D%AE%E9%93%BE%E8%B7%AF%E5%B1%82/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="https://raw.githubusercontent.com/DeutschBall/picbed/main/dustball.png">
+      <meta itemprop="name" content="dustball">
+      <meta itemprop="description" content="dustland">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="dustland">
+    </span>
+      <header class="post-header">
+        <h2 class="post-title" itemprop="name headline">
+          
+            <a href="/2023/02/08/%E6%95%B0%E6%8D%AE%E9%93%BE%E8%B7%AF%E5%B1%82/" class="post-title-link" itemprop="url">计算机网络-数据链路层</a>
+        </h2>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-calendar"></i>
+              </span>
+              <span class="post-meta-item-text">Posted on</span>
+
+              <time title="Created: 2023-02-08 15:22:00" itemprop="dateCreated datePublished" datetime="2023-02-08T15:22:00+08:00">2023-02-08</time>
+            </span>
+              <span class="post-meta-item">
+                <span class="post-meta-item-icon">
+                  <i class="far fa-calendar-check"></i>
+                </span>
+                <span class="post-meta-item-text">Edited on</span>
+                <time title="Modified: 2023-02-12 18:43:43" itemprop="dateModified" datetime="2023-02-12T18:43:43+08:00">2023-02-12</time>
+              </span>
+
+          
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+          <h1 id="计算机网络-数据链路层"><a href="#计算机网络-数据链路层" class="headerlink" title="计算机网络-数据链路层"></a>计算机网络-数据链路层</h1><h2 id="数据链路层"><a href="#数据链路层" class="headerlink" title="数据链路层"></a>数据链路层</h2><h3 id="数据链路层的任务"><a href="#数据链路层的任务" class="headerlink" title="数据链路层的任务"></a>数据链路层的任务</h3><p>数据链路层的功能:成帧,流量控制,差错控制,通信</p>
+<p>成帧:多个数据帧之间如何区分?添加标志位,比如011111,如果接收方发现一个0后面连着5个1,就认为这和刚才接收到的数据不是一个帧的.</p>
+<p>流量控制用于,限制发送方在等到确认之前发送的数据数量</p>
+<p>差错控制指望重发,说官话就是”自动重复请求”(ARQ,Automatic Repeat Request)</p>
+<h3 id="冗余编码"><a href="#冗余编码" class="headerlink" title="冗余编码"></a>冗余编码</h3><p>冗余:Redundancy</p>
+<p>冗余本是多余的意思,在计算机中,冗余量和业务逻辑无关,没有冗余照样执行业务</p>
+<p>但是冗余可以增强非业务性能,比如信息论上的冗余可以提高发现错误和纠正错误的能力</p>
+<blockquote>
+<p>考虑8个工件有一个坏件,质量和其他的不同(具体重了还是清了不知道)</p>
+<p>最快多少次找到?这实际上就是尽量减少冗余,尽最大可能利用信息熵的问题</p>
+<p>采用二分需要单调性,即知道这个坏件轻了还是重了,现在不知道,没法二分</p>
+<p>三分?3v3v2,还是那个问题,3v3不知道哪个是标准</p>
+<p>四分?(2v2)v(2v2).其中必有一组2v2都是标准件,天平平衡</p>
+<p>不妨设前一个2v2平等,说明坏件一定在后面的2v2中,并且前面四个都是标准件,可以用来参考</p>
+<p>后面的2v2就不用称了,每个2直接和两个标准件比较</p>
+<p>必然有一组不平衡,这就意味着另一组必定平衡,从不平衡组任意拿出一个,和标准件对比</p>
+<p>如果是坏件则天平不平衡,否则如果是好件,则同组另一件必定坏件</p>
+</blockquote>
+<h4 id="块编码"><a href="#块编码" class="headerlink" title="块编码"></a>块编码</h4><blockquote>
+<p>数据字+冗余&#x3D;码字</p>
+<p>什么思想呢?</p>
+<p>假如原来要传输一个比特,要么是0要么是1</p>
+<p>但是路上可能发生各种变故导致1变成0.但是接收方不知道发生了变故,它认为人家就是发送的0,于是错误接收了0</p>
+<p>为了增加检错能力</p>
+<p>添加一位冗余,比如数据字为0,码字就为00.数据字为1,码字就为11</p>
+<p>这样如果有一位发生突变(认为两位同突变的概率低),会形成01或者10这种无效码字,发现错误</p>
+<p>那么问题又来了,如果接到01,怎么确定它是00还是11变来的?两者都只需要突变一位就能形成01,因而只添加一位冗余无法纠错</p>
+<p>于是再添加一位冗余,只有000和111合法</p>
+<p>那么接到100,认为它是000突变来的,这个概率要比他是从111突变来的大.</p>
+<p>于是就有了纠错能力.</p>
+</blockquote>
+<p>实际上的块编码,是多位为一个数据字</p>
+<p>整个报文划分为弱干块,每块k位,称为数据字</p>
+<p>每块中假如r个冗余位,块长度变为n&#x3D;k+r,形成这个n位的块叫做码字</p>
+<p>码字有$2^n$种,但是其中实际承载数据字的只有$2^k$种</p>
+<p>如果一个承载数据的码字,其中的一位或者几位发生突变,突变之后的码字:</p>
+<p>如果如果不承载数据,则可以被检错</p>
+<p>如果也是承载数据的码字,则无法检错</p>
+<p>比如4B&#x2F;5B编码(部分)中:</p>
+<p><img src="https://raw.githubusercontent.com/DeutschBall/VideoBed/main/image-20230208093738919.png" alt="image-20230208093738919"></p>
+<p>如果0100的编码01010最后一位发生突变,编程了01011,这是0101的编码.那么错误就检查不出来了,接收方会认为发送方一开始就是发的0101</p>
+<p>下面推导,检错能力和纠错能力的条件是什么</p>
+<h5 id="汉明距离"><a href="#汉明距离" class="headerlink" title="汉明距离"></a>汉明距离</h5><p>假设只有一位突变</p>
+<p>如果两个有效码字只有一位不同,这样不具备检错能力</p>
+<p>如果任何两个有效码字至少有两位不同.这样才具备检错能力,但是不具备纠错能力</p>
+<p>如果任何两个有效码字至少有三位不同.这样才具备纠错一位的能力,也可以检错两位</p>
+<p>定义两个长度相同的字x,y的汉明距离是对应位不同的数量,记作$d(x,y)$<br>$$<br>d(x,y)&#x3D;x\oplus y 结果中1的数量<br>$$<br>最小汉明距离:一组字所有对中最小的汉明距离</p>
+<h5 id="编码方案"><a href="#编码方案" class="headerlink" title="编码方案"></a>编码方案</h5><p>块编码方案记为$C(n,k)\ with\ d_{min}&#x3D;x$</p>
+<p>其中n是码字长度,k是数据字长度.$d_{min}$是<strong>有效</strong>码字的最小汉明距离</p>
+<p>当可以检错$s$个错误时,要求$d_{min}&#x3D;s+1$</p>
+<p>当可以纠错$s$个错误时,要求$d_{min}&gt; 2s$,也就是$d_{min}&#x3D;2s+1$</p>
+<blockquote>
+<p>因此最好采用奇数长度的码字</p>
+</blockquote>
+<p><img src="https://raw.githubusercontent.com/DeutschBall/VideoBed/main/image-20230208100459337.png" alt="image-20230208100459337"></p>
+<p>x和y两个有效码字,有相同的概率突变为同一个错误码字,因而无法纠错</p>
+<p><img src="https://raw.githubusercontent.com/DeutschBall/VideoBed/main/image-20230208101051053.png" alt="image-20230208101051053"></p>
+<p>x突变s位之后依然落在半径为s的圈里,而任意两个圈相离,也就是说一个错误码字一定有一个概率最大的突变来源.</p>
+<p>这就有了纠错能力</p>
+<h4 id="线性块编码"><a href="#线性块编码" class="headerlink" title="线性块编码"></a>线性块编码</h4><p>线性块编码:任何两个有效码字的异或生成另一个有效码字.比如:</p>
+<p><img src="https://raw.githubusercontent.com/DeutschBall/VideoBed/main/image-20230208101612648.png" alt="image-20230208101612648"></p>
+<h5 id="最小汉明距离"><a href="#最小汉明距离" class="headerlink" title="最小汉明距离"></a>最小汉明距离</h5><p>线性快编码的最小汉明距离:1的个数最少的非零有效码字中的1的个数</p>
+<p>还是以上图为例</p>
+<table>
+<thead>
+<tr>
+<th>非零码字</th>
+<th>1的个数</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>01011</td>
+<td>3</td>
+</tr>
+<tr>
+<td>10101</td>
+<td>3</td>
+</tr>
+<tr>
+<td>11110</td>
+<td>4</td>
+</tr>
+</tbody></table>
+<p>因此$d_{min}&#x3D;3$</p>
+<h5 id="简单奇偶校验编码"><a href="#简单奇偶校验编码" class="headerlink" title="简单奇偶校验编码"></a>简单奇偶校验编码</h5><p>$n&#x3D;k+1,d_{min}&#x3D;2$</p>
+<p>只有一位校验位</p>
+<p>比如$C(5,4)$</p>
+<p><img src="https://raw.githubusercontent.com/DeutschBall/VideoBed/main/image-20230208102201761.png" alt="image-20230208102201761"></p>
+<p>突变奇数位可以被检查出</p>
+<p>突变偶数位不可以</p>
+<h5 id="二维奇偶校验"><a href="#二维奇偶校验" class="headerlink" title="二维奇偶校验"></a>二维奇偶校验</h5><p><img src="https://raw.githubusercontent.com/DeutschBall/VideoBed/main/image-20230208102627543.png" alt="image-20230208102627543"></p>
+<p>两维奇偶校验能检测出所有3位或3位以下的错误（因为此时至少在某一行或某一列上有一位错）、奇数位错以及很大一部分偶数位错。</p>
+<h4 id="汉明编码"><a href="#汉明编码" class="headerlink" title="汉明编码"></a>汉明编码</h4><p>对于汉明编码$C(n,k),d_{min}&#x3D;3$,有如下关系:<br>$$<br>\begin{cases}<br>n&#x3D;2^m-1\<br>k&#x3D;n-m\<br>r&#x3D;m<br>\end{cases}<br>$$<br>比如$C(7,4)$中,$n&#x3D;7&#x3D;2^m-1$得到m&#x3D;3</p>
+<p>$k&#x3D;n-m&#x3D;7-3&#x3D;4$即数据字位数</p>
+<p>$r&#x3D;m&#x3D;3$即冗余位数</p>
+<p><img src="https://raw.githubusercontent.com/DeutschBall/VideoBed/main/image-20230208103155013.png" alt="image-20230208103155013"></p>
+<p>如何检错?</p>
+<p>比如数据字0111,计算冗余校验位:<br>$$<br>\begin{cases}<br>r_0&#x3D;a_2+a_1+a_0&#x3D;1+1+1&#x3D;1\<br>r_1&#x3D;a_3+a_2+a_1&#x3D;0+1+1&#x3D;0\<br>r_2&#x3D;a_1+a_0+a_3&#x3D;1+1+0&#x3D;0</p>
+<p>\end{cases}<br>$$<br>得到码字$0111001$</p>
+<p>如果码字没有错误,那么接收方计算得到的q2q1q0应该全零</p>
+<p>如果码字有一位出现错误,变成$0110001$</p>
+<p>在接收方(接收方认为顶多有一位发生错误):<br>$$<br>q_0&#x3D;b_2+b_1+b_0+q_0&#x3D;1+1+0+1&#x3D;1<br>$$<br>此时已经发现错误了,但是不能确认是b2,b1,b0,q0这四位中的哪一位出现的差错</p>
+<p>然后又算得<br>$$<br>q_1&#x3D;b_3+b_2+b_1+q_1&#x3D;0+1+1+0&#x3D;0<br>$$<br>说明b3b2b1q1都没错误,那么只有b0,q0中有错误</p>
+<p>然后又算得<br>$$<br>q_2&#x3D;b_1+b_0+b_3+q_2&#x3D;1+0+0+0&#x3D;1<br>$$<br>可以肯定是$b_0$的错误了</p>
+<blockquote>
+<p>如果数据字至少是7位,计算满足一位检错条件的汉明编码方案<br>$$<br>\begin{cases}<br>n&#x3D;2^m-1\<br>k&#x3D;n-m\<br>r&#x3D;m<br>\end{cases}<br>$$</p>
+<p>$$<br>k&#x3D;n-m&#x3D;2^m-1-m\ge7<br>$$</p>
+<p>解得</p>
+<p>$m&#x3D;4,n&#x3D;15,k&#x3D;11$</p>
+<p>因此满足条件的编码方案是$C(15,11)$</p>
+</blockquote>
+<h4 id="循环冗余编码"><a href="#循环冗余编码" class="headerlink" title="循环冗余编码"></a>循环冗余编码</h4><p>Cyclic Redundancy Check,CRC</p>
+<p>$C(n,k)$</p>
+<p>n位的码字,其中k位数据字,最右边加上n-k个0作为校正子的初始值,这样n位传递给生成器</p>
+<p>生成器用长度n-k+1的除数去除码字</p>
+<p>得到n-k位余数,填到校正子上</p>
+<p>真码字(数据字:校正子)就计算完毕了,然后传输,然后被接收</p>
+<p>接收方校验器用相同除数除码字</p>
+<p>如果得到n-k位余数是0则无误,码字前k位就是数据字</p>
+<p>否则丢弃</p>
+<p><img src="https://raw.githubusercontent.com/DeutschBall/VideoBed/main/image-20230208110416498.png" alt="image-20230208110416498"></p>
+<p>计算过程</p>
+<p><img src="https://raw.githubusercontent.com/DeutschBall/VideoBed/main/image-20230208111036131.png" alt="image-20230208111036131"></p>
+<h5 id="多项式"><a href="#多项式" class="headerlink" title="多项式"></a>多项式</h5><p>CRC的除数称为生成多项式,简称生成子或者生成器$g(x)$</p>
+<p>码字$c(x)&#x3D;d(x):s(x)$,码字就是数据字和校正子的增广</p>
+<p>差错$e(x)$</p>
+<p>校验原理:</p>
+<p><img src="https://raw.githubusercontent.com/DeutschBall/VideoBed/main/image-20230208111438640.png" alt="image-20230208111438640"></p>
+<p>在发送端计算完的真码字一定满足$\frac{c(x)}{g(x)}&#x3D;0$</p>
+<p>因此对接收方的码字除以$g(x)$,如果不为零,说明一定存在$\frac{e(x)}{g(x)}$这一项,也就是说分子不为零,即存在$e(x)$这一项,即存在差错</p>
+<p>生成多项式的形式决定了检错能力</p>
+<h5 id="单个位差错"><a href="#单个位差错" class="headerlink" title="单个位差错"></a>单个位差错</h5><p>单个位差错是指$e(x)&#x3D;x^i$的情形</p>
+<p>检测单个位差错需要保证$e(x)$不能被$g(x)$整除</p>
+<p>比如如果设置$g(x)&#x3D;1$,则任何多项式都被$g(x)$整除,这就查不出任何错误来</p>
+<p>如果生成多项式至少有两项,并且有1这一项(也就是$x^0$这一项),那么所有单比特错误都可以检出</p>
+<p><strong>也就是说,$g(x)$的作用是,出现差错时,$e(x)$无法被$g(x)$整除</strong></p>
+<h5 id="两独立位差错"><a href="#两独立位差错" class="headerlink" title="两独立位差错"></a>两独立位差错</h5><p>两独立位差错指$e(x)&#x3D;x^i+x^j$的情形<br>$$<br>e(x)&#x3D;x^i+x^j&#x3D;x^i(x^{j-i}+1)&#x3D;x^i(x^t+1)<br>$$<br>如果生成多项式$g(x)$无法整除$x^t+1$则所有独立两位错误都可以检查出来</p>
+<p>比如$x+1$不能检查出两个相邻位的错误</p>
+<p>$x^4+1$无法检查出两个相隔4位的错误</p>
+<p>$x^3+x^2+1$就可以检查所有两个独立位错误</p>
+<h5 id="奇数个位差错"><a href="#奇数个位差错" class="headerlink" title="奇数个位差错"></a>奇数个位差错</h5><p>奇数个位错误指:<br>$$<br>e(x)&#x3D;x^{i1}+x^{i2}+…+x^{ik}<br>$$<br>其中k是奇数</p>
+<p>只要是$g(x)$包含$x+1$因式,就可以检查出$e(x)$,证明:</p>
+<p>假设检查不出来,即$g(x)|e(x)$<br>$$<br>g(x)|e(x),x+1|g(x)\rightarrow x+1|e(x)<br>$$<br>只需要证明$x+1|e(x)$不能成立</p>
+<p>如果任何一个偶数项多项式都可以被$x+1$整除,那么任何奇数项多项式,就可以拆成一个偶数项多项式加一个单独的多项式.那么问题转化为单个比特错误</p>
+<p>于是只需要证明任何偶数项多项式可以被$x+1$整除</p>
+<p>由于任何偶数项多项式,都可以转化为若干个这种形式的和<br>$$<br>x^a(x^t+1)<br>$$</p>
+<p>由于多项式系数在**模2域上,**因此上式又可以写为<br>$$<br>x^n(1-x+x^2-x^3+…)&#x3D;x^n\frac{1-(-x)^t}{1-(-x)}<br>$$<br>当t是奇数时由上式得到<br>$$<br>x^t+1&#x3D;(x+1)(x^{t-1}-x^{t-2}+x^{t-3}-…)<br>$$<br>当t不是奇数,是偶数比如$e(x)&#x3D;x^2+1$,此时t&#x3D;2是偶数</p>
+<p>这就可以利用系数在模2域上的性质了</p>
+<p>此时$e(x)&#x3D;x^2+1&#x3D;x^2+2x+1&#x3D;(x+1)^2$</p>
+<p>推广一下,可以得到$x^t+1&#x3D;(x+1)^t$其中t是偶数,并且系数在模2域上</p>
+<p>这就证明了$x+1$整除任何偶数项多项式</p>
+<h5 id="突发性错误"><a href="#突发性错误" class="headerlink" title="突发性错误"></a>突发性错误</h5><p>突发恶疾指接连几个bit位都可能发生错误<br>$$<br>e(x)&#x3D;x^j+…x^i&#x3D;x^j(1+…+x^{i-j})<br>$$<br>令$e’(x)&#x3D;1+…+x^{i-j}$</p>
+<p>意思时,起码两头的i,j两位是有错误的,中间的位可能有错误也可能无误,但是无所谓</p>
+<p>设$L&#x3D;i-j+1$,意思是突发性错误的长度</p>
+<p>这L位中,提出公因式$x^j$之后,最低次项是1,最高次项是$x^{i-j}$,这两项肯定得有</p>
+<p>设$g(x)&#x3D;x^r+…+1$表示生成多项式,它至少包含$x^r+1$两项,这保证了可以检测任何单比特错误.其他比r低次的项可有可无.</p>
+<p><strong>如果$g(x)$阶比$e’(x)$大</strong>,即r&gt;L-1,显然$\frac{e’(x)}{g(x)}$是有余数的,此时任何差错都可以检查出来</p>
+<p><strong>如果$g(x)$和$e’(x)$同阶</strong>,即r&#x3D;L-1,</p>
+<p>此时只有$e’(x)&#x3D;g(x)$只有这种情况没有余数,这个概率是多大呢?</p>
+<p>要求$g(x)$和$e’(x)$的每一项系数都相同,根据概率论独立事件乘法原则,这个概率是<br>$$<br>P(g(x)&#x3D;e’(x))&#x3D;(\frac{1}{2})^{L-2}&#x3D;(\frac{1}{2})^{r-1}<br>$$</p>
+<blockquote>
+<p>这里L-2的原因是,$g(x),e’(x)$最高次项和常数项1都已经是相同的了,只需要考虑中间各项的情况</p>
+</blockquote>
+<p>因此r&#x3D;L-1时,能够检查出错误的概率是$1-(\frac{1}{2})^{r-1}$</p>
+<p><strong>如果$g(x)$比$e’(x)$阶小</strong>,即L&gt;r+1时,考虑啥情况检查不出错误?</p>
+<p>比如$e(x)&#x3D;x^6+x^5+x+1$,$g(x)&#x3D;x^5+1$</p>
+<p>此时$\frac{e(x)}{g(x)}&#x3D;x+1$可以被整除,无法检查出错误</p>
+<p>考虑对于任意一个$g(x)$,只要是其阶比$e’(x)$小,一定存在$e’(x)$,使得$g(x)|e’(x)$吗?</p>
+<p>确实如此,只需要构造$e’(x)&#x3D;x^{L-1-r}g(x)+g(x)&#x3D;(x^{L-1-r}+1)g(x)$</p>
+<p>这是一个临界条件,保证了阶是L-1并且存在常数项1</p>
+<p>还可以往里随便加$x^kg(x),k\in(0,L-1-r)$项</p>
+<p>这样满足条件的构造共有$2^{L-2-r}$种</p>
+<p>而L-1阶含常数项1的多项式共有$2^{L-2}$个</p>
+<p>因此构造的出现概率就是$\frac{2^{L-2-r}}{2^{L-2}}&#x3D;(\frac{1}{2})^r$,也就是检不出错误的概率</p>
+<p>那么能够检查出错误的概率就是$1-(\frac{1}{2})^r$</p>
+<p>总结:</p>
+<p>所有$L ≤ r $的突发性差错均可被检测到。</p>
+<p>所有$L &#x3D; r + 1 $的突发性差错有$1 – (1&#x2F;2)r–1      $的概率被检测到。</p>
+<p>所有$L &gt; r + 1 $的突发性差错有$1 – (1&#x2F;2)r     $ 的概率被检测到。</p>
+<h5 id="高性能多项式特性"><a href="#高性能多项式特性" class="headerlink" title="高性能多项式特性"></a>高性能多项式特性</h5><ol>
+<li>至少有两项,要有常数项1,保证检查一位错误</li>
+<li>不能整除 $x^t + 1(2 ≤ t ≤ n − 1)$,保证检查两个独立位错误</li>
+<li>应当有因子 $x + 1$,保证检查所有奇数位数错误</li>
+</ol>
+<h4 id="校验和"><a href="#校验和" class="headerlink" title="校验和"></a>校验和</h4><p>脚丫子都知道怎么算,注意结果要取反</p>
+<h3 id="数据链路层协议"><a href="#数据链路层协议" class="headerlink" title="数据链路层协议:"></a>数据链路层协议:</h3><p><img src="https://raw.githubusercontent.com/DeutschBall/VideoBed/main/image-20230204191849501.png" alt="image-20230204191849501"></p>
+<p>只要带上ARQ的肯定有差错控制功能</p>
+<p>noiseless channel是没有噪声,不会丢包,不会重复,无损坏帧的理想信道,最简单协议和停止等待协议只是最初的一厢情愿</p>
+<table>
+<thead>
+<tr>
+<th>协议</th>
+<th>特点</th>
+<th></th>
+</tr>
+</thead>
+<tbody><tr>
+<td>simplest</td>
+<td>纯纯理想环境,<br />发送方不需要考虑丢包坏帧的情况,要说啥只说一遍,不多废话<br />接收方就洗耳恭听,也不需要回复收到</td>
+<td></td>
+</tr>
+<tr>
+<td>stop-and-wait</td>
+<td>发送方发<strong>一个</strong>帧,就等着接收方回复收到<br />如果没有收到回复,那么可能是网络阻塞或者接收方死球了<br />长时间没有收到回复就认为超时了,重发该帧<br />啥时候收到回复确认,啥时候发下一帧</td>
+<td></td>
+</tr>
+<tr>
+<td></td>
+<td></td>
+<td></td>
+</tr>
+<tr>
+<td>Stop-and-wait ARQ</td>
+<td>停等ARQ协议中,每个帧要么编号1要么编号0(原序号模2得到)<br />如果收到0号帧,则下一个期望的就是1号帧<br />如果接收方接收到的帧不是期望帧,回复自己期望的那一帧<br />已发送的帧会被保留副本,如果超时没有收到该帧的确认(或者说下一帧的期待)<br />则重发超时帧</td>
+<td><img src="https://raw.githubusercontent.com/DeutschBall/VideoBed/main/image-20230204193901028.png" alt="image-20230204193901028"></td>
+</tr>
+<tr>
+<td>Go-Back-N ARQ</td>
+<td>实际上是Stop-and-wait ARQ的增强版<br />Stop-and-wait ARQ协议中没发一个包都要确认一下<br />现在可以<strong>发一组</strong>包然后确认一下<br />让确认这种控制信息比重更少</td>
+<td></td>
+</tr>
+<tr>
+<td>Selective Repeat ARQ</td>
+<td>Go-Back-N ARQ的增强版<br />Go-Back-N ARQ中接收方窗口为1,<br />本算法中将接收方窗口增强到和发送方窗口一样大<br />但是窗口大小更小了,为$2^{m-1}$<br />(Go-Back-N ARQ中发送方窗口是$2^m-1$)</td>
+<td></td>
+</tr>
+</tbody></table>
+<h5 id="回退N帧自动重发请求"><a href="#回退N帧自动重发请求" class="headerlink" title="回退N帧自动重发请求"></a>回退N帧自动重发请求</h5><p>Go-Back-N Automatic Repeat Request</p>
+<p>在帧头部设置一个帧序号字段,假设这个字段使用m位,那么可以编号$[0,2^m)$,即帧序号是模$2^m$的</p>
+<p>发送窗口:</p>
+<p>发送方的发送窗口大小就设置为$S_{size}&#x3D;2^m-1$,</p>
+<blockquote>
+<p>为什么要设置成这个值呢?为什么不设置成$2^m$?留作后话</p>
+</blockquote>
+<p>比如帧序号字段占用4bit,那么发送方滑动窗口大小就是16-1&#x3D;15</p>
+<p>两个指针,</p>
+<p>其中$S_f$永远指向最早没有被确认的窗口</p>
+<p>$S_n$指向当前发送方应该发送的窗口位置</p>
+<p><img src="https://raw.githubusercontent.com/DeutschBall/VideoBed/main/image-20230204195038189.png" alt="发送窗口"></p>
+<p>接收窗口:</p>
+<p><img src="https://raw.githubusercontent.com/DeutschBall/VideoBed/main/image-20230204195932727.png" alt="image-20230204195932727"></p>
+<p>接收方只需要一个指针即可,只需要记录下一个期待接收的窗口</p>
+<p><strong>两个窗口如何交互?</strong></p>
+<p>假设发送方连续发了0到14帧,这几个帧是陆续到达的,接收方收到第n帧就会回复期待n+1帧.也可能一股脑收到了n,n+1,n+2这三帧,此时接收方直接回复一个累计确认,期望第n+3帧</p>
+<p>考虑有丢包,可能接收方对0到5帧的确认都丢了,但是对第6帧的确认没丢,被发送方收到了,这时发送方Sf指针直接移动到第7帧,也就是发送方窗口右移,此时发送方就可以继续发送第15,16,17等等帧了</p>
+<p>也可能发送方第0帧就在路上丢包了,第1,2,等等帧都到了,但是接收方不要,就要第一帧,于是接收方直接丢弃并保持沉默,</p>
+<p>发送方发现从第0帧往后,一直长时间没有收到回应,就要从第0帧这里开始重发0到14帧</p>
+<p>**发送方滑动窗口大小设为$2^m-1$**的目的</p>
+<blockquote>
+<p>假设m&#x3D;4,即帧的编号$\in[0,15]$</p>
+<p>并且假设滑动窗口大小大于等于$2^m&#x3D;16$,不妨就设置为16</p>
+<p>好,现在一个大文件成帧之后</p>
+<p>0 1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 0 1 2 3 4 5 6 7 8 9 10 11 12 13 14 15…</p>
+<p>滑动窗口要是16就会包含[0,15],假设发送方这16帧全都发出去了,但是网络太垃圾了,没有收到任何回复,而接收方实际上全都回复了,并且接收方已经准备接收下一个0号帧了</p>
+<p>此时发送方认为接收方本次[0,15]全都没有收到,于是从0开始重发,但是接收方期望的是下一个0号帧</p>
+<p>但是两个帧都是编号0,接收方无法发现错误,于是就错误地接受了</p>
+<p><img src="https://raw.githubusercontent.com/DeutschBall/VideoBed/main/image-20230204201039834.png" alt="image-20230204201039834"></p>
+</blockquote>
+<h5 id="选择性重传"><a href="#选择性重传" class="headerlink" title="选择性重传"></a>选择性重传</h5><p>在回退N帧自动重发中只有发送方会累计确认</p>
+<p>在选择性重传中,发送方和接收方都会累计确认</p>
+<p>解决了啥问题呢?</p>
+<p>发送方如果发送了$[0,14]$这些帧,接收方可能就得发送15个确认回复,回复太多这是其一</p>
+<p>其二是,如果发送方已经接到了[1,14],唯独0号帧路上丢包了,在回退N帧自动重发中,发送方就得从0开始重发[0,14]</p>
+<p>而实际上只需要重发一个0就足够了,但是接收方脑子太小了,只认一个数,[1,14]已经忘记了.</p>
+<p>于是就改进成<strong>选择性重传算法</strong></p>
+<p>接收方加上了窗口,就有了缓存的能力</p>
+<p><img src="https://raw.githubusercontent.com/DeutschBall/VideoBed/main/image-20230206220446089.png" alt="image-20230206220446089"></p>
+<p>关键注意1号帧在发送途中丢包,但是2号帧顺利抵达,此时接收方回复NAK1,意思是期望1.然而在发送方针对NAK1的回应到达之前,3号帧也顺利抵达了,此时接收方默默收下,但是啥回复都没有</p>
+<p>然后发送方的针对NAK1的回复1号帧到了,</p>
+<p>此时接收方回复的是ACK4,通知发送方,3之前已经都接收到了,可以发送4及之后的帧了,</p>
+<p>发送方接收到ACK4之后会调整自己的发送窗口,然后继续发送4,5,…号帧</p>
+<p>**为啥发送方和接收方的窗口都得是$2^{m-1}$**呢?</p>
+<p><img src="https://raw.githubusercontent.com/DeutschBall/VideoBed/main/image-20230204204344648.png" alt="image-20230204204344648"></p>
+<p>假设m&#x3D;2,那么帧编号就是$[0,3]$此时窗口大小最大为2,否则,假设是3</p>
+<p>发送方发送0,1,2三帧之后,都被接收方收到,但是所有回复都丢包了</p>
+<p>此时接收方已经后移了接收窗口,此时接收方窗口内的期待0号帧是下一个0号帧.</p>
+<p>但是发送方超时重发了刚才的0号帧</p>
+<p>于是接收方就把刚才的0号帧当成下一个0号帧错误接收了</p>
+<h5 id="带捎带的N步返回NRQ"><a href="#带捎带的N步返回NRQ" class="headerlink" title="带捎带的N步返回NRQ"></a>带捎带的N步返回NRQ</h5><p>捎带:将控制报文,比如NAK,ACK等等,附带到数据报文中一起发送</p>
+<h4 id="带宽利用率"><a href="#带宽利用率" class="headerlink" title="带宽利用率"></a>带宽利用率</h4><p>首先计算整个链路充满数据,能放开多少数据,也就是带宽时延积</p>
+<p>然后使用的协议在传播时间内最多能有多少帧,多少bit上到信道上传输</p>
+<p>做比即可</p>
+<p><img src="https://raw.githubusercontent.com/DeutschBall/VideoBed/main/image-20230206221303181.png" alt="image-20230206221303181"></p>
+<h3 id="多路访问"><a href="#多路访问" class="headerlink" title="多路访问"></a>多路访问</h3><p><img src="https://raw.githubusercontent.com/DeutschBall/VideoBed/main/image-20230206222507328.png" alt="image-20230206222507328"></p>
+<h4 id="随机访问协议"><a href="#随机访问协议" class="headerlink" title="随机访问协议"></a>随机访问协议</h4><p>所有站点低位相同,任何站点都不能组织其他站点说话</p>
+<p>有话要说就根据自己的协议说</p>
+<h5 id="AlOHA"><a href="#AlOHA" class="headerlink" title="AlOHA"></a>AlOHA</h5><p>任何站点,在任何时间,想说啥就说啥</p>
+<p><img src="https://raw.githubusercontent.com/DeutschBall/VideoBed/main/image-20230207093146683.png" alt="image-20230207093146683"></p>
+<p>只要同一时间在信道上有两个帧,就会造成冲突,发生冲突的帧都会废掉</p>
+<p>ALOHA协议流程:</p>
+<p><img src="https://raw.githubusercontent.com/DeutschBall/VideoBed/main/image-20230207093619308.png" alt="image-20230207093619308"></p>
+<p>最多重发$K_{max}$次,如果一直没有收到ACK回复则放弃</p>
+<p>每次发送之后等待$2\times T_{p}$,这是接收ACK的窗口期</p>
+<p>如果没有收到,则等待一个随机数的时间$T_{B}&#x3D; T_{p}\times R,r\in[0,2^k)$.然后再重发</p>
+<h6 id="传输和传播"><a href="#传输和传播" class="headerlink" title="传输和传播"></a>传输和传播</h6><p>传输,transmission,又可以翻译为发射,是发送方将信号全放到信道上用的时间<br>$$<br>传输时间&#x3D;\frac{帧长}{带宽}<br>$$</p>
+<p><img src="https://raw.githubusercontent.com/DeutschBall/VideoBed/main/image-20230207093935960.png" alt="image-20230207093935960"></p>
+<p>传播,propagation,信号的一位经过信道用时<br>$$<br>传播时间&#x3D;\frac{电缆长度}{信号速度(一般是光速)}<br>$$</p>
+<h6 id="冲突时间"><a href="#冲突时间" class="headerlink" title="冲突时间:"></a>冲突时间:</h6><p>假设各帧长度相同,ALOHA的冲突时间是传输时间的两倍</p>
+<p><img src="https://raw.githubusercontent.com/DeutschBall/VideoBed/main/image-20230207094413864.png" alt="image-20230207094413864"></p>
+<p>即在$[t-T_{fr},t+T_{fr}]$这期间,不允许有第二个帧</p>
+<h6 id="吞吐量"><a href="#吞吐量" class="headerlink" title="吞吐量"></a>吞吐量</h6><p>$$<br>S&#x3D;G\times e^{-2G}<br>$$</p>
+<p>单位:帧</p>
+<blockquote>
+<p>注意这里的吞吐量单位不是bps</p>
+</blockquote>
+<p>当且仅当$G&#x3D;\frac{1}{2}$,$S_{max}&#x3D;0.184$</p>
+<p>G是帧传输时间内系统平均产生帧的数量</p>
+<p>对于$G&#x3D;\frac{1}{2}$也好立即,因为冲突时间就是两个帧传输时间,如果整个系统在一个传输时间内产生的帧数均值是$G&#x3D;\frac{1}{2}$,则冲突事件内产生的帧数均值就是1</p>
+<p>如果$G&gt;\frac{1}{2}$则冲突的概率增大,一旦发生冲突,两个帧都是废物</p>
+<p>而吞吐量的定义是:单位时间内<strong>成功</strong>传送的数据量.</p>
+<p>两个废物帧都不是成功传送,因此导致了吞吐量降低</p>
+<blockquote>
+<p>推导$S&#x3D;G\times e^{-2G}$</p>
+<p>假设传输时间是T,当一个帧发射之后,在T时间内,系统中又发送帧数均值是G</p>
+<p>也就是说,T时间内系统又发送一帧的概率为$G$</p>
+<p>首先考虑吞吐量怎么计算</p>
+<p>定义吞吐量:传输时间内,能够成功传输的帧数,则有:<br>$$<br>S&#x3D;GP_0<br>$$<br>其中$P_0$为一帧发送成功的概率,也就是冲突时间内没有第二个帧的概率.</p>
+<p>$G$是T时间内系统发送帧数的<strong>均值</strong></p>
+<p>$P_0$是成功率</p>
+<p>那么$S&#x3D;GP_0$就计算了T时间内发送成功的帧数的<strong>均值</strong></p>
+<p>下面考虑$P_0$怎么算</p>
+<p>计算一帧成功传输的概率,也就是发送一帧之后2T时间内没有其他帧的概率</p>
+<p>假设T时间内有其他X个帧发射.显然$X\sim P(G)$泊松分布,则分布律为<br>$$<br>P(X&#x3D;k)&#x3D;\frac{G ^k}{k!}e^{-G}<br>$$</p>
+<p>在2T时间即冲突时间内,不发生冲突,意味着没有其他帧发送,其概率是<br>$$<br>P(X&#x3D;0)\times P(X&#x3D;0)&#x3D;(\frac{G^0}{0!}e^{-G})^2&#x3D;e^{-2G}<br>$$</p>
+<p>带入$P_0&#x3D;P(X&#x3D;0)\times P(X&#x3D;0)&#x3D;e^{-2G}$得到<br>$$<br>S&#x3D;GP_0&#x3D;Ge^{-2G}<br>$$</p>
+<p>如果定义吞吐量为:传输时间内成功传输的帧数.那么算到这里就结束了</p>
+<p>如果定义吞吐量为:单位时间内成功传输的帧数.那么$S&#x3D;\frac{G{e^{-2G}}}{T}$</p>
+<p>如果定义吞吐量为:单位时间内成功传输的bit数.那么$S&#x3D;\frac{G{e^{-2G}}}{T}\times 帧大小$</p>
+</blockquote>
+<h5 id="时隙ALOHA"><a href="#时隙ALOHA" class="headerlink" title="时隙ALOHA"></a>时隙ALOHA</h5><p><img src="https://raw.githubusercontent.com/DeutschBall/VideoBed/main/image-20230207102708453.png" alt="image-20230207102708453"></p>
+<p>规定只能在每个Slotn一开始发送,每个帧顶多占用一个Slot,不会影响其他Slot</p>
+<p>那么冲突只会发生在一个Slot之内,并且一旦发生冲突,一定是两个帧在时间上完全重合</p>
+<h6 id="吞吐量-1"><a href="#吞吐量-1" class="headerlink" title="吞吐量"></a>吞吐量</h6><p>假设每个Slot开始时,系统中传输帧的均值为G帧,则Slot时间内又发送的帧数还是满足泊松分布</p>
+<p>只不过冲突时间降为一个Slot,成功发送一帧的概率变为<br>$$<br>P_0&#x3D;P(X&#x3D;0)&#x3D;e^{-G}<br>$$<br>吞吐量就是$S&#x3D;GP_0&#x3D;Ge^{-G}$</p>
+<h5 id="CSMA"><a href="#CSMA" class="headerlink" title="CSMA"></a>CSMA</h5><p>Carrier Sense Multiple Access</p>
+<p>载波侦听 多路访问</p>
+<p>发送前首先侦听,看看有没有其他帧在发送,可以缓解冲突,但是不能解决冲突</p>
+<p>因为一个站点侦听时,可能另一个站点已经传输了信号,但是由于<strong>传播</strong>延迟,没有被本站点侦听到,如图所示:</p>
+<p><img src="https://raw.githubusercontent.com/DeutschBall/VideoBed/main/image-20230207103600938.png" alt="image-20230207103600938"></p>
+<p>B站点在t1时刻传输一个信号,C在t2时刻要发送一个信号,但是t2时刻信号尚未传播到C处,因此C在t2传输一个信号,就会和B传输的信号发生冲突</p>
+<h6 id="冲突时间-1"><a href="#冲突时间-1" class="headerlink" title="冲突时间"></a>冲突时间</h6><p>在B开始传输消息,到消息传播到其他站点之前,这段时间是不能有第二个消息传播的</p>
+<p>因此冲突时间就等于传播时间</p>
+<p><img src="https://raw.githubusercontent.com/DeutschBall/VideoBed/main/image-20230207104138197.png" alt="image-20230207104138197"></p>
+<h6 id="冲突缓解方法"><a href="#冲突缓解方法" class="headerlink" title="冲突缓解方法"></a>冲突缓解方法</h6><p><img src="https://raw.githubusercontent.com/DeutschBall/VideoBed/main/image-20230207104446245.png" alt="image-20230207104446245"></p>
+<h5 id="CSMA-CD"><a href="#CSMA-CD" class="headerlink" title="CSMA&#x2F;CD"></a>CSMA&#x2F;CD</h5><p>Carrier Sense Multiple Access with Collision Detection,带冲突检测的载波侦听多路访问</p>
+<p><img src="https://raw.githubusercontent.com/DeutschBall/VideoBed/main/image-20230207105245273.png" alt="image-20230207105245273"></p>
+<p>之前CSMA协议中,一个站点只会在发送前进行检查,如果信道空闲就发送</p>
+<p>现在CSMA&#x2F;CD在CSMA的基础上,一个站点会在发送时同时检查,如果侦测到信道中有其他信号,立刻终止发送</p>
+<p>因为起码顺着该信号的传播方向上,如果再发送信号肯定是冲突了,那就不如立刻闭嘴不发了</p>
+<h6 id="冲突检测时间"><a href="#冲突检测时间" class="headerlink" title="冲突检测时间"></a>冲突检测时间</h6><p>首先考虑如图所示情况</p>
+<p><img src="https://raw.githubusercontent.com/DeutschBall/VideoBed/main/image-20230207110344621.png" alt="image-20230207110344621"></p>
+<p>如果传输时间很短但是传播延迟很长,可能就存在双方均检测不到冲突或者只有一方能够检测到冲突的情形</p>
+<p>此时冲突废帧会被错误交付</p>
+<p>为了避免这种情况,就需要传输时间和传播时间有约束关系</p>
+<p>直接考虑距离最远的两个站点A,B的情况即可</p>
+<p><img src="https://raw.githubusercontent.com/DeutschBall/VideoBed/main/image-20230207111015408.png" alt="image-20230207111015408"></p>
+<p>如果B在A的信号马上就要发到时才开始发送,直到B的信号被A侦听到时,A必须仍在发送</p>
+<p>也就是说<strong>最小传输时间应为最大传播时间的两倍</strong>,如下图</p>
+<blockquote>
+<p>因为A,B是两个距离最远的站点,因此是最大传播时间</p>
+</blockquote>
+<p><img src="https://raw.githubusercontent.com/DeutschBall/VideoBed/main/image-20230207111728369.png" alt="image-20230207111728369"></p>
+<blockquote>
+<p>CSMA&#x2F;CD网络中，带宽10Mbps，最大传播时间为25.6us，那么最小帧长度是多少？</p>
+<p>假设帧长是x,则传输时间是$T_{fr}&#x3D;\frac{x}{10M}$</p>
+<p>由$T_{fr}\ge 2T_p$得到<br>$$<br>\frac{x}{10\times 10^6}\ge 25.6\times 10^{-6}\times 2<br>$$<br>即$x\ge 512bit$</p>
+<p>因此帧长最小为512比特</p>
+</blockquote>
+<h6 id="CSMA-CD算法流程"><a href="#CSMA-CD算法流程" class="headerlink" title="CSMA&#x2F;CD算法流程"></a>CSMA&#x2F;CD算法流程</h6><p><img src="https://raw.githubusercontent.com/DeutschBall/VideoBed/main/image-20230207112317356.png" alt="image-20230207112317356"></p>
+<h5 id="CSMA-CA"><a href="#CSMA-CA" class="headerlink" title="CSMA&#x2F;CA"></a>CSMA&#x2F;CA</h5><p>Carrier Sense Multiple Access with Collision Avoidance,带冲突避免的载波侦听多路访问</p>
+<p>这个协议挺有意思</p>
+<p><img src="https://raw.githubusercontent.com/DeutschBall/VideoBed/main/image-20230207151754370.png" alt="image-20230207151754370"></p>
+<p>IFS:Interframe Space,IFS 帧间间隔</p>
+<blockquote>
+<p>IFS用于定义一个站点的优先权,优先权高的站点,其IFS就短</p>
+<p>为啥IFS短了就意味着优先权高呢?这就需要了解协议如何工作的</p>
+</blockquote>
+<p>Contention Window 竞争窗口</p>
+<p>工作流程:</p>
+<img src="https://raw.githubusercontent.com/DeutschBall/VideoBed/main/image-20230207151820663.png" alt="CSMA/CA" style="zoom:25%;" />
+
+
+
+<p>1.首先检查信道是否空闲,如果不是,重新检查</p>
+<p>2.如果信道空闲,等待IFS时间</p>
+<p>3.等完了再检查一下信道是否空闲,如果忙,退回1.</p>
+<p>4.挑一个随机数$R\in[0,2^K)$,也就是在竞争窗口中抓阄</p>
+<p>5.等R个时间片,然后检查信道是否忙,如果忙,就等会不忙了再发送.如果不忙就发送</p>
+<p>6.发完了设置窗口期等待ACK回复,如果收到,则通信成功,否则K++,回头从1开始,如果K&gt;15则不再尝试,通信事变</p>
+<h3 id="以太网"><a href="#以太网" class="headerlink" title="以太网"></a>以太网</h3><p>低层协议的组成</p>
+<p><img src="https://raw.githubusercontent.com/DeutschBall/VideoBed/main/image-20230207155541312.png" alt="image-20230207155541312"></p>
+<p>OSI规定的数据链路层分成两个子层,一个是LLC层,一个是MAC层.前者承上后者启下</p>
+<p>以太网是MAC的一种实现方式,并且是目前最成功的实现方式</p>
+<h4 id="MAC地址"><a href="#MAC地址" class="headerlink" title="MAC地址"></a>MAC地址</h4><h5 id="MAC地址规定"><a href="#MAC地址规定" class="headerlink" title="MAC地址规定"></a>MAC地址规定</h5><p>以太网地址是一个6字节数,每个网卡都有一个固定的MAC地址</p>
+<p>一个计算机可能由多张网卡,因此计算机可以有多个MAC地址</p>
+<p><code>ipconfig /all</code>即可查看</p>
+<figure class="highlight sh"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line">以太网适配器 以太网:</span><br><span class="line"></span><br><span class="line">   媒体状态  . . . . . . . . . . . . : 媒体已断开连接</span><br><span class="line">   连接特定的 DNS 后缀 . . . . . . . :</span><br><span class="line">   描述. . . . . . . . . . . . . . . : Realtek PCIe GbE Family Controller</span><br><span class="line">   物理地址. . . . . . . . . . . . . : 84-A9-38-F4-9B-69</span><br><span class="line">...</span><br><span class="line">  </span><br><span class="line">无线局域网适配器 WLAN:</span><br><span class="line"></span><br><span class="line">   连接特定的 DNS 后缀 . . . . . . . :</span><br><span class="line">   描述. . . . . . . . . . . . . . . : Intel(R) Wi-Fi 6 AX201 160MHz</span><br><span class="line">   物理地址. . . . . . . . . . . . . : 2C-6D-C1-98-7D-03</span><br><span class="line">....</span><br></pre></td></tr></table></figure>
+
+<p>以<code>2C-6D-C1-98-7D-03</code>为例子,最左边是最高位,</p>
+<p>称”第一个字节”为最左边的0x2C,第二个就是0x6D</p>
+<h5 id="特殊地址"><a href="#特殊地址" class="headerlink" title="特殊地址"></a>特殊地址</h5><p>如果一个MAC地址第一个字节的最低为是0,则该地址是一个单播地址,是1则为多播地址</p>
+<p>特殊的,如果MAC addr&#x3D;FF:FF:FF:FF:FF:FF,则该地址是一个广播地址</p>
+<p>0x2C&#x3D;00101100b,显然所有的物理网卡地址必然是一个单播地址</p>
+<p>怎么观察广播地址呢?可以观察ARP协议需要在以太网中广播寻找目标IP地址的主机</p>
+<p><img src="https://raw.githubusercontent.com/DeutschBall/VideoBed/main/image-20230207160905292.png" alt="image-20230207160905292"></p>
+<p>源地址就是本机WLAN网卡的地址2C-6D-C1-98-7D-03,目的地址12个F,显然是一个广播</p>
+<p>wireshark已经自动根据本机WLAN网卡的<strong>前三个字节</strong>判断出本网卡产自Intel公司</p>
+<p>再一查好家伙made in 马来西亚</p>
+<p><img src="https://raw.githubusercontent.com/DeutschBall/VideoBed/main/image-20230207161145923.png" alt="image-20230207161145923"></p>
+<p>同理华为公司也会买下前三个字节用来标志自己公司的网卡</p>
+<p><img src="https://raw.githubusercontent.com/DeutschBall/VideoBed/main/image-20230207161443085.png" alt="image-20230207161443085"></p>
+<p>如果前三个字节是公司编号</p>
+<p>那么一个公司编号最多能够产$2^{24}\approx400万$张网卡</p>
+<p>如果一部手机使用一个wifi网卡,光中国就有13亿人,假设有1亿人用华为手机,显然一个公司编号是不够用的</p>
+<h5 id="网络序"><a href="#网络序" class="headerlink" title="网络序"></a>网络序</h5><p>字节序不变,但是每个字节内的比特位分别调转(不是取反,是前后调转)</p>
+<p><img src="https://raw.githubusercontent.com/DeutschBall/VideoBed/main/image-20230207161313727.png" alt="image-20230207161313727"></p>
+<h4 id="MAC帧格式"><a href="#MAC帧格式" class="headerlink" title="MAC帧格式"></a>MAC帧格式</h4><p>MAC帧有两种格式,</p>
+<p>不常用的802.2LLC帧,这是IEEE802工作组制定的答辩</p>
+<p>最常用的EthernetV2帧</p>
+<p><img src="https://raw.githubusercontent.com/DeutschBall/VideoBed/main/image-20230207162023980.png" alt="image-20230207162023980"></p>
+<p>MAC帧&#x3D;MAC头+MAC数据+FCS</p>
+<p>其中MAC头包括目的地址,源地址,MAC数据类型</p>
+<p>FCS就是校验和</p>
+<p>MAC数据一般是IP数据报,包括IPv4包或者IPv6数据包</p>
+<h5 id="不合法的MAC帧"><a href="#不合法的MAC帧" class="headerlink" title="不合法的MAC帧"></a>不合法的MAC帧</h5><p>以下有一则为不合法MAC帧</p>
+<p>数据字段的长度与长度字段的值不一致；</p>
+<p>帧的长度不是整数个字节；</p>
+<p>用收到的帧检验序列 FCS 查出有差错；</p>
+<p><strong>数据字段的长度不在 46 ~ 1500 字节之间；</strong></p>
+<p> <strong>MAC 帧长度不在64 ~ 1518 字节之间；</strong></p>
+<p>对于检查出的无效 MAC 帧就简单地丢弃，以太网<strong>不负责重传丢弃的帧。</strong> </p>
+<p>这里对帧长度有一个规定,[64,1518]为啥会有这两头的限制呢?</p>
+<h5 id="合法帧长度"><a href="#合法帧长度" class="headerlink" title="合法帧长度"></a>合法帧长度</h5><p>[64,1518]bytes</p>
+<p>由于有限以太网使用CSMA&#x2F;CD协议,因此需要保证最小传输时间大于等于两倍的最大传播时间</p>
+<p>而这两个时间的关系,关乎帧长度啥事呢?</p>
+<p>显然帧长越长,传输时间就越长,可以推测帧长为64bytes时达到临界值</p>
+<p>根据802.3规定,以太网最长2500米,带宽10Mbps,四个中继器,最坏情况下,往返时间(也就是两倍的最长传播时间)大约是50μs.</p>
+<p>那么传输速度应该大于50μs.</p>
+<p>又带宽是10Mbps,在50微妙内能够发送$50\times 10^{-6}s\times 10\times 10^6bps&#x3D;500bit$</p>
+<p>增加安全边际,往上取整到512bit&#x3D;64byte</p>
+<p>因此规定最小帧长就是64byte</p>
+<p>那么又为啥限制最长帧长为1500呢?</p>
+<p>因为网络是多台计算机共享的,如果一台主机一直喋喋不休地说,其他主机就得等着,因此一句话不能说太长</p>
+<p>于是人为规定为最长1518byte</p>
+<p>那么在以太网上的IP包长度就跟着被限制到[48,1500]字节</p>
+<p>这个1500字节也就是MTU,最大传输单元</p>
+<h3 id="网络连接"><a href="#网络连接" class="headerlink" title="网络连接"></a>网络连接</h3><h4 id="数据链路层设备"><a href="#数据链路层设备" class="headerlink" title="数据链路层设备"></a>数据链路层设备</h4><p>网桥,集线器,二层交换机都是链路层设备</p>
+<table>
+<thead>
+<tr>
+<th>一层设备</th>
+<th>结构</th>
+<th>作用</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>中继器</td>
+<td><img src="https://raw.githubusercontent.com/DeutschBall/VideoBed/main/image-20230207210513001.png" alt="image-20230207210513001"></td>
+<td>再生信号(不是放大信号),延长通信距离</td>
+</tr>
+<tr>
+<td>集线器</td>
+<td><img src="https://raw.githubusercontent.com/DeutschBall/VideoBed/main/image-20230207210909500.png" alt="image-20230207210909500"><br />所有计算机同处于一个冲突域<br />集线器从一个端口进来的包会被无脑拷贝到所有的出端口</td>
+<td>只是把多个主机联通,<br />相当于多通水管<br />多端口的中继器</td>
+</tr>
+<tr>
+<td></td>
+<td></td>
+<td></td>
+</tr>
+</tbody></table>
+<table>
+<thead>
+<tr>
+<th>二层设备</th>
+<th>结构</th>
+<th>作用</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>网桥</td>
+<td><img src="https://raw.githubusercontent.com/DeutschBall/VideoBed/main/image-20230207211056989.png" alt="image-20230207211056989" style="zoom:25%;" /><br />网桥可以检查目标地址,根据自己学习建立的转发表,决定从哪个端口转发,相对集线器聪明了不少</td>
+<td>减小冲突域,网桥的一个接口是一个冲突域<br />但是所有达到接口都在同一个广播域</td>
+</tr>
+<tr>
+<td>二层交换机</td>
+<td><img src="https://raw.githubusercontent.com/DeutschBall/VideoBed/main/image-20230207163904317.png" alt="image-20230207163904317" style="zoom:25%;" /></td>
+<td>消除冲突域,从此不再有冲突<br />相当于带阀门的多通水管<br />但是所有接口都在同一广播域</td>
+</tr>
+</tbody></table>
+<p>区分两个术语:广播域,冲突域</p>
+<p>广播域:能够接收广播帧的所有设备的集合</p>
+<p>冲突域:所有共享介质(比如电缆)都是冲突域</p>
+<p>显然广播域的范围要大于等于冲突域</p>
+<p><img src="https://raw.githubusercontent.com/DeutschBall/VideoBed/main/image-20230207213901157.png" alt="image-20230207213901157"></p>
+<p>以太网:有线局域网的一种实现,链路层使用CSMA&#x2F;CD技术</p>
+<h5 id="网桥"><a href="#网桥" class="headerlink" title="网桥"></a>网桥</h5><h6 id="爱学习の网桥"><a href="#爱学习の网桥" class="headerlink" title="爱学习の网桥"></a>爱学习の网桥</h6><p><img src="https://raw.githubusercontent.com/DeutschBall/VideoBed/main/image-20230207211927143.png" alt="image-20230207211927143"></p>
+<p>刚接入局域网的网桥是个傻子,啥也不知道,但是他很快就会知道</p>
+<p>一开始他的MAC:Port映射表是空的</p>
+<p>当A@LAN1 向 D@LAN2发送一个数据帧之后,这个帧显然必须从网桥的1号端口进入.网桥从帧中得知,源地址A在1端口对应的LAN上,于是将A:1写入映射表</p>
+<p>如果D回复A收到,立刻就会把D的MAC暴露给网桥,网桥就会记录D:2</p>
+<p>D不回复也没关系,反正D只要一说话立刻就会被网桥学会</p>
+<h6 id="环路问题"><a href="#环路问题" class="headerlink" title="环路问题"></a>环路问题</h6><p><img src="https://raw.githubusercontent.com/DeutschBall/VideoBed/main/image-20230207212358099.png" alt="image-20230207212358099"></p>
+<p>如果有两个网桥同时连接了两个LAN</p>
+<p>那么一个LAN发出的帧会同时被两个网桥转发,导致另一个LAN中出现两次该帧</p>
+<h6 id="生成树算法"><a href="#生成树算法" class="headerlink" title="生成树算法"></a>生成树算法</h6><p>生成树算法用于建立多个LAN的最优联通路径</p>
+<p>这里的最优可能是最小跳数,最小延迟,最大带宽等等</p>
+<p>假设从网桥到LAN跳数为1，从LAN到网桥跳数为0。</p>
+<blockquote>
+<p>为啥要这样假设呢?</p>
+<p>因为网桥不会主动向一个LAN发送帧,除非该帧的目的在这个LAN中</p>
+<p>而一个LAN的帧要想传送到另一个LAN,必须要经过网桥</p>
+<p>也就是说,网桥转发帧需要一定的代价,应该尽量减少转发量</p>
+<p>而LAN向网桥发送帧这是不可阻阻挡的,几乎没有代价</p>
+<p>因此有这么一个假设</p>
+</blockquote>
+<p>首先将网桥和LAN进行有向图建模,并标注边权</p>
+<p><img src="https://raw.githubusercontent.com/DeutschBall/VideoBed/main/image-20230207212859184.png" alt="image-20230207212859184"></p>
+<blockquote>
+<p>为啥没有两个网桥直接连接?或者两个LAN直接连接?</p>
+<p>这不废话吗</p>
+<p>两个网桥连接和只用一个网桥不一样吗?</p>
+<p>两个LAN连接就是一个LAN</p>
+<blockquote>
+<p>两个LAN连接也得使用网桥啊(</p>
+</blockquote>
+</blockquote>
+<p>生成树算法:</p>
+<p>spanning tree algorithm:</p>
+<p>1.每个网桥广播ID,选择最小的ID作为根网桥</p>
+<p><strong>2.找出从根网桥到其它网桥或LAN的最短路径</strong></p>
+<p>3.最短路径组合生成最短的树</p>
+<p>4.标记转发端口和阻塞端口</p>
+<p>注意生成树算法目的是,找出从根网桥到其他网桥和LAN的最短路,</p>
+<p>而不是为每个LAN找出到其他各个LAN的最短路</p>
+<p>使用生成树算法之后,阻塞端口不再使用,转发端口活跃</p>
+<h5 id="交换机"><a href="#交换机" class="headerlink" title="交换机"></a>交换机</h5><p>交换机相对于集线器的优点:</p>
+<p>1.每个端口是一个冲突域</p>
+<p>2.根据目标MAC地址查转发表,决定发往哪个端口</p>
+<p>3.全双工,由于没有冲突域,不需要CSMA&#x2F;CD协议</p>
+<p>4.有缓存,各个接口的带宽可以不同</p>
+<h4 id="网络层设备"><a href="#网络层设备" class="headerlink" title="网络层设备"></a>网络层设备</h4><p>链路层设备关心帧的MAC地址</p>
+<p>网络层设备关心包的IP地址</p>
+<p>三层设备就一个三层交换机和一个路由器</p>
+<p>这个三层交换机不伦不类,它既有二层交换机那个交换转发的功能,也有路由器的路由功能</p>
+<p>两者本身上的区别是,三层交换机主要是硬件驱动的,但是路由器是CPU+操作系统软件驱动的.这就导致三层交换机的效率远快于路由器</p>
+<p>两者功能上的区别是,三层交换机用于连接相同性质的网络,比如连接两个LAN:192.168.2.1&#x2F;24和192.168.1.1&#x2F;24</p>
+<p>但是路由器主要用于不同类型的网络连接,比如因特网和局域网的连接,入户网线可能给一个互联网的公网地址,需要使用一个路由器NAT转化为一个LAN.并且实际上的路由选择,负荷分担,链路备份,和其他网络交换路由信息,都是路由器实现的</p>
+<p>路由功能:当IP报文抵达路由器时,决定转发给哪一个下一跳路由器</p>
+<p>这个决策是基于路由器的路由表做出的</p>
+<p>路由表可以人工填写静态的,也可以让路由器自己学,就跟网桥交换机的转发表差不多</p>
+<h4 id="网关"><a href="#网关" class="headerlink" title="网关"></a>网关</h4><p>比较特殊的路由器</p>
+<p>一个LAN内的主机如果想要跨LAN访问另一个主机,只通过二层交换机是做不到的,因为二层交换机是连IP地址都不知道的傻子.网关就是一个LAN和外部网络连接的关口.LAN内的主机只要是想和外部通信,无脑往网关发包就可以了,网关负责决定这个包如何路由</p>
+<h4 id="虚拟局域网"><a href="#虚拟局域网" class="headerlink" title="虚拟局域网"></a>虚拟局域网</h4><p>交换机可以隔离冲突域但是无法隔离广播域</p>
+<p>划分虚拟局域网之后可以隔离冲突域和广播域</p>
+<p>在一个交换机上划分了VLAN,实际上相当于虚拟出多个交换机,每个交换机都分别连接到路由器上,形成多个LAN,并且这几个LAN互不连通.这个路由器就是各个LAN的网关</p>
+<h5 id="等效结构"><a href="#等效结构" class="headerlink" title="等效结构"></a>等效结构</h5><p>如图所示</p>
+<p><img src="https://raw.githubusercontent.com/DeutschBall/VideoBed/main/image-20230207220800643.png" alt="image-20230207220800643"></p>
+<p>这实际上就相当于</p>
+<p><img src="https://raw.githubusercontent.com/DeutschBall/VideoBed/main/image-20230207220913692.png" alt="image-20230207220913692"></p>
+<h5 id="如何实现"><a href="#如何实现" class="headerlink" title="如何实现"></a>如何实现</h5><p><img src="https://raw.githubusercontent.com/DeutschBall/VideoBed/main/image-20230207221014728.png" alt="image-20230207221014728"></p>
+<p>如果一个VLAN跨越了两个交换机,那么这个VLAN中两个计算机通过交换机通信时,交换机在发往另一个交换机之前,检查A计算机所处VLAN,然后在链路层帧后面加上VLAN标志,这样另一个交换机就知道把改帧转发给哪一个目标VLAN了</p>
+<p><img src="https://raw.githubusercontent.com/DeutschBall/VideoBed/main/image-20230207223219150.png" alt="image-20230207223219150"></p>
+<p>如图所示的拓扑中,经过实验,<a href="mailto:&#x50;&#x43;&#x39;&#64;&#49;&#57;&#50;&#x2e;&#49;&#x36;&#56;&#x2e;&#x31;&#48;&#x2e;&#x31;">&#x50;&#x43;&#x39;&#64;&#49;&#57;&#50;&#x2e;&#49;&#x36;&#56;&#x2e;&#x31;&#48;&#x2e;&#x31;</a> ping <a href="mailto:&#80;&#x43;&#49;&#51;&#64;&#49;&#57;&#x32;&#46;&#49;&#54;&#x38;&#x2e;&#49;&#48;&#x2e;&#51;">&#80;&#x43;&#49;&#51;&#64;&#49;&#57;&#x32;&#46;&#49;&#54;&#x38;&#x2e;&#49;&#48;&#x2e;&#51;</a>时,ICMP报文会被LSW5交换机准确地从GE0&#x2F;0&#x2F;4口转发到GE0&#x2F;0&#x2F;2端口,报文中也没有体现VLAN</p>
+<p><img src="https://raw.githubusercontent.com/DeutschBall/VideoBed/main/image-20230207223605022.png" alt="image-20230207223605022"></p>
+<p><a href="mailto:&#80;&#x43;&#x31;&#51;&#x40;&#49;&#x39;&#x32;&#x2e;&#49;&#54;&#x38;&#x2e;&#49;&#48;&#x2e;&#51;">&#80;&#x43;&#x31;&#51;&#x40;&#49;&#x39;&#x32;&#x2e;&#49;&#54;&#x38;&#x2e;&#49;&#48;&#x2e;&#51;</a> ping <a href="mailto:&#80;&#67;&#49;&#49;&#64;&#x31;&#57;&#x32;&#x2e;&#x31;&#54;&#56;&#46;&#x31;&#x30;&#46;&#50;">&#80;&#67;&#49;&#49;&#64;&#x31;&#57;&#x32;&#x2e;&#x31;&#54;&#56;&#46;&#x31;&#x30;&#46;&#50;</a>时会经过两个路由器的Trunk端口,其报文中,以太网头和IP头之间加上了VLAN编号,占用四个字节,这个玩意叫做tag(标签)</p>
+<p><img src="https://raw.githubusercontent.com/DeutschBall/VideoBed/main/image-20230207223506096.png" alt="image-20230207223506096"></p>
+<h5 id="交换机端口类型"><a href="#交换机端口类型" class="headerlink" title="交换机端口类型"></a>交换机端口类型</h5><p>access类型,只属于一个VLAN,用于连接计算机</p>
+<p>trunk类型,主干道,可以设置允许哪些VLAN通过,用于连接交换机</p>
+<p>hybrid类型,类似于trunk,但是hybrid允许通过改接口的帧不带VLAN tag,而trunk要求必须带VLAN tag(除了缺省VLAN,默认是VLAN 1,的帧不需要带tag)</p>
+<p>当端口接收到不带VLAN Tag的报文后，则将报文转发到<strong>属于缺省VLAN的端口</strong>(如果设置了端口的缺省VLAN ID,默认是VLAN 1)。</p>
+<p>当端口发送带有VLAN Tag的报文时，如果该报文的VLAN ID与端口缺省的VLAN ID相同，则系统将去掉报文的VLAN Tag，然后再发送该报文。</p>
+
+      
+    </div>
+
+    
+    
+    
+      <footer class="post-footer">
+        <div class="post-eof"></div>
+      </footer>
+  </article>
+  
+  
+  
+
+      
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="en">
     <link itemprop="mainEntityOfPage" href="http://deutschball.github.io/2023/01/30/Spring/">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
@@ -2813,623 +3449,6 @@
 <p>因此又在$O(n\lg n)$内解决了</p>
 <h2 id="回到多项式求积"><a href="#回到多项式求积" class="headerlink" title="回到多项式求积"></a>回到多项式求积</h2><p>卷积定理:</p>
 <p>对于两个长度为n的向量$\vec a,\vec b$<br>$$<br>a\otimes b&#x3D;DFT^{-1}<em>{2n}(DFT</em>{2n}(a)·DFT_{2n}(b))<br>$$<br>将多项式A,B只保留系数看成向量a,b,此时$a\otimes b$就是积多项式AB的系数向量</p>
-
-      
-    </div>
-
-    
-    
-    
-      <footer class="post-footer">
-        <div class="post-eof"></div>
-      </footer>
-  </article>
-  
-  
-  
-
-      
-  
-  
-  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="en">
-    <link itemprop="mainEntityOfPage" href="http://deutschball.github.io/2022/11/11/moectf%E8%A1%A5%E9%A2%98/">
-
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="image" content="https://raw.githubusercontent.com/DeutschBall/picbed/main/dustball.png">
-      <meta itemprop="name" content="dustball">
-      <meta itemprop="description" content="dustland">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="dustland">
-    </span>
-      <header class="post-header">
-        <h2 class="post-title" itemprop="name headline">
-          
-            <a href="/2022/11/11/moectf%E8%A1%A5%E9%A2%98/" class="post-title-link" itemprop="url">moectf补题</a>
-        </h2>
-
-        <div class="post-meta">
-            <span class="post-meta-item">
-              <span class="post-meta-item-icon">
-                <i class="far fa-calendar"></i>
-              </span>
-              <span class="post-meta-item-text">Posted on</span>
-
-              <time title="Created: 2022-11-11 11:36:00" itemprop="dateCreated datePublished" datetime="2022-11-11T11:36:00+08:00">2022-11-11</time>
-            </span>
-              <span class="post-meta-item">
-                <span class="post-meta-item-icon">
-                  <i class="far fa-calendar-check"></i>
-                </span>
-                <span class="post-meta-item-text">Edited on</span>
-                <time title="Modified: 2024-07-05 13:16:14" itemprop="dateModified" datetime="2024-07-05T13:16:14+08:00">2024-07-05</time>
-              </span>
-
-          
-
-        </div>
-      </header>
-
-    
-    
-    
-    <div class="post-body" itemprop="articleBody">
-
-      
-          <h1 id="moectf补题"><a href="#moectf补题" class="headerlink" title="moectf补题"></a>moectf补题</h1><p><a target="_blank" rel="noopener" href="https://github.com/XDSEC/moeCTF_2022">XDSEC&#x2F;MoeCTF_2022: MoeCTF 2022 Challenges and Writeups (github.com)</a></p>
-<h2 id="reverse"><a href="#reverse" class="headerlink" title="reverse"></a>reverse</h2><h3 id="EquationPy"><a href="#EquationPy" class="headerlink" title="EquationPy"></a>EquationPy</h3><p>python逆向</p>
-<h4 id="pyc与py"><a href="#pyc与py" class="headerlink" title="pyc与py"></a>pyc与py</h4><p>在写数据库上机作业时,已经遇见过pyc文件了</p>
-<figure class="highlight sh"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">├─admin</span><br><span class="line">│  │  admin.py</span><br><span class="line">│  │  __init__.py</span><br><span class="line">│  │</span><br><span class="line">│  └─__pycache__</span><br><span class="line">│          admin.cpython-38.pyc</span><br><span class="line">│          __init__.cpython-38.pyc</span><br></pre></td></tr></table></figure>
-
-<p>所有pyc文件都放到<code>__pycache__</code>目录下面,且pyc文件都是和其父目录中的py文件一一对应的</p>
-<p>比如这里admin.py对应到admin.cpython-38.pyc</p>
-<p>既然cache是缓存的意思,那么可以推测,pyc是py文件编译形成的,用来加速运行的.因为直接运行编译好的二进制文件必然比解释运行py源文件快</p>
-<p>查阅资料:</p>
-<blockquote>
-<p>pyc是一种二进制文件，是由py文件经过编译后，生成的文件，是一种byte code，py文件变成pyc文件后，加载的速度有所提高，而且pyc是一种跨平台的字节码，是由python的虚拟机来执行的，这个是类似于JAVA或者.NET的虚拟机的概念。pyc的内容，是跟python的版本相关的，不同版本编译后的pyc文件是不同的，3.7编译的pyc文件，3.6版本的 python是无法执行的。</p>
-</blockquote>
-<h4 id="python命令行编译"><a href="#python命令行编译" class="headerlink" title="python命令行编译"></a>python命令行编译</h4><figure class="highlight sh"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">python -m py_compile main.py</span><br></pre></td></tr></table></figure>
-
-<p>这条命令执行之后就会在当前目录下生成一个子目录<code>__pycache__</code>,其中就有main.cpython-38.pyc文件</p>
-<p>这个玩意儿长啥样?</p>
-<p><img src="https://raw.githubusercontent.com/DeutschBall/DeutschBall/main/image-20221110123037633.png" alt="image-20221110123037633"></p>
-<h4 id="反编译"><a href="#反编译" class="headerlink" title="反编译"></a>反编译</h4><p>可以使用<a target="_blank" rel="noopener" href="https://tool.lu/pyc/">在线网站</a>反编译</p>
-<p>也可以使用uncompyle6反编译,但是在我电脑上直接卡死</p>
-<p>用在线网站反编译之后得到的是一个</p>
-<figure class="highlight py"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line"></span><br><span class="line"><span class="built_in">print</span>(<span class="string">&#x27;Maybe z3 can help you solve this challenge.&#x27;</span>)</span><br><span class="line"><span class="built_in">print</span>(<span class="string">&#x27;Now give me your flag, and I will check for you.&#x27;</span>)</span><br><span class="line">flag = <span class="built_in">input</span>(<span class="string">&#x27;Input your flag:&#x27;</span>)</span><br><span class="line"><span class="keyword">if</span> <span class="built_in">len</span>(flag) == <span class="number">22</span> <span class="keyword">and</span> <span class="built_in">ord</span>(flag[<span class="number">0</span>]) * <span class="number">7072</span> + <span class="built_in">ord</span>(flag[<span class="number">1</span>]) * <span class="number">2523</span> + <span class="built_in">ord</span>(flag[<span class="number">2</span>]) * <span class="number">6714</span> + <span class="built_in">ord</span>(flag[<span class="number">3</span>]) * <span class="number">8810</span> + <span class="built_in">ord</span>(flag[<span class="number">4</span>]) * <span class="number">6796</span> + <span class="built_in">ord</span>(flag[<span class="number">5</span>]) * <span class="number">2647</span> + <span class="built_in">ord</span>(flag[<span class="number">6</span>]) * <span class="number">1347</span> + <span class="built_in">ord</span>(flag[<span class="number">7</span>]) * <span class="number">1289</span> + <span class="built_in">ord</span>(flag[<span class="number">8</span>]) * <span class="number">8917</span> + <span class="built_in">ord</span>(flag[<span class="number">9</span>]) * <span class="number">2304</span> + <span class="built_in">ord</span>(flag[<span class="number">10</span>]) * <span class="number">5001</span> + <span class="built_in">ord</span>(flag[<span class="number">11</span>]) * <span class="number">2882</span> + <span class="built_in">ord</span>(flag[<span class="number">12</span>]) * <span class="number">7232</span> + <span class="built_in">ord</span>(flag[<span class="number">13</span>]) * <span class="number">3192</span> + <span class="built_in">ord</span>(flag[<span class="number">14</span>]) * <span class="number">9676</span> + <span class="built_in">ord</span>(flag[<span class="number">15</span>]) * <span class="number">5436</span> + <span class="built_in">ord</span>(flag[<span class="number">16</span>]) * <span class="number">4407</span> + <span class="built_in">ord</span>(flag[<span class="number">17</span>]) * <span class="number">6269</span> + <span class="built_in">ord</span>(flag[<span class="number">18</span>]) * <span class="number">9623</span> + <span class="built_in">ord</span>(flag[<span class="number">19</span>]) * <span class="number">6230</span> + <span class="built_in">ord</span>(flag[<span class="number">20</span>]) * <span class="number">6292</span> + <span class="built_in">ord</span>(flag[<span class="number">21</span>]) * <span class="number">57</span> == <span class="number">10743134</span> <span class="keyword">and</span> ...</span><br><span class="line">...</span><br><span class="line"><span class="keyword">and</span> <span class="built_in">ord</span>(flag[<span class="number">0</span>]) * <span class="number">5926</span> + <span class="built_in">ord</span>(flag[<span class="number">1</span>]) * <span class="number">9095</span> + <span class="built_in">ord</span>(flag[<span class="number">2</span>]) * <span class="number">2048</span> + <span class="built_in">ord</span>(flag[<span class="number">3</span>]) * <span class="number">4639</span> + <span class="built_in">ord</span>(flag[<span class="number">4</span>]) * <span class="number">3035</span> + <span class="built_in">ord</span>(flag[<span class="number">5</span>]) * <span class="number">9560</span> + <span class="built_in">ord</span>(flag[<span class="number">6</span>]) * <span class="number">1591</span> + <span class="built_in">ord</span>(flag[<span class="number">7</span>]) * <span class="number">2392</span> + <span class="built_in">ord</span>(flag[<span class="number">8</span>]) * <span class="number">1812</span> + <span class="built_in">ord</span>(flag[<span class="number">9</span>]) * <span class="number">6732</span> + <span class="built_in">ord</span>(flag[<span class="number">10</span>]) * <span class="number">9454</span> + <span class="built_in">ord</span>(flag[<span class="number">11</span>]) * <span class="number">8175</span> + <span class="built_in">ord</span>(flag[<span class="number">12</span>]) * <span class="number">7346</span> + <span class="built_in">ord</span>(flag[<span class="number">13</span>]) * <span class="number">6333</span> + <span class="built_in">ord</span>(flag[<span class="number">14</span>]) * <span class="number">9812</span> + <span class="built_in">ord</span>(flag[<span class="number">15</span>]) * <span class="number">2034</span> + <span class="built_in">ord</span>(flag[<span class="number">16</span>]) * <span class="number">6634</span> + <span class="built_in">ord</span>(flag[<span class="number">17</span>]) * <span class="number">1762</span> + <span class="built_in">ord</span>(flag[<span class="number">18</span>]) * <span class="number">7058</span> + <span class="built_in">ord</span>(flag[<span class="number">19</span>]) * <span class="number">3524</span> + <span class="built_in">ord</span>(flag[<span class="number">20</span>]) * <span class="number">7462</span> + <span class="built_in">ord</span>(flag[<span class="number">21</span>]) * <span class="number">11</span> == <span class="number">11118093</span>:</span><br><span class="line">    <span class="built_in">print</span>(<span class="string">&#x27;Congratulate!!!You are right!&#x27;</span>)</span><br><span class="line"><span class="keyword">else</span>:</span><br><span class="line">    <span class="built_in">print</span>(<span class="string">&#x27;What a pity...Please try again &gt;__&lt;&#x27;</span>)</span><br><span class="line"></span><br></pre></td></tr></table></figure>
-
-<p>中间省去了一大段约束条件,因为没有缩进,格式很乱,可以在一个and上ctrl+f2选择所有and,然后移动光标到and最后按回车,相对于刚才稍微明朗点了</p>
-<p><img src="https://raw.githubusercontent.com/DeutschBall/DeutschBall/main/image-20221110161830590.png" alt="image-20221110161830590"></p>
-<p>实际上整个是一个22元一次方程组,怎么解这个方程组呢?z3</p>
-<h4 id="Z3模块"><a href="#Z3模块" class="headerlink" title="Z3模块"></a>Z3模块</h4><p>z3用于在约束条件下求一组解</p>
-<h5 id="python安装z3模块"><a href="#python安装z3模块" class="headerlink" title="python安装z3模块"></a>python安装z3模块</h5><p>官网<a target="_blank" rel="noopener" href="https://pypi.org/project/z3-solver/">z3-solver · PyPI</a></p>
-<figure class="highlight sh"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">pip install z3-solver</span><br></pre></td></tr></table></figure>
-
-<p>之后就可以在python中使用了</p>
-<figure class="highlight py"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">from</span> z3 <span class="keyword">import</span> *</span><br></pre></td></tr></table></figure>
-
-
-
-<h5 id="使用"><a href="#使用" class="headerlink" title="使用"></a>使用</h5><p><a target="_blank" rel="noopener" href="https://blog.shi1011.cn/learn/1789">从CTF入门z3 solver - 翻车鱼 (shi1011.cn)</a></p>
-<p>[<a target="_blank" rel="noopener" href="https://bbs.pediy.com/thread-266921.htm">原创]Z3求解约束器及例题-CTF对抗-看雪论坛-安全社区|安全招聘|bbs.pediy.com</a></p>
-<p><a target="_blank" rel="noopener" href="https://ericpony.github.io/z3py-tutorial/guide-examples.htm">Z3Py Guide (ericpony.github.io)</a></p>
-<p><a target="_blank" rel="noopener" href="https://cloud.tencent.com/developer/article/1423409">Z3简介及在逆向领域的应用 - 腾讯云开发者社区-腾讯云 (tencent.com)</a></p>
-<h5 id="基本类型"><a href="#基本类型" class="headerlink" title="基本类型"></a>基本类型</h5><table>
-<thead>
-<tr>
-<th>Z3类型</th>
-<th>意义</th>
-</tr>
-</thead>
-<tbody><tr>
-<td>Int</td>
-<td>整数</td>
-</tr>
-<tr>
-<td>Bool</td>
-<td>布尔</td>
-</tr>
-<tr>
-<td>Array</td>
-<td>数组</td>
-</tr>
-<tr>
-<td>BitVec</td>
-<td>位域</td>
-</tr>
-<tr>
-<td>Real</td>
-<td>实数</td>
-</tr>
-</tbody></table>
-<h5 id="基本语句"><a href="#基本语句" class="headerlink" title="基本语句"></a>基本语句</h5><table>
-<thead>
-<tr>
-<th>基本语句</th>
-<th>意义</th>
-<th>例子</th>
-</tr>
-</thead>
-<tbody><tr>
-<td>Solver</td>
-<td>创建一个求解器,可以添加约束条件</td>
-<td>s&#x3D;Solver()</td>
-</tr>
-<tr>
-<td>add</td>
-<td>添加约束条件</td>
-<td></td>
-</tr>
-<tr>
-<td>check</td>
-<td>检查在给定约束条件下是否有解</td>
-<td></td>
-</tr>
-<tr>
-<td>model</td>
-<td>求出满足所有约束条件的一个解</td>
-<td></td>
-</tr>
-</tbody></table>
-<p>比如想要求解椭圆$\frac{x^2}{25}+\frac{y^2}{16}&#x3D;1$与直线$y&#x3D;x-1$在y轴右侧的一个焦点</p>
-<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">from</span> z3 <span class="keyword">import</span> *</span><br><span class="line">x=Real(<span class="string">&#x27;x&#x27;</span>)</span><br><span class="line">y=Real(<span class="string">&#x27;y&#x27;</span>)</span><br><span class="line">s=Solver()</span><br><span class="line">s.add(x*x/<span class="number">25</span>+y*y/<span class="number">16</span>==<span class="number">1</span>)<span class="comment">#约束椭圆方程</span></span><br><span class="line">s.add(y==x-<span class="number">1</span>)<span class="comment">#约束直线方程</span></span><br><span class="line">s.add(x&gt;<span class="number">0</span>)<span class="comment">#约束y轴右侧</span></span><br><span class="line"><span class="keyword">if</span>(s.check()==sat):</span><br><span class="line">    <span class="built_in">print</span>(s.model())</span><br></pre></td></tr></table></figure>
-
-<figure class="highlight sh"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">[x = 3.6949050343?, y = 2.6949050343?]</span><br></pre></td></tr></table></figure>
-
-
-
-
-
-<h5 id="ISCC-2018-reverse-My-math-is-bad"><a href="#ISCC-2018-reverse-My-math-is-bad" class="headerlink" title="ISCC-2018 reverse-My math is bad"></a>ISCC-2018 reverse-My math is bad</h5><p><strong>main</strong></p>
-<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br></pre></td><td class="code"><pre><span class="line">__int64 __fastcall <span class="title function_">main</span><span class="params">(<span class="type">int</span> a1, <span class="type">char</span> **a2, <span class="type">char</span> **a3)</span></span><br><span class="line">&#123;</span><br><span class="line">  <span class="built_in">puts</span>(<span class="string">&quot;=======================================&quot;</span>);</span><br><span class="line">  <span class="built_in">puts</span>(<span class="string">&quot;= Welcome to the flag access machine! =&quot;</span>);</span><br><span class="line">  <span class="built_in">puts</span>(<span class="string">&quot;=   Input the password to login ...   =&quot;</span>);</span><br><span class="line">  <span class="built_in">puts</span>(<span class="string">&quot;=======================================&quot;</span>);</span><br><span class="line">  __isoc99_scanf(<span class="string">&quot;%s&quot;</span>, input);</span><br><span class="line">  <span class="keyword">if</span> ( (<span class="type">unsigned</span> <span class="type">int</span>)check() )</span><br><span class="line">  &#123;</span><br><span class="line">    <span class="built_in">puts</span>(<span class="string">&quot;Congratulations! You should get the flag...&quot;</span>);</span><br><span class="line">    flag();</span><br><span class="line">  &#125;</span><br><span class="line">  <span class="keyword">else</span></span><br><span class="line">  &#123;</span><br><span class="line">    <span class="built_in">puts</span>(<span class="string">&quot;Wrong password!&quot;</span>);</span><br><span class="line">  &#125;</span><br><span class="line">  <span class="keyword">return</span> <span class="number">0LL</span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-
-<p>全局位置有一个字符串input,首先check会检查input,如果通过,则调用flag函数给出flag,其中check和flag中都有加密</p>
-<p>这个输入的字符串input在bss节[0x6020A0,0x6020C0)</p>
-<p><img src="https://raw.githubusercontent.com/DeutschBall/DeutschBall/main/image-20221002154256280.png" alt="image-20221002154256280"></p>
-<p> <strong>check</strong></p>
-<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br></pre></td><td class="code"><pre><span class="line">__int64 __fastcall <span class="title function_">check</span><span class="params">()</span></span><br><span class="line">&#123;</span><br><span class="line">  __int64 result; <span class="comment">// rax</span></span><br><span class="line">  __int64 v1; <span class="comment">// [rsp+20h] [rbp-60h]</span></span><br><span class="line">  __int64 v2; <span class="comment">// [rsp+28h] [rbp-58h]</span></span><br><span class="line">  __int64 v3; <span class="comment">// [rsp+30h] [rbp-50h]</span></span><br><span class="line">  __int64 v4; <span class="comment">// [rsp+38h] [rbp-48h]</span></span><br><span class="line">  __int64 v5; <span class="comment">// [rsp+40h] [rbp-40h]</span></span><br><span class="line">  __int64 v6; <span class="comment">// [rsp+48h] [rbp-38h]</span></span><br><span class="line">  __int64 v7; <span class="comment">// [rsp+50h] [rbp-30h]</span></span><br><span class="line">  __int64 v8; <span class="comment">// [rsp+58h] [rbp-28h]</span></span><br><span class="line">  __int64 v9; <span class="comment">// [rsp+60h] [rbp-20h]</span></span><br><span class="line">  __int64 v10; <span class="comment">// [rsp+68h] [rbp-18h]</span></span><br><span class="line">  __int64 v11; <span class="comment">// [rsp+70h] [rbp-10h]</span></span><br><span class="line">  __int64 v12; <span class="comment">// [rsp+78h] [rbp-8h]</span></span><br><span class="line"></span><br><span class="line">  <span class="comment">// 要求input长32个字节</span></span><br><span class="line">  <span class="keyword">if</span> ( <span class="built_in">strlen</span>(input) != <span class="number">32</span> )</span><br><span class="line">    <span class="keyword">return</span> <span class="number">0LL</span>;</span><br><span class="line">  v1 = unk_6020B0;                              <span class="comment">// 0x30303030</span></span><br><span class="line">  v2 = unk_6020B4;</span><br><span class="line">  v3 = unk_6020B8;</span><br><span class="line">  v4 = unk_6020BC;</span><br><span class="line">  <span class="comment">// 约束条件1</span></span><br><span class="line">  <span class="keyword">if</span> ( dword_6020A4 * (__int64)*(<span class="type">int</span> *)input - dword_6020AC * (__int64)dword_6020A8 != <span class="number">0x24CDF2E7C953DA56</span>LL )</span><br><span class="line">    <span class="keyword">goto</span> LABEL_12;</span><br><span class="line">  <span class="comment">// 约束条件2</span></span><br><span class="line">  <span class="keyword">if</span> ( <span class="number">3LL</span> * dword_6020A8 + <span class="number">4LL</span> * dword_6020AC - dword_6020A4 - <span class="number">2LL</span> * *(<span class="type">int</span> *)input != <span class="number">0x17B85F06</span> )</span><br><span class="line">    <span class="keyword">goto</span> LABEL_12;</span><br><span class="line">  <span class="comment">// 约束条件3</span></span><br><span class="line">  <span class="keyword">if</span> ( <span class="number">3</span> * *(<span class="type">int</span> *)input * (__int64)dword_6020AC - dword_6020A8 * (__int64)dword_6020A4 != <span class="number">0x2E6E497E6415CF3E</span>LL )</span><br><span class="line">    <span class="keyword">goto</span> LABEL_12;</span><br><span class="line">  <span class="comment">// 约束条件4</span></span><br><span class="line">  <span class="keyword">if</span> ( <span class="number">27LL</span> * dword_6020A4 + *(<span class="type">int</span> *)input - <span class="number">11LL</span> * dword_6020AC - dword_6020A8 != <span class="number">0x95AE13337</span>LL )</span><br><span class="line">    <span class="keyword">goto</span> LABEL_12;</span><br><span class="line">  srand(dword_6020A8 ^ dword_6020A4 ^ *(_DWORD *)input ^ dword_6020AC);</span><br><span class="line">  v5 = rand() % <span class="number">50</span>;</span><br><span class="line">  v6 = rand() % <span class="number">50</span>;</span><br><span class="line">  v7 = rand() % <span class="number">50</span>;</span><br><span class="line">  v8 = rand() % <span class="number">50</span>;</span><br><span class="line">  v9 = rand() % <span class="number">50</span>;</span><br><span class="line">  v10 = rand() % <span class="number">50</span>;</span><br><span class="line">  v11 = rand() % <span class="number">50</span>;</span><br><span class="line">  v12 = rand() % <span class="number">50</span>;</span><br><span class="line">  <span class="comment">// 约束条件5</span></span><br><span class="line">  <span class="keyword">if</span> ( v4 * v6 + v1 * v5 - v2 - v3 != <span class="number">0xE638C96D3</span>LL )</span><br><span class="line">    <span class="keyword">goto</span> LABEL_12;</span><br><span class="line">  <span class="comment">// 约束条件6,7,8</span></span><br><span class="line">  <span class="keyword">if</span> ( v4 + v1 + v3 * v8 - v2 * v7 == <span class="number">0xB59F2D0CB</span>LL</span><br><span class="line">    &amp;&amp; v1 * v9 + v2 * v10 - v3 - v4 == <span class="number">0xDCFE88C6D</span>LL</span><br><span class="line">    &amp;&amp; v3 * v12 + v1 - v2 - v4 * v11 == <span class="number">0xC076D98BB</span>LL )</span><br><span class="line">  &#123;</span><br><span class="line">    result = <span class="number">1LL</span>;</span><br><span class="line">  &#125;</span><br><span class="line">  <span class="keyword">else</span></span><br><span class="line">  &#123;</span><br><span class="line">LABEL_12:</span><br><span class="line">    result = <span class="number">0LL</span>;</span><br><span class="line">  &#125;</span><br><span class="line">  <span class="keyword">return</span> result;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-
-<p>前四个约束条件组成方程组可以确定输入的前四个双字,</p>
-<p>后面的srand种子就是前四个双字的异或,也可以确定了,然后产生的v5~v12随机数也可以确定了,</p>
-<p>下面的运算又可以根据四个约束条件确定后四个双字</p>
-<p><img src="https://raw.githubusercontent.com/DeutschBall/DeutschBall/main/image-20221002153303248.png"></p>
-<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">if</span> ( dword_6020A4 * (__int64)*(<span class="type">int</span> *)input - dword_6020AC * (__int64)dword_6020A8 != <span class="number">0x24CDF2E7C953DA56</span>LL )</span><br><span class="line">  <span class="keyword">goto</span> LABEL_12;</span><br></pre></td></tr></table></figure>
-
-<p>第一个双字和第二个双字的积减去第三个双字和第四个双字的积得是0x24CDF2E7C953DA56</p>
-<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// 约束条件2</span></span><br><span class="line"><span class="keyword">if</span> ( <span class="number">3LL</span> * dword_6020A8 + <span class="number">4LL</span> * dword_6020AC - dword_6020A4 - <span class="number">2LL</span> * *(<span class="type">int</span> *)input != <span class="number">0x17B85F06</span> )</span><br><span class="line">  <span class="keyword">goto</span> LABEL_12;</span><br></pre></td></tr></table></figure>
-
-<p>$$<br>(3<em>input[8:11]+4</em>input[12:15])-(1<em>input[4:7]+2</em>input[0:3])&#x3D;17B85F06h<br>$$</p>
-<p>前四个约束条件就可以写成:</p>
-<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">dword0*dword1-dword2*dword3==0x24CDF2E7C953DA56</span><br><span class="line">(3*dword2+4*dword3)-(1*dword1+2*dword0)==0x17B85F06</span><br><span class="line">3*dword0*dword3-dword2*dword1==0x2E6E497E6415CF3E</span><br><span class="line">(27*dword1+dword0)-(11*dword3+dword2)==0x95AE13337</span><br></pre></td></tr></table></figure>
-
-
-
-<p>写z3脚本解方程</p>
-<figure class="highlight py"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">from</span> z3 <span class="keyword">import</span> *</span><br><span class="line"></span><br><span class="line">dword0=Int(<span class="string">&#x27;dword0&#x27;</span>)</span><br><span class="line">dword1=Int(<span class="string">&#x27;dword1&#x27;</span>)</span><br><span class="line">dword2=Int(<span class="string">&#x27;dword2&#x27;</span>)</span><br><span class="line">dword3=Int(<span class="string">&#x27;dword3&#x27;</span>)</span><br><span class="line">solve(</span><br><span class="line">    dword0*dword1-dword2*dword3==<span class="number">0x24CDF2E7C953DA56</span>,</span><br><span class="line">    (<span class="number">3</span>*dword2+<span class="number">4</span>*dword3)-(<span class="number">1</span>*dword1+<span class="number">2</span>*dword0)==<span class="number">0x17B85F06</span>,</span><br><span class="line">    <span class="number">3</span>*dword0*dword3-dword2*dword1==<span class="number">0x2E6E497E6415CF3E</span>,</span><br><span class="line">    (<span class="number">27</span>*dword1+dword0)-(<span class="number">11</span>*dword3+dword2)==<span class="number">0x95AE13337</span>,</span><br><span class="line">)</span><br><span class="line"></span><br></pre></td></tr></table></figure>
-
-<p>运行结果</p>
-<figure class="highlight py"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">PS C:\Users\<span class="number">86135</span>\Desktop\reverse&gt; python exp.py</span><br><span class="line">[dword3 = <span class="number">862734414</span>,</span><br><span class="line"> dword1 = <span class="number">1801073242</span>,</span><br><span class="line"> dword2 = <span class="number">829124174</span>,</span><br><span class="line"> dword0 = <span class="number">1869639009</span>]</span><br></pre></td></tr></table></figure>
-
-<p>下面解出v5~v12的随机数值</p>
-<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;iostream&gt;</span></span></span><br><span class="line"><span class="keyword">using</span> <span class="keyword">namespace</span> std;</span><br><span class="line"><span class="type">int</span> dword3 = <span class="number">862734414</span>;</span><br><span class="line"><span class="type">int</span> dword1 = <span class="number">1801073242</span>;</span><br><span class="line"><span class="type">int</span> dword2 = <span class="number">829124174</span>;</span><br><span class="line"><span class="type">int</span> dword0 = <span class="number">1869639009</span>;</span><br><span class="line"><span class="function"><span class="type">int</span> <span class="title">main</span><span class="params">()</span></span></span><br><span class="line"><span class="function"></span>&#123;</span><br><span class="line">    <span class="built_in">srand</span>(dword1 ^ dword2 ^ dword3 ^ dword0);</span><br><span class="line">    <span class="type">int</span> v5 = <span class="built_in">rand</span>() % <span class="number">50</span>;</span><br><span class="line">    <span class="type">int</span> v6 = <span class="built_in">rand</span>() % <span class="number">50</span>;</span><br><span class="line">    <span class="type">int</span> v7 = <span class="built_in">rand</span>() % <span class="number">50</span>;</span><br><span class="line">    <span class="type">int</span> v8 = <span class="built_in">rand</span>() % <span class="number">50</span>;</span><br><span class="line">    <span class="type">int</span> v9 = <span class="built_in">rand</span>() % <span class="number">50</span>;</span><br><span class="line">    <span class="type">int</span> v10 = <span class="built_in">rand</span>() % <span class="number">50</span>;</span><br><span class="line">    <span class="type">int</span> v11 = <span class="built_in">rand</span>() % <span class="number">50</span>;</span><br><span class="line">    <span class="type">int</span> v12 = <span class="built_in">rand</span>() % <span class="number">50</span>;</span><br><span class="line">    cout&lt;&lt;v5&lt;&lt;endl&lt;&lt;v6&lt;&lt;endl&lt;&lt;v7&lt;&lt;endl&lt;&lt;v8&lt;&lt;endl&lt;&lt;v9&lt;&lt;endl&lt;&lt;v10&lt;&lt;endl&lt;&lt;v11&lt;&lt;endl&lt;&lt;v12&lt;&lt;endl;</span><br><span class="line">    <span class="keyword">return</span> <span class="number">0</span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-
-<figure class="highlight sh"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line">┌──(root㉿Executor)-[/mnt/c/Users/86135/Desktop/reverse]</span><br><span class="line">└─# g++ main.cpp -O0 -o main -m32</span><br><span class="line"></span><br><span class="line">┌──(root㉿Executor)-[/mnt/c/Users/86135/Desktop/reverse]</span><br><span class="line">└─# ./main</span><br><span class="line">22</span><br><span class="line">39</span><br><span class="line">45</span><br><span class="line">45</span><br><span class="line">35</span><br><span class="line">41</span><br><span class="line">13</span><br><span class="line">36</span><br></pre></td></tr></table></figure>
-
-<p>下面又有四个约束条件</p>
-<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">v4 * v6 + v1 * v5 - v2 - v3 == 0xE638C96D3LL</span><br><span class="line">v4 + v1 + v3 * v8 - v2 * v7 == 0xB59F2D0CBLL</span><br><span class="line">v1 * v9 + v2 * v10 - v3 - v4 == 0xDCFE88C6DLL</span><br><span class="line">v3 * v12 + v1 - v2 - v4 * v11 == 0xC076D98BBLL </span><br></pre></td></tr></table></figure>
-
-<p>目标是解出v1~v4,对应输入的后四个双字</p>
-<figure class="highlight py"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">from</span> z3 <span class="keyword">import</span> *</span><br><span class="line">v5=<span class="number">22</span></span><br><span class="line">v6=<span class="number">39</span></span><br><span class="line">v7=<span class="number">45</span></span><br><span class="line">v8=<span class="number">45</span></span><br><span class="line">v9=<span class="number">35</span></span><br><span class="line">v10=<span class="number">41</span></span><br><span class="line">v11=<span class="number">13</span></span><br><span class="line">v12=<span class="number">36</span></span><br><span class="line">v1=Int(<span class="string">&#x27;v1&#x27;</span>)</span><br><span class="line">v2=Int(<span class="string">&#x27;v2&#x27;</span>)</span><br><span class="line">v3=Int(<span class="string">&#x27;v3&#x27;</span>)</span><br><span class="line">v4=Int(<span class="string">&#x27;v4&#x27;</span>)</span><br><span class="line">solve(</span><br><span class="line">    v4 * v6 + v1 * v5 - v2 - v3 == <span class="number">0xE638C96D3</span>,</span><br><span class="line">    v4 + v1 + v3 * v8 - v2 * v7 == <span class="number">0xB59F2D0CB</span>,</span><br><span class="line">    v1 * v9 + v2 * v10 - v3 - v4 == <span class="number">0xDCFE88C6D</span>,</span><br><span class="line">    v3 * v12 + v1 - v2 - v4 * v11 == <span class="number">0xC076D98BB</span>,</span><br><span class="line">)</span><br></pre></td></tr></table></figure>
-
-<figure class="highlight py"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">PS C:\Users\<span class="number">86135</span>\Desktop\reverse&gt; python exp2.py</span><br><span class="line">[v1 = <span class="number">811816014</span>,</span><br><span class="line"> v4 = <span class="number">1195788129</span>,</span><br><span class="line"> v2 = <span class="number">828593230</span>,</span><br><span class="line"> v3 = <span class="number">1867395930</span>]</span><br></pre></td></tr></table></figure>
-
-<p>到此输入全部被解出了,将其转换为字符串</p>
-<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;iostream&gt;</span></span></span><br><span class="line">using namespace <span class="built_in">std</span>;</span><br><span class="line"><span class="type">int</span> dwords[<span class="number">8</span>] = &#123;</span><br><span class="line">    <span class="number">1869639009</span>,</span><br><span class="line">    <span class="number">1801073242</span>,</span><br><span class="line">    <span class="number">829124174</span>,</span><br><span class="line">    <span class="number">862734414</span>,</span><br><span class="line">    <span class="number">811816014</span>,</span><br><span class="line">    <span class="number">828593230</span>,</span><br><span class="line">    <span class="number">1867395930</span>,</span><br><span class="line">    <span class="number">1195788129</span></span><br><span class="line">&#125;;</span><br><span class="line"><span class="class"><span class="keyword">struct</span> <span class="title">Bitfield</span>&#123;</span></span><br><span class="line">    <span class="type">char</span> bytes[<span class="number">4</span>];</span><br><span class="line">    <span class="type">int</span> aInt;</span><br><span class="line">    Bitfield(<span class="type">const</span> <span class="type">int</span> &amp;x)&#123;</span><br><span class="line">        bytes[<span class="number">0</span>]=(<span class="type">unsigned</span> <span class="type">char</span> )x;</span><br><span class="line">        bytes[<span class="number">1</span>]=(<span class="type">unsigned</span> <span class="type">char</span>)(x&gt;&gt;<span class="number">8</span>);</span><br><span class="line">        bytes[<span class="number">2</span>]=(<span class="type">unsigned</span> <span class="type">char</span>)(x&gt;&gt;<span class="number">16</span>);</span><br><span class="line">        bytes[<span class="number">3</span>]=(<span class="type">unsigned</span> <span class="type">char</span>)(x&gt;&gt;<span class="number">24</span>);</span><br><span class="line">    &#125;</span><br><span class="line">    friend ostream &amp;operator&lt;&lt;(ostream &amp;os,<span class="type">const</span> Bitfield &amp;bf)&#123;</span><br><span class="line">        <span class="keyword">for</span>(<span class="type">int</span> i=<span class="number">0</span>;i&lt;<span class="number">4</span>;++i)&#123;</span><br><span class="line">            os&lt;&lt;bf.bytes[i];</span><br><span class="line">        &#125;</span><br><span class="line">        <span class="keyword">return</span> os;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;;</span><br><span class="line"><span class="type">int</span> <span class="title function_">main</span><span class="params">()</span>&#123;</span><br><span class="line">    <span class="keyword">for</span>(<span class="type">int</span> i=<span class="number">0</span>;i&lt;<span class="number">8</span>;++i)&#123;</span><br><span class="line">        Bitfield <span class="title function_">bf</span><span class="params">(dwords[i])</span>;</span><br><span class="line">        <span class="built_in">cout</span>&lt;&lt;bf;</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">return</span> <span class="number">0</span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-
-<figure class="highlight sh"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">PS C:\Users\86135\Desktop\reverse&gt; g++ main2.cpp -O0 -o main2</span><br><span class="line">PS C:\Users\86135\Desktop\reverse&gt; ./main2</span><br><span class="line">ampoZ2ZkNnk1NHl3NTc0NTc1Z3NoaGFG</span><br></pre></td></tr></table></figure>
-
-<p>然后输入到程序就可以得到flag</p>
-<figure class="highlight sh"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line">┌──(root㉿Executor)-[/mnt/c/Users/86135/Desktop/reverse]</span><br><span class="line">└─# ./mathbad</span><br><span class="line">=======================================</span><br><span class="line">= Welcome to the flag access machine! =</span><br><span class="line">=   Input the password to login ...   =</span><br><span class="line">=======================================</span><br><span class="line">ampoZ2ZkNnk1NHl3NTc0NTc1Z3NoaGFG</span><br><span class="line">Congratulations! You should get the flag...</span><br><span class="line">flag&#123;th3_Line@r_4lgebra_1s_d1fficult!&#125;</span><br></pre></td></tr></table></figure>
-
-
-
-
-
-<h4 id="回到本题"><a href="#回到本题" class="headerlink" title="回到本题"></a>回到本题</h4><p>要使用z3模块解体,首先需要注册变量,比如<code>x=Int(&quot;x&quot;)</code>这种</p>
-<p>而现在22个变量如果手动更换成x,y,z这种字母,太浪费时间,太死脑筋</p>
-<p>师傅直接用循环注册了一个flag变量数组</p>
-<figure class="highlight py"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">flag = [Int(<span class="string">&quot;input[%d]&quot;</span>%i) <span class="keyword">for</span> i <span class="keyword">in</span> <span class="built_in">range</span>(<span class="number">22</span>)]</span><br><span class="line">s = Solver()</span><br></pre></td></tr></table></figure>
-
-
-
-<p>然后怎么添加约束条件呢?利用这个and,再每个等式前面和后面都加上点东西</p>
-<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">s.add(等式)</span><br></pre></td></tr></table></figure>
-
-<p>就要这种光标排山倒海的效果</p>
-<p><img src="https://raw.githubusercontent.com/DeutschBall/DeutschBall/main/image-20221110163329271.png" alt="image-20221110163329271"></p>
-<p>把原来有的ord函数也去掉</p>
-<figure class="highlight py"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">from</span> z3 <span class="keyword">import</span> *</span><br><span class="line">flag=[Int(<span class="string">&quot;flag[%d]&quot;</span>%i)<span class="keyword">for</span> i <span class="keyword">in</span> <span class="built_in">range</span>(<span class="number">22</span>)]</span><br><span class="line">s=Solver()</span><br><span class="line">s.add((flag[<span class="number">0</span>]) * <span class="number">7072</span> + (flag[<span class="number">1</span>]) * <span class="number">2523</span> + (flag[<span class="number">2</span>]) * <span class="number">6714</span> + (flag[<span class="number">3</span>]) * <span class="number">8810</span> + (flag[<span class="number">4</span>]) * <span class="number">6796</span> + (flag[<span class="number">5</span>]) * <span class="number">2647</span> + (flag[<span class="number">6</span>]) * <span class="number">1347</span> + (flag[<span class="number">7</span>]) * <span class="number">1289</span> + (flag[<span class="number">8</span>]) * <span class="number">8917</span> + (flag[<span class="number">9</span>]) * <span class="number">2304</span> + (flag[<span class="number">10</span>]) * <span class="number">5001</span> + (flag[<span class="number">11</span>]) * <span class="number">2882</span> + (flag[<span class="number">12</span>]) * <span class="number">7232</span> + (flag[<span class="number">13</span>]) * <span class="number">3192</span> + (flag[<span class="number">14</span>]) * <span class="number">9676</span> + (flag[<span class="number">15</span>]) * <span class="number">5436</span> + (flag[<span class="number">16</span>]) * <span class="number">4407</span> + (flag[<span class="number">17</span>]) * <span class="number">6269</span> + (flag[<span class="number">18</span>]) * <span class="number">9623</span> + (flag[<span class="number">19</span>]) * <span class="number">6230</span> + (flag[<span class="number">20</span>]) * <span class="number">6292</span> + (flag[<span class="number">21</span>]) * <span class="number">57</span> == <span class="number">10743134</span>)</span><br><span class="line">...</span><br><span class="line">s.add((flag[<span class="number">0</span>]) * <span class="number">5926</span> + (flag[<span class="number">1</span>]) * <span class="number">9095</span> + (flag[<span class="number">2</span>]) * <span class="number">2048</span> + (flag[<span class="number">3</span>]) * <span class="number">4639</span> + (flag[<span class="number">4</span>]) * <span class="number">3035</span> + (flag[<span class="number">5</span>]) * <span class="number">9560</span> + (flag[<span class="number">6</span>]) * <span class="number">1591</span> + (flag[<span class="number">7</span>]) * <span class="number">2392</span> + (flag[<span class="number">8</span>]) * <span class="number">1812</span> + (flag[<span class="number">9</span>]) * <span class="number">6732</span> + (flag[<span class="number">10</span>]) * <span class="number">9454</span> + (flag[<span class="number">11</span>]) * <span class="number">8175</span> + (flag[<span class="number">12</span>]) * <span class="number">7346</span> + (flag[<span class="number">13</span>]) * <span class="number">6333</span> + (flag[<span class="number">14</span>]) * <span class="number">9812</span> + (flag[<span class="number">15</span>]) * <span class="number">2034</span> + (flag[<span class="number">16</span>]) * <span class="number">6634</span> + (flag[<span class="number">17</span>]) * <span class="number">1762</span> + (flag[<span class="number">18</span>]) * <span class="number">7058</span> + (flag[<span class="number">19</span>]) * <span class="number">3524</span> + (flag[<span class="number">20</span>]) * <span class="number">7462</span> + (flag[<span class="number">21</span>]) * <span class="number">11</span> == <span class="number">11118093</span>)</span><br><span class="line"><span class="keyword">if</span>(s.check()==sat):</span><br><span class="line">    result = s.model()</span><br><span class="line">    <span class="keyword">for</span> i <span class="keyword">in</span> <span class="built_in">range</span> (<span class="number">22</span>):</span><br><span class="line">        <span class="built_in">print</span>(result[flag[i]])</span><br></pre></td></tr></table></figure>
-
-<p>这样写完之后,最终打印的是<code>result[flag[i]]</code>,不是<code>result[i]</code>,这是因为一开始是将flag[0]注册为第一个变量,flag[1]注册为第二个变量</p>
-<p>这样打印出来的是字符的ascii值,怎么才能打印出字符呢?</p>
-<figure class="highlight py"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="built_in">print</span>(<span class="built_in">chr</span>(<span class="built_in">int</span>(<span class="built_in">str</span>(m[flag[i]]))),end = <span class="string">&#x27;&#x27;</span>)</span><br></pre></td></tr></table></figure>
-
-<p>为了搞明白为啥需要这么多类型转换,总结一下python中int,byte,char,str之间的转换函数</p>
-<h4 id="python中的类型转换"><a href="#python中的类型转换" class="headerlink" title="python中的类型转换"></a>python中的类型转换</h4><table>
-<thead>
-<tr>
-<th>函数</th>
-<th>说明</th>
-</tr>
-</thead>
-<tbody><tr>
-<td>int(x [,base ])</td>
-<td>将字符串x转换为⼀个整数</td>
-</tr>
-<tr>
-<td>float(x )</td>
-<td>将字符串x转换为⼀个浮点数</td>
-</tr>
-<tr>
-<td>complex(real [,imag ])</td>
-<td>创建⼀个复数，real为实部，imag为虚部</td>
-</tr>
-<tr>
-<td>str(x )</td>
-<td>将对象 x 转换为字符串</td>
-</tr>
-<tr>
-<td>repr(x )</td>
-<td>将对象 x 转换为表达式字符串</td>
-</tr>
-<tr>
-<td>eval(str )</td>
-<td>⽤来计算在字符串中的有效Python表达式,并返回⼀个对象</td>
-</tr>
-<tr>
-<td>tuple(s )</td>
-<td>将序列 s 转换为⼀个元组</td>
-</tr>
-<tr>
-<td>list(s )</td>
-<td>将序列 s 转换为⼀个列表</td>
-</tr>
-<tr>
-<td>chr(x )</td>
-<td>将⼀个整数转换为⼀个Unicode字符</td>
-</tr>
-<tr>
-<td>ord(x )</td>
-<td>将⼀个字符转换为它的ASCII整数值</td>
-</tr>
-<tr>
-<td>hex(x )</td>
-<td>将⼀个整数转换为⼀个⼗六进制<strong>字符串</strong></td>
-</tr>
-<tr>
-<td>oct(x )</td>
-<td>将⼀个整数转换为⼀个⼋进制字符串</td>
-</tr>
-<tr>
-<td>bin(x )</td>
-<td>将⼀个整数转换为⼀个⼆进制字符串</td>
-</tr>
-</tbody></table>
-<p>对于<code>int(str,[,base])</code>,base通过一个整数值指定将str理解为10进制或者16进制的字面量进行转换</p>
-<figure class="highlight py"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">&gt;&gt;&gt; </span><span class="built_in">int</span>(<span class="string">&quot;10&quot;</span>,<span class="number">10</span>)</span><br><span class="line"><span class="number">10</span></span><br><span class="line"><span class="meta">&gt;&gt;&gt; </span><span class="built_in">int</span>(<span class="string">&quot;0x10&quot;</span>,<span class="number">10</span>)</span><br><span class="line">Traceback (most recent call last):</span><br><span class="line">  File <span class="string">&quot;&lt;stdin&gt;&quot;</span>, line <span class="number">1</span>, <span class="keyword">in</span> &lt;module&gt;</span><br><span class="line">ValueError: invalid literal <span class="keyword">for</span> <span class="built_in">int</span>() <span class="keyword">with</span> base <span class="number">10</span>: <span class="string">&#x27;0x10&#x27;</span></span><br><span class="line"><span class="meta">&gt;&gt;&gt; </span><span class="built_in">int</span>(<span class="string">&quot;0x10&quot;</span>,<span class="number">16</span>)</span><br><span class="line"><span class="number">16</span></span><br></pre></td></tr></table></figure>
-
-<p>如果str&#x3D;”0x10”带了0x前缀,此时base&#x3D;16可以将str转换为16进制整数,但是尝试转换为10进制就会出错</p>
-<p>但是如果str&#x3D;”0x10”则既可以识别为10进制,也可以识别为16进制</p>
-<p>回过头来理解<code>print(chr(int(str(m[flag[i]]))),end = &#39;&#39;)</code></p>
-<p>这样写首先将一个整数转为str然后又转为int,看似是转了个寂寞,其实一个函数也不能少</p>
-<p>chr接收一个int,但是<code>m[flag[i]]</code>实际上是Solver.model()的返回值,是一个modelRef引用.为啥不是整数?因为Solver还可以求解浮点数方程组.因此需要对modelRef不能直接丢给chr</p>
-<p>并且modelRef也没有直接丢给int函数,这是因为int函数只接受str作为参数,modelRef没有像str的自动类型转换,因此首先需要调用一个str函数将modelRef转为字符串类型</p>
-<p>为啥str函数可以接收这个不是python自己的,而是来自其他模块的类型modelRef?</p>
-<p>因为str的参数可以是任何obj对象,显然modelRef是一个对象,可以被str通吃</p>
-<h4 id="str干了啥"><a href="#str干了啥" class="headerlink" title="str干了啥?"></a>str干了啥?</h4><p>str函数会调用该类的<code>__str__</code>函数,如果没有显式定义这个函数,则隐式的<code>__str__</code>函数会将对象的地址信息转换成字符串返回给str函数,然后str再将这个值返回给用户,比如</p>
-<figure class="highlight py"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">&lt;__main__.A <span class="built_in">object</span> at <span class="number">0x0000026784BF8730</span>&gt;</span><br></pre></td></tr></table></figure>
-
-
-
-<p>如果有显式实现<code>__str__</code>函数,则str会获得该函数的返回值,比如</p>
-<figure class="highlight py"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">class</span> <span class="title class_">A</span>:</span><br><span class="line">    a=<span class="string">&#x27;&#x27;</span></span><br><span class="line">    <span class="keyword">def</span> <span class="title function_">__init__</span>(<span class="params">x</span>):</span><br><span class="line">        a=x</span><br><span class="line">        </span><br><span class="line">    <span class="keyword">def</span> <span class="title function_">__str__</span>(<span class="params">self</span>) -&gt; <span class="built_in">str</span>:</span><br><span class="line">        <span class="keyword">return</span> <span class="string">&quot;123&quot;</span></span><br><span class="line">a=A()</span><br><span class="line"><span class="built_in">print</span>(<span class="built_in">str</span>(a))</span><br></pre></td></tr></table></figure>
-
-<p>这样运行结果就是<code>123</code></p>
-<p>如果还重载了<code>__repr__</code>函数,则str函数首先调用显式的<code>__repr__</code>函数获得返回值</p>
-<figure class="highlight py"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">class</span> <span class="title class_">A</span>:</span><br><span class="line">    a=<span class="string">&#x27;&#x27;</span></span><br><span class="line">    <span class="keyword">def</span> <span class="title function_">__init__</span>(<span class="params">x</span>):</span><br><span class="line">        a=x</span><br><span class="line">        <span class="comment"># pass</span></span><br><span class="line"></span><br><span class="line">    <span class="keyword">def</span> <span class="title function_">__repr__</span>(<span class="params">self</span>) -&gt; <span class="built_in">str</span>:</span><br><span class="line">        <span class="keyword">return</span> <span class="string">&quot;123&quot;</span></span><br><span class="line">    <span class="keyword">def</span> <span class="title function_">__str__</span>(<span class="params">self</span>) -&gt; <span class="built_in">str</span>:</span><br><span class="line">        <span class="keyword">return</span> <span class="string">&quot;456&quot;</span></span><br><span class="line"></span><br><span class="line"></span><br><span class="line">a=A()</span><br><span class="line"><span class="built_in">print</span>(<span class="built_in">str</span>(a))</span><br></pre></td></tr></table></figure>
-
-<p>运行结果:<code>456</code></p>
-<p>因此可以估计,Solver.model()函数返回的东西,要么重载了<code>__str__</code>函数,要么重载了<code>__repr__</code>函数</p>
-<figure class="highlight py"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">def</span> <span class="title function_">model</span>(<span class="params">self</span>):</span><br><span class="line">    <span class="keyword">try</span>:</span><br><span class="line">        <span class="keyword">return</span> ModelRef(Z3_solver_get_model(<span class="variable language_">self</span>.ctx.ref(), <span class="variable language_">self</span>.solver), <span class="variable language_">self</span>.ctx)</span><br><span class="line">    <span class="keyword">except</span> Z3Exception:</span><br><span class="line">        <span class="keyword">raise</span> Z3Exception(<span class="string">&quot;model is not available&quot;</span>)</span><br></pre></td></tr></table></figure>
-
-<p>如果程序没有问题则返回了一个ModelRef类型的对象</p>
-<figure class="highlight py"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">class</span> <span class="title class_">ModelRef</span>(<span class="title class_ inherited__">Z3PPObject</span>):</span><br><span class="line">	...</span><br><span class="line">	   <span class="keyword">def</span> <span class="title function_">__repr__</span>(<span class="params">self</span>):</span><br><span class="line">        <span class="keyword">return</span> obj_to_string(<span class="variable language_">self</span>)</span><br><span class="line">	...</span><br></pre></td></tr></table></figure>
-
-<p>这里调用了一个obj_to_string函数,这个函数也是z3模块提供的</p>
-<figure class="highlight py"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">def</span> <span class="title function_">obj_to_string</span>(<span class="params">a</span>):</span><br><span class="line">    out = io.StringIO()<span class="comment">#都是python自带类型,创建一个字符串流对象</span></span><br><span class="line">    _PP(out, _Formatter(a))<span class="comment">#z3模块函数,将z3模块对象a按照其实际类型转换后放到out流上</span></span><br><span class="line">    <span class="keyword">return</span> out.getvalue()<span class="comment">#getvalue取得字符串流上的字符串,返回</span></span><br></pre></td></tr></table></figure>
-
-<p>这里z3模块函数Formatter会根据z3对象a的实际类型,决定返回什么样的字符串</p>
-<h3 id="D-flat"><a href="#D-flat" class="headerlink" title="D_flat"></a>D_flat</h3><p>给了好多个文件</p>
-<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">Mode                 LastWriteTime         Length Name</span><br><span class="line">----                 -------------         ------ ----</span><br><span class="line">-a----         2022/7/19     18:10            410 D_flat.deps.json</span><br><span class="line">-a----         2022/7/19     18:11           5632 D_flat.dll</span><br><span class="line">-a----         2022/7/19     18:11         149504 D_flat.exe</span><br><span class="line">-a----         2022/7/19     18:11          10384 D_flat.pdb</span><br><span class="line">-a----         2022/7/19     18:10            253 D_flat.runtimeconfig.json</span><br></pre></td></tr></table></figure>
-
-<p>我认识的有</p>
-<p>dll,动态链接库</p>
-<p>exe,主程序,入口点</p>
-<p>pdb,符号文件,ida调试时可以载入</p>
-<p>我认识json是字符串存储的js对象,但是不知道这里两个json文件可以干啥</p>
-<p>用exeinfope查dll文件的壳发现是C#编写的,</p>
-<p>用ida64打开D_flat.exe之后就傻眼了,看不到一点flag的痕迹,感觉都是什么.NET平台还有C#那一套东西的环境初始化</p>
-<p>师傅说用dnspy反汇编D_flat.dll,刚用dnspy蒙蔽的很,但是转到入口点五个字我还是认得的</p>
-<p><img src="https://raw.githubusercontent.com/DeutschBall/DeutschBall/main/image-20221110180846574.png" alt="image-20221110180846574"></p>
-<figure class="highlight c#"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">using</span> System;</span><br><span class="line"><span class="keyword">using</span> System.Text;</span><br><span class="line"></span><br><span class="line"><span class="comment">// Token: 0x02000002 RID: 2</span></span><br><span class="line"><span class="keyword">internal</span> <span class="keyword">class</span> <span class="title">D_flate</span></span><br><span class="line">&#123;</span><br><span class="line">	<span class="comment">// Token: 0x06000001 RID: 1 RVA: 0x00002050 File Offset: 0x00000250</span></span><br><span class="line">	<span class="function"><span class="keyword">private</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title">Main</span>()</span></span><br><span class="line">	&#123;</span><br><span class="line">		<span class="built_in">int</span> f = <span class="number">0</span>;</span><br><span class="line">		<span class="built_in">int</span>[] flag = <span class="keyword">new</span> <span class="built_in">int</span>[]</span><br><span class="line">		&#123;</span><br><span class="line">			<span class="number">109</span>,</span><br><span class="line">			<span class="number">111</span>,</span><br><span class="line">			...</span><br><span class="line">			<span class="number">33</span>,</span><br><span class="line">			<span class="number">125</span></span><br><span class="line">		&#125;;</span><br><span class="line">		Console.WriteLine(<span class="string">&quot;In music theory, there is a note that has the same pitch as D flat.&quot;</span>);</span><br><span class="line">		Console.WriteLine(<span class="string">&quot;Do you know it?\nNow plz input your flag:&quot;</span>);</span><br><span class="line">		<span class="built_in">string</span> input = Console.ReadLine();</span><br><span class="line">		<span class="built_in">byte</span>[] byteArray = Encoding.ASCII.GetBytes(input);</span><br><span class="line">		<span class="keyword">for</span> (<span class="built_in">int</span> i = <span class="number">0</span>; i &lt; input.Length; i++)</span><br><span class="line">		&#123;</span><br><span class="line">			<span class="keyword">if</span> (flag[i] == (<span class="built_in">int</span>)byteArray[i])</span><br><span class="line">			&#123;</span><br><span class="line">				f++;</span><br><span class="line">			&#125;</span><br><span class="line">		&#125;</span><br><span class="line">		<span class="keyword">if</span> (f == flag.Length)</span><br><span class="line">		&#123;</span><br><span class="line">			Console.WriteLine(<span class="string">&quot;TTTTTQQQQQQLLLLLLL!!! This is your flag!&quot;</span>);</span><br><span class="line">			<span class="keyword">return</span>;</span><br><span class="line">		&#125;</span><br><span class="line">		Console.WriteLine(<span class="string">&quot;QwQ, plz try again.&quot;</span>);</span><br><span class="line">	&#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br></pre></td></tr></table></figure>
-
-<p>怎么C#程序长得跟java这么像?类里面才能有main函数是吧?</p>
-<p>实际上逻辑很简单,就是输入一串和这个flag数组比一下,如果一模一样则成功</p>
-<p>解法也很简单</p>
-<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;iostream&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;vector&gt;</span></span></span><br><span class="line"><span class="keyword">using</span> <span class="keyword">namespace</span> std;</span><br><span class="line">vector&lt;<span class="type">char</span>&gt; flag = &#123;<span class="number">109</span>, <span class="number">111</span>, <span class="number">101</span>, <span class="number">99</span>, <span class="number">116</span>, <span class="number">102</span>, <span class="number">123</span>, <span class="number">68</span>, <span class="number">95</span>, <span class="number">102</span>, <span class="number">108</span>, <span class="number">97</span>, <span class="number">116</span>, <span class="number">101</span>, <span class="number">95</span>, <span class="number">105</span>, <span class="number">115</span>, <span class="number">95</span>, <span class="number">67</span>, <span class="number">95</span>, <span class="number">115</span>, <span class="number">104</span>, <span class="number">97</span>, <span class="number">114</span>, <span class="number">112</span>, <span class="number">33</span>, <span class="number">125</span>&#125;;</span><br><span class="line"><span class="function"><span class="type">int</span> <span class="title">main</span><span class="params">()</span></span></span><br><span class="line"><span class="function"></span>&#123;</span><br><span class="line">    <span class="keyword">for</span> (<span class="keyword">auto</span> c : flag)</span><br><span class="line">    &#123;</span><br><span class="line">        cout &lt;&lt; c;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-
-<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">PS C:\Users\<span class="number">86135</span>\Desktop\moectfwp\MoeCTF_2022-main\Challenges\Reverse\D_flat\D_flat&gt; g++ main.cpp -o main</span><br><span class="line">PS C:\Users\<span class="number">86135</span>\Desktop\moectfwp\MoeCTF_2022-main\Challenges\Reverse\D_flat\D_flat&gt; ./main</span><br><span class="line">moectf&#123;D_flate_is_C_sharp!&#125;</span><br></pre></td></tr></table></figure>
-
-
-
-<p>解是解出来了,但是还有几个问题,</p>
-<p>1.exe文件是干啥的?主要逻辑都放在dll中了,要exe有何用?</p>
-<p>2.我怎么上来就知道应该去dll中找茬?</p>
-<p>3.exe中干了啥</p>
-<h3 id="chicken-soup"><a href="#chicken-soup" class="headerlink" title="chicken_soup"></a>chicken_soup</h3><p>花指令,当时只知道这是花指令,不知道怎么处理花指令,幸好逻辑清晰,看汇编也能分析</p>
-<p>实际上把花指令都改成nop指令就可以让ida正确反编译</p>
-<p>直接用ida打开程序反编译main函数,输入input要求是38个字符,经过两个加密函数,encrypt1,encrypt2之后,与密文target比较,如果一模一样就通过</p>
-<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br></pre></td><td class="code"><pre><span class="line"><span class="type">int</span> __cdecl <span class="title function_">main</span><span class="params">(<span class="type">int</span> argc, <span class="type">const</span> <span class="type">char</span> **argv, <span class="type">const</span> <span class="type">char</span> **envp)</span></span><br><span class="line">&#123;</span><br><span class="line">  <span class="type">int</span> result; <span class="comment">// eax</span></span><br><span class="line">  <span class="type">char</span> input[<span class="number">100</span>]; <span class="comment">// [esp+10h] [ebp-68h] BYREF</span></span><br><span class="line"></span><br><span class="line">  <span class="built_in">puts</span>(<span class="string">&quot;I poisoned the program... Can you reverse it?!&quot;</span>);</span><br><span class="line">  <span class="built_in">puts</span>(<span class="string">&quot;Come on! Give me your flag:&quot;</span>);</span><br><span class="line">  <span class="built_in">scanf</span>(<span class="string">&quot;%s&quot;</span>, (<span class="type">char</span>)input);</span><br><span class="line">  <span class="keyword">if</span> ( <span class="built_in">strlen</span>(input) == <span class="number">38</span> )</span><br><span class="line">  &#123;</span><br><span class="line">    ((<span class="type">void</span> (__cdecl *)(<span class="type">char</span> *))encrypt1)(input);</span><br><span class="line">    ((<span class="type">void</span> (__cdecl *)(<span class="type">char</span> *))encrypt2)(input);</span><br><span class="line">    <span class="keyword">if</span> ( <span class="built_in">strcmp</span>(input, &amp;target) )</span><br><span class="line">      <span class="built_in">puts</span>(<span class="string">&quot;\nTTTTTTTTTTQQQQQQQQQQQQQLLLLLLLLL!!!!&quot;</span>);</span><br><span class="line">    <span class="keyword">else</span></span><br><span class="line">      <span class="built_in">puts</span>(<span class="string">&quot;\nQwQ, please try again.&quot;</span>);</span><br><span class="line">    result = <span class="number">0</span>;</span><br><span class="line">  &#125;</span><br><span class="line">  <span class="keyword">else</span></span><br><span class="line">  &#123;</span><br><span class="line">    <span class="built_in">puts</span>(<span class="string">&quot;\nQwQ, please try again.&quot;</span>);</span><br><span class="line">    result = <span class="number">0</span>;</span><br><span class="line">  &#125;</span><br><span class="line">  <span class="keyword">return</span> result;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-
-<p>target一直,那么问题转化为求两个加密函数的逆</p>
-<p>然而这个encrypt1并没有被ida识别为函数,他长得特别丑</p>
-<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br></pre></td><td class="code"><pre><span class="line">.text:00401000 encrypt1:                               ; CODE XREF: _main+85↓p</span><br><span class="line">.text:00401000                 push    ebp</span><br><span class="line">.text:00401001                 mov     ebp, esp</span><br><span class="line">.text:00401003                 sub     esp, 14h</span><br><span class="line">.text:00401006                 push    ebx</span><br><span class="line">.text:00401007                 push    esi</span><br><span class="line">.text:00401008                 push    edi</span><br><span class="line">.text:00401009                 jz      short near ptr loc_40100D+1</span><br><span class="line">.text:0040100B                 jnz     short near ptr loc_40100D+1</span><br><span class="line">.text:0040100D</span><br><span class="line">.text:0040100D loc_40100D:                             ; CODE XREF: .text:00401009↑j</span><br><span class="line">.text:0040100D                                         ; .text:0040100B↑j</span><br><span class="line">.text:0040100D                 jmp     near ptr 13855D9h</span><br><span class="line">.text:0040100D ; ---------------------------------------------------------------------------</span><br><span class="line">.text:00401012                 align 4</span><br><span class="line">.text:00401014                 dd 8B09EB00h, 0C083F845h, 0F8458901h, 89084D8Bh, 558BF44Dh</span><br><span class="line">.text:00401014                 dd 1C283F4h, 8BF05589h, 88AF445h, 83FF4D88h, 8001F445h</span><br><span class="line">.text:00401014                 dd 7500FF7Dh, 0F4558BEEh, 89F0552Bh, 458BEC55h, 1E883ECh</span><br><span class="line">.text:00401014                 dd 73F84539h, 84D8B1Fh, 0FF84D03h, 8B0151B6h, 45030845h</span><br><span class="line">.text:00401014                 dd 8B60FF8h, 558BCA03h, 0F8550308h, 0A3EB0A88h, 8B5B5E5Fh</span><br><span class="line">.text:00401014                 dd 0CCC35DE5h, 0CCCCCCCCh</span><br><span class="line">.text:00401080 ; ---------------------------------------------------------------------------</span><br></pre></td></tr></table></figure>
-
-
-
-<p>00401009 和0040100B这两个地方的指令很奇怪,跳转到同一个地方,loc_40100D+1,也就是说越过了loc_40100D这个地方的”花指令”</p>
-<p>怎么让ida看起来正常点?可以在00401009下断点然后动态调试过去,此时.text:0026100D db 0E9h这条花指令就非常明显了,</p>
-<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br></pre></td><td class="code"><pre><span class="line">.text:00261000 encrypt1:                               ; CODE XREF: _main+85↓p</span><br><span class="line">.text:00261000 push    ebp</span><br><span class="line">.text:00261001 mov     ebp, esp</span><br><span class="line">.text:00261003 sub     esp, 14h</span><br><span class="line">.text:00261006 push    ebx</span><br><span class="line">.text:00261007 push    esi</span><br><span class="line">.text:00261008 push    edi</span><br><span class="line">.text:00261009 jz      short loc_26100E</span><br><span class="line">.text:0026100B jnz     short loc_26100E</span><br><span class="line">.text:0026100B ; ---------------------------------------------------------------------------</span><br><span class="line">.text:0026100D db 0E9h</span><br><span class="line">.text:0026100E ; ---------------------------------------------------------------------------</span><br><span class="line">.text:0026100E</span><br><span class="line">.text:0026100E loc_26100E:                             ; CODE XREF: .text:00261009↑j</span><br><span class="line">.text:0026100E                                         ; .text:0026100B↑j</span><br><span class="line">.text:0026100E mov     dword ptr [ebp-8], 0</span><br><span class="line">.text:00261015 jmp     short loc_261020</span><br><span class="line">.text:00261017 ; ---------------------------------------------------------------------------</span><br><span class="line">.text:00261017</span><br><span class="line">.text:00261017 loc_261017:                             ; CODE XREF: .text:00261072↓j</span><br><span class="line">...</span><br></pre></td></tr></table></figure>
-
-<p>把它改成nop空操作指令</p>
-<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><span class="line">.text:00261000 encrypt1:                               ; CODE XREF: _main+85↓p</span><br><span class="line">.text:00261000 push    ebp</span><br><span class="line">.text:00261001 mov     ebp, esp</span><br><span class="line">.text:00261003 sub     esp, 14h</span><br><span class="line">.text:00261006 push    ebx</span><br><span class="line">.text:00261007 push    esi</span><br><span class="line">.text:00261008 push    edi</span><br><span class="line">.text:00261009 jz      short loc_26100E</span><br><span class="line">.text:0026100B jnz     short loc_26100E</span><br><span class="line">.text:0026100D nop</span><br><span class="line">.text:0026100E</span><br><span class="line">.text:0026100E loc_26100E:                             ; CODE XREF: .text:00261009↑j</span><br><span class="line">.text:0026100E                                         ; .text:0026100B↑j</span><br><span class="line">.text:0026100E mov     dword ptr [ebp-8], 0</span><br><span class="line">.text:00261015 jmp     short loc_261020</span><br></pre></td></tr></table></figure>
-
-<p>然后在encrypt1上按p键转化为函数,就可以用F5反编译了</p>
-<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line"><span class="type">unsigned</span> <span class="type">int</span> __cdecl <span class="title function_">encrypt1</span><span class="params">(<span class="type">const</span> <span class="type">char</span> *a1)</span></span><br><span class="line">&#123;</span><br><span class="line">  <span class="type">unsigned</span> <span class="type">int</span> result; <span class="comment">// eax</span></span><br><span class="line">  <span class="type">unsigned</span> <span class="type">int</span> i; <span class="comment">// [esp+18h] [ebp-8h]</span></span><br><span class="line"></span><br><span class="line">  <span class="keyword">for</span> ( i = <span class="number">0</span>; ; ++i )</span><br><span class="line">  &#123;</span><br><span class="line">    result = <span class="built_in">strlen</span>(a1) - <span class="number">1</span>;</span><br><span class="line">    <span class="keyword">if</span> ( i &gt;= result )</span><br><span class="line">      <span class="keyword">break</span>;</span><br><span class="line">    a1[i] += a1[i + <span class="number">1</span>];</span><br><span class="line">  &#125;</span><br><span class="line">  <span class="keyword">return</span> result;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-
-<p>一目了然,赏心悦目</p>
-<p>出题人怎么出的题?用VC++内联汇编写的</p>
-<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line"><span class="type">void</span> <span class="title function_">enc1</span><span class="params">(<span class="type">unsigned</span> <span class="type">char</span>* input)</span></span><br><span class="line">&#123;</span><br><span class="line">    __asm &#123;</span><br><span class="line">        jz label</span><br><span class="line">        jnz label</span><br><span class="line">        _emit <span class="number">0xe9</span></span><br><span class="line">        label:</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">for</span> (<span class="type">int</span> i = <span class="number">0</span>; i &lt; <span class="built_in">strlen</span>((<span class="type">const</span> <span class="type">char</span>*)input) - <span class="number">1</span>; i++)</span><br><span class="line">        input[i] += input[i + <span class="number">1</span>];</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-
-<p>emit 指令直接在代码段插入数据,反汇编器会直接把插入的数据也当成代码,尝试反汇编,发现没有对应任何指令,寄了.这就是花指令</p>
-<p>前面两个jz,jnz保证跳过emit定义的数据,将控制转移到label,顺势执行下面的for循环了</p>
-<h3 id="fake-key"><a href="#fake-key" class="headerlink" title="fake_key"></a>fake_key</h3><h4 id="分析fake-key-exe"><a href="#分析fake-key-exe" class="headerlink" title="分析fake_key.exe"></a>分析fake_key.exe</h4><p>当时通了,但是有一个疑问是,key是啥时候被修改的</p>
-<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br></pre></td><td class="code"><pre><span class="line"><span class="type">int</span> __cdecl <span class="title function_">main</span><span class="params">(<span class="type">int</span> argc, <span class="type">const</span> <span class="type">char</span> **argv, <span class="type">const</span> <span class="type">char</span> **envp)</span></span><br><span class="line">&#123;</span><br><span class="line">  <span class="type">char</span> input[<span class="number">112</span>]; <span class="comment">// [rsp+20h] [rbp-80h] BYREF</span></span><br><span class="line">  <span class="type">int</span> lenInput; <span class="comment">// [rsp+90h] [rbp-10h]</span></span><br><span class="line">  <span class="type">int</span> lenStr; <span class="comment">// [rsp+94h] [rbp-Ch]</span></span><br><span class="line">  <span class="type">int</span> j; <span class="comment">// [rsp+98h] [rbp-8h]</span></span><br><span class="line">  <span class="type">int</span> i; <span class="comment">// [rsp+9Ch] [rbp-4h]</span></span><br><span class="line"></span><br><span class="line">  sub_401800(argc, argv, envp);</span><br><span class="line">  lenStr = <span class="built_in">strlen</span>(key);</span><br><span class="line">  <span class="built_in">puts</span>(<span class="string">&quot;I changed the key secretly, you can&#x27;t find the right key!&quot;</span>);</span><br><span class="line">  <span class="built_in">puts</span>(<span class="string">&quot;And I use random numbers to rot my input, you can never guess them!&quot;</span>);</span><br><span class="line">  <span class="built_in">puts</span>(<span class="string">&quot;Unless you debug to get the key and random numbers...&quot;</span>);</span><br><span class="line">  <span class="built_in">puts</span>(<span class="string">&quot;Now give me your flag:&quot;</span>);</span><br><span class="line">  <span class="built_in">scanf</span>(<span class="string">&quot;%s&quot;</span>, input);</span><br><span class="line">  lenInput = <span class="built_in">strlen</span>(input);</span><br><span class="line">  <span class="keyword">for</span> ( i = <span class="number">0</span>; i &lt; lenInput; ++i )</span><br><span class="line">    input[i] ^= key[i % lenStr];</span><br><span class="line">  <span class="keyword">for</span> ( j = <span class="number">0</span>; j &lt; lenInput; ++j )</span><br><span class="line">    input[j] += rand() % <span class="number">10</span>;</span><br><span class="line">  <span class="keyword">if</span> ( (<span class="type">unsigned</span> <span class="type">int</span>)<span class="built_in">strcmp</span>(input, &amp;target) )</span><br><span class="line">    <span class="built_in">puts</span>(<span class="string">&quot;\nRight! TTTTTQQQQQLLLLL!!!&quot;</span>);</span><br><span class="line">  <span class="keyword">else</span></span><br><span class="line">    <span class="built_in">puts</span>(<span class="string">&quot;QwQ, plz try again.&quot;</span>);</span><br><span class="line">  <span class="keyword">return</span> <span class="number">0</span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-
-<p>这里key一开始是”yunzh1jun”字样</p>
-<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">.data:0000000000403040 key             db &#x27;yunzh1jun&#x27;,0        ; DATA XREF: sub_401550+5↑o</span><br><span class="line">.data:0000000000403040                                         ; sub_401550+2A↑o ...</span><br></pre></td></tr></table></figure>
-
-<p>题目中提示”I changed the key secretly”,偷着把key改了,当时在key上看的交叉引用发现确实有个函数会修改key</p>
-<p><img src="https://raw.githubusercontent.com/DeutschBall/DeutschBall/main/image-20221110191538085.png" alt="image-20221110191538085"></p>
-<p>去sub_401550函数看看</p>
-<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="type">char</span> *<span class="title function_">sub_401550</span><span class="params">()</span></span><br><span class="line">&#123;</span><br><span class="line">  <span class="type">char</span> *result; <span class="comment">// rax</span></span><br><span class="line"></span><br><span class="line">  result = &amp;Str[<span class="built_in">strlen</span>(Str)];</span><br><span class="line">  <span class="built_in">strcpy</span>(result, <span class="string">&quot;TCL,trackYYDS&quot;</span>);</span><br><span class="line">  <span class="keyword">return</span> result;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-
-<p>也就是在原来key后附加了”TCL,trackYYDS”.</p>
-<p>现在的问题是,这个sub_401550是被谁,再何时调用的?</p>
-<p><img src="https://raw.githubusercontent.com/DeutschBall/DeutschBall/main/image-20221110191710527.png" alt="image-20221110191710527"></p>
-<p>看交叉引用,该函数的入口被维护在一张RUNTIME_FUNCTION表上,这个表又叫ExceptionDir,看来是</p>
-<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line">.pdata:0000000000405000 ExceptionDir    RUNTIME_FUNCTION &lt;rva nullsub_1, rva algn_401001, rva stru_406000&gt;</span><br><span class="line">.pdata:000000000040500C                 RUNTIME_FUNCTION &lt;rva pre_c_init, rva algn_401121, rva stru_406004&gt;</span><br><span class="line">.pdata:0000000000405018                 RUNTIME_FUNCTION &lt;rva pre_cpp_init, rva algn_401179, rva stru_40600C&gt;</span><br><span class="line">.pdata:0000000000405024                 RUNTIME_FUNCTION &lt;rva sub_401180, rva algn_4014A6, rva stru_406014&gt;</span><br><span class="line">.pdata:0000000000405030                 RUNTIME_FUNCTION &lt;rva WinMainCRTStartup, rva algn_4014D2, \</span><br><span class="line">.pdata:0000000000405030                                   rva stru_406028&gt;</span><br><span class="line">.pdata:000000000040503C                 RUNTIME_FUNCTION &lt;rva start, rva algn_401502, rva stru_406048&gt;</span><br><span class="line">.pdata:0000000000405048                 RUNTIME_FUNCTION &lt;rva sub_401510, rva algn_401529, rva stru_406068&gt;</span><br><span class="line">.pdata:0000000000405054                 RUNTIME_FUNCTION &lt;rva sub_401530, rva algn_40153C, rva stru_406070&gt;</span><br><span class="line">.pdata:0000000000405060                 RUNTIME_FUNCTION &lt;rva nullsub_2, rva algn_401541, rva stru_406074&gt;</span><br><span class="line">.pdata:000000000040506C                 RUNTIME_FUNCTION &lt;rva sub_401550, rva strcmp, rva stru_406078&gt;</span><br><span class="line">.pdata:0000000000405078                 RUNTIME_FUNCTION &lt;rva strcmp, rva main, rva stru_406084&gt;</span><br></pre></td></tr></table></figure>
-
-<p>这个表也是PE头的导入目录之一</p>
-<p><img src="https://raw.githubusercontent.com/DeutschBall/DeutschBall/main/image-20221110192410257.png" alt="image-20221110192410257"></p>
-<p>程序基址在0x400000加上0x5000,正好就是ida中的ExceptionDir</p>
-<p>查了一下,这是win64上的异常处理<a target="_blank" rel="noopener" href="https://dbgtech.github.io/2017/08/04/Windows-X64-Try-Except-Finally.html">Windows X64的Ring3层异常处理机制 | DbgTech</a></p>
-<p>想要彻底弄明白,首先得把异常处理这一套弄明白,留作后话</p>
-<h4 id="分析fake-key-elf"><a href="#分析fake-key-elf" class="headerlink" title="分析fake_key.elf"></a>分析fake_key.elf</h4><p>还给了一个linux上的程序,这个会修改key的函数放在一个<code>_init_array</code>的表中</p>
-<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br></pre></td><td class="code"><pre><span class="line">.init_array:0000000000003D88 ; ELF Initialization Function Table</span><br><span class="line">.init_array:0000000000003D88 ; ===========================================================================</span><br><span class="line">.init_array:0000000000003D88</span><br><span class="line">.init_array:0000000000003D88 ; Segment type: Pure data</span><br><span class="line">.init_array:0000000000003D88 ; Segment permissions: Read/Write</span><br><span class="line">.init_array:0000000000003D88 _init_array     segment qword public &#x27;DATA&#x27; use64</span><br><span class="line">.init_array:0000000000003D88                 assume cs:_init_array</span><br><span class="line">.init_array:0000000000003D88                 ;org 3D88h</span><br><span class="line">.init_array:0000000000003D88 initArray       dq offset loc_11E0      ; DATA XREF: LOAD:0000000000000168↑o</span><br><span class="line">.init_array:0000000000003D88                                         ; LOAD:00000000000002F0↑o ...</span><br><span class="line">.init_array:0000000000003D90                 dq offset changeKey</span><br><span class="line">.init_array:0000000000003D90 _init_array     ends</span><br><span class="line">.init_array:0000000000003D90</span><br><span class="line">.fini_array:0000000000003D98 ; ELF Termination Function Table</span><br><span class="line">.fini_array:0000000000003D98 ; ===========================================================================</span><br><span class="line">.fini_array:0000000000003D98</span><br><span class="line">.fini_array:0000000000003D98 ; Segment type: Pure data</span><br><span class="line">.fini_array:0000000000003D98 ; Segment permissions: Read/Write</span><br><span class="line">.fini_array:0000000000003D98 _fini_array     segment qword public &#x27;DATA&#x27; use64</span><br><span class="line">.fini_array:0000000000003D98                 assume cs:_fini_array</span><br><span class="line">.fini_array:0000000000003D98                 ;org 3D98h</span><br><span class="line">.fini_array:0000000000003D98 finiArray       dq offset __do_global_dtors_aux</span><br><span class="line">.fini_array:0000000000003D98                                         ; DATA XREF: __libc_csu_init+1D↑o</span><br><span class="line">.fini_array:0000000000003D98 _fini_array     ends</span><br></pre></td></tr></table></figure>
-
-<p>这个<code>_init_array</code>表在节头表中</p>
-<p><img src="https://raw.githubusercontent.com/DeutschBall/DeutschBall/main/image-20221110193559281.png" alt="image-20221110193559281"></p>
-<p>在initArray上按x看交叉引用</p>
-<p><img src="https://raw.githubusercontent.com/DeutschBall/DeutschBall/main/image-20221110194420955.png" alt="image-20221110194420955"></p>
-<p>发现<code>__libc_csu_init</code>函数会引用该表</p>
-<p>这个函数干了啥?</p>
-<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line"><span class="type">void</span> __fastcall _libc_csu_init(<span class="type">unsigned</span> <span class="type">int</span> a1, __int64 a2, __int64 a3)</span><br><span class="line">&#123;</span><br><span class="line">  <span class="type">signed</span> __int64 end; <span class="comment">// rbp</span></span><br><span class="line">  __int64 begin; <span class="comment">// rbx</span></span><br><span class="line"></span><br><span class="line">  init_proc();</span><br><span class="line">  end = ((<span class="type">char</span> *)&amp;finiArray - (<span class="type">char</span> *)&amp;initArray) &gt;&gt; <span class="number">3</span>;</span><br><span class="line">  <span class="keyword">if</span> ( end )</span><br><span class="line">  &#123;</span><br><span class="line">    <span class="keyword">for</span> ( begin = <span class="number">0LL</span>; begin != end; ++begin )</span><br><span class="line">      ((<span class="type">void</span> (__fastcall *)(_QWORD, __int64, __int64))*(&amp;initArray + begin))(a1, a2, a3);</span><br><span class="line">  &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-
-<p>首先调用了一个init_proc</p>
-<blockquote>
-<p>这个函数判断gmon_start标志是否已经起来了,如果否则调用_gmon_start__函数</p>
-<p>参考了</p>
-<p><a target="_blank" rel="noopener" href="https://www.jianshu.com/p/ebd516326a36">Linux 程序符号__gmon_start__ - 简书 (jianshu.com)</a></p>
-<p><a target="_blank" rel="noopener" href="https://stackoverflow.com/questions/12697081/what-is-the-gmon-start-symbol">c - What is the “<strong>gmon_start</strong>“ symbol? - Stack Overflow</a></p>
-<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line">__int64 (**init_proc())(<span class="type">void</span>)</span><br><span class="line">&#123;</span><br><span class="line">  __int64 (**result)(<span class="type">void</span>); <span class="comment">// rax</span></span><br><span class="line"></span><br><span class="line">  result = &amp;_gmon_start__;</span><br><span class="line">  <span class="keyword">if</span> ( &amp;_gmon_start__ )</span><br><span class="line">    result = (__int64 (**)(<span class="type">void</span>))_gmon_start__();</span><br><span class="line">  <span class="keyword">return</span> result;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-
-<p>这里的mon应该是monitor,监视器的意思,他好像会监视程序的性能,记录一些数据,反正和程序逻辑关系不大,</p>
-</blockquote>
-<p>然后类似于迭代器,计算end,即init_array的最后一项之后,</p>
-<p><code>  end = ((char *)&amp;finiArray - (char *)&amp;initArray) &gt;&gt; 3;</code>这里右移三位相当于除以8,原因是<code>_init_array</code>中维护的都是函数入口地址,每个地址都是8字节的,除以八才得到下标</p>
-<p>然后begin从0遍历到end,也就是遍历了这个<code>_init_array</code>表</p>
-<p>每次遍历都会执行一个<code>((void (__fastcall *)(_QWORD, __int64, __int64))*(&amp;initArray + begin))(a1, a2, a3);</code></p>
-<p>把<code>_init_array</code>中的表项,也就是函数入口点,带着(a1,a2,a3)三个参数去执行</p>
-<p>显然initArray中有两个表项</p>
-<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">.init_array:0000000000003D88 _init_array     segment qword public &#x27;DATA&#x27; use64</span><br><span class="line">.init_array:0000000000003D88                 assume cs:_init_array</span><br><span class="line">.init_array:0000000000003D88                 ;org 3D88h</span><br><span class="line">.init_array:0000000000003D88 initArray       dq offset loc_11E0      ; DATA XREF: LOAD:0000000000000168↑o</span><br><span class="line">.init_array:0000000000003D88                                         ; LOAD:00000000000002F0↑o ...</span><br><span class="line">.init_array:0000000000003D90                 dq offset changeKey</span><br><span class="line">.init_array:0000000000003D90 _init_array     ends</span><br></pre></td></tr></table></figure>
-
-<p>这个changeKey函数是第二个被执行的,显然它用不到a1,a2,a3三个参数.</p>
-<p>下面问题是,<code>_libc_csu_init</code>这个函数是干啥的,被谁,在啥时候执行</p>
-<p>交叉引用表明只有start函数会调用它</p>
-<p><img src="https://raw.githubusercontent.com/DeutschBall/DeutschBall/main/image-20221110195924354.png" alt="image-20221110195924354"></p>
-<p>start是程序入口点,它调用了<code>_libc_start_main</code>,这个函数会同时带着main函数和<code>_libc_csu_init</code>函数作为参数</p>
-<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// positive sp value has been detected, the output may be wrong!</span></span><br><span class="line"><span class="type">void</span> __fastcall __noreturn <span class="title function_">start</span><span class="params">(__int64 a1, __int64 a2, <span class="type">void</span> (*a3)(<span class="type">void</span>))</span></span><br><span class="line">&#123;</span><br><span class="line">  __int64 v3; <span class="comment">// rax</span></span><br><span class="line">  <span class="type">int</span> v4; <span class="comment">// esi</span></span><br><span class="line">  __int64 v5; <span class="comment">// [rsp-8h] [rbp-8h] BYREF</span></span><br><span class="line">  <span class="type">char</span> *retaddr; <span class="comment">// [rsp+0h] [rbp+0h] BYREF</span></span><br><span class="line"></span><br><span class="line">  v4 = v5;</span><br><span class="line">  v5 = v3;</span><br><span class="line">  _libc_start_main(</span><br><span class="line">    (<span class="type">int</span> (__fastcall *)(<span class="type">int</span>, <span class="type">char</span> **, <span class="type">char</span> **))main,</span><br><span class="line">    v4,</span><br><span class="line">    &amp;retaddr,</span><br><span class="line">    (<span class="type">void</span> (*)(<span class="type">void</span>))_libc_csu_init,</span><br><span class="line">    fini,</span><br><span class="line">    a3,</span><br><span class="line">    &amp;v5);</span><br><span class="line">  __halt();</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-
-
-
-<p>下面问题就是<code>_libc_start_main</code>的逻辑了,这实际上是linux程序从加载到main之前的逻辑,参考程序员的自我修养.留作后话</p>
-<p>可以确定的一点是<code>_libc_csu_init</code>是先于main函数执行的,因此main执行之前key已经被修改了</p>
-<h4 id="怎么出的题"><a href="#怎么出的题" class="headerlink" title="怎么出的题?"></a>怎么出的题?</h4><figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">__attribute((constructor)) <span class="type">static</span> <span class="type">void</span> <span class="title function_">fun</span><span class="params">()</span></span><br><span class="line">&#123;</span><br><span class="line">    <span class="built_in">strcat</span>(key,<span class="string">&quot;TCL,trackYYDS&quot;</span>);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-
-<p>这个fun函数被<code>__attribute((constructor))</code>修饰,这是GNU编译器的拓展语法</p>
-<blockquote>
-<p>__attribute__介绍</p>
-<p>参考<a target="_blank" rel="noopener" href="https://www.jianshu.com/p/dd425b9dc9db"><strong>attribute</strong>((constructor))用法解析 - 简书 (jianshu.com)</a></p>
-<p>__attribute__可以设置函数属性(Function Attribute)、变量属性(Variable Attribute)和类型属性(Type Attribute)。__attribute__前后都有两个下划线，并且后面会紧跟一对原括弧，括弧里面是相应的__attribute__参数</p>
-<p>__attribute__语法格式为：attribute ( ( attribute-list ) )</p>
-<p>如果函数被设定为constructor属性，则该函数会在main（）函数执行之前被自动的执行；若函数被设定为destructor属性，则该函数会在main（）函数执行之后或者exit（）被调用后被自动的执行。</p>
-</blockquote>
-<p>是一种比较明显的反调试手段</p>
-<h4 id="fake-code"><a href="#fake-code" class="headerlink" title="fake_code"></a>fake_code</h4><p>又是异常处理,遗留的问题是,如何过滤异常,只对除零异常感兴趣</p>
-<p>这样出的题:</p>
-<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br></pre></td><td class="code"><pre><span class="line"><span class="type">int</span> <span class="title function_">FilterFunc</span><span class="params">(<span class="type">int</span> dwExceptionCode)</span></span><br><span class="line">&#123;</span><br><span class="line">    <span class="keyword">if</span> (dwExceptionCode == EXCEPTION_INT_DIVIDE_BY_ZERO)</span><br><span class="line">        <span class="keyword">return</span> EXCEPTION_EXECUTE_HANDLER;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">return</span> EXCEPTION_CONTINUE_SEARCH;</span><br><span class="line">&#125;</span><br><span class="line">...</span><br><span class="line">		__try &#123;</span><br><span class="line">            index = (<span class="number">0x7f</span> * index + <span class="number">0x66</span>) % <span class="number">0xff</span>;</span><br><span class="line">            tmp = index &gt;&gt; <span class="number">7</span>;</span><br><span class="line">            tmp = <span class="number">1</span> / tmp;</span><br><span class="line">        &#125;</span><br><span class="line">        __except (FilterFunc(GetExceptionCode())) &#123;</span><br><span class="line">            key = (<span class="number">97</span> * key + <span class="number">101</span>) % <span class="number">233</span>;</span><br><span class="line">            key ^= <span class="number">0x29</span>;</span><br><span class="line">            <span class="comment">//printf(&quot;catch i = %d\n&quot;, i);</span></span><br><span class="line">        &#125;</span><br></pre></td></tr></table></figure>
-
-
-
-<p>try块中不管发生了什么异常,只要是异常,都会进入except块</p>
-<p>这except的参数是调用了FilterFunc函数,给FilterFunc函数传递的参数是GetExceptionCode(),也就是try中发生的异常的类型.</p>
-<p>FilterFunc中,当传递的参数是除零异常时,返回EXCEPTION_EXECUTE_HANDLER这么一个枚举值,否则都会返回EXCEPTION_CONTINUE_SEARCH这么一个枚举值</p>
-<p>然后except根据FilterFunc的返回值判断是否进入except块,怎么个评判标准呢?</p>
-<p>参考<a target="_blank" rel="noopener" href="https://learn.microsoft.com/en-us/windows/win32/debug/exception-handler-syntax">Exception-Handler Syntax - Win32 apps | Microsoft Learn</a></p>
-<table>
-<thead>
-<tr>
-<th align="left">Value</th>
-<th align="left">Meaning</th>
-</tr>
-</thead>
-<tbody><tr>
-<td align="left"><strong>EXCEPTION_EXECUTE_HANDLER</strong></td>
-<td align="left">The system transfers control to the exception handler, and execution continues in the stack frame in which the handler is found.<br />系统将控制移交给异常处理函数,也就是当前函数栈帧中的except块</td>
-</tr>
-<tr>
-<td align="left"><strong>EXCEPTION_CONTINUE_SEARCH</strong></td>
-<td align="left">The system continues to search for a handler.<br />系统将不是用当前函数栈帧中的except块中的异常处理,而是沿着seh链上溯早期注册的异常处理函数,而早期注册的异常处理函数都是系统注册的或者运行环境注册的,没有针对性,相当于是走个过场,也不会对程序逻辑造成很大的影响.<br />而除零异常会被返回EXCEPTION_EXECUTE_HANDLER,进入云之君自定义的except块,这个块就有实际作用了.</td>
-</tr>
-<tr>
-<td align="left"><strong>EXCEPTION_CONTINUE_EXECUTION</strong></td>
-<td align="left">The system stops its search for a handler and returns control to the point at which the exception occurred. If the exception is noncontinuable, this results in an <strong>EXCEPTION_NONCONTINUABLE_EXCEPTION</strong> exception.<br />系统忽略异常,控制还给程序异常点继续执行.<br />如果异常地太厉害执行不动了,将会又触发EXCEPTION_NONCONTINUABLE_EXCEPTION异常</td>
-</tr>
-</tbody></table>
-<h3 id="broken-hash"><a href="#broken-hash" class="headerlink" title="broken_hash"></a>broken_hash</h3><h4 id="当时的做法-非预期"><a href="#当时的做法-非预期" class="headerlink" title="当时的做法(非预期)"></a>当时的做法(非预期)</h4><p>当时想到一个非预期解,但是认为BYTE,WORD,还有char,int,unsigned等等这些玩意儿转换太费脑子了就没整,实际上不难</p>
-<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br></pre></td><td class="code"><pre><span class="line"><span class="built_in">puts</span>(<span class="string">&quot;This is a surprise!&quot;</span>);</span><br><span class="line"><span class="built_in">printf</span>(<span class="string">&quot;Give me your flag: &quot;</span>);</span><br><span class="line"><span class="built_in">scanf</span>(<span class="string">&quot;%s&quot;</span>, input);</span><br><span class="line">index = <span class="number">-1</span>i64;</span><br><span class="line"><span class="keyword">do</span></span><br><span class="line">  ++index;</span><br><span class="line"><span class="keyword">while</span> ( input[index] );</span><br><span class="line"><span class="keyword">if</span> ( index == <span class="number">88</span> )</span><br><span class="line">&#123;</span><br><span class="line">  encrypt(input);</span><br><span class="line">  <span class="keyword">for</span> ( i = <span class="number">0</span>; i &lt; <span class="number">88</span>; ++i )</span><br><span class="line">  &#123;</span><br><span class="line">    temp_check = check &amp;&amp; encrypted[i] == target[i];</span><br><span class="line">    check = temp_check;</span><br><span class="line">    <span class="keyword">if</span> ( !temp_check )</span><br><span class="line">      <span class="keyword">break</span>;</span><br><span class="line">  &#125;</span><br><span class="line">  v7();</span><br><span class="line">  <span class="keyword">if</span> ( check )</span><br><span class="line">    <span class="built_in">printf</span>(<span class="string">&quot;%s&quot;</span>, aTtttqqqqqqqlll);</span><br><span class="line">  <span class="keyword">else</span></span><br><span class="line">    <span class="built_in">printf</span>(<span class="string">&quot;%s&quot;</span>, aWhatAPityPlzTr);</span><br><span class="line">  result = <span class="number">0</span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-
-<p>逻辑就是输入要有88个字符,然后encrypt函数对输入进行加密,加密之后密文放在encrypted数组中,再和实现放置的密文target进行比较,全对则通过</p>
-<p>关键就在于encrypt这个函数,出题人参考的<a target="_blank" rel="noopener" href="https://github.com/B-Con/crypto-algorithms/blob/master/sha1.c">crypto-algorithms&#x2F;sha1.c at master · B-Con&#x2F;crypto-algorithms (github.com)</a>.fake_code这个题里面的SHA1加密代码是直接抄的,然后改了几个参数</p>
-<p>sha1加密的主逻辑长这样,函数名还有变量名有修改</p>
-<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br></pre></td><td class="code"><pre><span class="line">__int64 __fastcall <span class="title function_">sha1</span><span class="params">(__int64 text)</span></span><br><span class="line">&#123;</span><br><span class="line">  <span class="type">int</span> i; <span class="comment">// [rsp+20h] [rbp-B8h]</span></span><br><span class="line">  <span class="type">char</span> single[<span class="number">12</span>]; <span class="comment">// [rsp+24h] [rbp-B4h] BYREF</span></span><br><span class="line">  <span class="type">char</span> ctx[<span class="number">128</span>]; <span class="comment">// [rsp+30h] [rbp-A8h] BYREF</span></span><br><span class="line">  <span class="type">unsigned</span> __int8 hash[<span class="number">24</span>]; <span class="comment">// [rsp+B0h] [rbp-28h] BYREF</span></span><br><span class="line"></span><br><span class="line">  <span class="keyword">for</span> ( i = <span class="number">0</span>; i &lt; <span class="number">88</span>; ++i )</span><br><span class="line">  &#123;</span><br><span class="line">    single[<span class="number">0</span>] = *(_BYTE *)(text + i);           <span class="comment">// single=text[i]</span></span><br><span class="line">    sha1_init((__int64)ctx);</span><br><span class="line">    sha1_update((__int64)ctx, (__int64)single, <span class="number">1u</span>i64);</span><br><span class="line">    sha1_final((__int64)ctx, (__int64)hash);</span><br><span class="line">    encrypted[i] = hash[<span class="number">0</span>] | (hash[<span class="number">1</span>] &lt;&lt; <span class="number">8</span>) | (hash[<span class="number">2</span>] &lt;&lt; <span class="number">16</span>) | (hash[<span class="number">3</span>] &lt;&lt; <span class="number">24</span>);</span><br><span class="line">  &#125;</span><br><span class="line">  <span class="keyword">return</span> (<span class="type">unsigned</span> <span class="type">int</span>)check;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-
-<p>笑死,sha1加密每次只对一个字符进行,他将输入的88个字符分别进行sha1加密,然后将hash值一通按位或放到encrypted[1]上</p>
-<p>对单个字符的加密就失去了sha1加密的意义了,可以暴力枚举单个字符的ascii值然后加密之后encrypted[i]和target[i]直接进行比较,这就解出了input[i]</p>
-<p>云之君对sha1加密中的一些参数进行了魔改</p>
-<p>首先是sha1_init初始化中的参数</p>
-<p><img src="https://raw.githubusercontent.com/DeutschBall/DeutschBall/main/init.png" alt="左原始,右魔改"></p>
-<p>然后sha1_transform函数中也有魔改</p>
-<p><img src="https://raw.githubusercontent.com/DeutschBall/DeutschBall/main/sha1_transform_2.png" alt="sha1_transform_2"></p>
-<p>原来是<code>m[i] = (m[i] &lt;&lt; 1) | (m[i] &gt;&gt; 31);</code>魔改为<code>m[i] = (m[i] &lt;&lt; 2) | (m[i] &gt;&gt; 30);</code></p>
-<p>就这两个改动</p>
-<p>下面就可以暴力破解了</p>
-<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;iostream&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;vector&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;algorithm&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&quot;sha1.h&quot;</span></span></span><br><span class="line">using namespace <span class="built_in">std</span>;</span><br><span class="line"></span><br><span class="line"><span class="type">unsigned</span> <span class="type">int</span> target[<span class="number">88</span>] = &#123;</span><br><span class="line">    <span class="number">0x64744C9A</span>, <span class="number">0x047C2FF1</span>, <span class="number">0xA2D74292</span>, <span class="number">0x85BEF77E</span>, <span class="number">0x711FCBF7</span>, <span class="number">0x669E1609</span>, <span class="number">0x6BBD9DB6</span>, <span class="number">0x6941C8A4</span>,</span><br><span class="line">    <span class="number">0xB16E48B3</span>, <span class="number">0xDE321186</span>, <span class="number">0x5251E8C2</span>, <span class="number">0xFB8F95A7</span>, <span class="number">0x711FCBF7</span>, <span class="number">0xCB5C3FAD</span>, <span class="number">0x36568AF5</span>, <span class="number">0xFB8F95A7</span>,</span><br><span class="line">    <span class="number">0x82ACF96A</span>, <span class="number">0x75DCD570</span>, <span class="number">0x7EF00E40</span>, <span class="number">0xFB8F95A7</span>, <span class="number">0x4BE9314A</span>, <span class="number">0xCB5C3FAD</span>, <span class="number">0xA2D74292</span>, <span class="number">0xDE321186</span>,</span><br><span class="line">    <span class="number">0xFB8F95A7</span>, <span class="number">0x46927FA8</span>, <span class="number">0xB16E48B3</span>, <span class="number">0xD7C1A410</span>, <span class="number">0x567375C3</span>, <span class="number">0x711FCBF7</span>, <span class="number">0xFB8F95A7</span>, <span class="number">0x9C19F0F3</span>,</span><br><span class="line">    <span class="number">0xD035E914</span>, <span class="number">0xFB8F95A7</span>, <span class="number">0x6941C8A4</span>, <span class="number">0x0B7D1395</span>, <span class="number">0xD7C1A410</span>, <span class="number">0xC87A7C7E</span>, <span class="number">0xFB8F95A7</span>, <span class="number">0xD7C1A410</span>,</span><br><span class="line">    <span class="number">0xDE321186</span>, <span class="number">0x5251E8C2</span>, <span class="number">0xFB8F95A7</span>, <span class="number">0xD5380C52</span>, <span class="number">0xBEA99D3B</span>, <span class="number">0xCEDB7952</span>, <span class="number">0xFB8F95A7</span>, <span class="number">0x73456320</span>,</span><br><span class="line">    <span class="number">0xD7C1A410</span>, <span class="number">0xDE321186</span>, <span class="number">0xFB8F95A7</span>, <span class="number">0x581D99E5</span>, <span class="number">0xA2D74292</span>, <span class="number">0x711FCBF7</span>, <span class="number">0xFB8F95A7</span>, <span class="number">0x06372812</span>,</span><br><span class="line">    <span class="number">0xFB8F95A7</span>, <span class="number">0x73456320</span>, <span class="number">0xCEDB7952</span>, <span class="number">0xEF53E254</span>, <span class="number">0xFB8F95A7</span>, <span class="number">0x9F12424D</span>, <span class="number">0x669E1609</span>, <span class="number">0xFB8F95A7</span>,</span><br><span class="line">    <span class="number">0x9C19F0F3</span>, <span class="number">0xFECF7685</span>, <span class="number">0x0B7D1395</span>, <span class="number">0x1833E8B1</span>, <span class="number">0xFB8F95A7</span>, <span class="number">0x9F66DD04</span>, <span class="number">0xA2D74292</span>, <span class="number">0xD7C1A410</span>,</span><br><span class="line">    <span class="number">0xFB8F95A7</span>, <span class="number">0x6941C8A4</span>, <span class="number">0x866CAF4F</span>, <span class="number">0x047C2FF1</span>, <span class="number">0x64744C9A</span>, <span class="number">0xFB8F95A7</span>, <span class="number">0xD5380C52</span>, <span class="number">0xCEDB7952</span>,</span><br><span class="line">    <span class="number">0xDE321186</span>, <span class="number">0x81453D43</span>, <span class="number">0xCB5C3FAD</span>, <span class="number">0xB16E48B3</span>, <span class="number">0xC578F843</span>, <span class="number">0xCEDB7952</span>, <span class="number">0xDE321186</span>, <span class="number">0xE38C6F07</span>&#125;;</span><br><span class="line"></span><br><span class="line"><span class="type">int</span> <span class="title function_">sha1</span><span class="params">(BYTE c)</span><span class="comment">//接收一个char作为输入,输出加密之后的值</span></span><br><span class="line">&#123;</span><br><span class="line">    SHA1_CTX ctx;</span><br><span class="line">    BYTE single[<span class="number">12</span>];</span><br><span class="line">    BYTE hash[<span class="number">24</span>];</span><br><span class="line"></span><br><span class="line">    single[<span class="number">0</span>] = c;</span><br><span class="line">    sha1_init(&amp;ctx);</span><br><span class="line">    sha1_update(&amp;ctx, single, <span class="number">1</span>);</span><br><span class="line">    sha1_final(&amp;ctx, hash);</span><br><span class="line">    <span class="keyword">return</span> hash[<span class="number">0</span>] | (hash[<span class="number">1</span>] &lt;&lt; <span class="number">8</span>) | (hash[<span class="number">2</span>] &lt;&lt; <span class="number">16</span>) | (hash[<span class="number">3</span>] &lt;&lt; <span class="number">24</span>);</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="type">int</span> <span class="title function_">main</span><span class="params">()</span></span><br><span class="line">&#123;</span><br><span class="line">    <span class="keyword">for</span> (<span class="type">int</span> t = <span class="number">0</span>; t &lt; <span class="number">88</span>; ++t)<span class="comment">//遍历88次</span></span><br><span class="line">    &#123;</span><br><span class="line">        <span class="keyword">for</span> (<span class="type">char</span> i = <span class="number">20</span>; i &lt; <span class="number">127</span>; ++i)<span class="comment">//每次尝试从20到127的每个ascii值</span></span><br><span class="line">        &#123;</span><br><span class="line">            <span class="keyword">if</span> (sha1(i) == target[t])<span class="comment">//如果对上了则打印char(i)</span></span><br><span class="line">            &#123;</span><br><span class="line">                <span class="built_in">cout</span> &lt;&lt; i;</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">return</span> <span class="number">0</span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-
-<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">PS C:\Users\<span class="number">86135</span>\Desktop\moectfwp\MoeCTF_2022-main\Challenges\Reverse\Broken_hash&gt; g++ main.cpp sha1.c -o main</span><br><span class="line">PS C:\Users\<span class="number">86135</span>\Desktop\moectfwp\MoeCTF_2022-main\Challenges\Reverse\Broken_hash&gt; ./main</span><br><span class="line">moectf&#123;F1nd_th3_SEH_7hen_B1a5t_My_Fla9_and_Y0u_Can_Get_A_Cup_Of_Milk_Tea_From_YunZh1Jun&#125;</span><br></pre></td></tr></table></figure>
-
-<p>但是看了flag就知道这不是预期解,flag中提到了SEH,但是我没有看到?</p>
-<h4 id="预期解"><a href="#预期解" class="headerlink" title="预期解"></a>预期解</h4><p>云之君一直说,patch程序然后写交互脚本,但是我听不懂她在说啥.看了题解才想明白为啥要这样patch程序</p>
-<p><img src="https://raw.githubusercontent.com/DeutschBall/DeutschBall/main/loc_140001DEF.png" alt="loc_140001DEF"></p>
-<p>把左边第7行的<code>lea rax,dword_140005000</code>改成<code>lea rax,[rsp+E8h+var_C8]</code>,也就是<code>lea rax,[rsp+20h]</code></p>
-<p>然后第8行的<code>add rax,160h</code>改成<code>nop</code></p>
-<p>这样第9行将rax交给rdx作为参数,实际上就是将var_C8的地址放到了rdx上,然后就要调用printf函数了.var_C8是自变量i的值</p>
-<p>这里调用printf打印i值,其目的是啥呢?</p>
-<p>蓝色框框里是判断输入的加密是否和已经存储的密文一致,不一致则会跳转黄色框框也就是loc_140001DEF,一致则跳转红色框框报告正确</p>
-<p><img src="https://raw.githubusercontent.com/DeutschBall/DeutschBall/main/image-20221111001926390.png" alt="image-20221111001926390"></p>
-<p>如果进入了黄色框框,var_8C也就是循环变量是没有清零的,在黄色框框中调用printf函数打印出var_8C的值,如果var_8C&#x3D;1就说明第一个输入字符对上号了,此时flag就可以确定第一个字符,然后枚举第二个字符,当var_8C打印出2的时候,flag就确定了第二个字符,以此类推</p>
-<p>然而这里能够一个一个字符的确认就是因为sha1每次只对一个字符加密.如果sha1对整个输入同时加密,则这种方法也不能用.</p>
-<p>也就是说,只要是”预期解”能用,”非预期解”也能用,两种解法实际上是一个道理</p>
-<p>下面研究一下预期解的解密脚本</p>
-<h4 id="解密脚本"><a href="#解密脚本" class="headerlink" title="解密脚本"></a>解密脚本</h4><figure class="highlight py"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">import</span> subprocess</span><br><span class="line"></span><br><span class="line">flag = <span class="string">&#x27;moectf&#123;&#x27;</span></span><br><span class="line"><span class="keyword">for</span> i <span class="keyword">in</span> <span class="built_in">range</span>(<span class="number">7</span>, <span class="number">88</span>):</span><br><span class="line">    <span class="keyword">for</span> j <span class="keyword">in</span> <span class="built_in">range</span>(<span class="number">0x21</span>,<span class="number">0x7f</span>):</span><br><span class="line">        tmp = flag + <span class="built_in">chr</span>(j) * (<span class="number">88</span> - i)<span class="comment">#开头是已经确定的flag,后面剩余的字符全都使用chr(j)填充,填满88个字符</span></span><br><span class="line"></span><br><span class="line">        p = subprocess.Popen([<span class="string">&quot;Broken_hash.exe&quot;</span>], stdin=subprocess.PIPE, stdout=subprocess.PIPE, stderr=subprocess.PIPE)<span class="comment">#建立子进程,将其三标重定向到管道</span></span><br><span class="line">        p.stdin.write(tmp.encode())<span class="comment">#将tmp输入到子进程 的标准输入</span></span><br><span class="line">        p.stdin.close()<span class="comment">#关闭子进程的标准输入</span></span><br><span class="line">        out = p.stdout.read()<span class="comment">#从子进程标准输出获取输出</span></span><br><span class="line">        p.stdout.close()<span class="comment">#关闭标准输出</span></span><br><span class="line"></span><br><span class="line">        <span class="keyword">if</span> out[-<span class="number">1</span>] &gt; i:<span class="comment">#out[-1]是out串的最后一个字符,也就是patch程序之后,输出的匹配上的下标i,也就是var_C8,如果匹配成功,则var_C8会比i多一个,否则相等</span></span><br><span class="line">            flag += <span class="built_in">chr</span>(j)<span class="comment">#如果var_C*&gt;i则j添加到flag最后</span></span><br><span class="line">            <span class="built_in">print</span>(flag)</span><br><span class="line">            <span class="keyword">break</span></span><br><span class="line"></span><br><span class="line">flag += <span class="string">&#x27;&#125;&#x27;</span></span><br><span class="line"><span class="built_in">print</span>(flag)</span><br></pre></td></tr></table></figure>
-
-<p>执行之后</p>
-<figure class="highlight sh"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line">PS C:\Users\86135\Desktop\moectfwp\MoeCTF_2022-main\Challenges\Reverse\Broken_hash&gt; python ./solve.py</span><br><span class="line">moectf&#123;F</span><br><span class="line">moectf&#123;F1</span><br><span class="line">moectf&#123;F1n</span><br><span class="line">moectf&#123;F1nd</span><br><span class="line">moectf&#123;F1nd_</span><br><span class="line">moectf&#123;F1nd_t</span><br><span class="line">...</span><br><span class="line">moectf&#123;F1nd_th3_SEH_7hen_B1a5t_My_Fla9_and_Y0u_Can_Get_A_Cup_Of_Milk_Tea_From_YunZh1Ju</span><br><span class="line">moectf&#123;F1nd_th3_SEH_7hen_B1a5t_My_Fla9_and_Y0u_Can_Get_A_Cup_Of_Milk_Tea_From_YunZh1Jun</span><br><span class="line">moectf&#123;F1nd_th3_SEH_7hen_B1a5t_My_Fla9_and_Y0u_Can_Get_A_Cup_Of_Milk_Tea_From_YunZh1Jun&#125;</span><br></pre></td></tr></table></figure>
-
-<h4 id="subprocess模块"><a href="#subprocess模块" class="headerlink" title="subprocess模块"></a>subprocess模块</h4><p>subprocess模块允许我们启动一个子进程,并且控制其输入输入输出</p>
-<blockquote>
-<p><strong>Popen() 方法</strong></p>
-<p>Popen 是 subprocess的核心，子进程的创建和管理都靠它处理。</p>
-<p>构造函数：</p>
-<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">class subprocess.Popen(args, bufsize=-1, executable=None, stdin=None, stdout=None, stderr=None, </span><br><span class="line">preexec_fn=None, close_fds=True, shell=False, cwd=None, env=None, universal_newlines=False, </span><br><span class="line">startupinfo=None, creationflags=0,restore_signals=True, start_new_session=False, pass_fds=(),</span><br><span class="line">*, encoding=None, errors=None)</span><br></pre></td></tr></table></figure>
-
-<p><strong>常用参数：</strong></p>
-<ul>
-<li>args：shell命令，可以是字符串或者序列类型（如：list，元组）</li>
-<li>bufsize：缓冲区大小。当创建标准流的管道对象时使用，默认-1。<br>  0：不使用缓冲区<br>  1：表示行缓冲，仅当universal_newlines&#x3D;True时可用，也就是文本模式<br>  正数：表示缓冲区大小<br>  负数：表示使用系统默认的缓冲区大小。</li>
-<li>stdin, stdout, stderr：分别表示程序的标准输入、输出、错误句柄</li>
-<li>preexec_fn：只在 Unix 平台下有效，用于指定一个可执行对象（callable object），它将在子进程运行之前被调用</li>
-<li>shell：如果该参数为 True，将通过操作系统的 shell 执行指定的命令。</li>
-<li>cwd：用于设置子进程的当前目录。</li>
-<li>env：用于指定子进程的环境变量。如果 env &#x3D; None，子进程的环境变量将从父进程中继承。</li>
-</ul>
-</blockquote>
-<p>wp中stdin,stderr,stdout都设置为subprocess.PIPE,这个值等于-1</p>
-<p>意思是将标准输入输出错误都重定向到管道,然后才可以调用<code> p.stdin.write()</code>,还有<code> p.stdout.read()</code>两个函数</p>
-<p>否则子进程的三标还是指向键盘和屏幕的,此时调用<code> p.stdin.write()</code>函数会报错</p>
-<h3 id="gogogo"><a href="#gogogo" class="headerlink" title="gogogo"></a>gogogo</h3><p>go语言逆向题,没有扣符号表</p>
-<p>很容易就能找到这么一个函数<code>main_flagHandler</code></p>
-<p>推测和flag有关系,然而这个函数的反汇编很抽象,推测是初始化的go语言的环境.</p>
-<p>看了官方wp说关键函数是main_check</p>
-<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br></pre></td><td class="code"><pre><span class="line"><span class="type">void</span> __fastcall <span class="title function_">main_check</span><span class="params">(<span class="built_in">string</span> flag, <span class="type">bool</span> _r0)</span></span><br><span class="line">&#123;</span><br><span class="line">....</span><br><span class="line">  <span class="keyword">if</span> ( (<span class="type">unsigned</span> <span class="type">int</span>)&amp;v24 &lt;= *(_QWORD *)(v3 + <span class="number">16LL</span>) )</span><br><span class="line">    runtime_morestack_noctxt();</span><br><span class="line">  v27 = v2;</span><br><span class="line">  qmemcpy(&amp;v23.cap, <span class="string">&quot;---moeCTF2022---&quot;</span>, <span class="number">16LL</span>);</span><br><span class="line">  runtime_newobject((runtime__type_0 *)flag.str, (<span class="type">void</span> *)flag.len);</span><br><span class="line">  v26 = v4;</span><br><span class="line">  qmemcpy(v4, <span class="string">&quot;---moeCTF2022---&quot;</span>, <span class="number">16LL</span>);</span><br><span class="line">  runtime_stringtoslicebyte((runtime_tmpBuf *)flag.str, (<span class="built_in">string</span>)__PAIR128__(v5, flag.len), v19);</span><br><span class="line">  v6.tab = (runtime_itab_0 *)&amp;v23.cap;</span><br><span class="line">  v6.data = (<span class="type">void</span> *)<span class="number">16LL</span>;</span><br><span class="line">  main_AesEncrypt(v20, v21, v22, v23, v6);</span><br><span class="line">  <span class="keyword">if</span> ( &amp;v23 == (__uint8 *)<span class="number">-16LL</span> )</span><br><span class="line">  &#123;</span><br><span class="line">    v23.<span class="built_in">array</span> = v27;</span><br><span class="line">    ptr = v7;</span><br><span class="line">    v23.len = <span class="number">2LL</span> * (_QWORD)v27;</span><br><span class="line">    runtime_makeslice(<span class="number">0LL</span>, <span class="number">16LL</span>, v8, (<span class="type">void</span> *)(<span class="number">2LL</span> * (_QWORD)v27));</span><br><span class="line">    v11 = v23.<span class="built_in">array</span>;</span><br><span class="line">    v12 = v23.len;</span><br><span class="line">    v13 = ptr;</span><br><span class="line">    v14 = <span class="number">0LL</span>;</span><br><span class="line">    v15 = <span class="number">0LL</span>;</span><br><span class="line">    <span class="keyword">while</span> ( (<span class="type">int</span>)v11 &gt; v14 )</span><br><span class="line">    &#123;</span><br><span class="line">      v16 = v13[v14];</span><br><span class="line">      <span class="keyword">if</span> ( (<span class="type">unsigned</span> <span class="type">int</span>)v15 &gt;= v12 )</span><br><span class="line">        runtime_panicIndex();</span><br><span class="line">      (*v15)[v9] = byte_7F65E7[v16 &gt;&gt; <span class="number">4LL</span>];</span><br><span class="line">      v10 = &amp;(*v15)[<span class="number">1LL</span>];</span><br><span class="line">      v17 = byte_7F65E7[v16 &amp; <span class="number">0xF</span>LL];</span><br><span class="line">      <span class="keyword">if</span> ( v12 &lt;= (<span class="type">unsigned</span> <span class="type">int</span>)&amp;(*v15)[<span class="number">1LL</span>] )</span><br><span class="line">        runtime_panicIndex();</span><br><span class="line">      (*v15)[v9 + <span class="number">1LL</span>] = v17;</span><br><span class="line">      ++v14;</span><br><span class="line">      v15 = (runtime_tmpBuf *)((<span class="type">char</span> *)v15 + <span class="number">2LL</span>);</span><br><span class="line">    &#125;</span><br><span class="line">    v18 = v9;</span><br><span class="line">    runtime_slicebytetostring(v15, v13, v12, (<span class="built_in">string</span>)__PAIR128__((<span class="type">unsigned</span> <span class="type">int</span>)v10, v12));</span><br><span class="line">    <span class="keyword">if</span> ( v18 == <span class="number">96LL</span> )</span><br><span class="line">      runtime_memequal();</span><br><span class="line">  &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-
-<p>看来是main_check干了这么几件事:</p>
-<p>首先将输入使用AES加密,然后和事先存放好的密文对照</p>
-<p>AES加密中主要需要确定(原文,密钥,偏移量,模式)等等变量</p>
-<p>前面有两个”—moeCTF2022—“字样正好16字节,而密钥和偏移量也要求是16字节的,因此可以推测这就是密钥和偏移量</p>
-<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">  qmemcpy(&amp;v23.cap, &quot;---moeCTF2022---&quot;, 16LL);</span><br><span class="line">...</span><br><span class="line">  qmemcpy(v4, &quot;---moeCTF2022---&quot;, 16LL);</span><br></pre></td></tr></table></figure>
-
-<p>如何确定模式呢?进main_AesEncrypt函数看看</p>
-<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">// local variable allocation has failed, the output may be wrong!</span><br><span class="line">void __fastcall main_AesEncrypt(error_0 _r1, int a2, int a3, int a4, void *a5)</span><br><span class="line">...</span><br><span class="line">    crypto_cipher_NewCBCEncrypter(iv_8, v20, v15);</span><br><span class="line">...</span><br><span class="line">  &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-
-<p>这有个<code>crypto_cipher_NewCBCEncrypter</code>函数,因此推测使用CBC模式</p>
-<p>综上找个在线网站<a target="_blank" rel="noopener" href="https://www.mklab.cn/utils/aes">AES在线加密解密工具 - MKLab在线工具</a></p>
-<p>解一下密</p>
-<p><img src="https://raw.githubusercontent.com/DeutschBall/DeutschBall/main/image-20221111090020054.png" alt="image-20221111090020054"></p>
-<p>还真就解出来了</p>
-<p>但是总感觉这样是瞎猫碰见死耗子,推测的地方太多了,怎么合情合理地推断呢?</p>
-<p>首先要知道程序到底干了啥?控制什么时候执行到main_flagHandler?参数都是什么?</p>
-<h4 id="go源代码"><a href="#go源代码" class="headerlink" title="go源代码"></a>go源代码</h4><p>一看源代码,总共加起来150行左右,咱也不知道ida怎么就反编译了这么多,跟老太太裹脚一样</p>
-<p><img src="https://raw.githubusercontent.com/DeutschBall/DeutschBall/main/lr.png" alt="lr"></p>
-<blockquote>
-<p><code>Gin</code>是一个用<code>Golang</code>编写的<code>Web</code>框架， 是一个基于<code>Radix</code>树的路由，小内存占用，没有反射，可预测的<code>API</code>框架，速度挺高了近40倍，支持中间件、路由组处理、JSON等多方式验证、内置了<code>JSON</code>、<code>XML</code>、<code>HTML</code>等渲染。</p>
-</blockquote>
-<p>也就是说server这个程序是一个go语言Gin框架搭建的应用层web服务器</p>
-<h5 id="main"><a href="#main" class="headerlink" title="main"></a>main</h5><figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">package</span> main</span><br><span class="line"></span><br><span class="line"><span class="keyword">import</span> (</span><br><span class="line">	<span class="string">&quot;log&quot;</span></span><br><span class="line">)</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">func</span> <span class="title">main</span><span class="params">()</span></span> &#123;</span><br><span class="line">	<span class="keyword">if</span> err := RouterInit(); err != <span class="literal">nil</span> &#123;</span><br><span class="line">		log.Panic(err)</span><br><span class="line">	&#125;</span><br><span class="line">	err := Run()</span><br><span class="line">	<span class="keyword">if</span> err != <span class="literal">nil</span> &#123;</span><br><span class="line">		log.Panic(err)</span><br><span class="line">	&#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-
-<p>首先调用RouterInit函数,然后调用Run函数</p>
-<h5 id="RouterInit"><a href="#RouterInit" class="headerlink" title="RouterInit"></a>RouterInit</h5><figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">func</span> <span class="title">RouterInit</span><span class="params">()</span></span> <span class="type">error</span> &#123;</span><br><span class="line">	gin.SetMode(<span class="string">&quot;release&quot;</span>)</span><br><span class="line">	engine = gin.Default()</span><br><span class="line">	engine.GET(<span class="string">&quot;/welcome&quot;</span>, welcomeHandler)</span><br><span class="line">	flagRouter := engine.Group(<span class="string">&quot;/find&quot;</span>)</span><br><span class="line">	flagRouter.Use(authRequired)</span><br><span class="line">	flagRouter.GET(<span class="string">&quot;/&quot;</span>, findHandler)</span><br><span class="line">	flagRouter.GET(<span class="string">&quot;/flag&quot;</span>, flagHandler)</span><br><span class="line">	<span class="keyword">return</span> <span class="literal">nil</span></span><br><span class="line">&#125;</span><br><span class="line"></span><br></pre></td></tr></table></figure>
-
-<p>这里面注册了如果收到GET方法的报文并且负载是”&#x2F;welcome”,则调用welcomeHandler函数</p>
-<p><img src="https://raw.githubusercontent.com/DeutschBall/DeutschBall/main/image-20221111091736911.png" alt="image-20221111091736911"></p>
-<p>然后后面干了啥呢?</p>
-<p>上网搜了一下,这是一个名叫”路由”的机制,推测是这么一个意思:</p>
-<p>可以认为,engine就是访问<code>localhost:8080</code>之后立刻得到的页面的</p>
-<p>然后<code>/welcome</code>被路由到welcomeHandler函数,执行完后再返回engine对一个你得页面</p>
-<p>flagRouter是一个新的路由,也是engine的子路由,只要是<code>/find</code>路由分支,都会由engine进入flagRouter路由</p>
-<p>然后给他注册了两个路由,如果是<code>/find/</code>就会转到findHandler</p>
-<p>如果是<code>/find/flag/</code>就会转到flagHandler</p>
-<p>当然这里只是注册,不会执行,实际上执行是在Run之后</p>
-<h5 id="Run"><a href="#Run" class="headerlink" title="Run"></a>Run</h5><figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">func</span> <span class="title">Run</span><span class="params">()</span></span> <span class="type">error</span> &#123;</span><br><span class="line">	log.Println(<span class="string">&quot;Service running at [127.0.0.1:8080]&quot;</span>)</span><br><span class="line">	fmt.Println(<span class="string">&quot;Type localhost:8080/welcome in your browser and open it&quot;</span>)</span><br><span class="line">	err := engine.Run(<span class="string">&quot;127.0.0.1:8080&quot;</span>)</span><br><span class="line">	<span class="keyword">if</span> err != <span class="literal">nil</span> &#123;</span><br><span class="line">		<span class="keyword">return</span> err</span><br><span class="line">	&#125;</span><br><span class="line">	<span class="keyword">return</span> <span class="literal">nil</span></span><br><span class="line">&#125;</span><br><span class="line"></span><br></pre></td></tr></table></figure>
-
-
-
-<p>engine.Run就在本机的8080端口上启动HTTP服务了,此后程序一直监听该端口上的客户请求.</p>
-<p>根据RouterInit中注册的路由,回应客户的请求,然后恢复到监听状态准备下一个客户的请求(或者一个接待线程,一个服务线程,到底怎么实现,现在不关心)</p>
-<h5 id="flagHandler"><a href="#flagHandler" class="headerlink" title="flagHandler"></a>flagHandler</h5><figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">func</span> <span class="title">flagHandler</span><span class="params">(ctx *gin.Context)</span></span> &#123;</span><br><span class="line">	flag = ctx.Query(<span class="string">&quot;flag&quot;</span>)<span class="comment">//负载</span></span><br><span class="line">	<span class="keyword">if</span> flag == <span class="string">&quot;&quot;</span> &#123;</span><br><span class="line">		ctx.JSON(<span class="number">400</span>, gin.H&#123;</span><br><span class="line">			<span class="string">&quot;message&quot;</span>: <span class="string">&quot;please input your flag and I will check it&quot;</span>,</span><br><span class="line">		&#125;)</span><br><span class="line">		ctx.Abort()</span><br><span class="line">		<span class="keyword">return</span></span><br><span class="line">	&#125;</span><br><span class="line">	<span class="keyword">if</span> !check(flag) &#123;</span><br><span class="line">		ctx.JSON(<span class="number">200</span>, gin.H&#123;</span><br><span class="line">			<span class="string">&quot;message&quot;</span>: <span class="string">&quot;flag incorrect, please try again&quot;</span>,</span><br><span class="line">		&#125;)</span><br><span class="line">		ctx.Abort()</span><br><span class="line">		<span class="keyword">return</span></span><br><span class="line">	&#125; <span class="keyword">else</span> &#123;</span><br><span class="line">		ctx.JSON(<span class="number">200</span>, gin.H&#123;</span><br><span class="line">			<span class="string">&quot;message&quot;</span>: <span class="string">&quot;congratulations&quot;</span>,</span><br><span class="line">		&#125;)</span><br><span class="line">	&#125;</span><br><span class="line"></span><br><span class="line">	ctx.SetAccepted()</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-
-<p>flag以GET负载的形式传递给后端</p>
-<p>然后后端首先对flag判空,然后调用了check检查flag的正确性</p>
-<h5 id="check"><a href="#check" class="headerlink" title="check"></a>check</h5><figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">func</span> <span class="title">check</span><span class="params">(flag <span class="type">string</span>)</span></span> <span class="type">bool</span> &#123;</span><br><span class="line">	encFlag := <span class="string">&quot;200c2c3ef00f31999df93d6919aa33e42dde307be02017ebf47067099ed0bddc525d5dba0f83c122159b89ae715907cc&quot;</span></span><br><span class="line">	key := []<span class="type">byte</span>(<span class="string">&quot;---moeCTF2022---&quot;</span>)</span><br><span class="line">	iv := []<span class="type">byte</span>(<span class="string">&quot;---moeCTF2022---&quot;</span>)</span><br><span class="line">	encrypt, err := AesEncrypt([]<span class="type">byte</span>(flag), key, iv)</span><br><span class="line">	<span class="keyword">if</span> err != <span class="literal">nil</span> &#123;</span><br><span class="line">		<span class="keyword">return</span> <span class="literal">false</span></span><br><span class="line">	&#125;</span><br><span class="line">	<span class="keyword">if</span> hex.EncodeToString(encrypt) == encFlag &#123;</span><br><span class="line">		<span class="keyword">return</span> <span class="literal">true</span></span><br><span class="line">	&#125;</span><br><span class="line">	<span class="keyword">return</span> <span class="literal">false</span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-
-<p>check中就是Aes加密了,加密之后的密文和encFlag这个值进行比较,如果相同则返回true,再回到flagHandler中进入else块</p>
-<figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">else</span> &#123;</span><br><span class="line">	ctx.JSON(<span class="number">200</span>, gin.H&#123;</span><br><span class="line">		<span class="string">&quot;message&quot;</span>: <span class="string">&quot;congratulations&quot;</span>,</span><br><span class="line">	&#125;)</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-
-<p>然后就会打印恭喜发财了</p>
-<p>看来自己写的函数,对应到符号表中的函数名都会加上main_前缀</p>
-<p><img src="https://raw.githubusercontent.com/DeutschBall/DeutschBall/main/image-20221111094105703.png" alt="image-20221111094105703"></p>
 
       
     </div>
