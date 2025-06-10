@@ -167,6 +167,289 @@
   
   
   <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="en">
+    <link itemprop="mainEntityOfPage" href="http://deutschball.github.io/2022/08/12/windows%20SDK%20chapter%206%20keyboard/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="https://raw.githubusercontent.com/DeutschBall/picbed/main/dustball.png">
+      <meta itemprop="name" content="dustball">
+      <meta itemprop="description" content="dustland">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="dustland">
+    </span>
+      <header class="post-header">
+        <h2 class="post-title" itemprop="name headline">
+          
+            <a href="/2022/08/12/windows%20SDK%20chapter%206%20keyboard/" class="post-title-link" itemprop="url">win32程序设计-chapter6 键盘</a>
+        </h2>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-calendar"></i>
+              </span>
+              <span class="post-meta-item-text">Posted on</span>
+              
+
+              <time title="Created: 2022-08-12 23:38:00 / Modified: 23:46:10" itemprop="dateCreated datePublished" datetime="2022-08-12T23:38:00+08:00">2022-08-12</time>
+            </span>
+
+          
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+          <h1 id="windows-SDK-chapter-6-keyboard"><a href="#windows-SDK-chapter-6-keyboard" class="headerlink" title="windows SDK chapter 6 keyboard"></a>windows SDK chapter 6 keyboard</h1><h2 id="键盘基础"><a href="#键盘基础" class="headerlink" title="键盘基础"></a>键盘基础</h2><h3 id="who-is-using-the-keyboard"><a href="#who-is-using-the-keyboard" class="headerlink" title="who is using the keyboard?"></a>who is using the keyboard?</h3><p>正在使用键盘的窗口,称为有输入焦点的窗口</p>
+<p>windows操作系统上处于最顶层的窗口往往是焦点窗口,然而存在两分屏看似并列的情况,实际上这时候可以从多方面判断哪个窗口是焦点窗口</p>
+<p>比如从任务栏</p>
+<p><img src="https://raw.githubusercontent.com/DeutschBall/DeutschBall/main/image-20220812083837696.png" alt="image-20220812083837696"></p>
+<p>这里Typora上有高亮,就是焦点窗口,</p>
+<p>windows终端,DEVC++,VisualStudio等等都是黑色的,不是焦点窗口</p>
+<p>又如从标题栏</p>
+<p><img src="https://raw.githubusercontent.com/DeutschBall/DeutschBall/main/image-20220812083907654.png" alt="image-20220812083907654"></p>
+<p><img src="https://raw.githubusercontent.com/DeutschBall/DeutschBall/main/image-20220812083932266.png" alt="左侧typora为焦点窗口,其标题栏为深色."></p>
+<p>在word,wps等等文字编辑器中,是否获得焦点更加明显,只要光标在闪烁就意味着持有焦点</p>
+<p>实际上窗口过程通过处理<code>WM_SETFOCUS,WM_KILLFOCUS</code>两个消息来判断自己有没有焦点</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">case</span> WM_SETFOCUS:</span><br><span class="line">    <span class="built_in">cout</span>&lt;&lt;<span class="string">&quot;focused&quot;</span>&lt;&lt;<span class="built_in">endl</span>;</span><br><span class="line">    <span class="keyword">return</span> <span class="number">0</span>;</span><br><span class="line"><span class="keyword">case</span> WM_KILLFOCUS:</span><br><span class="line">    <span class="built_in">cout</span>&lt;&lt;<span class="string">&quot;left&quot;</span>&lt;&lt;<span class="built_in">endl</span>;</span><br><span class="line">    <span class="keyword">return</span> <span class="number">0</span>;</span><br></pre></td></tr></table></figure>
+
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">PS C:\Users\<span class="number">86135</span>\desktop\myWin32&gt; g++ main.cpp -O0 -o main -lkernel32 -lgdi32 -luser32 -m32</span><br></pre></td></tr></table></figure>
+
+<p><img src="https://raw.githubusercontent.com/DeutschBall/DeutschBall/main/image-20220812084229815.png" alt="焦点在windows终端"></p>
+<p><img src="https://raw.githubusercontent.com/DeutschBall/DeutschBall/main/image-20220812084241047.png" alt="焦点在the Hello Program"></p>
+<h3 id="队列与同步"><a href="#队列与同步" class="headerlink" title="队列与同步"></a>队列与同步</h3><p>键盘动作由键盘驱动程序转化为格式化的消息之后,首先发往windows消息队列,不会直接发往焦点窗口</p>
+<p>这是因为,有的键盘消息具有修改焦点窗口的功能,比如Alt+F4可关闭当前窗口.又比如win+r可以打开运行框,此时窗口焦点自动放在运行框上</p>
+<p>windows需要先看一看键盘消息是针对当前焦点窗口的还是针对整个系统的.</p>
+<p>如果发生了焦点转移,那么windows需要保证后续的相应键盘消息指向新的焦点窗口</p>
+<h2 id="击键消息"><a href="#击键消息" class="headerlink" title="击键消息"></a>击键消息</h2><p><img src="https://raw.githubusercontent.com/DeutschBall/DeutschBall/main/image-20220812085353287.png" alt="image-20220812085353287"></p>
+<p>其中系统键一般是Alt+其他键的组合键,比如Alt+Tab,切换任务窗口.</p>
+<p>键按下之后如果不松开,会间隔一定时间(这个间隔在系统启动时BIOS中设置)之后进入连续输入状态(连续输入的速度也取决于BIOS中的设置),此时应用程序会收到一连串的WM_KEYDOWN或者WM_SYSKEYDOWN消息</p>
+<p>系统键对于windows操作系统来说更加重要,应用程序一般忽略系统键信息,交给DefWindowProc处理.windows会处理所有Alt组合键信息</p>
+<p>如果非得在应用程序中处理Alt消息,并且处理完成之后立刻返回,不调用DefWindowProc,那么系统键消息将会被应用程序截胡,不能发给操作系统.此时按下Alt+F4就无法关闭该窗口了</p>
+<p>比如:</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">case</span> WM_SYSKEYDOWN:</span><br><span class="line">    <span class="built_in">cout</span> &lt;&lt; <span class="string">&quot;sysKey down&quot;</span> &lt;&lt; <span class="built_in">endl</span>;</span><br><span class="line">    <span class="keyword">return</span> <span class="number">0</span>;</span><br><span class="line"><span class="keyword">case</span> WM_SYSKEYUP:</span><br><span class="line">    <span class="built_in">cout</span> &lt;&lt; <span class="string">&quot;sysKey up&quot;</span> &lt;&lt; <span class="built_in">endl</span>;</span><br><span class="line">    <span class="keyword">return</span> <span class="number">0</span>;</span><br></pre></td></tr></table></figure>
+
+<p>此时只会在终端上打印一下,但是只要时Alt键的消息都不会发往windows</p>
+<p>当组合键中没有Alt时,不会产生系统键消息,顶多产生WM_KEYDOWN和WM_KEYUP,应用程序可以根据自己的兴趣选择处理其中的部分消息,如果应用程序不做处理,windows也不做处理</p>
+<p>不管是系统键消息还是非系统键消息,不管是按下还是起来,所有的键盘消息都会伴随着wParam表示虚拟键代码,lParam包含本次击键的其他数据</p>
+<h3 id="虚拟键代码wParam"><a href="#虚拟键代码wParam" class="headerlink" title="虚拟键代码wParam"></a>虚拟键代码wParam</h3><p>捕获WM_KEYDOWN或者WM_KEYUP消息只能说明非系统键被按下或者松开了,单凭着一个信息无法判断谁被按下或者松开了.wParam就提供了更多的细节</p>
+<p>该案件消息是一个枚举类型,大多数都以VK_开头</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#<span class="keyword">define</span> VK_LBUTTON 0x01</span></span><br><span class="line"><span class="meta">#<span class="keyword">define</span> VK_RBUTTON 0x02</span></span><br><span class="line"><span class="meta">#<span class="keyword">define</span> VK_CANCEL 0x03</span></span><br><span class="line"><span class="meta">#<span class="keyword">define</span> VK_MBUTTON 0x04</span></span><br><span class="line"><span class="meta">#<span class="keyword">define</span> VK_XBUTTON1 0x05</span></span><br><span class="line"><span class="meta">#<span class="keyword">define</span> VK_XBUTTON2 0x06</span></span><br><span class="line"><span class="meta">#<span class="keyword">define</span> VK_BACK 0x08</span></span><br><span class="line"><span class="meta">#<span class="keyword">define</span> VK_TAB 0x09</span></span><br><span class="line"><span class="meta">#<span class="keyword">define</span> VK_CLEAR 0x0C</span></span><br><span class="line"><span class="meta">#<span class="keyword">define</span> VK_RETURN 0x0D</span></span><br><span class="line"><span class="meta">#<span class="keyword">define</span> VK_SHIFT 0x10</span></span><br><span class="line"><span class="meta">#<span class="keyword">define</span> VK_CONTROL 0x11</span></span><br><span class="line"><span class="meta">#<span class="keyword">define</span> VK_MENU 0x12</span></span><br><span class="line"><span class="meta">#<span class="keyword">define</span> VK_PAUSE 0x13</span></span><br><span class="line">...</span><br></pre></td></tr></table></figure>
+
+<p>前两个鼠标动作貌似通过处理不到</p>
+<p>数字键(不是右侧数字键盘,是左侧主键盘上一长条的数字键)和字母键:</p>
+<p><img src="https://raw.githubusercontent.com/DeutschBall/DeutschBall/main/image-20220812092101119.png" alt="image-20220812092101119"></p>
+<p>虽然键盘可以接收到键盘上<code>@#$%*</code>这种字符的消息,但是这是对于英语键盘而言的,对于欧洲人来说欧元符号比美元符号更加重要,如果要写出地区无关的代码,那么我们需要和windows操作系统协作处理键盘消息,对于有意义的字符的处理,<strong>一般使用字符消息,不使用击键消息</strong></p>
+<p>微软键盘特有:</p>
+<p><img src="https://raw.githubusercontent.com/DeutschBall/DeutschBall/main/image-20220812092200252.png" alt="image-20220812092200252"></p>
+<p>需要给哪个键安排任务的时候就去查它的宏定义编码即可</p>
+<h3 id="其他消息lParam"><a href="#其他消息lParam" class="headerlink" title="其他消息lParam"></a>其他消息lParam</h3><p><img src="https://raw.githubusercontent.com/DeutschBall/DeutschBall/main/image-20220812094137721.png" alt="image-20220812094137721"></p>
+<h4 id="重复计数Repeat-Count"><a href="#重复计数Repeat-Count" class="headerlink" title="重复计数Repeat Count"></a>重复计数Repeat Count</h4><p>低16位为重复计数,当一个键按下一直不松开时,应用程序会接收到一大串WM_KEYDOWN消息.如果窗口过程的处理速度跟不上,那么windows会把多个WM_KEYDOWN消息合并成一条消息,然后修改其lParam的低16位,决定这条消息重复了多少次</p>
+<p>在比较卡顿的电脑上使用word有过这种体验,一直按着某个键不放,计算机可能不会实时跟着显示字符,但是一段时间后呼哧出来一摊这个字符</p>
+<h4 id="OEM扫描码"><a href="#OEM扫描码" class="headerlink" title="OEM扫描码"></a>OEM扫描码</h4><p>历史古董了,现在几乎不用了</p>
+<h4 id="拓展键标记Extended-Key-Flag"><a href="#拓展键标记Extended-Key-Flag" class="headerlink" title="拓展键标记Extended Key Flag"></a>拓展键标记Extended Key Flag</h4><p>对于IBM拓展键盘才有用,一般的键盘上已经有足够多的键用了,不需要拓展了</p>
+<h4 id="内容代码Context-Code"><a href="#内容代码Context-Code" class="headerlink" title="内容代码Context Code"></a>内容代码Context Code</h4><p>如果Alt键被按下,则相应的键盘消息中该值为1</p>
+<h4 id="先前状态Previous-Key-State"><a href="#先前状态Previous-Key-State" class="headerlink" title="先前状态Previous Key State"></a>先前状态Previous Key State</h4><p>如果先前改键是松开的则该值为0</p>
+<p>如果先前该键是按下的则该值为1</p>
+<p>这个值可以用来去除重复输入,比如老年人动作缓慢,本来就只想输入一个A结果按下A忘了松开了 ,可以判断先前该键的状态,如果也是按下的则抛弃</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">case</span> WM_KEYDOWN:</span><br><span class="line">    <span class="keyword">if</span>((lParam&gt;&gt;<span class="number">30</span>)&amp;<span class="number">1</span>)&#123;<span class="comment">//lParam第31位是键先前状态,右移30位之后成为最低位,和1按位与只保留该位</span></span><br><span class="line">            <span class="keyword">return</span> <span class="number">0</span>;</span><br><span class="line">    &#125;</span><br></pre></td></tr></table></figure>
+
+
+
+<h4 id="转换状态Transition-State"><a href="#转换状态Transition-State" class="headerlink" title="转换状态Transition State"></a>转换状态Transition State</h4><p>键正在被按下则转换状态为0</p>
+<p>键正在被释放则转换状态为1</p>
+<h3 id="转义状态"><a href="#转义状态" class="headerlink" title="转义状态"></a>转义状态</h3><p>转义键:Shift,Alt,Ctrl</p>
+<p>切换键:Caps Lock,Num Lock,Scroll Lock</p>
+<p>区分主键盘上大小写输入就要看这些键的状态</p>
+<p>考虑如何判断一套组合键都有谁按下了呢?比如Ctrl+F,首先按下的是Ctrl,然后按下F,但是按下F的时候引用程序已经处理过了Ctrl,现在只知道按下了F.这样看来是不是还得开一些变量记录刚才按下了谁呢?当Ctrl松开的时候这个变量置零,当Ctrl按下的时候这个变量置1.</p>
+<p>windows操作系统确实是按照这个思想做的,它给我们代劳了.我们要判断Ctrl的状态,只需要<code>GetKeyState(VK_CONTROL);</code>就可以获取windows帮我们记录好的Ctrl状态了</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">SHORT <span class="title function_">GetKeyState</span><span class="params">(</span></span><br><span class="line"><span class="params">  [in] <span class="type">int</span> nVirtKey</span></span><br><span class="line"><span class="params">)</span>;</span><br></pre></td></tr></table></figure>
+
+<p>当需要查询状态的键处于按下时,该函数返回负值.否则最低位置1</p>
+<p>可以通过是否小于0或者和1按位与判断状态</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">if</span>(wParam&lt;=<span class="number">0x5A</span>&amp;&amp;wParam&gt;=<span class="number">0x41</span>)&#123;<span class="comment">//首先判断是不是英文字母</span></span><br><span class="line">    <span class="keyword">if</span>(GetKeyState(VK_CAPITAL))&#123;</span><br><span class="line">        szBuffer[cnt_keys]=wParam;<span class="comment">//大写字母添加进入缓冲区</span></span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">else</span>&#123;</span><br><span class="line">        szBuffer[cnt_keys]=wParam-<span class="string">&#x27;A&#x27;</span>+<span class="string">&#x27;a&#x27;</span>;<span class="comment">//小写字母添加进入缓冲区</span></span><br><span class="line">    &#125;</span><br><span class="line">    ++cnt_keys;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+
+
+
+
+<h3 id="应用"><a href="#应用" class="headerlink" title="应用"></a>应用</h3><p>给滚动条添加键盘动作:</p>
+<p>按下PgUp往前翻页,按下PgDn往后翻页</p>
+<p>按上下键滚动一行</p>
+<p>按左右键左右滚动一个字符的宽度</p>
+<p>实际上直接发送信息处理滚动条消息即可</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">case</span> WM_KEYDOWN:</span><br><span class="line">	<span class="keyword">switch</span> (wParam) &#123;</span><br><span class="line">	<span class="keyword">case</span> VK_HOME:</span><br><span class="line">		SendMessage(hwnd, WM_VSCROLL, SB_BOTTOM, <span class="number">0</span>);</span><br><span class="line">		<span class="keyword">break</span>;</span><br><span class="line">	<span class="keyword">case</span> VK_END:</span><br><span class="line">		SendMessage(hwnd, WM_VSCROLL, SB_TOP, <span class="number">0</span>);</span><br><span class="line">		<span class="keyword">break</span>;</span><br><span class="line">	<span class="keyword">case</span> VK_PRIOR:</span><br><span class="line">		SendMessage(hwnd, WM_VSCROLL, SB_PAGEUP, <span class="number">0</span>);</span><br><span class="line">		<span class="keyword">break</span>;</span><br><span class="line">	<span class="keyword">case</span> VK_NEXT:</span><br><span class="line">		SendMessage(hwnd, WM_VSCROLL, SB_PAGEDOWN, <span class="number">0</span>);</span><br><span class="line">	<span class="keyword">case</span> VK_UP:</span><br><span class="line">		SendMessage(hwnd, WM_VSCROLL, SB_LINEUP, <span class="number">0</span>);</span><br><span class="line">		<span class="keyword">break</span>;</span><br><span class="line">	<span class="keyword">case</span> VK_DOWN:</span><br><span class="line">		SendMessage(hwnd, WM_VSCROLL, SB_LINEDOWN, <span class="number">0</span>);</span><br><span class="line">		<span class="keyword">break</span>;</span><br><span class="line">	<span class="keyword">case</span> VK_RIGHT:</span><br><span class="line">		SendMessage(hwnd, WM_HSCROLL, SB_LINERIGHT, <span class="number">0</span>);</span><br><span class="line">		<span class="keyword">break</span>;</span><br><span class="line">	<span class="keyword">case</span> VK_LEFT:</span><br><span class="line">		SendMessage(hwnd, WM_HSCROLL, SB_LINELEFT, <span class="number">0</span>);</span><br><span class="line">		<span class="keyword">break</span>;</span><br><span class="line">	&#125;</span><br></pre></td></tr></table></figure>
+
+
+
+<h2 id="字符消息"><a href="#字符消息" class="headerlink" title="字符消息"></a>字符消息</h2><h3 id="再看消息循环"><a href="#再看消息循环" class="headerlink" title="再看消息循环"></a>再看消息循环</h3><figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">while</span> (GetMessage(&amp;msg, <span class="literal">NULL</span>, <span class="number">0</span>, <span class="number">0</span>))</span><br><span class="line">&#123;</span><br><span class="line">    TranslateMessage(&amp;msg);</span><br><span class="line">    DispatchMessage(&amp;msg);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>在主函数的最后,返回之前,像定式一样必须要有一个消息循环.</p>
+<p>其中GetMessage从应用程序的消息队列中,获取一条新消息,用msg承载该消息</p>
+<p>DispatchMessage将该消息分拣交给相应窗口</p>
+<p>TranslageMessage将<strong>可打印字符</strong>的击键消息转换为<strong>字符消息</strong>,然后将该字符消息放入应用程序的消息队列</p>
+<blockquote>
+<p>可打印字符包括英文字母,阿拉伯数字,标点符号,运算符号等等</p>
+<p>不包括Ctrl,Shift,Insert,Delete,Alt</p>
+</blockquote>
+<p>字符消息的种类:</p>
+<p><img src="https://raw.githubusercontent.com/DeutschBall/DeutschBall/main/image-20220812105605047.png" alt="image-20220812105605047"></p>
+<p>死字符只对需要重音符号的语言键盘有用,比如德语.可以忽略</p>
+<p>应用程序主要就处理WM_CHAR消息,该消息从WM_KEYDOWN翻译而来.</p>
+<p>WM_SYSCHAR消息从WM_SYSKEYDOWN翻译而来</p>
+<h3 id="参数意义"><a href="#参数意义" class="headerlink" title="参数意义"></a>参数意义</h3><p>对于字符消息,lParam参数的含义和击键消息相同</p>
+<p><img src="https://raw.githubusercontent.com/DeutschBall/DeutschBall/main/image-20220812201421640.png" alt="image-20220812201421640"></p>
+<p>wParam是ANSI或者Unicode编码的字符码,这一点和击键消息中不同</p>
+<p>具体是用的ANSI还是Unicode编码,要看注册窗口类的时候调用的是RegisterClassA还是RegisterClassW</p>
+<blockquote>
+<p>如果使用RegisterClass,最近的windows操作系统上会被宏定义为RegisterClassW.因为Windows 2000之后Unicode标识符就被定义了</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#<span class="keyword">ifdef</span> UNICODE</span></span><br><span class="line"><span class="meta">#<span class="keyword">define</span> RegisterClass  RegisterClassW</span></span><br><span class="line"><span class="meta">#<span class="keyword">else</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">define</span> RegisterClass  RegisterClassA</span></span><br><span class="line"><span class="meta">#<span class="keyword">endif</span> <span class="comment">// !UNICODE</span></span></span><br></pre></td></tr></table></figure>
+
+
+</blockquote>
+<h3 id="先来后到"><a href="#先来后到" class="headerlink" title="先来后到"></a>先来后到</h3><p>当字符键盘比如’A’按下后,对于应用程序的消息队列</p>
+<p>首先收到的是’A’的击键消息WM_KEYDOWN,虚拟键代码wParam&#x3D;0x41</p>
+<p>然后收到的是’A’的字符消息WM_CHAR,字符编码wParam&#x3D;0x61</p>
+<p>然后’A’松开时收到击键消息WM_KEYUP,虚拟键代码wParam&#x3D;0x41</p>
+<h3 id="各司其职"><a href="#各司其职" class="headerlink" title="各司其职"></a>各司其职</h3><p>对于功能键比如Ctrl,Shift等等,作为虚拟键,需要处理WM_KEYDOWN消息</p>
+<p>对于可打印字符就需要处理字符消息WM_CHAR</p>
+<p>Tab,回车,空格,Esc作为控制字符也处理WM_CHAR</p>
+<p><img src="https://raw.githubusercontent.com/DeutschBall/DeutschBall/main/image-20220812203020207.png" alt="image-20220812203020207"></p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">case</span> WM_CHAR:</span><br><span class="line">    <span class="keyword">switch</span> (wParam)</span><br><span class="line">    &#123;</span><br><span class="line">    <span class="keyword">case</span> <span class="string">&#x27;\b&#x27;</span>:</span><br><span class="line">        <span class="built_in">cout</span> &lt;&lt; <span class="string">&quot;space down&quot;</span> &lt;&lt; <span class="built_in">endl</span>;</span><br><span class="line">        <span class="keyword">break</span>;</span><br><span class="line">    <span class="keyword">case</span> <span class="string">&#x27;\t&#x27;</span>:</span><br><span class="line">        <span class="built_in">cout</span> &lt;&lt; <span class="string">&quot;Tab down&quot;</span> &lt;&lt; <span class="built_in">endl</span>;</span><br><span class="line">        <span class="keyword">break</span>;</span><br><span class="line">    <span class="keyword">case</span> <span class="string">&#x27;\n&#x27;</span>:</span><br><span class="line">        <span class="built_in">cout</span> &lt;&lt; <span class="string">&quot;Ctrl+Enter down&quot;</span> &lt;&lt; <span class="built_in">endl</span>;</span><br><span class="line">        <span class="keyword">break</span>;</span><br><span class="line">    <span class="keyword">case</span> <span class="string">&#x27;\r&#x27;</span>:</span><br><span class="line">        <span class="built_in">cout</span> &lt;&lt; <span class="string">&quot;Enter down&quot;</span> &lt;&lt; <span class="built_in">endl</span>;</span><br><span class="line">        <span class="keyword">break</span>;</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">return</span> <span class="number">0</span>;</span><br></pre></td></tr></table></figure>
+
+
+
+<h2 id="应用-1"><a href="#应用-1" class="headerlink" title="应用"></a>应用</h2><p>windows程序设计在此给出了一个例子,记录键盘动作并且输出到屏幕</p>
+<p>分析其过程函数WndProc</p>
+<h3 id="变量定义"><a href="#变量定义" class="headerlink" title="变量定义"></a>变量定义</h3><figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br></pre></td><td class="code"><pre><span class="line">	<span class="type">static</span> <span class="type">int</span> cxClientMax, cyClientMax, cxClient, cyClient, cxChar, cyChar;</span><br><span class="line"><span class="comment">//cxClientMax为客户区最大宽度,根据该值决定保存显示哪一部分消息</span></span><br><span class="line"><span class="comment">//cxClient是客户区宽度</span></span><br><span class="line">	<span class="type">static</span> <span class="type">int</span> cLinesMax, cLines;<span class="comment">//当前客户区最大能打印多少行,已经使用了多少行</span></span><br><span class="line">	<span class="type">static</span> PMSG pmsg;<span class="comment">//消息结构体</span></span><br><span class="line">	<span class="type">static</span> RECT rectScroll;<span class="comment">//客户区矩形</span></span><br><span class="line">	<span class="type">static</span> TCHAR szTop[] = TEXT(<span class="string">&quot;Message Key Char &quot;</span>)	TEXT(<span class="string">&quot;Repeat Scan Ext ALT Prev Tran&quot;</span>);<span class="comment">//顶部栏目</span></span><br><span class="line">	<span class="type">static</span> TCHAR szUnd[] = TEXT(<span class="string">&quot;_______ ___ ____ &quot;</span>)	TEXT(<span class="string">&quot;______ ____ ___ ___ ____ ____&quot;</span>);<span class="comment">//下划线 </span></span><br><span class="line">	<span class="type">static</span> TCHAR  szFormat[<span class="number">2</span>][<span class="number">100</span>] = &#123;<span class="comment">//格式化字符串,用于szTop和szUnd的打印格式</span></span><br><span class="line">		TEXT(<span class="string">&quot;%-13s %3d %-15s%c%6u %4d %3s %3s %4s %4s&quot;</span>),</span><br><span class="line">		TEXT(<span class="string">&quot;%-13s 0x%04X%1s%c %6u %4d %3s %3s %4s %4s&quot;</span>)</span><br><span class="line">	&#125;;</span><br><span class="line"></span><br><span class="line">	<span class="type">static</span> TCHAR  szYes[] = TEXT(<span class="string">&quot;Yes&quot;</span>);</span><br><span class="line">	<span class="type">static</span> TCHAR szNo[] = TEXT(<span class="string">&quot;No&quot;</span>);</span><br><span class="line">	<span class="type">static</span> TCHAR  szDown[] = TEXT(<span class="string">&quot;Down&quot;</span>);</span><br><span class="line">	<span class="type">static</span> TCHAR  szUp[] = TEXT(<span class="string">&quot;Up&quot;</span>);</span><br><span class="line">	<span class="type">static</span> TCHAR  szMessage[<span class="number">8</span>][<span class="number">100</span>] = &#123;<span class="comment">//八种键盘消息</span></span><br><span class="line">		TEXT(<span class="string">&quot;WM_KEYDOWN&quot;</span>), TEXT(<span class="string">&quot;WM_KEYUP&quot;</span>),</span><br><span class="line">		TEXT(<span class="string">&quot;WM_CHAR&quot;</span>), TEXT(<span class="string">&quot;WM_DEADCHAR&quot;</span>),</span><br><span class="line">		TEXT(<span class="string">&quot;WM_SYSKEYDOWN&quot;</span>),TEXT(<span class="string">&quot;WM_SYSKEYUP&quot;</span>),</span><br><span class="line">		TEXT(<span class="string">&quot;WM_SYSCHAR&quot;</span>), TEXT(<span class="string">&quot;WM_SYSDEADCHAR&quot;</span>) </span><br><span class="line">	&#125;;</span><br><span class="line">	HDC hdc;<span class="comment">//设备环境句柄</span></span><br><span class="line">	<span class="type">int</span> i, iType;<span class="comment">//循环变量,</span></span><br><span class="line">	PAINTSTRUCT ps;</span><br><span class="line">	TCHAR szBuffer[<span class="number">128</span>], szKeyName[<span class="number">32</span>];</span><br><span class="line">	TEXTMETRIC tm;<span class="comment">//字符信息结构体</span></span><br></pre></td></tr></table></figure>
+
+<h4 id="pmsg"><a href="#pmsg" class="headerlink" title="pmsg"></a>pmsg</h4><p>存放消息的结构体</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">typedef</span> <span class="class"><span class="keyword">struct</span> <span class="title">tagMSG</span> &#123;</span></span><br><span class="line">    HWND        hwnd;</span><br><span class="line">    UINT        message;</span><br><span class="line">    WPARAM      wParam;</span><br><span class="line">    LPARAM      lParam;</span><br><span class="line">    DWORD       time;</span><br><span class="line">    POINT       pt;</span><br><span class="line"><span class="meta">#<span class="keyword">ifdef</span> _MAC</span></span><br><span class="line">    DWORD       lPrivate;</span><br><span class="line"><span class="meta">#<span class="keyword">endif</span></span></span><br><span class="line">&#125; MSG, *PMSG, NEAR *NPMSG, FAR *LPMSG;</span><br></pre></td></tr></table></figure>
+
+<p>其前四个参数和WndProc窗口过程函数相同</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">LRESULT CALLBACK    <span class="title function_">WndProc</span><span class="params">(HWND, UINT, WPARAM, LPARAM)</span>;</span><br></pre></td></tr></table></figure>
+
+<p>该结构体的作用就是完整记录一条消息,甚至连消息产生时间time都有记录</p>
+<p>POINT pt记录的是发生该消息时鼠标的位置(相对于整块屏幕的坐标)</p>
+<h4 id="ps"><a href="#ps" class="headerlink" title="ps"></a>ps</h4><p>记录绘画信息的结构体</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">typedef</span> <span class="class"><span class="keyword">struct</span> <span class="title">tagPAINTSTRUCT</span> &#123;</span></span><br><span class="line">    HDC         hdc;</span><br><span class="line">    BOOL        fErase;</span><br><span class="line">    RECT        rcPaint;</span><br><span class="line">    BOOL        fRestore;</span><br><span class="line">    BOOL        fIncUpdate;</span><br><span class="line">    BYTE        rgbReserved[<span class="number">32</span>];</span><br><span class="line">&#125; PAINTSTRUCT, *PPAINTSTRUCT, *NPPAINTSTRUCT, *LPPAINTSTRUCT;</span><br></pre></td></tr></table></figure>
+
+<h5 id="hdc"><a href="#hdc" class="headerlink" title="hdc"></a>hdc</h5><p>设备环境句柄</p>
+<h5 id="fErase"><a href="#fErase" class="headerlink" title="fErase"></a>fErase</h5><p>表明背景是否擦除,非0则擦除</p>
+<h5 id="rcPaint"><a href="#rcPaint" class="headerlink" title="rcPaint"></a>rcPaint</h5><p>需要重绘的矩形范围</p>
+<p>剩下三个成员尚未使用</p>
+<h3 id="窗口创建和变形消息"><a href="#窗口创建和变形消息" class="headerlink" title="窗口创建和变形消息"></a>窗口创建和变形消息</h3><figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">case</span> WM_CREATE:</span><br><span class="line"><span class="keyword">case</span> WM_DISPLAYCHANGE:<span class="comment">//窗口最大化还有普通状态变化时获取该消息</span></span><br><span class="line">	<span class="comment">// Get maximum size of client area </span></span><br><span class="line">	cxClientMax = GetSystemMetrics(SM_CXMAXIMIZED);<span class="comment">//顶层窗口最大化时的宽度(像素)</span></span><br><span class="line">	cyClientMax = GetSystemMetrics(SM_CYMAXIMIZED);</span><br><span class="line">	<span class="comment">// Get character size for fixed-pitch font </span></span><br><span class="line">	hdc = GetDC(hwnd);</span><br><span class="line">	SelectObject(hdc, GetStockObject(SYSTEM_FIXED_FONT));<span class="comment">//使用系统等宽字体</span></span><br><span class="line">	GetTextMetrics(hdc, &amp;tm);<span class="comment">//获取系统等宽字体信息</span></span><br><span class="line">	cxChar = tm.tmAveCharWidth;<span class="comment">//字符宽度,列宽度</span></span><br><span class="line">	cyChar = tm.tmHeight+tm.tmExternalLeading;<span class="comment">//行高度</span></span><br><span class="line">	ReleaseDC(hwnd, hdc);</span><br><span class="line">	<span class="comment">// Allocate memory for display lines </span></span><br><span class="line">	<span class="keyword">if</span> (pmsg)<span class="comment">//如果pmsg非NULL则表明先前已经给他分配过堆空间,那么本次需要重新分配,先把以前的扬了</span></span><br><span class="line">		<span class="built_in">free</span>(pmsg);</span><br><span class="line">	cLinesMax = cyClientMax / cyChar;<span class="comment">//计算行数</span></span><br><span class="line">	pmsg = (PMSG)<span class="built_in">malloc</span>(cLinesMax * <span class="keyword">sizeof</span>(MSG));<span class="comment">//根据当前客户区大小决定pmsg数组大小</span></span><br><span class="line">	cLines = <span class="number">0</span>;<span class="comment">//已使用行数清零</span></span><br><span class="line">	<span class="comment">// fall through </span></span><br><span class="line">	<span class="comment">//此处没有返回直接继续执行case WM_SIZE标签中的内容</span></span><br><span class="line"><span class="keyword">case</span> WM_SIZE:</span><br><span class="line">	<span class="keyword">if</span> (message == WM_SIZE)<span class="comment">//由于能够到达此块的不止WM_SIZE消息,还有可能时WM_CREATE和WM_DISPLAYCHANGE</span></span><br><span class="line">	&#123;</span><br><span class="line">		cxClient = LOWORD(lParam);<span class="comment">//只有窗口尺寸发生变化时才重新获取客户区尺寸</span></span><br><span class="line">		cyClient = HIWORD(lParam);</span><br><span class="line">	&#125;</span><br><span class="line">	<span class="comment">// Calculate scrolling rectangle </span></span><br><span class="line">	<span class="comment">//滚动矩形的</span></span><br><span class="line">	rectScroll.left = <span class="number">0</span>;</span><br><span class="line">	rectScroll.right = cxClient;</span><br><span class="line">	rectScroll.top = cyChar;<span class="comment">//滚动矩形起点是第一行,第0行用于打印栏目常量</span></span><br><span class="line">	rectScroll.bottom = cyChar * (cyClient / cyChar);<span class="comment">//滚动矩形的底是客户区最多能容纳的那一行</span></span><br><span class="line">	InvalidateRect(hwnd, <span class="literal">NULL</span>, TRUE);<span class="comment">//一旦客户区尺寸变化则重绘整个客户区</span></span><br><span class="line">	<span class="keyword">return</span> <span class="number">0</span>;</span><br></pre></td></tr></table></figure>
+
+<h3 id="键盘消息"><a href="#键盘消息" class="headerlink" title="键盘消息"></a>键盘消息</h3><figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br></pre></td><td class="code"><pre><span class="line">	<span class="comment">//所有的键盘动作,包括击键消息和字符消息还有系统键消息都记录下来</span></span><br><span class="line"><span class="keyword">case</span> WM_KEYDOWN:<span class="comment">//键盘按下</span></span><br><span class="line"><span class="keyword">case</span> WM_KEYUP:<span class="comment">//键盘起来</span></span><br><span class="line"><span class="keyword">case</span> WM_CHAR:<span class="comment">//字符消息</span></span><br><span class="line"><span class="keyword">case</span> WM_DEADCHAR:<span class="comment">//死字符消息</span></span><br><span class="line"><span class="keyword">case</span> WM_SYSKEYDOWN:<span class="comment">//系统键Alt按下</span></span><br><span class="line"><span class="keyword">case</span> WM_SYSKEYUP:<span class="comment">//系统键起来</span></span><br><span class="line"><span class="keyword">case</span> WM_SYSCHAR:<span class="comment">//系统字符消息</span></span><br><span class="line"><span class="keyword">case</span> WM_SYSDEADCHAR:<span class="comment">//系统死字符消息</span></span><br><span class="line">	<span class="comment">// Rearrange storage array </span></span><br><span class="line">	<span class="keyword">for</span> (i = cLinesMax - <span class="number">1</span>; i &gt; <span class="number">0</span>; i--)</span><br><span class="line">	&#123;</span><br><span class="line">		pmsg[i] = pmsg[i - <span class="number">1</span>];<span class="comment">//新的键盘记录放到pmsg[0],历史消息都顺次后移一个</span></span><br><span class="line">           <span class="comment">//如果消息总数超过了cLinesMax则丢弃早些时候到达的消息,实际上维护了一个队列</span></span><br><span class="line">	&#125;</span><br><span class="line">	<span class="comment">// Store new message </span></span><br><span class="line">	pmsg[<span class="number">0</span>].hwnd = hwnd;<span class="comment">//记录最新键盘消息</span></span><br><span class="line">	pmsg[<span class="number">0</span>].message = message;</span><br><span class="line">	pmsg[<span class="number">0</span>].wParam = wParam;</span><br><span class="line">	pmsg[<span class="number">0</span>].lParam = lParam;</span><br><span class="line">	cLines = min(cLines + <span class="number">1</span>, cLinesMax);<span class="comment">//更新 &quot;已使用行数&quot; ,但是最大值不能超过最大行数</span></span><br><span class="line">	<span class="comment">// Scroll up the display </span></span><br><span class="line">	ScrollWindow(hwnd, <span class="number">0</span>, -cyChar, &amp;rectScroll, &amp;rectScroll);<span class="comment">//滚动rectScroll对应区域,实际上整个网上平移cyChar即一行的高度</span></span><br><span class="line">	<span class="keyword">break</span>; <span class="comment">// i.e., call DefWindowProc so Sys messages work</span></span><br></pre></td></tr></table></figure>
+
+<blockquote>
+<p>“i.e., call DefWindowProc so Sys messages work”翻译成人话:</p>
+<p>“也就是说,调用DefWindowProc”处理系统键消息</p>
+</blockquote>
+<p>最后这里用的是break不是return,意味着只是看看键盘消息是谁而不进行拦截,记录一下接着丢给系统做取舍,保证Alt系统消息能够被正确处理</p>
+<h3 id="绘图消息"><a href="#绘图消息" class="headerlink" title="绘图消息"></a>绘图消息</h3><p>前面的一切消息处理都是在给绘图消息的处理做准备</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">case</span> WM_PAINT:</span><br><span class="line">	hdc = BeginPaint(hwnd, &amp;ps);</span><br><span class="line">	SelectObject(hdc, GetStockObject(SYSTEM_FIXED_FONT));</span><br><span class="line">	SetBkMode(hdc, TRANSPARENT);</span><br><span class="line">	TextOut(hdc, <span class="number">0</span>, <span class="number">0</span>, szTop, lstrlen(szTop));<span class="comment">//打印最顶上第0行</span></span><br><span class="line">	TextOut(hdc, <span class="number">0</span>, <span class="number">0</span>, szUnd, lstrlen(szUnd));</span><br><span class="line">	<span class="keyword">for</span> (i = <span class="number">0</span>; i &lt; min(cLines, cyClient / cyChar - <span class="number">1</span>); i++)<span class="comment">//一共打印cLines行,但是不能超过客户区总行数</span></span><br><span class="line">	&#123;</span><br><span class="line">		iType = pmsg[i].message == WM_CHAR ||<span class="comment">//如果是字符消息则iType=1否则为0</span></span><br><span class="line">			pmsg[i].message == WM_SYSCHAR ||</span><br><span class="line">			pmsg[i].message == WM_DEADCHAR ||</span><br><span class="line">			pmsg[i].message == WM_SYSDEADCHAR;</span><br><span class="line">		GetKeyNameText(pmsg[i].lParam, szKeyName,</span><br><span class="line">			<span class="keyword">sizeof</span>(szKeyName) / <span class="keyword">sizeof</span>(TCHAR));<span class="comment">//获取表示键名的字符串</span></span><br><span class="line">		TextOut(hdc, <span class="number">0</span>, (cyClient / cyChar - <span class="number">1</span> - i) * cyChar, szBuffer,</span><br><span class="line">			wsprintf(szBuffer, szFormat[iType],<span class="comment">//根据szFormat[iType]格式化字符串进行打印,即区分字符消息和虚拟键消息</span></span><br><span class="line">				szMessage[pmsg[i].message - WM_KEYFIRST],<span class="comment">///如此计算出来正好得到消息类型</span></span><br><span class="line">				pmsg[i].wParam,</span><br><span class="line">				(PTSTR)(iType ? TEXT(<span class="string">&quot; &quot;</span>) : szKeyName),<span class="comment">//如果是字符类型则打印空字符串否则打印键名</span></span><br><span class="line">				(TCHAR)(iType ? pmsg[i].wParam : <span class="string">&#x27; &#x27;</span>),<span class="comment">//如果是字符类型则打印该字符,否则打印空串</span></span><br><span class="line">				LOWORD(pmsg[i].lParam),</span><br><span class="line">				HIWORD(pmsg[i].lParam) &amp; <span class="number">0xFF</span>,</span><br><span class="line">				<span class="number">0x01000000</span> &amp; pmsg[i].lParam ? szYes : szNo,</span><br><span class="line">				<span class="number">0x20000000</span> &amp; pmsg[i].lParam ? szYes : szNo,</span><br><span class="line">				<span class="number">0x40000000</span> &amp; pmsg[i].lParam ? szDown : szUp,</span><br><span class="line">				<span class="number">0x80000000</span> &amp; pmsg[i].lParam ? szUp : szDown));</span><br><span class="line">	&#125;</span><br><span class="line">	EndPaint(hwnd, &amp;ps);</span><br><span class="line">	<span class="keyword">return</span> <span class="number">0</span>;</span><br></pre></td></tr></table></figure>
+
+<p>其中<code>szMessage[pmsg[i].message - WM_KEYFIRST]</code>很巧妙</p>
+<p>szMessage在WndProc一开始有定义</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="type">static</span> TCHAR  szMessage[<span class="number">8</span>][<span class="number">100</span>] = &#123;</span><br><span class="line">	TEXT(<span class="string">&quot;WM_KEYDOWN&quot;</span>), TEXT(<span class="string">&quot;WM_KEYUP&quot;</span>),</span><br><span class="line">	TEXT(<span class="string">&quot;WM_CHAR&quot;</span>), TEXT(<span class="string">&quot;WM_DEADCHAR&quot;</span>),</span><br><span class="line">	TEXT(<span class="string">&quot;WM_SYSKEYDOWN&quot;</span>),TEXT(<span class="string">&quot;WM_SYSKEYUP&quot;</span>),</span><br><span class="line">	TEXT(<span class="string">&quot;WM_SYSCHAR&quot;</span>), TEXT(<span class="string">&quot;WM_SYSDEADCHAR&quot;</span>) </span><br><span class="line">&#125;;</span><br></pre></td></tr></table></figure>
+
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#<span class="keyword">define</span> WM_KEYFIRST                     0x0100</span></span><br><span class="line"><span class="meta">#<span class="keyword">define</span> WM_KEYDOWN                      0x0100</span></span><br><span class="line"><span class="meta">#<span class="keyword">define</span> WM_KEYUP                        0x0101</span></span><br><span class="line"><span class="meta">#<span class="keyword">define</span> WM_CHAR                         0x0102</span></span><br><span class="line"><span class="meta">#<span class="keyword">define</span> WM_DEADCHAR                     0x0103</span></span><br><span class="line"><span class="meta">#<span class="keyword">define</span> WM_SYSKEYDOWN                   0x0104</span></span><br><span class="line"><span class="meta">#<span class="keyword">define</span> WM_SYSKEYUP                     0x0105</span></span><br><span class="line"><span class="meta">#<span class="keyword">define</span> WM_SYSCHAR                      0x0106</span></span><br><span class="line"><span class="meta">#<span class="keyword">define</span> WM_SYSDEADCHAR                  0x0107</span></span><br></pre></td></tr></table></figure>
+
+<p>WM_KEYFIRST表示WM消息的第一个,WM_KEYDOWN-WM_KEYFIRSST&#x3D;0x100-0x100&#x3D;0</p>
+<p>正好对应szMessage下标为0的的成员TEXT(“WM_KEYDOWN”)</p>
+<h3 id="窗口销毁消息"><a href="#窗口销毁消息" class="headerlink" title="窗口销毁消息"></a>窗口销毁消息</h3><figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">case</span> WM_DESTROY:</span><br><span class="line">	PostQuitMessage(<span class="number">0</span>);</span><br><span class="line">	<span class="keyword">return</span> <span class="number">0</span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+
+
+
+
+<h2 id="插入符号"><a href="#插入符号" class="headerlink" title="插入符号"></a>插入符号</h2><p>向文本编辑器中输入文本时,当前输入位置会有一个方格或者竖线或者下划线闪烁,</p>
+<p>这个闪烁的玩意儿叫做”插入符号(caret)”,而不是”光标(cursor)”,光标是指鼠标位置</p>
+<p><img src="https://raw.githubusercontent.com/DeutschBall/DeutschBall/main/image-20220812221958812.png" alt="windows终端中的插入符号"></p>
+<p>windowsAPI提供了插入符号的现成的函数,</p>
+<blockquote>
+<p>在此之前我还以为这个闪烁效果得是行尾一个竖线|和空格交替重绘.客户区其他部位一直重绘.显然客户区重新打印一遍太耗时了</p>
+</blockquote>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">CreateCaret 建立与视窗有关的插入符号</span><br><span class="line">SetCaretPos 在视窗中设定插入符号的位置</span><br><span class="line">ShowCaret 显示插入符号</span><br><span class="line">HideCaret 隐藏插入符号</span><br><span class="line">DestroyCaret 撤消插入符号</span><br><span class="line">GetCaretPos 获取当前插入符号位置</span><br><span class="line">GetCaretBlinkTime 获取符号闪烁时间</span><br><span class="line">SetCaretBlinkTime 设置符号闪烁时间</span><br></pre></td></tr></table></figure>
+
+<h3 id="时机"><a href="#时机" class="headerlink" title="时机"></a>时机</h3><p>插入符号的作用就是提示用户当前输入位置,显然这个正在被输入的窗口是焦点窗口</p>
+<p>而一个窗口过程可能负责多个窗口的消息处理,那么插入符号的改变应该是窗口特定的,不应是窗口过程特定的</p>
+<p>因此最好的处理时机是WM_SETFOCUS和WM_KILLFOCUS消息</p>
+<p>在处理WM_SETFOCUS时调用CreateCaret,在处理WM_KILLFOCUS消息时调用DestoryCaret</p>
+<p>创建插入符号之后并没有立刻输出到屏幕,需要再挑一个适当的时候调用ShowCaret显示它</p>
+<p>在处理WM_PAINT时调用CreateCaret,在处理其他需要绘图的消息时调用HideCaret暂时隐藏插入符号.其他消息处理完成之后再调用CreateCaret重新显示插入符号</p>
+<p>HideCaret的效果叠加,假设连续调用了10次HideCaret函数,那么就需要调用ShowCaret函数10次才可以把插入符号拽出来.</p>
+<h2 id="baby-notepad"><a href="#baby-notepad" class="headerlink" title="baby notepad"></a>baby notepad</h2><p>“弟弟军训完了,非要给我露一手”</p>
+<p>书上在这里给出了一个例子,一个婴儿版的文本编辑器</p>
+<p>分析一下它的窗口过程WndProc函数</p>
+<h3 id="宏定义"><a href="#宏定义" class="headerlink" title="宏定义"></a>宏定义</h3><figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#<span class="keyword">define</span> BUFFER(x,y) *(pBuffer + y * cxBuffer + x)</span></span><br></pre></td></tr></table></figure>
+
+<p>本定义用于取缓冲区的第x行第y列这个字符.</p>
+<p>实际上用了一个一维数组模拟二维数组,<code>BUFFER(x,y)</code>相当于<code>buffer[x][y]</code></p>
+<h3 id="变量定义-1"><a href="#变量定义-1" class="headerlink" title="变量定义"></a>变量定义</h3><figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line"><span class="type">static</span> DWORD dwCharSet = DEFAULT_CHARSET;<span class="comment">//字符集标志</span></span><br><span class="line"><span class="type">static</span> <span class="type">int</span> cxChar, cyChar, cxClient, cyClient, cxBuffer, cyBuffer,</span><br><span class="line">	xCaret, yCaret;</span><br><span class="line"><span class="type">static</span> TCHAR* pBuffer = <span class="literal">NULL</span>;</span><br><span class="line">HDC hdc;</span><br><span class="line"><span class="type">int</span> x, y, i;</span><br><span class="line">PAINTSTRUCT ps;</span><br><span class="line">TEXTMETRIC tm;</span><br><span class="line"></span><br></pre></td></tr></table></figure>
+
+<h3 id="字符集变换-窗口创建-尺寸变化消息"><a href="#字符集变换-窗口创建-尺寸变化消息" class="headerlink" title="字符集变换,窗口创建,尺寸变化消息"></a>字符集变换,窗口创建,尺寸变化消息</h3><figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br></pre></td><td class="code"><pre><span class="line">	<span class="keyword">case</span> WM_INPUTLANGCHANGE:</span><br><span class="line">		dwCharSet = wParam;<span class="comment">//字符集,和输入法有关,默认是DEFAULT_CHARSET</span></span><br><span class="line">		<span class="comment">// fall through </span></span><br><span class="line">	<span class="keyword">case</span> WM_CREATE:</span><br><span class="line">		hdc = GetDC(hwnd);</span><br><span class="line">		SelectObject(hdc, CreateFont(<span class="number">0</span>, <span class="number">0</span>, <span class="number">0</span>, <span class="number">0</span>, <span class="number">0</span>, <span class="number">0</span>, <span class="number">0</span>, <span class="number">0</span>,</span><br><span class="line">			dwCharSet, <span class="number">0</span>, <span class="number">0</span>, <span class="number">0</span>, FIXED_PITCH, <span class="literal">NULL</span>));</span><br><span class="line"><span class="comment">//输入法改变或者窗口创建时都需要重新设置字符集,字符集是字体的一部分</span></span><br><span class="line"></span><br><span class="line">		GetTextMetrics(hdc, &amp;tm);</span><br><span class="line">		cxChar = tm.tmAveCharWidth;<span class="comment">//获取字符宽度</span></span><br><span class="line">		cyChar = tm.tmHeight;<span class="comment">//字符高度</span></span><br><span class="line"></span><br><span class="line">		DeleteObject(SelectObject(hdc, GetStockObject(SYSTEM_FONT)));<span class="comment">//使用系统字体</span></span><br><span class="line">		ReleaseDC(hwnd, hdc);</span><br><span class="line">		<span class="comment">// fall through </span></span><br><span class="line">	<span class="keyword">case</span> WM_SIZE:</span><br><span class="line">		<span class="comment">// obtain window size in pixels </span></span><br><span class="line">		<span class="keyword">if</span> (message == WM_SIZE)</span><br><span class="line">		&#123;</span><br><span class="line">			cxClient = LOWORD(lParam);<span class="comment">//更新客户区尺寸记录</span></span><br><span class="line">			cyClient = HIWORD(lParam);</span><br><span class="line">		&#125;</span><br><span class="line">		<span class="comment">// calculate window size in characters </span></span><br><span class="line"></span><br><span class="line">		cxBuffer = max(<span class="number">1</span>, cxClient / cxChar);<span class="comment">//横向最多打印cxClient/cxChar列</span></span><br><span class="line">		cyBuffer = max(<span class="number">1</span>, cyClient / cyChar);<span class="comment">//纵向最多打印cyClient/cyChar行</span></span><br><span class="line"></span><br><span class="line">		<span class="comment">// allocate memory for buffer and clear it </span></span><br><span class="line"></span><br><span class="line">		<span class="keyword">if</span> (pBuffer != <span class="literal">NULL</span>)</span><br><span class="line">			<span class="built_in">free</span>(pBuffer);</span><br><span class="line">		pBuffer = (TCHAR*)<span class="built_in">malloc</span>(cxBuffer * cyBuffer * <span class="keyword">sizeof</span>(TCHAR));<span class="comment">//pBuffer为需要打印到屏幕的缓冲区,其大小按照cxBuffer*cyBuffer分配</span></span><br><span class="line"></span><br><span class="line">		<span class="keyword">for</span> (y = <span class="number">0</span>; y &lt; cyBuffer; y++)</span><br><span class="line">			<span class="keyword">for</span> (x = <span class="number">0</span>; x &lt; cxBuffer; x++)</span><br><span class="line">				BUFFER(x, y) = <span class="string">&#x27; &#x27;</span>;<span class="comment">//初始化buffer全为空格</span></span><br><span class="line">		<span class="comment">// set caret to upper left corner </span></span><br><span class="line">		xCaret = <span class="number">0</span>;<span class="comment">//初始插入字符位置(0,0)</span></span><br><span class="line">		yCaret = <span class="number">0</span>;</span><br><span class="line"></span><br><span class="line">		<span class="keyword">if</span> (hwnd == GetFocus())<span class="comment">//判断当前窗口是否为焦点窗口</span></span><br><span class="line">			SetCaretPos(xCaret * cxChar, yCaret * cyChar);<span class="comment">//如果是已经是焦点窗口了则设置当前插入字符位置</span></span><br><span class="line">		InvalidateRect(hwnd, <span class="literal">NULL</span>, TRUE);<span class="comment">//重绘整个客户区</span></span><br><span class="line">		<span class="keyword">return</span> <span class="number">0</span>;</span><br></pre></td></tr></table></figure>
+
+
+
+<h3 id="获取焦点消息"><a href="#获取焦点消息" class="headerlink" title="获取焦点消息"></a>获取焦点消息</h3><figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">case</span> WM_SETFOCUS:</span><br><span class="line">	<span class="comment">// create and show the caret </span></span><br><span class="line">	CreateCaret(hwnd, <span class="literal">NULL</span>, cxChar, cyChar);<span class="comment">//当前窗口获取焦点,此时创建插入字符</span></span><br><span class="line">	SetCaretPos(xCaret * cxChar, yCaret * cyChar);<span class="comment">//设置好插入字符的位置,这个位置可以通过方向键等改变</span></span><br><span class="line">	ShowCaret(hwnd);<span class="comment">//显示插入字符</span></span><br><span class="line">	<span class="keyword">return</span> <span class="number">0</span>;</span><br></pre></td></tr></table></figure>
+
+
+
+<h3 id="失去焦点消息"><a href="#失去焦点消息" class="headerlink" title="失去焦点消息"></a>失去焦点消息</h3><figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">case</span> WM_KILLFOCUS:</span><br><span class="line">	<span class="comment">// hide and destroy the caret </span></span><br><span class="line">	HideCaret(hwnd);<span class="comment">//失去焦点,隐藏插入符号</span></span><br><span class="line">	DestroyCaret();<span class="comment">//删除插入符号</span></span><br><span class="line">	<span class="keyword">return</span> <span class="number">0</span>;</span><br></pre></td></tr></table></figure>
+
+<h3 id="键盘消息-1"><a href="#键盘消息-1" class="headerlink" title="键盘消息"></a>键盘消息</h3><figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">case</span> WM_KEYDOWN:</span><br><span class="line">	<span class="keyword">switch</span> (wParam)</span><br><span class="line">	&#123;</span><br><span class="line">	<span class="keyword">case</span> VK_HOME:<span class="comment">//各种移动插入符号位置</span></span><br><span class="line">		xCaret = <span class="number">0</span>;</span><br><span class="line">		<span class="keyword">break</span>;</span><br><span class="line"></span><br><span class="line">	<span class="keyword">case</span> VK_END:</span><br><span class="line">		xCaret = cxBuffer - <span class="number">1</span>;</span><br><span class="line">		<span class="keyword">break</span>;</span><br><span class="line"></span><br><span class="line">	<span class="keyword">case</span> VK_PRIOR:</span><br><span class="line">		yCaret = <span class="number">0</span>;</span><br><span class="line">		<span class="keyword">break</span>;</span><br><span class="line"></span><br><span class="line">	<span class="keyword">case</span> VK_NEXT:</span><br><span class="line">		yCaret = cyBuffer - <span class="number">1</span>;</span><br><span class="line">		<span class="keyword">break</span>;</span><br><span class="line"></span><br><span class="line">	<span class="keyword">case</span> VK_LEFT:</span><br><span class="line">		xCaret = max(xCaret - <span class="number">1</span>, <span class="number">0</span>);<span class="comment">//最左不能移出客户区</span></span><br><span class="line">		<span class="keyword">break</span>;</span><br><span class="line"></span><br><span class="line">	<span class="keyword">case</span> VK_RIGHT:</span><br><span class="line">		xCaret = min(xCaret + <span class="number">1</span>, cxBuffer - <span class="number">1</span>);<span class="comment">//最右不能移出客户区</span></span><br><span class="line">		<span class="keyword">break</span>;</span><br><span class="line"></span><br><span class="line">	<span class="keyword">case</span> VK_UP:</span><br><span class="line">		yCaret = max(yCaret - <span class="number">1</span>, <span class="number">0</span>);</span><br><span class="line">		<span class="keyword">break</span>;</span><br><span class="line"></span><br><span class="line">	<span class="keyword">case</span> VK_DOWN:</span><br><span class="line">		yCaret = min(yCaret + <span class="number">1</span>, cyBuffer - <span class="number">1</span>);</span><br><span class="line">		<span class="keyword">break</span>;</span><br><span class="line"></span><br><span class="line">	<span class="keyword">case</span> VK_DELETE:<span class="comment">//退格键</span></span><br><span class="line">		<span class="keyword">for</span> (x = xCaret; x &lt; cxBuffer - <span class="number">1</span>; x++)<span class="comment">//退格键的作用是当前行当前位置之后的所有字符前移一个字符的宽度,删除当前字符</span></span><br><span class="line">			BUFFER(x, yCaret) = BUFFER(x + <span class="number">1</span>, yCaret);</span><br><span class="line"></span><br><span class="line">		BUFFER(cxBuffer - <span class="number">1</span>, yCaret) = <span class="string">&#x27; &#x27;</span>;<span class="comment">//退格前本行最后一个字符置空格</span></span><br><span class="line"></span><br><span class="line">		HideCaret(hwnd);<span class="comment">//临时隐藏插入字符,必须的操作,否则插入字符后面会拖着个黑框</span></span><br><span class="line">		hdc = GetDC(hwnd);</span><br><span class="line"></span><br><span class="line">		SelectObject(hdc, CreateFont(<span class="number">0</span>, <span class="number">0</span>, <span class="number">0</span>, <span class="number">0</span>, <span class="number">0</span>, <span class="number">0</span>, <span class="number">0</span>, <span class="number">0</span>,</span><br><span class="line">			dwCharSet, <span class="number">0</span>, <span class="number">0</span>, <span class="number">0</span>, FIXED_PITCH, <span class="literal">NULL</span>));</span><br><span class="line">		TextOut(hdc, xCaret * cxChar, yCaret * cyChar,</span><br><span class="line">			&amp;BUFFER(xCaret, yCaret),</span><br><span class="line">			cxBuffer - xCaret);<span class="comment">//重新打印该行</span></span><br><span class="line">		DeleteObject(SelectObject(hdc, GetStockObject</span><br><span class="line">		(SYSTEM_FONT)));<span class="comment">//这句话写不写无所谓</span></span><br><span class="line">		ReleaseDC(hwnd, hdc);</span><br><span class="line">		ShowCaret(hwnd);</span><br><span class="line">		<span class="keyword">break</span>;</span><br><span class="line">	&#125;</span><br><span class="line">	SetCaretPos(xCaret * cxChar, yCaret * cyChar);<span class="comment">//设置插入字符的位置</span></span><br><span class="line">	<span class="keyword">return</span> <span class="number">0</span>;</span><br></pre></td></tr></table></figure>
+
+
+
+<h3 id="字符消息-1"><a href="#字符消息-1" class="headerlink" title="字符消息"></a>字符消息</h3><figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">case</span> WM_CHAR:</span><br><span class="line">	<span class="keyword">for</span> (i = <span class="number">0</span>; i &lt; (<span class="type">int</span>)LOWORD(lParam); i++)</span><br><span class="line">	&#123;</span><br><span class="line">		<span class="keyword">switch</span> (wParam)</span><br><span class="line">		&#123;</span><br><span class="line">		<span class="keyword">case</span> <span class="string">&#x27;\b&#x27;</span>: <span class="comment">// backspace </span></span><br><span class="line">			<span class="keyword">if</span> (xCaret &gt; <span class="number">0</span>)<span class="comment">//退格最多退到本行开始</span></span><br><span class="line">			&#123;</span><br><span class="line">				xCaret--;<span class="comment">//插入符号的位置左移</span></span><br><span class="line">				SendMessage(hwnd, WM_KEYDOWN, VK_DELETE,</span><br><span class="line">					<span class="number">1</span>);<span class="comment">//发生退格的时候要删除字符</span></span><br><span class="line">			&#125;</span><br><span class="line">			<span class="keyword">break</span>;</span><br><span class="line">		<span class="keyword">case</span> <span class="string">&#x27;\t&#x27;</span>: <span class="comment">// tab </span></span><br><span class="line">			<span class="keyword">do</span></span><br><span class="line">			&#123;</span><br><span class="line">				SendMessage(hwnd, WM_CHAR, <span class="string">&#x27; &#x27;</span>, <span class="number">1</span>);</span><br><span class="line">			&#125; <span class="keyword">while</span> (xCaret % <span class="number">8</span> != <span class="number">0</span>);<span class="comment">//右移直到xCaret位置8字符对齐</span></span><br><span class="line">			<span class="keyword">break</span>;</span><br><span class="line">		<span class="keyword">case</span> <span class="string">&#x27;\n&#x27;</span>: <span class="comment">// line feed </span></span><br><span class="line">			<span class="keyword">if</span> (++yCaret == cyBuffer)<span class="comment">//回车后需要跳到下一行相同x位置</span></span><br><span class="line">				yCaret = <span class="number">0</span>;</span><br><span class="line">			<span class="keyword">break</span>;</span><br><span class="line"></span><br><span class="line">		<span class="keyword">case</span> <span class="string">&#x27;\r&#x27;</span>: <span class="comment">// carriage return </span></span><br><span class="line">			xCaret = <span class="number">0</span>;</span><br><span class="line"></span><br><span class="line">			<span class="keyword">if</span> (++yCaret == cyBuffer)</span><br><span class="line">				yCaret = <span class="number">0</span>;</span><br><span class="line">			<span class="keyword">break</span>;</span><br><span class="line"></span><br><span class="line">		<span class="keyword">case</span> <span class="string">&#x27;\x1B&#x27;</span>: <span class="comment">// escape ,清空缓冲区</span></span><br><span class="line">			<span class="keyword">for</span> (y = <span class="number">0</span>; y &lt; cyBuffer; y++)</span><br><span class="line">				<span class="keyword">for</span> (x = <span class="number">0</span>; x &lt; cxBuffer; x++)</span><br><span class="line">					BUFFER(x, y) = <span class="string">&#x27; &#x27;</span>;<span class="comment">//遍历清空缓冲区</span></span><br><span class="line"></span><br><span class="line">			xCaret = <span class="number">0</span>;</span><br><span class="line">			yCaret = <span class="number">0</span>;</span><br><span class="line"></span><br><span class="line">			InvalidateRect(hwnd, <span class="literal">NULL</span>, FALSE);<span class="comment">//清空缓冲区后立刻重绘</span></span><br><span class="line">			<span class="keyword">break</span>;</span><br><span class="line"></span><br><span class="line">		<span class="keyword">default</span>: <span class="comment">// character codes ,其他字符看作可打印字符,存入缓冲区</span></span><br><span class="line">			BUFFER(xCaret, yCaret) = (TCHAR)wParam;</span><br><span class="line"></span><br><span class="line">			HideCaret(hwnd);</span><br><span class="line">			hdc = GetDC(hwnd);</span><br><span class="line"></span><br><span class="line">			SelectObject(hdc, CreateFont(<span class="number">0</span>, <span class="number">0</span>, <span class="number">0</span>, <span class="number">0</span>, <span class="number">0</span>, <span class="number">0</span>, <span class="number">0</span>, <span class="number">0</span>,</span><br><span class="line">				dwCharSet, <span class="number">0</span>, <span class="number">0</span>, <span class="number">0</span>, FIXED_PITCH, <span class="literal">NULL</span>));</span><br><span class="line">			TextOut(hdc, xCaret * cxChar, yCaret * cyChar,</span><br><span class="line">				&amp;BUFFER(xCaret, yCaret), <span class="number">1</span>);</span><br><span class="line">			DeleteObject(</span><br><span class="line">				SelectObject(hdc, GetStockObject(SYSTEM_FONT)));</span><br><span class="line">			ReleaseDC(hwnd, hdc);</span><br><span class="line">			ShowCaret(hwnd);</span><br><span class="line">			<span class="keyword">if</span> (++xCaret == cxBuffer)<span class="comment">//本行到头了,需要换行</span></span><br><span class="line">			&#123;</span><br><span class="line">				xCaret = <span class="number">0</span>;</span><br><span class="line">				<span class="keyword">if</span> (++yCaret == cyBuffer)</span><br><span class="line">					yCaret = <span class="number">0</span>;</span><br><span class="line">			&#125;</span><br><span class="line">			<span class="keyword">break</span>;</span><br><span class="line">		&#125;</span><br><span class="line">	&#125;</span><br><span class="line"></span><br><span class="line">	SetCaretPos(xCaret * cxChar, yCaret * cyChar);</span><br><span class="line">	<span class="keyword">return</span> <span class="number">0</span>;</span><br></pre></td></tr></table></figure>
+
+
+
+<h3 id="绘图消息-1"><a href="#绘图消息-1" class="headerlink" title="绘图消息"></a>绘图消息</h3><figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">case</span> WM_PAINT:</span><br><span class="line">	hdc = BeginPaint(hwnd, &amp;ps);</span><br><span class="line"></span><br><span class="line">	SelectObject(hdc, CreateFont(<span class="number">0</span>, <span class="number">0</span>, <span class="number">0</span>, <span class="number">0</span>, <span class="number">0</span>, <span class="number">0</span>, <span class="number">0</span>, <span class="number">0</span>,</span><br><span class="line">		dwCharSet, <span class="number">0</span>, <span class="number">0</span>, <span class="number">0</span>, FIXED_PITCH, <span class="literal">NULL</span>));<span class="comment">//等宽字体,FIXED_PITCH等宽间距</span></span><br><span class="line">	<span class="keyword">for</span> (y = <span class="number">0</span>; y &lt; cyBuffer; y++)<span class="comment">//按行遍历,每次打印一整行</span></span><br><span class="line">		TextOut(hdc, <span class="number">0</span>, y * cyChar, &amp;BUFFER(<span class="number">0</span>, y), cxBuffer);</span><br><span class="line">	DeleteObject(SelectObject(hdc,GetStockObject(SYSTEM_FONT)));</span><br><span class="line">	EndPaint(hwnd, &amp;ps);</span><br><span class="line">	<span class="keyword">return</span> <span class="number">0</span>;</span><br></pre></td></tr></table></figure>
+
+
+
+<h3 id="窗口销毁消息-1"><a href="#窗口销毁消息-1" class="headerlink" title="窗口销毁消息"></a>窗口销毁消息</h3><figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">case</span> WM_DESTROY:</span><br><span class="line">	PostQuitMessage(<span class="number">0</span>);</span><br><span class="line">	<span class="keyword">return</span> <span class="number">0</span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+      
+    </div>
+
+    
+    
+    
+      <footer class="post-footer">
+        <div class="post-eof"></div>
+      </footer>
+  </article>
+  
+  
+  
+
+      
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="en">
     <link itemprop="mainEntityOfPage" href="http://deutschball.github.io/2022/08/11/%E7%A8%8B%E5%BA%8F%E5%91%98%E7%9A%84%E8%87%AA%E6%88%91%E4%BF%AE%E5%85%BB-chapter-5-COFF/">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
@@ -5596,398 +5879,10 @@
   
   
 
-      
-  
-  
-  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="en">
-    <link itemprop="mainEntityOfPage" href="http://deutschball.github.io/2022/06/23/wsl/">
-
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="image" content="https://raw.githubusercontent.com/DeutschBall/picbed/main/dustball.png">
-      <meta itemprop="name" content="dustball">
-      <meta itemprop="description" content="dustland">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="dustland">
-    </span>
-      <header class="post-header">
-        <h2 class="post-title" itemprop="name headline">
-          
-            <a href="/2022/06/23/wsl/" class="post-title-link" itemprop="url">WSL2</a>
-        </h2>
-
-        <div class="post-meta">
-            <span class="post-meta-item">
-              <span class="post-meta-item-icon">
-                <i class="far fa-calendar"></i>
-              </span>
-              <span class="post-meta-item-text">Posted on</span>
-
-              <time title="Created: 2022-06-23 22:44:00" itemprop="dateCreated datePublished" datetime="2022-06-23T22:44:00+08:00">2022-06-23</time>
-            </span>
-              <span class="post-meta-item">
-                <span class="post-meta-item-icon">
-                  <i class="far fa-calendar-check"></i>
-                </span>
-                <span class="post-meta-item-text">Edited on</span>
-                <time title="Modified: 2024-09-02 23:13:16" itemprop="dateModified" datetime="2024-09-02T23:13:16+08:00">2024-09-02</time>
-              </span>
-
-          
-
-        </div>
-      </header>
-
-    
-    
-    
-    <div class="post-body" itemprop="articleBody">
-
-      
-          <h1 id="WSL2"><a href="#WSL2" class="headerlink" title="WSL2"></a>WSL2</h1><p>Windows Subsystem for Linux,在windows上运行的linux子系统</p>
-<p>前一段时间一直在用WSL kali+vscode+python3,做pwn的题目还有linux上的逆向题.确实比用vmware开一个虚拟机方便一万倍</p>
-<p>但是对wsl的了解也就仅限于一些简单的命令比如<code>ls </code>等等,对于子系统和主系统的网络关系,以及子系统的其他用法,没有了解过</p>
-<p>现在想了解一下子系统的结构,怎么用子系统完成操作系统的课程实验(编译内核,系统调用,内核模块,设备驱动)</p>
-<p>以及如何修改子系统的各种设置,比如防火墙,与主机的网络关系,网络发现等</p>
-<p>随性更新…</p>
-<h2 id="安装-卸载wsl"><a href="#安装-卸载wsl" class="headerlink" title="安装&#x2F;卸载wsl"></a>安装&#x2F;卸载wsl</h2><h3 id="安装wsl"><a href="#安装wsl" class="headerlink" title="安装wsl"></a>安装wsl</h3><p>后面的实验都是基于WSL2已经安装完成,kali子系统已经能够在终端上运行了.安装wsl可以去微软官网(这部分已经被翻译过了),要添加windows功能</p>
-<p><img src="https://raw.githubusercontent.com/DeutschBall/test/master/image-20220622193653802.png" alt="image-20220622193653802"></p>
-<p>具体参考<a target="_blank" rel="noopener" href="https://docs.microsoft.com/zh-cn/windows/wsl/basic-commands">WSL 的基本命令 | Microsoft Docs</a></p>
-<p>在微软应用市场上可以下载各种linux系统,比如ubuntu18.04和ubuntu20.04,kali,debian等等</p>
-<p><img src="https://raw.githubusercontent.com/DeutschBall/test/master/image-20220622191626686.png" alt="image-20220622191626686"></p>
-<p>更方便的方法是在命令行上</p>
-<p><strong>查看本机已安装子系统</strong></p>
-<p><code>wsl -l </code></p>
-<figure class="highlight powershell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="built_in">PS</span> C:\Users\<span class="number">86135</span>\Desktop\pwn&gt; wsl <span class="literal">-l</span></span><br><span class="line">适用于 Linux 的 Windows 子系统分发版:</span><br><span class="line">kali<span class="literal">-linux</span> (默认)</span><br><span class="line">Ubuntu</span><br></pre></td></tr></table></figure>
-
-
-
-<p><strong>查看可以安装的子系统</strong></p>
-<p><code>wsl -l -o</code></p>
-<figure class="highlight powershell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line"><span class="built_in">PS</span> C:\Users\<span class="number">86135</span>\Desktop\pwn&gt; wsl <span class="literal">-l</span> <span class="literal">-o</span></span><br><span class="line">以下是可安装的有效分发的列表。</span><br><span class="line">请使用“wsl <span class="literal">--install</span> <span class="literal">-d</span> &lt;分发&gt;”安装。</span><br><span class="line"></span><br><span class="line">NAME            FRIENDLY NAME</span><br><span class="line">Ubuntu          Ubuntu</span><br><span class="line">Debian          Debian GNU/Linux</span><br><span class="line">kali<span class="literal">-linux</span>      Kali Linux Rolling</span><br><span class="line">openS<span class="built_in">USE-42</span>     openSUSE Leap <span class="number">42</span></span><br><span class="line">SLES<span class="literal">-12</span>         SUSE Linux Enterprise Server v12</span><br><span class="line">Ubuntu<span class="literal">-16</span>.<span class="number">04</span>    Ubuntu <span class="number">16.04</span> LTS</span><br><span class="line">Ubuntu<span class="literal">-18</span>.<span class="number">04</span>    Ubuntu <span class="number">18.04</span> LTS</span><br><span class="line">Ubuntu<span class="literal">-20</span>.<span class="number">04</span>    Ubuntu <span class="number">20.04</span> LTS</span><br></pre></td></tr></table></figure>
-
-
-
-<p><strong>设置默认的wsl</strong></p>
-<p><code>wsl --set-default &lt;子系统名&gt;</code></p>
-<p>在powershell中使用wsl命令时,有一个默认使用的子系统,比如我现在默认使用kali-linux,当终端上直接输入wsl时默认唤醒kali-linux,而不是ubuntu</p>
-<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line">PS C:\Users\86135\Desktop\pwn&gt; wsl --set-default ubuntu</span><br><span class="line">PS C:\Users\86135\Desktop\pwn&gt; wsl -l</span><br><span class="line">适用于 Linux 的 Windows 子系统分发版:</span><br><span class="line">Ubuntu (默认)</span><br><span class="line">kali-linux</span><br><span class="line">PS C:\Users\86135\Desktop\pwn&gt; wsl --set-default kali-linux</span><br><span class="line">PS C:\Users\86135\Desktop\pwn&gt; wsl -l</span><br><span class="line">适用于 Linux 的 Windows 子系统分发版:</span><br><span class="line">kali-linux (默认)</span><br><span class="line">Ubuntu</span><br></pre></td></tr></table></figure>
-
-<h3 id="卸载子系统"><a href="#卸载子系统" class="headerlink" title="卸载子系统"></a>卸载子系统</h3><p>在微软应用商店里是木法卸载子系统的,在终端上行</p>
-<p><code>wsl --unregister &lt;子系统名&gt;</code></p>
-<figure class="highlight powershell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="built_in">PS</span> C:\Users\<span class="number">86135</span>\Desktop\pwn&gt; wsl <span class="literal">--unregister</span> ubuntu</span><br><span class="line">正在注销...</span><br><span class="line"><span class="built_in">PS</span> C:\Users\<span class="number">86135</span>\Desktop\pwn&gt; wsl <span class="literal">-l</span></span><br><span class="line">适用于 Linux 的 Windows 子系统分发版:</span><br><span class="line">kali<span class="literal">-linux</span> (默认)</span><br></pre></td></tr></table></figure>
-
-<blockquote>
-<p>三炮!</p>
-<p>出去!</p>
-</blockquote>
-<h2 id="唤醒-关闭wsl"><a href="#唤醒-关闭wsl" class="headerlink" title="唤醒&#x2F;关闭wsl"></a>唤醒&#x2F;关闭wsl</h2><h3 id="选择唤醒哪一个子系统"><a href="#选择唤醒哪一个子系统" class="headerlink" title="选择唤醒哪一个子系统"></a>选择唤醒哪一个子系统</h3><p><code>wsl -d &lt;子系统名&gt;</code></p>
-<figure class="highlight powershell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="built_in">PS</span> C:\Users\<span class="number">86135</span>\Desktop\pwn&gt; wsl <span class="literal">-d</span> ubuntu</span><br><span class="line">ubuntu@Executor:/mnt/c/Users/<span class="number">86135</span>/Desktop/pwn<span class="variable">$</span></span><br></pre></td></tr></table></figure>
-
-
-
-<h3 id="选择登录用户"><a href="#选择登录用户" class="headerlink" title="选择登录用户"></a>选择登录用户</h3><p><code>wsl -u &lt;用户名&gt;</code></p>
-<p>比如可以选择使用root登录系统,也可以使用普通用户登录系统.</p>
-<p>只要是从powershell上唤醒子系统,不需要输入登录密码</p>
-<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br></pre></td><td class="code"><pre><span class="line">PS C:\Users\86135\Desktop\pwn&gt; wsl -u root</span><br><span class="line">┏━(Message from Kali developers)</span><br><span class="line">┃</span><br><span class="line">┃ This is a minimal installation of Kali Linux, you likely</span><br><span class="line">┃ want to install supplementary tools. Learn how:</span><br><span class="line">┃ ⇒ https://www.kali.org/docs/troubleshooting/common-minimum-setup/</span><br><span class="line">┃</span><br><span class="line">┗━(Run: “touch ~/.hushlogin” to hide this message)</span><br><span class="line">┌──(root㉿Executor)-[/mnt/c/Users/86135/Desktop/pwn]</span><br><span class="line">└─# exit</span><br><span class="line">logout</span><br><span class="line">PS C:\Users\86135\Desktop\pwn&gt; wsl -u kali</span><br><span class="line">┏━(Message from Kali developers)</span><br><span class="line">┃</span><br><span class="line">┃ This is a minimal installation of Kali Linux, you likely</span><br><span class="line">┃ want to install supplementary tools. Learn how:</span><br><span class="line">┃ ⇒ https://www.kali.org/docs/troubleshooting/common-minimum-setup/</span><br><span class="line">┃</span><br><span class="line">┗━(Run: “touch ~/.hushlogin” to hide this message)</span><br></pre></td></tr></table></figure>
-
-<h3 id="设置默认登录用户"><a href="#设置默认登录用户" class="headerlink" title="设置默认登录用户"></a>设置默认登录用户</h3><p>kali的默认登录用户是普通用户,权限有限.现在想要将默认登录用户改成root,如此不需要su或者sudo再输入密码</p>
-<p><code>&lt;子系统名&gt; config --default-user &lt;用户名&gt;</code></p>
-<figure class="highlight powershell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line"><span class="built_in">PS</span> C:\Users\<span class="number">86135</span>\Desktop\pwn&gt; kali config <span class="literal">--default-user</span> root</span><br><span class="line"><span class="built_in">PS</span> C:\Users\<span class="number">86135</span>\Desktop\pwn&gt; kali</span><br><span class="line">┏━(Message from Kali developers)</span><br><span class="line">┃</span><br><span class="line">┃ This is a minimal installation of Kali Linux, you likely</span><br><span class="line">┃ want to install supplementary tools. Learn how:</span><br><span class="line">┃ ⇒ https://www.kali.org/docs/troubleshooting/common<span class="literal">-minimum-setup</span>/</span><br><span class="line">┃</span><br><span class="line">┗━(Run: “touch ~/.hushlogin” to hide this message)</span><br><span class="line">┌──(root㉿Executor)-[~]</span><br><span class="line">└─<span class="comment">#</span></span><br></pre></td></tr></table></figure>
-
-
-
-<h3 id="查看子系统内核版本wsl-status"><a href="#查看子系统内核版本wsl-status" class="headerlink" title="查看子系统内核版本wsl --status"></a>查看子系统内核版本<code>wsl --status</code></h3><figure class="highlight powershell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line"><span class="built_in">PS</span> C:\Users\<span class="number">86135</span>\Desktop\pwn&gt; wsl <span class="literal">--status</span></span><br><span class="line">默认分发：kali<span class="literal">-linux</span></span><br><span class="line">默认版本：<span class="number">2</span></span><br><span class="line"></span><br><span class="line">适用于 Linux 的 Windows 子系统最后更新于 <span class="number">2022</span>/<span class="number">4</span>/<span class="number">21</span></span><br><span class="line">适用于 Linux 的 Windows 子系统内核可以使用“wsl <span class="literal">--update</span>”手动更新，但由于你的系统设置，无法进行自动更新。</span><br><span class="line"> 若要接收自动内核更新，请启用 Windows 更新设置:“在更新 Windows 时接收其他 Microsoft 产品的更新”。</span><br><span class="line"> 有关详细信息，请访问https://aka.ms/wsl2kernel。</span><br><span class="line">Windows 更新已暂停。</span><br><span class="line"></span><br><span class="line">内核版本： <span class="number">5.10</span>.<span class="number">102.1</span></span><br></pre></td></tr></table></figure>
-
-<h3 id="子系统关机"><a href="#子系统关机" class="headerlink" title="子系统关机"></a>子系统关机</h3><p>关闭子系统所在的终端并不会关闭wsl,它会在后台运行,因此下一次打开wsl的时候会发现开启的很快.</p>
-<p>在powershell上使用<code>wsl --shutdown</code>就可以关闭所有在后台运行的子系统</p>
-<p>如果不想关闭所有后台子系统,只停止其中的某一个,可以<code>wsl --terminate &lt;子系统名&gt;</code></p>
-<h2 id="工作目录"><a href="#工作目录" class="headerlink" title="工作目录"></a>工作目录</h2><h3 id="windows下wsl的位置"><a href="#windows下wsl的位置" class="headerlink" title="windows下wsl的位置"></a>windows下wsl的位置</h3><p><code>\\wsl.localhost\kali-linux</code></p>
-<figure class="highlight powershell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="built_in">PS</span> Microsoft.PowerShell.Core\FileSystem::\\wsl.localhost\kali<span class="literal">-linux</span>&gt; <span class="built_in">pwd</span></span><br><span class="line"></span><br><span class="line">Path</span><br><span class="line"><span class="literal">----</span></span><br><span class="line">Microsoft.PowerShell.Core\FileSystem::\\wsl.localhost\kali<span class="literal">-linux</span></span><br></pre></td></tr></table></figure>
-
-<p>这到底是个啥地方呢?前面怎么好长一坨,FileSystem后面还有俩冒号</p>
-<figure class="highlight powershell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="built_in">PS</span> C:\Users\<span class="number">86135</span>&gt; <span class="built_in">cd</span> \\wsl.localhost\kali<span class="literal">-linux</span></span><br><span class="line"><span class="built_in">PS</span> Microsoft.PowerShell.Core\FileSystem::\\wsl.localhost\kali<span class="literal">-linux</span>&gt;</span><br></pre></td></tr></table></figure>
-
-<p>如果在这个目录下面,想使用cd ..退到爹目录,接着说找不到爹目录</p>
-<p>实际上可以直接用explorer访问wsl的文件系统</p>
-<p><img src="https://raw.githubusercontent.com/DeutschBall/test/master/image-20220716105512580.png" alt="image-20220716105512580"></p>
-<h3 id="wsl上windows的位置"><a href="#wsl上windows的位置" class="headerlink" title="wsl上windows的位置"></a>wsl上windows的位置</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">┌──(root㉿Executor)-[/mnt/c/Users/86135/Desktop/pwn]</span><br><span class="line">└─# <span class="built_in">pwd</span></span><br><span class="line">/mnt/c/Users/86135/Desktop/pwn</span><br></pre></td></tr></table></figure>
-
-<p>即windows的根目录在wsl上为<code>/mnt/</code></p>
-<p>比如桌面就是<code>/mnt/c/Users/86135/Desktop/</code></p>
-<p>D盘就是<code>/mnt/d/</code></p>
-<h2 id="共享环境变量"><a href="#共享环境变量" class="headerlink" title="共享环境变量"></a>共享环境变量</h2><p>在wsl上可以调用windows的环境变量中的应用程序</p>
-<p>不同于windows终端的是,wsl上调用win的应用需要.exe后缀</p>
-<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line">┌──(root㉿Executor)-[~]</span><br><span class="line">└─# ipconfig</span><br><span class="line">-bash: ipconfig: <span class="built_in">command</span> not found</span><br><span class="line"></span><br><span class="line">┌──(root㉿Executor)-[~]</span><br><span class="line">└─# ipconfig.exe</span><br><span class="line"></span><br><span class="line">Windows IP 配置</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">以太网适配器 以太网:</span><br><span class="line"></span><br><span class="line">   媒体状态  . . . . . . . . . . . . : 媒体已断开连接</span><br><span class="line">   ...</span><br></pre></td></tr></table></figure>
-
-<p>也可以用wsl打开主系统中已经添加到环境变量的窗口应用程序</p>
-<p>也可以在wsl上调用主系统的cmd,切换到主系统的cmd终端</p>
-<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line">┌──(root㉿Executor)-[~]</span><br><span class="line">└─# cmd.exe</span><br><span class="line"><span class="string">&#x27;\\wsl.localhost\kali-linux\root&#x27;</span></span><br><span class="line">用作为当前目录的以上路径启动了 CMD.EXE。</span><br><span class="line">UNC 路径不受支持。默认值设为 Windows 目录。</span><br><span class="line">Microsoft Windows [版本 10.0.22000.675]</span><br><span class="line">(c) Microsoft Corporation。保留所有权利。</span><br><span class="line"></span><br><span class="line">C:\Windows&gt;</span><br></pre></td></tr></table></figure>
-
-
-
-<p>至于两个系统的终端怎么怎么联系.</p>
-<p>这都是茴香豆的n种写法,不会有人闲的让终端之间踢皮球吧</p>
-<p>并且还有设置开关这些功能,我寻思多多益善吧,不冲突关他干啥呢</p>
-<h2 id="wsl执行linux命令"><a href="#wsl执行linux命令" class="headerlink" title="wsl执行linux命令"></a>wsl执行linux命令</h2><p>正常情况下,linux上的可执行程序.elf或者.out,在windows上是没法执行的.同理win上的.exe也无法在linux上执行</p>
-<p>而wsl就提供了一种在windows上执行linux可执行目标文件的方法</p>
-<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line">用法: wsl.exe [参数] [选项...] [命令行]</span><br><span class="line"></span><br><span class="line">运行 Linux 二进制文件的参数:</span><br><span class="line"></span><br><span class="line">    如果未提供命令行，wsl.exe 将启动默认 shell。</span><br><span class="line"></span><br><span class="line">    --exec, -e &lt;命令行&gt;</span><br><span class="line">        在不使用默认 Linux Shell 的情况下执行指定的命令。</span><br><span class="line"></span><br><span class="line">    --</span><br><span class="line">        按原样传递其余命令行。</span><br></pre></td></tr></table></figure>
-
-<p>比如</p>
-<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br></pre></td><td class="code"><pre><span class="line">PS C:\Users\86135\Desktop\pwn&gt; ls -l</span><br><span class="line">Get-ChildItem : 缺少参数“LiteralPath”的某个参数。请指定一个类型为“System.String[]”的参数，然后再试一次。</span><br><span class="line">所在位置 行:1 字符: 4</span><br><span class="line">+ ls -l</span><br><span class="line">+    ~~</span><br><span class="line">    + CategoryInfo          : InvalidArgument: (:) [Get-ChildItem]，ParameterBindingException</span><br><span class="line">    + FullyQualifiedErrorId : MissingArgument,Microsoft.PowerShell.Commands.GetChildItemCommand</span><br><span class="line"></span><br><span class="line">PS C:\Users\86135\Desktop\pwn&gt; wsl ls -l</span><br><span class="line">total 108</span><br><span class="line">drwxrwxrwx 1 kali kali  4096 Jun  2 19:52 CGfsb</span><br><span class="line">drwxrwxrwx 1 kali kali  4096 May 19 23:14 cgpwn</span><br><span class="line">drwxrwxrwx 1 kali kali  4096 Jun 20 09:55 dice_game</span><br><span class="line">drwxrwxrwx 1 kali kali  4096 Jun 19 23:09 forgot</span><br><span class="line">drwxrwxrwx 1 kali kali  4096 May 11 17:45 get_shell</span><br><span class="line">drwxrwxrwx 1 kali kali  4096 May 20 09:28 guess_num</span><br><span class="line">drwxrwxrwx 1 kali kali  4096 May 11 09:51 hello_pwn</span><br><span class="line">drwxrwxrwx 1 kali kali  4096 May 20 08:45 int_overflow</span><br><span class="line">drwxrwxrwx 1 kali kali  4096 May 11 17:38 level0</span><br><span class="line">drwxrwxrwx 1 kali kali  4096 May 11 21:08 level2</span><br><span class="line">drwxrwxrwx 1 kali kali  4096 Jun  3 16:27 level3</span><br><span class="line">drwxrwxrwx 1 kali kali  4096 Jun 21 10:30 mytest</span><br><span class="line">-rwxrwxrwx 1 kali kali 84286 Jun  3 16:10 pwn.md</span><br><span class="line">drwxrwxrwx 1 kali kali  4096 Jun 19 23:38 reactor</span><br><span class="line">drwxrwxrwx 1 kali kali  4096 Jun 20 00:28 realtime</span><br><span class="line">drwxrwxrwx 1 kali kali  4096 Jun 20 10:06 stack2</span><br><span class="line">drwxrwxrwx 1 kali kali  4096 Jun  3 10:56 string</span><br><span class="line">drwxrwxrwx 1 kali kali  4096 May 29 16:03 testPIE</span><br></pre></td></tr></table></figure>
-
-<p>在输入<code>wsl ls -l</code>命令之后终端等了好长时间去了,推测是启动子系统去了.</p>
-<p>估计这个过程就是在子系统上运行了<code>ls -l</code>命令之后,将结果反馈给powershell,然后powershell打印到屏幕上</p>
-<h2 id="高级配置"><a href="#高级配置" class="headerlink" title="高级配置"></a>高级配置</h2><p>wsl上两个配置文件<code>wsl.conf</code> <code>.wslconfig</code></p>
-<p>微软给出的这两个文件的描述</p>
-<blockquote>
-<p> <strong>wsl.conf</strong></p>
-<ul>
-<li>作为 unix 文件存储在 <code>/etc</code> 分发目录中。</li>
-<li>用于按分布配置设置。 在此文件中配置的设置将仅应用于包含存储此文件的目录的特定 Linux 分发版。</li>
-<li>可用于版本、WSL 1 或 WSL 2 运行的分发版。</li>
-<li>若要访问已安装的发行版的 <code>/etc</code> 目录，请使用发行版的命令行和 <code>cd /</code> 访问根目录，然后使用 <code>ls</code> 列出文件或使用 <code>explorer.exe .</code> 在 Windows 文件资源管理器中查看。 目录路径应如下所示： <code>/etc/wsl.conf</code></li>
-</ul>
-<p> <strong>.wslconfig</strong></p>
-<ul>
-<li>存储在 <code>%UserProfile%</code> 目录中。</li>
-<li>用于全局配置作为 WSL 2 版本运行的所有已安装 Linux 分发版的设置。</li>
-<li>仅适用于 <strong>WSL 2 运行的分发</strong>版。 作为 WSL 1 运行的分发版不会受到此配置的影响，因为它们未作为虚拟机运行。</li>
-<li>要访问 <code>%UserProfile%</code> 目录，请在 PowerShell 中使用 <code>cd ~</code> 访问主目录（通常是用户配置文件 <code>C:\Users\&lt;UserName&gt;</code>），或者可以打开 Windows 文件资源管理器并在地址栏中输入 <code>%UserProfile%</code>。 目录路径应如下所示： <code>C:\Users\&lt;UserName&gt;\.wslconfig</code></li>
-</ul>
-</blockquote>
-<p>这两个文件在默认情况下是不存在的,只有我们需要修改wsl的参数时,才需要在相应位置建立这么一个文件.</p>
-<p><code>wsl</code>再启动时就会考虑这些文件里的规定了</p>
-<p><code>wsl.conf</code>放在子系统里</p>
-<p><code>.wslconfig</code>放在主系统里.</p>
-<p>在使用wmware的时候,我们可以自由决定虚拟机占用多大内存,最多使用多少个处理器,这就是<code>.wslconfig</code>的作用</p>
-<p>在修改之前,首先在wsl上观察一下处理器数量</p>
-<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">┌──(root㉿Executor)-[/mnt/c/Users/86135]</span><br><span class="line">└─# <span class="built_in">cat</span> /proc/cpuinfo | grep name | <span class="built_in">cut</span> -f2 -d: | <span class="built_in">uniq</span> -c</span><br><span class="line">     16  11th Gen Intel(R) Core(TM) i7-11800H @ 2.30GHz</span><br></pre></td></tr></table></figure>
-
-<p>wsl显示有16个,现在修改<code>.wslconfig</code>给他改成8个</p>
-<p>观察一下总内存大小</p>
-<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">┌──(root㉿Executor)-[/mnt/c/Users/86135]</span><br><span class="line">└─# <span class="built_in">cat</span> /proc/meminfo | grep MemTotal</span><br><span class="line">MemTotal:       16262436 kB</span><br></pre></td></tr></table></figure>
-
-<p>现在修改<code>.wslconfig</code>文件,调整上面两个值</p>
-<p><code>C:\Users\86135\.wslconfig</code></p>
-<figure class="highlight powershell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># Settings apply across all Linux distros running on WSL 2</span></span><br><span class="line">[<span class="type">wsl2</span>]			<span class="comment">#正文第一行必须是[wsl2]这种标记</span></span><br><span class="line"></span><br><span class="line"><span class="comment"># Limits VM memory to use no more than 4 GB, this can be set as whole numbers using GB or MB</span></span><br><span class="line">memory=<span class="number">4</span>GB 	<span class="comment">#限制内存最大4G</span></span><br><span class="line">	</span><br><span class="line"><span class="comment"># Sets the VM to use two virtual processors</span></span><br><span class="line">processors=<span class="number">8</span>		<span class="comment">#设置8个处理器</span></span><br></pre></td></tr></table></figure>
-
-<p>调整后保存,子系统重启,再打印观察</p>
-<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">┌──(root㉿Executor)-[~]</span><br><span class="line">└─# <span class="built_in">cat</span> /proc/meminfo | grep MemTotal</span><br><span class="line">MemTotal:        4017200 kB</span><br><span class="line"></span><br><span class="line">┌──(root㉿Executor)-[~]</span><br><span class="line">└─# <span class="built_in">cat</span> /proc/cpuinfo | grep name | <span class="built_in">cut</span> -f2 -d: | <span class="built_in">uniq</span> -c</span><br><span class="line">      8  11th Gen Intel(R) Core(TM) i7-11800H @ 2.30GHz</span><br></pre></td></tr></table></figure>
-
-<p>发现刚才的修改确实奏效了</p>
-<h2 id="换下载源"><a href="#换下载源" class="headerlink" title="换下载源"></a>换下载源</h2><p>首先备份原来的源</p>
-<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">┌──(root㉿Executor)-[~]</span><br><span class="line">└─# <span class="built_in">mv</span> /etc/apt/sources.list /etc/apt/sources.list.bak</span><br></pre></td></tr></table></figure>
-
-<p>将该文件修改为阿里云的源</p>
-<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">deb https://mirrors.aliyun.com/kali kali-rolling main non-free contrib</span><br><span class="line">deb-src https://mirrors.aliyun.com/kali kali-rolling main non-free contrib</span><br></pre></td></tr></table></figure>
-
-<p>修改之后可以<code>apt update</code>看看成功没</p>
-<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br></pre></td><td class="code"><pre><span class="line">┌──(root㉿Executor)-[~]</span><br><span class="line">└─# vim /etc/apt/sources.list</span><br><span class="line"></span><br><span class="line">┌──(root㉿Executor)-[~]</span><br><span class="line">└─# apt update</span><br><span class="line">Get:1 https://mirrors.aliyun.com/kali kali-rolling InRelease [30.6 kB]</span><br><span class="line">Get:2 https://mirrors.aliyun.com/kali kali-rolling/main Sources [14.7 MB]</span><br><span class="line">Get:3 https://mirrors.aliyun.com/kali kali-rolling/non-free Sources [128 kB]</span><br><span class="line">Get:4 https://mirrors.aliyun.com/kali kali-rolling/contrib Sources [73.1 kB]</span><br><span class="line">Get:5 https://mirrors.aliyun.com/kali kali-rolling/main amd64 Packages [18.4 MB]</span><br><span class="line">Get:6 https://mirrors.aliyun.com/kali kali-rolling/non-free amd64 Packages [213 kB]</span><br><span class="line">Get:7 https://mirrors.aliyun.com/kali kali-rolling/contrib amd64 Packages [116 kB]</span><br><span class="line">Fetched 33.6 MB <span class="keyword">in</span> 22s (1,505 kB/s)</span><br><span class="line">Reading package lists... Done</span><br><span class="line">Building dependency tree... Done</span><br><span class="line">Reading state information... Done</span><br><span class="line">257 packages can be upgraded. Run <span class="string">&#x27;apt list --upgradable&#x27;</span> to see them.</span><br></pre></td></tr></table></figure>
-
-
-
-
-
-<h2 id="设置代理"><a href="#设置代理" class="headerlink" title="设置代理"></a>设置代理</h2><p>找个好地方<code>vim bash_profile</code></p>
-<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">export http_proxy=http://172.25.144.1:7891/</span><br><span class="line">export https_proxy=http://172.25.144.1:7891/</span><br></pre></td></tr></table></figure>
-
-<p>这里172.25.144.1是我windows本机的wsl网卡地址,这玩意儿可以在<code>/etc/resolv.conf</code>查看</p>
-<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">┌──(root㉿Executor)-[/home]</span><br><span class="line">└─# cat /etc/resolv.conf</span><br><span class="line"># This file was automatically generated by WSL. To stop automatic generation of this file, add the following entry to /etc/wsl.conf:</span><br><span class="line"># [network]</span><br><span class="line"># generateResolvConf = false</span><br><span class="line">nameserver 172.25.144.1</span><br></pre></td></tr></table></figure>
-
-<p>端口号为啥是7891呢,因为我本机clash在7891上开的代理端口</p>
-<p>注意clash开允许局域网,系统代理</p>
-<p><img src="https://raw.githubusercontent.com/DeutschBall/picbed/main/image-20240321233234943.png" alt="image-20240321233234943"></p>
-<p>写完了bash_profile之后保存退出,然后<code>source bash_profile</code></p>
-<p><strong>这样对于本终端就已经更换了代理,重新开机或者打开其他终端都没有此设置</strong></p>
-<h2 id="wsl迁移"><a href="#wsl迁移" class="headerlink" title="wsl迁移"></a>wsl迁移</h2><p>kali-linux迁移前的C卷大小</p>
-<p><img src="https://raw.githubusercontent.com/DeutschBall/test/master/image-20220716102545759.png" alt="image-20220716102545759"></p>
-<p>由于我想为kali安装一个xfce桌面,KDE桌面很大,又要剥削压迫C卷,于是就像把wsl搬到D卷</p>
-<p>先用安装了python3的ubuntu20.04LTS做了一个实验,结果迁移后的ubuntu还是有python3的,这意味着以前的修改都会保留</p>
-<p>kali-linux迁移过程:</p>
-<h3 id="1-wsl关机"><a href="#1-wsl关机" class="headerlink" title="1.wsl关机"></a>1.wsl关机</h3><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">wsl --shutdown</span><br></pre></td></tr></table></figure>
-
-<h3 id="2-选好目的地"><a href="#2-选好目的地" class="headerlink" title="2.选好目的地"></a>2.选好目的地</h3><p>我将D:\wsl\kali作为目的地,加一个wsl父目录是因为,同父目录下还有D:\wsl\ubuntu子系统,将powershell的当前工作目录调整到D:\wsl\kali</p>
-<figure class="highlight powershell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="built_in">PS</span> D:\wsl\kali&gt; <span class="built_in">pwd</span></span><br><span class="line"></span><br><span class="line">Path</span><br><span class="line"><span class="literal">----</span></span><br><span class="line">D:\wsl\kali</span><br></pre></td></tr></table></figure>
-
-<h3 id="3-选择需要导出的子系统"><a href="#3-选择需要导出的子系统" class="headerlink" title="3.选择需要导出的子系统"></a>3.选择需要导出的子系统</h3><p>使用<code>wsl -l</code>指令列出所有已经注册的子系统名</p>
-<figure class="highlight powershell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="built_in">PS</span> D:\wsl\kali&gt; wsl <span class="literal">-l</span></span><br><span class="line">适用于 Linux 的 Windows 子系统分发版:</span><br><span class="line">kali<span class="literal">-linux</span> (默认)</span><br><span class="line">ubuntu</span><br></pre></td></tr></table></figure>
-
-<h3 id="4-导出kali-linux-tar"><a href="#4-导出kali-linux-tar" class="headerlink" title="4.导出kali-linux.tar"></a>4.导出<code>kali-linux.tar</code></h3><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">wsl --export &lt;子系统名&gt; &lt;tar包路径&gt;</span><br></pre></td></tr></table></figure>
-
-<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">PS D:\wsl\kali&gt; wsl --export kali-linux ./kali.tar</span><br></pre></td></tr></table></figure>
-
-<p>本条命令的意义是,将名为kali-linux的子系统,导出到当前工作目录下的kali.tar中</p>
-<h3 id="5-卸载本来安装在C卷的kali-linux"><a href="#5-卸载本来安装在C卷的kali-linux" class="headerlink" title="5.卸载本来安装在C卷的kali-linux"></a>5.卸载本来安装在C卷的kali-linux</h3><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">wsl --unregister &lt;子系统名&gt;</span><br></pre></td></tr></table></figure>
-
-<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">PS D:\wsl\kali&gt; wsl --unregister kali-linux</span><br><span class="line">正在注销...</span><br></pre></td></tr></table></figure>
-
-<h3 id="6-导入迁移到D卷的kali-linux"><a href="#6-导入迁移到D卷的kali-linux" class="headerlink" title="6.导入迁移到D卷的kali-linux"></a>6.导入迁移到D卷的kali-linux</h3><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">wsl --import &lt;子系统名&gt; &lt;子系统安装路径&gt; &lt;tar包路径&gt;</span><br></pre></td></tr></table></figure>
-
-<figure class="highlight powershell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="built_in">PS</span> D:\wsl\kali&gt; wsl <span class="literal">--import</span> kali<span class="literal">-linux</span> . ./kali.tar</span><br></pre></td></tr></table></figure>
-
-<p>本条命令的意义是,从当前目录的kali.tar包导入子系统到当前目录,子系统名叫kali-linux</p>
-<h3 id="7-验证导出成功"><a href="#7-验证导出成功" class="headerlink" title="7.验证导出成功"></a>7.验证导出成功</h3><p>终端启动kali成功</p>
-<p><img src="https://raw.githubusercontent.com/DeutschBall/test/master/image-20220716103913136.png" alt="image-20220716103913136"></p>
-<p>虽然迁移kali只给C省出了3G的磁盘空间…</p>
-<p><img src="https://raw.githubusercontent.com/DeutschBall/test/master/image-20220716103955718.png" alt="image-20220716103955718"></p>
-<p>但是可以放心安装桌面了</p>
-<h2 id="安装桌面"><a href="#安装桌面" class="headerlink" title="安装桌面"></a>安装桌面</h2><p>在此之前需要保证wsl升级到wsl2,换下载源到阿里云(如果梯子流量管够忽略)</p>
-<h3 id="安装Win-KeX"><a href="#安装Win-KeX" class="headerlink" title="安装Win-KeX"></a>安装Win-KeX</h3><blockquote>
-<p>Win-KeX是windows为kali专门提供的桌面体验,具有以下功能</p>
-<ul>
-<li>窗口模式：在专用窗口中启动Kali Linux桌面</li>
-<li>无缝模式：在Windows和Kali应用程序和菜单之间共享Windows桌面</li>
-<li>声音支持</li>
-<li>无特权和根会话支持</li>
-<li>共享剪贴板，可在Kali Linux和Windows应用之间进行剪切和粘贴支持</li>
-<li>多会话支持：根窗口和非私有窗口以及无缝会话同时进行</li>
-</ul>
-</blockquote>
-<p>安装之前先<code>apt update</code>更新一下</p>
-<p>之后安装Win-KeX</p>
-<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">apt install -y kali-win-kex</span><br></pre></td></tr></table></figure>
-
-<p>安装可能很慢…但是速度是百度云盘两倍(比烂是吧)</p>
-<p><img src="https://raw.githubusercontent.com/DeutschBall/test/master/image-20220716104931612.png" alt="image-20220716104931612"></p>
-<p>安装完成后在kali上使用kex命令,输入一些密码之后,就可以使用xfce桌面了</p>
-<p><img src="https://raw.githubusercontent.com/DeutschBall/test/master/image-20220716114030667.png" alt="image-20220716114030667"></p>
-<p>在kex中使用F8键可以选择桌面以windows窗口运行还是全屏运行,</p>
-<p>全屏时就和真的kali系统没有区别了,所有键鼠命令都会被kali捕获,不会发往windows</p>
-<p>F8的fullscreen可以设置窗口或者全屏模式</p>
-<h2 id="完整everything"><a href="#完整everything" class="headerlink" title="完整everything"></a>完整everything</h2><p>一开始安装的子系统只是最小安装,只安装了一个系统,各种武器都没有安装</p>
-<p>kali子系统完整安装</p>
-<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">apt install kali-linux-everything</span><br></pre></td></tr></table></figure>
-
-<p>大约有20个G,还是在学校wifi环境下安装吧,使用流量划不来</p>
-<h2 id="ida-wsl远程调试"><a href="#ida-wsl远程调试" class="headerlink" title="ida+wsl远程调试"></a>ida+wsl远程调试</h2><p>终于会动态调试了</p>
-<p>但是windows上的IDA似乎只能用local windows debugger,其他的各种各样的设置看了就烦</p>
-<p>今天终于不厌其烦试了试IDA+remote linux debugger在ida上调试elf文件</p>
-<p>终于调通了</p>
-<p>需要ida,wsl</p>
-<h3 id="remote-linux-debugger"><a href="#remote-linux-debugger" class="headerlink" title="remote linux debugger"></a>remote linux debugger</h3><p>win11+wsl kali+ida</p>
-<p><code>IDA-&lt;version&gt;/dbgsrv/</code>这个目录下面有调试需要使用的文件</p>
-<p><img src="https://raw.githubusercontent.com/DeutschBall/DeutschBall/main/image-20220901163211166.png" alt="image-20220901163211166"></p>
-<p>如果要使用linux远程调试elf文件,需要linux_server和linux_server64两个文件,把他俩复制到kali的文件系统中去</p>
-<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">┌──(root㉿Executor)-[/home/kali]</span><br><span class="line">└─# ls -l | grep linux</span><br><span class="line">-rwxrwxrwx 1 root root 783792 Jan  1  2021 linux_server</span><br><span class="line">-rwxrwxrwx 1 root root 735376 Jan  1  2021 linux_server64</span><br></pre></td></tr></table></figure>
-
-<p>cd 到该目录下,修改其权限</p>
-<p>可以使用–help看linux_server的用法</p>
-<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">chmod 777 linux_server</span><br></pre></td></tr></table></figure>
-
-<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line">┌──(root㉿Executor)-[/home/kali]</span><br><span class="line">└─# ./linux_server --help</span><br><span class="line">IDA Linux 32-bit remote debug server(ST) v7.5.26. Hex-Rays (c) 2004-2020</span><br><span class="line">Usage: linux_server [options]</span><br><span class="line">  -p ...  (--port-number ...) Port number</span><br><span class="line">  -i ...  (--ip-address ...) IP address to bind to (default to any)</span><br><span class="line">  -s      (--use-tls) Use TLS</span><br><span class="line">  -c ...  (--certchain-file ...) TLS certificate chain file</span><br><span class="line">  -k ...  (--privkey-file ...) TLS private key file</span><br><span class="line">  -v      (--verbose) Verbose mode</span><br><span class="line">  -P ...  (--password ...) Password</span><br><span class="line">  -k      (--on-broken-connection-keep-session) Keep debugger session alive when connection breaks</span><br><span class="line">  -K      (--on-stop-kill-process) Kill debuggee when closing session</span><br><span class="line"></span><br></pre></td></tr></table></figure>
-
-<p>执行linux_server</p>
-<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">┌──(root㉿Executor)-[/home/kali]</span><br><span class="line">└─# ./linux_server</span><br><span class="line">IDA Linux 32-bit remote debug server(ST) v7.5.26. Hex-Rays (c) 2004-2020</span><br><span class="line">Listening on 0.0.0.0:23946...</span><br></pre></td></tr></table></figure>
-
-<p>此时kali已经在监听其23946端口了</p>
-<p>现在用ida打开一个32位elf程序,F9或者点击Debugger下拉菜单,选择调试器Remote Linux debugger</p>
-<p><img src="https://raw.githubusercontent.com/DeutschBall/DeutschBall/main/image-20220901163954709.png" alt="image-20220901163954709"></p>
-<p>然后调试运行(ida默认也是访问远程主机的23946端口,如果不是则这里肯定联不通,ida会让重新设置端口的)</p>
-<p>必然会报错找不到输入文件,</p>
-<p><img src="https://raw.githubusercontent.com/DeutschBall/DeutschBall/main/image-20220901164111650.png" alt="image-20220901164111650"></p>
-<p>一看报错信息,原来输入文件是从远程linux上找的,当然找不到</p>
-<p>OK之后ida提供了替代方案</p>
-<p><img src="https://raw.githubusercontent.com/DeutschBall/DeutschBall/main/image-20220901164214375.png" alt="image-20220901164214375"></p>
-<p>点这个Use found就可以使用本机的<code>C:\Users\86135\Desktop\malloc\main</code>作为输入文件了</p>
-<p>但是调试界面刚出来又没了,原来是忘记下断点了</p>
-<p>在main函数(或者其他地方)下断点,然后重新调试运行,可以调试了</p>
-<p><img src="https://raw.githubusercontent.com/DeutschBall/DeutschBall/main/image-20220901164532437.png" alt="image-20220901164532437"></p>
-<p>甚至可以使用F5反汇编,显然是linux上的光棍儿gdb做不到的</p>
-<h3 id="remote-gbd-debugger"><a href="#remote-gbd-debugger" class="headerlink" title="remote gbd debugger"></a>remote gbd debugger</h3><p>既然linux上也有gdb,那么是不是也可以用远程gdb调试呢?确实能调通,安一个gdbserver剩下的随便拾到拾到就行了</p>
-<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">apt install gdbserver</span><br></pre></td></tr></table></figure>
-
-
-
-<p>&#x2F;usr&#x2F;src&#x2F;WSL2-Linux-Kernel-linux-msft-wsl-5.15.137.3&#x2F;arch&#x2F;x86&#x2F;boot&#x2F;bzImage</p>
-<h2 id="编译内核"><a href="#编译内核" class="headerlink" title="编译内核"></a>编译内核</h2><p>如果用普通的linux内核直接编译,然后给wsl换这个普通内核,这样wsl起不来</p>
-<p>编译wsl内核需要有专门的config文件</p>
-<p>内核源码可以用原版的,比如到这里下载<a target="_blank" rel="noopener" href="https://mirrors.edge.kernel.org/pub/linux/kernel/v5.x/">Index of &#x2F;pub&#x2F;linux&#x2F;kernel&#x2F;v5.x&#x2F;</a></p>
-<p>以5.8.13为例,</p>
-<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">wget https://mirrors.edge.kernel.org/pub/linux/kernel/v5.x/linux-5.8.13.tar.gz</span><br><span class="line">tar -xzf linux-5.8.13.tar.gz</span><br><span class="line">cd linux-5.8.13</span><br></pre></td></tr></table></figure>
-
-<p>然后在内核源码的根目录下</p>
-<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">mkdir Microsoft</span><br><span class="line">cd Microsoft</span><br><span class="line">vim config-wsl</span><br></pre></td></tr></table></figure>
-
-<p>这玩意儿可以抄<a target="_blank" rel="noopener" href="https://github.com/xieyubo/WSL2-Linux-Kernel/blob/wsl-xyb-port-5.8.y-latest/Microsoft/config-wsl">WSL2-Linux-Kernel&#x2F;Microsoft&#x2F;config-wsl at wsl-xyb-port-5.8.y-latest · xieyubo&#x2F;WSL2-Linux-Kernel · GitHub</a>,注意版本,5.8的内核就得抄5.8的config_wsl,直接复制粘贴</p>
-<p>可以修改其中的<code>CONFIG_LOCALVERSION</code>,改成自定义内核名称后缀</p>
-<p>完事之后退到内核源码根目录下</p>
-<figure class="highlight sh"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">make KCONIFG_CONFIG=./Microsoft/config-wsl -j`<span class="built_in">nproc</span>`</span><br></pre></td></tr></table></figure>
-
-<p>编译完了之后会生成.&#x2F;arch&#x2F;x86&#x2F;boot&#x2F;bzImage,这就是可以引导的内核</p>
-<p>可以安装头文件</p>
-<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">make modules_install</span><br></pre></td></tr></table></figure>
-
-
-
-
-
-
-
-
-
-
-
-<h2 id="更换内核"><a href="#更换内核" class="headerlink" title="更换内核"></a>更换内核</h2><h3 id="默认配置"><a href="#默认配置" class="headerlink" title="默认配置"></a>默认配置</h3><p>如果没有在~&#x2F;.wslconfig中修改内核位置,那么可以这样整:</p>
-<p>编译内核完成后,将生成的bzImage可引导镜像放到本机的<code>C:\Windows\System32\lxss\tools</code>这个位置</p>
-<p><code>wsl --shutdown</code></p>
-<p>在<code>C:\Windows\System32\lxss\tools</code>中,将之前的内核镜像kernel改个名,比如oldkernel</p>
-<p>然后将刚搬过来的bzImage改成kernel</p>
-<p>重启wsl</p>
-<p><code>uname -a</code>查看当前内核版本</p>
-<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">┌──(root㉿Executor)-[/home/dustball/kernelROP/mydev]</span><br><span class="line">└─# uname -a</span><br><span class="line">Linux Executor 5.8.13-dustland #1 SMP Sun Mar 24 13:56:15 CST 2024 x86_64 GNU/Linux</span><br></pre></td></tr></table></figure>
-
-
-
-<h3 id="指定kernel位置"><a href="#指定kernel位置" class="headerlink" title="指定kernel位置"></a>指定kernel位置</h3><p>比如在windows的<code>~/.wslconfig</code>中这样写</p>
-<figure class="highlight sh"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># Settings apply across all Linux distros running on WSL 2</span></span><br><span class="line">[wsl2]</span><br><span class="line">kernel=C:\\opt\\kernel</span><br><span class="line"><span class="comment"># Limits VM memory to use no more than 4 GB, this can be set as whole numbers using GB or MB</span></span><br><span class="line">memory=4GB      <span class="comment">#限制内存最大4G</span></span><br><span class="line"></span><br><span class="line"><span class="comment"># Sets the VM to use two virtual processors</span></span><br><span class="line">processors=8            <span class="comment">#设置8个处理器</span></span><br><span class="line"></span><br><span class="line"><span class="comment"># vmSwitch=vEthernet</span></span><br><span class="line"></span><br><span class="line"><span class="comment"># networkingMode=bridged</span></span><br><span class="line"><span class="comment"># vmSwitch=WSL</span></span><br><span class="line"><span class="comment"># ipv6=true</span></span><br><span class="line"></span><br></pre></td></tr></table></figure>
-
-<p>这就指定了wsl内核使用<code>c:\\opt\\kernel</code></p>
-<h2 id="编译内核模块"><a href="#编译内核模块" class="headerlink" title="编译内核模块"></a>编译内核模块</h2><p>需要更滑内核</p>
-<p>编译内核模块需要内核头文件,</p>
-<p>如果已经编译过wsl内核,并且<code>make modules_install &amp;&amp; make install</code>,那么就可以直接编译内核模块了</p>
-<p>如果没有编译过内核,需要先编译内核</p>
-<p>假设内核模块hello.c这样写</p>
-<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// hello.c</span></span><br><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;linux/init.h&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;linux/module.h&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;linux/kernel.h&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;linux/moduleparam.h&gt;</span></span></span><br><span class="line"></span><br><span class="line">MODULE_LICENSE(<span class="string">&quot;GPL&quot;</span>);</span><br><span class="line"></span><br><span class="line"><span class="type">static</span> <span class="type">int</span> __init <span class="title function_">mod_init</span><span class="params">(<span class="type">void</span>)</span></span><br><span class="line">&#123;</span><br><span class="line">    printk(KERN_ALERT <span class="string">&quot;Hello world\n&quot;</span>);</span><br><span class="line">    <span class="keyword">return</span> <span class="number">0</span>;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="type">static</span> <span class="type">void</span> __exit <span class="title function_">mod_exit</span><span class="params">(<span class="type">void</span>)</span></span><br><span class="line">&#123;</span><br><span class="line">    printk(KERN_ALERT <span class="string">&quot;Goodbye\n&quot;</span>);</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">module_init(mod_init);</span><br><span class="line">module_exit(mod_exit);</span><br></pre></td></tr></table></figure>
-
-<p>它的Makefile这样写</p>
-<figure class="highlight makefile"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># Makefile</span></span><br><span class="line">KDIR = /lib/modules/5.15.137.3/</span><br><span class="line">TARGETNAME = hello</span><br><span class="line">OBJ        = <span class="variable">$(TARGETNAME)</span>.o</span><br><span class="line">MODULE     = <span class="variable">$(TARGETNAME)</span>.ko</span><br><span class="line">obj-m += <span class="variable">$(OBJ)</span></span><br><span class="line"></span><br><span class="line"><span class="section">all:</span></span><br><span class="line">		make -j <span class="variable">$(nproc)</span> -C <span class="variable">$(KDIR)</span>/build M=<span class="variable">$(PWD)</span> modules</span><br><span class="line"></span><br><span class="line"><span class="section">install:</span></span><br><span class="line">		@modprobe -r <span class="variable">$(TARGETNAME)</span></span><br><span class="line">		@install <span class="variable">$(MODULE)</span> <span class="variable">$(KDIR)</span>3/kernel/drivers/hid</span><br><span class="line">		@depmod</span><br><span class="line">		@modprobe <span class="variable">$(TARGETNAME)</span></span><br><span class="line"><span class="section">clean:</span></span><br><span class="line">		make -C <span class="variable">$(KDIR)</span>/build M=<span class="variable">$(PWD)</span> clean</span><br></pre></td></tr></table></figure>
-
-<p>KDIR这个自己写,通常是<code>/lib/modules/$(shell uname -r)</code></p>
-<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">make</span><br></pre></td></tr></table></figure>
-
-<p>之后在当前目录下生成hello.ko</p>
-<p>加载到内核</p>
-<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">insmod hello.ko</span><br></pre></td></tr></table></figure>
-
-
-
-
-
-
-
-
-
-
-      
-    </div>
-
-    
-    
-    
-      <footer class="post-footer">
-        <div class="post-eof"></div>
-      </footer>
-  </article>
-  
-  
-  
-
 
   
   <nav class="pagination">
-    <a class="extend prev" rel="prev" href="/impossible/page/7/"><i class="fa fa-angle-left" aria-label="Previous page"></i></a><a class="page-number" href="/impossible/">1</a><span class="space">&hellip;</span><a class="page-number" href="/impossible/page/7/">7</a><span class="page-number current">8</span><a class="page-number" href="/impossible/page/9/">9</a><a class="page-number" href="/impossible/page/10/">10</a><a class="extend next" rel="next" href="/impossible/page/9/"><i class="fa fa-angle-right" aria-label="Next page"></i></a>
+    <a class="extend prev" rel="prev" href="/impossible/page/7/"><i class="fa fa-angle-left" aria-label="Previous page"></i></a><a class="page-number" href="/impossible/">1</a><span class="space">&hellip;</span><a class="page-number" href="/impossible/page/7/">7</a><span class="page-number current">8</span><a class="page-number" href="/impossible/page/9/">9</a><span class="space">&hellip;</span><a class="page-number" href="/impossible/page/11/">11</a><a class="extend next" rel="next" href="/impossible/page/9/"><i class="fa fa-angle-right" aria-label="Next page"></i></a>
   </nav>
 
 

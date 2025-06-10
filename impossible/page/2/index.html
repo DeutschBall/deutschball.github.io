@@ -167,6 +167,152 @@
   
   
   <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="en">
+    <link itemprop="mainEntityOfPage" href="http://deutschball.github.io/2025/04/22/[AFL%20V]%20afl-analyze/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="https://raw.githubusercontent.com/DeutschBall/picbed/main/dustball.png">
+      <meta itemprop="name" content="dustball">
+      <meta itemprop="description" content="dustland">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="dustland">
+    </span>
+      <header class="post-header">
+        <h2 class="post-title" itemprop="name headline">
+          
+            <a href="/2025/04/22/%5BAFL%20V%5D%20afl-analyze/" class="post-title-link" itemprop="url">AFL V - afl-analyze</a>
+        </h2>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-calendar"></i>
+              </span>
+              <span class="post-meta-item-text">Posted on</span>
+              
+
+              <time title="Created: 2025-04-22 13:11:00 / Modified: 13:22:38" itemprop="dateCreated datePublished" datetime="2025-04-22T13:11:00+08:00">2025-04-22</time>
+            </span>
+
+          
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+          <h1 id="AFL-V-afl-analyze"><a href="#AFL-V-afl-analyze" class="headerlink" title="[AFL V] afl-analyze"></a>[AFL V] afl-analyze</h1><p>本工具用于尝试理解输入文件的结构</p>
+<h2 id="举个🌰"><a href="#举个🌰" class="headerlink" title="举个🌰"></a>举个🌰</h2><p>假设有这么一种结构:</p>
+<p><img src="https://raw.githubusercontent.com/DeutschBall/VideoBed/main/image-20250301145341103.png" alt="image-20250301145341103"></p>
+<figure class="highlight sh"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">┌──(root㉿Destroyer)-[/home/dustball/myfile]</span><br><span class="line">└─# xxd dustland</span><br><span class="line">00000000: 6475 7374 3400 0000 6161 6161 6161 6161  dust4...aaaaaaaa</span><br><span class="line">00000010: 6161 6161 6161 6161 6161 6161 6161 6161  aaaaaaaaaaaaaaaa</span><br><span class="line">00000020: 6262 6262 6262 6262 6261 6161 6161 6161  bbbbbbbbbaaaaaaa</span><br><span class="line">00000030: 6161 6162 6162 6162 6162 6161 6c61 6e64  aaababababaaland</span><br><span class="line">00000040: 3f14 1d10                                ?...</span><br></pre></td></tr></table></figure>
+
+<p>该结构前后有两个元数据块, 中间是数据块</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">//format_dstb.h</span></span><br><span class="line"><span class="meta">#<span class="keyword">ifndef</span> FORMAT_DSTB_H</span></span><br><span class="line"><span class="meta">#<span class="keyword">define</span> FORMAT_DSTB_H</span></span><br><span class="line"></span><br><span class="line"><span class="meta">#<span class="keyword">define</span> DSTB_HEADER_MAGIC 0x74737564 <span class="comment">//&quot;dust&quot;</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">define</span> DSTB_FOOTER_MAGIC 0x646e616c <span class="comment">//&quot;ball&quot;</span></span></span><br><span class="line"><span class="keyword">typedef</span> <span class="class"><span class="keyword">struct</span>&#123;</span></span><br><span class="line">    <span class="type">unsigned</span> magic;</span><br><span class="line">    <span class="type">int</span> data_size;</span><br><span class="line">&#125;DSTB_Header;</span><br><span class="line"></span><br><span class="line"><span class="keyword">typedef</span> <span class="class"><span class="keyword">struct</span> &#123;</span></span><br><span class="line">    <span class="type">unsigned</span> magic;</span><br><span class="line">    <span class="type">unsigned</span> check_sum;</span><br><span class="line">&#125;DSTB_Footer;</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="meta">#<span class="keyword">endif</span></span></span><br></pre></td></tr></table></figure>
+
+<p>构造器</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">//formatter.c</span></span><br><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&quot;format_dstb.h&quot;</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;stdio.h&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;stdlib.h&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;string.h&gt;</span></span></span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="comment">//formatter input output</span></span><br><span class="line"><span class="type">int</span> <span class="title function_">main</span><span class="params">(<span class="type">int</span> argc, <span class="type">char</span> *argv[])</span>&#123;</span><br><span class="line">    <span class="type">char</span> *input = argv[<span class="number">1</span>];</span><br><span class="line">    <span class="type">char</span> *output = argv[<span class="number">2</span>];</span><br><span class="line"></span><br><span class="line">    FILE * fp = fopen(input, <span class="string">&quot;rb&quot;</span>);</span><br><span class="line">    fseek(fp, <span class="number">0</span>, SEEK_END);</span><br><span class="line">    <span class="type">int</span> file_size = ftell(fp);</span><br><span class="line">    <span class="type">int</span> data_size = (file_size + <span class="number">3</span>) &amp; ~<span class="number">3</span>; <span class="comment">//round up to nearest 4 bytes</span></span><br><span class="line">    <span class="type">char</span> *data = <span class="built_in">malloc</span>(data_size);</span><br><span class="line">    <span class="built_in">memset</span>(data, <span class="number">0</span>, data_size);</span><br><span class="line">    fseek(fp, <span class="number">0</span>, SEEK_SET);</span><br><span class="line">    fread(data, <span class="number">1</span>, file_size, fp);</span><br><span class="line">    fclose(fp);</span><br><span class="line"></span><br><span class="line">    DSTB_Header header = &#123;</span><br><span class="line">        .magic = DSTB_HEADER_MAGIC,</span><br><span class="line">        .data_size = data_size</span><br><span class="line">    &#125;;</span><br><span class="line">    DSTB_Footer ender = &#123;</span><br><span class="line">        .magic = DSTB_FOOTER_MAGIC,</span><br><span class="line">        .check_sum = <span class="number">0</span></span><br><span class="line">    &#125;;</span><br><span class="line">    <span class="type">unsigned</span> check_sum = <span class="number">0</span>;</span><br><span class="line">    check_sum = header.magic ^ header.data_size;</span><br><span class="line">    <span class="keyword">for</span>(<span class="type">int</span> i = <span class="number">0</span>; i &lt; data_size; i++)&#123;</span><br><span class="line">        check_sum ^= data[i];</span><br><span class="line">    &#125;</span><br><span class="line">    check_sum ^= ender.magic;</span><br><span class="line">    ender.check_sum = check_sum;</span><br><span class="line"></span><br><span class="line">    FILE * out = fopen(output, <span class="string">&quot;wb&quot;</span>);</span><br><span class="line">    fwrite(&amp;header, <span class="keyword">sizeof</span>(DSTB_Header), <span class="number">1</span>, out);</span><br><span class="line">    fwrite(data, <span class="number">1</span>, data_size, out);</span><br><span class="line">    fwrite(&amp;ender, <span class="keyword">sizeof</span>(DSTB_Footer), <span class="number">1</span>, out);</span><br><span class="line">    fclose(out);</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">    <span class="keyword">return</span> <span class="number">0</span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+
+
+<p>为其编写parser</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&quot;format_dstb.h&quot;</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;stdio.h&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;unistd.h&gt;</span></span></span><br><span class="line"></span><br><span class="line"><span class="type">int</span> <span class="title function_">main</span><span class="params">(<span class="type">int</span> argc, <span class="type">char</span> *argv[])</span>&#123;</span><br><span class="line">    <span class="type">char</span> input[<span class="number">300</span>];</span><br><span class="line">    <span class="type">int</span> file_len = read(<span class="number">0</span>,input,<span class="number">300</span>);   <span class="comment">//从标准输入获取</span></span><br><span class="line">    DSTB_Header *header = (DSTB_Header*)input;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">if</span>(header-&gt;magic!= DSTB_HEADER_MAGIC)&#123;</span><br><span class="line">        <span class="built_in">printf</span>(<span class="string">&quot;Invalid header magic\n&quot;</span>);</span><br><span class="line">        <span class="keyword">return</span> <span class="number">0</span>;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="type">int</span> data_size = header-&gt;data_size;</span><br><span class="line">    <span class="type">char</span> *data = input + <span class="keyword">sizeof</span>(DSTB_Header);</span><br><span class="line">    <span class="type">char</span> *footer = data + data_size; </span><br><span class="line">    DSTB_Footer *f = (DSTB_Footer*)footer;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">if</span>(f-&gt;magic!= DSTB_FOOTER_MAGIC)&#123;</span><br><span class="line">        <span class="built_in">printf</span>(<span class="string">&quot;Invalid footer magic\n&quot;</span>);</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="type">int</span> check_sum = <span class="number">0</span>;</span><br><span class="line">    check_sum = header-&gt;magic ^ header-&gt;data_size;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">for</span>(<span class="type">int</span> i=<span class="number">0</span>;i&lt;data_size;i++)&#123;</span><br><span class="line">        check_sum ^= data[i];</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    check_sum ^= f-&gt;magic;</span><br><span class="line">    check_sum ^= f-&gt;check_sum;</span><br><span class="line">    <span class="built_in">printf</span>(<span class="string">&quot;Data size: %d\n&quot;</span>,data_size);</span><br><span class="line">    <span class="built_in">printf</span>(<span class="string">&quot;Check sum: %d\n&quot;</span>,check_sum);</span><br><span class="line">    </span><br><span class="line">    <span class="keyword">if</span>(check_sum != <span class="number">0</span>)&#123;</span><br><span class="line">        <span class="built_in">printf</span>(<span class="string">&quot;Invalid check sum\n&quot;</span>);</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">    <span class="built_in">puts</span>(<span class="string">&quot;accepted&quot;</span>);</span><br><span class="line"></span><br><span class="line">    <span class="keyword">return</span> <span class="number">0</span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+
+
+<p>接下来用<code>afl-analyze</code>分析文件结构</p>
+<p><img src="https://raw.githubusercontent.com/DeutschBall/VideoBed/main/image-20250301150622626.png" alt="image-20250301150622626"></p>
+<p>afl发现了两个魔数、数据块</p>
+<p>虽然没有发现校验和, 但是能发现这已经很神奇了</p>
+<p>并且这界面花花绿绿的, 着实豪堪</p>
+<h2 id="🧄法原理"><a href="#🧄法原理" class="headerlink" title="🧄法原理"></a>🧄法原理</h2><p>首先保持输入不变, dry_run一次 ,记录执行路径共享内存校验和为orig_cksum</p>
+<p>然后遍历输入, 对于每个字节, 分别进行如下四个变异操作:</p>
+<p>1.整体取反, 执行 , 记录执行后的共享内存校验和xor_ff</p>
+<p>2.末位取反, 执行 , 记录校验和xor_01</p>
+<p>3.减去0x10, 执行 , 记录校验和sub_10</p>
+<p>4.加上0x10, 执行 , 记录校验和add_10</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line">in_data[i] ^= <span class="number">0xff</span>;</span><br><span class="line">xor_ff = run_target(argv, in_data, in_len, <span class="number">0</span>);</span><br><span class="line"></span><br><span class="line">in_data[i] ^= <span class="number">0xfe</span>;</span><br><span class="line">xor_01 = run_target(argv, in_data, in_len, <span class="number">0</span>);</span><br><span class="line"></span><br><span class="line">in_data[i] = (in_data[i] ^ <span class="number">0x01</span>) - <span class="number">0x10</span>;</span><br><span class="line">sub_10 = run_target(argv, in_data, in_len, <span class="number">0</span>);</span><br><span class="line"></span><br><span class="line">in_data[i] += <span class="number">0x20</span>;</span><br><span class="line">add_10 = run_target(argv, in_data, in_len, <span class="number">0</span>);</span><br><span class="line">in_data[i] -= <span class="number">0x10</span>;</span><br></pre></td></tr></table></figure>
+
+<blockquote>
+<p>这四个变异操作是单独执行的, 互相不影响, 每次操作之后都会当前字节还原</p>
+</blockquote>
+<p>这样四个结果会有16种情况,afl-analyze只关心其中几种情况</p>
+<p>1.四个检校和均和orig_cksum一致, 意味着对该字节任何变动不会影响执行路径 ,字微节轻</p>
+<p>2.这四个检校和中有至少一个不等于orig_cksum, 认为该字节可以变异, 但是也就那样吧, 不太重要</p>
+<p>3.四次变异后的检校和相同, 但是不等于orig_cksum, 则认为这个地方不能改, 比如文件魔数,检校和等等, 这里如果不对了则parser直接丢弃文件</p>
+<p>4.四次变异之后的检校和与orig_cksum均不相同, 并且这四个检校和也各不相同, 说明该位置会显著影响控制流, 可能是一个switch case位置或者一个if的条件</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br></pre></td><td class="code"><pre><span class="line">xff_orig = (xor_ff == orig_cksum);</span><br><span class="line">x01_orig = (xor_01 == orig_cksum);</span><br><span class="line">s10_orig = (sub_10 == orig_cksum);</span><br><span class="line">a10_orig = (add_10 == orig_cksum);</span><br><span class="line"></span><br><span class="line"><span class="keyword">if</span> (xff_orig &amp;&amp; x01_orig &amp;&amp; s10_orig &amp;&amp; a10_orig) &#123;</span><br><span class="line"></span><br><span class="line">  b_data[i] = RESP_NONE;</span><br><span class="line">  boring_len++;</span><br><span class="line"></span><br><span class="line">&#125; <span class="keyword">else</span> <span class="keyword">if</span> (xff_orig || x01_orig || s10_orig || a10_orig) &#123;</span><br><span class="line"></span><br><span class="line">  b_data[i] = RESP_MINOR;</span><br><span class="line">  boring_len++;</span><br><span class="line"></span><br><span class="line">&#125; <span class="keyword">else</span> <span class="keyword">if</span> (xor_ff == xor_01 &amp;&amp; xor_ff == sub_10 &amp;&amp; xor_ff == add_10) &#123;</span><br><span class="line"></span><br><span class="line">  b_data[i] = RESP_FIXED;</span><br><span class="line"></span><br><span class="line">&#125; <span class="keyword">else</span> b_data[i] = RESP_VARIABLE;</span><br></pre></td></tr></table></figure>
+
+
+
+
+
+<p>考虑到一个字段可能是连续的四个字节(int类型), 或者八个字节等等, afl-analyze会在给当前字节下结论之后, 再联系上一个字节看看</p>
+<p>如果上一个字节和当前字节的四种检校和, 每种都各自不一样, 说明这相邻的两个字节的作用大不相同, 应该是不同的字段.</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">if</span> (prev_xff != xor_ff &amp;&amp; prev_x01 != xor_01 &amp;&amp;</span><br><span class="line">    prev_s10 != sub_10 &amp;&amp; prev_a10 != add_10) seq_byte ^= <span class="number">0x80</span>;</span><br><span class="line"></span><br><span class="line">b_data[i] |= seq_byte;</span><br><span class="line"></span><br><span class="line">prev_xff = xor_ff;</span><br><span class="line">prev_x01 = xor_01;</span><br><span class="line">prev_s10 = sub_10;</span><br><span class="line">prev_a10 = add_10;</span><br></pre></td></tr></table></figure>
+
+
+
+
+
+<p>等所有的字节都变异一遍了, 下面要打印装👃界面了, 这里除了装👃还是有一些推理的</p>
+<p>刚才已经初步给每个字节有一个判断, 并且也划分了字段, 现在利用上述信息:</p>
+<p>对于字段的首字节是非常重要不能改的, 也就是上述变异结果中的第3个, “四次变异后的检校和相同, 但是不等于orig_cksum,”</p>
+<p>​	如果这个字段长2字节字节 </p>
+<p>​		并且字段上的值的小端序或者大端序值, 比输入数据长度小, 那么认为这个字段是一个长度值</p>
+<p>​		否则如果这个字段的首字节值和次字节值相差超过32, 那么认为这个字段是一个检校和</p>
+<p>​	否则如果这个字段长4字节,</p>
+<p>​		并且字段上的值的小端序或者大端序值, 比输入数据长度小, 那么认为这个字段是一个长度值</p>
+<p>​		否则如果该字段的首字节最高位, 不等于其他字节之一的首字节最高位, 则认为该字段是一个校验和</p>
+<p>​	其他长度就不得而知了</p>
+<p>此部分代码如下:</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">if</span> (rtype == RESP_FIXED) &#123;</span><br><span class="line"></span><br><span class="line">  <span class="keyword">switch</span> (rlen) &#123;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">case</span> <span class="number">2</span>: &#123;</span><br><span class="line"></span><br><span class="line">        u16 val = *(u16*)(in_data + i);</span><br><span class="line"></span><br><span class="line">        <span class="comment">/* Small integers may be length fields. */</span></span><br><span class="line"></span><br><span class="line">        <span class="keyword">if</span> (val &amp;&amp; (val &lt;= in_len || SWAP16(val) &lt;= in_len)) &#123;</span><br><span class="line">          rtype = RESP_LEN;</span><br><span class="line">          <span class="keyword">break</span>;</span><br><span class="line">        &#125;</span><br><span class="line"></span><br><span class="line">        <span class="comment">/* Uniform integers may be checksums. */</span></span><br><span class="line"></span><br><span class="line">        <span class="keyword">if</span> (val &amp;&amp; <span class="built_in">abs</span>(in_data[i] - in_data[i + <span class="number">1</span>]) &gt; <span class="number">32</span>) &#123;</span><br><span class="line">          rtype = RESP_CKSUM;</span><br><span class="line">          <span class="keyword">break</span>;</span><br><span class="line">        &#125;</span><br><span class="line"></span><br><span class="line">        <span class="keyword">break</span>;</span><br><span class="line"></span><br><span class="line">      &#125;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">case</span> <span class="number">4</span>: &#123;</span><br><span class="line"></span><br><span class="line">        u32 val = *(u32*)(in_data + i);</span><br><span class="line"></span><br><span class="line">        <span class="comment">/* Small integers may be length fields. */</span></span><br><span class="line"></span><br><span class="line">        <span class="keyword">if</span> (val &amp;&amp; (val &lt;= in_len || SWAP32(val) &lt;= in_len)) &#123;</span><br><span class="line">          rtype = RESP_LEN;</span><br><span class="line">          <span class="keyword">break</span>;</span><br><span class="line">        &#125;</span><br><span class="line"></span><br><span class="line">        <span class="comment">/* Uniform integers may be checksums. */</span></span><br><span class="line"></span><br><span class="line">        <span class="keyword">if</span> (val &amp;&amp; (in_data[i] &gt;&gt; <span class="number">7</span> != in_data[i + <span class="number">1</span>] &gt;&gt; <span class="number">7</span> ||</span><br><span class="line">            in_data[i] &gt;&gt; <span class="number">7</span> != in_data[i + <span class="number">2</span>] &gt;&gt; <span class="number">7</span> ||</span><br><span class="line">            in_data[i] &gt;&gt; <span class="number">7</span> != in_data[i + <span class="number">3</span>] &gt;&gt; <span class="number">7</span>)) &#123;</span><br><span class="line">          rtype = RESP_CKSUM;</span><br><span class="line">          <span class="keyword">break</span>;</span><br><span class="line">        &#125;</span><br><span class="line"></span><br><span class="line">        <span class="keyword">break</span>;</span><br><span class="line"></span><br><span class="line">      &#125;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">case</span> <span class="number">1</span>: <span class="keyword">case</span> <span class="number">3</span>: <span class="keyword">case</span> <span class="number">5</span> ... MAX_AUTO_EXTRA - <span class="number">1</span>: <span class="keyword">break</span>;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">default</span>: rtype = RESP_SUSPECT;</span><br><span class="line"></span><br><span class="line">  &#125;</span><br><span class="line"></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+      
+    </div>
+
+    
+    
+    
+      <footer class="post-footer">
+        <div class="post-eof"></div>
+      </footer>
+  </article>
+  
+  
+  
+
+      
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="en">
     <link itemprop="mainEntityOfPage" href="http://deutschball.github.io/2025/04/22/%E7%96%91%E5%BD%A2/">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
@@ -4297,267 +4443,10 @@
   
   
 
-      
-  
-  
-  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="en">
-    <link itemprop="mainEntityOfPage" href="http://deutschball.github.io/2024/10/17/%E8%B0%83%E8%AF%95Glibc/">
-
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="image" content="https://raw.githubusercontent.com/DeutschBall/picbed/main/dustball.png">
-      <meta itemprop="name" content="dustball">
-      <meta itemprop="description" content="dustland">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="dustland">
-    </span>
-      <header class="post-header">
-        <h2 class="post-title" itemprop="name headline">
-          
-            <a href="/2024/10/17/%E8%B0%83%E8%AF%95Glibc/" class="post-title-link" itemprop="url">glibc 相关备忘</a>
-        </h2>
-
-        <div class="post-meta">
-            <span class="post-meta-item">
-              <span class="post-meta-item-icon">
-                <i class="far fa-calendar"></i>
-              </span>
-              <span class="post-meta-item-text">Posted on</span>
-              
-
-              <time title="Created: 2024-10-17 23:20:00 / Modified: 23:25:26" itemprop="dateCreated datePublished" datetime="2024-10-17T23:20:00+08:00">2024-10-17</time>
-            </span>
-
-          
-
-        </div>
-      </header>
-
-    
-    
-    
-    <div class="post-body" itemprop="articleBody">
-
-      
-          <h1 id="源码调试Glibc"><a href="#源码调试Glibc" class="headerlink" title="源码调试Glibc"></a>源码调试Glibc</h1><h2 id="系统自带glibc的缺点"><a href="#系统自带glibc的缺点" class="headerlink" title="系统自带glibc的缺点"></a>系统自带glibc的缺点</h2><p>在我们尝试观察延迟绑定机制时,</p>
-<p>需要观察_dl_runtime_resolve和dl_fixup这两个函数</p>
-<p>这两个函数都位于ld-linux.so.2 动态库中</p>
-<p>默认情况下使用gcc编译程序时,动态链接的glibc动态库文件,都在&#x2F;lib下</p>
-<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">root@Destroyer:/usr/src/CTF-All-In-One/src/writeup/<span class="number">6.1</span><span class="number">.3</span>_pwn_xdctf2015_pwn200<span class="meta"># ldd /bin/cat</span></span><br><span class="line">        linux-vdso.so<span class="number">.1</span> (<span class="number">0x00007fffee15a000</span>)</span><br><span class="line">        libc.so<span class="number">.6</span> =&gt; /lib/x86_64-linux-gnu/libc.so<span class="number">.6</span> (<span class="number">0x00007f36b527b000</span>)</span><br><span class="line">        /lib64/ld-linux-x86<span class="number">-64.</span>so<span class="number">.2</span> (<span class="number">0x00007f36b5875000</span>)</span><br><span class="line">root@Destroyer:/usr/src/CTF-All-In-One/src/writeup/<span class="number">6.1</span><span class="number">.3</span>_pwn_xdctf2015_pwn200<span class="meta"># ldd ./test</span></span><br><span class="line">        linux-gate.so<span class="number">.1</span> (<span class="number">0xf7f33000</span>)</span><br><span class="line">        libc.so<span class="number">.6</span> =&gt; /lib/i386-linux-gnu/libc.so<span class="number">.6</span> (<span class="number">0xf7d3b000</span>)</span><br><span class="line">        /lib/ld-linux.so<span class="number">.2</span> (<span class="number">0xf7f35000</span>)</span><br></pre></td></tr></table></figure>
-
-<table>
-<thead>
-<tr>
-<th></th>
-<th>libc</th>
-<th>ld</th>
-</tr>
-</thead>
-<tbody><tr>
-<td>32位程序</td>
-<td>&#x2F;lib&#x2F;i386-linux-gnu&#x2F;libc.so.6</td>
-<td>&#x2F;lib&#x2F;ld-linux.so.2</td>
-</tr>
-<tr>
-<td>64位程序</td>
-<td>&#x2F;lib&#x2F;x86_64-linux-gnu&#x2F;libc.so.6</td>
-<td>&#x2F;lib64&#x2F;ld-linux-x86-64.so.2</td>
-</tr>
-</tbody></table>
-<p>这是安装ubuntu这种发行版时系统自带的glibc-release版</p>
-<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">root@Destroyer:/lib/i386-linux-gnu<span class="meta"># file ld-2.27.so</span></span><br><span class="line">ld<span class="number">-2.27</span>.so: ELF <span class="number">32</span>-bit LSB shared object, Intel <span class="number">80386</span>, version <span class="number">1</span> (SYSV), dynamically linked, BuildID[sha1]=<span class="number">8</span>da666988713e9bb88f4eb5d27dc35d815cf006b, stripped</span><br></pre></td></tr></table></figure>
-
-<p>可以看到调试符号信息已经被strip了</p>
-<p>就算我们编译一个c程序时加入了-g选项,也只是保留了程序领空内的所有符号信息,该程序链接的glibc照样是没有调试符号的</p>
-<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">gef➤  info sharedlibrary</span><br><span class="line">From        To          Syms Read   Shared Object Library</span><br><span class="line"><span class="number">0xf7fd6ab0</span>  <span class="number">0xf7ff18bb</span>  Yes (*)     /lib/ld-linux.so<span class="number">.2</span></span><br><span class="line"><span class="number">0xf7df4690</span>  <span class="number">0xf7f414b6</span>  Yes (*)     /lib/i386-linux-gnu/libc.so<span class="number">.6</span></span><br><span class="line">(*): Shared library is missing debugging information.</span><br></pre></td></tr></table></figure>
-
-<p>两个库都标着*,意思是缺乏调试信息</p>
-<p>如果我们想要调试glibc,或者说能够保留glibc中的符号,比如函数名,变量名之类,需要带有符号的glibc</p>
-<p>可以自己编译一个玩</p>
-<p>以我的wsl kali-linux为例,装机自带的libc版本号是2.38</p>
-<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">┌──(dustball㉿Destroyer)-[~]</span><br><span class="line">└─$ ldd --version</span><br><span class="line"><span class="title function_">ldd</span> <span class="params">(Debian GLIBC <span class="number">2.38</span><span class="number">-13</span>)</span> 2.38</span><br><span class="line"><span class="title function_">Copyright</span> <span class="params">(C)</span> 2023 Free Software Foundation, Inc.</span><br><span class="line">This is <span class="built_in">free</span> software; see the source <span class="keyword">for</span> copying conditions.  There is NO</span><br><span class="line">warranty; not even <span class="keyword">for</span> MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.</span><br><span class="line">Written by Roland McGrath and Ulrich Drepper.</span><br></pre></td></tr></table></figure>
-
-<p>下面我们编译一个新的带有调试符号的2.38版本的glibc</p>
-<h2 id="编译64位glibc"><a href="#编译64位glibc" class="headerlink" title="编译64位glibc"></a>编译64位glibc</h2><h3 id="下载glibc"><a href="#下载glibc" class="headerlink" title="下载glibc"></a>下载glibc</h3><p>首先下载glibc源码</p>
-<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">apt install glibc-source</span><br></pre></td></tr></table></figure>
-
-<p>执行完后会在&#x2F;usr&#x2F;src下面生成glibc目录</p>
-<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">┌──(root㉿Destroyer)-[/usr/src/glibc]</span><br><span class="line">└─# ls</span><br><span class="line">debian  glibc-2.38.tar.xz</span><br></pre></td></tr></table></figure>
-
-<blockquote>
-<p>这个方法不太靠谱，我在另一台机器的wsl上这样整，缺少texinfo源代码</p>
-<p>还是到仓库下载源代码稳妥</p>
-</blockquote>
-<p>或者到glibc仓库<a target="_blank" rel="noopener" href="http://ftp.gnu.org/gnu/glibc/">http://ftp.gnu.org/gnu/glibc/</a>挑一个下载</p>
-<p>或者到镜像仓库下载<a target="_blank" rel="noopener" href="https://mirrors.aliyun.com/gnu/glibc/">https://mirrors.aliyun.com/gnu/glibc/</a></p>
-<p>比如</p>
-<figure class="highlight sh"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">curl http://ftp.gnu.org/gnu/glibc/glibc-2.38.tar.xz -o glibc-2.38.tar.xz</span><br></pre></td></tr></table></figure>
-
-<h3 id="解压glibc"><a href="#解压glibc" class="headerlink" title="解压glibc"></a>解压glibc</h3><figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">tar -xf glibc<span class="number">-2.38</span>.tar.xz</span><br></pre></td></tr></table></figure>
-
-<h3 id="建立bulid目录"><a href="#建立bulid目录" class="headerlink" title="建立bulid目录"></a>建立bulid目录</h3><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">cd glibc-2.38</span><br><span class="line">mkdir build</span><br><span class="line">cd build</span><br></pre></td></tr></table></figure>
-
-<h3 id="配置编译选项"><a href="#配置编译选项" class="headerlink" title="配置编译选项"></a>配置编译选项</h3><p>在build路径下</p>
-<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">../configure --prefix=/home/glibc/ --enable-add-ons=nptl --with-tls --with-__thread --enable-kernel=2.6.32 --enable-debug --disable-werror </span><br></pre></td></tr></table></figure>
-
-<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">../configure --prefix=/home/glibc32/glibc-2.38 --enable-add-ons=nptl --with-tls --with-__thread --enable-kernel=2.6.32 --enable-debug --disable-werror </span><br></pre></td></tr></table></figure>
-
-
-
-<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">../configure --prefix=/home/dustball/glibc/glibc-2.35 --enable-add-ons=nptl --with-tls --with-__thread --enable-kernel=2.6.32 --enable-debug --disable-werror</span><br></pre></td></tr></table></figure>
-
-
-
-<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">../configure --prefix=/home/dustball/glibc/glibc-2.27 --enable-add-ons=nptl --with-tls --with-__thread --enable-kernel=2.6.32 --enable-debug --disable-werror</span><br></pre></td></tr></table></figure>
-
-
-
-<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">../configure --prefix=/home/dustball/glibc/glibc-2.31 --enable-add-ons=nptl --with-tls --with-__thread --enable-kernel=2.6.32 --enable-debug --disable-werror</span><br></pre></td></tr></table></figure>
-
-<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">../configure --prefix=/home/dustball/glibc/glibc-2.35 --enable-add-ons=nptl --with-tls --with-__thread --enable-kernel=2.6.32 --enable-debug --disable-werror</span><br></pre></td></tr></table></figure>
-
-
-
-
-
-
-
-<p>这里<code>--prefix=/home/glibc</code>是决定<code>make install</code>的安装地址</p>
-<p><code>–-enable-debug</code>允许调试,实际上就是给gcc传递-g编译选项</p>
-<h3 id="编译-安装"><a href="#编译-安装" class="headerlink" title="编译&amp;安装"></a>编译&amp;安装</h3><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">make -j `nproc`</span><br><span class="line">make install</span><br></pre></td></tr></table></figure>
-
-<blockquote>
-<p>如果配置编译选项时prefix没有写或者写错了也没关系</p>
-<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">make install DESTDIR=/home/glibc/</span><br></pre></td></tr></table></figure>
-
-<p>这样安装也可以</p>
-</blockquote>
-<p>如果编译和安装都没有错误,会在<code>/home/glibc/</code>下生成我们的货</p>
-<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">┌──(root㉿Destroyer)-[/home/glibc]</span><br><span class="line">└─<span class="meta"># ls</span></span><br><span class="line">bin  etc  include  lib  libexec  sbin  share  var</span><br></pre></td></tr></table></figure>
-
-<p>动态库在lib下面放着了</p>
-<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">┌──(root㉿Destroyer)-[/home/glibc/lib]</span><br><span class="line">└─<span class="meta"># file libc.so.6</span></span><br><span class="line">libc.so<span class="number">.6</span>: ELF <span class="number">64</span>-bit LSB shared object, x86<span class="number">-64</span>, version <span class="number">1</span> (GNU/Linux), dynamically linked, interpreter /home/glibc/lib/ld-linux-x86<span class="number">-64.</span>so<span class="number">.2</span>, BuildID[sha1]=a8ebdd4a75fecb70ba9fe1dc5765fcd87c77742e, <span class="keyword">for</span> GNU/Linux <span class="number">3.2</span><span class="number">.0</span>, with debug_info, not stripped</span><br></pre></td></tr></table></figure>
-
-<p>非常滴漂亮</p>
-<h2 id="交叉编译32位glibc-可选"><a href="#交叉编译32位glibc-可选" class="headerlink" title="交叉编译32位glibc(可选)"></a>交叉编译32位glibc(可选)</h2><p>在x86_64 linux上,也兼容32位的程序</p>
-<p>如果想要32位带符号glibc的支持,需要再编译一个32位的glibc</p>
-<p>下载和解压不用做了,还是利用之前编译64位glibc时的源码即可</p>
-<h3 id="建立build32目录"><a href="#建立build32目录" class="headerlink" title="建立build32目录"></a>建立build32目录</h3><figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">cd glibc<span class="number">-2.38</span></span><br><span class="line">mkdir build32</span><br><span class="line">cd build32</span><br></pre></td></tr></table></figure>
-
-<h3 id="配置32位编译选项"><a href="#配置32位编译选项" class="headerlink" title="配置32位编译选项"></a>配置32位编译选项</h3><p>首先让gcc能够编译32位程序,需要安装一些依赖</p>
-<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">apt-get install build-essential module-assistant gcc-multilib g++-multilib </span><br></pre></td></tr></table></figure>
-
-<p>然后配置编译选项</p>
-<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">../configure --prefix=/home/glibc32 --host=i686-pc-linux-gnu --enable-add-ons=nptl --with-tls --with-__thread --enable-kernel=2.6.32 --with-binutils=/usr/bin --with-headers=/usr/include --build=i686-linux-gnu CC=&quot;gcc -m32&quot; CXX=&quot;g++ -m32&quot;</span><br></pre></td></tr></table></figure>
-
-<h3 id="编译-安装-1"><a href="#编译-安装-1" class="headerlink" title="编译&amp;安装"></a>编译&amp;安装</h3><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">make -j`nproc`</span><br><span class="line">make install</span><br></pre></td></tr></table></figure>
-
-<p>如果编译安装都没有错误,会在&#x2F;home&#x2F;glibc32下面生成我们的货</p>
-<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">┌──(root㉿Destroyer)-[/home]</span><br><span class="line">└─# ls</span><br><span class="line">dustball  glibc  glibc32</span><br></pre></td></tr></table></figure>
-
-<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">┌──(root㉿Destroyer)-[/home/glibc32/lib]</span><br><span class="line">└─<span class="meta"># file libc.so.6</span></span><br><span class="line">libc.so<span class="number">.6</span>: ELF <span class="number">32</span>-bit LSB shared object, Intel <span class="number">80386</span>, version <span class="number">1</span> (GNU/Linux), dynamically linked, interpreter /lib/ld-linux.so<span class="number">.2</span>, BuildID[sha1]=<span class="number">3</span>d4a2e7c0e16c8cc778b5bd574a59eb4988e2d96, <span class="keyword">for</span> GNU/Linux <span class="number">3.2</span><span class="number">.0</span>, with debug_info, not stripped</span><br></pre></td></tr></table></figure>
-
-<p>漂亮滴很</p>
-<h2 id="编译链接glibc"><a href="#编译链接glibc" class="headerlink" title="编译链接glibc"></a>编译链接glibc</h2><p>现在系统里面有两个glibc</p>
-<p>一个系统自带的没有调试符号的glibc在&#x2F;lib下面</p>
-<p>一个我们自己编译的有调试符号的glibc在&#x2F;home&#x2F;glibc下面</p>
-<p>但是天无二日,程序只能链接一个glibc,并且程序默认链接到&#x2F;lib下的老太阳</p>
-<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">┌──(root㉿Destroyer)-[/home/glibc-test]</span><br><span class="line">└─<span class="meta"># ldd main</span></span><br><span class="line">        linux-vdso.so<span class="number">.1</span> (<span class="number">0x00007fff451fb000</span>)</span><br><span class="line">        libc.so<span class="number">.6</span> =&gt; /lib/x86_64-linux-gnu/libc.so<span class="number">.6</span> (<span class="number">0x00007f93106d0000</span>)</span><br><span class="line">        /lib64/ld-linux-x86<span class="number">-64.</span>so<span class="number">.2</span> (<span class="number">0x00007f93108c0000</span>)</span><br></pre></td></tr></table></figure>
-
-<p>如何让程序链接到我们自己编译的glibc呢?</p>
-<p>gcc有一个编译选项可以指定链接libc的位置</p>
-<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">gcc main.c -o main -Wl,--rpath=/home/glibc/lib -Wl,--dynamic-linker=/home/glibc/lib/ld-linux-x86-64.so.2   -I/home/glibc/include -g -no-pie</span><br></pre></td></tr></table></figure>
-
-<p><code>-Wl,--rpath=/home/glibc/lib</code>指定glibc路径</p>
-<p><code>-Wl,--dynamic-linker=/home/glibc/lib/ld-linux-x86-64.so.2</code>指定动态链接器的路径</p>
-<p><code>-I/home/glibc/include</code>指定头文件路径</p>
-<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line">┌──(root㉿Destroyer)-[/home/glibc-test]</span><br><span class="line">└─# ./main</span><br><span class="line">Hello, world!</span><br><span class="line"></span><br><span class="line">┌──(root㉿Destroyer)-[/home/glibc-test]</span><br><span class="line">└─<span class="meta"># file main</span></span><br><span class="line">main: ELF <span class="number">64</span>-bit LSB executable, x86<span class="number">-64</span>, version <span class="number">1</span> (SYSV), dynamically linked, interpreter /home/glibc/lib/ld-linux-x86<span class="number">-64.</span>so<span class="number">.2</span>, BuildID[sha1]=<span class="number">27284e24</span>ab02fa64103591192dd8b3b006ae20f5, <span class="keyword">for</span> GNU/Linux <span class="number">3.2</span><span class="number">.0</span>, with debug_info, not stripped</span><br><span class="line"></span><br><span class="line">┌──(root㉿Destroyer)-[/home/glibc-test]</span><br><span class="line">└─<span class="meta"># ldd main</span></span><br><span class="line">        linux-vdso.so<span class="number">.1</span> (<span class="number">0x00007ffe18b9d000</span>)</span><br><span class="line">        libc.so<span class="number">.6</span> =&gt; /home/glibc/lib/libc.so<span class="number">.6</span> (<span class="number">0x00007f1a6a9ec000</span>)</span><br><span class="line">        /home/glibc/lib/ld-linux-x86<span class="number">-64.</span>so<span class="number">.2</span> =&gt; /lib64/ld-linux-x86<span class="number">-64.</span>so<span class="number">.2</span> (<span class="number">0x00007f1a6abc6000</span>)</span><br></pre></td></tr></table></figure>
-
-<p>libc和动态链接器都改好了</p>
-<p>如果想要编译成32位程序</p>
-<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">gcc main.c -o main -Wl,--rpath=/home/glibc32/lib -Wl,--dynamic-linker=/home/glibc32/lib/ld-linux.so.2   -I/home/glibc/include -g -no-pie -m32</span><br></pre></td></tr></table></figure>
-
-<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line">┌──(root㉿Destroyer)-[/home/glibc-test]</span><br><span class="line">└─# ./main</span><br><span class="line">Hello, world!</span><br><span class="line"></span><br><span class="line">┌──(root㉿Destroyer)-[/home/glibc-test]</span><br><span class="line">└─# ┌──(root㉿Destroyer)-[/home/glibc-test]</span><br><span class="line">└─<span class="meta"># file main</span></span><br><span class="line">main: ELF <span class="number">32</span>-bit LSB executable, Intel <span class="number">80386</span>, version <span class="number">1</span> (SYSV), dynamically linked, interpreter /home/glibc32/lib/ld-linux.so<span class="number">.2</span>, BuildID[sha1]=c2629c0f00b91e2caa60e88d0d27198bc71ff49c, <span class="keyword">for</span> GNU/Linux <span class="number">3.2</span><span class="number">.0</span>, with debug_info, not stripped</span><br><span class="line"></span><br><span class="line">┌──(root㉿Destroyer)-[/home/glibc-test]</span><br><span class="line">└─<span class="meta"># ldd main</span></span><br><span class="line">        linux-gate.so<span class="number">.1</span> (<span class="number">0xf7ef7000</span>)</span><br><span class="line">        libc.so<span class="number">.6</span> =&gt; /home/glibc32/lib/libc.so<span class="number">.6</span> (<span class="number">0xf7cd0000</span>)</span><br><span class="line">        /home/glibc32/lib/ld-linux.so<span class="number">.2</span> =&gt; /lib/ld-linux.so<span class="number">.2</span> (<span class="number">0xf7ef9000</span>)</span><br></pre></td></tr></table></figure>
-
-<p>libc和动态链接器都改好了</p>
-<p>此时使用gdb调试程序也是可以看到动态链接器的源码的</p>
-<p><img src="https://raw.githubusercontent.com/DeutschBall/VideoBed/main/image-20240813215802807.png" alt="image-20240813215802807"></p>
-<p>也可以看到ld中的符号<code>link_map</code></p>
-<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><span class="line">pwndbg&gt; info types link_map</span><br><span class="line">All types matching regular expression <span class="string">&quot;link_map&quot;</span>:</span><br><span class="line"></span><br><span class="line">File ../elf/link.h:</span><br><span class="line"><span class="number">101</span>:    <span class="class"><span class="keyword">struct</span> <span class="title">link_map_public</span>;</span></span><br><span class="line"></span><br><span class="line">File ../include/link.h:</span><br><span class="line"><span class="number">95</span>:     <span class="class"><span class="keyword">struct</span> <span class="title">link_map</span>;</span></span><br><span class="line"><span class="number">286</span>:    <span class="class"><span class="keyword">struct</span> <span class="title">link_map_reldeps</span>;</span></span><br><span class="line"></span><br><span class="line">File ../nptl_db/db_info.c:</span><br><span class="line"><span class="number">40</span>:     <span class="keyword">typedef</span> <span class="class"><span class="keyword">struct</span> <span class="title">link_map</span> <span class="title">link_map</span>;</span></span><br><span class="line"></span><br><span class="line">File ../sysdeps/x86/linkmap.h:</span><br><span class="line"><span class="number">10</span>:     <span class="class"><span class="keyword">struct</span> <span class="title">link_map_machine</span>;</span></span><br></pre></td></tr></table></figure>
-
-
-
-
-
-<h2 id="patch-elf修改程序链接glibc"><a href="#patch-elf修改程序链接glibc" class="headerlink" title="patch-elf修改程序链接glibc"></a>patch-elf修改程序链接glibc</h2><p>对于一个已经编译链接完毕,默认链接系统自带glibc的程序,如何让它使用我们编译的glibc呢</p>
-<p>可以使用patch-elf修改程序，一是修改libc所在目录的位置，二是修改使用的链接器的绝对地址</p>
-<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">patchelf --<span class="built_in">set</span>-rpath /home/glibc/lib/ --<span class="built_in">set</span>-interpreter /home/glibc/lib/ld-linux-x86<span class="number">-64.</span>so<span class="number">.2</span> main</span><br></pre></td></tr></table></figure>
-
-<figure class="highlight sh"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br></pre></td><td class="code"><pre><span class="line">┌──(root㉿Executor)-[/home/glibc-test]</span><br><span class="line">└─# make main</span><br><span class="line">gcc main.c -o main -no-pie -g -O0</span><br><span class="line"></span><br><span class="line">┌──(root㉿Executor)-[/home/glibc-test]</span><br><span class="line">└─# make ldd</span><br><span class="line">ldd main</span><br><span class="line">        linux-vdso.so.1 (0x00007fff8e1b2000)</span><br><span class="line">        libc.so.6 =&gt; /lib/x86_64-linux-gnu/libc.so.6 (0x00007f02aebae000)</span><br><span class="line">        /lib64/ld-linux-x86-64.so.2 (0x00007f02aedb3000)</span><br><span class="line"></span><br><span class="line">┌──(root㉿Executor)-[/home/glibc-test]</span><br><span class="line">└─# make patch</span><br><span class="line">patchelf --set-rpath /home/glibc/lib/ --set-interpreter /home/glibc/lib/ld-linux-x86-64.so.2 main</span><br><span class="line"></span><br><span class="line">┌──(root㉿Executor)-[/home/glibc-test]</span><br><span class="line">└─# make ldd</span><br><span class="line">ldd main</span><br><span class="line">        linux-vdso.so.1 (0x00007fff70bfc000)</span><br><span class="line">        libc.so.6 =&gt; /home/glibc/lib/libc.so.6 (0x00007f8ab9eef000)</span><br><span class="line">        /home/glibc/lib/ld-linux-x86-64.so.2 =&gt; /lib64/ld-linux-x86-64.so.2 (0x00007f8aba126000)</span><br><span class="line">        </span><br><span class="line">┌──(root㉿Executor)-[/home/glibc-test]</span><br><span class="line">└─# ./main</span><br><span class="line">helloworld</span><br></pre></td></tr></table></figure>
-
-<p>改完了之后ldd观察结果和在编译链接时指定我们的glibc效果是一样的</p>
-<p>虽然改完了ld的地址看上去还是指向原来那个<code>/home/glibc/lib/ld-linux-x86-64.so.2 =&gt; /lib64/ld-linux-x86-64.so.2</code></p>
-<p>但是调试观察实际上已经改过了</p>
-<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">gef➤  info sharedlibrary </span><br><span class="line">From                To                  Syms Read   Shared Object Library</span><br><span class="line">0x00007f5aff5a5000  0x00007f5aff5c8f91  Yes         /home/glibc/lib/ld-linux-x86-64.so.2</span><br><span class="line">0x00007f5aff38f3c0  0x00007f5aff4d8c9d  Yes         /home/glibc/lib/libc.so.6</span><br></pre></td></tr></table></figure>
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-      
-    </div>
-
-    
-    
-    
-      <footer class="post-footer">
-        <div class="post-eof"></div>
-      </footer>
-  </article>
-  
-  
-  
-
 
   
   <nav class="pagination">
-    <a class="extend prev" rel="prev" href="/impossible/"><i class="fa fa-angle-left" aria-label="Previous page"></i></a><a class="page-number" href="/impossible/">1</a><span class="page-number current">2</span><a class="page-number" href="/impossible/page/3/">3</a><span class="space">&hellip;</span><a class="page-number" href="/impossible/page/10/">10</a><a class="extend next" rel="next" href="/impossible/page/3/"><i class="fa fa-angle-right" aria-label="Next page"></i></a>
+    <a class="extend prev" rel="prev" href="/impossible/"><i class="fa fa-angle-left" aria-label="Previous page"></i></a><a class="page-number" href="/impossible/">1</a><span class="page-number current">2</span><a class="page-number" href="/impossible/page/3/">3</a><span class="space">&hellip;</span><a class="page-number" href="/impossible/page/11/">11</a><a class="extend next" rel="next" href="/impossible/page/3/"><i class="fa fa-angle-right" aria-label="Next page"></i></a>
   </nav>
 
 

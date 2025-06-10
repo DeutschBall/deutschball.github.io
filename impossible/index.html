@@ -167,6 +167,240 @@
   
   
   <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="en">
+    <link itemprop="mainEntityOfPage" href="http://deutschball.github.io/2025/06/10/https/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="https://raw.githubusercontent.com/DeutschBall/picbed/main/dustball.png">
+      <meta itemprop="name" content="dustball">
+      <meta itemprop="description" content="dustland">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="dustland">
+    </span>
+      <header class="post-header">
+        <h2 class="post-title" itemprop="name headline">
+          
+            <a href="/2025/06/10/https/" class="post-title-link" itemprop="url">HTTPS</a>
+        </h2>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-calendar"></i>
+              </span>
+              <span class="post-meta-item-text">Posted on</span>
+              
+
+              <time title="Created: 2025-06-10 22:10:00 / Modified: 22:10:56" itemprop="dateCreated datePublished" datetime="2025-06-10T22:10:00+08:00">2025-06-10</time>
+            </span>
+
+          
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+          <h1 id="HTTPS"><a href="#HTTPS" class="headerlink" title="HTTPS"></a>HTTPS</h1><h2 id="HTTP"><a href="#HTTP" class="headerlink" title="HTTP"></a>HTTP</h2><h3 id="HTTP连接过程"><a href="#HTTP连接过程" class="headerlink" title="HTTP连接过程"></a>HTTP连接过程</h3><ol>
+<li><p>建立TCP连接，</p>
+</li>
+<li><p>[客户端发送HTTP request，服务端回复HTTP response] x n，</p>
+</li>
+<li><p>关闭TCP连接。</p>
+</li>
+</ol>
+<blockquote>
+<p>HTTP长短连接：</p>
+<p>HTTP 1.0协议版本默认是短链接，每次HTTP请求都需要重新TCP握手建立连接，HTTP回复后需要四次挥手关闭TCP连接。</p>
+<p>然而在访问dustball.top时，浏览器会自动请求界面上的所有资源，包括头像、目录等等，这就需要多次HTTP请求，如果每次都要重新建立TCP连接，就会有大量TCP握手挥手的额外开销。</p>
+<p>因此在HTTP request和response头中都带上<code>Connection: keep-alive</code>字段，就可以让双方保持TCP连接的打开状态，复用这个通道。保持一段时间如果一直没有新的请求，则服务器主动关闭TCP连接。或者服务器已经打开的长连接通道已经达到上限，就需要挑一些幸运通道关闭。</p>
+<p>HTTP 1.1之后默认长连接，除非显示带上<code>Connection: close</code>，就成为了短连接</p>
+</blockquote>
+<p>建立TCP连接由客户端发起，</p>
+<p>关闭TCP连接可以是客户端也可以是服务端。</p>
+<h3 id="为什么引入HTTPS协议？"><a href="#为什么引入HTTPS协议？" class="headerlink" title="为什么引入HTTPS协议？"></a>为什么引入HTTPS协议？</h3><p>或者说HTTP协议存在什么缺点？</p>
+<p>HTTP明文传播，面临被窃听，被篡改，被冒充 <strong>三种</strong>风险。</p>
+<ol>
+<li>被窃听指攻击者可以在路由器上捕获到受害者的HTTP数据包，并直接看到其中明文信息。</li>
+<li>被篡改指攻击者可以在路由器上拦截到受害者的HTTP数据包，修改其中的值后再放行给服务器。</li>
+<li>被冒充指攻击者可以在路由器上拦截到受害者的HTTP数据包后，冒充自己是服务器，直接回复受害者，不再放行HTTP数据包。攻击者也可以在日后重放受害者的HTTP数据包给服务器，冒充自己是客户。</li>
+</ol>
+<p>因此引入HTTPS协议，目的有三：</p>
+<h3 id="引入HTTPS协议的目的"><a href="#引入HTTPS协议的目的" class="headerlink" title="引入HTTPS协议的目的"></a>引入HTTPS协议的目的</h3><ol>
+<li><p>所有信息加密传播，无法窃听</p>
+</li>
+<li><p>具有校验机制，被篡改可以被通信双方发现</p>
+</li>
+<li><p>具备身份证书，防止冒充</p>
+</li>
+</ol>
+<h2 id="HTTPS-1"><a href="#HTTPS-1" class="headerlink" title="HTTPS"></a>HTTPS</h2><p>HTTPS &#x3D; HTTP + TSL&#x2F;SSL</p>
+<p><img src="https://raw.githubusercontent.com/DeutschBall/picbed/main/v2-facb6f0b75594188bd7ae936b9338e4f_1440w.jpg" alt="img"></p>
+<p>HTTPS(Hypertext Transfer Protocol Secure,超文本传输协议安全），在HTTP基础上加入了SSL(Secure Sockets Layer,安全套接层)。</p>
+<p>目前SSL协议已经被TLS(Transport Layer Security,安全传输层协议)协议取代。TLS是基于SSL 3.0改进的。</p>
+<p>TLS&#x2F;SSL不止可以与HTTP协议结合，也可以与FTP、SMTP等协议结合。</p>
+<h3 id="HTTPS连接过程"><a href="#HTTPS连接过程" class="headerlink" title="HTTPS连接过程"></a>HTTPS连接过程</h3><ol>
+<li><p>建立TCP连接，</p>
+</li>
+<li><p>建立TLS连接，</p>
+</li>
+<li><p>[客户端发送加密的HTTP request， 服务端回复加密的HTTP response] x n，</p>
+</li>
+<li><p>关闭TCP连接。</p>
+</li>
+</ol>
+<p><img src="https://raw.githubusercontent.com/DeutschBall/picbed/main/20250608224229.png" alt="image-20250608224159606"></p>
+<p>如图1775、1780、1781三帧首先建立TCP连接</p>
+<p>接下来1782、1791、1794是TLS握手过程</p>
+<h3 id="TLS握手目的"><a href="#TLS握手目的" class="headerlink" title="TLS握手目的"></a>TLS握手目的</h3><ol>
+<li><p>客户端验证服务器的证书是否可信</p>
+</li>
+<li><p>客户端与服务端协商一个公认的<strong>对称密钥</strong></p>
+</li>
+<li><p>此后的通信使用该对称密钥加密传输</p>
+</li>
+</ol>
+<h3 id="TLS握手过程"><a href="#TLS握手过程" class="headerlink" title="TLS握手过程"></a>TLS握手过程</h3><p>TLS握手发生在TCP三次握手建立TCP连接之后，HTTP请求之前</p>
+<ol>
+<li>Client Hello，客户端发起，携带客户端随机数Client Random</li>
+<li>Server Hello，站点回应，携带服务端随机数Server Random，TLS证书<strong>链</strong>（包括站点证书、中间证书、根证书）</li>
+</ol>
+<p>​	2.1. 客户端收到后，首先校验证书合法性。</p>
+<blockquote>
+<p>客户端收到后，会校验证书可信性，校验方式：</p>
+<p><strong>从站点证书开始，证书链上溯，直到某个授信的CA，则认为整个证书链可信</strong></p>
+<p>比如西电站点的证书就是第三级证书，</p>
+<p><img src="https://raw.githubusercontent.com/DeutschBall/VideoBed/main/image-20250610140712074.png" alt="image-20250610140712074"></p>
+<p>CA，Certificate Authority，证书颁发机构。低级证书由高级CA颁发，比如西电的证书由中间机构GlobalSign RSA OV SSL CA 2018颁发。</p>
+<p>浏览器在安装时会自动集成GlobalSign这种根证书，但是它不知道xidian的证书是什么玩意儿，也不知道中间证书GlobalSign RSA OV SSL CA 2018是个什么玩意儿。</p>
+<p>可以在浏览器的 <strong>设置&#x2F;隐私、搜索和服务&#x2F;安全性&#x2F;管理证书&#x2F;Microsoft受信任的根证书计划存储区</strong> 找到GlobalSign的记录。浏览器在校验过西电证书链中，根证书的sha256指纹值后，发现等于自己预存的GlobalSign证书的SHA256指纹值CBB522…，于是就认为这个证书绝对可信了。</p>
+<p><img src="https://raw.githubusercontent.com/DeutschBall/VideoBed/main/image-20250610141903617.png" alt="image-20250610141903617"></p>
+<p>虽然证书链的根证书可信，但是中间证书和服务器证书是否可信呢？这个证书是否已经过期被吊销了呢？这个证书是否是伪造的呢？这个怎么验证呢？证书链验证过程：</p>
+<p>首先看CA给站点颁发证书的过程：</p>
+<ol>
+<li>站点向CA申请一个数字签名：站点填一张表单，包括站点公钥，站点基础信息等，然后表单交给CA。</li>
+<li>CA给出一个数字签名：CA使用站点表单计算出一个摘要值，然后使用CA私钥加密这个摘要值，加密值作为数字签名交给站点。</li>
+<li>站点组装证书：站点保持公钥和站点基础信息不变，组装上数字签名，形成站点证书。</li>
+</ol>
+<p>浏览器访问站点时，站点会一并发送站点证书、中间CA证书、根CA证书链</p>
+<p>浏览器验证站点证书过程：</p>
+<ol>
+<li>浏览器从中间CA证书中拿到中间CA的公钥</li>
+<li>浏览器使用中间CA的公钥，解密站点数字签名，得到摘要值A</li>
+<li>浏览器使用站点证书公钥与基本信息，使用相同的摘要算法，计算出一个摘要值B</li>
+<li>浏览器比较摘要值A和B，如果相同则通过站点证书校验</li>
+<li>浏览器沿着证书链校验中间CA证书</li>
+</ol>
+<p>中间CA可能是伪造的，但是这条证书链最终需要根CA的私钥加密第一个中间CA的摘要值。而操作系统会预装根CA证书，浏览器直接拿来用，认为根CA证书可信。因此自然情况下，只要是这一条证书链都校验通过，就不存在伪造证书的可能。</p>
+<p>当然如果非要伪造也不是不行，由于浏览器使用的是本地保存的根CA证书，可以伪造根CA证书，或者说可信CA证书放在本地，浏览器上溯到这个证书就认为证书链可信了。</p>
+<p>在通过了证书链验证之后，浏览器还会验证证书是否过期等等</p>
+<p>这可以使用证书包含的基本信息，比如有效期等进行验证，由于该证书已经被CA计算过摘要然后加密成签名，因此站点不可能篡改证书的有效期，否则：摘要值就会变，导致数字签名就会变，导致浏览器根据站点证书计算的摘要值和使用CA公钥解密数字签名得到的摘要值就不同，导致证书验证失败。</p>
+<p>如果证书链不完整，确实某些中间证书，则浏览器会根据下级证书的颁发者字段，去公共存储库寻找上级证书。找不到就认为证书链校验失败。</p>
+</blockquote>
+<p>​	2.2. 客户端校验证书通过后，客户端生成一个PreMaster Key，</p>
+<p>​	2.3. 然后客户端根据Client Random、Server Random、PreMaster Key三值生成<strong>对称密钥</strong></p>
+<p>​	2.4. 客户端从站点证书中拿到站点公钥，使用站点公钥加密<strong>对称密钥</strong></p>
+<ol start="3">
+<li>客户端向站点发送 经过站点公钥加密的<strong>对称密钥</strong></li>
+</ol>
+<p>​	站点收到后使用自己的私钥解密得到<strong>对称密钥</strong></p>
+<p>​	到此双方就协商好了此后HTTPS通信加密使用的<strong>对称密钥</strong></p>
+<p>​	显然此次握手中客户端发送的握手包中已经可以携带http请求了</p>
+<h2 id="HTTPS抓包实验"><a href="#HTTPS抓包实验" class="headerlink" title="HTTPS抓包实验"></a>HTTPS抓包实验</h2><p>HTTPS抓包必须是中间人攻击，</p>
+<p>中间人必须让客户端认为自己就是站点，自己的证书就是站点的证书</p>
+<p>中间人必须让站点认为自己就是客户</p>
+<p>原理如图，图片参考<a target="_blank" rel="noopener" href="https://blog.csdn.net/qq_41315957/article/details/123987266">BurpSuite抓取https包原理_burpsuite拦截原理-CSDN博客</a>：</p>
+<p><img src="https://raw.githubusercontent.com/DeutschBall/VideoBed/main/1ef6ff5acb9fbb71789234dd6ced740c.png" alt="这里写图片描述"></p>
+<h3 id="burpsuit-抓HTTPS包"><a href="#burpsuit-抓HTTPS包" class="headerlink" title="burpsuit 抓HTTPS包"></a>burpsuit 抓HTTPS包</h3><ol>
+<li>使用burpsuit在本地8080端口上开启代理，</li>
+</ol>
+<p><img src="https://raw.githubusercontent.com/DeutschBall/VideoBed/main/image-20250610161833652.png" alt="image-20250610161833652"></p>
+<ol start="2">
+<li>使用edge浏览器，不使用burpsuit自带的浏览器时，此时通过proxySwitchOmega插件，让edge浏览器走本地8080代理</li>
+</ol>
+<p><img src="https://raw.githubusercontent.com/DeutschBall/VideoBed/main/image-20250610161916362.png" alt="image-20250610161916362"></p>
+<ol start="3">
+<li>在edge浏览器上访问baidu.com，会报告隐私错误，高级里面也没有无视风险继续访问🤣</li>
+</ol>
+<p><img src="https://raw.githubusercontent.com/DeutschBall/VideoBed/main/image-20250610162110857.png" alt="image-20250610162110857"></p>
+<p>此时查看证书，可以发现baidu的证书是由根PortSwigger CA签发的，然而这个PortSwigger CA就是burpsuit伪装的CA，这个CA不在操作系统信任根CA列表里，因此浏览器认为这个CA不可靠，于是禁止了访问。</p>
+<p><img src="https://raw.githubusercontent.com/DeutschBall/VideoBed/main/image-20250610162341196.png" alt="image-20250610162341196"></p>
+<p>这个证书是burpsuit硬造的，浏览器验证证书链发现不可信于是不让访问</p>
+<p>如何让浏览器能够继续访问呢？将burp根证书添加到操作系统可信证书列表中即可</p>
+<ol start="4">
+<li>在burpsuit&#x2F;Proxy&#x2F;Options导出证书为der文件，然后安装</li>
+</ol>
+<p><img src="https://raw.githubusercontent.com/DeutschBall/VideoBed/main/image-20250610170310268.png" alt="image-20250610170310268"></p>
+<p>此时在浏览器的证书管理界面的<strong>中间证书颁发机构</strong>就可以看到这个证书了</p>
+<p><img src="https://raw.githubusercontent.com/DeutschBall/VideoBed/main/image-20250610170424697.png" alt="image-20250610170424697"></p>
+<p> 此时访问baidu.com还是隐私错误，这是因为根证书仍然不可信</p>
+<p>因此在这个界面上将PortSwigger CA导出为Base64编码的cer格式，然后在受信任的根证书颁发机构里重新导入cer格式证书，就可以让该证书成为受信任的根证书了。</p>
+<ol start="5">
+<li>将PortSwigger CA证书安装为可信根证书</li>
+</ol>
+<p>此时就可以访问baidu.com了，可以看到虽然证书都是假的，但是我们自欺欺人地认为是真的</p>
+<p><img src="https://raw.githubusercontent.com/DeutschBall/VideoBed/main/image-20250610170818152.png" alt="image-20250610170818152"></p>
+<p>此时就可以用burpsuit抓baidu登录包了，虽然这个登录包的内容是经过前端加密的</p>
+<p><img src="https://raw.githubusercontent.com/DeutschBall/VideoBed/main/image-20250610170933802.png" alt="image-20250610170933802"></p>
+<h3 id="wireshark抓HTTPS包"><a href="#wireshark抓HTTPS包" class="headerlink" title="wireshark抓HTTPS包"></a>wireshark抓HTTPS包</h3><p>直接用wireshark抓https包，效果是能看到tls握手过程，握手之后的http数据全都是加密传输的tcp数据包，看不到http请求头，也看不到请求体，就是一个tcp头加上tcp数据体。</p>
+<p>这是因为wireshark不知道客户端与服务端协商的对称加密密钥是多少，不知道如何解密这些tcp数据包。</p>
+<p>因为如果能够捕获到客户端与服务端协商的对称加密密钥，就可以破解https包。</p>
+<p>这个对称加密密钥是在客户端处生成，经过站点公钥加密传输给站点的</p>
+<p>因此显然可以让客户端操作系统在生成对称加密密钥时，直接把密钥记录一下，在windows上可以指定<code>SSLKEYLOGFILE</code>环境变量，让所有tls对称加密密钥输出到一个文件中。</p>
+<ol>
+<li>任意目录下新建一个<code>ssl.log</code>文件，在windows环境变量里加入一个<code>SSLKEYLOGFILE</code>，值为ssl.log的绝对地址</li>
+</ol>
+<p><img src="https://raw.githubusercontent.com/DeutschBall/VideoBed/main/image-20250610181942368.png" alt="image-20250610181942368"></p>
+<ol start="2">
+<li>此后浏览器只要是访问<code>https</code>网站，就会在这个<code>ssl.log</code>中保留<code>tls</code>握手信息，包括</li>
+</ol>
+<p><img src="https://raw.githubusercontent.com/DeutschBall/VideoBed/main/c664955013ab4f18b5ad535bba3e41dd.png" alt="在这里插入图片描述"></p>
+<p>这个文档长这样：</p>
+<p><img src="https://raw.githubusercontent.com/DeutschBall/VideoBed/main/image-20250610182037599.png" alt="image-20250610182037599"></p>
+<p>关于其格式可以参考<a target="_blank" rel="noopener" href="https://www.ietf.org/archive/id/draft-thomson-tls-keylogfile-00.html">The SSLKEYLOGFILE Format for TLS</a></p>
+<ol start="3">
+<li>在<code>wireshark/编辑/首选项/Protocols/TLS</code>中指定<code>Pre-Master-Secret log filename</code>位置</li>
+</ol>
+<p><img src="https://raw.githubusercontent.com/DeutschBall/VideoBed/main/image-20250610182132980.png" alt="image-20250610182132980"></p>
+<p>之后就可以使用<code>wireshark</code>看到<code>http</code>的请求和回复内容了</p>
+<p>比如这里访问了<code>baidu.com</code>的登录接口</p>
+<p><img src="C:\Users\HP\AppData\Roaming\Typora\typora-user-images\image-20250610183622496.png" alt="image-20250610183622496"></p>
+<p>同理在<code>Linux</code>上也可以设置这么一个环境变量</p>
+<figure class="highlight sh"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="built_in">export</span> SSLKEYLOGFILE=~/.sslkeylogfile</span><br></pre></td></tr></table></figure>
+
+
+
+
+
+<h2 id="python-网络编程中使用TLS"><a href="#python-网络编程中使用TLS" class="headerlink" title="python 网络编程中使用TLS"></a>python 网络编程中使用TLS</h2><p>浏览器和站点使用HTTPS协议交互的过程中，可以看到TLS发挥了协商加密公钥的作用，</p>
+<p>如果不使用浏览器，不使用HTTPS协议，而是其他协议套上TLS，应该如何实现呢？</p>
+<p>除了浏览器外的其他客户端比如一个安卓程序或者一个GUI程序， 在与服务器通信时，怎样使用TLS协议呢？客户端又是如何校验证书的呢？</p>
+<p>显然也需要实现ssl库</p>
+<p><a target="_blank" rel="noopener" href="https://github.com/brandon-rhodes/fopnp/blob/m/py3/chapter06/safe_tls.py">fopnp&#x2F;py3&#x2F;chapter06&#x2F;safe_tls.py at m · brandon-rhodes&#x2F;fopnp</a></p>
+
+      
+    </div>
+
+    
+    
+    
+      <footer class="post-footer">
+        <div class="post-eof"></div>
+      </footer>
+  </article>
+  
+  
+  
+
+      
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="en">
     <link itemprop="mainEntityOfPage" href="http://deutschball.github.io/2025/05/16/stupid_move_II/">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
@@ -4235,156 +4469,10 @@ alt="image-20250516214424982" />
   
   
 
-      
-  
-  
-  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="en">
-    <link itemprop="mainEntityOfPage" href="http://deutschball.github.io/2025/04/22/[AFL%20V]%20afl-analyze/">
-
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="image" content="https://raw.githubusercontent.com/DeutschBall/picbed/main/dustball.png">
-      <meta itemprop="name" content="dustball">
-      <meta itemprop="description" content="dustland">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="dustland">
-    </span>
-      <header class="post-header">
-        <h2 class="post-title" itemprop="name headline">
-          
-            <a href="/2025/04/22/%5BAFL%20V%5D%20afl-analyze/" class="post-title-link" itemprop="url">AFL V - afl-analyze</a>
-        </h2>
-
-        <div class="post-meta">
-            <span class="post-meta-item">
-              <span class="post-meta-item-icon">
-                <i class="far fa-calendar"></i>
-              </span>
-              <span class="post-meta-item-text">Posted on</span>
-              
-
-              <time title="Created: 2025-04-22 13:11:00 / Modified: 13:22:38" itemprop="dateCreated datePublished" datetime="2025-04-22T13:11:00+08:00">2025-04-22</time>
-            </span>
-
-          
-
-        </div>
-      </header>
-
-    
-    
-    
-    <div class="post-body" itemprop="articleBody">
-
-      
-          <h1 id="AFL-V-afl-analyze"><a href="#AFL-V-afl-analyze" class="headerlink" title="[AFL V] afl-analyze"></a>[AFL V] afl-analyze</h1><p>本工具用于尝试理解输入文件的结构</p>
-<h2 id="举个🌰"><a href="#举个🌰" class="headerlink" title="举个🌰"></a>举个🌰</h2><p>假设有这么一种结构:</p>
-<p><img src="https://raw.githubusercontent.com/DeutschBall/VideoBed/main/image-20250301145341103.png" alt="image-20250301145341103"></p>
-<figure class="highlight sh"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">┌──(root㉿Destroyer)-[/home/dustball/myfile]</span><br><span class="line">└─# xxd dustland</span><br><span class="line">00000000: 6475 7374 3400 0000 6161 6161 6161 6161  dust4...aaaaaaaa</span><br><span class="line">00000010: 6161 6161 6161 6161 6161 6161 6161 6161  aaaaaaaaaaaaaaaa</span><br><span class="line">00000020: 6262 6262 6262 6262 6261 6161 6161 6161  bbbbbbbbbaaaaaaa</span><br><span class="line">00000030: 6161 6162 6162 6162 6162 6161 6c61 6e64  aaababababaaland</span><br><span class="line">00000040: 3f14 1d10                                ?...</span><br></pre></td></tr></table></figure>
-
-<p>该结构前后有两个元数据块, 中间是数据块</p>
-<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">//format_dstb.h</span></span><br><span class="line"><span class="meta">#<span class="keyword">ifndef</span> FORMAT_DSTB_H</span></span><br><span class="line"><span class="meta">#<span class="keyword">define</span> FORMAT_DSTB_H</span></span><br><span class="line"></span><br><span class="line"><span class="meta">#<span class="keyword">define</span> DSTB_HEADER_MAGIC 0x74737564 <span class="comment">//&quot;dust&quot;</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">define</span> DSTB_FOOTER_MAGIC 0x646e616c <span class="comment">//&quot;ball&quot;</span></span></span><br><span class="line"><span class="keyword">typedef</span> <span class="class"><span class="keyword">struct</span>&#123;</span></span><br><span class="line">    <span class="type">unsigned</span> magic;</span><br><span class="line">    <span class="type">int</span> data_size;</span><br><span class="line">&#125;DSTB_Header;</span><br><span class="line"></span><br><span class="line"><span class="keyword">typedef</span> <span class="class"><span class="keyword">struct</span> &#123;</span></span><br><span class="line">    <span class="type">unsigned</span> magic;</span><br><span class="line">    <span class="type">unsigned</span> check_sum;</span><br><span class="line">&#125;DSTB_Footer;</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="meta">#<span class="keyword">endif</span></span></span><br></pre></td></tr></table></figure>
-
-<p>构造器</p>
-<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">//formatter.c</span></span><br><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&quot;format_dstb.h&quot;</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;stdio.h&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;stdlib.h&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;string.h&gt;</span></span></span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="comment">//formatter input output</span></span><br><span class="line"><span class="type">int</span> <span class="title function_">main</span><span class="params">(<span class="type">int</span> argc, <span class="type">char</span> *argv[])</span>&#123;</span><br><span class="line">    <span class="type">char</span> *input = argv[<span class="number">1</span>];</span><br><span class="line">    <span class="type">char</span> *output = argv[<span class="number">2</span>];</span><br><span class="line"></span><br><span class="line">    FILE * fp = fopen(input, <span class="string">&quot;rb&quot;</span>);</span><br><span class="line">    fseek(fp, <span class="number">0</span>, SEEK_END);</span><br><span class="line">    <span class="type">int</span> file_size = ftell(fp);</span><br><span class="line">    <span class="type">int</span> data_size = (file_size + <span class="number">3</span>) &amp; ~<span class="number">3</span>; <span class="comment">//round up to nearest 4 bytes</span></span><br><span class="line">    <span class="type">char</span> *data = <span class="built_in">malloc</span>(data_size);</span><br><span class="line">    <span class="built_in">memset</span>(data, <span class="number">0</span>, data_size);</span><br><span class="line">    fseek(fp, <span class="number">0</span>, SEEK_SET);</span><br><span class="line">    fread(data, <span class="number">1</span>, file_size, fp);</span><br><span class="line">    fclose(fp);</span><br><span class="line"></span><br><span class="line">    DSTB_Header header = &#123;</span><br><span class="line">        .magic = DSTB_HEADER_MAGIC,</span><br><span class="line">        .data_size = data_size</span><br><span class="line">    &#125;;</span><br><span class="line">    DSTB_Footer ender = &#123;</span><br><span class="line">        .magic = DSTB_FOOTER_MAGIC,</span><br><span class="line">        .check_sum = <span class="number">0</span></span><br><span class="line">    &#125;;</span><br><span class="line">    <span class="type">unsigned</span> check_sum = <span class="number">0</span>;</span><br><span class="line">    check_sum = header.magic ^ header.data_size;</span><br><span class="line">    <span class="keyword">for</span>(<span class="type">int</span> i = <span class="number">0</span>; i &lt; data_size; i++)&#123;</span><br><span class="line">        check_sum ^= data[i];</span><br><span class="line">    &#125;</span><br><span class="line">    check_sum ^= ender.magic;</span><br><span class="line">    ender.check_sum = check_sum;</span><br><span class="line"></span><br><span class="line">    FILE * out = fopen(output, <span class="string">&quot;wb&quot;</span>);</span><br><span class="line">    fwrite(&amp;header, <span class="keyword">sizeof</span>(DSTB_Header), <span class="number">1</span>, out);</span><br><span class="line">    fwrite(data, <span class="number">1</span>, data_size, out);</span><br><span class="line">    fwrite(&amp;ender, <span class="keyword">sizeof</span>(DSTB_Footer), <span class="number">1</span>, out);</span><br><span class="line">    fclose(out);</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">    <span class="keyword">return</span> <span class="number">0</span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-
-
-
-<p>为其编写parser</p>
-<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&quot;format_dstb.h&quot;</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;stdio.h&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;unistd.h&gt;</span></span></span><br><span class="line"></span><br><span class="line"><span class="type">int</span> <span class="title function_">main</span><span class="params">(<span class="type">int</span> argc, <span class="type">char</span> *argv[])</span>&#123;</span><br><span class="line">    <span class="type">char</span> input[<span class="number">300</span>];</span><br><span class="line">    <span class="type">int</span> file_len = read(<span class="number">0</span>,input,<span class="number">300</span>);   <span class="comment">//从标准输入获取</span></span><br><span class="line">    DSTB_Header *header = (DSTB_Header*)input;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">if</span>(header-&gt;magic!= DSTB_HEADER_MAGIC)&#123;</span><br><span class="line">        <span class="built_in">printf</span>(<span class="string">&quot;Invalid header magic\n&quot;</span>);</span><br><span class="line">        <span class="keyword">return</span> <span class="number">0</span>;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="type">int</span> data_size = header-&gt;data_size;</span><br><span class="line">    <span class="type">char</span> *data = input + <span class="keyword">sizeof</span>(DSTB_Header);</span><br><span class="line">    <span class="type">char</span> *footer = data + data_size; </span><br><span class="line">    DSTB_Footer *f = (DSTB_Footer*)footer;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">if</span>(f-&gt;magic!= DSTB_FOOTER_MAGIC)&#123;</span><br><span class="line">        <span class="built_in">printf</span>(<span class="string">&quot;Invalid footer magic\n&quot;</span>);</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="type">int</span> check_sum = <span class="number">0</span>;</span><br><span class="line">    check_sum = header-&gt;magic ^ header-&gt;data_size;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">for</span>(<span class="type">int</span> i=<span class="number">0</span>;i&lt;data_size;i++)&#123;</span><br><span class="line">        check_sum ^= data[i];</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    check_sum ^= f-&gt;magic;</span><br><span class="line">    check_sum ^= f-&gt;check_sum;</span><br><span class="line">    <span class="built_in">printf</span>(<span class="string">&quot;Data size: %d\n&quot;</span>,data_size);</span><br><span class="line">    <span class="built_in">printf</span>(<span class="string">&quot;Check sum: %d\n&quot;</span>,check_sum);</span><br><span class="line">    </span><br><span class="line">    <span class="keyword">if</span>(check_sum != <span class="number">0</span>)&#123;</span><br><span class="line">        <span class="built_in">printf</span>(<span class="string">&quot;Invalid check sum\n&quot;</span>);</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">    <span class="built_in">puts</span>(<span class="string">&quot;accepted&quot;</span>);</span><br><span class="line"></span><br><span class="line">    <span class="keyword">return</span> <span class="number">0</span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-
-
-
-<p>接下来用<code>afl-analyze</code>分析文件结构</p>
-<p><img src="https://raw.githubusercontent.com/DeutschBall/VideoBed/main/image-20250301150622626.png" alt="image-20250301150622626"></p>
-<p>afl发现了两个魔数、数据块</p>
-<p>虽然没有发现校验和, 但是能发现这已经很神奇了</p>
-<p>并且这界面花花绿绿的, 着实豪堪</p>
-<h2 id="🧄法原理"><a href="#🧄法原理" class="headerlink" title="🧄法原理"></a>🧄法原理</h2><p>首先保持输入不变, dry_run一次 ,记录执行路径共享内存校验和为orig_cksum</p>
-<p>然后遍历输入, 对于每个字节, 分别进行如下四个变异操作:</p>
-<p>1.整体取反, 执行 , 记录执行后的共享内存校验和xor_ff</p>
-<p>2.末位取反, 执行 , 记录校验和xor_01</p>
-<p>3.减去0x10, 执行 , 记录校验和sub_10</p>
-<p>4.加上0x10, 执行 , 记录校验和add_10</p>
-<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line">in_data[i] ^= <span class="number">0xff</span>;</span><br><span class="line">xor_ff = run_target(argv, in_data, in_len, <span class="number">0</span>);</span><br><span class="line"></span><br><span class="line">in_data[i] ^= <span class="number">0xfe</span>;</span><br><span class="line">xor_01 = run_target(argv, in_data, in_len, <span class="number">0</span>);</span><br><span class="line"></span><br><span class="line">in_data[i] = (in_data[i] ^ <span class="number">0x01</span>) - <span class="number">0x10</span>;</span><br><span class="line">sub_10 = run_target(argv, in_data, in_len, <span class="number">0</span>);</span><br><span class="line"></span><br><span class="line">in_data[i] += <span class="number">0x20</span>;</span><br><span class="line">add_10 = run_target(argv, in_data, in_len, <span class="number">0</span>);</span><br><span class="line">in_data[i] -= <span class="number">0x10</span>;</span><br></pre></td></tr></table></figure>
-
-<blockquote>
-<p>这四个变异操作是单独执行的, 互相不影响, 每次操作之后都会当前字节还原</p>
-</blockquote>
-<p>这样四个结果会有16种情况,afl-analyze只关心其中几种情况</p>
-<p>1.四个检校和均和orig_cksum一致, 意味着对该字节任何变动不会影响执行路径 ,字微节轻</p>
-<p>2.这四个检校和中有至少一个不等于orig_cksum, 认为该字节可以变异, 但是也就那样吧, 不太重要</p>
-<p>3.四次变异后的检校和相同, 但是不等于orig_cksum, 则认为这个地方不能改, 比如文件魔数,检校和等等, 这里如果不对了则parser直接丢弃文件</p>
-<p>4.四次变异之后的检校和与orig_cksum均不相同, 并且这四个检校和也各不相同, 说明该位置会显著影响控制流, 可能是一个switch case位置或者一个if的条件</p>
-<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br></pre></td><td class="code"><pre><span class="line">xff_orig = (xor_ff == orig_cksum);</span><br><span class="line">x01_orig = (xor_01 == orig_cksum);</span><br><span class="line">s10_orig = (sub_10 == orig_cksum);</span><br><span class="line">a10_orig = (add_10 == orig_cksum);</span><br><span class="line"></span><br><span class="line"><span class="keyword">if</span> (xff_orig &amp;&amp; x01_orig &amp;&amp; s10_orig &amp;&amp; a10_orig) &#123;</span><br><span class="line"></span><br><span class="line">  b_data[i] = RESP_NONE;</span><br><span class="line">  boring_len++;</span><br><span class="line"></span><br><span class="line">&#125; <span class="keyword">else</span> <span class="keyword">if</span> (xff_orig || x01_orig || s10_orig || a10_orig) &#123;</span><br><span class="line"></span><br><span class="line">  b_data[i] = RESP_MINOR;</span><br><span class="line">  boring_len++;</span><br><span class="line"></span><br><span class="line">&#125; <span class="keyword">else</span> <span class="keyword">if</span> (xor_ff == xor_01 &amp;&amp; xor_ff == sub_10 &amp;&amp; xor_ff == add_10) &#123;</span><br><span class="line"></span><br><span class="line">  b_data[i] = RESP_FIXED;</span><br><span class="line"></span><br><span class="line">&#125; <span class="keyword">else</span> b_data[i] = RESP_VARIABLE;</span><br></pre></td></tr></table></figure>
-
-
-
-
-
-<p>考虑到一个字段可能是连续的四个字节(int类型), 或者八个字节等等, afl-analyze会在给当前字节下结论之后, 再联系上一个字节看看</p>
-<p>如果上一个字节和当前字节的四种检校和, 每种都各自不一样, 说明这相邻的两个字节的作用大不相同, 应该是不同的字段.</p>
-<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">if</span> (prev_xff != xor_ff &amp;&amp; prev_x01 != xor_01 &amp;&amp;</span><br><span class="line">    prev_s10 != sub_10 &amp;&amp; prev_a10 != add_10) seq_byte ^= <span class="number">0x80</span>;</span><br><span class="line"></span><br><span class="line">b_data[i] |= seq_byte;</span><br><span class="line"></span><br><span class="line">prev_xff = xor_ff;</span><br><span class="line">prev_x01 = xor_01;</span><br><span class="line">prev_s10 = sub_10;</span><br><span class="line">prev_a10 = add_10;</span><br></pre></td></tr></table></figure>
-
-
-
-
-
-<p>等所有的字节都变异一遍了, 下面要打印装👃界面了, 这里除了装👃还是有一些推理的</p>
-<p>刚才已经初步给每个字节有一个判断, 并且也划分了字段, 现在利用上述信息:</p>
-<p>对于字段的首字节是非常重要不能改的, 也就是上述变异结果中的第3个, “四次变异后的检校和相同, 但是不等于orig_cksum,”</p>
-<p>​	如果这个字段长2字节字节 </p>
-<p>​		并且字段上的值的小端序或者大端序值, 比输入数据长度小, 那么认为这个字段是一个长度值</p>
-<p>​		否则如果这个字段的首字节值和次字节值相差超过32, 那么认为这个字段是一个检校和</p>
-<p>​	否则如果这个字段长4字节,</p>
-<p>​		并且字段上的值的小端序或者大端序值, 比输入数据长度小, 那么认为这个字段是一个长度值</p>
-<p>​		否则如果该字段的首字节最高位, 不等于其他字节之一的首字节最高位, 则认为该字段是一个校验和</p>
-<p>​	其他长度就不得而知了</p>
-<p>此部分代码如下:</p>
-<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">if</span> (rtype == RESP_FIXED) &#123;</span><br><span class="line"></span><br><span class="line">  <span class="keyword">switch</span> (rlen) &#123;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">case</span> <span class="number">2</span>: &#123;</span><br><span class="line"></span><br><span class="line">        u16 val = *(u16*)(in_data + i);</span><br><span class="line"></span><br><span class="line">        <span class="comment">/* Small integers may be length fields. */</span></span><br><span class="line"></span><br><span class="line">        <span class="keyword">if</span> (val &amp;&amp; (val &lt;= in_len || SWAP16(val) &lt;= in_len)) &#123;</span><br><span class="line">          rtype = RESP_LEN;</span><br><span class="line">          <span class="keyword">break</span>;</span><br><span class="line">        &#125;</span><br><span class="line"></span><br><span class="line">        <span class="comment">/* Uniform integers may be checksums. */</span></span><br><span class="line"></span><br><span class="line">        <span class="keyword">if</span> (val &amp;&amp; <span class="built_in">abs</span>(in_data[i] - in_data[i + <span class="number">1</span>]) &gt; <span class="number">32</span>) &#123;</span><br><span class="line">          rtype = RESP_CKSUM;</span><br><span class="line">          <span class="keyword">break</span>;</span><br><span class="line">        &#125;</span><br><span class="line"></span><br><span class="line">        <span class="keyword">break</span>;</span><br><span class="line"></span><br><span class="line">      &#125;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">case</span> <span class="number">4</span>: &#123;</span><br><span class="line"></span><br><span class="line">        u32 val = *(u32*)(in_data + i);</span><br><span class="line"></span><br><span class="line">        <span class="comment">/* Small integers may be length fields. */</span></span><br><span class="line"></span><br><span class="line">        <span class="keyword">if</span> (val &amp;&amp; (val &lt;= in_len || SWAP32(val) &lt;= in_len)) &#123;</span><br><span class="line">          rtype = RESP_LEN;</span><br><span class="line">          <span class="keyword">break</span>;</span><br><span class="line">        &#125;</span><br><span class="line"></span><br><span class="line">        <span class="comment">/* Uniform integers may be checksums. */</span></span><br><span class="line"></span><br><span class="line">        <span class="keyword">if</span> (val &amp;&amp; (in_data[i] &gt;&gt; <span class="number">7</span> != in_data[i + <span class="number">1</span>] &gt;&gt; <span class="number">7</span> ||</span><br><span class="line">            in_data[i] &gt;&gt; <span class="number">7</span> != in_data[i + <span class="number">2</span>] &gt;&gt; <span class="number">7</span> ||</span><br><span class="line">            in_data[i] &gt;&gt; <span class="number">7</span> != in_data[i + <span class="number">3</span>] &gt;&gt; <span class="number">7</span>)) &#123;</span><br><span class="line">          rtype = RESP_CKSUM;</span><br><span class="line">          <span class="keyword">break</span>;</span><br><span class="line">        &#125;</span><br><span class="line"></span><br><span class="line">        <span class="keyword">break</span>;</span><br><span class="line"></span><br><span class="line">      &#125;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">case</span> <span class="number">1</span>: <span class="keyword">case</span> <span class="number">3</span>: <span class="keyword">case</span> <span class="number">5</span> ... MAX_AUTO_EXTRA - <span class="number">1</span>: <span class="keyword">break</span>;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">default</span>: rtype = RESP_SUSPECT;</span><br><span class="line"></span><br><span class="line">  &#125;</span><br><span class="line"></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-      
-    </div>
-
-    
-    
-    
-      <footer class="post-footer">
-        <div class="post-eof"></div>
-      </footer>
-  </article>
-  
-  
-  
-
 
   
   <nav class="pagination">
-    <span class="page-number current">1</span><a class="page-number" href="/impossible/page/2/">2</a><span class="space">&hellip;</span><a class="page-number" href="/impossible/page/10/">10</a><a class="extend next" rel="next" href="/impossible/page/2/"><i class="fa fa-angle-right" aria-label="Next page"></i></a>
+    <span class="page-number current">1</span><a class="page-number" href="/impossible/page/2/">2</a><span class="space">&hellip;</span><a class="page-number" href="/impossible/page/11/">11</a><a class="extend next" rel="next" href="/impossible/page/2/"><i class="fa fa-angle-right" aria-label="Next page"></i></a>
   </nav>
 
 

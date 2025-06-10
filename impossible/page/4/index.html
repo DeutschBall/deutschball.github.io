@@ -167,6 +167,346 @@
   
   
   <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="en">
+    <link itemprop="mainEntityOfPage" href="http://deutschball.github.io/2023/02/08/%E4%BC%A0%E8%BE%93%E5%B1%82/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="https://raw.githubusercontent.com/DeutschBall/picbed/main/dustball.png">
+      <meta itemprop="name" content="dustball">
+      <meta itemprop="description" content="dustland">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="dustland">
+    </span>
+      <header class="post-header">
+        <h2 class="post-title" itemprop="name headline">
+          
+            <a href="/2023/02/08/%E4%BC%A0%E8%BE%93%E5%B1%82/" class="post-title-link" itemprop="url">计算机网络-传输层</a>
+        </h2>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-calendar"></i>
+              </span>
+              <span class="post-meta-item-text">Posted on</span>
+
+              <time title="Created: 2023-02-08 18:08:00" itemprop="dateCreated datePublished" datetime="2023-02-08T18:08:00+08:00">2023-02-08</time>
+            </span>
+              <span class="post-meta-item">
+                <span class="post-meta-item-icon">
+                  <i class="far fa-calendar-check"></i>
+                </span>
+                <span class="post-meta-item-text">Edited on</span>
+                <time title="Modified: 2024-05-05 15:57:07" itemprop="dateModified" datetime="2024-05-05T15:57:07+08:00">2024-05-05</time>
+              </span>
+
+          
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+          <h1 id="计算机网络-传输层"><a href="#计算机网络-传输层" class="headerlink" title="计算机网络-传输层"></a>计算机网络-传输层</h1><h2 id="传输层"><a href="#传输层" class="headerlink" title="传输层"></a>传输层</h2><h3 id="概念"><a href="#概念" class="headerlink" title="概念"></a>概念</h3><p>网络层提供点到点服务,也就是主机到主机的服务</p>
+<p>传输层提供端到端服务,也就是进程到进程的服务</p>
+<p><img src="https://raw.githubusercontent.com/DeutschBall/VideoBed/main/image-20221128103802707.png" alt="image-20221128103802707"></p>
+<h4 id="端口号"><a href="#端口号" class="headerlink" title="端口号"></a>端口号</h4><table>
+<thead>
+<tr>
+<th>层</th>
+<th>寻址方式</th>
+<th>寻址范围</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>链路层</td>
+<td>MAC地址</td>
+<td></td>
+</tr>
+<tr>
+<td>网络层</td>
+<td>ip地址</td>
+<td>ipv4地址32位</td>
+</tr>
+<tr>
+<td>传输层</td>
+<td>端口号</td>
+<td>端口号16位</td>
+</tr>
+</tbody></table>
+<p><strong>服务端</strong>端口号规定</p>
+<p><img src="https://raw.githubusercontent.com/DeutschBall/VideoBed/main/image-20221128104113012.png" alt="image-20221128104113012"></p>
+<p>客户端都是临时端口,不用管到底用的哪个端口</p>
+<h4 id="套接字"><a href="#套接字" class="headerlink" title="套接字"></a>套接字</h4><p>socket&#x3D;IP地址+端口号</p>
+<p>一个套接字唯一标识了一个进程</p>
+<p>一个TCP连接两头是两个套接字,即一个TCP连接被一对套接字决定</p>
+<h4 id="差错控制"><a href="#差错控制" class="headerlink" title="差错控制"></a>差错控制</h4><p>可靠传输:不错,不丢,不乱</p>
+<p>每一层的校验都只校验本层数据</p>
+<table>
+<thead>
+<tr>
+<th>层</th>
+<th>差错控制的目的</th>
+<th>是否可靠</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>数据链路层</td>
+<td>通过CRC校验,保证一个帧中没有比特差错,但不能保证丢不丢帧</td>
+<td>否,只能保证不错</td>
+</tr>
+<tr>
+<td>网络层IP协议</td>
+<td>只针对网络层包的头部进行CRC校验</td>
+<td>否</td>
+</tr>
+<tr>
+<td>传输层TCP协议</td>
+<td>保证做到无传输差错</td>
+<td>是</td>
+</tr>
+</tbody></table>
+<h4 id="应用场景"><a href="#应用场景" class="headerlink" title="应用场景"></a>应用场景</h4><table>
+<thead>
+<tr>
+<th>传输层协议</th>
+<th>应用场景</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>TCP</td>
+<td>客户端和服务端多次交互入访问页面HTTP<br />传输文件FTP<br />电子邮件POP3,SMTP</td>
+</tr>
+<tr>
+<td>UDP</td>
+<td>实时聊天通信,DNS,多播,广播<br />对等网络技术P2P<br />部分路由协议RIP<br />网络时间管理NTP<br />简单网络管理SNTP</td>
+</tr>
+</tbody></table>
+<h3 id="UDP"><a href="#UDP" class="headerlink" title="UDP"></a>UDP</h3><h4 id="UDP首部"><a href="#UDP首部" class="headerlink" title="UDP首部"></a>UDP首部</h4><p><img src="https://raw.githubusercontent.com/DeutschBall/VideoBed/main/image-20221128105608481.png" alt="UDP首部"></p>
+<p>源端口,目的端口各16位,总长度16位,校验和16位</p>
+<h4 id="校验和"><a href="#校验和" class="headerlink" title="校验和"></a>校验和</h4><p>UDP的校验和&#x3D;UDP伪首部+UDP首部+数据</p>
+<p>这个伪首部指，源地址、目的地址、协议类型（0x11）,一个字节的全0,一个字节的<strong>UDP数据长度</strong>，对齐填充2字节的0，整个伪首部共12个字节。</p>
+<blockquote>
+<p><strong>UDP伪首部是为了计算校验和而临时存在的,在计算之前由主机加上,计算之后立刻扔掉,不会参与传输</strong></p>
+<p>UDP伪首部和IP首部无关,<strong>不能理解为</strong>借用的IP首部</p>
+<p><img src="https://raw.githubusercontent.com/DeutschBall/VideoBed/main/v2-86bb22904619c1bd318996b26b7825c2_720w.webp" alt="UDP伪首部不是IP首部"></p>
+<p>伪首部中的UDP长度就是UDP首部+UDP数据的长度,不需要考虑对齐填充,是多少就是多少</p>
+</blockquote>
+<p>伪首部+UDP首部+数据一起计算校验和。</p>
+<p><img src="https://raw.githubusercontent.com/DeutschBall/VideoBed/main/image-20221128110006207.png" alt="image-20221128110006207"></p>
+<p>具体计算方法:</p>
+<p><strong>16位一组相加,最高位进位回卷,和Sum取反得到CheckSum</strong></p>
+<p>在计算校验和时,此时UDP首部的校验和字段先置零,伪首部中的UDP长度就是实际的UDP长度,15,不用考虑对齐填充</p>
+<p><img src="https://raw.githubusercontent.com/DeutschBall/VideoBed/main/image-20221128110218290.png" alt="image-20221128110218290"></p>
+<h4 id="UDPの特点"><a href="#UDPの特点" class="headerlink" title="UDPの特点"></a>UDPの特点</h4><p>1.报文在发送方这里不会拆分,发送方一次交付一个完整报文.</p>
+<blockquote>
+<p>注意强调了发送方,因为网络层才不会管你拆不拆,大于MTU的报必须拆</p>
+<p>比如如果发送方不管三七二十一发了一个巨大的上万字节的UDP报文</p>
+<p>如果数据链路层使用以太网,那么每个以太网帧最大是1500字节,也就是说网络层的MTU&#x3D;1500(Maximum Transmission Unit).</p>
+<p>显然一个上万字节的UDP数据报无法直接发送,因此路由器会进行报文分割,把该UDP数据报拆分成若干不大于1500字节的包,分开发送</p>
+<p>最终在接收方还是需要组装的</p>
+</blockquote>
+<p>2.无流量控制,无差错控制,无拥塞控制</p>
+<blockquote>
+<p>差错控制要求发现错误时要求重传,但是UDP数据报的校验和如果发现错误,直接被路由器或者主机丢弃,不会要求重传</p>
+</blockquote>
+<h3 id="TCP"><a href="#TCP" class="headerlink" title="TCP"></a>TCP</h3><p>分段传输:虚电路建立之后,看上去TCP协议直接发送和接收字节流,就像访问硬盘一样,但是下层实际上还是数据报实现的</p>
+<p>一个图是需要切成好多段,扔给网络层以报文形式交付</p>
+<h4 id="TCP协议的熟知端口号"><a href="#TCP协议的熟知端口号" class="headerlink" title="TCP协议的熟知端口号"></a>TCP协议的熟知端口号</h4><p><img src="https://raw.githubusercontent.com/DeutschBall/VideoBed/main/image-20230203162222069.png" alt="image-20230203162222069"></p>
+<p>特别注意</p>
+<p>20-FTP.Data</p>
+<p>21-FTP.Control</p>
+<p>53-DNS</p>
+<h4 id="字节流"><a href="#字节流" class="headerlink" title="字节流"></a>字节流</h4><p>啥玩意叫字节流?</p>
+<p>啥玩意叫流?Stream,在计算机里就是顺序读取或者写入的字节序列.</p>
+<p>包括从硬盘读取的文件,从键盘输入的字符序列,从网络获取的字符序列.都叫流</p>
+<p>叫做字节流,是因为还有一个字符流</p>
+<p>两者的区别是,字节流使用8位一个字节为信息单元,一个字节传输一个信息,比如一个字母</p>
+<p>而字符流使用16位两个字节作为信息单元,使用unicode编码传输信息</p>
+<p><img src="https://raw.githubusercontent.com/DeutschBall/VideoBed/main/image-20221128111751747.png" alt="image-20221128111751747"></p>
+<p>“流”是<strong>针对应用层上的应用程序而言</strong>的,在应用程序看来,他调用read函数从硬盘读取字节流和调用recv函数从套接字获取字节流没有区别.</p>
+<p>反正就是得用<code>while(!read.eof())&#123;read(buf,n,file);...&#125;</code>这样不停地从缓冲区取出字节,因为一个文件的传输,是像水流一样,源源不断地抵达缓冲区的,不可以一下子全部获取</p>
+<p>传输层只管给应用程序的缓冲区写入数据,不管应用程序拿着数据干了啥</p>
+<p>应用程序只管从缓冲区读取数据,不管传输层从哪里搞来的数据</p>
+<p>因此,传输层单蹦个地顺序传送比特位,还是单蹦个顺序传送字节,抑或是分段每次传送成千个字节即分段,应用程序不关心,全靠传输层自由发挥了</p>
+<p>显然传输层应该选择分段发送,这样效率高</p>
+<blockquote>
+<p>为什么效率高?</p>
+<p>对于网络来说头部长度固定,数据部分越长有效信息比例越高,需要发送的数据报越少,网络负载也就轻</p>
+<p>对于主机来说,每个字节就发送一次,需要频繁地系统调用(显然访问网络这种外设需要系统调用),开销太大</p>
+</blockquote>
+<h4 id="首部格式"><a href="#首部格式" class="headerlink" title="首部格式"></a>首部格式</h4><p><img src="https://raw.githubusercontent.com/DeutschBall/VideoBed/main/image-20221128111530489.png" alt="image-20221128111530489"></p>
+<h5 id="Source-Destination-port-address"><a href="#Source-Destination-port-address" class="headerlink" title="Source&#x2F;Destination port address"></a>Source&#x2F;Destination port address</h5><p>源&#x2F;目的端口地址</p>
+<h5 id="sequence-number"><a href="#sequence-number" class="headerlink" title="sequence number"></a>sequence number</h5><p>字节序列号,一个TCP包可以发送若干数据字节,每一个数据字节都编一个字节序列号,</p>
+<p>在首部中sequence number表明本TCP报文中<strong>第一个数据字节的编号</strong></p>
+<p>本字段用于分段系统</p>
+<h5 id="acknowledgment-number"><a href="#acknowledgment-number" class="headerlink" title="acknowledgment number"></a>acknowledgment number</h5><p>确认号字段,<strong>期望收到的,对方下一个报文段数据的,第一个字节的序号</strong></p>
+<p>本字段用于分段系统</p>
+<h5 id="HLEN"><a href="#HLEN" class="headerlink" title="HLEN"></a>HLEN</h5><p>header length首部长度,<strong>其单位是4字节</strong></p>
+<p>比如HLEN&#x3D;5&#x3D;0101b,表示首部长度为5*4&#x3D;20字节</p>
+<h5 id="Reserved"><a href="#Reserved" class="headerlink" title="Reserved"></a>Reserved</h5><p>保留字段,6位,目前全置零</p>
+<h5 id="控制字段"><a href="#控制字段" class="headerlink" title="控制字段"></a>控制字段</h5><p>6位</p>
+<p>用于TCP连接的流量控制,连接建立终止,连接失败和数据传送方式</p>
+<p><img src="https://raw.githubusercontent.com/DeutschBall/VideoBed/main/image-20221128113731360.png" alt="image-20221128113731360"></p>
+<p>当URG&#x3D;1时,紧急指针Urgent pointer才有效</p>
+<blockquote>
+<p>如何体现紧急?</p>
+<p>正常情况下一个TCP报文段会拆分重组</p>
+<p>整个重组利索之后才会交付给应用程序</p>
+<p>而紧急数据无需等待重组,直接交给应用程序</p>
+</blockquote>
+<p>ACK,确认,1代表acknoledgment number字段有效</p>
+<p>PSH,请求急迫,发送端不需等待窗口填满才发送</p>
+<blockquote>
+<p>PSH用于什么情况?</p>
+<p><img src="https://raw.githubusercontent.com/DeutschBall/VideoBed/main/20210317143111661.png" alt="缓冲区与PSH"></p>
+<p>进程A向socket写东西,实际上就是写到发送缓冲区中,此时并没有实际往网络上发送,啥时候发送呢?得等到缓冲区满了才发,这就像是机场包车的包不满不走一样</p>
+<p>而PSH位就是要强迫发送,即使车没有坐满人,也把枪夹到司机头上给我立刻发车</p>
+<p>有意义吗?急着发车干啥?还真有意义</p>
+<p>有的乘客不在乎自己坐车多花的开销,他急着办事.</p>
+<p>正如有些服务的及时性比效率更优先</p>
+<p>比如ssh服务</p>
+<p>客户端这会急着想看服务端根目录下有啥,于是客户端想发送一个ls命令,如果不加psh位,好吧你等着吧,啥时候缓冲区满了才发送.实际上ssh服务是psh&#x3D;1的</p>
+<p><img src="https://raw.githubusercontent.com/DeutschBall/VideoBed/main/image-20230203172915324.png" alt="image-20230203172915324"></p>
+</blockquote>
+<p>RST,重置连接</p>
+<p>SYN,同步信号,建立连接时使用</p>
+<p>FIN,结束</p>
+<h5 id="window-size"><a href="#window-size" class="headerlink" title="window size"></a>window size</h5><p>窗口大小,单位字节</p>
+<p>用于<strong>控制对方发送的数据量</strong></p>
+<p>根据自身缓冲区剩余空间大小,决定接收窗口大小,通知对方发送窗口上限</p>
+<h5 id="checksum"><a href="#checksum" class="headerlink" title="checksum"></a>checksum</h5><p>检验和</p>
+<p>TCP检验和&#x3D;TCP伪首部+TCP首部+TCP数据</p>
+<p>其中TCP伪首部和UDP伪首部一模一样</p>
+<h5 id="urgent-pointer"><a href="#urgent-pointer" class="headerlink" title="urgent pointer"></a>urgent pointer</h5><p>紧急指针字段,</p>
+<p>如果有紧急数据,则一定放在TCP数据的最开始</p>
+<p>紧急指针表明紧急数据的大小,单位字节</p>
+<h5 id="option"><a href="#option" class="headerlink" title="option"></a>option</h5><p>选项字段,长度可变</p>
+<p>通常不用这个字段</p>
+<p>TCP之规定一种选项,MSS,最大报文段长度,即TCP数据的最大长度</p>
+<h4 id="序号系统"><a href="#序号系统" class="headerlink" title="序号系统"></a>序号系统</h4><p>由于TCP报文需要分段,因此需要引入一套编号机制,让分段和重组有序</p>
+<p>TCP首部的sequence number,acknowledgment number两个字段和ACK,SYN两个标志位就是为序号系统服务的</p>
+<p>需要牢记的是:</p>
+<p><strong>编号是给每个字节的编号,不是给分段的编号!</strong></p>
+<p><strong>编号是给每个字节的编号,不是给分段的编号!</strong></p>
+<p><strong>编号是给每个字节的编号,不是给分段的编号!</strong></p>
+<p>所有数据的第一个字节是一个$[0,2^{32})$内的随机数</p>
+<p>sequence number,该TCP报文段段第一个数据字节的编号</p>
+<p>acknowledgment number,希望接收的下一个报文段的第一个数据字节的编号.也表明接收方已经正确接收该编号-1之前的所有字节</p>
+<p>比如这么一个问题</p>
+<p><img src="https://raw.githubusercontent.com/DeutschBall/VideoBed/main/image-20230203173943002.png" alt="image-20230203173943002"></p>
+<p>显然第一问是100-70&#x3D;30</p>
+<p>第二问,主机B接收到的字节序列应该是$[70,99]$,因此ack number&#x3D;100,表明希望接收编号为100的字节,并且告知发送方,编号为99及之前的所有字节都已经正确接收了</p>
+<h4 id="连接建立-终止"><a href="#连接建立-终止" class="headerlink" title="连接建立&amp;终止"></a>连接建立&amp;终止</h4><p>三次握手建立连接</p>
+<p><img src="https://raw.githubusercontent.com/DeutschBall/VideoBed/main/image-20230203224344990.png" alt="image-20230203224344990"></p>
+<p>服务端是被动打开的,而客户端是主动打开的</p>
+<p>三次握手建立连接的目的是,证明通信双方的收发都正常</p>
+<p>第一次握手,客户端啥也不知道,但是服务端知道客户端不哑,自己不聋</p>
+<p>第二次握手,客户端知道了服务端收到了自己的消息,证明自己不哑,这次收到消息证明自己不聋.</p>
+<p>此时只剩最后一步,此时服务端不知道自己是否哑巴</p>
+<p>第三次握手,服务端收到客户端对第二次握手的确认,因此证明服务端不哑</p>
+<p>第三次握手时,实际上客户端已经可以在TCP数据中,写上对服务端请求什么了</p>
+<p>然而实际上HTTP协议中,三次握手不涉及任何有效数据传输,三次握手建立之后,客户端会另外发送GET请求</p>
+<p><img src="https://raw.githubusercontent.com/DeutschBall/VideoBed/main/image-20230203225616420.png" alt="image-20230203225616420"></p>
+<p>四次挥手断开连接的目的是:</p>
+<p>首先客户端主动提出FIN分手,表明客户端没有要求了</p>
+<p>服务端收到客户端的分手请求后,立刻回复ACK收到,但是如果服务端还有没说完的话,还可以继续说.</p>
+<p>这个阶段叫做半关闭阶段,客户端只能回复收到,不会再有新的请求</p>
+<p>如果服务端也说完了,没有其他话要说了,就发送FIN</p>
+<p>然后客户端收到FINI之后知道服务端也没得说了,回复收到</p>
+<p>到此整个连接关闭</p>
+<h4 id="流量控制"><a href="#流量控制" class="headerlink" title="流量控制"></a>流量控制</h4><blockquote>
+<p>区分流量控制和拥塞控制:</p>
+<p>流量控制是避免接收方来不及接收,缓冲区溢出</p>
+<p>拥塞控制是避免网络拥塞</p>
+</blockquote>
+<p>为啥要进行流量控制?</p>
+<p>接收方的缓冲区大小有限,要保证接收方来得及接收消息并腾出缓冲区</p>
+<p>如果发送方发的过快,接收方处理慢,缓冲区满了,那么后来的消息就会被直接丢弃</p>
+<p>如何进行流量控制?滑动窗口算法</p>
+<h5 id="滑动窗口算法"><a href="#滑动窗口算法" class="headerlink" title="滑动窗口算法"></a>滑动窗口算法</h5><p><img src="https://raw.githubusercontent.com/DeutschBall/VideoBed/main/image-20230204190749379.png" alt="image-20230204190749379"><br>$$<br>发送方滑动窗口大小swnd&#x3D;min(接收方滑动窗口大小rwnd,拥塞窗口大小cwnd)<br>$$<br>其中rwnd是接收方缓冲区剩余空间大小</p>
+<p>比如接收方缓冲区本身4KB,发送方发了一个1K的报文,填到接收方缓冲区中,此时接收方rwnd&#x3D;3000,接收方就得在ACK报文中报告自己的rwnd大小,让发送方心里有数,后面该法多少</p>
+<p>cwnd是发送方自己维护的,发送方根据接收方的回应报文丢失情况,推测网络的拥塞程度,动态调整cwnd的大小</p>
+<blockquote>
+<p>TCP滑动窗口和数据链路层滑动窗口的区别:</p>
+<p>TCP滑动窗口的单位是字节,而数据链路层滑动窗口的单位是帧</p>
+<p>数据链路层的滑动窗口大小是固定的,而TCP滑动窗口大小根据实时情况改变</p>
+</blockquote>
+<p>如图所示的滑动窗口(只是一个例子,实际上一个滑动窗口有成百上千字节)中,cwnd&#x3D;20,rwnd&#x3D;9,</p>
+<p>这就意味着接收方此时的缓冲区只有9个字节的空间了,发送方顶多再发送9字节</p>
+<p><img src="https://raw.githubusercontent.com/DeutschBall/VideoBed/main/image-20230208173522440.png" alt="image-20230208173522440"></p>
+<p>此时发送方啥状态呢?目前滑动窗口中的200,201,202三个字节都已经发送,可能是一个报文同时发走的,也可能是分批发走的,但是这不重要,重要的是,目前尚未得到接收方的ACK回复.发送方现在还可以接着发送203~208这6个字节.</p>
+<p>如果发完了这6个字节仍热没有收到回复,就不能发了,得等等</p>
+<p>时序图</p>
+<p><img src="https://raw.githubusercontent.com/DeutschBall/VideoBed/main/image-20230208174029314.png" alt="image-20230208174029314"></p>
+<p>首先发送方得等接收方告知自己的接收窗口大小</p>
+<p>拿到这个数之后,发送方就可以在这个接收窗口大小和拥塞窗口大小中娶一个最小值,然后放心地发送这么多字节</p>
+<p>这些字节不必是一个报文发走的,这要看链路层对一个数据帧的限制,比如以太网帧中的数据不能超过1500字节.因此,即使swnd&#x3D;min(cwnd,rwnd)&#x3D;2400,也得分成多个报文发送</p>
+<p>接收方会对发送方的每一个报文都进行回复,回复内容包括:</p>
+<p>1.期待接收的下一个字节编号</p>
+<p>2.当前接收方窗口剩余大小</p>
+<p>当接收方的回复报文中,swnd&#x3D;0时,发送方就得停下等接收方消化消化.</p>
+<p>接收方消化一阵子之后,缓冲区有比较大的空间,能够容纳一个大帧时,才会主动发送更新报文.告知发送方,可以继续灌输了</p>
+<blockquote>
+<p>等待缓冲区有较大空间的目的是,防止糊涂窗口综合征</p>
+</blockquote>
+<p>这个更新报文的内容包括:</p>
+<p>1.期待接收的下一个字节编号</p>
+<p>2.当前接收方窗口剩余大小</p>
+<p>为了防止这个更新报文丢包,发送方有一个坚持计时器.当发送方接到swnd&#x3D;0的回复报文就开始了.如果在到时之前收到更新报文自然最好.如果没有收到,则发送方认为更新报文在路上丢了,于是发送方发送一个1字节的探测报文,提醒接收方更新报文丢失了.</p>
+<h4 id="差错控制-1"><a href="#差错控制-1" class="headerlink" title="差错控制"></a>差错控制</h4><p>TCP的差错控制有三个手段</p>
+<p>1.校验和,接收方收到坏段,丢弃并要求重传,通过ACK+坏段序号 要求重传</p>
+<p>2.确认</p>
+<p>发送方发出的每一个数据段都需要ACK确认</p>
+<p>不携带数据但是占用序号的控制段也需要确认</p>
+<p><strong>ACK段不需要确认</strong>,因为ACK本身就是确认用的</p>
+<p>3.重传</p>
+<p>当段损坏,丢失或者超时,需要重传</p>
+<p><strong>ACK段不需要重传</strong></p>
+<blockquote>
+<p>重传的情形:</p>
+<p>1.丢失段</p>
+<p><img src="https://raw.githubusercontent.com/DeutschBall/VideoBed/main/image-20230208175609900.png" alt="image-20230208175609900"></p>
+<p>2.3ACK快速重传</p>
+<p><img src="https://raw.githubusercontent.com/DeutschBall/VideoBed/main/image-20230208175633242.png" alt="image-20230208175633242"></p>
+</blockquote>
+<h4 id="拥塞控制"><a href="#拥塞控制" class="headerlink" title="拥塞控制"></a>拥塞控制</h4><p>拥塞控制可以理解为网络流问题</p>
+<p>一条主干道的带宽是1000Mbps,其支线的带宽和是1500Mbps,如果所有支线都满载传输,则骨干路由器就得缓存支线的数据报文,满满地往主干道发.</p>
+<p>如果骨干路由器缓冲区溢出,就有数据丢包了</p>
+<p>拥塞控制还是滑动窗口算法,并且和流量控制兼容,体现在<br>$$<br>swnd&#x3D;min(cwnd,rwnd)<br>$$</p>
+<h5 id="慢启动和拥塞避免"><a href="#慢启动和拥塞避免" class="headerlink" title="慢启动和拥塞避免"></a>慢启动和拥塞避免</h5><p><img src="https://raw.githubusercontent.com/DeutschBall/VideoBed/main/image-20230208180115427.png" alt="image-20230208180115427"></p>
+<p>最初慢启动阶段,cwnd&#x3D;1,发一个报文,收到ACK,这就意味着一次发一个包,网络可以承受,于是蹬鼻子上脸,cwnd&#x3D;2,发俩报文,等俩ACK,如果又都受到了,那就更加猖狂</p>
+<p>一直到慢启动阈sstresh,之后就不能指数扩大cwnd了,需要加性增大,也就是发一个包收到ACK就cwnd扩大1,一直这样直到计时器超时,说明达到网络流量上限了,</p>
+<p>此时立刻回到慢启动阶段,cwnd&#x3D;1,并重新设置ssthresh阈值为超时cwnd的一半</p>
+<p>之后重复上述过程</p>
+<h5 id="3ACK快速恢复"><a href="#3ACK快速恢复" class="headerlink" title="3ACK快速恢复"></a>3ACK快速恢复</h5><p><img src="https://raw.githubusercontent.com/DeutschBall/VideoBed/main/image-20230208180505456.png" alt="image-20230208180505456"></p>
+<p>能够收到3ACK说明网络只是轻度拥塞</p>
+<p>此时直接ssthresh降为收到3ACK时cwnd的一半,然后设置cwnd&#x3D;ssthresh,然后重复加性增大阶段</p>
+<h5 id="状态转移图"><a href="#状态转移图" class="headerlink" title="状态转移图"></a>状态转移图</h5><p><img src="https://raw.githubusercontent.com/DeutschBall/VideoBed/main/image-20230208180715552.png" alt="image-20230208180715552"></p>
+
+      
+    </div>
+
+    
+    
+    
+      <footer class="post-footer">
+        <div class="post-eof"></div>
+      </footer>
+  </article>
+  
+  
+  
+
+      
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="en">
     <link itemprop="mainEntityOfPage" href="http://deutschball.github.io/2023/02/08/%E6%95%B0%E6%8D%AE%E9%93%BE%E8%B7%AF%E5%B1%82/">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
@@ -3290,184 +3630,10 @@
   
   
 
-      
-  
-  
-  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="en">
-    <link itemprop="mainEntityOfPage" href="http://deutschball.github.io/2022/12/19/%E5%82%85%E9%87%8C%E5%8F%B6%E5%8F%98%E6%8D%A2/">
-
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="image" content="https://raw.githubusercontent.com/DeutschBall/picbed/main/dustball.png">
-      <meta itemprop="name" content="dustball">
-      <meta itemprop="description" content="dustland">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="dustland">
-    </span>
-      <header class="post-header">
-        <h2 class="post-title" itemprop="name headline">
-          
-            <a href="/2022/12/19/%E5%82%85%E9%87%8C%E5%8F%B6%E5%8F%98%E6%8D%A2/" class="post-title-link" itemprop="url">傅里叶变换</a>
-        </h2>
-
-        <div class="post-meta">
-            <span class="post-meta-item">
-              <span class="post-meta-item-icon">
-                <i class="far fa-calendar"></i>
-              </span>
-              <span class="post-meta-item-text">Posted on</span>
-
-              <time title="Created: 2022-12-19 21:52:00" itemprop="dateCreated datePublished" datetime="2022-12-19T21:52:00+08:00">2022-12-19</time>
-            </span>
-              <span class="post-meta-item">
-                <span class="post-meta-item-icon">
-                  <i class="far fa-calendar-check"></i>
-                </span>
-                <span class="post-meta-item-text">Edited on</span>
-                <time title="Modified: 2024-09-22 01:59:33" itemprop="dateModified" datetime="2024-09-22T01:59:33+08:00">2024-09-22</time>
-              </span>
-
-          
-
-        </div>
-      </header>
-
-    
-    
-    
-    <div class="post-body" itemprop="articleBody">
-
-      
-          <h1 id="傅里叶变换"><a href="#傅里叶变换" class="headerlink" title="傅里叶变换"></a>傅里叶变换</h1><p>一个欠了一年的帐,今天终于还上了</p>
-<p><del>我根本不知道录音的基本原理</del></p>
-<h2 id="O-n-lg-n-内求解多项式乘法"><a href="#O-n-lg-n-内求解多项式乘法" class="headerlink" title="$O(n\lg n)$内求解多项式乘法"></a>$O(n\lg n)$内求解多项式乘法</h2><p>算法导论上的傅里叶变换,是为了在$O(n\lg n)$时间内,解决多项式乘法</p>
-<p>如果直接让两个多项式卷积,那么朴素方法复杂度显然是$O(n^2)$</p>
-<p>如何降复杂度呢?使用点值计算</p>
-<p>线性代数上可以证明,一个n-1次多项式,可以在其图像上使用n个点唯一确定(插值方法)</p>
-<p>也就是说,一个多项式$A(x)&#x3D;\sum_{j&#x3D;0}^{n-1}a_jx^j$可以用n个点表示</p>
-<p>那么两个均为$n-1$次的多项式$A(x),B(x)$,其乘积多项式就得是一个$2n-2$次多项式,需要$2n-2$个点唯一确定</p>
-<p>显然从一个$n-1$次多项式上取n-1个点已经足够唯一确定这个多项式了,再取其他点就是冗余信息,对确定表达式没有影响,因此可以在$A(x),B(x)$上各取2n-2个点,计算这2n-2个点的积,这就得出了积多项式的点值表示</p>
-<p>其中第i个点$C(x_i,A(x_i)\times B(x_i))$纵坐标为两个多项式在$x_0$处函数值的乘积</p>
-<p>画在图上也就是:</p>
-<p>普通乘法是我们之前使用的lowB方法,下面曲线救国nb,就求值和插值这两步是真nb,求值和插值为何是$O(n\lg n)$呢?</p>
-<p><img src="https://raw.githubusercontent.com/DeutschBall/VideoBed/main/image-20221219191232000.png" alt="image-20221219191232000"></p>
-<p>使用之前学过的方法,这两步都是$O(n^2)$的,</p>
-<p>求值时需要将$x_0,x_1…$以此带入$A(x)$一共n个自变量,每个自变量求值都是$O(n)$,因此总共$O(n^2)$</p>
-<p>插值时需要使用拉格朗日插值法,也是$O(n^2)$</p>
-<blockquote>
-<p>拉格朗日插值公式:<br>$$<br>A(x)&#x3D;\sum_{k&#x3D;0}^{n-1}y_k\frac{\Pi_{j\neq k }(x-x_j)}{\Pi_{j\neq k}(x_k-x_j)}<br>$$<br>其中$(x_0,y_0),(x_1,y_1),…,(x_n-1,y_n-1)$是多项式$A(x)$的点值表示</p>
-<p>最外层这个求和已经是$O(n)$</p>
-<p>用二维数组$M[k][j]&#x3D;x_k-x_j$预处理分母,</p>
-<p>分子预先先直接求出$F(x)&#x3D;\Pi(x-x_j)$</p>
-<p>那么对于一个给定的k,分母就是n个数的积,$O(n)$</p>
-<p>分子就是$F(x)&#x2F;(x-x_j)$,$O(n)$</p>
-<p>乘上最外圈的$O(n)$得到$O(n^2)$</p>
-<p>也就是说,之前使用的方法是$O(n^2)$的</p>
-</blockquote>
-<p>但是使用快速傅里叶变换这种吊法,就能给他降到$O(n\lg n)$</p>
-<p>怎么降的?选点值的时候有讲究</p>
-<p>任意n个不同的点就可以确定一个n-1次表达式.</p>
-<p>如果选n个单位复根,然后对系数向量$(a_0,a_1,…,a_{n-1})$应用离散傅里叶变换DFT,就可以在$O(n\lg n)$内完成求值,使用逆DFT变换就可以在$O(n\lg n)$完成插值</p>
-<h2 id="单位复根儿"><a href="#单位复根儿" class="headerlink" title="单位复根儿"></a>单位复根儿</h2><p>“n次单位复根”就是指满足$\omega^n&#x3D;1$的负数$\omega$,注意是这个$\omega$,不带那个n次方,一定要注意上下角标</p>
-<p>欧拉公式<br>$$<br>e^{i\pi}+1&#x3D;0<br>$$<br>第k个n次单位复根是$\omega_k&#x3D;e^{\frac{2\pi ik}{n}}$</p>
-<p>显然$\omega_k^n&#x3D;(e^{\frac{2\pi ik}{n}})^n&#x3D;e^{2\pi ik}&#x3D;((e^{i\pi})^2)^k&#x3D;((-1)^2)^k&#x3D;1^k&#x3D;1$</p>
-<p>n次单位复根儿恰好有n个,也就是$k&#x3D;0,1,2,…,n-1$</p>
-<p>这n个画在复平面儿上是很整齐的,比如8次复根就长这样:</p>
-<p>任何两个相邻的单位复根之间的角度都是固定的,$360&#x2F;n&#x3D;360&#x2F;8$</p>
-<p><img src="https://raw.githubusercontent.com/DeutschBall/VideoBed/main/image-20221219193558548.png" alt="image-20221219193558548"></p>
-<p>都落在复平面单位元上</p>
-<p>显然8次复根只有8个,如果非要写第九个$\omega_8^9$,就和$\omega_8^0$重合了,</p>
-<p>然后书上就说这是加法群$(Z_8,+)$,确实是,除了装了个B对于解决问题没有帮助,甚至没有学过抽代的就蒙蔽了</p>
-<h2 id="DFT"><a href="#DFT" class="headerlink" title="DFT"></a>DFT</h2><p>求n-1次多项式的点值表示时,就需要选取n个点$(x_0,x_1,x,…,x_{n-1})$,然后求出各自的函数值$(y_0,y_1,…,y_{n-1})$</p>
-<p>如果选取的n个点是n个富哥儿,那么此时有<br>$$<br>y_k&#x3D;A(\omega_n^k)&#x3D;\sum_{j&#x3D;0}^{n-1}a_j\omega <em>n^{jk}<br>$$<br>以此得到的$\vec{y}&#x3D;(y_0,y_1,…,y</em>{n-1})$叫做系数向量$\vec{a}&#x3D;(a_0,a_1,…,a_{n-1})$的离散傅里叶变换,</p>
-<p>记作$\vec{y}&#x3D;DFT_n(\vec{a})$</p>
-<p>笑死,这看上去不就是带入求值吗,选n个富哥有屁用啊?</p>
-<p>如果用普通的带入求值,找n个富哥儿和找n个普通人儿没有区别.</p>
-<p>富哥儿的作用不能浪费喽,他们和普通值又有啥区别呢?</p>
-<p>这就是单位复根儿的几个性质</p>
-<p>这几个性质在计算时会体现群论的对称性,这意味着,这n个富哥确实能够比n个普通值携带更多的信息</p>
-<blockquote>
-<p><img src="https://raw.githubusercontent.com/DeutschBall/VideoBed/main/image-20221219195023551.png" alt="image-20221219195023551"></p>
-</blockquote>
-<h2 id="FFT"><a href="#FFT" class="headerlink" title="FFT"></a>FFT</h2><p>fast Fourier transform,快速傅里叶变换</p>
-<p>在$O(n\lg n)$内求解DFT的算法</p>
-<p>也就是说,DFT并不是一个求解方法,只是娶了n个富哥作为点值表示</p>
-<p>仍然可以使用带入求值这种$O(n^2)$的lowB算法求解</p>
-<p>而FFT就是一种吊法</p>
-<p>他这样变形:</p>
-<p>首先n向上取整到最近的2的幂次,这样做是为了保证能够一直二分直到剩1项,反正多取点不会降低精度</p>
-<p>后面的n默认就认为是2的幂次了<br>$$<br>\begin{aligned}<br>A(x)&amp;&#x3D;a_0+a_1x+a_2x^2+…+a_{n-1}x^{n-1}\<br>&amp;&#x3D;(a_0+a_2x^2+a_4x^4+…+a_{n-2}x^{n-2})+(a_1x+a_3x^3+a_5x^{5}+…+a_{n-1}x^{n-1})\<br>&amp;&#x3D;A^{[0]}(x^2)+xA^{[1]}(x^2)<br>\end{aligned}<br>$$<br>也就是说将$A(x)$按照偶数项和奇数项分开,其中奇数项都提出一个x来,这样子多项式中的x都是偶数,可以提取$x^2$作为自变量,于是得到<br>$$<br>\begin{cases}<br>A^{[0]}(x)&#x3D;a_0+a_2x+a_4x^2+…+a_{n-2}x^{\frac{n}{2}-1}\<br>A^{[1]}(x)&#x3D;a_1+a_3x+a_5x^2+…+a_{n-1}x^{\frac{n}{2}-1}<br>\end{cases}<br>$$<br>时刻不要忘记在求什么,</p>
-<p>我们现在已知的是$\vec{a}&#x3D;(a_0,a_1,a_2,…,a_{n-1})$,$\vec{x}&#x3D;(\omega_n^0,\omega_n^1,…,\omega_n^{n-1})$</p>
-<p>要求的是$\vec {y}&#x3D;DFT_n(\vec{a})$</p>
-<p>现在可以这样算了:<br>$$<br>A(x_k)&#x3D;A(\omega_{n}^k)&#x3D;A^{[0]}(\omega^{2k}_n)+\omega^k_nA^{[1]}(\omega^{2k}_n)<br>$$<br>注意到我们不容易计算$A(x)$是因为,它的项太多了,0次项,1次项等等一直到n-1次项,共n项</p>
-<p>而现在对于一个$A^{[0]}(x)$他只有$\frac{n}{2}$项了,工作量直接下降到一半</p>
-<p>以此递归,总会有个时候,$A(x)$只有一项,也就是0次项,也就是那个常数项,算也不用算直接返回了,和x没有关系了,和富哥没关系了</p>
-<p>写出伪代码:</p>
-<p>注意FFT函数的输入是目标多项式的系数向量,不是富哥,因为富哥是作为常数使用的,不需要参数传递</p>
-<p>FFT函数输出的是$\vec{y}&#x3D;DFT(\vec{a})$也就是和将n个富哥直接带入多项式求值得到的n个值相同,但是算法更好</p>
-<blockquote>
-<p>一定注意函数不是y&#x3D;A(x),而是y&#x3D;FFT(a)</p>
-<p>一定要清楚函数在干什么</p>
-</blockquote>
-<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br></pre></td><td class="code"><pre><span class="line"><span class="function">vector&lt;<span class="type">int</span>&gt; <span class="title">FFT</span><span class="params">(vector&lt;<span class="type">int</span>&gt; a)</span></span>&#123;<span class="comment">//a是系数,返回y向量</span></span><br><span class="line">	n=a.<span class="built_in">length</span>();</span><br><span class="line">    <span class="keyword">if</span>(<span class="number">1</span>==n)&#123;<span class="comment">//递归出口条件,只剩一项时,也就是那个常数项,直接返回此时的a,实际上是a[0]作为y[0]返回了y</span></span><br><span class="line">        <span class="keyword">return</span> a;</span><br><span class="line">    &#125;;</span><br><span class="line">    Complex omega_n=e^(<span class="number">2</span>*pi*i/n);</span><br><span class="line">    vector&lt;<span class="type">int</span>&gt; a0,a1;</span><br><span class="line">    <span class="keyword">for</span>(<span class="type">int</span> i=<span class="number">0</span>;i&lt;n;++i)&#123;</span><br><span class="line">        <span class="keyword">if</span>(i%<span class="number">2</span>==<span class="number">0</span>)a<span class="number">0.</span><span class="built_in">push_back</span>(a[i]);</span><br><span class="line">        <span class="keyword">else</span> a<span class="number">1.</span><span class="built_in">push_back</span>(a[i]);</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="type">int</span> y0=<span class="built_in">FFT</span>(a0);</span><br><span class="line">    <span class="type">int</span> y1=<span class="built_in">FFT</span>(a1);</span><br><span class="line">    <span class="function">vector&lt;<span class="type">int</span>&gt; <span class="title">y</span><span class="params">(n)</span></span>;</span><br><span class="line">    <span class="keyword">for</span>(<span class="type">int</span> i=<span class="number">0</span>;i&lt;n/<span class="number">2</span>;i++)&#123;<span class="comment">//一定注意此处上界是n/2</span></span><br><span class="line">        y[i]	=y0[i]+<span class="built_in">pow</span>(omega_n,i)*y1[i];<span class="comment">//容易理解</span></span><br><span class="line">       	y[n/<span class="number">2</span>+i]=y0[i]-<span class="built_in">pow</span>(omega_n,i)*y1[i];<span class="comment">//想对困难</span></span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">return</span> y;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-
-<p>这里面有一个<code>y[n/2+i]=y0[i]-pow(omega_n,i)*y1[i]</code>,怎么得到的呢?<br>$$<br>\begin{aligned}<br>y[\frac{n}{2}+i]&amp;&#x3D;A(\omega_n^{\frac{n}{2}+i})\<br>&amp;&#x3D;A^{[0]}(\omega_n^{n+2i})+\omega_n^{\frac{n}{2}+i}A^{[1]}(\omega_n^{n+2i})\<br>&amp;&#x3D;A^{[0]}(\omega_n^{2i})+\omega_n^{\frac{n}{2}+i}A^{[1]}(\omega_n^{2i})\<br>&amp;&#x3D;A^{[0]}(\omega_{\frac{n}{2}}^i)-\omega_n^{i}A^{[1]}(\omega_{\frac{n}{2}}^i)\<br>&amp;&#x3D;y_0[i]-\omega_{n}^i y_1[i]<br>\end{aligned}<br>$$<br><strong>这就体现出富哥和普通点的区别了</strong>,富哥的变换很灵活</p>
-<p>从上面的伪代码可以看出,最底层的递归和自变量无关.</p>
-<p>加速发生在这里,将工程量直接缩减到一半</p>
-<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">for</span>(<span class="type">int</span> i=<span class="number">0</span>;i&lt;n/<span class="number">2</span>;i++)&#123;<span class="comment">//一定注意此处上界是n/2</span></span><br><span class="line">    y[i]	=y0[i]+<span class="built_in">pow</span>(omega_n,i)*y1[i];<span class="comment">//容易理解</span></span><br><span class="line">   	y[n/<span class="number">2</span>+i]=y0[i]-<span class="built_in">pow</span>(omega_n,i)*y1[i];<span class="comment">//想对困难</span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-
-<p>每次递归都将工程量缩减一半,因此总工程量直接对n取对数<br>$$<br>T(n)&#x3D;2T(\frac{n}{2})+\Theta(n)&#x3D;\Theta(n\lg n)<br>$$</p>
-<p>好了到此FFT的思路有了,求值结束,也就是我们求得了$y&#x3D;DFT(a)$</p>
-<blockquote>
-<p>举个例子,$A(x)&#x3D;1+2x+x^2+x^3$,正好有$2^2&#x3D;4$项,n&#x3D;4</p>
-<p>4次单位复根$\omega_4^k&#x3D;e^{\frac{2\pi ik}{4}}$</p>
-<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line">FFT(&lt;1,2,1,1&gt;)&#123;</span><br><span class="line">	n=&lt;1,2,1,1&gt;.length()=4;</span><br><span class="line">	a0=&lt;1,1&gt;;</span><br><span class="line">	a1=&lt;2,1&gt;;</span><br><span class="line">	w1;</span><br><span class="line">	y0=FFT(&lt;1,1&gt;)&#123;</span><br><span class="line">		n=&lt;1,1&gt;.length()=2;</span><br><span class="line">		a0=&lt;1&gt;;</span><br><span class="line">		a1=&lt;1&gt;;</span><br><span class="line">		y0=FFT(&lt;1&gt;)=&lt;1&gt;;</span><br><span class="line">		y1=FFT(&lt;1&gt;)=&lt;1&gt;;</span><br><span class="line">		y[0]=y[0]+w1</span><br><span class="line">	&#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-
-
-</blockquote>
-<p>下面考虑如何从点值形式倒回去,也就是如何在$O(n\lg n)$实现插值</p>
-<p>现在已知的是$\vec{y}$和$\vec{x}&#x3D;{\omega_{n}^0,\omega_n^1,…,\omega_n^{n-1}}$,求系数向量$\vec{a}$</p>
-<p>显然可以待定系数法设n个系数,然后带入自变量和因变量,解一元n次方程组.</p>
-<p>高斯消元法是$O(n^2)$的lowB算法,要用吊算法</p>
-<p>写成矩阵形式</p>
-<p><img src="https://raw.githubusercontent.com/DeutschBall/VideoBed/main/image-20221219211357315.png" alt="image-20221219211357315"></p>
-<p>也就是说,一眼顶针,鉴定为范德蒙矩阵,必然可逆且逆矩阵唯一</p>
-<p>现在要用尽可能快的方法求解这个范德蒙矩阵$V$的逆矩阵,这个求解方法就是算法关键</p>
-<p>这有个定理$V^{-1}_n[j,k]&#x3D;\frac{\omega_n^{-kj}}{n}$</p>
-<p>怎么得出来的,我线性代数忘了,不会解,但是$VV^{-1}$算一下确实得到$E$,满足互逆矩阵的定义</p>
-<p>由于$\vec{a}&#x3D;\vec V^{-1}\vec{y}$</p>
-<p>$a_j$就等于$\vec V^{-1}$的第j行与$\vec y$的乘积,也就是说<br>$$<br>a_j&#x3D;\sum_{k&#x3D;0}^{n-1}V_n^{-1}[j,k]\times y_k\<br>&#x3D;\sum_{k&#x3D;0}^{n-1}\frac{\omega^{-kj}<em>n}{n}\times y_k\<br>&#x3D;\frac{1}{n}\sum</em>{k&#x3D;0}^{n-1}\omega_n^{-kj}\times y_k<br>$$<br>求解一个$a_j$,是$O(n)$复杂度的,</p>
-<p>共有n个$a_j$,总共就是$O(n^2)$复杂度的,怎么降到$O(n\lg n)$呢?</p>
-<p>回忆正向的FFT是干啥的来着</p>
-<p>是求解$\vec{y}&#x3D;DFT_n(\vec {a})$问题的</p>
-<p>其中$y_j&#x3D;\sum_{k&#x3D;0}^{n-1}a_j\omega_n^{jk}$</p>
-<p>类比一下<br>$$<br>\begin{aligned}<br>n a_j&amp;&#x3D;\sum_{k&#x3D;0}^{n-1} y_k\omega_n^{-jk}\<br>y_j&amp;&#x3D;\sum_{k&#x3D;0}^{n-1}a_k\omega_n^{jk}<br>\end{aligned}<br>$$<br>令$\vec{y’}&#x3D;n\vec{a},$</p>
-<p>$\vec{a’}&#x3D;\vec{y}$</p>
-<p>令单位富哥变成单位负哥,就可以直接带入FFT函数求解了$\vec{y’}$了</p>
-<p>解出来都除以n就得到了$\vec{a}$</p>
-<p>因此又在$O(n\lg n)$内解决了</p>
-<h2 id="回到多项式求积"><a href="#回到多项式求积" class="headerlink" title="回到多项式求积"></a>回到多项式求积</h2><p>卷积定理:</p>
-<p>对于两个长度为n的向量$\vec a,\vec b$<br>$$<br>a\otimes b&#x3D;DFT^{-1}<em>{2n}(DFT</em>{2n}(a)·DFT_{2n}(b))<br>$$<br>将多项式A,B只保留系数看成向量a,b,此时$a\otimes b$就是积多项式AB的系数向量</p>
-
-      
-    </div>
-
-    
-    
-    
-      <footer class="post-footer">
-        <div class="post-eof"></div>
-      </footer>
-  </article>
-  
-  
-  
-
 
   
   <nav class="pagination">
-    <a class="extend prev" rel="prev" href="/impossible/page/3/"><i class="fa fa-angle-left" aria-label="Previous page"></i></a><a class="page-number" href="/impossible/">1</a><span class="space">&hellip;</span><a class="page-number" href="/impossible/page/3/">3</a><span class="page-number current">4</span><a class="page-number" href="/impossible/page/5/">5</a><span class="space">&hellip;</span><a class="page-number" href="/impossible/page/10/">10</a><a class="extend next" rel="next" href="/impossible/page/5/"><i class="fa fa-angle-right" aria-label="Next page"></i></a>
+    <a class="extend prev" rel="prev" href="/impossible/page/3/"><i class="fa fa-angle-left" aria-label="Previous page"></i></a><a class="page-number" href="/impossible/">1</a><span class="space">&hellip;</span><a class="page-number" href="/impossible/page/3/">3</a><span class="page-number current">4</span><a class="page-number" href="/impossible/page/5/">5</a><span class="space">&hellip;</span><a class="page-number" href="/impossible/page/11/">11</a><a class="extend next" rel="next" href="/impossible/page/5/"><i class="fa fa-angle-right" aria-label="Next page"></i></a>
   </nav>
 
 

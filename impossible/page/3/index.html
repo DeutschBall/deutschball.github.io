@@ -167,6 +167,263 @@
   
   
   <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="en">
+    <link itemprop="mainEntityOfPage" href="http://deutschball.github.io/2024/10/17/%E8%B0%83%E8%AF%95Glibc/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="https://raw.githubusercontent.com/DeutschBall/picbed/main/dustball.png">
+      <meta itemprop="name" content="dustball">
+      <meta itemprop="description" content="dustland">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="dustland">
+    </span>
+      <header class="post-header">
+        <h2 class="post-title" itemprop="name headline">
+          
+            <a href="/2024/10/17/%E8%B0%83%E8%AF%95Glibc/" class="post-title-link" itemprop="url">glibc 相关备忘</a>
+        </h2>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-calendar"></i>
+              </span>
+              <span class="post-meta-item-text">Posted on</span>
+              
+
+              <time title="Created: 2024-10-17 23:20:00 / Modified: 23:25:26" itemprop="dateCreated datePublished" datetime="2024-10-17T23:20:00+08:00">2024-10-17</time>
+            </span>
+
+          
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+          <h1 id="源码调试Glibc"><a href="#源码调试Glibc" class="headerlink" title="源码调试Glibc"></a>源码调试Glibc</h1><h2 id="系统自带glibc的缺点"><a href="#系统自带glibc的缺点" class="headerlink" title="系统自带glibc的缺点"></a>系统自带glibc的缺点</h2><p>在我们尝试观察延迟绑定机制时,</p>
+<p>需要观察_dl_runtime_resolve和dl_fixup这两个函数</p>
+<p>这两个函数都位于ld-linux.so.2 动态库中</p>
+<p>默认情况下使用gcc编译程序时,动态链接的glibc动态库文件,都在&#x2F;lib下</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">root@Destroyer:/usr/src/CTF-All-In-One/src/writeup/<span class="number">6.1</span><span class="number">.3</span>_pwn_xdctf2015_pwn200<span class="meta"># ldd /bin/cat</span></span><br><span class="line">        linux-vdso.so<span class="number">.1</span> (<span class="number">0x00007fffee15a000</span>)</span><br><span class="line">        libc.so<span class="number">.6</span> =&gt; /lib/x86_64-linux-gnu/libc.so<span class="number">.6</span> (<span class="number">0x00007f36b527b000</span>)</span><br><span class="line">        /lib64/ld-linux-x86<span class="number">-64.</span>so<span class="number">.2</span> (<span class="number">0x00007f36b5875000</span>)</span><br><span class="line">root@Destroyer:/usr/src/CTF-All-In-One/src/writeup/<span class="number">6.1</span><span class="number">.3</span>_pwn_xdctf2015_pwn200<span class="meta"># ldd ./test</span></span><br><span class="line">        linux-gate.so<span class="number">.1</span> (<span class="number">0xf7f33000</span>)</span><br><span class="line">        libc.so<span class="number">.6</span> =&gt; /lib/i386-linux-gnu/libc.so<span class="number">.6</span> (<span class="number">0xf7d3b000</span>)</span><br><span class="line">        /lib/ld-linux.so<span class="number">.2</span> (<span class="number">0xf7f35000</span>)</span><br></pre></td></tr></table></figure>
+
+<table>
+<thead>
+<tr>
+<th></th>
+<th>libc</th>
+<th>ld</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>32位程序</td>
+<td>&#x2F;lib&#x2F;i386-linux-gnu&#x2F;libc.so.6</td>
+<td>&#x2F;lib&#x2F;ld-linux.so.2</td>
+</tr>
+<tr>
+<td>64位程序</td>
+<td>&#x2F;lib&#x2F;x86_64-linux-gnu&#x2F;libc.so.6</td>
+<td>&#x2F;lib64&#x2F;ld-linux-x86-64.so.2</td>
+</tr>
+</tbody></table>
+<p>这是安装ubuntu这种发行版时系统自带的glibc-release版</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">root@Destroyer:/lib/i386-linux-gnu<span class="meta"># file ld-2.27.so</span></span><br><span class="line">ld<span class="number">-2.27</span>.so: ELF <span class="number">32</span>-bit LSB shared object, Intel <span class="number">80386</span>, version <span class="number">1</span> (SYSV), dynamically linked, BuildID[sha1]=<span class="number">8</span>da666988713e9bb88f4eb5d27dc35d815cf006b, stripped</span><br></pre></td></tr></table></figure>
+
+<p>可以看到调试符号信息已经被strip了</p>
+<p>就算我们编译一个c程序时加入了-g选项,也只是保留了程序领空内的所有符号信息,该程序链接的glibc照样是没有调试符号的</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">gef➤  info sharedlibrary</span><br><span class="line">From        To          Syms Read   Shared Object Library</span><br><span class="line"><span class="number">0xf7fd6ab0</span>  <span class="number">0xf7ff18bb</span>  Yes (*)     /lib/ld-linux.so<span class="number">.2</span></span><br><span class="line"><span class="number">0xf7df4690</span>  <span class="number">0xf7f414b6</span>  Yes (*)     /lib/i386-linux-gnu/libc.so<span class="number">.6</span></span><br><span class="line">(*): Shared library is missing debugging information.</span><br></pre></td></tr></table></figure>
+
+<p>两个库都标着*,意思是缺乏调试信息</p>
+<p>如果我们想要调试glibc,或者说能够保留glibc中的符号,比如函数名,变量名之类,需要带有符号的glibc</p>
+<p>可以自己编译一个玩</p>
+<p>以我的wsl kali-linux为例,装机自带的libc版本号是2.38</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">┌──(dustball㉿Destroyer)-[~]</span><br><span class="line">└─$ ldd --version</span><br><span class="line"><span class="title function_">ldd</span> <span class="params">(Debian GLIBC <span class="number">2.38</span><span class="number">-13</span>)</span> 2.38</span><br><span class="line"><span class="title function_">Copyright</span> <span class="params">(C)</span> 2023 Free Software Foundation, Inc.</span><br><span class="line">This is <span class="built_in">free</span> software; see the source <span class="keyword">for</span> copying conditions.  There is NO</span><br><span class="line">warranty; not even <span class="keyword">for</span> MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.</span><br><span class="line">Written by Roland McGrath and Ulrich Drepper.</span><br></pre></td></tr></table></figure>
+
+<p>下面我们编译一个新的带有调试符号的2.38版本的glibc</p>
+<h2 id="编译64位glibc"><a href="#编译64位glibc" class="headerlink" title="编译64位glibc"></a>编译64位glibc</h2><h3 id="下载glibc"><a href="#下载glibc" class="headerlink" title="下载glibc"></a>下载glibc</h3><p>首先下载glibc源码</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">apt install glibc-source</span><br></pre></td></tr></table></figure>
+
+<p>执行完后会在&#x2F;usr&#x2F;src下面生成glibc目录</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">┌──(root㉿Destroyer)-[/usr/src/glibc]</span><br><span class="line">└─# ls</span><br><span class="line">debian  glibc-2.38.tar.xz</span><br></pre></td></tr></table></figure>
+
+<blockquote>
+<p>这个方法不太靠谱，我在另一台机器的wsl上这样整，缺少texinfo源代码</p>
+<p>还是到仓库下载源代码稳妥</p>
+</blockquote>
+<p>或者到glibc仓库<a target="_blank" rel="noopener" href="http://ftp.gnu.org/gnu/glibc/">http://ftp.gnu.org/gnu/glibc/</a>挑一个下载</p>
+<p>或者到镜像仓库下载<a target="_blank" rel="noopener" href="https://mirrors.aliyun.com/gnu/glibc/">https://mirrors.aliyun.com/gnu/glibc/</a></p>
+<p>比如</p>
+<figure class="highlight sh"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">curl http://ftp.gnu.org/gnu/glibc/glibc-2.38.tar.xz -o glibc-2.38.tar.xz</span><br></pre></td></tr></table></figure>
+
+<h3 id="解压glibc"><a href="#解压glibc" class="headerlink" title="解压glibc"></a>解压glibc</h3><figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">tar -xf glibc<span class="number">-2.38</span>.tar.xz</span><br></pre></td></tr></table></figure>
+
+<h3 id="建立bulid目录"><a href="#建立bulid目录" class="headerlink" title="建立bulid目录"></a>建立bulid目录</h3><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">cd glibc-2.38</span><br><span class="line">mkdir build</span><br><span class="line">cd build</span><br></pre></td></tr></table></figure>
+
+<h3 id="配置编译选项"><a href="#配置编译选项" class="headerlink" title="配置编译选项"></a>配置编译选项</h3><p>在build路径下</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">../configure --prefix=/home/glibc/ --enable-add-ons=nptl --with-tls --with-__thread --enable-kernel=2.6.32 --enable-debug --disable-werror </span><br></pre></td></tr></table></figure>
+
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">../configure --prefix=/home/glibc32/glibc-2.38 --enable-add-ons=nptl --with-tls --with-__thread --enable-kernel=2.6.32 --enable-debug --disable-werror </span><br></pre></td></tr></table></figure>
+
+
+
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">../configure --prefix=/home/dustball/glibc/glibc-2.35 --enable-add-ons=nptl --with-tls --with-__thread --enable-kernel=2.6.32 --enable-debug --disable-werror</span><br></pre></td></tr></table></figure>
+
+
+
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">../configure --prefix=/home/dustball/glibc/glibc-2.27 --enable-add-ons=nptl --with-tls --with-__thread --enable-kernel=2.6.32 --enable-debug --disable-werror</span><br></pre></td></tr></table></figure>
+
+
+
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">../configure --prefix=/home/dustball/glibc/glibc-2.31 --enable-add-ons=nptl --with-tls --with-__thread --enable-kernel=2.6.32 --enable-debug --disable-werror</span><br></pre></td></tr></table></figure>
+
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">../configure --prefix=/home/dustball/glibc/glibc-2.35 --enable-add-ons=nptl --with-tls --with-__thread --enable-kernel=2.6.32 --enable-debug --disable-werror</span><br></pre></td></tr></table></figure>
+
+
+
+
+
+
+
+<p>这里<code>--prefix=/home/glibc</code>是决定<code>make install</code>的安装地址</p>
+<p><code>–-enable-debug</code>允许调试,实际上就是给gcc传递-g编译选项</p>
+<h3 id="编译-安装"><a href="#编译-安装" class="headerlink" title="编译&amp;安装"></a>编译&amp;安装</h3><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">make -j `nproc`</span><br><span class="line">make install</span><br></pre></td></tr></table></figure>
+
+<blockquote>
+<p>如果配置编译选项时prefix没有写或者写错了也没关系</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">make install DESTDIR=/home/glibc/</span><br></pre></td></tr></table></figure>
+
+<p>这样安装也可以</p>
+</blockquote>
+<p>如果编译和安装都没有错误,会在<code>/home/glibc/</code>下生成我们的货</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">┌──(root㉿Destroyer)-[/home/glibc]</span><br><span class="line">└─<span class="meta"># ls</span></span><br><span class="line">bin  etc  include  lib  libexec  sbin  share  var</span><br></pre></td></tr></table></figure>
+
+<p>动态库在lib下面放着了</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">┌──(root㉿Destroyer)-[/home/glibc/lib]</span><br><span class="line">└─<span class="meta"># file libc.so.6</span></span><br><span class="line">libc.so<span class="number">.6</span>: ELF <span class="number">64</span>-bit LSB shared object, x86<span class="number">-64</span>, version <span class="number">1</span> (GNU/Linux), dynamically linked, interpreter /home/glibc/lib/ld-linux-x86<span class="number">-64.</span>so<span class="number">.2</span>, BuildID[sha1]=a8ebdd4a75fecb70ba9fe1dc5765fcd87c77742e, <span class="keyword">for</span> GNU/Linux <span class="number">3.2</span><span class="number">.0</span>, with debug_info, not stripped</span><br></pre></td></tr></table></figure>
+
+<p>非常滴漂亮</p>
+<h2 id="交叉编译32位glibc-可选"><a href="#交叉编译32位glibc-可选" class="headerlink" title="交叉编译32位glibc(可选)"></a>交叉编译32位glibc(可选)</h2><p>在x86_64 linux上,也兼容32位的程序</p>
+<p>如果想要32位带符号glibc的支持,需要再编译一个32位的glibc</p>
+<p>下载和解压不用做了,还是利用之前编译64位glibc时的源码即可</p>
+<h3 id="建立build32目录"><a href="#建立build32目录" class="headerlink" title="建立build32目录"></a>建立build32目录</h3><figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">cd glibc<span class="number">-2.38</span></span><br><span class="line">mkdir build32</span><br><span class="line">cd build32</span><br></pre></td></tr></table></figure>
+
+<h3 id="配置32位编译选项"><a href="#配置32位编译选项" class="headerlink" title="配置32位编译选项"></a>配置32位编译选项</h3><p>首先让gcc能够编译32位程序,需要安装一些依赖</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">apt-get install build-essential module-assistant gcc-multilib g++-multilib </span><br></pre></td></tr></table></figure>
+
+<p>然后配置编译选项</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">../configure --prefix=/home/glibc32 --host=i686-pc-linux-gnu --enable-add-ons=nptl --with-tls --with-__thread --enable-kernel=2.6.32 --with-binutils=/usr/bin --with-headers=/usr/include --build=i686-linux-gnu CC=&quot;gcc -m32&quot; CXX=&quot;g++ -m32&quot;</span><br></pre></td></tr></table></figure>
+
+<h3 id="编译-安装-1"><a href="#编译-安装-1" class="headerlink" title="编译&amp;安装"></a>编译&amp;安装</h3><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">make -j`nproc`</span><br><span class="line">make install</span><br></pre></td></tr></table></figure>
+
+<p>如果编译安装都没有错误,会在&#x2F;home&#x2F;glibc32下面生成我们的货</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">┌──(root㉿Destroyer)-[/home]</span><br><span class="line">└─# ls</span><br><span class="line">dustball  glibc  glibc32</span><br></pre></td></tr></table></figure>
+
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">┌──(root㉿Destroyer)-[/home/glibc32/lib]</span><br><span class="line">└─<span class="meta"># file libc.so.6</span></span><br><span class="line">libc.so<span class="number">.6</span>: ELF <span class="number">32</span>-bit LSB shared object, Intel <span class="number">80386</span>, version <span class="number">1</span> (GNU/Linux), dynamically linked, interpreter /lib/ld-linux.so<span class="number">.2</span>, BuildID[sha1]=<span class="number">3</span>d4a2e7c0e16c8cc778b5bd574a59eb4988e2d96, <span class="keyword">for</span> GNU/Linux <span class="number">3.2</span><span class="number">.0</span>, with debug_info, not stripped</span><br></pre></td></tr></table></figure>
+
+<p>漂亮滴很</p>
+<h2 id="编译链接glibc"><a href="#编译链接glibc" class="headerlink" title="编译链接glibc"></a>编译链接glibc</h2><p>现在系统里面有两个glibc</p>
+<p>一个系统自带的没有调试符号的glibc在&#x2F;lib下面</p>
+<p>一个我们自己编译的有调试符号的glibc在&#x2F;home&#x2F;glibc下面</p>
+<p>但是天无二日,程序只能链接一个glibc,并且程序默认链接到&#x2F;lib下的老太阳</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">┌──(root㉿Destroyer)-[/home/glibc-test]</span><br><span class="line">└─<span class="meta"># ldd main</span></span><br><span class="line">        linux-vdso.so<span class="number">.1</span> (<span class="number">0x00007fff451fb000</span>)</span><br><span class="line">        libc.so<span class="number">.6</span> =&gt; /lib/x86_64-linux-gnu/libc.so<span class="number">.6</span> (<span class="number">0x00007f93106d0000</span>)</span><br><span class="line">        /lib64/ld-linux-x86<span class="number">-64.</span>so<span class="number">.2</span> (<span class="number">0x00007f93108c0000</span>)</span><br></pre></td></tr></table></figure>
+
+<p>如何让程序链接到我们自己编译的glibc呢?</p>
+<p>gcc有一个编译选项可以指定链接libc的位置</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">gcc main.c -o main -Wl,--rpath=/home/glibc/lib -Wl,--dynamic-linker=/home/glibc/lib/ld-linux-x86-64.so.2   -I/home/glibc/include -g -no-pie</span><br></pre></td></tr></table></figure>
+
+<p><code>-Wl,--rpath=/home/glibc/lib</code>指定glibc路径</p>
+<p><code>-Wl,--dynamic-linker=/home/glibc/lib/ld-linux-x86-64.so.2</code>指定动态链接器的路径</p>
+<p><code>-I/home/glibc/include</code>指定头文件路径</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line">┌──(root㉿Destroyer)-[/home/glibc-test]</span><br><span class="line">└─# ./main</span><br><span class="line">Hello, world!</span><br><span class="line"></span><br><span class="line">┌──(root㉿Destroyer)-[/home/glibc-test]</span><br><span class="line">└─<span class="meta"># file main</span></span><br><span class="line">main: ELF <span class="number">64</span>-bit LSB executable, x86<span class="number">-64</span>, version <span class="number">1</span> (SYSV), dynamically linked, interpreter /home/glibc/lib/ld-linux-x86<span class="number">-64.</span>so<span class="number">.2</span>, BuildID[sha1]=<span class="number">27284e24</span>ab02fa64103591192dd8b3b006ae20f5, <span class="keyword">for</span> GNU/Linux <span class="number">3.2</span><span class="number">.0</span>, with debug_info, not stripped</span><br><span class="line"></span><br><span class="line">┌──(root㉿Destroyer)-[/home/glibc-test]</span><br><span class="line">└─<span class="meta"># ldd main</span></span><br><span class="line">        linux-vdso.so<span class="number">.1</span> (<span class="number">0x00007ffe18b9d000</span>)</span><br><span class="line">        libc.so<span class="number">.6</span> =&gt; /home/glibc/lib/libc.so<span class="number">.6</span> (<span class="number">0x00007f1a6a9ec000</span>)</span><br><span class="line">        /home/glibc/lib/ld-linux-x86<span class="number">-64.</span>so<span class="number">.2</span> =&gt; /lib64/ld-linux-x86<span class="number">-64.</span>so<span class="number">.2</span> (<span class="number">0x00007f1a6abc6000</span>)</span><br></pre></td></tr></table></figure>
+
+<p>libc和动态链接器都改好了</p>
+<p>如果想要编译成32位程序</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">gcc main.c -o main -Wl,--rpath=/home/glibc32/lib -Wl,--dynamic-linker=/home/glibc32/lib/ld-linux.so.2   -I/home/glibc/include -g -no-pie -m32</span><br></pre></td></tr></table></figure>
+
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line">┌──(root㉿Destroyer)-[/home/glibc-test]</span><br><span class="line">└─# ./main</span><br><span class="line">Hello, world!</span><br><span class="line"></span><br><span class="line">┌──(root㉿Destroyer)-[/home/glibc-test]</span><br><span class="line">└─# ┌──(root㉿Destroyer)-[/home/glibc-test]</span><br><span class="line">└─<span class="meta"># file main</span></span><br><span class="line">main: ELF <span class="number">32</span>-bit LSB executable, Intel <span class="number">80386</span>, version <span class="number">1</span> (SYSV), dynamically linked, interpreter /home/glibc32/lib/ld-linux.so<span class="number">.2</span>, BuildID[sha1]=c2629c0f00b91e2caa60e88d0d27198bc71ff49c, <span class="keyword">for</span> GNU/Linux <span class="number">3.2</span><span class="number">.0</span>, with debug_info, not stripped</span><br><span class="line"></span><br><span class="line">┌──(root㉿Destroyer)-[/home/glibc-test]</span><br><span class="line">└─<span class="meta"># ldd main</span></span><br><span class="line">        linux-gate.so<span class="number">.1</span> (<span class="number">0xf7ef7000</span>)</span><br><span class="line">        libc.so<span class="number">.6</span> =&gt; /home/glibc32/lib/libc.so<span class="number">.6</span> (<span class="number">0xf7cd0000</span>)</span><br><span class="line">        /home/glibc32/lib/ld-linux.so<span class="number">.2</span> =&gt; /lib/ld-linux.so<span class="number">.2</span> (<span class="number">0xf7ef9000</span>)</span><br></pre></td></tr></table></figure>
+
+<p>libc和动态链接器都改好了</p>
+<p>此时使用gdb调试程序也是可以看到动态链接器的源码的</p>
+<p><img src="https://raw.githubusercontent.com/DeutschBall/VideoBed/main/image-20240813215802807.png" alt="image-20240813215802807"></p>
+<p>也可以看到ld中的符号<code>link_map</code></p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><span class="line">pwndbg&gt; info types link_map</span><br><span class="line">All types matching regular expression <span class="string">&quot;link_map&quot;</span>:</span><br><span class="line"></span><br><span class="line">File ../elf/link.h:</span><br><span class="line"><span class="number">101</span>:    <span class="class"><span class="keyword">struct</span> <span class="title">link_map_public</span>;</span></span><br><span class="line"></span><br><span class="line">File ../include/link.h:</span><br><span class="line"><span class="number">95</span>:     <span class="class"><span class="keyword">struct</span> <span class="title">link_map</span>;</span></span><br><span class="line"><span class="number">286</span>:    <span class="class"><span class="keyword">struct</span> <span class="title">link_map_reldeps</span>;</span></span><br><span class="line"></span><br><span class="line">File ../nptl_db/db_info.c:</span><br><span class="line"><span class="number">40</span>:     <span class="keyword">typedef</span> <span class="class"><span class="keyword">struct</span> <span class="title">link_map</span> <span class="title">link_map</span>;</span></span><br><span class="line"></span><br><span class="line">File ../sysdeps/x86/linkmap.h:</span><br><span class="line"><span class="number">10</span>:     <span class="class"><span class="keyword">struct</span> <span class="title">link_map_machine</span>;</span></span><br></pre></td></tr></table></figure>
+
+
+
+
+
+<h2 id="patch-elf修改程序链接glibc"><a href="#patch-elf修改程序链接glibc" class="headerlink" title="patch-elf修改程序链接glibc"></a>patch-elf修改程序链接glibc</h2><p>对于一个已经编译链接完毕,默认链接系统自带glibc的程序,如何让它使用我们编译的glibc呢</p>
+<p>可以使用patch-elf修改程序，一是修改libc所在目录的位置，二是修改使用的链接器的绝对地址</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">patchelf --<span class="built_in">set</span>-rpath /home/glibc/lib/ --<span class="built_in">set</span>-interpreter /home/glibc/lib/ld-linux-x86<span class="number">-64.</span>so<span class="number">.2</span> main</span><br></pre></td></tr></table></figure>
+
+<figure class="highlight sh"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br></pre></td><td class="code"><pre><span class="line">┌──(root㉿Executor)-[/home/glibc-test]</span><br><span class="line">└─# make main</span><br><span class="line">gcc main.c -o main -no-pie -g -O0</span><br><span class="line"></span><br><span class="line">┌──(root㉿Executor)-[/home/glibc-test]</span><br><span class="line">└─# make ldd</span><br><span class="line">ldd main</span><br><span class="line">        linux-vdso.so.1 (0x00007fff8e1b2000)</span><br><span class="line">        libc.so.6 =&gt; /lib/x86_64-linux-gnu/libc.so.6 (0x00007f02aebae000)</span><br><span class="line">        /lib64/ld-linux-x86-64.so.2 (0x00007f02aedb3000)</span><br><span class="line"></span><br><span class="line">┌──(root㉿Executor)-[/home/glibc-test]</span><br><span class="line">└─# make patch</span><br><span class="line">patchelf --set-rpath /home/glibc/lib/ --set-interpreter /home/glibc/lib/ld-linux-x86-64.so.2 main</span><br><span class="line"></span><br><span class="line">┌──(root㉿Executor)-[/home/glibc-test]</span><br><span class="line">└─# make ldd</span><br><span class="line">ldd main</span><br><span class="line">        linux-vdso.so.1 (0x00007fff70bfc000)</span><br><span class="line">        libc.so.6 =&gt; /home/glibc/lib/libc.so.6 (0x00007f8ab9eef000)</span><br><span class="line">        /home/glibc/lib/ld-linux-x86-64.so.2 =&gt; /lib64/ld-linux-x86-64.so.2 (0x00007f8aba126000)</span><br><span class="line">        </span><br><span class="line">┌──(root㉿Executor)-[/home/glibc-test]</span><br><span class="line">└─# ./main</span><br><span class="line">helloworld</span><br></pre></td></tr></table></figure>
+
+<p>改完了之后ldd观察结果和在编译链接时指定我们的glibc效果是一样的</p>
+<p>虽然改完了ld的地址看上去还是指向原来那个<code>/home/glibc/lib/ld-linux-x86-64.so.2 =&gt; /lib64/ld-linux-x86-64.so.2</code></p>
+<p>但是调试观察实际上已经改过了</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">gef➤  info sharedlibrary </span><br><span class="line">From                To                  Syms Read   Shared Object Library</span><br><span class="line">0x00007f5aff5a5000  0x00007f5aff5c8f91  Yes         /home/glibc/lib/ld-linux-x86-64.so.2</span><br><span class="line">0x00007f5aff38f3c0  0x00007f5aff4d8c9d  Yes         /home/glibc/lib/libc.so.6</span><br></pre></td></tr></table></figure>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+      
+    </div>
+
+    
+    
+    
+      <footer class="post-footer">
+        <div class="post-eof"></div>
+      </footer>
+  </article>
+  
+  
+  
+
+      
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="en">
     <link itemprop="mainEntityOfPage" href="http://deutschball.github.io/2024/10/17/ret2dl-resolve/">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
@@ -4538,350 +4795,10 @@
   
   
 
-      
-  
-  
-  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="en">
-    <link itemprop="mainEntityOfPage" href="http://deutschball.github.io/2023/02/08/%E4%BC%A0%E8%BE%93%E5%B1%82/">
-
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="image" content="https://raw.githubusercontent.com/DeutschBall/picbed/main/dustball.png">
-      <meta itemprop="name" content="dustball">
-      <meta itemprop="description" content="dustland">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="dustland">
-    </span>
-      <header class="post-header">
-        <h2 class="post-title" itemprop="name headline">
-          
-            <a href="/2023/02/08/%E4%BC%A0%E8%BE%93%E5%B1%82/" class="post-title-link" itemprop="url">计算机网络-传输层</a>
-        </h2>
-
-        <div class="post-meta">
-            <span class="post-meta-item">
-              <span class="post-meta-item-icon">
-                <i class="far fa-calendar"></i>
-              </span>
-              <span class="post-meta-item-text">Posted on</span>
-
-              <time title="Created: 2023-02-08 18:08:00" itemprop="dateCreated datePublished" datetime="2023-02-08T18:08:00+08:00">2023-02-08</time>
-            </span>
-              <span class="post-meta-item">
-                <span class="post-meta-item-icon">
-                  <i class="far fa-calendar-check"></i>
-                </span>
-                <span class="post-meta-item-text">Edited on</span>
-                <time title="Modified: 2024-05-05 15:57:07" itemprop="dateModified" datetime="2024-05-05T15:57:07+08:00">2024-05-05</time>
-              </span>
-
-          
-
-        </div>
-      </header>
-
-    
-    
-    
-    <div class="post-body" itemprop="articleBody">
-
-      
-          <h1 id="计算机网络-传输层"><a href="#计算机网络-传输层" class="headerlink" title="计算机网络-传输层"></a>计算机网络-传输层</h1><h2 id="传输层"><a href="#传输层" class="headerlink" title="传输层"></a>传输层</h2><h3 id="概念"><a href="#概念" class="headerlink" title="概念"></a>概念</h3><p>网络层提供点到点服务,也就是主机到主机的服务</p>
-<p>传输层提供端到端服务,也就是进程到进程的服务</p>
-<p><img src="https://raw.githubusercontent.com/DeutschBall/VideoBed/main/image-20221128103802707.png" alt="image-20221128103802707"></p>
-<h4 id="端口号"><a href="#端口号" class="headerlink" title="端口号"></a>端口号</h4><table>
-<thead>
-<tr>
-<th>层</th>
-<th>寻址方式</th>
-<th>寻址范围</th>
-</tr>
-</thead>
-<tbody><tr>
-<td>链路层</td>
-<td>MAC地址</td>
-<td></td>
-</tr>
-<tr>
-<td>网络层</td>
-<td>ip地址</td>
-<td>ipv4地址32位</td>
-</tr>
-<tr>
-<td>传输层</td>
-<td>端口号</td>
-<td>端口号16位</td>
-</tr>
-</tbody></table>
-<p><strong>服务端</strong>端口号规定</p>
-<p><img src="https://raw.githubusercontent.com/DeutschBall/VideoBed/main/image-20221128104113012.png" alt="image-20221128104113012"></p>
-<p>客户端都是临时端口,不用管到底用的哪个端口</p>
-<h4 id="套接字"><a href="#套接字" class="headerlink" title="套接字"></a>套接字</h4><p>socket&#x3D;IP地址+端口号</p>
-<p>一个套接字唯一标识了一个进程</p>
-<p>一个TCP连接两头是两个套接字,即一个TCP连接被一对套接字决定</p>
-<h4 id="差错控制"><a href="#差错控制" class="headerlink" title="差错控制"></a>差错控制</h4><p>可靠传输:不错,不丢,不乱</p>
-<p>每一层的校验都只校验本层数据</p>
-<table>
-<thead>
-<tr>
-<th>层</th>
-<th>差错控制的目的</th>
-<th>是否可靠</th>
-</tr>
-</thead>
-<tbody><tr>
-<td>数据链路层</td>
-<td>通过CRC校验,保证一个帧中没有比特差错,但不能保证丢不丢帧</td>
-<td>否,只能保证不错</td>
-</tr>
-<tr>
-<td>网络层IP协议</td>
-<td>只针对网络层包的头部进行CRC校验</td>
-<td>否</td>
-</tr>
-<tr>
-<td>传输层TCP协议</td>
-<td>保证做到无传输差错</td>
-<td>是</td>
-</tr>
-</tbody></table>
-<h4 id="应用场景"><a href="#应用场景" class="headerlink" title="应用场景"></a>应用场景</h4><table>
-<thead>
-<tr>
-<th>传输层协议</th>
-<th>应用场景</th>
-</tr>
-</thead>
-<tbody><tr>
-<td>TCP</td>
-<td>客户端和服务端多次交互入访问页面HTTP<br />传输文件FTP<br />电子邮件POP3,SMTP</td>
-</tr>
-<tr>
-<td>UDP</td>
-<td>实时聊天通信,DNS,多播,广播<br />对等网络技术P2P<br />部分路由协议RIP<br />网络时间管理NTP<br />简单网络管理SNTP</td>
-</tr>
-</tbody></table>
-<h3 id="UDP"><a href="#UDP" class="headerlink" title="UDP"></a>UDP</h3><h4 id="UDP首部"><a href="#UDP首部" class="headerlink" title="UDP首部"></a>UDP首部</h4><p><img src="https://raw.githubusercontent.com/DeutschBall/VideoBed/main/image-20221128105608481.png" alt="UDP首部"></p>
-<p>源端口,目的端口各16位,总长度16位,校验和16位</p>
-<h4 id="校验和"><a href="#校验和" class="headerlink" title="校验和"></a>校验和</h4><p>UDP的校验和&#x3D;UDP伪首部+UDP首部+数据</p>
-<p>这个伪首部指，源地址、目的地址、协议类型（0x11）,一个字节的全0,一个字节的<strong>UDP数据长度</strong>，对齐填充2字节的0，整个伪首部共12个字节。</p>
-<blockquote>
-<p><strong>UDP伪首部是为了计算校验和而临时存在的,在计算之前由主机加上,计算之后立刻扔掉,不会参与传输</strong></p>
-<p>UDP伪首部和IP首部无关,<strong>不能理解为</strong>借用的IP首部</p>
-<p><img src="https://raw.githubusercontent.com/DeutschBall/VideoBed/main/v2-86bb22904619c1bd318996b26b7825c2_720w.webp" alt="UDP伪首部不是IP首部"></p>
-<p>伪首部中的UDP长度就是UDP首部+UDP数据的长度,不需要考虑对齐填充,是多少就是多少</p>
-</blockquote>
-<p>伪首部+UDP首部+数据一起计算校验和。</p>
-<p><img src="https://raw.githubusercontent.com/DeutschBall/VideoBed/main/image-20221128110006207.png" alt="image-20221128110006207"></p>
-<p>具体计算方法:</p>
-<p><strong>16位一组相加,最高位进位回卷,和Sum取反得到CheckSum</strong></p>
-<p>在计算校验和时,此时UDP首部的校验和字段先置零,伪首部中的UDP长度就是实际的UDP长度,15,不用考虑对齐填充</p>
-<p><img src="https://raw.githubusercontent.com/DeutschBall/VideoBed/main/image-20221128110218290.png" alt="image-20221128110218290"></p>
-<h4 id="UDPの特点"><a href="#UDPの特点" class="headerlink" title="UDPの特点"></a>UDPの特点</h4><p>1.报文在发送方这里不会拆分,发送方一次交付一个完整报文.</p>
-<blockquote>
-<p>注意强调了发送方,因为网络层才不会管你拆不拆,大于MTU的报必须拆</p>
-<p>比如如果发送方不管三七二十一发了一个巨大的上万字节的UDP报文</p>
-<p>如果数据链路层使用以太网,那么每个以太网帧最大是1500字节,也就是说网络层的MTU&#x3D;1500(Maximum Transmission Unit).</p>
-<p>显然一个上万字节的UDP数据报无法直接发送,因此路由器会进行报文分割,把该UDP数据报拆分成若干不大于1500字节的包,分开发送</p>
-<p>最终在接收方还是需要组装的</p>
-</blockquote>
-<p>2.无流量控制,无差错控制,无拥塞控制</p>
-<blockquote>
-<p>差错控制要求发现错误时要求重传,但是UDP数据报的校验和如果发现错误,直接被路由器或者主机丢弃,不会要求重传</p>
-</blockquote>
-<h3 id="TCP"><a href="#TCP" class="headerlink" title="TCP"></a>TCP</h3><p>分段传输:虚电路建立之后,看上去TCP协议直接发送和接收字节流,就像访问硬盘一样,但是下层实际上还是数据报实现的</p>
-<p>一个图是需要切成好多段,扔给网络层以报文形式交付</p>
-<h4 id="TCP协议的熟知端口号"><a href="#TCP协议的熟知端口号" class="headerlink" title="TCP协议的熟知端口号"></a>TCP协议的熟知端口号</h4><p><img src="https://raw.githubusercontent.com/DeutschBall/VideoBed/main/image-20230203162222069.png" alt="image-20230203162222069"></p>
-<p>特别注意</p>
-<p>20-FTP.Data</p>
-<p>21-FTP.Control</p>
-<p>53-DNS</p>
-<h4 id="字节流"><a href="#字节流" class="headerlink" title="字节流"></a>字节流</h4><p>啥玩意叫字节流?</p>
-<p>啥玩意叫流?Stream,在计算机里就是顺序读取或者写入的字节序列.</p>
-<p>包括从硬盘读取的文件,从键盘输入的字符序列,从网络获取的字符序列.都叫流</p>
-<p>叫做字节流,是因为还有一个字符流</p>
-<p>两者的区别是,字节流使用8位一个字节为信息单元,一个字节传输一个信息,比如一个字母</p>
-<p>而字符流使用16位两个字节作为信息单元,使用unicode编码传输信息</p>
-<p><img src="https://raw.githubusercontent.com/DeutschBall/VideoBed/main/image-20221128111751747.png" alt="image-20221128111751747"></p>
-<p>“流”是<strong>针对应用层上的应用程序而言</strong>的,在应用程序看来,他调用read函数从硬盘读取字节流和调用recv函数从套接字获取字节流没有区别.</p>
-<p>反正就是得用<code>while(!read.eof())&#123;read(buf,n,file);...&#125;</code>这样不停地从缓冲区取出字节,因为一个文件的传输,是像水流一样,源源不断地抵达缓冲区的,不可以一下子全部获取</p>
-<p>传输层只管给应用程序的缓冲区写入数据,不管应用程序拿着数据干了啥</p>
-<p>应用程序只管从缓冲区读取数据,不管传输层从哪里搞来的数据</p>
-<p>因此,传输层单蹦个地顺序传送比特位,还是单蹦个顺序传送字节,抑或是分段每次传送成千个字节即分段,应用程序不关心,全靠传输层自由发挥了</p>
-<p>显然传输层应该选择分段发送,这样效率高</p>
-<blockquote>
-<p>为什么效率高?</p>
-<p>对于网络来说头部长度固定,数据部分越长有效信息比例越高,需要发送的数据报越少,网络负载也就轻</p>
-<p>对于主机来说,每个字节就发送一次,需要频繁地系统调用(显然访问网络这种外设需要系统调用),开销太大</p>
-</blockquote>
-<h4 id="首部格式"><a href="#首部格式" class="headerlink" title="首部格式"></a>首部格式</h4><p><img src="https://raw.githubusercontent.com/DeutschBall/VideoBed/main/image-20221128111530489.png" alt="image-20221128111530489"></p>
-<h5 id="Source-Destination-port-address"><a href="#Source-Destination-port-address" class="headerlink" title="Source&#x2F;Destination port address"></a>Source&#x2F;Destination port address</h5><p>源&#x2F;目的端口地址</p>
-<h5 id="sequence-number"><a href="#sequence-number" class="headerlink" title="sequence number"></a>sequence number</h5><p>字节序列号,一个TCP包可以发送若干数据字节,每一个数据字节都编一个字节序列号,</p>
-<p>在首部中sequence number表明本TCP报文中<strong>第一个数据字节的编号</strong></p>
-<p>本字段用于分段系统</p>
-<h5 id="acknowledgment-number"><a href="#acknowledgment-number" class="headerlink" title="acknowledgment number"></a>acknowledgment number</h5><p>确认号字段,<strong>期望收到的,对方下一个报文段数据的,第一个字节的序号</strong></p>
-<p>本字段用于分段系统</p>
-<h5 id="HLEN"><a href="#HLEN" class="headerlink" title="HLEN"></a>HLEN</h5><p>header length首部长度,<strong>其单位是4字节</strong></p>
-<p>比如HLEN&#x3D;5&#x3D;0101b,表示首部长度为5*4&#x3D;20字节</p>
-<h5 id="Reserved"><a href="#Reserved" class="headerlink" title="Reserved"></a>Reserved</h5><p>保留字段,6位,目前全置零</p>
-<h5 id="控制字段"><a href="#控制字段" class="headerlink" title="控制字段"></a>控制字段</h5><p>6位</p>
-<p>用于TCP连接的流量控制,连接建立终止,连接失败和数据传送方式</p>
-<p><img src="https://raw.githubusercontent.com/DeutschBall/VideoBed/main/image-20221128113731360.png" alt="image-20221128113731360"></p>
-<p>当URG&#x3D;1时,紧急指针Urgent pointer才有效</p>
-<blockquote>
-<p>如何体现紧急?</p>
-<p>正常情况下一个TCP报文段会拆分重组</p>
-<p>整个重组利索之后才会交付给应用程序</p>
-<p>而紧急数据无需等待重组,直接交给应用程序</p>
-</blockquote>
-<p>ACK,确认,1代表acknoledgment number字段有效</p>
-<p>PSH,请求急迫,发送端不需等待窗口填满才发送</p>
-<blockquote>
-<p>PSH用于什么情况?</p>
-<p><img src="https://raw.githubusercontent.com/DeutschBall/VideoBed/main/20210317143111661.png" alt="缓冲区与PSH"></p>
-<p>进程A向socket写东西,实际上就是写到发送缓冲区中,此时并没有实际往网络上发送,啥时候发送呢?得等到缓冲区满了才发,这就像是机场包车的包不满不走一样</p>
-<p>而PSH位就是要强迫发送,即使车没有坐满人,也把枪夹到司机头上给我立刻发车</p>
-<p>有意义吗?急着发车干啥?还真有意义</p>
-<p>有的乘客不在乎自己坐车多花的开销,他急着办事.</p>
-<p>正如有些服务的及时性比效率更优先</p>
-<p>比如ssh服务</p>
-<p>客户端这会急着想看服务端根目录下有啥,于是客户端想发送一个ls命令,如果不加psh位,好吧你等着吧,啥时候缓冲区满了才发送.实际上ssh服务是psh&#x3D;1的</p>
-<p><img src="https://raw.githubusercontent.com/DeutschBall/VideoBed/main/image-20230203172915324.png" alt="image-20230203172915324"></p>
-</blockquote>
-<p>RST,重置连接</p>
-<p>SYN,同步信号,建立连接时使用</p>
-<p>FIN,结束</p>
-<h5 id="window-size"><a href="#window-size" class="headerlink" title="window size"></a>window size</h5><p>窗口大小,单位字节</p>
-<p>用于<strong>控制对方发送的数据量</strong></p>
-<p>根据自身缓冲区剩余空间大小,决定接收窗口大小,通知对方发送窗口上限</p>
-<h5 id="checksum"><a href="#checksum" class="headerlink" title="checksum"></a>checksum</h5><p>检验和</p>
-<p>TCP检验和&#x3D;TCP伪首部+TCP首部+TCP数据</p>
-<p>其中TCP伪首部和UDP伪首部一模一样</p>
-<h5 id="urgent-pointer"><a href="#urgent-pointer" class="headerlink" title="urgent pointer"></a>urgent pointer</h5><p>紧急指针字段,</p>
-<p>如果有紧急数据,则一定放在TCP数据的最开始</p>
-<p>紧急指针表明紧急数据的大小,单位字节</p>
-<h5 id="option"><a href="#option" class="headerlink" title="option"></a>option</h5><p>选项字段,长度可变</p>
-<p>通常不用这个字段</p>
-<p>TCP之规定一种选项,MSS,最大报文段长度,即TCP数据的最大长度</p>
-<h4 id="序号系统"><a href="#序号系统" class="headerlink" title="序号系统"></a>序号系统</h4><p>由于TCP报文需要分段,因此需要引入一套编号机制,让分段和重组有序</p>
-<p>TCP首部的sequence number,acknowledgment number两个字段和ACK,SYN两个标志位就是为序号系统服务的</p>
-<p>需要牢记的是:</p>
-<p><strong>编号是给每个字节的编号,不是给分段的编号!</strong></p>
-<p><strong>编号是给每个字节的编号,不是给分段的编号!</strong></p>
-<p><strong>编号是给每个字节的编号,不是给分段的编号!</strong></p>
-<p>所有数据的第一个字节是一个$[0,2^{32})$内的随机数</p>
-<p>sequence number,该TCP报文段段第一个数据字节的编号</p>
-<p>acknowledgment number,希望接收的下一个报文段的第一个数据字节的编号.也表明接收方已经正确接收该编号-1之前的所有字节</p>
-<p>比如这么一个问题</p>
-<p><img src="https://raw.githubusercontent.com/DeutschBall/VideoBed/main/image-20230203173943002.png" alt="image-20230203173943002"></p>
-<p>显然第一问是100-70&#x3D;30</p>
-<p>第二问,主机B接收到的字节序列应该是$[70,99]$,因此ack number&#x3D;100,表明希望接收编号为100的字节,并且告知发送方,编号为99及之前的所有字节都已经正确接收了</p>
-<h4 id="连接建立-终止"><a href="#连接建立-终止" class="headerlink" title="连接建立&amp;终止"></a>连接建立&amp;终止</h4><p>三次握手建立连接</p>
-<p><img src="https://raw.githubusercontent.com/DeutschBall/VideoBed/main/image-20230203224344990.png" alt="image-20230203224344990"></p>
-<p>服务端是被动打开的,而客户端是主动打开的</p>
-<p>三次握手建立连接的目的是,证明通信双方的收发都正常</p>
-<p>第一次握手,客户端啥也不知道,但是服务端知道客户端不哑,自己不聋</p>
-<p>第二次握手,客户端知道了服务端收到了自己的消息,证明自己不哑,这次收到消息证明自己不聋.</p>
-<p>此时只剩最后一步,此时服务端不知道自己是否哑巴</p>
-<p>第三次握手,服务端收到客户端对第二次握手的确认,因此证明服务端不哑</p>
-<p>第三次握手时,实际上客户端已经可以在TCP数据中,写上对服务端请求什么了</p>
-<p>然而实际上HTTP协议中,三次握手不涉及任何有效数据传输,三次握手建立之后,客户端会另外发送GET请求</p>
-<p><img src="https://raw.githubusercontent.com/DeutschBall/VideoBed/main/image-20230203225616420.png" alt="image-20230203225616420"></p>
-<p>四次挥手断开连接的目的是:</p>
-<p>首先客户端主动提出FIN分手,表明客户端没有要求了</p>
-<p>服务端收到客户端的分手请求后,立刻回复ACK收到,但是如果服务端还有没说完的话,还可以继续说.</p>
-<p>这个阶段叫做半关闭阶段,客户端只能回复收到,不会再有新的请求</p>
-<p>如果服务端也说完了,没有其他话要说了,就发送FIN</p>
-<p>然后客户端收到FINI之后知道服务端也没得说了,回复收到</p>
-<p>到此整个连接关闭</p>
-<h4 id="流量控制"><a href="#流量控制" class="headerlink" title="流量控制"></a>流量控制</h4><blockquote>
-<p>区分流量控制和拥塞控制:</p>
-<p>流量控制是避免接收方来不及接收,缓冲区溢出</p>
-<p>拥塞控制是避免网络拥塞</p>
-</blockquote>
-<p>为啥要进行流量控制?</p>
-<p>接收方的缓冲区大小有限,要保证接收方来得及接收消息并腾出缓冲区</p>
-<p>如果发送方发的过快,接收方处理慢,缓冲区满了,那么后来的消息就会被直接丢弃</p>
-<p>如何进行流量控制?滑动窗口算法</p>
-<h5 id="滑动窗口算法"><a href="#滑动窗口算法" class="headerlink" title="滑动窗口算法"></a>滑动窗口算法</h5><p><img src="https://raw.githubusercontent.com/DeutschBall/VideoBed/main/image-20230204190749379.png" alt="image-20230204190749379"><br>$$<br>发送方滑动窗口大小swnd&#x3D;min(接收方滑动窗口大小rwnd,拥塞窗口大小cwnd)<br>$$<br>其中rwnd是接收方缓冲区剩余空间大小</p>
-<p>比如接收方缓冲区本身4KB,发送方发了一个1K的报文,填到接收方缓冲区中,此时接收方rwnd&#x3D;3000,接收方就得在ACK报文中报告自己的rwnd大小,让发送方心里有数,后面该法多少</p>
-<p>cwnd是发送方自己维护的,发送方根据接收方的回应报文丢失情况,推测网络的拥塞程度,动态调整cwnd的大小</p>
-<blockquote>
-<p>TCP滑动窗口和数据链路层滑动窗口的区别:</p>
-<p>TCP滑动窗口的单位是字节,而数据链路层滑动窗口的单位是帧</p>
-<p>数据链路层的滑动窗口大小是固定的,而TCP滑动窗口大小根据实时情况改变</p>
-</blockquote>
-<p>如图所示的滑动窗口(只是一个例子,实际上一个滑动窗口有成百上千字节)中,cwnd&#x3D;20,rwnd&#x3D;9,</p>
-<p>这就意味着接收方此时的缓冲区只有9个字节的空间了,发送方顶多再发送9字节</p>
-<p><img src="https://raw.githubusercontent.com/DeutschBall/VideoBed/main/image-20230208173522440.png" alt="image-20230208173522440"></p>
-<p>此时发送方啥状态呢?目前滑动窗口中的200,201,202三个字节都已经发送,可能是一个报文同时发走的,也可能是分批发走的,但是这不重要,重要的是,目前尚未得到接收方的ACK回复.发送方现在还可以接着发送203~208这6个字节.</p>
-<p>如果发完了这6个字节仍热没有收到回复,就不能发了,得等等</p>
-<p>时序图</p>
-<p><img src="https://raw.githubusercontent.com/DeutschBall/VideoBed/main/image-20230208174029314.png" alt="image-20230208174029314"></p>
-<p>首先发送方得等接收方告知自己的接收窗口大小</p>
-<p>拿到这个数之后,发送方就可以在这个接收窗口大小和拥塞窗口大小中娶一个最小值,然后放心地发送这么多字节</p>
-<p>这些字节不必是一个报文发走的,这要看链路层对一个数据帧的限制,比如以太网帧中的数据不能超过1500字节.因此,即使swnd&#x3D;min(cwnd,rwnd)&#x3D;2400,也得分成多个报文发送</p>
-<p>接收方会对发送方的每一个报文都进行回复,回复内容包括:</p>
-<p>1.期待接收的下一个字节编号</p>
-<p>2.当前接收方窗口剩余大小</p>
-<p>当接收方的回复报文中,swnd&#x3D;0时,发送方就得停下等接收方消化消化.</p>
-<p>接收方消化一阵子之后,缓冲区有比较大的空间,能够容纳一个大帧时,才会主动发送更新报文.告知发送方,可以继续灌输了</p>
-<blockquote>
-<p>等待缓冲区有较大空间的目的是,防止糊涂窗口综合征</p>
-</blockquote>
-<p>这个更新报文的内容包括:</p>
-<p>1.期待接收的下一个字节编号</p>
-<p>2.当前接收方窗口剩余大小</p>
-<p>为了防止这个更新报文丢包,发送方有一个坚持计时器.当发送方接到swnd&#x3D;0的回复报文就开始了.如果在到时之前收到更新报文自然最好.如果没有收到,则发送方认为更新报文在路上丢了,于是发送方发送一个1字节的探测报文,提醒接收方更新报文丢失了.</p>
-<h4 id="差错控制-1"><a href="#差错控制-1" class="headerlink" title="差错控制"></a>差错控制</h4><p>TCP的差错控制有三个手段</p>
-<p>1.校验和,接收方收到坏段,丢弃并要求重传,通过ACK+坏段序号 要求重传</p>
-<p>2.确认</p>
-<p>发送方发出的每一个数据段都需要ACK确认</p>
-<p>不携带数据但是占用序号的控制段也需要确认</p>
-<p><strong>ACK段不需要确认</strong>,因为ACK本身就是确认用的</p>
-<p>3.重传</p>
-<p>当段损坏,丢失或者超时,需要重传</p>
-<p><strong>ACK段不需要重传</strong></p>
-<blockquote>
-<p>重传的情形:</p>
-<p>1.丢失段</p>
-<p><img src="https://raw.githubusercontent.com/DeutschBall/VideoBed/main/image-20230208175609900.png" alt="image-20230208175609900"></p>
-<p>2.3ACK快速重传</p>
-<p><img src="https://raw.githubusercontent.com/DeutschBall/VideoBed/main/image-20230208175633242.png" alt="image-20230208175633242"></p>
-</blockquote>
-<h4 id="拥塞控制"><a href="#拥塞控制" class="headerlink" title="拥塞控制"></a>拥塞控制</h4><p>拥塞控制可以理解为网络流问题</p>
-<p>一条主干道的带宽是1000Mbps,其支线的带宽和是1500Mbps,如果所有支线都满载传输,则骨干路由器就得缓存支线的数据报文,满满地往主干道发.</p>
-<p>如果骨干路由器缓冲区溢出,就有数据丢包了</p>
-<p>拥塞控制还是滑动窗口算法,并且和流量控制兼容,体现在<br>$$<br>swnd&#x3D;min(cwnd,rwnd)<br>$$</p>
-<h5 id="慢启动和拥塞避免"><a href="#慢启动和拥塞避免" class="headerlink" title="慢启动和拥塞避免"></a>慢启动和拥塞避免</h5><p><img src="https://raw.githubusercontent.com/DeutschBall/VideoBed/main/image-20230208180115427.png" alt="image-20230208180115427"></p>
-<p>最初慢启动阶段,cwnd&#x3D;1,发一个报文,收到ACK,这就意味着一次发一个包,网络可以承受,于是蹬鼻子上脸,cwnd&#x3D;2,发俩报文,等俩ACK,如果又都受到了,那就更加猖狂</p>
-<p>一直到慢启动阈sstresh,之后就不能指数扩大cwnd了,需要加性增大,也就是发一个包收到ACK就cwnd扩大1,一直这样直到计时器超时,说明达到网络流量上限了,</p>
-<p>此时立刻回到慢启动阶段,cwnd&#x3D;1,并重新设置ssthresh阈值为超时cwnd的一半</p>
-<p>之后重复上述过程</p>
-<h5 id="3ACK快速恢复"><a href="#3ACK快速恢复" class="headerlink" title="3ACK快速恢复"></a>3ACK快速恢复</h5><p><img src="https://raw.githubusercontent.com/DeutschBall/VideoBed/main/image-20230208180505456.png" alt="image-20230208180505456"></p>
-<p>能够收到3ACK说明网络只是轻度拥塞</p>
-<p>此时直接ssthresh降为收到3ACK时cwnd的一半,然后设置cwnd&#x3D;ssthresh,然后重复加性增大阶段</p>
-<h5 id="状态转移图"><a href="#状态转移图" class="headerlink" title="状态转移图"></a>状态转移图</h5><p><img src="https://raw.githubusercontent.com/DeutschBall/VideoBed/main/image-20230208180715552.png" alt="image-20230208180715552"></p>
-
-      
-    </div>
-
-    
-    
-    
-      <footer class="post-footer">
-        <div class="post-eof"></div>
-      </footer>
-  </article>
-  
-  
-  
-
 
   
   <nav class="pagination">
-    <a class="extend prev" rel="prev" href="/impossible/page/2/"><i class="fa fa-angle-left" aria-label="Previous page"></i></a><a class="page-number" href="/impossible/">1</a><a class="page-number" href="/impossible/page/2/">2</a><span class="page-number current">3</span><a class="page-number" href="/impossible/page/4/">4</a><span class="space">&hellip;</span><a class="page-number" href="/impossible/page/10/">10</a><a class="extend next" rel="next" href="/impossible/page/4/"><i class="fa fa-angle-right" aria-label="Next page"></i></a>
+    <a class="extend prev" rel="prev" href="/impossible/page/2/"><i class="fa fa-angle-left" aria-label="Previous page"></i></a><a class="page-number" href="/impossible/">1</a><a class="page-number" href="/impossible/page/2/">2</a><span class="page-number current">3</span><a class="page-number" href="/impossible/page/4/">4</a><span class="space">&hellip;</span><a class="page-number" href="/impossible/page/11/">11</a><a class="extend next" rel="next" href="/impossible/page/4/"><i class="fa fa-angle-right" aria-label="Next page"></i></a>
   </nav>
 
 
