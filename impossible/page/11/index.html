@@ -167,6 +167,635 @@
   
   
   <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="en">
+    <link itemprop="mainEntityOfPage" href="http://deutschball.github.io/2022/04/22/gdb%E8%B0%83%E8%AF%95%E5%99%A8/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="https://raw.githubusercontent.com/DeutschBall/picbed/main/dustball.png">
+      <meta itemprop="name" content="dustball">
+      <meta itemprop="description" content="dustland">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="dustland">
+    </span>
+      <header class="post-header">
+        <h2 class="post-title" itemprop="name headline">
+          
+            <a href="/2022/04/22/gdb%E8%B0%83%E8%AF%95%E5%99%A8/" class="post-title-link" itemprop="url">gbd调试器的使用</a>
+        </h2>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-calendar"></i>
+              </span>
+              <span class="post-meta-item-text">Posted on</span>
+
+              <time title="Created: 2022-04-22 19:57:20" itemprop="dateCreated datePublished" datetime="2022-04-22T19:57:20+08:00">2022-04-22</time>
+            </span>
+              <span class="post-meta-item">
+                <span class="post-meta-item-icon">
+                  <i class="far fa-calendar-check"></i>
+                </span>
+                <span class="post-meta-item-text">Edited on</span>
+                <time title="Modified: 2023-09-20 16:14:03" itemprop="dateModified" datetime="2023-09-20T16:14:03+08:00">2023-09-20</time>
+              </span>
+
+          
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+          <h1 id="gbd调试器的使用"><a href="#gbd调试器的使用" class="headerlink" title="gbd调试器的使用"></a>gbd调试器的使用</h1><p>环境:Win11+Kali子系统</p>
+<h2 id="启动"><a href="#启动" class="headerlink" title="启动"></a>启动</h2><h3 id="启动gdb"><a href="#启动gdb" class="headerlink" title="启动gdb"></a>启动<code>gdb</code></h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br></pre></td><td class="code"><pre><span class="line">┌──(root㉿Executor)-[/home/kali]</span><br><span class="line">└─# gdb</span><br><span class="line">GNU gdb (Debian 10.1-2+b1) 10.1.90.20210103-git</span><br><span class="line">Copyright (C) 2021 Free Software Foundation, Inc.</span><br><span class="line">License GPLv3+: GNU GPL version 3 or later &lt;http://gnu.org/licenses/gpl.html&gt;</span><br><span class="line">This is free software: you are free to change and redistribute it.</span><br><span class="line">There is NO WARRANTY, to the extent permitted by law.</span><br><span class="line">Type <span class="string">&quot;show copying&quot;</span> and <span class="string">&quot;show warranty&quot;</span> <span class="keyword">for</span> details.</span><br><span class="line">This GDB was configured as <span class="string">&quot;x86_64-linux-gnu&quot;</span>.</span><br><span class="line">Type <span class="string">&quot;show configuration&quot;</span> <span class="keyword">for</span> configuration details.</span><br><span class="line">For bug reporting instructions, please see:</span><br><span class="line">&lt;https://www.gnu.org/software/gdb/bugs/&gt;.</span><br><span class="line">Find the GDB manual and other documentation resources online at:</span><br><span class="line">    &lt;http://www.gnu.org/software/gdb/documentation/&gt;.</span><br><span class="line"></span><br><span class="line">For <span class="built_in">help</span>, <span class="built_in">type</span> <span class="string">&quot;help&quot;</span>.</span><br><span class="line">Type <span class="string">&quot;apropos word&quot;</span> to search <span class="keyword">for</span> commands related to <span class="string">&quot;word&quot;</span>.</span><br><span class="line">(gdb)</span><br></pre></td></tr></table></figure>
+
+<p>看到命令提示符号变成<code>(gdb)</code>则启动成功</p>
+<h3 id="安静启动gdb-q"><a href="#安静启动gdb-q" class="headerlink" title="安静启动gdb -q"></a>安静启动<code>gdb -q</code></h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">┌──(root㉿Executor)-[/home/kali]</span><br><span class="line">└─# gdb --silent</span><br><span class="line">(gdb)</span><br></pre></td></tr></table></figure>
+
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">--silent也可以写成-q,-quiet</span><br></pre></td></tr></table></figure>
+
+<h3 id="分屏启动gdb-tui"><a href="#分屏启动gdb-tui" class="headerlink" title="分屏启动gdb -tui"></a>分屏启动<code>gdb -tui</code></h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">┌──(root㉿Executor)-[/home/kali/mydir]</span><br><span class="line">└─# gdb -tui</span><br></pre></td></tr></table></figure>
+
+<p><img src="https://raw.githubusercontent.com/DeutschBall/test/master/image-20220421202637748.png" alt="image-20220421202637748"></p>
+<p>上方窗口是源代码窗口,下方是gbd命令行窗口</p>
+<p>这样启动不需要另开一个终端观察源代码</p>
+<p>并且当程序在端点停下的时候上方窗口也会显示当前程序停止的位置</p>
+<p>上方的源代码窗口使用上下箭头移动视野</p>
+<h3 id="分屏-安静-指定调试程序gdb-tui-q"><a href="#分屏-安静-指定调试程序gdb-tui-q" class="headerlink" title="分屏+安静+指定调试程序gdb -tui -q &lt;prog_name&gt;"></a>分屏+安静+指定调试程序<code>gdb -tui -q &lt;prog_name&gt;</code></h3><p>注意使用gdb调试的文件必须是可执行文件(windows上的.exe或者linux上的.out等)</p>
+<p>并且在编译该可执行文件的时候&#x3D;&#x3D;必须加入-g选项&#x3D;&#x3D;生成gbd调试信息</p>
+<blockquote>
+<p>如果不使用-g生成了.out文件然后使用gdb调试则</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">┌──(root㉿Executor)-[/home/kali/mydir]</span><br><span class="line">└─# gcc main.c -Og -o  main.out</span><br><span class="line"></span><br><span class="line">┌──(root㉿Executor)-[/home/kali/mydir]</span><br><span class="line">└─# gdb --silent main.out</span><br><span class="line">Reading symbols from main.out...</span><br><span class="line">(No debugging symbols found <span class="keyword">in</span> main.out)			<span class="comment">#报告没有调试信息</span></span><br><span class="line">(gdb)</span><br></pre></td></tr></table></figure>
+
+<p>使用-tui打开,源代码都看不到</p>
+<p><img src="https://raw.githubusercontent.com/DeutschBall/test/master/image-20220421203357054.png" alt="image-20220421203357054"></p>
+</blockquote>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">┌──(root㉿Executor)-[/home/kali/mydir]</span><br><span class="line">└─# gcc main.c -Og -g -o main.out				<span class="comment">#使用-g选项生成调试信息</span></span><br><span class="line"></span><br><span class="line">┌──(root㉿Executor)-[/home/kali/mydir]</span><br><span class="line">└─# gdb -tui --silent main.out</span><br></pre></td></tr></table></figure>
+
+<p><img src="https://raw.githubusercontent.com/DeutschBall/test/master/image-20220421203550729.png" alt="image-20220421203550729"></p>
+<h4 id="带参数启动-args"><a href="#带参数启动-args" class="headerlink" title="带参数启动--args  &lt;程序&gt; &lt;参数1&gt; &lt;参数2&gt;..."></a>带参数启动<code>--args  &lt;程序&gt; &lt;参数1&gt; &lt;参数2&gt;...</code></h4><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">┌──(root㉿Executor)-[/home/kali/mydir]</span><br><span class="line">└─# gdb -q -tui --args main.out 1 2 3 4</span><br></pre></td></tr></table></figure>
+
+<p>这里指定的参数1 2 3 4将会作为<code>main.out</code>执行时的命令行参数</p>
+<h2 id="启动后运行前"><a href="#启动后运行前" class="headerlink" title="启动后运行前"></a>启动后运行前</h2><p>加载需要调试的程序</p>
+<p>当在命令行直接使用gdb命令打开gdb调试器时,此时是没有指定需要调试的程序的</p>
+<h3 id="工作目录pwd"><a href="#工作目录pwd" class="headerlink" title="工作目录pwd"></a>工作目录<code>pwd</code></h3><p>默认工作目录是打开gdb的位置,gdb启动后也可以使用<code>pwd</code>命令观察当前工作目录</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">┌──(root㉿Executor)-[/home/kali/mydir]</span><br><span class="line">└─# gdb -q</span><br><span class="line">(gdb) <span class="built_in">pwd</span></span><br><span class="line">Working directory /home/kali/mydir.</span><br></pre></td></tr></table></figure>
+
+<h3 id="指定调试程序位置file"><a href="#指定调试程序位置file" class="headerlink" title="指定调试程序位置file &lt;prog_name&gt;"></a>指定调试程序位置<code>file &lt;prog_name&gt;</code></h3><p>对于当前目录下的程序可以直接使用程序名</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br></pre></td><td class="code"><pre><span class="line">┌──(root㉿Executor)-[/home/kali/mydir]</span><br><span class="line">└─# <span class="built_in">ls</span> -l|gdb -q</span><br><span class="line">(gdb) Undefined <span class="built_in">command</span>: <span class="string">&quot;total&quot;</span>.  Try <span class="string">&quot;help&quot;</span>.</span><br><span class="line">(gdb) Undefined <span class="built_in">command</span>: <span class="string">&quot;-rw-r--r--&quot;</span>.  Try <span class="string">&quot;help&quot;</span>.</span><br><span class="line">(gdb) Undefined <span class="built_in">command</span>: <span class="string">&quot;-rwxr-xr-x&quot;</span>.  Try <span class="string">&quot;help&quot;</span>.</span><br><span class="line">(gdb) Undefined <span class="built_in">command</span>: <span class="string">&quot;-rw-r--r--&quot;</span>.  Try <span class="string">&quot;help&quot;</span>.</span><br><span class="line">(gdb) quit</span><br><span class="line"></span><br><span class="line">┌──(root㉿Executor)-[/home/kali/mydir]</span><br><span class="line">└─# <span class="built_in">ls</span> -l</span><br><span class="line">total 28</span><br><span class="line">-rw-r--r-- 1 root root   139 Apr 21 20:23 main.c</span><br><span class="line">-rwxr-xr-x 1 root root 17672 Apr 21 20:35 main.out</span><br><span class="line">-rw-r--r-- 1 root root    25 Apr 21 20:38 r.txt</span><br><span class="line"></span><br><span class="line">┌──(root㉿Executor)-[/home/kali/mydir]</span><br><span class="line">└─# gdb -q</span><br><span class="line">(gdb) file main.out</span><br><span class="line">Reading symbols from main.out...</span><br><span class="line">(gdb)</span><br></pre></td></tr></table></figure>
+
+<p>对于其他目录下的可以使用绝对或者相对位置</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">(gdb) file /home/kali/mydir/main.out</span><br><span class="line">Load new symbol table from <span class="string">&quot;/home/kali/mydir/main.out&quot;</span>? (y or n) y</span><br><span class="line">Reading symbols from /home/kali/mydir/main.out...</span><br></pre></td></tr></table></figure>
+
+<h3 id="查看信息"><a href="#查看信息" class="headerlink" title="查看信息"></a>查看信息</h3><h4 id="查看当前工作目录pwd"><a href="#查看当前工作目录pwd" class="headerlink" title="查看当前工作目录pwd"></a>查看当前工作目录<code>pwd</code></h4><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">(gdb) <span class="built_in">pwd</span></span><br><span class="line">Working directory /home/kali/mydir.</span><br></pre></td></tr></table></figure>
+
+<h4 id="查看是否找到目标程序文件list"><a href="#查看是否找到目标程序文件list" class="headerlink" title="查看是否找到目标程序文件list"></a>查看是否找到目标程序文件<code>list</code></h4><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line">(gdb) list</span><br><span class="line">1       <span class="comment">#include &lt;stdio.h&gt;</span></span><br><span class="line">2       <span class="comment">#include &lt;stdlib.h&gt;</span></span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5       int main(int argc,char **argv)&#123;</span><br><span class="line">6               <span class="keyword">for</span>(int i=0;i&lt;argc;++i)&#123;</span><br><span class="line">7                       <span class="built_in">printf</span>(<span class="string">&quot;%s&quot;</span>,argv[i]);</span><br><span class="line">8               &#125;</span><br><span class="line">9               <span class="built_in">return</span> 0;</span><br><span class="line">10      &#125;</span><br></pre></td></tr></table></figure>
+
+<h4 id="查看调试程序语言show-language"><a href="#查看调试程序语言show-language" class="headerlink" title="查看调试程序语言show language"></a>查看调试程序语言<code>show language</code></h4><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">(gdb) show language</span><br><span class="line">The current <span class="built_in">source</span> language is <span class="string">&quot;auto; currently c&quot;</span>.</span><br></pre></td></tr></table></figure>
+
+<h4 id="查看源文件信息info-source"><a href="#查看源文件信息info-source" class="headerlink" title="查看源文件信息info source"></a>查看源文件信息<code>info source</code></h4><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line">(gdb) info <span class="built_in">source</span></span><br><span class="line">Current <span class="built_in">source</span> file is main.c</span><br><span class="line">Compilation directory is /home/kali/mydir</span><br><span class="line">Located <span class="keyword">in</span> /home/kali/mydir/main.c</span><br><span class="line">Contains 10 lines.</span><br><span class="line">Source language is c.</span><br><span class="line">Producer is GNU C17 11.2.0 -mtune=generic -march=x86-64 -g -Og -fasynchronous-unwind-tables.</span><br><span class="line">Compiled with DWARF 2 debugging format.</span><br><span class="line">Does not include preprocessor macro info.</span><br></pre></td></tr></table></figure>
+
+<h4 id="查看可以设置的程序语言set-language"><a href="#查看可以设置的程序语言set-language" class="headerlink" title="查看可以设置的程序语言set language"></a>查看可以设置的程序语言<code>set language</code></h4><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">(gdb) <span class="built_in">set</span> language</span><br><span class="line">Requires an argument. Valid arguments are auto, <span class="built_in">local</span>, unknown, ada, asm, c, c++, d, fortran, go, minimal, modula-2, objective-c, opencl, pascal, rust.</span><br></pre></td></tr></table></figure>
+
+<h4 id="查看程序运行状态info-program"><a href="#查看程序运行状态info-program" class="headerlink" title="查看程序运行状态info program"></a>查看程序运行状态<code>info program</code></h4><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">(gdb) info prog</span><br><span class="line">The program being debugged is not being run.</span><br></pre></td></tr></table></figure>
+
+<h3 id="设置信息"><a href="#设置信息" class="headerlink" title="设置信息"></a>设置信息</h3><h4 id="设置命令行参数set-args"><a href="#设置命令行参数set-args" class="headerlink" title="设置命令行参数set args &lt;参数1&gt; &lt;参数2&gt;..."></a>设置命令行参数<code>set args &lt;参数1&gt; &lt;参数2&gt;...</code></h4><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">(gdb) set args 1 2 3</span><br><span class="line">(gdb) show args</span><br><span class="line">Argument list to give program being debugged when it is started is &quot;1 2 3&quot;.</span><br></pre></td></tr></table></figure>
+
+<p>如果在启动时有指定参数,此时再用set指定参数则会覆盖启动时设置的参数</p>
+<h4 id="设置语言’set-language-’"><a href="#设置语言’set-language-’" class="headerlink" title="设置语言’set language &lt;语言&gt;’"></a>设置语言’set language &lt;语言&gt;’</h4><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">(gdb) <span class="built_in">set</span> language c</span><br></pre></td></tr></table></figure>
+
+<h2 id="运行"><a href="#运行" class="headerlink" title="运行"></a>运行</h2><h3 id="运行程序run"><a href="#运行程序run" class="headerlink" title="运行程序run"></a>运行程序<code>run</code></h3><p>命令行参数使用启动时指定的参数或者set args设置的参数,如果都没有给定则无参数执行</p>
+<p>如果有断点则程序在第一个断点处停止,否则直接运行完.</p>
+<h4 id="带参数运行run"><a href="#带参数运行run" class="headerlink" title="带参数运行run &lt;参数1&gt; &lt;参数2&gt;..."></a>带参数运行<code>run &lt;参数1&gt; &lt;参数2&gt;...</code></h4><p>此参数将会直接作为运行参数,覆盖前面设置的参数</p>
+<h3 id="main停止运行start"><a href="#main停止运行start" class="headerlink" title="main停止运行start"></a>main停止运行<code>start</code></h3><p><code>start</code>相当于在main函数处下了断点然后<code>run</code>,自动在main开始前停下</p>
+<h2 id="运行时"><a href="#运行时" class="headerlink" title="运行时"></a>运行时</h2><h3 id="断点"><a href="#断点" class="headerlink" title="断点"></a>断点</h3><h4 id="设置断点b"><a href="#设置断点b" class="headerlink" title="设置断点b &lt;行号&gt;"></a>设置断点<code>b &lt;行号&gt;</code></h4><p>断点可以运行前设置也可以运行时设置</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">(gdb) b 6</span><br><span class="line">Breakpoint 6 at 0x555555555142: file main.c, line 6.</span><br></pre></td></tr></table></figure>
+
+<p>如果以-tui分屏打开,则设置好的断点会显示在行号左侧,大写的B+&gt;意味当前程序暂停的断点</p>
+<p><img src="https://raw.githubusercontent.com/DeutschBall/test/master/image-20220421213142314.png" alt="image-20220421213142314"></p>
+<h5 id="b-直接给函数下断点"><a href="#b-直接给函数下断点" class="headerlink" title="b &lt;函数名&gt;直接给函数下断点"></a><code>b &lt;函数名&gt;</code>直接给函数下断点</h5><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">(gdb) b main</span><br><span class="line">Breakpoint 10 at 0x555555555139: file main.c, line 5.</span><br></pre></td></tr></table></figure>
+
+<h4 id="删除断点-delete"><a href="#删除断点-delete" class="headerlink" title="删除断点 delete &lt;断点编号&gt;"></a>删除断点 <code>delete &lt;断点编号&gt;</code></h4><p>注意端点编号不是行号</p>
+<p>删除全部断点则不指定编号,直接<code>delete</code></p>
+<h5 id="删除指定行上的断点clear"><a href="#删除指定行上的断点clear" class="headerlink" title="删除指定行上的断点clear &lt;行号&gt;"></a>删除指定行上的断点<code>clear &lt;行号&gt;</code></h5><h4 id="条件断点b-if"><a href="#条件断点b-if" class="headerlink" title="条件断点b if &lt;条件&gt;"></a>条件断点<code>b if &lt;条件&gt;</code></h4><p>比如如果没有输入命令行参数时才给main函数下断点</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">(gdb) b main <span class="keyword">if</span> argc==1					<span class="comment">#用户没有输入时argc=1,第一个参数是当前程序位置</span></span><br><span class="line">Breakpoint 11 at 0x555555555139: file main.c, line 5.</span><br></pre></td></tr></table></figure>
+
+<h4 id="查看断点信息info-b"><a href="#查看断点信息info-b" class="headerlink" title="查看断点信息info b &lt;断点号&gt;"></a>查看断点信息<code>info b &lt;断点号&gt;</code></h4><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">Breakpoint 11 at 0x555555555139: file main.c, line 5.</span><br><span class="line">(gdb) info b 11</span><br><span class="line">Num     Type           Disp Enb Address            What</span><br><span class="line">11      breakpoint     keep y   0x0000555555555139 <span class="keyword">in</span> main at main.c:5</span><br><span class="line">        stop only <span class="keyword">if</span> argc==1</span><br></pre></td></tr></table></figure>
+
+<h5 id="info-b查看所有断点信息"><a href="#info-b查看所有断点信息" class="headerlink" title="info b查看所有断点信息"></a><code>info b</code>查看所有断点信息</h5><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">(gdb) info b</span><br><span class="line">Num     Type           Disp Enb Address            What</span><br><span class="line">11      breakpoint     keep y   0x0000555555555139 <span class="keyword">in</span> main at main.c:5</span><br><span class="line">        stop only <span class="keyword">if</span> argc==1</span><br><span class="line">12      breakpoint     keep y   0x0000555555555142 <span class="keyword">in</span> main at main.c:6</span><br><span class="line">13      breakpoint     keep y   0x0000555555555149 <span class="keyword">in</span> main at main.c:7</span><br></pre></td></tr></table></figure>
+
+
+
+<h3 id="查看信息-1"><a href="#查看信息-1" class="headerlink" title="查看信息"></a>查看信息</h3><h4 id="print命令"><a href="#print命令" class="headerlink" title="print命令"></a>print命令</h4><h5 id="查看函数信息p"><a href="#查看函数信息p" class="headerlink" title="查看函数信息p &lt;函数名&gt;"></a>查看函数信息<code>p &lt;函数名&gt;</code></h5><p>函数信息也可以在运行前查看</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">(gdb) p main</span><br><span class="line"><span class="variable">$6</span> = &#123;int (int, char **)&#125; 0x555555555139 &lt;main&gt;</span><br></pre></td></tr></table></figure>
+
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">&#123;返回值类型(参数1类型,参数2类型)&#125; 函数地址 &lt;函数名&gt;</span><br></pre></td></tr></table></figure>
+
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">(gdb) whatis main</span><br><span class="line">type = int (int, char **)</span><br><span class="line">(gdb) ptype main</span><br><span class="line">type = int (int, char **)</span><br></pre></td></tr></table></figure>
+
+<h5 id="查看变量信息p"><a href="#查看变量信息p" class="headerlink" title="查看变量信息p &lt;变量名&gt;"></a>查看变量信息<code>p &lt;变量名&gt;</code></h5><p>查看变量信息必须是程序在该变量下文的断点处停下</p>
+<p>即当前程序的运行位置必须已经经过变量,并且变量没有消亡</p>
+<p>比如函数中的局部变量在函数返回之后就会消亡,只能在函数中断点然后查看断点之前的变量</p>
+<p>如图调试一个用循环计算阶乘的函数,将断点下在第10行<code>result*=n</code>处</p>
+<p><img src="https://raw.githubusercontent.com/DeutschBall/test/master/image-20220422175357420.png" alt="image-20220422175357420"></p>
+<p>当程序第一次执行到次时会停在<code>result*=n</code>&#x3D;&#x3D;执行前&#x3D;&#x3D;的状态</p>
+<p><img src="https://raw.githubusercontent.com/DeutschBall/test/master/image-20220422175511240.png" alt="image-20220422175511240"></p>
+<p>如图第一次在第10行停下,打印result&#x3D;1</p>
+<h5 id="查看寄存器信息p"><a href="#查看寄存器信息p" class="headerlink" title="查看寄存器信息p $&lt;寄存器名&gt;"></a>查看寄存器信息<code>p $&lt;寄存器名&gt;</code></h5><p>对于刚才的fact循环求阶乘函数,最后返回值是result,可想而知,该值是存放在rax寄存器中的</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line"><span class="type">int</span> <span class="title function_">fact</span><span class="params">(<span class="type">int</span> n)</span>&#123;</span><br><span class="line">        <span class="keyword">if</span>(n&lt;<span class="number">0</span>)<span class="keyword">return</span> n;</span><br><span class="line">        <span class="keyword">if</span>(n==<span class="number">0</span>)<span class="keyword">return</span> <span class="number">1</span>;</span><br><span class="line">        <span class="type">int</span> result=<span class="number">1</span>;</span><br><span class="line">        <span class="keyword">while</span>(n&gt;<span class="number">0</span>)&#123;</span><br><span class="line">                result*=n;</span><br><span class="line">                --n;</span><br><span class="line"></span><br><span class="line">        &#125;</span><br><span class="line">        <span class="keyword">return</span> result;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>下面调试程序验证猜想</p>
+<p><img src="https://raw.githubusercontent.com/DeutschBall/test/master/image-20220422180106540.png" alt="image-20220422180106540"></p>
+<p>还是将断点下到第10行while循环中</p>
+<p>逐次进行循环,观察rax寄存器中的值</p>
+<p><img src="https://raw.githubusercontent.com/DeutschBall/test/master/image-20220422180159934.png" alt="image-20220422180159934"></p>
+<p>与result的变化是一致的</p>
+<p><strong>也可以查看程序计数器<code>rip</code>中的值,观察程序当前进行位置</strong></p>
+<p><img src="https://raw.githubusercontent.com/DeutschBall/test/master/image-20220422180413841.png" alt="image-20220422180413841"></p>
+<p>用objdump反编译然后观察fact+13处的指令</p>
+<p><img src="https://raw.githubusercontent.com/DeutschBall/test/master/image-20220422180540637.png" alt="image-20220422180540637"></p>
+<p><code>fact+13=0x1139+0x13=0x114c</code>,该位置是一个<code>test %edi,%edi</code>指令,而n作为第一个参数是存放在edi寄存器中的</p>
+<p><img src="https://raw.githubusercontent.com/DeutschBall/test/master/image-20220422180821161.png" alt="image-20220422180821161"></p>
+<p>紧接着114e处<code>jg 1146</code>意味如果<code>R[%edi]=n&gt;0</code>则跳转1146位置,</p>
+<p>而1146位置在114e上方,相当于跳进了循环,</p>
+<p>也就是说0x114c处相当于循环判断<code>while(n&gt;0)</code></p>
+<p>即程序在第10行的断点停下时rip中是第9行中的条件判断指令</p>
+<h4 id="x-检查字节或者字"><a href="#x-检查字节或者字" class="headerlink" title="x&#x2F;&lt;大小&gt; &lt;位置&gt;检查字节或者字"></a>x&#x2F;&lt;大小&gt; &lt;位置&gt;检查字节或者字</h4><h5 id="x-20b-fact检查fact函数的前20个字节"><a href="#x-20b-fact检查fact函数的前20个字节" class="headerlink" title="x/20b fact检查fact函数的前20个字节"></a><code>x/20b fact</code>检查fact函数的前20个字节</h5><p><img src="https://raw.githubusercontent.com/DeutschBall/test/master/image-20220422181438589.png" alt="image-20220422181438589"></p>
+<p>与objdump得到的反汇编是一样的</p>
+<h5 id="x-2g-0x555555555139-检查从0x555555555139地址开始的双字"><a href="#x-2g-0x555555555139-检查从0x555555555139地址开始的双字" class="headerlink" title="x&#x2F;2g 0x555555555139 检查从0x555555555139地址开始的双字"></a>x&#x2F;2g 0x555555555139 检查从0x555555555139地址开始的双字</h5><p><img src="https://raw.githubusercontent.com/DeutschBall/test/master/image-20220422181756825.png" alt="image-20220422181756825"></p>
+<h4 id="info命令"><a href="#info命令" class="headerlink" title="info命令"></a>info命令</h4><h5 id="查看所有寄存器信息info-registers"><a href="#查看所有寄存器信息info-registers" class="headerlink" title="查看所有寄存器信息info registers"></a>查看所有寄存器信息<code>info registers</code></h5><p><img src="https://raw.githubusercontent.com/DeutschBall/test/master/image-20220422181858252.png" alt="image-20220422181858252"></p>
+<p>其中<code>rax</code>存放result,<code>rdi</code>存放n</p>
+<h5 id="查看栈帧’info-frame’"><a href="#查看栈帧’info-frame’" class="headerlink" title="查看栈帧’info frame’"></a>查看栈帧’info frame’</h5><p><img src="https://raw.githubusercontent.com/DeutschBall/test/master/image-20220422182024087.png" alt="image-20220422182024087"></p>
+<h4 id="disas命令"><a href="#disas命令" class="headerlink" title="disas命令"></a>disas命令</h4><h5 id="反汇编当前程序暂停的函数disas"><a href="#反汇编当前程序暂停的函数disas" class="headerlink" title="反汇编当前程序暂停的函数disas"></a>反汇编当前程序暂停的函数<code>disas</code></h5><p>首先要在函数里下断点,然后程序在该断点暂停时使用disas可以观察当前函数的反汇编信息</p>
+<p><img src="https://raw.githubusercontent.com/DeutschBall/test/master/image-20220422182255390.png" alt="image-20220422182255390"></p>
+<p>可见反汇编信息中也会有当前断点位置信息</p>
+<p>如此就不用再开一个终端使用objdump观察了</p>
+<h5 id="反汇编指定名称的函数disas"><a href="#反汇编指定名称的函数disas" class="headerlink" title="反汇编指定名称的函数disas &lt;函数名&gt;"></a>反汇编指定名称的函数<code>disas &lt;函数名&gt;</code></h5><p>此方法不需要在函数中下断点</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">(gdb) disas fact</span><br></pre></td></tr></table></figure>
+
+<p><img src="https://raw.githubusercontent.com/DeutschBall/test/master/image-20220422182507141.png" alt="image-20220422182507141"></p>
+<h5 id="反汇编某个地址附近的函数disas"><a href="#反汇编某个地址附近的函数disas" class="headerlink" title="反汇编某个地址附近的函数disas &lt;地址&gt;"></a>反汇编某个地址附近的函数<code>disas &lt;地址&gt;</code></h5><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">disas 0x000055555555514c</span><br></pre></td></tr></table></figure>
+
+<p><img src="https://raw.githubusercontent.com/DeutschBall/test/master/image-20220422182706003.png" alt="image-20220422182706003"></p>
+<h3 id="继续执行"><a href="#继续执行" class="headerlink" title="继续执行"></a>继续执行</h3><p>执行有多种情况,通常会与断点或者一些逻辑结构联合使用,</p>
+<p>比如在断点处停下或者不停下</p>
+<p>在循环处,在函数中都有特殊的命令决定如何执行</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br></pre></td><td class="code"><pre><span class="line">源代码层面</span><br><span class="line">next		单步执行,不进入函数,但是函数会执行然后返回值</span><br><span class="line">next n		单步执行n行,均不进入函数</span><br><span class="line"></span><br><span class="line">step		单步执行,进入函数</span><br><span class="line">step n		单步执行n行,均进入函数</span><br><span class="line"></span><br><span class="line"><span class="built_in">continue</span>	恢复执行,直到预见下一个断点</span><br><span class="line"><span class="built_in">continue</span> n	恢复执行,并忽略下面的n个断点</span><br><span class="line"></span><br><span class="line">finish		一直运行直到当前函数返回后停止,忽略断点</span><br><span class="line"></span><br><span class="line"><span class="built_in">return</span>		放弃后面的执行直接<span class="built_in">return</span></span><br><span class="line"></span><br><span class="line"></span><br><span class="line">机器码层面(或者说汇编代码层面)</span><br><span class="line">stepi		单步执行一条指令,进入函数</span><br><span class="line">stepi n</span><br><span class="line"></span><br><span class="line">nexti		单步执行一条指令,不进入函数(不会call)</span><br><span class="line">nexti n</span><br><span class="line"></span><br><span class="line"><span class="keyword">until</span>		一直运行当前循环,在出循环之后的第一条语句停下,如果循环内有断点则在断点停下</span><br><span class="line">			实际上在机器码层面上,一直运行直到一个内存地址比当前更大的指令处停下</span><br></pre></td></tr></table></figure>
+
+
+
+<h4 id="源代码层面"><a href="#源代码层面" class="headerlink" title="源代码层面"></a>源代码层面</h4><p>以一个递归求阶乘的程序为例子</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br></pre></td><td class="code"><pre><span class="line">┌──(root㉿Executor)-[/home/kali/mydir]</span><br><span class="line">└─# <span class="built_in">cat</span> main.c</span><br><span class="line"><span class="comment">#include &lt;stdio.h&gt;</span></span><br><span class="line"><span class="comment">#include &lt;stdlib.h&gt;</span></span><br><span class="line"></span><br><span class="line"></span><br><span class="line">int fact(int n)&#123;</span><br><span class="line">        <span class="keyword">if</span>(n&lt;0)<span class="built_in">return</span> n;</span><br><span class="line">        <span class="keyword">if</span>(n==0)<span class="built_in">return</span> 1;</span><br><span class="line">        <span class="built_in">return</span> n*fact(n-1);</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"></span><br><span class="line">int main(int argc,char **argv)&#123;</span><br><span class="line">        int ans=123456;</span><br><span class="line">        ans=fact(9);</span><br><span class="line">        <span class="built_in">printf</span>(<span class="string">&quot;%d&quot;</span>,ans);</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">        <span class="built_in">return</span> 0;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+
+
+<h5 id="next单步步过"><a href="#next单步步过" class="headerlink" title="next单步步过"></a>next单步步过</h5><p>在main函数处下断点,使得程序上来先停一下,让我们有机会一行一行地执行</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">(gdb) b main</span><br><span class="line">Breakpoint 3 at 0x55555555515a: file main.c, line 13.</span><br></pre></td></tr></table></figure>
+
+<p><img src="https://raw.githubusercontent.com/DeutschBall/test/master/image-20220422185956239.png" alt="image-20220422185956239"></p>
+<p>第一个n命令使得程序断在<code>15:ans=fact(123456)</code></p>
+<p>第二个n命令使得程序断在<code>16:printf(&quot;%d&quot;,ans)</code></p>
+<p>此时使用print命令观察ans的值发现其确实是9的阶乘,即第15行是自动执行然后返回了值的,单步步过只是忽略了执行细节,只要函数的执行后果</p>
+<h5 id="step单步步入"><a href="#step单步步入" class="headerlink" title="step单步步入"></a>step单步步入</h5><p>还是在main函数处下断点,然后使用step</p>
+<p><img src="https://raw.githubusercontent.com/DeutschBall/test/master/image-20220422190333043.png" alt="image-20220422190333043"></p>
+<p>第一个step命令会让程序断在<code>15:ans=fact(9)</code>这与next是相同的</p>
+<p>但是下一个step会进入step并在都5行停下</p>
+<h5 id="continue执行到下一个断点"><a href="#continue执行到下一个断点" class="headerlink" title="continue执行到下一个断点"></a>continue执行到下一个断点</h5><p>在main函数开始(line 13)和main函数中打印ans前(line16)各打一个断点</p>
+<p><img src="https://raw.githubusercontent.com/DeutschBall/test/master/image-20220422190554335.png" alt="image-20220422190554335"></p>
+<p>run运行之后会在13行停下,然后在输入c命令则会直接在16行停下</p>
+<p><img src="https://raw.githubusercontent.com/DeutschBall/test/master/image-20220422190646915.png" alt="image-20220422190646915"></p>
+<p>此时print命令打印ans值发现为362880确实是9的阶乘,即两个断点之间的所有程序都被执行过了</p>
+<h5 id="finish一直运行到当前函数返回"><a href="#finish一直运行到当前函数返回" class="headerlink" title="finish一直运行到当前函数返回"></a>finish一直运行到当前函数返回</h5><p>分两种情况,有没有进入函数</p>
+<p>使用step命令让程序在第一层递归函数&#x3D;&#x3D;入口前&#x3D;&#x3D;停下,此时使用finish</p>
+<p><img src="https://raw.githubusercontent.com/DeutschBall/test/master/image-20220422191432439.png" alt="image-20220422191432439"></p>
+<p>发现程序直接返回到了main函数中,并且带着返回值<code>362880</code>恰好是9的阶乘,说明递归函数各层都执行了</p>
+<p>现在让程序在第一层递归函数的&#x3D;&#x3D;内部&#x3D;&#x3D;停下</p>
+<p><img src="https://raw.githubusercontent.com/DeutschBall/test/master/image-20220422192218738.png" alt="image-20220422192218738"></p>
+<p>发现进入的递归函数的第二层</p>
+<h5 id="return-放弃函数未执行的部分-直接返回到调用者"><a href="#return-放弃函数未执行的部分-直接返回到调用者" class="headerlink" title="return 放弃函数未执行的部分,直接返回到调用者"></a>return 放弃函数未执行的部分,直接返回到调用者</h5><p><img src="https://raw.githubusercontent.com/DeutschBall/test/master/image-20220422192641695.png" alt="image-20220422192641695"></p>
+<p>fact(6)返回到fact(7)</p>
+<p>然后一直使用finish命令返回main函数</p>
+<p><img src="https://raw.githubusercontent.com/DeutschBall/test/master/image-20220422192818544.png" alt="image-20220422192818544"></p>
+<p>发现ans值并没有被正确地计算</p>
+<p>即return会放弃下文</p>
+<h4 id="机器码层面"><a href="#机器码层面" class="headerlink" title="机器码层面"></a>机器码层面</h4><h5 id="until-在循环体的机器码的最高地址时挑出循环到第一条高于循环地址的指令"><a href="#until-在循环体的机器码的最高地址时挑出循环到第一条高于循环地址的指令" class="headerlink" title="until 在循环体的机器码的最高地址时挑出循环到第一条高于循环地址的指令"></a>until 在循环体的机器码的最高地址时挑出循环到第一条高于循环地址的指令</h5><p>调试一个使用循环计算阶乘的函数fact</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br></pre></td><td class="code"><pre><span class="line">┌──(root㉿Executor)-[/home/kali/mydir]</span><br><span class="line">└─<span class="meta"># cat main.c</span></span><br><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;stdio.h&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;stdlib.h&gt;</span></span></span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="type">int</span> <span class="title function_">fact</span><span class="params">(<span class="type">int</span> n)</span>&#123;</span><br><span class="line">        <span class="keyword">if</span>(n&lt;<span class="number">0</span>)<span class="keyword">return</span> n;</span><br><span class="line">        <span class="keyword">if</span>(n==<span class="number">0</span>)<span class="keyword">return</span> <span class="number">1</span>;</span><br><span class="line"></span><br><span class="line">        <span class="type">int</span> result=<span class="number">1</span>;</span><br><span class="line"></span><br><span class="line">        <span class="keyword">while</span>(n&gt;<span class="number">0</span>)&#123;</span><br><span class="line">                result*=n;</span><br><span class="line">                --n;</span><br><span class="line"></span><br><span class="line">        &#125;</span><br><span class="line">        <span class="keyword">return</span> result;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="type">int</span> <span class="title function_">main</span><span class="params">(<span class="type">int</span> argc,<span class="type">char</span> **argv)</span>&#123;</span><br><span class="line">        <span class="type">int</span> ans=<span class="number">123456</span>;</span><br><span class="line">        ans=fact(<span class="number">9</span>);</span><br><span class="line">        <span class="built_in">printf</span>(<span class="string">&quot;%d&quot;</span>,ans);</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">        <span class="keyword">return</span> <span class="number">0</span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>在main函数打一个断点方便单步调试</p>
+<p>一直使用step单步步入命令,直到第一次到达while条件判断的时候,使用disas观察反汇编代码</p>
+<p><img src="https://raw.githubusercontent.com/DeutschBall/test/master/image-20220422194448277.png" alt="image-20220422194448277"></p>
+<p>此时对应指令fact+19位置</p>
+<p>此时再使用一次单步步入,进入循环,<code>line 12:result*=n</code></p>
+<p><img src="https://raw.githubusercontent.com/DeutschBall/test/master/image-20220422194622378.png" alt="image-20220422194622378"></p>
+<p>对应指令fact+13位置</p>
+<p>即源代码的执行顺序和机器码相反</p>
+<p>显然是由于刚才的fact+21的jg条件跳转满足,跳到了fact+13</p>
+<p>此时使用until只是相当于step命令,因为until只会在循环的机器码层面的最大地址处才会有快速执行循环的作用</p>
+<p><img src="https://raw.githubusercontent.com/DeutschBall/test/master/image-20220422194902282.png" alt="image-20220422194902282"></p>
+<p>继续disas观察反汇编发现<code>line13:--n</code>对应反汇编的fact+16</p>
+<p>此时再使用u</p>
+<p><img src="https://raw.githubusercontent.com/DeutschBall/test/master/image-20220422195028273.png" alt="image-20220422195028273"></p>
+<p>源代码层面进行循环条件判断,对应机器码层面test判断,而fact+19就是循环体在机器层面的最高地址</p>
+<p>此时再使用u</p>
+<p><img src="https://raw.githubusercontent.com/DeutschBall/test/master/image-20220422195116698.png" alt="image-20220422195116698"></p>
+<p>直接返回了main函数,这是因为fact函数中while循环结束立刻就返回了,对应机器码</p>
+<p><img src="https://raw.githubusercontent.com/DeutschBall/test/master/image-20220422195301219.png" alt="image-20220422195301219"></p>
+<p>第23行是循环外首条高于循环的地址,该条指令又是返回,因此返回了main函数</p>
+<p>返回main后打印ans值发现是362880是9的阶乘,证明until指令会执行循环体剩下的部分</p>
+
+      
+    </div>
+
+    
+    
+    
+      <footer class="post-footer">
+        <div class="post-eof"></div>
+      </footer>
+  </article>
+  
+  
+  
+
+      
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="en">
+    <link itemprop="mainEntityOfPage" href="http://deutschball.github.io/2022/04/18/%E6%8A%BD%E8%B1%A1%E4%BB%A3%E6%95%B0/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="https://raw.githubusercontent.com/DeutschBall/picbed/main/dustball.png">
+      <meta itemprop="name" content="dustball">
+      <meta itemprop="description" content="dustland">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="dustland">
+    </span>
+      <header class="post-header">
+        <h2 class="post-title" itemprop="name headline">
+          
+            <a href="/2022/04/18/%E6%8A%BD%E8%B1%A1%E4%BB%A3%E6%95%B0/" class="post-title-link" itemprop="url">抽象代数</a>
+        </h2>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-calendar"></i>
+              </span>
+              <span class="post-meta-item-text">Posted on</span>
+
+              <time title="Created: 2022-04-18 16:27:20" itemprop="dateCreated datePublished" datetime="2022-04-18T16:27:20+08:00">2022-04-18</time>
+            </span>
+              <span class="post-meta-item">
+                <span class="post-meta-item-icon">
+                  <i class="far fa-calendar-check"></i>
+                </span>
+                <span class="post-meta-item-text">Edited on</span>
+                <time title="Modified: 2024-01-15 20:41:05" itemprop="dateModified" datetime="2024-01-15T20:41:05+08:00">2024-01-15</time>
+              </span>
+
+          
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+          <h1 id="抽象代数"><a href="#抽象代数" class="headerlink" title="抽象代数"></a>抽象代数</h1><p>参考教材:密码编码学与网络安全</p>
+<p>AES加密的数学基础</p>
+<p>第一遍读感觉教材上对数学基础(群环域,多项式运算)P72-P91给的莫名奇妙</p>
+<p><a target="_blank" rel="noopener" href="https://www.zhihu.com/question/22072020">然后参考了知乎回答</a>对群环域的解释</p>
+<p>此时第二遍读教材,发现其实教材在讲每一部分的开始都写了为什么要讲.</p>
+<p>学习这部分一定要明确目的,在陷入定理的证明时或者公式应用时时刻想想是在干什么</p>
+<p>引入多项式构造$GF(p^n)$这一想法真的太神奇了,将整数上的数论定理应用于多项式也真的太神奇了</p>
+<p>另,教材P74页的图4.2是有错误的</p>
+<h2 id="抽象代数基础"><a href="#抽象代数基础" class="headerlink" title="抽象代数基础"></a>抽象代数基础</h2><p>图片来自<a target="_blank" rel="noopener" href="https://zhuanlan.zhihu.com/p/21583674">代数结构入门：群、环、域、向量空间 - 知乎 (zhihu.com)</a></p>
+<p><img src="https://pica.zhimg.com/feb8dbb0222be967e7b04f81d69267cc_1440w.jpg?source=172ae18b" alt="代数结构入门：群、环、域、向量空间"></p>
+<h3 id="群"><a href="#群" class="headerlink" title="群"></a>群</h3><h4 id="群-1"><a href="#群-1" class="headerlink" title="群"></a>群</h4><p>$&lt;G,·&gt;$表示一个定义了二元关系$·$的集合(注意这里$·$不一定是乘号,可以是所有二元关系的抽象表示)</p>
+<p>如果G满足:</p>
+<p>A1封闭性:$\forall a,b\in G\rightarrow a·b\in b$</p>
+<p>A2结合律:$\forall a,b\in G,a·(b·c)&#x3D;(a·b)·c$</p>
+<p>A3单位元:$\exist e\in G,\forall a\in G,e·a&#x3D;a·e&#x3D;a$</p>
+<p>A4逆元:$\forall a\in G,\exist a^{-1},a·a^{-1}&#x3D;a^{-1}·a&#x3D;e$</p>
+<blockquote>
+<p>这里$^{-1}$不是一定是-1次幂,只是逆元的表示形式</p>
+</blockquote>
+<p>集合G+A1+A2+A3+A4&#x3D;群G</p>
+<blockquote>
+<p>&lt;Z,+&gt;就是一个群</p>
+<p>&lt;N,+&gt;就不是一个群,因为如果定义单位元是0,那么1的逆元就是-1,但是-1不在自然数范围内,满足A1A2A3但是不满足A4的代数系统被称为幺半群</p>
+</blockquote>
+<h5 id="变换群"><a href="#变换群" class="headerlink" title="变换群"></a>变换群</h5><p>设A是一非空集合,G是A到A的映射集合,如果G关于运算*构成一个群,则称$&lt;G,✳&gt;$是集合A上的一个变换群,简称变换群</p>
+<h5 id="置换群"><a href="#置换群" class="headerlink" title="置换群"></a>置换群</h5><p>设A是一非空有限集合,则A上的一个变换群就是A的一个置换群,简称置换群</p>
+<h4 id="交换群"><a href="#交换群" class="headerlink" title="交换群"></a>交换群</h4><p>A5交换律:$\forall a,b\in G,a·b&#x3D;b·a$</p>
+<p>群G+A5&#x3D;交换群G</p>
+<p>l</p>
+<h3 id="环"><a href="#环" class="headerlink" title="环"></a>环</h3><h4 id="环-1"><a href="#环-1" class="headerlink" title="环"></a>环</h4><p>$&lt;R,+,\times&gt;$R是一个有两种二元运算的集合,这两种二元运算分别为加法$+$和乘法$\times$</p>
+<p>已知$&lt;R,+&gt;$是交换群</p>
+<p>如果R再满足</p>
+<p>M1乘法封闭性:$\forall a,b\in R,a\times b\in R$</p>
+<p>M2乘法结合律:$\forall a,b,c\in R,a\times (b\times c)&#x3D;(a\times b)\times c$</p>
+<p>M3乘法对加法的分配律:$\forall a,b,c\in R,\begin{cases}a\times (b+c)&#x3D;a\times b+a\times c\(a+b)\times c&#x3D;a\times c+b\times c\end{cases}$</p>
+<blockquote>
+<p>注意这里没有写$a \times (b+c)&#x3D;(b+c)\times a$</p>
+<p>因为这样写实际上是满足乘法交换律,而满足分配律不一定满足交换律,比如矩阵乘法</p>
+<p>矩阵的左右乘结果一般是不一样的,但是矩阵乘法对矩阵加法是有结合律的</p>
+</blockquote>
+<p>则称R为环</p>
+<h4 id="交换环"><a href="#交换环" class="headerlink" title="交换环"></a>交换环</h4><p>如果环R再满足</p>
+<p>M4乘法交换律:$\forall a,b,c\in R,(a\times b)\times c&#x3D;a\times (b\times c)$</p>
+<blockquote>
+<p>显然$R_n(Q)$是环但不是交换环</p>
+</blockquote>
+<p>则称R为交换环</p>
+<h4 id="整环"><a href="#整环" class="headerlink" title="整环"></a>整环</h4><p>如果交换环R再满足</p>
+<p>M5乘法单位元:$\exist e,\forall a\in R,e\times a&#x3D;a\times e&#x3D;a$</p>
+<blockquote>
+<p>当$R&#x3D;S$为整数时,$e&#x3D;1$</p>
+<p>当$R&#x3D;R_n(Q)$,n阶实数矩阵集合,$e&#x3D;E(n)$n阶单位矩阵</p>
+</blockquote>
+<p>M6无零因子,:$\forall a,b\in R,a\times b&#x3D;0\rightarrow a&#x3D;0\ or\ b&#x3D;0$</p>
+<p>则称R为整环</p>
+<blockquote>
+<p>怎么理解”无0因子”?</p>
+<p>显然$R_n(Q)$不满足M6,因为两个矩阵$A,B$乘积是个0矩阵并不能说明$A$或者$B$矩阵有至少一个是零矩阵</p>
+<p>比如</p>
+<p>$$<br>A&#x3D;\begin{bmatrix}<br>0\ 0\ 0\<br>0\ 0\ 0\<br>0\ 0\ 1\<br>\end{bmatrix}\ \ \ \ \<br>B&#x3D;\begin{bmatrix}<br>0\ 0\ 1\<br>0\ 0\ 0\<br>0\ 0\ 0\<br>\end{bmatrix}<br>$$<br>又如,</p>
+<p>令$Z_6&#x3D;{0,1,2,3,4,5}$,</p>
+<p>定义$Z_6$上的乘法$\otimes$为$a\otimes b&#x3D;(a\times b\ )mod\ 6$</p>
+<p>定义$Z_6$上的加法$\oplus$为$a\oplus b&#x3D;(a+b)mod\ 6$</p>
+<p>显然$Z_6$满足$A_1-A_5,M_1-M_5$</p>
+<p>但是$&lt;Z_6,+,\times&gt;$不满足无零因子,比如</p>
+<p>$2\otimes 3&#x3D;(2\times 3)mod \ 6&#x3D;6mod\ 6&#x3D;0$</p>
+<p>就是说,0这个元素一定也是在集合R中存在的,并且乘法运算结果为0一定和引入这个元素0有关</p>
+</blockquote>
+<h3 id="域"><a href="#域" class="headerlink" title="域"></a>域</h3><p>设$&lt;R,+,\times&gt;$为一个整环,如果R再满足</p>
+<p>M7乘法逆元:$\forall a≠0\in R,\exist a^{-1}\in R,a\times a^{-1}&#x3D;1$则称$a^{-1}$为a的乘法逆元</p>
+<blockquote>
+<p>注意乘法逆元也是$R$中的</p>
+<p>定义乘法逆元的作用实际上是可以使用除法,除以一个数等于乘以该数的乘法逆元</p>
+<p>比如对于$&lt;Z_7,+,\times&gt;$,由拓展欧几里得定理可知,由于模数为7是一个质数,因此0到6都存在$Z_7$上的mod 7意义下的乘法逆元</p>
+<p>再比如全体整数就不是任何元素都有乘法逆元,只有1和-1有乘法逆元,任何绝对值大于1的整数其乘法逆元应该是分数,不属于整数.</p>
+</blockquote>
+<p>则称R为域F</p>
+<h2 id="有限域GF-p"><a href="#有限域GF-p" class="headerlink" title="有限域GF(p)"></a>有限域GF(p)</h2><p>符号意义:</p>
+<p>$GF(p)&#x3D;&lt;Z_p,\oplus,\otimes &gt;$</p>
+<p>$GF:Galois Field$,伽罗华域</p>
+<p>$p$:表示一个正素数</p>
+<p>$\oplus:\forall a,b\in Z_p,a\oplus b&#x3D;(a+b)\ mod\ p$即模p加法</p>
+<p>$\otimes : \forall a,b\in Z_p,a\otimes b&#x3D;(a\times b)\ mod\ p$即模屁乘法</p>
+<blockquote>
+<p>为什么一定要求是一个素数?</p>
+<p>当N为一个合数的时候$Z_N&#x3D;{1,2,3,…,N-2,N-1}$不满足$M_6$无零因子,不是整环,因此不是域</p>
+<p>为什么不满足$M_6$?</p>
+<p>由已知,N是合数,则至少存在$n\in Z_N,1&lt;n&lt;N,n|N$</p>
+<p>如果$n^2&#x3D;N$,则有$n\otimes n&#x3D;n\times n\ mod\ N&#x3D;0$</p>
+<p>如果$n^2!&#x3D;N$,则$\exist n’\in (1,N),nn’&#x3D;N$那么$n\otimes n’&#x3D;nn’\ mod\ N&#x3D;N\ mod \ N&#x3D;0$</p>
+<p>故选取p为素数,就是为了保证$M_6$无零因子</p>
+<p>同时,选取一个素数作为mod值,保证了$M_7$乘法逆元:</p>
+<p>$\forall a\in Z_p,a\otimes x&#x3D;1$,即$ax\equiv 1(mod\ p)$,显然当p为一个素数时有$gcd(a,p)&#x3D;1$由2拓展欧几里得定理即可求出x的值</p>
+<p>因此$Z_p$就是一个有限域,用$GF(p)$表示</p>
+</blockquote>
+<h3 id="Z-p-上的数论定理"><a href="#Z-p-上的数论定理" class="headerlink" title="$Z_p$上的数论定理"></a>$Z_p$上的数论定理</h3><h4 id="拓展欧几里得定理求乘法逆元"><a href="#拓展欧几里得定理求乘法逆元" class="headerlink" title="拓展欧几里得定理求乘法逆元"></a>拓展欧几里得定理求乘法逆元</h4><figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="type">int</span> <span class="title">exgcd</span><span class="params">(<span class="type">const</span> <span class="type">int</span> &amp;a, <span class="type">const</span> <span class="type">int</span> &amp;b, <span class="type">int</span> &amp;x, <span class="type">int</span> &amp;y)</span> </span>&#123;<span class="comment">//拓展欧几里得算法ax+by=1=gcd(a,b)</span></span><br><span class="line">	<span class="keyword">if</span> (b == <span class="number">0</span>) &#123;</span><br><span class="line">		x = <span class="number">1</span>;</span><br><span class="line">		y = <span class="number">0</span>;</span><br><span class="line">		<span class="keyword">return</span> a;</span><br><span class="line">	&#125;</span><br><span class="line">	<span class="type">int</span> x2, y2;</span><br><span class="line">	<span class="type">int</span> d = <span class="built_in">exgcd</span>(b, a % b, x2, y2);</span><br><span class="line">	x = y2;</span><br><span class="line">	y = x2 - a / b * y2;</span><br><span class="line">	<span class="keyword">return</span> d;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="type">int</span> <span class="title">inverse</span><span class="params">(<span class="type">const</span> <span class="type">int</span> &amp;a, <span class="type">const</span> <span class="type">int</span> &amp;mod)</span> </span>&#123;<span class="comment">//求a在模mod下的逆元</span></span><br><span class="line">	<span class="type">int</span> x, y;</span><br><span class="line">	<span class="built_in">exgcd</span>(a, mod, x, y);</span><br><span class="line">	<span class="keyword">return</span> ((x % mod) + mod) % mod;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h4 id="快速幂"><a href="#快速幂" class="headerlink" title="快速幂"></a>快速幂</h4><figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line"></span><br><span class="line"><span class="function"><span class="type">int</span> <span class="title">quick_pow</span><span class="params">(<span class="type">const</span> <span class="type">int</span> &amp;base, <span class="type">const</span> <span class="type">int</span> &amp;index, <span class="type">const</span> <span class="type">int</span> &amp;mod)</span> </span>&#123;<span class="comment">//bash^index(% mod)</span></span><br><span class="line">	<span class="keyword">if</span> (index == <span class="number">0</span>)</span><br><span class="line">		<span class="keyword">return</span> <span class="number">1</span>;</span><br><span class="line">	<span class="keyword">else</span> <span class="keyword">if</span> (index == <span class="number">1</span>)</span><br><span class="line">		<span class="keyword">return</span> base % mod;</span><br><span class="line">	<span class="keyword">else</span> <span class="keyword">if</span> (index % <span class="number">2</span>) &#123;</span><br><span class="line">		<span class="keyword">return</span> <span class="built_in">quick_pow</span>(base * base % mod, index &gt;&gt; <span class="number">1</span>, mod) % mod;</span><br><span class="line">	&#125; <span class="keyword">else</span> &#123;</span><br><span class="line">		<span class="keyword">return</span> base * <span class="built_in">quick_pow</span>(base * base % mod, index &gt;&gt; <span class="number">1</span>, mod) % mod;</span><br><span class="line">	&#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+
+
+<h2 id="多项式算术"><a href="#多项式算术" class="headerlink" title="多项式算术"></a>多项式算术</h2><h3 id="为什么突然扯到”多项式算数”呢"><a href="#为什么突然扯到”多项式算数”呢" class="headerlink" title="为什么突然扯到”多项式算数”呢?"></a>为什么突然扯到”多项式算数”呢?</h3><p>前面我们证明了<strong>对于整数集$Z_N&#x3D;{0,1,2,3,…,N-1}$,只有当$|Z_N|&#x3D;N$为素数p时,$Z_p$才为一个域</strong></p>
+<p>如果想要得到一个元素个数为$2^n$的域,显然$Z_p$做不到.</p>
+<p>为什么要得到一个元素个数为$2^n$的域?计算机使用二进制编码,AES加密算法就用到了$GF(2^8)$</p>
+<p>一个3位二进制数可以表示8中状态,明文和密码就在这八种状态之中</p>
+<table>
+<thead>
+<tr>
+<th>模8乘法</th>
+<th>0</th>
+<th>1</th>
+<th>2</th>
+<th>3</th>
+<th>4</th>
+<th>5</th>
+<th>6</th>
+<th>7</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>0</td>
+<td>0</td>
+<td>0</td>
+<td>0</td>
+<td>0</td>
+<td>0</td>
+<td>0</td>
+<td>0</td>
+<td>0</td>
+</tr>
+<tr>
+<td>1</td>
+<td>0</td>
+<td>1</td>
+<td>2</td>
+<td>3</td>
+<td>4</td>
+<td>5</td>
+<td>6</td>
+<td>7</td>
+</tr>
+<tr>
+<td>2</td>
+<td>0</td>
+<td>2</td>
+<td>4</td>
+<td>6</td>
+<td>0</td>
+<td>2</td>
+<td>4</td>
+<td>6</td>
+</tr>
+<tr>
+<td>3</td>
+<td>0</td>
+<td>3</td>
+<td>6</td>
+<td>1</td>
+<td>4</td>
+<td>7</td>
+<td>2</td>
+<td>5</td>
+</tr>
+<tr>
+<td>4</td>
+<td>0</td>
+<td>4</td>
+<td>0</td>
+<td>4</td>
+<td>0</td>
+<td>4</td>
+<td>4</td>
+<td>3</td>
+</tr>
+<tr>
+<td>5</td>
+<td>0</td>
+<td>5</td>
+<td>2</td>
+<td>7</td>
+<td>4</td>
+<td>1</td>
+<td>6</td>
+<td>3</td>
+</tr>
+<tr>
+<td>6</td>
+<td>0</td>
+<td>6</td>
+<td>4</td>
+<td>2</td>
+<td>4</td>
+<td>3</td>
+<td>4</td>
+<td>2</td>
+</tr>
+<tr>
+<td>7</td>
+<td>0</td>
+<td>7</td>
+<td>6</td>
+<td>5</td>
+<td>3</td>
+<td>3</td>
+<td>2</td>
+<td>1</td>
+</tr>
+</tbody></table>
+<p>在$Z_8$中的数字乘法,其结果中个数字的出现次数显然是不均匀的,比如1出现了4次,2就出现了8次</p>
+<p>而一个理想的密码是不能暴露词频信息的,显然用$Z_8$上的变换进行加密不理想,于是想一种乘法和除法的构造方法, 使得有8个元素的域其乘法或者加法的结果的频率相等</p>
+<p>而使用多项式运算就可以解决这个问题,因此引入了多项式运算</p>
+<p>首先要研究的是&#x3D;&#x3D;如何构造一个有8个元素($p^n$)的域&#x3D;&#x3D;</p>
+<h3 id="将数的性质拓展到多项式式上"><a href="#将数的性质拓展到多项式式上" class="headerlink" title="&#x3D;&#x3D;将数的性质拓展到多项式式上&#x3D;&#x3D;"></a>&#x3D;&#x3D;将数的性质拓展到多项式式上&#x3D;&#x3D;</h3><p>我们使用的一般是<strong>代数基本规则的普通多项式运算</strong></p>
+<p><strong>然后拓展到系数在$GF(p)$中的多项式运算</strong></p>
+<p><strong>然后再拓展到系数在$GF(p)$,模一个$n$次多项式$m(x)$的多项式运算</strong></p>
+<p>最终目标是理解并应用最后一种多项式</p>
+<h3 id="普通多项式运算"><a href="#普通多项式运算" class="headerlink" title="普通多项式运算"></a>普通多项式运算</h3><p>多项式次数:最高次项的次数</p>
+<p>多项式的表示:<br>$$<br>f(x)&#x3D;a_nx^n+a_{n-1}x^{n-1}+…+a_1x+a_0&#x3D;\sum_{i&#x3D;0}^na_ix^i,a_n≠0<br>$$<br>如果$\forall a_i\in S$则称$f(x)$是系数集$S$上的多项式,令$&lt;A,+,\times &gt;$表示S上的所有多项式以及加法和乘法二元关系</p>
+<blockquote>
+<p>当$S&#x3D;Z$表示整数集的时候,显然A是满足$A_1-A_5,M_1-M_6$,是个整环,</p>
+<p>但是不满足乘法逆元,比如$x$的乘法逆元$x^{-1}$,是一个指数为负的多项式,显然不在$A$</p>
+</blockquote>
+<p>设<br>$$<br>f(x)&#x3D;\sum_{i&#x3D;0}^na_ix^i\<br>g(x)&#x3D;\sum_{i&#x3D;0}^mb_ix^i\<br>a_nb_m≠0,n\ge m<br>$$<br>则普通多项式的加法运算<br>$$<br>f(x)+g(x)&#x3D;\sum_{i&#x3D;0}^m(a_i+b_i)x^i+\sum_{i&#x3D;m+1}^na_i x^i<br>$$<br>普通多项式乘法<br>$$<br>f(x)g(x)&#x3D;\sum_{i&#x3D;0}^{n+m}c_ix^i\<br>c_i&#x3D;a_0b_i+a_1b_{i-1}+…+a_ib_0<br>$$</p>
+<h3 id="系数在-Z-p-中的多项式运算"><a href="#系数在-Z-p-中的多项式运算" class="headerlink" title="系数在$Z_p$中的多项式运算"></a>系数在$Z_p$中的多项式运算</h3><p>当系数集是全体整数的时候,由于系数不都有乘法逆元,因此无法进行多项式除法</p>
+<p>当系数集是一个域的时候,系数都有了乘法逆元,可以对多项式引入除法(带余除法)</p>
+<p>可以类比整数的除法,求余数用$%$,求商用$&#x2F;$</p>
+<p>那么在$Z_p$中的多项式,求余式用$%$,求商式用$&#x2F;$</p>
+<blockquote>
+<p>比如对于$Z_2$上的多项式$f(x)&#x3D;x^4+1&#x3D;(x+1)(x^3+x^2+x+1)$,则$f(x)&#x2F;(x+1)&#x3D;x^3+x^2+x+1$</p>
+</blockquote>
+<p>设系数域为$&lt;Z_p,\oplus,\otimes &gt;$</p>
+<p>设$Z_p$上的两个多项式<br>$$<br>f(x)&#x3D;\sum_{i&#x3D;0}^na_ix^i\<br>g(x)&#x3D;\sum_{i&#x3D;0}^mb_ix^i\<br>a_n,b_m≠0,n\ge m<br>$$</p>
+<h4 id="Z-p-多项式的四则运算"><a href="#Z-p-多项式的四则运算" class="headerlink" title="$Z_p$多项式的四则运算"></a>$Z_p$多项式的四则运算</h4><p>则$Z_p$上的多项式加法(减法类似)为<br>$$<br>f(x)+g(x)&#x3D;\sum_{i&#x3D;0}^m(a_i\oplus b_i)x^i+\sum_{i&#x3D;m+1}^na_i x^i\<br>&#x3D;\sum_{i&#x3D;0}^m(a_i+ b_i)mod\ p\ \times x^i+\sum_{i&#x3D;m+1}^na_i x^i<br>$$</p>
+<p>$Z_p$上的多项式乘法为<br>$$<br>f(x)g(x)&#x3D;\sum_{i&#x3D;0}^{n+m}c_ix^i\<br>c_i&#x3D;(a_0b_i+a_1b_{i-1}+…+a_ib_0)mod\ p<br>$$<br>$Z_p$上的带余式除法<br>$$<br>f(x)&#x3D;q(x)g(x)+r(x)<br>$$<br>意思是$f(x)\div g(x)&#x3D;q(x)…r(x)$</p>
+<p>以$Degree(f)$表示多项式f的阶,并且$Degree(f)&#x3D;n,\<br>Degree(g)&#x3D;m,\$则有$Degree(q)&#x3D;n-m\<br>Degree(r)\le m-1$</p>
+<h4 id="Z-p-多项式的欧几里得定理"><a href="#Z-p-多项式的欧几里得定理" class="headerlink" title="$Z_p$多项式的欧几里得定理"></a>$Z_p$多项式的欧几里得定理</h4><p>定义$d(x)$是$a(x),b(x)$的最大公因式,即$d(x)$是能够整除$a(x),b(x)$的所有多项式中次数最高的<br>$$<br>gcd(a(x),b(x))&#x3D;gcd[b(x),a(x)%b(x)]<br>$$</p>
+<h3 id="Z-p-上多项式再mod-n次素多项式"><a href="#Z-p-上多项式再mod-n次素多项式" class="headerlink" title="$Z_p$上多项式再mod n次素多项式"></a>$Z_p$上多项式再mod n次素多项式</h3><p>对于$Z_p$上次数高于n-1的多项式$f(x)$,需要mod一个$Z_p$上的n次<strong>素多项式</strong>$m(x)$,如此限制$f(x)$的次数在$[0,n-1]$</p>
+<p>什么是”素多项式”?$Z_p$上的素多项式$m(x)$无法被$Z_p$上的任意多项式整除</p>
+<p>当$m(x)$的次数为n,则$Z_p$上的多项式$mod\ m(x)$都会落在次数小于等于n-1的多项式集$F$中</p>
+<p>显然$F$中的多项式都可以表示为<br>$$<br>\forall f(x)\in F,f(x)&#x3D;a_0+a_1x+…+a_{n-1}x^{n-1},\forall a_i\in Z_p<br>$$<br>那么这样的多项式一共有$p^n$个(系数的乘法原理),即模$m(x)$构成的剩余类</p>
+<p>现在类比$Z_p$,<strong>证明$F$是一个域</strong></p>
+<p>显然加减乘封闭且结合律分配律交换律均满足,$F$容易判定为交换环</p>
+<p>由于1也是$F$中的多项式,因此存在乘法单位元1,</p>
+<p><strong>下面证明M6无零因子</strong></p>
+<p>由于k阶多项式的k次项系数不为零,假设有两个非零多项式,其最高次项分别为$a_ix^i,b_jx^j$</p>
+<p>乘积多项式的最高次项为$a_ib_jx^{i+j}$如果指数$i+j\ge n$则对$m(x)$取模,如果系数$a_ib_j\ge p$则对$p$取模</p>
+<p>显然p是一个素数,$a_ib_j&#x3D;a_i\times b_j$是一个合数,合数对素数取模显然不为0</p>
+<p>因此任何两个非零多项式乘积一定非零,M6无零因子得证</p>
+<p>到此F被证明是整环</p>
+<blockquote>
+<p>无零因子就是$GF(2^3)$是域但是$Z_8$不是域的本质原因</p>
+</blockquote>
+<p><strong>下面证明任意F中的非0多项式都在F中有乘法逆元</strong></p>
+<p>$f(x)g(x)\equiv 1(mod\ m(x))$</p>
+<p>$g(x)f(x)+k(x)m(x)&#x3D;1$</p>
+<p>又$m(x)$为素因式,有欧几里得定理知上式有解</p>
+<p>因此M7乘法逆元得证</p>
+<p>因此$F$是域</p>
+<h3 id="F-和-Z-p-的不同"><a href="#F-和-Z-p-的不同" class="headerlink" title="$F$和$Z_p$的不同"></a>$F$和$Z_p$的不同</h3><p>我们在证明$Z_p$是域的时候发现,对于整数集$Z_N&#x3D;{0,1,2,3,…,N-1}$,只有当$|Z_N|&#x3D;N$为素数p时,$Z_p$才为一个域</p>
+<p>而现在$|F|&#x3D;p^n$显然当$n&gt;1$时是一个合数,但是$F$仍然是一个域</p>
+<p>将$F$记作$GF(p^n)$表示伽罗华域</p>
+<h3 id="F-GF-p-n-上的乘法逆元"><a href="#F-GF-p-n-上的乘法逆元" class="headerlink" title="$F&#x3D;GF(p^n)$上的乘法逆元"></a>$F&#x3D;GF(p^n)$上的乘法逆元</h3><p>$$<br>f(x)g(x)\equiv 1(mod \ m(x))\<br>g(x)f(x)+k(x)m(x)&#x3D;1\<br>gcd(f(x),m(x))&#x3D;1<br>$$</p>
+<p>显然可以将整数上的拓展欧几里得推广到F上</p>
+<h2 id="GF-2-n-上构造结果分布均匀的二元运算"><a href="#GF-2-n-上构造结果分布均匀的二元运算" class="headerlink" title="$GF(2^n)$上构造结果分布均匀的二元运算"></a>$GF(2^n)$上构造结果分布均匀的二元运算</h2><p>$GF(2^n)$上的多项式各项的系数要么是0,要么是1,可以用二进制数表示</p>
+<p>比如$x^3+x^2+1$就可以表示为1101</p>
+<h3 id="加法"><a href="#加法" class="headerlink" title="加法"></a>加法</h3><p>由于系数要么是0要么是1,即系数要自动对2取模</p>
+<p>那么多项式的加法就是二进制数按位异或</p>
+<p>比如$(x^3+x^2+x)+(x^4+x+1)&#x3D;x^4+x^3+x^2+2x+1&#x3D;x^4+x^3+x^2+1$</p>
+<p>$01110\oplus 10011&#x3D;11101$</p>
+<h3 id="乘法"><a href="#乘法" class="headerlink" title="乘法"></a>乘法</h3><p>教材上一本正经地写了一堆用字母表示的多项式,看上去头大.</p>
+<p>从一个例子入手可能比较容易理解:</p>
+<p>考虑AES加密算法使用到的$GF(2^8)$,取$m(x)&#x3D;x^8+x^4+x^3+x+1$为模.</p>
+<p>$f(x)&#x3D;x^6+x^4+x^2+x+1$</p>
+<p>$g(x)&#x3D;x^7+x+1$</p>
+<p>求$f(x)\otimes g(x)&#x3D;f(x)\times g(x)\mod m(x)$</p>
+<h4 id="拆分成项"><a href="#拆分成项" class="headerlink" title="拆分成项"></a>拆分成项</h4><p>容易想到的是把$g(x)$按幂次拆分成项然后用f(x)与g(x)的各项相乘之后相加,而相加在”加法”中我们已经认识到可以通过两个多项式异或这种简洁的方式实现,因此我们现在把精力放在$f(x)$如何和一个$x^k$项相乘上<br>$$<br>f(x)\times g(x)\mod m(x)\<br>&#x3D;f(x)\times(1+x+x^7)\mod m(x)\<br>&#x3D;f(x)\times 1\mod m(x)+f(x)\times x\mod m(x)+f(x)\times x^7\mod m(x)<br>$$<br>问题转化为如何求$f(x)\times x^k\mod m(x)$</p>
+<h4 id="求-f-x-times-x-k-mod-m-x"><a href="#求-f-x-times-x-k-mod-m-x" class="headerlink" title="求$f(x)\times x^k\mod m(x)$"></a>求$f(x)\times x^k\mod m(x)$</h4><p>由于<br>$$<br>f(x)\times x^k\mod m(x)\<br>&#x3D;{[(f(x)\times x\mod m(x))\times x\mod m(x)]\times …\times x\mod m(x)}\times x\mod m(x)<br>$$<br>因此问题又可以转换为怎么跨出求$f(x)$到$f(x)\times x\mod m(x)$这第一步</p>
+<h4 id="求-f-x-times-x-mod-m-x"><a href="#求-f-x-times-x-mod-m-x" class="headerlink" title="求$f(x)\times x\mod m(x)$"></a>求$f(x)\times x\mod m(x)$</h4><p>假设$f(x)&#x3D;a_7x^7+a_6x^6+…+a_1x+a_0$表示$GF(2^8)$上的任意多项式</p>
+<p>则$x\times f(x)&#x3D;a_7x^8+a_6x^7+…+a_0x$</p>
+<p>如果用二进制表示,那么<br>$$<br>f(x)&#x3D;&amp;a_7&amp;a_6&amp;a_5&amp;a_4&amp;a_3&amp;a_2&amp;a_1&amp;a_0\<br>x\times f(x)&#x3D;a_7&amp;a_6&amp;a_5&amp;a_4&amp;a_3&amp;a_2&amp;a_1&amp;a_0&amp;0<br>$$<br>在还没有取模时,我们可以发现$f(x)$到$x\times f(x)$只需要将$f(x)$的二进制表示左移一位,下面考虑如何取模</p>
+<p>如果$a_7&#x3D;0$则$x\times f(x)$顶多是一个7次多项式,如果有$a_6&#x3D;0$则顶多是一个6次多项式,一个七次多项式$x\times f(x)$去mod一个8次多项式$m(x)$实乃以卵击石,直接被8次多项式劝返</p>
+<p>如果$a_7&#x3D;1$则$x\times f(x)$与$m(x)$都是8次多项式,算是旗鼓相当,可以一战</p>
+<p>此时$x\times f(x)$可以分成精锐的头部$x^8$与累赘的尾部$a_6x^7+a_5x^6+…+a_0x$,</p>
+<p>这个尾部对$m(x)$取模还是被劝返,只留下精锐的头部$x^8$独自抗衡$m(x)$</p>
+<p>那么问题转化为$x^8$对$m(x)&#x3D;x^8+x^4+x^3+x+1$取模,考虑如何取模?</p>
+<h4 id="求-x-8-mod-m-x"><a href="#求-x-8-mod-m-x" class="headerlink" title="求$x^8 \mod m(x)$"></a>求$x^8 \mod m(x)$</h4><p>$x^8$形单影只,只能单挑$m(x)$的$x^8$项,无暇处理$m(x)$的一伙子小弟,</p>
+<p>于是$x^8$利用其系数都在$GF(2)$上,无中生有搬来了一伙子小弟:<br>$$<br>x^8\equiv x^8+2x^7+2x^6+…+2x+2(系数mod 2)<br>$$<br>此时用$x^8+2x^7+2x^6+…+2x+2$去$\mod m(x)$终于可以大干一场了,还得是门当户对地干,次数相同的项单挑</p>
+<p>$x^8\equiv x^8+2x^7+2x^6+…+2x+2(系数mod 2)$作为被除数,$m(x)$作为除数,余数即为所求结果</p>
+<p>战争一开始,商1之后被除数减去除数得到$2x^7+2x^6+2x^5+x^4+x^3+2x^2+x+1\equiv x^4+x^3+x+1(系数mod2)$</p>
+<p>立刻发现刚才”精锐的头部”那个$x^8$在和$m(x)$的8次项的决斗中阵亡了,剩下的小弟都是7次方以下的项,无力与$m(x)$抗衡,直接作为余数</p>
+<p>即刚才的”战争”可以写为:<br>$$<br>x^8\equiv x^4+x^3+x+1 \mod m(x)&amp;系数mod2\<br>其中m(x)&#x3D;x^8+x^4+x^3+x+1<br>$$<br>突然发现$x^8\mod m(x)&#x3D;m(x)-x^8&#x3D;x^4+x^3+x+1$</p>
+<p>这是巧合吗?</p>
+<p>这是系数mod2的必然结果,并且可以从8次推广到n次:</p>
+<p>$m(x)$为n次多项式<br>$$<br>x^n\mod m(x)&#x3D;m(x)-x^n(系数mod2)<br>$$<br>$x^8$独自面对$m(x)$,最终壮烈牺牲但是换回$x^4+x^3+x+1$颇有”将军百战死,壮士十年归”的感觉</p>
+<p>在战争之前我们把”累赘的尾部$a_6x^7+a_5x^6+…+a_0x$”留下不参战,原因是他们参战也会被敌人$m(x)$直接劝返</p>
+<p>现在我们知道了精锐的头部$x^8$和累赘的尾部$a_6x^7+a_5x^6+…+a_0x$各自参战的结果了,此时可以总结一支部队$x\times f(x)&#x3D;x^8+a_6x^7+a_5x^6+…+a_0x$参战的结果了:<br>$$<br>x\times f(x)\mod m(x)&#x3D;[m(x)-x^8]+a_6x^7+a_5x^6+…+a_0x<br>$$<br>比如当$f(x)&#x3D;x^7+x^4+x^2+x+1,m(x)&#x3D;x^8+x^4+x^3+x+1$时<br>$$<br>\begin{aligned}<br>&amp;x\times f(x)\mod m(x)\<br>&amp;&#x3D;(x^8+x^5+x^3+x^2+x)\mod (x^8+x^4+x^3+x+1)\<br>&amp;&#x3D;[x^4+x^3+x+1]+[x^5+x^3+x^2+x]\<br>&amp;&#x3D;011011\oplus 101110\<br>&amp;&#x3D;110101<br>\end{aligned}<br>$$<br>到此我们知道$x\times f(x)\mod m(x)$如何计算了,</p>
+<p>那么$x^2\times f(x)\mod m(x)&#x3D;x\times (x\times f(x)\mod m(x))\mod m(x)$</p>
+<p>以此类推可以得到$x^k\times f(x)\mod m(x)$如何计算了</p>
+<h4 id="回到求-f-x-times-g-x-mod-m-x"><a href="#回到求-f-x-times-g-x-mod-m-x" class="headerlink" title="回到求$f(x)\times g(x)\mod m(x)$"></a>回到求$f(x)\times g(x)\mod m(x)$</h4><p>不管你$g(x)$长什么样,我先预处理出$f(x)\times x\mod x,f(x)\times x^2\mod m(x),f(x)\times x^k\mod m(x)$等等情况</p>
+<p>如果你$g(x)&#x3D;1+x+x^2$长得很虚,那么<br>$$<br>f(x)\times g(x)\mod m(x)\<br>&#x3D;f(x)\times (1+x+x^2)\mod m(x)\<br>&#x3D;(f(x)+x\times f(x)+x^2\times f(x))\mod m(x)\<br>&#x3D;f(x)+x\times f(x)\mod m(x)+x^2\times f(x)\mod m(x)<br>$$<br>直接利用预处理得出的结果,然后计算加法直接用二进制异或</p>
+<h2 id="总结"><a href="#总结" class="headerlink" title="总结"></a>总结</h2><p>到此我们构造出了$GF(2^n)$,即有$2^n$个元素的伽罗华域</p>
+<p>怎么构造出的?由系数在$GF(2)$上的多项式模一个$2^n$次的素多项式拓展出的</p>
+<p>多项式和这$2^n$个数怎么产生联系?每一个多项式都对应一个二进制数</p>
+<p>这$2^n$个数的加减乘除运算怎么定义的?还是通过多项式的运算得到的</p>
+<p>下一步可以向AES加密算法进军了</p>
+
+      
+    </div>
+
+    
+    
+    
+      <footer class="post-footer">
+        <div class="post-eof"></div>
+      </footer>
+  </article>
+  
+  
+  
+
+      
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="en">
     <link itemprop="mainEntityOfPage" href="http://deutschball.github.io/2022/02/07/MySQL/">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">

