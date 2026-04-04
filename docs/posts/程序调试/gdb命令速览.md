@@ -1,3 +1,9 @@
+---
+title: gbd调试器命令速览
+date: 2022-04-22 19:57:20
+tags: reverse
+mathjax: true
+---
 # 调试技巧
 
 ## gdb
@@ -6,11 +12,7 @@
 
 ![img](https://raw.githubusercontent.com/DeutschBall/VideoBed/main/3fea595e45f144c8a485c3d3865f8076.png)
 
-
-
 ### pwndbg加强命令
-
-
 
 ```c
 address              Print virtual memory map pages. Results can be filtered by providing address/module name.
@@ -174,10 +176,6 @@ xpsr                 Print out ARM xPSR or CPSR register
 xuntil               Continue execution until an address or function.
 ```
 
-
-
-
-
 查看结构的定义位置
 
 ```c
@@ -212,8 +210,6 @@ File /usr/include/x86_64-linux-gnu/bits/types/struct_FILE.h:
 49:     struct _IO_FILE;
 ```
 
-
-
 ### 针对函数
 
 | 功能                 | 命令                  |
@@ -232,30 +228,26 @@ File /usr/include/x86_64-linux-gnu/bits/types/struct_FILE.h:
 
 ### 针对结构体
 
-| 功能                       | 命令                  |      |
-| -------------------------- | --------------------- | ---- |
-| 查看结构体定义             | ptype FILE            |      |
-| 查看结构体所在文件         | info types FILE       |      |
-| 将某基地址作为某结构体打印 | `p *(FILE*)0x80052a0` |      |
-
-
-
-
+| 功能                       | 命令                    |  |
+| -------------------------- | ----------------------- | - |
+| 查看结构体定义             | ptype FILE              |  |
+| 查看结构体所在文件         | info types FILE         |  |
+| 将某基地址作为某结构体打印 | `p *(FILE*)0x80052a0` |  |
 
 ### 针对保护
 
 gcc编译选项
 
-| 保护   | 作用                                            | 编译选项                                                     |
-| ------ | ----------------------------------------------- | ------------------------------------------------------------ |
-| NX     | 堆栈不可执行,防止在堆栈中写`shellcode`          | `-z execstack / -z noexecstack` (关闭 / 开启)                |
+| 保护   | 作用                                            | 编译选项                                                                                   |
+| ------ | ----------------------------------------------- | ------------------------------------------------------------------------------------------ |
+| NX     | 堆栈不可执行,防止在堆栈中写 `shellcode`       | `-z execstack / -z noexecstack` (关闭 / 开启)                                            |
 | Canary | 金丝雀,防止缓冲区溢出,隔离缓冲区和返回地址      | `-fno-stack-protector /-fstack-protector / -fstack-protector-all `(关闭 / 开启 / 全开启) |
-| PIE    | 位置无关可执行文件,动态库的加载位置随机或者固定 | `-no-pie / -pie` (关闭 / 开启)                               |
-| RELRO  | `GOT`表只读保护,防止篡改劫持`GOT`跳转表         | `-z norelro / -z lazy / -z now `(关闭 / 部分开启 / 完全开启) |
+| PIE    | 位置无关可执行文件,动态库的加载位置随机或者固定 | `-no-pie / -pie` (关闭 / 开启)                                                           |
+| RELRO  | `GOT`表只读保护,防止篡改劫持 `GOT`跳转表    | `-z norelro / -z lazy / -z now `(关闭 / 部分开启 / 完全开启)                             |
 
 ASLR,操作系统提供的保护
 
-如果使用gdb调试,可以直接使用`aslr on /aslr off`临时关闭或者开启对本程序的保护
+如果使用gdb调试,可以直接使用 `aslr on /aslr off`临时关闭或者开启对本程序的保护
 
 `/proc/sys/kernel/randomize_va_space`这个文件里写0/1/2
 
@@ -267,22 +259,12 @@ ASLR,操作系统提供的保护
 
 ### 针对符号
 
-
-
-
-
 | 功能                   | 命令               |
 | ---------------------- | ------------------ |
 | 查看符号所属模块       | info symbol printf |
 | 查看当前执行模块源文件 | info source        |
 
-
-
-
-
 ### 针对内存布局
-
-
 
 | 功能                                 | 命令                       |
 | ------------------------------------ | -------------------------- |
@@ -292,9 +274,7 @@ ASLR,操作系统提供的保护
 | 查看符号地址                         | info address printf        |
 | 各节区段的分布                       | info target或者elfsections |
 | 查看pie基地址                        | piebase                    |
-| 打印address开始,直到NULL结束的字符串 | `da <address>`             |
-
-
+| 打印address开始,直到NULL结束的字符串 | `da <address>`           |
 
 ### 针对堆栈
 
@@ -302,12 +282,6 @@ ASLR,操作系统提供的保护
 | ------------ | ------ |
 | 查看当前堆栈 | stack  |
 | 查看金丝雀   | canary |
-
-
-
-
-
-
 
 ### 针对堆
 
@@ -319,12 +293,6 @@ ASLR,操作系统提供的保护
 | 查看符号地址         | info address printf |
 | 各节区段的分布       | info target         |
 
-
-
-
-
-
-
 ```
 172.28.32.1
 export http_proxy=http://172.28.32.1:7890/
@@ -333,48 +301,26 @@ export https_proxy=http://172.28.32.1:7890/
 
 ### 多进程
 
-
-
-
-
-| 功能                   | 命令                          | 备注                                                         |
-| ---------------------- | ----------------------------- | ------------------------------------------------------------ |
-| 设置调试模式           | `set detach-on-fork [on|off]` | on：调试当前进程，其他进程继续<br />off：调试当前进程，其他进程挂起 |
-| 查看可调试进程         | `info inferiors`              |                                                              |
-| 切换调试进程           | `inferior  <pid>`             |                                                              |
-| 子进程启动后调试子进程 | `set follow-fork-mode child`  |                                                              |
-
-
+| 功能                   | 命令                           | 备注  |
+| ---------------------- | ------------------------------ | ----- |
+| 设置调试模式           | `set detach-on-fork [on        | off]` |
+| 查看可调试进程         | `info inferiors`             |       |
+| 切换调试进程           | `inferior  <pid>`            |       |
+| 子进程启动后调试子进程 | `set follow-fork-mode child` |       |
 
 ### 多线程
 
-
-
-
-
-
-
-
-
 ### 内核调试
-
-
 
 #### monitor相关
 
-| 指令                   | 作用                  |      |
-| ---------------------- | --------------------- | ---- |
-| monitor xp/10gx 0      | 查看物理地址          |      |
-| monitor x/10gx 0       | 查看虚拟地址          |      |
-| monitor system_reset   | 重启                  |      |
-| monitor info registers | 查看所有寄存器        |      |
-| monitor info cpus      | 查看所有cpu与所属线程 |      |
-
-
-
-
-
-
+| 指令                   | 作用                  |  |
+| ---------------------- | --------------------- | - |
+| monitor xp/10gx 0      | 查看物理地址          |  |
+| monitor x/10gx 0       | 查看虚拟地址          |  |
+| monitor system_reset   | 重启                  |  |
+| monitor info registers | 查看所有寄存器        |  |
+| monitor info cpus      | 查看所有cpu与所属线程 |  |
 
 ```
 pwndbg> monitor help
@@ -542,10 +488,3 @@ x_colo_lost_heartbeat  -- Tell COLO that heartbeat is lost,
                         a failover or takeover is needed.
 xp /fmt addr -- physical memory dump starting at 'addr'
 ```
-
-
-
-
-
-
-

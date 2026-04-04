@@ -1,6 +1,10 @@
-# [Syzkaller II]syzlang
-
-
+---
+title: Syzkaller III - syz-extract
+date: 2024-12-21 21:09:00
+tags: syzkaller
+mathjax: true
+---
+# [Syzkaller III]syzlang
 
 ![image-20251210214201755](https://raw.githubusercontent.com/DeutschBall/VideoBed/main/202512102142539.png)
 
@@ -12,8 +16,6 @@
 2. 对于1中可能的每个系统调用, 他可能的参数是什么格式的
 3. 解决资源依赖问题, 比如文件描述符fd
 
-
-
 ```c
 include <linux/fs.h>
 open$testxy(file ptr[in, string["/proc/test1"]], flags flags[proc_open_flags], mode flags[proc_open_mode]) fd
@@ -24,11 +26,11 @@ proc_open_flags = O_RDONLY, O_WRONLY, O_RDWR, O_APPEND, FASYNC, O_CLOEXEC, O_CRE
 proc_open_mode = S_IRUSR, S_IWUSR, S_IXUSR, S_IRGRP, S_IWGRP, S_IXGRP, S_IROTH, S_IWOTH, S_IXOTH
 ```
 
-> 这里`open$testxy`为了和其他模块的open调用规约区分开
+> 这里 `open$testxy`为了和其他模块的open调用规约区分开
 >
-> 比如对于模块A可以有`open$a`
+> 比如对于模块A可以有 `open$a`
 >
-> 对于模块B可以有`open$b`
+> 对于模块B可以有 `open$b`
 >
 > 这样可以在syz-manager的config文件中指定启用哪个系统调用, 比如
 >
@@ -46,8 +48,6 @@ proc_open_mode = S_IRUSR, S_IWUSR, S_IXUSR, S_IRGRP, S_IWGRP, S_IXGRP, S_IROTH, 
 r0 = open$testxy(&(0x7f0000000040), 0x28441, 0x21)
 write$testxy(r0, 0x0, 0x0)
 ```
-
-
 
 使用syz-execprog可以生成等价的一份c源码, 里面带着syz-execprog生成的注释, 方便理解
 
@@ -109,14 +109,8 @@ int main(void)
 }
 ```
 
-
-
 具体的syzlang语法见:
 
 [syzkaller/docs/syscall_descriptions.md at master · google/syzkaller · GitHub](https://github.com/google/syzkaller/blob/master/docs/syscall_descriptions.md)
 
 [syzkaller/docs/syscall_descriptions_syntax.md at master · google/syzkaller · GitHub](https://github.com/google/syzkaller/blob/master/docs/syscall_descriptions_syntax.md)
-
-
-
-

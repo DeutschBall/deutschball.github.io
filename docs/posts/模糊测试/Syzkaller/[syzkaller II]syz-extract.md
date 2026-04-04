@@ -3,17 +3,8 @@ title: Syzkaller II - syz-extract
 date: 2024-12-21 21:09:00
 tags: syzkaller
 mathjax: true
-
-
-
-
-
-
 ---
-
 # [Syzkaller II]syz-extract
-
-
 
 ## 0x0 TL;DR
 
@@ -28,11 +19,7 @@ testxy.txt -----> testxy.txt.const -----> syscalls.h & defs.h
 
 we found that syz-* tools can be used independently by step
 
-
-
 So , this post , we will dive only into source of syz-extract , to work out the dataflow.
-
-
 
 suppose that we have typed syslang as proc_testxy.txt
 
@@ -90,15 +77,11 @@ __NR_write = amd64:1
 __O_TMPFILE = amd64:4194304
 ```
 
-we notice that macro definations and their value have been listed out 
+we notice that macro definations and their value have been listed out
 
 that means syz-extract plays a role in translate macro definations
 
-
-
 ## main
-
-
 
 1.parse cmdline flags , get arch and os type according to cmdline flags
 
@@ -118,15 +101,4 @@ that means syz-extract plays a role in translate macro definations
 		}
 ```
 
-4.call extractor.prepare 
-
-
-
-
-
-
-
-
-
-
-
+4.call extractor.prepare

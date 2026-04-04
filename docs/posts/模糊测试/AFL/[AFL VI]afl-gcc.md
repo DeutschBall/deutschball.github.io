@@ -1,25 +1,18 @@
 ---
-title: [AFL VI] afl-gcc
+title: AFL VI - afl-gcc
 date: 2025-10-30 13:11:00
 tags: 模糊测试
 mathjax: true
-
-
-
-
 ---
-
-
-
 # [AFL VI] afl-gcc & afl-as
 
 ## 插桩
 
-`afl-gcc`和`afl-as`是AFL提供的用于插桩的编译工具, 替代`gcc`和`as`使用
+`afl-gcc`和 `afl-as`是AFL提供的用于插桩的编译工具, 替代 `gcc`和 `as`使用
 
 插桩的目的是, 统计每个基本块的访达情况, 计算覆盖率.
 
-插桩的原理是, 在每个基本块(`basic block`)的入口处插入一条`call 桩函数`的指令, 携带该基本块的id作为参数, 在桩函数的位图中记录该基本块的访达情况.
+插桩的原理是, 在每个基本块(`basic block`)的入口处插入一条 `call 桩函数`的指令, 携带该基本块的id作为参数, 在桩函数的位图中记录该基本块的访达情况.
 
 ## afl-gcc
 
@@ -33,8 +26,6 @@ afl-gcc /home/dustball/fuzz/main.c
 	-g -no-pie -O0 
 ```
 
-
-
 实际上afl-gcc将该命令转化为
 
 ```sh
@@ -46,19 +37,17 @@ gcc /home/dustball/fuzz/main.c
 	-DFUZZING_BUILD_MODE_UNSAFE_FOR_PRODUCTION=1
 ```
 
-这里`-B /usr/src/AFL`将会使gcc去`/usr/src/AFL`目录下寻找编译工具组件比如`as`, 
+这里 `-B /usr/src/AFL`将会使gcc去 `/usr/src/AFL`目录下寻找编译工具组件比如 `as`,
 
-而AFL会在该目录下创建一个`as`到`afl-as`的链接, 
+而AFL会在该目录下创建一个 `as`到 `afl-as`的链接,
 
-因此`gcc -B /usr/src/AFL`使用的`as`就是`afl-as`
+因此 `gcc -B /usr/src/AFL`使用的 `as`就是 `afl-as`
 
 ```sh
 ┌──(root㉿DustReich)-[/usr/src/AFL]
 └─# ls -l as
 lrwxrwxrwx 1 root root 6 Oct 30 15:59 as -> afl-as
 ```
-
-
 
 ```c
 
@@ -108,13 +97,9 @@ int main(int argc, char** argv) {
 
 add_instrument函数中进行插桩, 在汇编语言层面进行插桩
 
-
-
 首先使用gcc将源代码编译为.s汇编代码, 在/tmp下生成临时产物
 
 然后再/tmp下生成插桩后汇编语言
-
-
 
 比如main.c编译完成后生成的汇编代码如下
 
@@ -181,8 +166,6 @@ main:
 ```
 
 插桩时只对其中的代码段感兴趣, 比如这里.LFB11,以及.LVL0等等
-
-
 
 ### 插桩内容
 
@@ -503,12 +486,6 @@ __afl_setup_abort:
   .asciz "__AFL_SHM_ID"
 ```
 
-
-
-
-
-
-
 ### 插桩算法
 
 1. 以\t开头紧跟字母的, 一定是代码段的指令, 对齐插桩.
@@ -528,7 +505,7 @@ __afl_setup_abort:
 
 但是两条相邻的mov指令一定会顺序执行, 后者上不需要插桩, 怎么做到只给基本块的开头位置插桩呢?这就有规则2
 
-2. 以\t开头紧跟j字母的, 一定是条件跳转比如jz, jnz等等, 在该指令之后立刻插桩, 意义是如果jnz不实现, 则顺序进入jnz之后的基本块. 
+2. 以\t开头紧跟j字母的, 一定是条件跳转比如jz, jnz等等, 在该指令之后立刻插桩, 意义是如果jnz不实现, 则顺序进入jnz之后的基本块.
 
 ```c
     /* If we're in the right mood for instrumenting, check for function
@@ -580,13 +557,11 @@ __afl_setup_abort:
 
 那么如果jnz实现, 是否还需要对跳转过去的基本块插桩呢?这就有规则3:
 
-
-
 3. 如果该行是一个**分支标号**
 
-​	如果是一个函数, 则插桩
+    如果是一个函数, 则插桩
 
-​	如果不是一个函数, 说明是一个跳转分支, 也插桩
+    如果不是一个函数, 说明是一个跳转分支, 也插桩
 
 ```c
     if (strstr(line, ":")) {
@@ -621,29 +596,10 @@ __afl_setup_abort:
         /* Function label (always instrumented, deferred mode). */
 
         instrument_next = 1;
-    
+  
       }
 
     }
 ```
 
-
-
-
-
-
-
 4. 在整个汇编文件最后插入main_payload_64
-
-   
-
-
-
-
-
-
-
-
-
-
-

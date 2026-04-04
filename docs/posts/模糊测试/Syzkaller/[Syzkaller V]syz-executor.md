@@ -1,8 +1,14 @@
+---
+title: Syzkaller V - syz-executor
+date: 2024-12-21 21:09:00
+tags: syzkaller
+mathjax: true
+---
 # [Syzkaller V]syz-executor
 
 `syz-executor` 是 syzkaller 中运行在目标虚拟机（Target VM）内部的 C++ 程序，负责实际执行模糊测试生成的系统调用序列。
 
-![Syzkaller overview](https://i-blog.csdnimg.cn/blog_migrate/44e703525d71dc4fff4dfbbbea067ab3.png)
+![syzkaller_arch](https://raw.githubusercontent.com/DeutschBall/picbed/main/202604050106846.png)
 
 executor的编译命令:
 
@@ -69,8 +75,6 @@ ENV := $(subst \n,$(newline),$(shell CI=$(CI)\
 | -I.                               | 当前目录添加到头文件搜索范围              |
 | -Iexecutor/_include               | executor/_include目录添加到头文件搜索范围 |
 
-
-
 因此syz-executor是静态链接的，可以在虚拟机中独立执行的
 
 ```sh
@@ -81,15 +85,4 @@ syz-executor: ELF 64-bit LSB pie executable, x86-64, version 1 (GNU/Linux), stat
 
 ![image-20260105214403031](https://raw.githubusercontent.com/DeutschBall/VideoBed/main/202601052144692.png)
 
-
-
-
-
 syz-executor runner 0 localhost 51589
-
-
-
-
-
-
-
