@@ -1,0 +1,188 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>dustland</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        html, body {
+            margin: 0;
+            padding: 0;
+            width: 100%;
+            height: 100%;
+            overflow: hidden;
+        }
+
+        body {
+            font-family: 'Courier New', 'Microsoft YaHei', monospace;
+            height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            color: #fff;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .video-background {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            min-width: 100%;
+            min-height: 100%;
+            width: auto;
+            height: auto;
+            transform: translate(-50%, -50%);
+            object-fit: cover;
+            z-index: -2;
+        }
+
+        .video-background {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            min-width: 100%;
+            min-height: 100%;
+            width: auto;
+            height: auto;
+            transform: translate(-50%, -50%);
+            object-fit: cover;
+            z-index: -2;
+        }
+
+        body::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.3);
+            z-index: -1;
+        }
+
+        .container {
+            text-align: center;
+            padding: 0;
+            position: relative;
+            z-index: 1;
+            width: 100%;
+            max-width: 100%;
+        }
+
+        h1 {
+            font-size: 3.5rem;
+            margin-bottom: 1rem;
+            font-weight: 700;
+            text-shadow: 3px 3px 0 rgba(0, 0, 0, 0.5);
+            letter-spacing: 0.05em;
+            color: #fff;
+        }
+
+        .subtitle {
+            font-size: 1.3rem;
+            margin-bottom: 2.5rem;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5);
+            color: #f0f0f0;
+        }
+
+        .enter-btn {
+            display: block;
+            width: 100%;
+            padding: 2.5rem 2rem;
+            font-size: 2.5rem;
+            color: #fff;
+            background: rgba(76, 175, 80, 0.5);
+            border: none;
+            text-decoration: none;
+            transition: all 0.3s ease;
+            font-weight: bold;
+            text-shadow:
+                3px 3px 0 rgba(0, 0, 0, 0.5),
+                5px 5px 10px rgba(0, 0, 0, 0.4),
+                0 0 20px rgba(0, 0, 0, 0.3);
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
+            text-align: center;
+        }
+
+        .enter-btn:hover {
+            background: rgba(56, 142, 60, 0.7);
+            box-shadow: 0 6px 20px rgba(0, 0, 0, 0.4);
+        }
+
+        .enter-btn:active {
+            transform: translateY(-1px);
+        }
+
+        @media (max-width: 768px) {
+            .container {
+                padding: 2rem;
+                margin: 1rem;
+            }
+
+            h1 {
+                font-size: 2.5rem;
+            }
+
+            .subtitle {
+                font-size: 1.1rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <video class="video-background" autoplay loop playsinline id="bgVideo">
+        <source src="assets/background.mp4" type="video/mp4">
+    </video>
+    <div class="container">
+        <a href="posts/" class="enter-btn">🌾🌾🌾🌾🌾🌾🌾🌾🌾 老乡上号 🌾🌾🌾🌾🌾🌾🌾🌾🌾</a>
+    </div>
+    <script>
+        const video = document.getElementById('bgVideo');
+        const isFirstVisit = !sessionStorage.getItem('visited');
+
+        // 视频加载失败时使用图片背景
+        video.addEventListener('error', () => {
+            document.body.style.background = "url('assets/background.jpg') center/cover no-repeat fixed";
+            video.style.display = 'none';
+        });
+
+        // 如果不是首次访问，直接使用图片
+        if (!isFirstVisit) {
+            document.body.style.background = "url('assets/background.jpg') center/cover no-repeat fixed";
+            video.style.display = 'none';
+        } else {
+            // 首次访问，尝试自动播放
+            video.play().then(() => {
+                // 自动播放成功，标记已访问
+                sessionStorage.setItem('visited', 'true');
+            }).catch(() => {
+                // 自动播放失败，切换到图片
+                document.body.style.background = "url('assets/background.jpg') center/cover no-repeat fixed";
+                video.style.display = 'none';
+                sessionStorage.setItem('visited', 'true');
+            });
+        }
+
+        // 页面可见性变化时继续播放（仅当视频可见时）
+        document.addEventListener('visibilitychange', () => {
+            if (!document.hidden && video.style.display !== 'none' && video.paused) {
+                video.play();
+            }
+        });
+
+        // 页面获得焦点时继续播放（仅当视频可见时）
+        window.addEventListener('focus', () => {
+            if (video.style.display !== 'none' && video.paused) {
+                video.play();
+            }
+        });
+    </script>
+</body>
+</html>
