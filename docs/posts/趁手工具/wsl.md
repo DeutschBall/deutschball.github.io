@@ -1,7 +1,8 @@
 ---
 title: WSL2
 date: 2022-06-23 22:44:00
-tags: linux
+# tags:
+#   - linux
 mathjax: true
 
 

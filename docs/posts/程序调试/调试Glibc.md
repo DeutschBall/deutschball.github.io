@@ -1,7 +1,8 @@
 ---
 title: glibc 相关备忘 
 date: 2024-10-17 23:20:00
-tags: heap exploit
+# tags:
+#   - heap exploit
 mathjax: true
 
 

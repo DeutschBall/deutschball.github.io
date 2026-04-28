@@ -1,7 +1,8 @@
 ---
 title: coredump
 date: 2025-06-23 22:00:00
-tags: reverse
+# tags:
+#   - reverse
 mathjax: true
 ---
 # coredump

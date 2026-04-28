@@ -1,7 +1,8 @@
 ---
 title: 运行时多态
 date: 2022-09-23 22:00:00
-tags: reverse
+# tags:
+#   - reverse
 mathjax: true
 ---
 # C++晚联编如何实现
