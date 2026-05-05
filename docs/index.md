@@ -2,17 +2,15 @@
 
 ## 2026
 
-### 
-
 ### May
 
--  [复盘-中炮对五七列炮@2026.4.28](中国象棋\复盘\中炮对五七列炮.md) 
+-  [中炮对五七列炮@2026.4.28.md](posts\中国象棋\复盘\中炮对五七列炮@2026.4.28.md) 
 
 ---
 
 ### April
 
--  [布局-五六炮对屏风马](中国象棋\布局\布局-五六炮对屏风马.md) 
+- [布局-五六炮对屏风马](posts\中国象棋\布局\布局-五六炮对屏风马.md)
 
 用[幕布](https://mubu.com/home)写的，优点是正文和思维导图能直接转换，缺点是正文对markdown的支持不是很好用。
 
@@ -20,50 +18,47 @@
 
 ??? note "车一平二"
 	红出直车
-	
-	??? tip "车9进1"
-	
-		黑出横车
-		
-	??? success "卒7进1"
-	
-		黑缓开车
 
+    ??? tip "车9进1"
+    
+    黑出横车
+    
+    ??? success "卒7进1"
+    
+    黑缓开车
 
 ??? note "车一进一"
 	出横车
-
-
 
 ??? note "提示块类型"
     MkDocs Material 主题的 admonition支持很多类型。配置中启用 `admonition` 和 `pymdownx.details` 扩展，可以使用以下所有类型：
 
     **信息类：**
-
-    - `note` - 笔记
+    
+    -`note` - 笔记
     - `abstract` / `summary` / `tldr` - 摘要
     - `info` / `todo` - 信息/待办
     - `tip` / `hint` / `important` - 提示/重要
-
+    
     **成功类：**
-
-    - `success` / `check` / `done` - 成功/完成
-
+    
+    -`success` / `check` / `done` - 成功/完成
+    
     **问题类：**
-
-    - `question` / `help` / `faq` - 问题/帮助
-
+    
+    -`question` / `help` / `faq` - 问题/帮助
+    
     **警告类：**
-
-    - `warning` / `caution` / `attention` - 警告/注意
-
+    
+    -`warning` / `caution` / `attention` - 警告/注意
+    
     **错误类：**
-
-    - `failure` / `fail` / `missing` - 失败/缺失
+    
+    -`failure` / `fail` / `missing` - 失败/缺失
     - `danger` / `error` - 危险/错误
-
+    
     **其他：**
-
-    - `bug` - Bug
+    
+    -`bug` - Bug
     - `example` - 示例
     - `quote` / `cite` - 引用
