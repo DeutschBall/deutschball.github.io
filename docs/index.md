@@ -1,10 +1,16 @@
 # Dustball的博客
 
+
+
+## 🥰毕业快乐🥰
+
+<!-- ![type:audio](https://music.163.com/outchain/player?type=2&id=2705652124&auto=1&height=66) -->
+
+
+
+<iframe frameborder="no" border="0" marginwidth="0" marginheight="0" width=530 height=86 src="//music.163.com/outchain/player?type=2&id=2705652124&auto=1&height=66"></iframe>
+
 ## 2026
-
-毕业快乐🥰
-
-还有很多事情想做...
 
 ### May
 
@@ -23,24 +29,6 @@
 ### April
 
 - [布局-五六炮对屏风马](posts\中国象棋\布局\布局-五六炮对屏风马)
-
-用[幕布](https://mubu.com/home)写的，优点是正文和思维导图能直接转换，缺点是正文对markdown的支持不是很好用。
-
-本以为幕布能表现某个局面下的多个分支选择，后来发现mkdocs也可以做到，并且mkdocs能够选择性地折叠某些信息，比如：
-
-??? note "车一平二"
-	红出直车
-
-    ??? tip "车9进1"
-
-    黑出横车
-
-    ??? success "卒7进1"
-
-    黑缓开车
-
-??? note "车一进一"
-	出横车
 
 ??? note "提示块类型"
     MkDocs Material 主题的 admonition支持很多类型。配置中启用 `admonition` 和 `pymdownx.details` 扩展，可以使用以下所有类型：
