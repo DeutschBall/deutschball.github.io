@@ -7,21 +7,21 @@ mathjax: true
 ---
 
 
-# Dustball的博客
+# ret2dustland
 
 
 
-## 🥰毕业快乐🥰
+<!-- ## 朽骨暗夜候多时 -->
 
 <!-- ![type:audio](https://music.163.com/outchain/player?type=2&id=2705652124&auto=1&height=66) -->
 
 
 
-<iframe frameborder="no" border="0" marginwidth="0" marginheight="0" width=530 height=86 src="//music.163.com/outchain/player?type=2&id=2705652124&auto=1&height=66"></iframe>
+<!-- <iframe frameborder="no" border="0" marginwidth="0" marginheight="0" width=530 height=86 src="//music.163.com/outchain/player?type=2&id=2705652124&auto=1&height=66"></iframe> -->
 
-???+ success "🧑‍🎓那天"
+<!-- ???+ question "你可以回去，但是那里已经没人了" -->
 	
-	![](https://raw.githubusercontent.com/DeutschBall/picgo/main/20260611002204205.jpg)
+![](https://raw.githubusercontent.com/DeutschBall/picgo/main/20260926202429742.png)
 
 <!-- 
 ## 2026
