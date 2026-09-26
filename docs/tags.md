@@ -1,5 +1,14 @@
-# 战术标签
+---
+title: 战术标签
+date: 2026-01-01
+tags:
+  - 标签
+  - 中国象棋
+mathjax: true
+---
 
-<iframe frameborder="no" border="0" marginwidth="0" marginheight="0" width=520 height=86 src="//music.163.com/outchain/player?type=2&id=1849889679&auto=0&height=66"></iframe>
+# 🏷️ 战术标签
+
+按战术主题浏览文章，方便按专题查资料。
 
 <!-- material/tags -->
