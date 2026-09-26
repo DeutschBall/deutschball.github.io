@@ -1,9 +1,6 @@
 ---
 title: 战术标签
 date: 2026-01-01
-tags:
-  - 标签
-  - 中国象棋
 mathjax: true
 ---
 
