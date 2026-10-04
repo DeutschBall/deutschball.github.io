@@ -132,6 +132,16 @@ def _index_lines(items, current_page, depth=0):
     return lines
 
 
+def _article_count(items):
+    """递归统计目录下的文章，不把各级 index.md 计入篇数。"""
+    count = 0
+    for item in items:
+        if isinstance(item, Page) and PurePosixPath(_source_uri(item)).name != "index.md":
+            count += 1
+        count += _article_count(getattr(item, "children", None) or [])
+    return count
+
+
 @event_priority(-50)
 def on_nav(nav, **kwargs):
     for item in nav.items:
@@ -147,10 +157,15 @@ def on_nav(nav, **kwargs):
 
 def on_page_markdown(markdown, page, **kwargs):
     """在每个 index.md 末尾追加所在目录的自动索引。"""
-    if PurePosixPath(_source_uri(page)).name != "index.md":
+    source_uri = PurePosixPath(_source_uri(page))
+    if source_uri.name != "index.md" or source_uri == PurePosixPath("index.md"):
         return markdown
 
     children = getattr(page, "children", None) or []
+    article_count = _article_count(children)
+    if article_count == 0:
+        return f"{markdown.rstrip()}\n\n## 目录\n\n暂无内容。\n"
+
     lines = _index_lines(children, page)
-    content = "\n".join(lines) if lines else "暂无内容。"
-    return f"{markdown.rstrip()}\n\n## 目录\n\n{content}\n"
+    content = "\n".join(lines)
+    return f"{markdown.rstrip()}\n\n## 目录\n\n共 {article_count} 篇\n\n{content}\n"
