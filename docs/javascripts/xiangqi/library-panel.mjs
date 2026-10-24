@@ -9,7 +9,6 @@ export function mountLibrary(root,current,onLoad) {
   }
   function update() {
     root.replaceChildren();
-    root.append(node('h3','','我的博客棋谱'));
     if(!data) {
       root.append(node('p','xq-hint',failed?'棋谱库加载失败，不能判断命中数量。':'正在加载博客棋谱…'));
       if(failed){const b=node('button','xq-library-button','重试加载');b.onclick=load;root.append(b);}
