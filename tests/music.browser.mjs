@@ -11,10 +11,11 @@ async function makePage() {
  const page=await browser.newPage({viewport:{width:390,height:844}});
  await page.route('**/*',route=>{
   const url=new URL(route.request().url());
-  if(url.hostname==='music.163.com')return route.fulfill({contentType:'audio/wav',body:wav});
+  if(url.hostname==='music.163.com')return url.pathname.includes('/outchain/') ? route.fulfill({contentType:'text/html',body:'歌曲信息'}) : route.fulfill({contentType:'audio/wav',body:wav});
   if(url.origin!==new URL(base).origin)return route.abort();
   return route.continue();
  });
+ await page.addInitScript(()=>{Math.random=()=>0.25;});
  return page;
 }
 try {
@@ -24,7 +25,9 @@ try {
  await page.waitForFunction(()=>{const a=document.querySelector('#blog-music audio');return a&&!a.paused&&a.currentTime>0;});
  assert.equal(await panel.isVisible(),true);
  assert.deepEqual(await panel.locator('button').allTextContents(),['上一曲','暂停','下一曲']);
- assert.equal(await page.locator('#blog-music iframe, #blog-music select, #blog-music a').count(),0);
+ assert.equal(await page.locator('[data-music-mode]').inputValue(),'random');
+ assert.match(await page.locator('.music-info iframe').getAttribute('src'),/id=3448038585&auto=0/);
+ assert.equal(await page.locator('.music-info').evaluate(e=>e.inert),true);
  await page.locator('[data-music-play]').click();
  assert.equal(await audio.evaluate(a=>a.paused),true);
  const pausedTime=await audio.evaluate(a=>a.currentTime);
@@ -36,6 +39,8 @@ try {
  await page.locator('.music-toggle').click();
  await page.locator('[data-music-next]').click();
  assert.match(await audio.getAttribute('src'),/1918901957/);
+ assert.match(await page.locator('.music-info iframe').getAttribute('src'),/id=1918901957&auto=0/);
+ await page.locator('[data-music-mode]').selectOption('loop');
  await page.locator('[data-music-next]').click();
  assert.match(await audio.getAttribute('src'),/3448038585/);
  await page.locator('[data-music-prev]').click();
