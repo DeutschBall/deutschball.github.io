@@ -10,8 +10,8 @@ export function mountLibrary(root,current,onLoad,countNode) {
   function update() {
     root.replaceChildren();
     if(!data) {
-      if(countNode)countNode.textContent=failed?'加载失败':'加载中…';
-      root.append(node('p','xq-hint',failed?'棋谱库加载失败，不能判断命中数量。':'正在加载博客棋谱…'));
+      if(countNode)countNode.textContent=failed?'加载失败，请配置代理':'加载中…';
+      root.append(node('p','xq-hint',failed?'加载失败，请配置代理':'正在加载博客棋谱…'));
       if(failed){const b=node('button','xq-library-button','重试加载');b.onclick=load;root.append(b);}
       return;
     }

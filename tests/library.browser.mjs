@@ -17,6 +17,8 @@ const matchState=async value=>{
  assert.equal(await fenInput.inputValue(),value);
 };
 try {
+ // The external music iframe is unrelated to chess and emits browser-policy errors.
+ await page.route('https://music.163.com/**',r=>r.fulfill({contentType:'text/html',body:'<!doctype html><title>Music fixture</title>'}));
  await page.route('**/chessdb.php?**',r=>r.fulfill({body:'unknown',headers:{'Access-Control-Allow-Origin':'*'}}));
  await page.goto(base,{waitUntil:'domcontentloaded'});await lib.locator('.xq-library-count').waitFor({state:'attached'});
  assert.equal(await root.locator('.xq-library-toggle').evaluate(e=>e.open),false);
@@ -59,10 +61,19 @@ try {
  for(const scheme of ['default','slate']){await page.evaluate(s=>document.body.setAttribute('data-md-color-scheme',s),scheme);assert.equal(await fenInput.evaluate(e=>getComputedStyle(e).backgroundColor),'rgb(255, 255, 255)');}
  await context.setOffline(true);await action('reset');await matchState(START);await context.setOffline(false);
  await page.setViewportSize({width:390,height:844});assert.equal(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth),true);
- await page.route('**/assets/xiangqi/library.json',r=>r.fulfill({status:503,body:'Unavailable'}));
- await page.reload({waitUntil:'domcontentloaded'});await root.locator('.xq-library-toggle > summary').click();await lib.getByText('重试加载',{exact:true}).waitFor();assert.equal(await lib.locator('.xq-library-count').count(),0);
- assert.equal(await root.locator('[data-library-count]').innerText(),'加载失败');
- await page.unroute('**/assets/xiangqi/library.json');await lib.getByText('重试加载',{exact:true}).click();await lib.locator('.xq-library-count').waitFor();
+ // Cover HTTP errors, blocked connections, and requests that never finish.
+ for(const failure of ['http','network','timeout']) {
+  await page.route('**/assets/xiangqi/library.json',r=>failure==='http'?r.fulfill({status:503,body:'Unavailable'}):failure==='network'?r.abort('failed'):undefined);
+  await page.reload({waitUntil:'domcontentloaded'});
+  await lib.getByText('重试加载',{exact:true}).waitFor({state:'attached'});
+  assert.equal(await root.locator('[data-library-count]').innerText(),'加载失败，请配置代理');
+  await root.locator('.xq-library-toggle > summary').click();
+  assert.equal(await lib.locator('.xq-library-count').count(),0);
+  assert.equal(await lib.locator('.xq-hint').innerText(),'加载失败，请配置代理');
+  await page.unroute('**/assets/xiangqi/library.json');
+  await lib.getByText('重试加载',{exact:true}).click();await lib.locator('.xq-library-count').waitFor();
+  await matchState(START);
+ }
  assert.deepEqual(errors,[]);
  console.log(`Library browser: ${articles.length} article URLs, 149 initial matches, sampled mainline/branch replay, FEN, offline, mobile and recovery passed.`);
 }finally{await browser.close();}
