@@ -9,6 +9,8 @@ mathjax: true
 
 # ret2dustland
 
+<div id="xiangqi-analysis"><p>棋盘加载中…请启用 JavaScript。</p></div>
+
 
 
 <!-- ## 朽骨暗夜候多时 -->

@@ -1,0 +1,65 @@
+import assert from 'node:assert/strict';
+const {chromium}=await import(process.env.PLAYWRIGHT_MODULE || 'playwright');
+const browser=await chromium.launch({channel:'chrome',headless:true});
+const context=await browser.newContext({viewport:{width:1440,height:1100}});
+const page=await context.newPage(),errors=[];
+page.on('pageerror',e=>errors.push(e.message));
+const base=process.env.BLOG_URL || 'http://127.0.0.1:8001/';
+const root=page.locator('#xiangqi-analysis');
+const click=action=>root.locator(`[data-action="${action}"]`).click();
+const square=c=>root.locator(`[data-square="${c}"]`);
+const ready=()=>root.locator('.xq-square').first().waitFor();
+try {
+ await page.goto(base,{waitUntil:'domcontentloaded'});await ready();
+ await page.waitForFunction(()=>document.querySelectorAll('.xq-candidates tbody tr').length>0,{},{timeout:20000});
+ console.log('Live HTTPS/CORS: '+await root.locator('[data-cloud]').innerText());
+ assert.equal(await root.locator('.xq-piece').count(),32);
+ await square('h2').click();await square('e2').click();
+ assert.match(await root.locator('[data-turn]').innerText(),/黑方/);
+ assert.match(await root.locator('.xq-history').innerText(),/炮二平五/);
+ await square('h7').click();await square('e7').click();
+ await click('first');assert.match(await root.locator('[data-ply]').innerText(),/0 \/ 2/);
+ await click('next');assert.match(await root.locator('[data-ply]').innerText(),/1 \/ 2/);
+ await click('last');await click('undo');assert.match(await root.locator('[data-ply]').innerText(),/1 \/ 1/);
+ await click('reset');await click('flip');
+ assert.equal(await root.locator('.xq-square').first().getAttribute('data-square'),'i0');
+ await square('h2').click();await square('e2').click();assert.match(await root.locator('[data-turn]').innerText(),/黑方/);
+ await root.locator('.xq-fen summary').click();await click('export');const exported=await root.locator('textarea').inputValue();assert.match(exported,/ b - - 1 1$/);
+ await root.locator('textarea').fill('bad');await click('import');assert.match(await root.locator('[data-message]').innerText(),/FEN/);assert.match(await root.locator('[data-turn]').innerText(),/黑方/);
+ await root.locator('textarea').fill(exported);await click('import');assert.match(await root.locator('[data-ply]').innerText(),/0 \/ 0/);
+ await click('reset');await click('flip');
+ await page.waitForFunction(()=>document.querySelectorAll('.xq-candidates tbody tr').length>0);
+ await root.locator('.xq-move').first().click();assert.match(await root.locator('[data-ply]').innerText(),/1 \/ 1/);
+ await click('reset');await page.waitForFunction(()=>document.querySelectorAll('.xq-candidates tbody tr').length>0);
+ await root.locator('.xq-fen summary').click();
+ await root.locator('.xq-table-wrap').evaluate(e=>e.scrollTop=0);
+ await root.screenshot({path:process.env.SCREENSHOT_PATH || '/tmp/dustland-xiangqi-desktop.png',style:'.md-header,.md-top { visibility:hidden !important; }'});
+ await page.setViewportSize({width:390,height:844});
+ assert.equal(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth),true);
+ await square('h2').click();await square('e2').click();assert.match(await root.locator('[data-turn]').innerText(),/黑方/);
+ await page.evaluate(()=>document.body.setAttribute('data-md-color-scheme','default'));
+ await root.screenshot({path:'/tmp/dustland-xiangqi-mobile.png'});
+ await context.setOffline(true);await click('retry');
+ await page.waitForFunction(()=>document.querySelector('[data-cloud]').textContent.includes('无法连接'));
+ await square('h7').click();await square('e7').click();assert.match(await root.locator('[data-turn]').innerText(),/红方/);
+ await context.setOffline(false);await click('retry');await page.waitForFunction(()=>!document.querySelector('[data-cloud]').textContent.includes('正在'));
+ console.log('Board, history, flip, FEN, recommendation, mobile, offline operation: OK');
+ // Deterministic late responses, unknown data, and terminal state handling.
+ await page.route('https://www.chessdb.cn/chessdb.php?**',async route=>{
+   const url=new URL(route.request().url()),turn=url.searchParams.get('board').split(' ')[1];
+   if(turn==='w')await new Promise(r=>setTimeout(r,700));
+   try{await route.fulfill({status:200,headers:{'Access-Control-Allow-Origin':'*'},body:turn==='w'?'invalid board\0':'unknown\0'});}catch{}
+ });
+ await page.reload({waitUntil:'domcontentloaded'});await ready();await click('retry');await page.waitForTimeout(100);
+ await square('h2').click();await square('e2').click();await page.waitForTimeout(1100);
+ assert.match(await root.locator('[data-cloud]').innerText(),/暂无此局面/);
+ assert.equal(await root.locator('tbody tr').count(),0);
+ await root.locator('.xq-fen summary').click();
+ await root.locator('textarea').fill('3k5/9/9/9/9/9/9/9/3r1r3/4K4 w - - 0 1');await click('import');
+ assert.match(await root.locator('[data-turn]').innerText(),/困毙/);assert.equal(await root.locator('[data-action="retry"]').isDisabled(),true);
+ console.log('Unknown state, stale response isolation, stalemate: OK');
+ assert.deepEqual(errors,[]);
+ const article=await context.newPage();let cloudCalls=0;article.on('request',r=>{if(r.url().includes('chessdb.php'))cloudCalls++;});
+ await article.goto(new URL('tags/',base).href,{waitUntil:'domcontentloaded'});await article.waitForTimeout(500);assert.equal(cloudCalls,0);
+ console.log('Article pages make no cloud requests; no page errors.');
+}finally{await browser.close();}
