@@ -18,16 +18,13 @@ try {
  const fenInput=root.locator('textarea');
  assert.equal(await fenInput.inputValue(),START);
  for(const removed of ['按棋局去重，区分行棋方','实战归属待核实','仅收录明确编号着法','· 回放'])assert.ok(!(await lib.textContent()).includes(removed));
- const catalog=lib.locator('.xq-library-catalog');
- const openCatalog=async()=>{if(!await catalog.evaluate(e=>e.open))await catalog.locator(':scope > summary').click();};
- const expectCatalog=async count=>{assert.equal(await catalog.locator('summary').innerText(),`打开已收录棋谱（${count} 局）`);};
- await openCatalog();await expectCatalog(5);assert.equal(await catalog.locator('[data-line]').count(),5);
+ const expectCatalog=async count=>{assert.equal(await lib.locator('.xq-library-match').count(),count);assert.equal(await lib.locator('.xq-library-catalog').count(),0);};
+ await expectCatalog(5);assert.equal(await lib.getByRole('button',{name:'摆上棋谱',exact:true}).count(),5);assert.equal(await lib.getByRole('link',{name:'跳转文章',exact:true}).count(),5);
  await square('h2').click();await square('e2').click();assert.match(await lib.locator('.xq-library-count').innerText(),/5 局主线/);
  assert.equal(await fenInput.inputValue(),fen(play(parseFen(START),'h2e2')));
- assert.equal(await catalog.evaluate(e=>e.open),true);
  await action('undo');assert.equal(await fenInput.inputValue(),START);await square('a3').click();await square('a4').click();assert.match(await lib.locator('.xq-library-count').innerText(),/0 局主线/);assert.match(await lib.innerText(),/暂无匹配/);
- await expectCatalog(0);assert.equal(await catalog.locator('[data-line]').count(),0);
- await action('reset');await expectCatalog(5);await openCatalog();
+ await expectCatalog(0);assert.equal(await lib.locator('button[data-line]').count(),0);
+ await action('reset');await expectCatalog(5);
  await lib.locator(`[data-game="${game.id}"][data-line="main"]`).click();assert.match(await root.locator('[data-ply]').innerText(),/20 \/ 20/);
  assert.equal(await fenInput.inputValue(),fen(replay(game,'main').states.at(-1)));await expectCatalog(1);
  await action('first');await expectCatalog(5);assert.equal(await fenInput.inputValue(),START);
@@ -35,8 +32,8 @@ try {
  await root.locator('.xq-fen summary').click();
  const importFen=async value=>{await fenInput.fill(value);await action('import');};
  await importFen(fen(replay(game,'pawn-push').states[20]));await expectCatalog(1);
- assert.equal(await catalog.locator('[data-line="main"]').count(),0);
- await openCatalog();await lib.locator('[data-line="pawn-push"]').click();assert.match(await root.locator('[data-ply]').innerText(),/22 \/ 22/);
+ assert.equal(await lib.locator('button[data-line="main"]').count(),0);
+ await lib.locator('[data-line="pawn-push"]').click();assert.match(await root.locator('[data-ply]').innerText(),/22 \/ 22/);
  assert.equal(await fenInput.inputValue(),fen(replay(game,'pawn-push').states.at(-1)));
  await importFen(fen(replay(game,'main').states[10]).replace(/\d+ \d+$/,'30 99'));await expectCatalog(1);
  const currentFen=await fenInput.inputValue();await fenInput.fill('bad input');
@@ -47,13 +44,15 @@ try {
  for(const scheme of ['default','slate']){await page.evaluate(s=>document.body.setAttribute('data-md-color-scheme',s),scheme);assert.equal(await fenInput.evaluate(e=>getComputedStyle(e).backgroundColor),'rgb(255, 255, 255)');assert.equal(await fenInput.evaluate(e=>getComputedStyle(e).color),'rgb(32, 33, 36)');}
  await context.setOffline(true);await action('reset');assert.match(await lib.locator('.xq-library-count').innerText(),/5 局主线/);await context.setOffline(false);
  for(const entry of data.games) {
-  const link=lib.locator('a').filter({hasText:entry.title});
+  const link=lib.locator('.xq-library-match').filter({hasText:entry.title}).getByRole('link',{name:'跳转文章'});
   const url=await link.getAttribute('href');const r=await context.request.get(url);assert.equal(r.status(),200);assert.ok((await r.text()).includes(entry.title));
  }
  for(const entry of data.games)for(const line of entry.lines) {
   await importFen(fen(replay(entry,line.id).states.at(-1)));
-  await openCatalog();
-  await lib.locator(`[data-game="${entry.id}"][data-line="${line.id}"]`).click();
+
+  const select=lib.locator(`select[data-game="${entry.id}"]`);
+  if(await select.count())await select.selectOption(line.id);
+  await lib.locator(`button[data-game="${entry.id}"][data-line="${line.id}"]`).click();
   assert.equal(await root.locator('.xq-history button').count(),line.moves.length);
   assert.ok((await root.locator('[data-message]').innerText()).includes(entry.title));
  }
