@@ -13,15 +13,27 @@ const square=c=>root.locator(`[data-square="${c}"]`),action=a=>root.locator(`[da
 try {
  await page.route('**/chessdb.php?**',r=>r.fulfill({body:'unknown',headers:{'Access-Control-Allow-Origin':'*'}}));
  await page.goto(base,{waitUntil:'domcontentloaded'});await waitCount();
- assert.match(await lib.innerText(),/1 \/ 56 篇/);assert.match(await lib.locator('.xq-library-count').innerText(),/1 局主线.*0 个分析/);
+ assert.match(await lib.innerText(),/5 \/ 56 篇/);assert.match(await lib.locator('.xq-library-count').innerText(),/5 局主线.*0 个分析/);
  const articleURL=await lib.locator('a').first().getAttribute('href');const response=await context.request.get(articleURL);assert.equal(response.status(),200);assert.ok((await response.text()).includes(game.title));
- await square('h2').click();await square('e2').click();assert.match(await lib.locator('.xq-library-count').innerText(),/1 局主线/);
+ await square('h2').click();await square('e2').click();assert.match(await lib.locator('.xq-library-count').innerText(),/5 局主线/);
  await action('undo');await square('a3').click();await square('a4').click();assert.match(await lib.locator('.xq-library-count').innerText(),/0 局主线/);assert.match(await lib.innerText(),/暂无匹配/);
- await lib.locator('summary').click();await lib.locator('[data-line="main"]').click();assert.match(await root.locator('[data-ply]').innerText(),/20 \/ 20/);
- await action('first');assert.match(await lib.locator('.xq-library-count').innerText(),/1 局主线.*0 个分析/);
+ await lib.locator('summary').click();await lib.locator(`[data-game="${game.id}"][data-line="main"]`).click();assert.match(await root.locator('[data-ply]').innerText(),/20 \/ 20/);
+ await action('first');assert.match(await lib.locator('.xq-library-count').innerText(),/5 局主线.*0 个分析/);
  await lib.locator('summary').click();await lib.locator('[data-line="pawn-push"]').click();assert.match(await root.locator('[data-ply]').innerText(),/22 \/ 22/);assert.match(await lib.locator('.xq-library-count').innerText(),/0 局主线.*1 个分析/);
  await root.locator('.xq-fen summary').click();await root.locator('textarea').fill(fen(replay(game,'main').states[10]).replace(/\d+ \d+$/,'30 99'));await action('import');assert.match(await lib.locator('.xq-library-count').innerText(),/1 局主线/);
- await context.setOffline(true);await action('reset');assert.match(await lib.locator('.xq-library-count').innerText(),/1 局主线/);await context.setOffline(false);
+ await context.setOffline(true);await action('reset');assert.match(await lib.locator('.xq-library-count').innerText(),/5 局主线/);await context.setOffline(false);
+ for(const entry of data.games) {
+  const link=lib.locator('a').filter({hasText:entry.title});
+  const url=await link.getAttribute('href');const r=await context.request.get(url);assert.equal(r.status(),200);assert.ok((await r.text()).includes(entry.title));
+ }
+ for(const entry of data.games)for(const line of entry.lines) {
+  await lib.locator('.xq-library-catalog > summary').click();
+  await lib.locator(`[data-game="${entry.id}"][data-line="${line.id}"]`).click();
+  assert.equal(await root.locator('.xq-history button').count(),line.moves.length);
+  assert.ok((await root.locator('[data-message]').innerText()).includes(entry.title));
+ }
+ await action('reset');
+ console.log('All five source links and every mainline/variation replay passed.');
  await page.setViewportSize({width:390,height:844});assert.equal(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth),true);
  await page.setViewportSize({width:1440,height:1200});await lib.screenshot({path:'/tmp/dustland-library.png',style:'.md-header,.md-top {visibility:hidden!important;}'});
  await page.route('**/assets/xiangqi/library.json',r=>r.fulfill({status:503,body:'Unavailable'}));await page.reload({waitUntil:'domcontentloaded'});await lib.getByText('重试加载',{exact:true}).waitFor();assert.match(await lib.innerText(),/不能判断命中数量/);assert.equal(await lib.locator('.xq-library-count').count(),0);
