@@ -72,3 +72,37 @@ test('all article audits are complete and unresolved rows are not silently inclu
   for(const issue of a.issues)if(issue.line)assert.ok(!a.acceptedRows.includes(issue.line));
  }
 });
+
+
+test('move separators accept punctuation and symbols with all four numbering styles',()=>{
+ for(const prefix of ['1、','1、 ','1.','1. ']) {
+  for(const separator of ['，','， ',' ','  ','；','; ', '/', '|', '→', '——', ' · ', '、', '★', '😃', '\t']) {
+   const text=prefix+'炮二平五'+separator+'马８进７';
+   const result=convertRows([text],[{line:1,text}],parseFen(START));
+   assert.deepEqual(result.converted.map(m=>m.move),['h2e2','h9g7'],text);
+  }
+ }
+ for(const separator of ['然后','但是','and','123']) {
+  assert.throws(()=>parseMoveRow('1. 炮二平五'+separator+'马８进７'),/说明或不支持/);
+ }
+ assert.throws(()=>parseMoveRow('1. 炮二平五；马８进７；马二进三'),/说明或不支持/);
+ assert.throws(()=>convertRows(['1. 车一进九；马８进７'],[{line:1,text:'1. 车一进九；马８进７'}],parseFen(START)),/合法/);
+});
+
+test('ellipsis preserves recorded moves without inventing a missing turn',()=>{
+ for(const ellipsis of ['…','……','...','......','．．．']) {
+  const red='1. 炮二平五 '+ellipsis;
+  const first=convertRows([red],[{line:1,text:red}],parseFen(START));
+  assert.deepEqual(first.converted.map(m=>m.move),['h2e2']);
+  assert.equal(first.state.turn,'b');
+  const black='1. '+ellipsis+' 马８进７';
+  const second=convertRows([black],[{line:1,text:black}],first.state);
+  assert.deepEqual(second.converted.map(m=>m.move),['h9g7']);
+  assert.equal(second.state.turn,'w');
+  assert.equal(second.state.fullmove,2);
+  assert.throws(()=>convertRows([black],[{line:1,text:black}],parseFen(START)),/行棋方/);
+  const next='2. 马二进三 马２进３';
+  assert.throws(()=>convertRows([red,next],[{line:1,text:red},{line:2,text:next}],parseFen(START)),/回合/);
+  assert.equal(parseMoveRow('1. '+ellipsis),null);
+ }
+});

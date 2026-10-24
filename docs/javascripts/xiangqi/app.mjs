@@ -5,15 +5,19 @@ const statusText = {unknown:'云库暂无此局面数据，可继续走棋探索
 const scoreText = n => n === null ? '未知' : (n>0?'+':'')+n;
 const el = (tag,cls,text) => {const e=document.createElement(tag);if(cls)e.className=cls;if(text!==undefined)e.textContent=text;return e;};
 export function mount(root) {
+  const quotesEnabled=root.dataset.quotes!=='false', cloudEnabled=root.dataset.cloudAnalysis!=='false', libraryEnabled=root.dataset.chessLibrary!=='false';
   root.innerHTML = `<div class="xq-heading"><div><p data-quote>有棋友问，没根是谁</p></div><a class="xq-source" href="https://www.chessdb.cn/" target="_blank" rel="noopener">中国象棋云库 ↗</a></div>
   <div class="xq-layout"><section class="xq-play" aria-label="象棋棋盘"><details class="xq-board-toggle xq-panel-toggle" open><summary>象棋棋盘</summary><div class="xq-turnbar"><strong data-turn></strong><span data-ply></span></div><div class="xq-board" role="group" aria-label="象棋棋盘，点击棋子后点击目标位置"></div><div class="xq-toolbar"><button data-action="undo">悔棋</button><button data-action="redo">撤销悔棋</button><button data-action="flip">翻转棋盘</button><button data-action="reset">重新开局</button></div><p class="xq-message" data-message role="status" aria-live="polite">点击棋子，选择落点。</p></details></section>
   <section class="xq-panel"><details class="xq-cloud-toggle xq-panel-toggle"><summary><span>云库分析</span></summary><div class="xq-panel-title"><span>当前局面分析</span><button data-action="retry">刷新分析</button></div><p class="xq-perspective" data-perspective></p><p class="xq-cloud-status" data-cloud role="status" aria-live="polite"></p><div class="xq-table-wrap"><table class="xq-candidates"><thead><tr><th>候选着法</th><th>分值</th><th>评估胜率</th></tr></thead><tbody></tbody></table></div><details class="xq-pv"><summary>主变化</summary><p data-pv>等待分析</p></details></details></section>
   <section class="xq-panel"><details class="xq-history-toggle xq-panel-toggle"><summary><span>着法记录</span><span data-history-count>0 手</span></summary><div class="xq-history-nav"><button data-action="first" aria-label="回到起始局面">⇤</button><button data-action="prev" aria-label="上一步">←</button><button data-action="next" aria-label="下一步">→</button><button data-action="last" aria-label="最新局面">⇥</button></div><div class="xq-history" aria-label="着法历史"></div><p class="xq-hint">回看后落子将从此处开始新的变化。</p></details></section>
   <section class="xq-panel xq-library" aria-label="博客棋谱局面检索"><details class="xq-library-toggle xq-panel-toggle"><summary><span>我的博客棋谱</span><span data-library-count aria-live="polite">加载中…</span></summary><div data-library aria-live="polite"></div></details></section></div>
   <details class="xq-fen"><summary>FEN</summary><label for="xq-fen-input">局面代码（w 红走 / b 黑走）</label><textarea id="xq-fen-input" rows="3" spellcheck="false"></textarea><div class="xq-toolbar"><button data-action="import">导入局面</button><button data-action="export">导出当前局面</button></div><p>导入会清空当前着法记录；导出会将当前局面填入文本框并尝试复制。</p></details>`;
-  const $=s=>root.querySelector(s), boardNode=$('.xq-board'),cloud=new Cloud();
+  const $=s=>root.querySelector(s), boardNode=$('.xq-board'),cloud=cloudEnabled?new Cloud():null;
+  if(!cloudEnabled) $('.xq-cloud-toggle').closest('section').remove();
+  if(!libraryEnabled) $('.xq-library').remove();
   const quoteNode = $('[data-quote]');
-  fetch(new URL('../../assets/xiangqi/quotes.txt', import.meta.url))
+  if(!quotesEnabled) quoteNode.remove();
+  if(quotesEnabled) fetch(new URL('../../assets/xiangqi/quotes.txt', import.meta.url))
     .then(response => {
       if (!response.ok) throw new Error('名言表加载失败');
       return response.text();
@@ -91,15 +95,16 @@ export function mount(root) {
     $('textarea').value=fen(state);
     $('[data-turn]').textContent=`${state.turn==='w'?'红方':'黑方'}${ended?(checking?'被将死':'被困毙'):'走棋'+(checking?' · 将军':'')}`;
     $('[data-ply]').textContent=`第 ${state.fullmove} 回合 · ${cursor} / ${history.length} 手`;
-    $('[data-perspective]').textContent=`分值与评估胜率均为当前行棋方（${state.turn==='w'?'红方':'黑方'}）视角。`;
+    if(cloudEnabled) $('[data-perspective]').textContent=`分值与评估胜率均为当前行棋方（${state.turn==='w'?'红方':'黑方'}）视角。`;
     message(ended?'此局面已结束，行棋方负。':checking?'正在被将军，请先应将。':'点击棋子，选择落点。');
     const repetitions=states.slice(0,cursor+1).filter(s=>fen(s).split(' ').slice(0,2).join(' ')===fen(state).split(' ').slice(0,2).join(' ')).length;
     if(repetitions>=3)message('此局面已重复三次；长将、长捉请按实际棋规判断。');
-    drawBoard();drawHistory();$('[data-action="retry"]').disabled=ended;
+    drawBoard();drawHistory();if(cloudEnabled) $('[data-action="retry"]').disabled=ended;
     libraryPanel?.update();
     schedule();
   }
   function schedule(force=false) {
+    if(!cloudEnabled)return;
     clearTimeout(timer);controller?.abort();version++;
     $('tbody').replaceChildren();$('[data-pv]').textContent='等待分析';
     if(!$('.xq-cloud-toggle').open){$('[data-cloud]').textContent='展开后查询当前局面。';return;}
@@ -163,13 +168,13 @@ export function mount(root) {
     if(action==='next')cursor=Math.min(history.length,cursor+1);
     refresh();
   });
-  libraryPanel=mountLibrary($('[data-library]'),current,(loaded,lineMoves,ply,title)=>{
+  if(libraryEnabled) libraryPanel=mountLibrary($('[data-library]'),current,(loaded,lineMoves,ply,title)=>{
     redoStack=[];states=loaded;
     history=lineMoves.map((move,i)=>({move,label:notation(states[i],move),side:states[i].turn}));
     cursor=Math.max(0,Math.min(ply,history.length));
     refresh();message('已载入：'+title+'；使用历史按钮逐步回放。');
   },$('[data-library-count]'));
-  $('.xq-cloud-toggle').addEventListener('toggle',e=>{if(e.target===$('.xq-cloud-toggle'))schedule();});
+  $('.xq-cloud-toggle')?.addEventListener('toggle',e=>{if(e.target===$('.xq-cloud-toggle'))schedule();});
   refresh();
   // Material instant navigation can remove this root while requests are pending.
   const observer=new MutationObserver(()=>{if(!root.isConnected){clearTimeout(timer);controller?.abort();observer.disconnect();}});

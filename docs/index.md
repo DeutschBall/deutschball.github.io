@@ -9,9 +9,13 @@ mathjax: true
 
 # 棋局研究室
 
+<!-- feature:home_music -->
 <iframe title="网易云音乐播放器" frameborder="no" border="0" marginwidth="0" marginheight="0" width="1000" height="86" style="max-width: 100%;" src="https://music.163.com/outchain/player?type=2&amp;id=1918901957&amp;auto=1&amp;height=66"></iframe>
+<!-- /feature -->
 
+<!-- feature:xiangqi -->
 <div id="xiangqi-analysis"><p>棋盘加载中…请启用 JavaScript。</p></div>
+<!-- /feature -->
 
 
 

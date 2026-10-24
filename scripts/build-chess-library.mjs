@@ -11,7 +11,8 @@ export function parseMoveRow(raw) {
   if(!match)return null;
   const body=match[4], tokens=body.match(/[车馬马炮兵卒相象仕士帅将前中后][一二三四五六七八九1-9车馬马炮兵卒][进退平][一二三四五六七八九1-9]/g)||[];
   if(!tokens.length)return null;
-  const remainder=tokens.reduce((s,t)=>s.replace(t,''),body).replace(/[\s!?！？.,，。…*]/g,'');
+  // Accept Unicode punctuation/symbols between moves, but never discard prose or numbers.
+  const remainder=tokens.reduce((s,t)=>s.replace(t,''),body).replace(/[\s\p{P}\p{S}]/gu,'');
   if(remainder||tokens.length>2)throw Error('编号行含说明或不支持的着法格式');
   const black=/^(?:\.{3}|…)/.test(body)||/[1-9]/.test(tokens[0]);
   if(black&&tokens.length>1)throw Error('黑方起始行只能包含一个着法');
