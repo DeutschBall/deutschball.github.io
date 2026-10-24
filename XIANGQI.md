@@ -66,7 +66,7 @@ PLAYWRIGHT_MODULE=/tmp/dustland-browser/node_modules/playwright/index.mjs node t
 - 命中以棋子位置与行棋方匹配，忽略 FEN 计数器，不做镜像或红黑交换。
 - 同一棋局反复到达同一局面只计 1 局，记录全部命中手数；不同棋局分别计数。
 - 分析分支独立统计，分叉之前共享的主线前缀不再计入分析命中。
-- 覆盖率目前为 5/56 篇内容文章，分母不含目录首页和 tags.md。未收录不等于未出现。该覆盖率不是全部文章都可自动转换的承诺。
+- 覆盖率目前为 50/56 篇内容文章，分母不含目录首页和 tags.md。未收录不等于未出现。
 - 主线/分支可载入研究室并用历史按钮回放；每篇匹配文章标题旁提供“跳转文章”和“摆上棋谱”两个按钮，不再嵌套棋谱目录折叠。仅显示当前局面命中的棋局与分支；同篇文章有多个匹配分支时可选择分支再摆上棋谱。
 - 棋谱数据独立于云库；加载成功后，断网仍能查询。首次加载失败会明确提示并提供重试，不将失败显示为零命中。
 
@@ -93,7 +93,7 @@ PLAYWRIGHT_MODULE=/tmp/dustland-browser/node_modules/playwright/index.mjs node t
 
 ### 第二批收录（2026-10-24）
 
-目前共 5 篇文章、5 条主线片段、8 条分析分支，索引 123 个唯一局面。所有收录的编号着法通过逐步合法性校验。非编号散文、图片及缺失后续不作猜测补全。
+第二批当时共 5 篇文章、5 条主线片段、8 条分析分支，索引 123 个唯一局面。所有收录的编号着法通过逐步合法性校验。非编号散文、图片及缺失后续不作猜测补全。
 
 | 文章 | 主线手数 | 分析分支数 |
 | --- | ---: | ---: |
@@ -108,3 +108,25 @@ PLAYWRIGHT_MODULE=/tmp/dustland-browser/node_modules/playwright/index.mjs node t
 来源复核信息保留在数据和本文档中，界面仅显示匹配统计、文章链接与棋谱载入入口，不再显示来源归属说明或每条命中的“第几手 · 回放”按钮。
 
 FEN 输入框随走子、悔棋、历史回看、重置、棋谱载入与成功导入同步更新。明暗主题下均为白底深色文字，可以直接编辑或粘贴后点击导入。折叠切换与异步查询不覆盖编辑中的内容；非法导入保留输入及原棋盘。
+
+## Full-site import (2026-10-24)
+
+All 56 content articles were scanned. 50 articles yielded legally replayable numbered sequences: 149 mainline fragments, 249 variations and 3,324 distinct positions. Monthly compilations are split by their level-two headings; variations in a study article remain attached to its source record. These are source records, not independently verified real-world games. Identical openings alone are insufficient evidence to merge different articles into a single game.
+
+33 articles have unresolved numbered lines. Valid prefixes are retained, but missing or illegal moves are never invented to continue a line. Six articles lack reconstructible numbered sequences: the April 2026 compilation, the central-cannon/opposite-cannon positional essay, the five-six-cannon external-link directory, the empty screen-horse summary, the pawn-opening image summary, and the image-based `疑形与攻击` essay. They remain in the audit rather than being counted as empty games.
+
+`CHESS_IMPORT_REPORT.md` and `data/chess/import-audit.json` record every article, source line and unresolved issue. Their counts include dependent lines that cannot be replayed after an earlier failure, not just independent errors.
+
+```sh
+node scripts/import-blog-chess.mjs
+node scripts/build-chess-library.mjs
+node scripts/build-chess-library.mjs --check
+node --test tests/*.test.mjs
+mkdocs build
+```
+
+The importer preserves manually reviewed samples. Other numbered lines are interpreted using heading, indentation, admonition and quotation context. Parenthesized numbering, full-width digits, split black turns and trailing ellipses are supported. Move numbers and turn must agree with the source prefix. It does not modify original articles. A source row may retain only its first move via `take`; `branchPly` records the actual divergence independently of the replay prefix, preventing shared prefixes from inflating variation counts.
+
+The build checks the complete article inventory and source-content hashes. Rerun import and review after articles are added, removed or edited. Resolving the remaining issues requires corrected source moves or explicit starting FENs; automated legality checking does not replace editorial review.
+
+Validation: 19 tests; every imported line replayed; browser checks for all 50 article URLs, 149 initial matches, representative mainline/variation loading, FEN synchronization, offline lookup, mobile overflow and load-error recovery. No remote deployment has been performed.

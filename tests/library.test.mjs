@@ -3,7 +3,7 @@ import assert from 'node:assert/strict';
 import {readFileSync} from 'node:fs';
 import {START,parseFen,play} from '../docs/javascripts/xiangqi/rules.mjs';
 import {positionKey,createIndex,lookup,replay} from '../docs/javascripts/xiangqi/library.mjs';
-import {convertRows,build} from '../scripts/build-chess-library.mjs';
+import {convertRows,parseMoveRow,build} from '../scripts/build-chess-library.mjs';
 import {fileURLToPath} from 'node:url';
 const root=fileURLToPath(new URL('../',import.meta.url));
 const library=JSON.parse(readFileSync(new URL('../docs/assets/xiangqi/library.json',import.meta.url)));
@@ -26,11 +26,11 @@ test('game count deduplicates repeated positions, distinct games remain distinct
  assert.throws(()=>createIndex([g,g]),/重复/);
 });
 test('analysis prefix does not inflate counts; branch-only position has zero mainline games',()=>{
- const g=library.games[0];const branch=replay(g,g.lines[1].id),main=replay(g,'main');
- assert.equal(lookup(library,START).mainlineCount,5);assert.equal(lookup(library,START).variationCount,0);
- assert.equal(lookup(library,branch.states[20]).mainlineCount,0);assert.equal(lookup(library,branch.states[20]).variationCount,1);
- assert.equal(lookup(library,main.states[20]).mainlineCount,1);
- assert.equal(lookup(library,play(parseFen(START),'a3a4')).hits.length,0);
+ const g=library.games[0],isolated={positions:createIndex([g])};const branch=replay(g,g.lines[1].id),main=replay(g,'main');
+ assert.equal(lookup(isolated,START).mainlineCount,1);assert.equal(lookup(isolated,START).variationCount,0);
+ assert.equal(lookup(isolated,branch.states[20]).mainlineCount,0);assert.equal(lookup(isolated,branch.states[20]).variationCount,1);
+ assert.equal(lookup(isolated,main.states[20]).mainlineCount,1);
+ assert.equal(lookup(isolated,play(parseFen(START),'a3a4')).hits.length,0);
 });
 test('source changes, illegal moves and wrong turn fail conversion instead of guessing',()=>{
  assert.throws(()=>convertRows(['1、炮二平五'],[{line:1,text:'1、炮二平四'}],parseFen(START)),/已改变/);
@@ -39,14 +39,36 @@ test('source changes, illegal moves and wrong turn fail conversion instead of gu
  assert.throws(()=>convertRows(['2、炮二平五'],[{line:1,text:'2、炮二平五'}],parseFen(START)),/回合/);
 });
 
-test('five articles and every reviewed line replay with source provenance',()=>{
- assert.equal(library.coverage.indexedArticles,5);
- assert.equal(library.games.length,5);
- assert.equal(new Set(library.games.map(g=>g.source)).size,5);
+test('full-site articles and every imported line replay with source provenance',()=>{
+ assert.equal(library.coverage.indexedArticles,50);
+ assert.equal(library.coverage.processedArticles,56);
+ assert.equal(library.coverage.pendingArticles.length,6);
+ assert.equal(library.games.length,149);
+ assert.equal(new Set(library.games.map(g=>g.source)).size,50);
  for(const game of library.games)for(const line of game.lines){
   assert.equal(replay(game,line.id).states.length,line.moves.length+1);
   assert.equal(line.sources.length,line.moves.length);
   assert.ok(line.sources.every(s=>s.sourceLine>0&&s.chinese));
  }
- assert.equal(lookup(library,play(parseFen(START),'h2e2')).mainlineCount,5);
+ assert.equal(lookup(library,START).mainlineCount,149);
+ assert.equal(lookup(library,START).variationCount,0);
+});
+
+test('parenthesized notation, quoted continuations, ellipses and explicit source slices',()=>{
+ assert.equal(parseMoveRow('（1）炮二平五 馬８进７').tokens.length,2);
+ assert.equal(parseMoveRow('> （1） ... 炮８平５').turn,'b');
+ assert.equal(parseMoveRow('1、炮二平五 ...').turn,'w');
+ assert.equal(parseMoveRow('1、这是解释文字'),null);
+ const source=['（1）炮二平五 炮８平５'];
+ assert.equal(convertRows(source,[{line:1,text:source[0],take:1}],parseFen(START)).converted.length,1);
+ assert.throws(()=>convertRows(source,[{line:1,text:source[0],take:3}],parseFen(START)),/范围/);
+});
+
+test('all article audits are complete and unresolved rows are not silently included',()=>{
+ const audit=JSON.parse(readFileSync(new URL('../data/chess/import-audit.json',import.meta.url))).articles;
+ assert.equal(audit.length,56);assert.equal(new Set(audit.map(a=>a.source)).size,56);
+ for(const a of audit){
+  assert.equal(library.games.filter(g=>g.source===a.source).length,a.games);
+  for(const issue of a.issues)if(issue.line)assert.ok(!a.acceptedRows.includes(issue.line));
+ }
 });
