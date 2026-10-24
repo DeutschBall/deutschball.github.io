@@ -11,6 +11,7 @@ const square=c=>root.locator(`[data-square="${c}"]`);
 const ready=()=>root.locator('.xq-square').first().waitFor();
 try {
  await page.goto(base,{waitUntil:'domcontentloaded'});await ready();
+ await root.locator('.xq-cloud-toggle > summary').click();
  await page.waitForFunction(()=>document.querySelectorAll('.xq-candidates tbody tr').length>0,{},{timeout:20000});
  console.log('Live HTTPS/CORS: '+await root.locator('[data-cloud]').innerText());
  assert.equal(await root.locator('.xq-piece').count(),32);
@@ -50,7 +51,7 @@ try {
    if(turn==='w')await new Promise(r=>setTimeout(r,700));
    try{await route.fulfill({status:200,headers:{'Access-Control-Allow-Origin':'*'},body:turn==='w'?'invalid board\0':'unknown\0'});}catch{}
  });
- await page.reload({waitUntil:'domcontentloaded'});await ready();await click('retry');await page.waitForTimeout(100);
+ await page.reload({waitUntil:'domcontentloaded'});await ready();await root.locator('.xq-cloud-toggle > summary').click();await click('retry');await page.waitForTimeout(100);
  await square('h2').click();await square('e2').click();await page.waitForTimeout(1100);
  assert.match(await root.locator('[data-cloud]').innerText(),/暂无此局面/);
  assert.equal(await root.locator('tbody tr').count(),0);

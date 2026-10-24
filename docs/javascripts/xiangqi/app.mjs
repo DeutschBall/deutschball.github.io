@@ -7,7 +7,7 @@ const el = (tag,cls,text) => {const e=document.createElement(tag);if(cls)e.class
 export function mount(root) {
   root.innerHTML = `<div class="xq-heading"><div><span class="xq-eyebrow">DUSTLAND · XIANGQI</span><h2>棋局研究室</h2><p>落子之间，探寻更好的下一步。</p></div><a class="xq-source" href="https://www.chessdb.cn/" target="_blank" rel="noopener">中国象棋云库 ↗</a></div>
   <div class="xq-layout"><section class="xq-play" aria-label="象棋棋盘"><div class="xq-turnbar"><strong data-turn></strong><span data-ply></span></div><div class="xq-board" role="group" aria-label="象棋棋盘，点击棋子后点击目标位置"></div><div class="xq-toolbar"><button data-action="undo">悔棋</button><button data-action="flip">翻转棋盘</button><button data-action="reset">重新开局</button></div><p class="xq-message" data-message role="status" aria-live="polite">点击棋子，选择落点。</p></section>
-  <section class="xq-panel"><div class="xq-panel-title"><h3>云库分析</h3><button data-action="retry">刷新分析</button></div><p class="xq-perspective" data-perspective></p><p class="xq-cloud-status" data-cloud role="status" aria-live="polite"></p><div class="xq-table-wrap"><table class="xq-candidates"><thead><tr><th>候选着法</th><th>分值</th><th>评估胜率</th></tr></thead><tbody></tbody></table></div><details class="xq-pv"><summary>主变化</summary><p data-pv>等待分析</p></details></section>
+  <section class="xq-panel"><details class="xq-cloud-toggle"><summary><span>云库分析</span><span class="xq-cloud-expand">展开后查询 ▾</span><span class="xq-cloud-collapse">收起 ▴</span></summary><div class="xq-panel-title"><span>当前局面分析</span><button data-action="retry">刷新分析</button></div><p class="xq-perspective" data-perspective></p><p class="xq-cloud-status" data-cloud role="status" aria-live="polite"></p><div class="xq-table-wrap"><table class="xq-candidates"><thead><tr><th>候选着法</th><th>分值</th><th>评估胜率</th></tr></thead><tbody></tbody></table></div><details class="xq-pv"><summary>主变化</summary><p data-pv>等待分析</p></details></details></section>
   <section class="xq-panel"><div class="xq-panel-title"><h3>着法记录</h3><span data-history-count>0 手</span></div><div class="xq-history-nav"><button data-action="first" aria-label="回到起始局面">⇤</button><button data-action="prev" aria-label="上一步">←</button><button data-action="next" aria-label="下一步">→</button><button data-action="last" aria-label="最新局面">⇥</button></div><div class="xq-history" aria-label="着法历史"></div><p class="xq-hint">回看后落子将从此处开始新的变化。</p></section>
   <section class="xq-panel xq-library" data-library aria-label="博客棋谱局面检索" aria-live="polite"></section></div>
   <details class="xq-fen"><summary>FEN · 导入与导出局面</summary><label for="xq-fen-input">局面代码（w 红走 / b 黑走）</label><textarea id="xq-fen-input" rows="3" spellcheck="false"></textarea><div class="xq-toolbar"><button data-action="import">导入局面</button><button data-action="export">导出当前局面</button></div><p>导入会清空当前着法记录；导出会将当前局面填入文本框并尝试复制。</p></details><p class="xq-footnote">云库评估仅供研究，未知分值不代表均势。支持基本走子规则；长将、长捉及重复局面不作自动裁定。</p>`;
@@ -87,13 +87,15 @@ export function mount(root) {
   function schedule(force=false) {
     clearTimeout(timer);controller?.abort();version++;
     $('tbody').replaceChildren();$('[data-pv]').textContent='等待分析';
+    if(!$('.xq-cloud-toggle').open){$('[data-cloud]').textContent='展开后查询当前局面。';return;}
     if(ended){$('[data-cloud]').textContent='局面已结束。';$('[data-pv]').textContent='无后续着法。';return;}
     $('[data-cloud]').textContent='正在查询云库…';
     const request=version,state=current(),position=fen(state);
     controller=new AbortController();const signal=controller.signal;
     timer=setTimeout(async()=>{
+      if(signal.aborted || !$('.xq-cloud-toggle').open || !root.isConnected)return;
       const results=await Promise.allSettled([cloud.query('queryall',position,signal,force),cloud.query('querypv',position,signal,force)]);
-      if(request!==version||signal.aborted||!root.isConnected)return;
+      if(request!==version||signal.aborted||!root.isConnected||!$('.xq-cloud-toggle').open)return;
       const [all,pv]=results;
       if(all.status==='rejected')$('[data-cloud]').textContent='云库暂时无法连接或请求超时。可继续走棋，稍后点击刷新分析。';
       else if(all.value.status!=='ok')$('[data-cloud]').textContent=statusText[all.value.status]||'暂无数据';
@@ -150,6 +152,7 @@ export function mount(root) {
     cursor=Math.max(0,Math.min(ply,history.length));
     refresh();message('已载入：'+title+'；使用历史按钮逐步回放。');
   });
+  $('.xq-cloud-toggle').addEventListener('toggle',e=>{if(e.target===$('.xq-cloud-toggle'))schedule();});
   $('textarea').value=START;refresh();
   // Material instant navigation can remove this root while requests are pending.
   const observer=new MutationObserver(()=>{if(!root.isConnected){clearTimeout(timer);controller?.abort();observer.disconnect();}});
