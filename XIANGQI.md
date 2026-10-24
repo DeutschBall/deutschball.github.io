@@ -50,3 +50,35 @@ PLAYWRIGHT_MODULE=/tmp/dustland-browser/node_modules/playwright/index.mjs node t
 - https://www.chessdb.cn/cloudbook_info.html
 - https://www.xqbase.com/protocol/cchess_move.htm
 - https://www.xqbase.com/protocol/cchess_fen.htm
+
+## 博客棋谱库试点
+
+研究室棋盘下方新增「我的博客棋谱」。当前收录《中炮盘头马有时可以弃马保中兵@2026.6.22》：文章主线 20 手；“黑棋弃马冲中卒”分支从第 19 手后分叉、回放总计 22 手。共索引 24 个不同局面。均是片段，不补造文章未记录的后续。文章属于复盘资料，但不能仅凭文章断言每一步都是作者实战，故标注“文中主线，实战归属待核实”。散文中的未编号建议不自动纳入。
+
+- 命中以棋子位置与行棋方匹配，忽略 FEN 计数器，不做镜像或红黑交换。
+- 同一棋局反复到达同一局面只计 1 局，记录全部命中手数；不同棋局分别计数。
+- 分析分支独立统计，分叉之前共享的主线前缀不再计入分析命中。
+- 覆盖率目前为 1/56 篇内容文章，分母不含目录首页和 tags.md。未收录不等于未出现。该覆盖率不是全部文章都可自动转换的承诺。
+- 主线/分支可载入研究室并用历史按钮回放；点击文章标题打开原文；点击命中项回到该条棋谱的匹配手数。
+- 棋谱数据独立于云库；加载成功后，断网仍能查询。首次加载失败会明确提示并提供重试，不将失败显示为零命中。
+
+### 添加或修正棋谱
+
+`data/chess/games.json` 是经过核对的来源清单。每局使用稳定 ID，主线与变着保留原文行号和逐字快照。文章不被改写。`scripts/build-chess-library.mjs` 将中文着法与当前所有合法着法逐一匹配，仅接受唯一结果，保留中文名称、来源行、坐标着法和起始 FEN。支持数字全半角与仕/士、马/馬文字等价；不修改棋子实际位置。出现非法着法、歧义、回合断裂、来源行变化时失败，要求人工复核。
+
+```sh
+node scripts/build-chess-library.mjs
+node scripts/build-chess-library.mjs --check
+node --test tests/*.test.mjs
+mkdocs build
+```
+
+生成的 `docs/assets/xiangqi/library.json` 随静态网站提交。MkDocs 直接使用此文件，无运行时后端。新增文章或修改来源后需重新生成并提交；GitHub Actions 会验证索引是否过期并运行规则和棋谱测试。未来批量转换应先建立复核记录；同一对局跨文章出现需合并到同一个 gameId，而不是按文章数量冒充对局数量。
+
+浏览器验收（沿用上文 Playwright 安装方式）：
+
+```sh
+PLAYWRIGHT_MODULE=/tmp/dustland-browser/node_modules/playwright/index.mjs node tests/library.browser.mjs
+```
+
+验证覆盖原文链接 HTTP 200、走子/悔棋/FEN 联动、完整样例载入、分支不计入主线、断网查询、窄屏布局、库失败/重试。全部规则和棋谱测试共 16 项。

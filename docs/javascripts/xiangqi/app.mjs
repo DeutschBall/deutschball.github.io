@@ -1,17 +1,18 @@
 import {START,names,side,coord,index,parseFen,fen,legal,moves,play,inCheck,notation} from './rules.mjs';
 import {Cloud} from './cloud.mjs';
+import {mountLibrary} from './library-panel.mjs';
 const statusText = {unknown:'云库暂无此局面数据，可继续走棋探索。','invalid board':'云库不接受此局面，请检查 FEN。',checkmate:'将死：行棋方负。',stalemate:'困毙：行棋方负。',nobestmove:'暂无推荐着法。'};
 const scoreText = n => n === null ? '未知' : (n>0?'+':'')+n;
 const el = (tag,cls,text) => {const e=document.createElement(tag);if(cls)e.className=cls;if(text!==undefined)e.textContent=text;return e;};
 export function mount(root) {
   root.innerHTML = `<div class="xq-heading"><div><span class="xq-eyebrow">DUSTLAND · XIANGQI</span><h2>棋局研究室</h2><p>落子之间，探寻更好的下一步。</p></div><a class="xq-source" href="https://www.chessdb.cn/" target="_blank" rel="noopener">中国象棋云库 ↗</a></div>
-  <div class="xq-layout"><section class="xq-play" aria-label="象棋棋盘"><div class="xq-turnbar"><strong data-turn></strong><span data-ply></span></div><div class="xq-board" role="group" aria-label="象棋棋盘，点击棋子后点击目标位置"></div><div class="xq-toolbar"><button data-action="undo">悔棋</button><button data-action="flip">翻转棋盘</button><button data-action="reset">重新开局</button></div><p class="xq-message" data-message role="status" aria-live="polite">点击棋子，选择落点。</p></section>
+  <div class="xq-layout"><section class="xq-play" aria-label="象棋棋盘"><div class="xq-turnbar"><strong data-turn></strong><span data-ply></span></div><div class="xq-board" role="group" aria-label="象棋棋盘，点击棋子后点击目标位置"></div><div class="xq-toolbar"><button data-action="undo">悔棋</button><button data-action="flip">翻转棋盘</button><button data-action="reset">重新开局</button></div><p class="xq-message" data-message role="status" aria-live="polite">点击棋子，选择落点。</p><section class="xq-panel xq-library" data-library aria-label="博客棋谱局面检索" aria-live="polite"></section></section>
   <aside class="xq-side"><section class="xq-panel"><div class="xq-panel-title"><h3>云库分析</h3><button data-action="retry">刷新分析</button></div><p class="xq-perspective" data-perspective></p><p class="xq-cloud-status" data-cloud role="status" aria-live="polite"></p><div class="xq-table-wrap"><table class="xq-candidates"><thead><tr><th>候选着法</th><th>分值</th><th>评估胜率</th></tr></thead><tbody></tbody></table></div><details class="xq-pv"><summary>主变化</summary><p data-pv>等待分析</p></details></section>
   <section class="xq-panel"><div class="xq-panel-title"><h3>着法记录</h3><span data-history-count>0 手</span></div><div class="xq-history-nav"><button data-action="first" aria-label="回到起始局面">⇤</button><button data-action="prev" aria-label="上一步">←</button><button data-action="next" aria-label="下一步">→</button><button data-action="last" aria-label="最新局面">⇥</button></div><div class="xq-history" aria-label="着法历史"></div><p class="xq-hint">回看后落子将从此处开始新的变化。</p></section></aside></div>
   <details class="xq-fen"><summary>FEN · 导入与导出局面</summary><label for="xq-fen-input">局面代码（w 红走 / b 黑走）</label><textarea id="xq-fen-input" rows="3" spellcheck="false"></textarea><div class="xq-toolbar"><button data-action="import">导入局面</button><button data-action="export">导出当前局面</button></div><p>导入会清空当前着法记录；导出会将当前局面填入文本框并尝试复制。</p></details><p class="xq-footnote">云库评估仅供研究，未知分值不代表均势。支持基本走子规则；长将、长捉及重复局面不作自动裁定。</p>`;
   const $=s=>root.querySelector(s), boardNode=$('.xq-board'),cloud=new Cloud();
   let states=[parseFen(START)],history=[],cursor=0,flipped=false,selected=null,legalTargets=[],hoverMove=null;
-  let timer,controller,version=0,ended=false;
+  let timer,controller,version=0,ended=false,libraryPanel;
   const current=()=>states[cursor];
   const message=text=>{$('[data-message]').textContent=text;};
   function svgBoard() {
@@ -79,6 +80,7 @@ export function mount(root) {
     const repetitions=states.slice(0,cursor+1).filter(s=>fen(s).split(' ').slice(0,2).join(' ')===fen(state).split(' ').slice(0,2).join(' ')).length;
     if(repetitions>=3)message('此局面已重复三次；长将、长捉请按实际棋规判断。');
     drawBoard();drawHistory();$('[data-action="retry"]').disabled=ended;
+    libraryPanel?.update();
     schedule();
   }
   function schedule(force=false) {
@@ -140,6 +142,12 @@ export function mount(root) {
     if(action==='prev')cursor=Math.max(0,cursor-1);
     if(action==='next')cursor=Math.min(history.length,cursor+1);
     refresh();
+  });
+  libraryPanel=mountLibrary($('[data-library]'),current,(loaded,lineMoves,ply,title)=>{
+    states=loaded;
+    history=lineMoves.map((move,i)=>({move,label:notation(states[i],move),side:states[i].turn}));
+    cursor=Math.max(0,Math.min(ply,history.length));
+    refresh();message('已载入：'+title+'；使用历史按钮逐步回放。');
   });
   $('textarea').value=START;refresh();
   // Material instant navigation can remove this root while requests are pending.

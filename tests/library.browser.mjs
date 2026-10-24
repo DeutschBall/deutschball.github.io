@@ -1,0 +1,30 @@
+import assert from 'node:assert/strict';
+import {readFileSync} from 'node:fs';
+import {replay} from '../docs/javascripts/xiangqi/library.mjs';
+import {fen} from '../docs/javascripts/xiangqi/rules.mjs';
+const {chromium}=await import(process.env.PLAYWRIGHT_MODULE||'playwright');
+const browser=await chromium.launch({channel:'chrome'}),context=await browser.newContext({viewport:{width:1440,height:1200}}),page=await context.newPage();
+const base=process.env.BLOG_URL||'http://127.0.0.1:8001/';
+const data=JSON.parse(readFileSync(new URL('../docs/assets/xiangqi/library.json',import.meta.url))),game=data.games[0];
+const errors=[];page.on('pageerror',e=>errors.push(e.message));
+const lib=page.locator('[data-library]'),root=page.locator('#xiangqi-analysis');
+const waitCount=()=>lib.locator('.xq-library-count').waitFor();
+const square=c=>root.locator(`[data-square="${c}"]`),action=a=>root.locator(`[data-action="${a}"]`).click();
+try {
+ await page.route('**/chessdb.php?**',r=>r.fulfill({body:'unknown',headers:{'Access-Control-Allow-Origin':'*'}}));
+ await page.goto(base,{waitUntil:'domcontentloaded'});await waitCount();
+ assert.match(await lib.innerText(),/1 \/ 56 篇/);assert.match(await lib.locator('.xq-library-count').innerText(),/1 局主线.*0 个分析/);
+ const articleURL=await lib.locator('a').first().getAttribute('href');const response=await context.request.get(articleURL);assert.equal(response.status(),200);assert.ok((await response.text()).includes(game.title));
+ await square('h2').click();await square('e2').click();assert.match(await lib.locator('.xq-library-count').innerText(),/1 局主线/);
+ await action('undo');await square('a3').click();await square('a4').click();assert.match(await lib.locator('.xq-library-count').innerText(),/0 局主线/);assert.match(await lib.innerText(),/暂无匹配/);
+ await lib.locator('summary').click();await lib.locator('[data-line="main"]').click();assert.match(await root.locator('[data-ply]').innerText(),/20 \/ 20/);
+ await action('first');assert.match(await lib.locator('.xq-library-count').innerText(),/1 局主线.*0 个分析/);
+ await lib.locator('summary').click();await lib.locator('[data-line="pawn-push"]').click();assert.match(await root.locator('[data-ply]').innerText(),/22 \/ 22/);assert.match(await lib.locator('.xq-library-count').innerText(),/0 局主线.*1 个分析/);
+ await root.locator('.xq-fen summary').click();await root.locator('textarea').fill(fen(replay(game,'main').states[10]).replace(/\d+ \d+$/,'30 99'));await action('import');assert.match(await lib.locator('.xq-library-count').innerText(),/1 局主线/);
+ await context.setOffline(true);await action('reset');assert.match(await lib.locator('.xq-library-count').innerText(),/1 局主线/);await context.setOffline(false);
+ await page.setViewportSize({width:390,height:844});assert.equal(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth),true);
+ await page.setViewportSize({width:1440,height:1200});await lib.screenshot({path:'/tmp/dustland-library.png',style:'.md-header,.md-top {visibility:hidden!important;}'});
+ await page.route('**/assets/xiangqi/library.json',r=>r.fulfill({status:503,body:'Unavailable'}));await page.reload({waitUntil:'domcontentloaded'});await lib.getByText('重试加载',{exact:true}).waitFor();assert.match(await lib.innerText(),/不能判断命中数量/);assert.equal(await lib.locator('.xq-library-count').count(),0);
+ await page.unroute('**/assets/xiangqi/library.json');await lib.getByText('重试加载',{exact:true}).click();await waitCount();assert.deepEqual(errors,[]);
+ console.log('Library browser: counts, article URL, moves/undo/FEN, replay, variation isolation, offline lookup, mobile, failure/retry passed.');
+}finally{await browser.close();}

@@ -27,5 +27,13 @@ jobs:
           pip install mkdocs-audio
           pip install mkdocs-section-index
           # pip install mkdocs-with-pdf
+      - name: Setup Node for chess library validation
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Validate chess library
+        run: |
+          node scripts/build-chess-library.mjs --check
+          node --test tests/*.test.mjs
       - name: Deploy to GitHub Pages
         run: mkdocs gh-deploy --force
