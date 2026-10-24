@@ -11,25 +11,31 @@ const lib=page.locator('[data-library]'),root=page.locator('#xiangqi-analysis');
 const action=a=>root.locator(`[data-action="${a}"]`).click(),fenInput=root.locator('textarea');
 const matchState=async value=>{
  const result=lookup(data,value);
+ assert.equal(await root.locator('[data-library-count]').innerText(),`${new Set(result.hits.map(h=>h.gameId)).size} 局匹配`);
  assert.equal(await lib.locator('.xq-library-match').count(),new Set(result.hits.map(h=>h.gameId)).size);
- assert.equal(await lib.locator('.xq-library-count').innerText(),`${result.mainlineCount} 局主线到过此局面 · ${result.variationCount} 个分析分支命中`);
+ assert.equal(await lib.locator('.xq-library-count').textContent(),`${result.mainlineCount} 局主线到过此局面 · ${result.variationCount} 个分析分支命中`);
  assert.equal(await fenInput.inputValue(),value);
 };
 try {
  await page.route('**/chessdb.php?**',r=>r.fulfill({body:'unknown',headers:{'Access-Control-Allow-Origin':'*'}}));
- await page.goto(base,{waitUntil:'domcontentloaded'});await root.locator('.xq-library-toggle > summary').click();await lib.locator('.xq-library-count').waitFor();
- assert.match(await lib.innerText(),/50 \/ 56 篇/);await matchState(START);
- assert.equal(await lib.getByRole('button',{name:'摆上棋谱',exact:true}).count(),149);
+ await page.goto(base,{waitUntil:'domcontentloaded'});await lib.locator('.xq-library-count').waitFor({state:'attached'});
+ assert.equal(await root.locator('.xq-library-toggle').evaluate(e=>e.open),false);
+ assert.equal(await root.locator('[data-library-count]').innerText(),'149 局匹配');
+ assert.match(await lib.textContent(),/50 \/ 56 篇/);await matchState(START);
+ assert.equal(await lib.getByRole('button',{name:'摆上棋谱',exact:true,includeHidden:true}).count(),149);
  assert.equal(await lib.locator('.xq-library-catalog').count(),0);
  for(const removed of ['按棋局去重，区分行棋方','实战归属待核实','仅收录明确编号着法','· 回放'])assert.ok(!(await lib.textContent()).includes(removed));
  await root.locator('[data-square="h2"]').click();await root.locator('[data-square="e2"]').click();await matchState(fen(play(parseFen(START),'h2e2')));
  await action('undo');await matchState(START);
+ await action('redo');await matchState(fen(play(parseFen(START),'h2e2')));
+ await action('undo');await matchState(START);
+ await root.locator('.xq-library-toggle > summary').click();
  await root.locator('.xq-fen summary').click();
  const importFen=async value=>{await fenInput.fill(value);await action('import');await matchState(value);};
  // A legal empty-material position is absent from this opening-focused library.
  const unmatched='3k5/9/9/9/9/9/9/9/9/4K4 w - - 0 1';
  await importFen(unmatched);assert.equal(await lib.locator('.xq-library-match').count(),0);
- assert.match(await lib.innerText(),/暂无匹配/);
+ assert.match(await lib.textContent(),/暂无匹配/);
  await action('reset');await matchState(START);
  // Check every distinct article URL against the generated site, including monthly compilations.
  const articles=[...new Map(data.games.map(g=>[g.source,g])).values()];
@@ -55,6 +61,7 @@ try {
  await page.setViewportSize({width:390,height:844});assert.equal(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth),true);
  await page.route('**/assets/xiangqi/library.json',r=>r.fulfill({status:503,body:'Unavailable'}));
  await page.reload({waitUntil:'domcontentloaded'});await root.locator('.xq-library-toggle > summary').click();await lib.getByText('重试加载',{exact:true}).waitFor();assert.equal(await lib.locator('.xq-library-count').count(),0);
+ assert.equal(await root.locator('[data-library-count]').innerText(),'加载失败');
  await page.unroute('**/assets/xiangqi/library.json');await lib.getByText('重试加载',{exact:true}).click();await lib.locator('.xq-library-count').waitFor();
  assert.deepEqual(errors,[]);
  console.log(`Library browser: ${articles.length} article URLs, 149 initial matches, sampled mainline/branch replay, FEN, offline, mobile and recovery passed.`);

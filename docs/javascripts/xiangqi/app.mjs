@@ -9,7 +9,7 @@ export function mount(root) {
   <div class="xq-layout"><section class="xq-play" aria-label="象棋棋盘"><details class="xq-board-toggle xq-panel-toggle" open><summary>象棋棋盘</summary><div class="xq-turnbar"><strong data-turn></strong><span data-ply></span></div><div class="xq-board" role="group" aria-label="象棋棋盘，点击棋子后点击目标位置"></div><div class="xq-toolbar"><button data-action="undo">悔棋</button><button data-action="redo">撤销悔棋</button><button data-action="flip">翻转棋盘</button><button data-action="reset">重新开局</button></div><p class="xq-message" data-message role="status" aria-live="polite">点击棋子，选择落点。</p></details></section>
   <section class="xq-panel"><details class="xq-cloud-toggle xq-panel-toggle"><summary><span>云库分析</span></summary><div class="xq-panel-title"><span>当前局面分析</span><button data-action="retry">刷新分析</button></div><p class="xq-perspective" data-perspective></p><p class="xq-cloud-status" data-cloud role="status" aria-live="polite"></p><div class="xq-table-wrap"><table class="xq-candidates"><thead><tr><th>候选着法</th><th>分值</th><th>评估胜率</th></tr></thead><tbody></tbody></table></div><details class="xq-pv"><summary>主变化</summary><p data-pv>等待分析</p></details></details></section>
   <section class="xq-panel"><details class="xq-history-toggle xq-panel-toggle"><summary><span>着法记录</span><span data-history-count>0 手</span></summary><div class="xq-history-nav"><button data-action="first" aria-label="回到起始局面">⇤</button><button data-action="prev" aria-label="上一步">←</button><button data-action="next" aria-label="下一步">→</button><button data-action="last" aria-label="最新局面">⇥</button></div><div class="xq-history" aria-label="着法历史"></div><p class="xq-hint">回看后落子将从此处开始新的变化。</p></details></section>
-  <section class="xq-panel xq-library" aria-label="博客棋谱局面检索"><details class="xq-library-toggle xq-panel-toggle"><summary><span>我的博客棋谱</span></summary><div data-library aria-live="polite"></div></details></section></div>
+  <section class="xq-panel xq-library" aria-label="博客棋谱局面检索"><details class="xq-library-toggle xq-panel-toggle"><summary><span>我的博客棋谱</span><span data-library-count aria-live="polite">加载中…</span></summary><div data-library aria-live="polite"></div></details></section></div>
   <details class="xq-fen"><summary>FEN</summary><label for="xq-fen-input">局面代码（w 红走 / b 黑走）</label><textarea id="xq-fen-input" rows="3" spellcheck="false"></textarea><div class="xq-toolbar"><button data-action="import">导入局面</button><button data-action="export">导出当前局面</button></div><p>导入会清空当前着法记录；导出会将当前局面填入文本框并尝试复制。</p></details>`;
   const $=s=>root.querySelector(s), boardNode=$('.xq-board'),cloud=new Cloud();
   const quoteNode = $('[data-quote]');
@@ -168,7 +168,7 @@ export function mount(root) {
     history=lineMoves.map((move,i)=>({move,label:notation(states[i],move),side:states[i].turn}));
     cursor=Math.max(0,Math.min(ply,history.length));
     refresh();message('已载入：'+title+'；使用历史按钮逐步回放。');
-  });
+  },$('[data-library-count]'));
   $('.xq-cloud-toggle').addEventListener('toggle',e=>{if(e.target===$('.xq-cloud-toggle'))schedule();});
   refresh();
   // Material instant navigation can remove this root while requests are pending.

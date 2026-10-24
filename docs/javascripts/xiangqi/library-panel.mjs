@@ -1,6 +1,6 @@
 import {lookup,replay} from './library.mjs';
 const node=(tag,cls,text)=>{const n=document.createElement(tag);if(cls)n.className=cls;if(text!==undefined)n.textContent=text;return n;};
-export function mountLibrary(root,current,onLoad) {
+export function mountLibrary(root,current,onLoad,countNode) {
   let data=null,failed=false,loading=false;
   const siteRoot=new URL('../../',import.meta.url);
   function loadLine(game,lineId,ply) {
@@ -10,15 +10,17 @@ export function mountLibrary(root,current,onLoad) {
   function update() {
     root.replaceChildren();
     if(!data) {
+      if(countNode)countNode.textContent=failed?'加载失败':'加载中…';
       root.append(node('p','xq-hint',failed?'棋谱库加载失败，不能判断命中数量。':'正在加载博客棋谱…'));
       if(failed){const b=node('button','xq-library-button','重试加载');b.onclick=load;root.append(b);}
       return;
     }
     const result=lookup(data,current());
+    const gameIds=[...new Set(result.hits.map(h=>h.gameId))];
+    if(countNode)countNode.textContent=`${gameIds.length} 局匹配`;
     const coverage=node('p','xq-hint',`已收录 ${data.coverage.indexedArticles} / ${data.coverage.totalArticles} 篇 · ${data.coverage.games} 局主线（片段）`);
     root.append(coverage,node('p','xq-library-count',`${result.mainlineCount} 局主线到过此局面 · ${result.variationCount} 个分析分支命中`));
     const matches=node('div','xq-library-matches');
-    const gameIds=[...new Set(result.hits.map(h=>h.gameId))];
     for(const id of gameIds) {
       const game=data.games.find(g=>g.id===id);if(!game)continue;
       const item=node('div','xq-library-match');
