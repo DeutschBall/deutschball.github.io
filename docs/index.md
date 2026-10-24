@@ -23,7 +23,6 @@ mathjax: true
 
 <!-- ???+ question "你可以回去，但是那里已经没人了" -->
 	
-![](https://raw.githubusercontent.com/DeutschBall/picgo/main/20260926202429742.png)
 
 <!-- 
 ## 2026

@@ -11,6 +11,7 @@ const square=c=>root.locator(`[data-square="${c}"]`);
 const ready=()=>root.locator('.xq-square').first().waitFor();
 try {
  await page.goto(base,{waitUntil:'domcontentloaded'});await ready();
+ await root.locator('.xq-history-toggle > summary').click();
  await root.locator('.xq-cloud-toggle > summary').click();
  await page.waitForFunction(()=>document.querySelectorAll('.xq-candidates tbody tr').length>0,{},{timeout:20000});
  console.log('Live HTTPS/CORS: '+await root.locator('[data-cloud]').innerText());

@@ -5,14 +5,26 @@ const statusText = {unknown:'云库暂无此局面数据，可继续走棋探索
 const scoreText = n => n === null ? '未知' : (n>0?'+':'')+n;
 const el = (tag,cls,text) => {const e=document.createElement(tag);if(cls)e.className=cls;if(text!==undefined)e.textContent=text;return e;};
 export function mount(root) {
-  root.innerHTML = `<div class="xq-heading"><div><span class="xq-eyebrow">DUSTLAND · XIANGQI</span><h2>棋局研究室</h2><p>落子之间，探寻更好的下一步。</p></div><a class="xq-source" href="https://www.chessdb.cn/" target="_blank" rel="noopener">中国象棋云库 ↗</a></div>
-  <div class="xq-layout"><section class="xq-play" aria-label="象棋棋盘"><div class="xq-turnbar"><strong data-turn></strong><span data-ply></span></div><div class="xq-board" role="group" aria-label="象棋棋盘，点击棋子后点击目标位置"></div><div class="xq-toolbar"><button data-action="undo">悔棋</button><button data-action="flip">翻转棋盘</button><button data-action="reset">重新开局</button></div><p class="xq-message" data-message role="status" aria-live="polite">点击棋子，选择落点。</p></section>
+  root.innerHTML = `<div class="xq-heading"><div><span class="xq-eyebrow">DUSTLAND · XIANGQI</span><h2>棋局研究室</h2><p data-quote>有棋友问，没根是谁</p></div><a class="xq-source" href="https://www.chessdb.cn/" target="_blank" rel="noopener">中国象棋云库 ↗</a></div>
+  <div class="xq-layout"><section class="xq-play" aria-label="象棋棋盘"><details class="xq-board-toggle xq-panel-toggle" open><summary>象棋棋盘</summary><div class="xq-turnbar"><strong data-turn></strong><span data-ply></span></div><div class="xq-board" role="group" aria-label="象棋棋盘，点击棋子后点击目标位置"></div><div class="xq-toolbar"><button data-action="undo">悔棋</button><button data-action="redo">撤销悔棋</button><button data-action="flip">翻转棋盘</button><button data-action="reset">重新开局</button></div><p class="xq-message" data-message role="status" aria-live="polite">点击棋子，选择落点。</p></details></section>
   <section class="xq-panel"><details class="xq-cloud-toggle xq-panel-toggle"><summary><span>云库分析</span></summary><div class="xq-panel-title"><span>当前局面分析</span><button data-action="retry">刷新分析</button></div><p class="xq-perspective" data-perspective></p><p class="xq-cloud-status" data-cloud role="status" aria-live="polite"></p><div class="xq-table-wrap"><table class="xq-candidates"><thead><tr><th>候选着法</th><th>分值</th><th>评估胜率</th></tr></thead><tbody></tbody></table></div><details class="xq-pv"><summary>主变化</summary><p data-pv>等待分析</p></details></details></section>
-  <section class="xq-panel"><details class="xq-history-toggle xq-panel-toggle" open><summary><span>着法记录</span><span data-history-count>0 手</span></summary><div class="xq-history-nav"><button data-action="first" aria-label="回到起始局面">⇤</button><button data-action="prev" aria-label="上一步">←</button><button data-action="next" aria-label="下一步">→</button><button data-action="last" aria-label="最新局面">⇥</button></div><div class="xq-history" aria-label="着法历史"></div><p class="xq-hint">回看后落子将从此处开始新的变化。</p></details></section>
-  <section class="xq-panel xq-library" aria-label="博客棋谱局面检索"><details class="xq-library-toggle xq-panel-toggle" open><summary><span>我的博客棋谱</span></summary><div data-library aria-live="polite"></div></details></section></div>
-  <details class="xq-fen"><summary>FEN</summary><label for="xq-fen-input">局面代码（w 红走 / b 黑走）</label><textarea id="xq-fen-input" rows="3" spellcheck="false"></textarea><div class="xq-toolbar"><button data-action="import">导入局面</button><button data-action="export">导出当前局面</button></div><p>导入会清空当前着法记录；导出会将当前局面填入文本框并尝试复制。</p></details><p class="xq-footnote">云库评估仅供研究，未知分值不代表均势。支持基本走子规则；长将、长捉及重复局面不作自动裁定。</p>`;
+  <section class="xq-panel"><details class="xq-history-toggle xq-panel-toggle"><summary><span>着法记录</span><span data-history-count>0 手</span></summary><div class="xq-history-nav"><button data-action="first" aria-label="回到起始局面">⇤</button><button data-action="prev" aria-label="上一步">←</button><button data-action="next" aria-label="下一步">→</button><button data-action="last" aria-label="最新局面">⇥</button></div><div class="xq-history" aria-label="着法历史"></div><p class="xq-hint">回看后落子将从此处开始新的变化。</p></details></section>
+  <section class="xq-panel xq-library" aria-label="博客棋谱局面检索"><details class="xq-library-toggle xq-panel-toggle"><summary><span>我的博客棋谱</span></summary><div data-library aria-live="polite"></div></details></section></div>
+  <details class="xq-fen"><summary>FEN</summary><label for="xq-fen-input">局面代码（w 红走 / b 黑走）</label><textarea id="xq-fen-input" rows="3" spellcheck="false"></textarea><div class="xq-toolbar"><button data-action="import">导入局面</button><button data-action="export">导出当前局面</button></div><p>导入会清空当前着法记录；导出会将当前局面填入文本框并尝试复制。</p></details>`;
   const $=s=>root.querySelector(s), boardNode=$('.xq-board'),cloud=new Cloud();
-  let states=[parseFen(START)],history=[],cursor=0,flipped=false,selected=null,legalTargets=[],hoverMove=null;
+  const quoteNode = $('[data-quote]');
+  fetch(new URL('../../assets/xiangqi/quotes.txt', import.meta.url))
+    .then(response => {
+      if (!response.ok) throw new Error('名言表加载失败');
+      return response.text();
+    })
+    .then(text => {
+      const quotes = text.split(/\r?\n/).map(line => line.trim()).filter(Boolean);
+      if (quotes.length) quoteNode.textContent = quotes[Math.floor(Math.random() * quotes.length)];
+    })
+    .catch(() => {}); // 加载失败时保留默认名言，不影响棋盘。
+
+  let states=[parseFen(START)],history=[],redoStack=[],cursor=0,flipped=false,selected=null,legalTargets=[],hoverMove=null;
   let timer,controller,version=0,ended=false,libraryPanel;
   const current=()=>states[cursor];
   const message=text=>{$('[data-message]').textContent=text;};
@@ -55,6 +67,7 @@ export function mount(root) {
   function makeMove(move) {
     try {
       const before=current(),next=play(before,move);
+      redoStack=[];
       history=history.slice(0,cursor);states=states.slice(0,cursor+1);
       history.push({move,label:notation(before,move),side:before.turn});states.push(next);cursor++;
       refresh();
@@ -65,10 +78,11 @@ export function mount(root) {
     if(!history.length)container.append(el('span','xq-hint','尚未落子。试试走出你的第一步。'));
     history.forEach((entry,i)=>{
       const b=el('button',(i+1===cursor?'xq-active ':'')+(entry.side==='w'?'xq-red-text':''),`${i+1}. ${entry.label}`);
-      b.title=entry.move;b.setAttribute('aria-current',i+1===cursor?'step':'false');b.onclick=()=>{cursor=i+1;refresh();};container.append(b);
+      b.title=entry.move;b.setAttribute('aria-current',i+1===cursor?'step':'false');b.onclick=()=>{redoStack=[];cursor=i+1;refresh();};container.append(b);
     });
     $('[data-history-count]').textContent=`${history.length} 手`;
     for(const a of ['first','prev','undo'])$(`[data-action="${a}"]`).disabled=cursor===0;
+    $('[data-action="redo"]').disabled=redoStack.length===0;
     for(const a of ['next','last'])$(`[data-action="${a}"]`).disabled=cursor===history.length;
   }
   function refresh() {
@@ -136,11 +150,13 @@ export function mount(root) {
       try{await navigator.clipboard.writeText(value);message('当前 FEN 已复制。');}catch{$('textarea').focus();$('textarea').select();message('当前 FEN 已填入文本框，可手动复制。');}return;
     }
     if(action==='import') {
-      try {const s=parseFen($('textarea').value);states=[s];history=[];cursor=0;refresh();message('局面已导入。');}
+      try {const s=parseFen($('textarea').value);states=[s];history=[];redoStack=[];cursor=0;refresh();message('局面已导入。');}
       catch(e){message(e.message);}return;
     }
-    if(action==='reset'){states=[parseFen(START)];history=[];cursor=0;}
-    if(action==='undo'&&cursor>0){cursor--;history=history.slice(0,cursor);states=states.slice(0,cursor+1);}
+    if(action==='reset'){states=[parseFen(START)];history=[];redoStack=[];cursor=0;}
+    if(action==='undo'&&cursor>0){redoStack.push({states,history,cursor});cursor--;history=history.slice(0,cursor);states=states.slice(0,cursor+1);}
+    if(action==='redo'&&redoStack.length){({states,history,cursor}=redoStack.pop());}
+    if(['first','last','prev','next'].includes(action))redoStack=[];
     if(action==='first')cursor=0;
     if(action==='last')cursor=history.length;
     if(action==='prev')cursor=Math.max(0,cursor-1);
@@ -148,7 +164,7 @@ export function mount(root) {
     refresh();
   });
   libraryPanel=mountLibrary($('[data-library]'),current,(loaded,lineMoves,ply,title)=>{
-    states=loaded;
+    redoStack=[];states=loaded;
     history=lineMoves.map((move,i)=>({move,label:notation(states[i],move),side:states[i].turn}));
     cursor=Math.max(0,Math.min(ply,history.length));
     refresh();message('已载入：'+title+'；使用历史按钮逐步回放。');

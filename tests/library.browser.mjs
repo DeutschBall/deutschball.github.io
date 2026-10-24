@@ -17,7 +17,7 @@ const matchState=async value=>{
 };
 try {
  await page.route('**/chessdb.php?**',r=>r.fulfill({body:'unknown',headers:{'Access-Control-Allow-Origin':'*'}}));
- await page.goto(base,{waitUntil:'domcontentloaded'});await lib.locator('.xq-library-count').waitFor();
+ await page.goto(base,{waitUntil:'domcontentloaded'});await root.locator('.xq-library-toggle > summary').click();await lib.locator('.xq-library-count').waitFor();
  assert.match(await lib.innerText(),/50 \/ 56 篇/);await matchState(START);
  assert.equal(await lib.getByRole('button',{name:'摆上棋谱',exact:true}).count(),149);
  assert.equal(await lib.locator('.xq-library-catalog').count(),0);
@@ -54,7 +54,7 @@ try {
  await context.setOffline(true);await action('reset');await matchState(START);await context.setOffline(false);
  await page.setViewportSize({width:390,height:844});assert.equal(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth),true);
  await page.route('**/assets/xiangqi/library.json',r=>r.fulfill({status:503,body:'Unavailable'}));
- await page.reload({waitUntil:'domcontentloaded'});await lib.getByText('重试加载',{exact:true}).waitFor();assert.equal(await lib.locator('.xq-library-count').count(),0);
+ await page.reload({waitUntil:'domcontentloaded'});await root.locator('.xq-library-toggle > summary').click();await lib.getByText('重试加载',{exact:true}).waitFor();assert.equal(await lib.locator('.xq-library-count').count(),0);
  await page.unroute('**/assets/xiangqi/library.json');await lib.getByText('重试加载',{exact:true}).click();await lib.locator('.xq-library-count').waitFor();
  assert.deepEqual(errors,[]);
  console.log(`Library browser: ${articles.length} article URLs, 149 initial matches, sampled mainline/branch replay, FEN, offline, mobile and recovery passed.`);
