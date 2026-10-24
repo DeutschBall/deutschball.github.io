@@ -74,6 +74,7 @@ export function mount(root) {
   function refresh() {
     selected=null;legalTargets=[];hoverMove=null;
     const state=current(),checking=inCheck(state),available=moves(state);ended=available.length===0;
+    $('textarea').value=fen(state);
     $('[data-turn]').textContent=`${state.turn==='w'?'红方':'黑方'}${ended?(checking?'被将死':'被困毙'):'走棋'+(checking?' · 将军':'')}`;
     $('[data-ply]').textContent=`第 ${state.fullmove} 回合 · ${cursor} / ${history.length} 手`;
     $('[data-perspective]').textContent=`分值与评估胜率均为当前行棋方（${state.turn==='w'?'红方':'黑方'}）视角。`;
@@ -153,7 +154,7 @@ export function mount(root) {
     refresh();message('已载入：'+title+'；使用历史按钮逐步回放。');
   });
   $('.xq-cloud-toggle').addEventListener('toggle',e=>{if(e.target===$('.xq-cloud-toggle'))schedule();});
-  $('textarea').value=START;refresh();
+  refresh();
   // Material instant navigation can remove this root while requests are pending.
   const observer=new MutationObserver(()=>{if(!root.isConnected){clearTimeout(timer);controller?.abort();observer.disconnect();}});
   observer.observe(document.body,{childList:true,subtree:true});
