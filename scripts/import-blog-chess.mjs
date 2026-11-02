@@ -1,6 +1,6 @@
 /** Conservative full-site import: only numbered, legally replayable, source-backed lines. */
 import {readFileSync,writeFileSync,readdirSync} from 'node:fs';
-import {resolve,relative,dirname} from 'node:path';
+import {resolve,relative,dirname,basename,sep} from 'node:path';
 import {fileURLToPath} from 'node:url';
 import {createHash} from 'node:crypto';
 import {START,parseFen,play} from '../docs/javascripts/xiangqi/rules.mjs';
@@ -20,13 +20,13 @@ function prefixRows(rows,count) {
 }
 function samePrefix(a,b){return a.every((m,i)=>m===b[i]);}
 for(const filename of paths) {
- const source=relative(docs,filename),text=readFileSync(filename,'utf8'),lines=text.split(/\r?\n/);
+ const source=relative(docs,filename).split(sep).join('/'),text=readFileSync(filename,'utf8'),lines=text.split(/\r?\n/);
  const entry={source,sourceHash:hash(text),status:'pending',games:0,acceptedRows:[],issues:[]};audit.push(entry);
  if(covered.has(source)){entry.status='reviewed';entry.games=reviewed.filter(g=>g.source===source).length;continue;}
  const monthly=/复盘-\d{4}\.\d+\.md$/.test(source);
  let headings=[],callouts=[],quoteId=null,groups=[],group;
  const newGroup=title=>{const g={title,ordinal:groups.length,paths:[],contexts:new Map(),primary:null,main:null};groups.push(g);return g;};
- group=newGroup(filename.split('/').at(-1).replace(/\.md$/,''));
+ group=newGroup(basename(filename,'.md'));
  let inFrontMatter=false;
  for(let i=0;i<lines.length;i++) {
   const raw=lines[i],n=i+1,expanded=raw.replace(/\t/g,'    '),trim=raw.trim();
@@ -74,7 +74,7 @@ for(const filename of paths) {
    const prefixCount=prefixRows(path.rows,fork).length;
    variations.push({id:`line-${path.line}`,title:`${path.title.replace(/^\?\?\?[+]?\s+\S+\s*/, '').replace(/^"|"$/g,'')} · L${path.line}（分析变着）`,fromPly:fork,branchPly:common,rows:path.rows.slice(prefixCount)});
   }
-  generated.push({id,title:monthly?`${filename.split('/').at(-1).replace(/\.md$/,'')} · ${g.title}`:g.title,source,date:text.match(/^date:\s*(\d{4}-\d\d-\d\d)/m)?.[1]||null,kind:'article-mainline',completeness:'fragment',provenance:'按原文编号、层级与合法走法转换；缺失或歧义处已停止，详见导入审计。',importMethod:'numbered-source',mainline:main.rows,variations});entry.games++;
+  generated.push({id,title:monthly?`${basename(filename,'.md')} · ${g.title}`:g.title,source,date:text.match(/^date:\s*(\d{4}-\d\d-\d\d)/m)?.[1]||null,kind:'article-mainline',completeness:'fragment',provenance:'按原文编号、层级与合法走法转换；缺失或歧义处已停止，详见导入审计。',importMethod:'numbered-source',mainline:main.rows,variations});entry.games++;
  }
  entry.status=entry.games?(entry.issues.length?'partial':'converted'):'needs-source';
  if(!entry.games&&!entry.issues.length)entry.issues.push({reason:'未发现可从初始局面连续还原的编号棋谱；可能为图片、文字讲解或链接汇总。'});

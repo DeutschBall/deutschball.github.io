@@ -1,7 +1,7 @@
 import assert from 'node:assert/strict';
 import {readFileSync} from 'node:fs';
 import {lookup,replay} from '../docs/javascripts/xiangqi/library.mjs';
-import {START,fen,parseFen,play} from '../docs/javascripts/xiangqi/rules.mjs';
+import {START,fen,parseFen,play,index,names} from '../docs/javascripts/xiangqi/rules.mjs';
 const {chromium}=await import(process.env.PLAYWRIGHT_MODULE||'playwright');
 const browser=await chromium.launch({channel:'chrome'}),context=await browser.newContext({viewport:{width:1440,height:1200}}),page=await context.newPage();
 const base=process.env.BLOG_URL||'http://127.0.0.1:8001/';
@@ -22,9 +22,9 @@ try {
  await page.route('**/chessdb.php?**',r=>r.fulfill({body:'unknown',headers:{'Access-Control-Allow-Origin':'*'}}));
  await page.goto(base,{waitUntil:'domcontentloaded'});await lib.locator('.xq-library-count').waitFor({state:'attached'});
  assert.equal(await root.locator('.xq-library-toggle').evaluate(e=>e.open),false);
- assert.equal(await root.locator('[data-library-count]').innerText(),'149 局匹配');
- assert.match(await lib.textContent(),/50 \/ 56 篇/);await matchState(START);
- assert.equal(await lib.getByRole('button',{name:'摆上棋谱',exact:true,includeHidden:true}).count(),149);
+ assert.equal(await root.locator('[data-library-count]').innerText(),'150 局匹配');
+ assert.match(await lib.textContent(),/51 \/ 57 篇/);await matchState(START);
+ assert.equal(await lib.getByRole('button',{name:'摆上棋谱',exact:true,includeHidden:true}).count(),150);
  assert.equal(await lib.locator('.xq-library-catalog').count(),0);
  for(const removed of ['按棋局去重，区分行棋方','实战归属待核实','仅收录明确编号着法','· 回放'])assert.ok(!(await lib.textContent()).includes(removed));
  await root.locator('[data-square="h2"]').click();await root.locator('[data-square="e2"]').click();await matchState(fen(play(parseFen(START),'h2e2')));
@@ -55,6 +55,44 @@ try {
   assert.equal(await root.locator('.xq-history button').count(),line.moves.length);
   assert.ok((await root.locator('[data-message]').innerText()).includes(entry.title));
  }
+ // Exercise the new review itself, including the three variations sharing 8...卒5进1.
+ const review=data.games.find(g=>g.source==='复盘/业8/应对飞象拐角马@2026.11.2.md');
+ const reviewMatch=()=>lib.locator('.xq-library-match').filter({has:page.locator(`button[data-game="${review.id}"]`)});
+ await importFen(fen(replay(review,'main').states[8]));
+ assert.equal(await reviewMatch().locator('.xq-library-title').innerText(),review.title);
+ const [articlePage]=await Promise.all([context.waitForEvent('page'),reviewMatch().getByRole('link',{name:'跳转文章'}).click()]);
+ articlePage.on('pageerror',e=>errors.push(e.message));
+ await articlePage.waitForLoadState('domcontentloaded');
+ assert.equal(articlePage.url(),new URL(review.url,base).href);
+ assert.equal((await context.request.get(articlePage.url())).status(),200);
+ assert.equal(await articlePage.locator('article h1').innerText(),review.title);
+ assert.equal(await articlePage.locator('article img[src*="raw.githubusercontent.com/DeutschBall/picgo/"]').count(),16);
+ assert.ok(!(await articlePage.locator('article').innerText()).includes('???'));
+ await articlePage.close();
+ await root.locator('.xq-history-toggle > summary').click();
+ const shared=fen(replay(review,'line-211').states[16]);
+ for(const line of review.lines){
+  const {states}=replay(review,line.id),last=states.at(-1);
+  const sharedBranch=['line-108','line-171','line-211'].includes(line.id);
+  await importFen(sharedBranch?shared:fen(last));
+  if(sharedBranch){
+   const select=reviewMatch().locator('select');
+   assert.equal(await select.locator('option').count(),3);
+   await select.selectOption(line.id);
+  }
+  await reviewMatch().locator(`button[data-line="${line.id}"]`).click();
+  await matchState(fen(last));
+  assert.deepEqual(await root.locator('.xq-history button').evaluateAll(nodes=>nodes.map(n=>n.title)),line.moves);
+  assert.equal(await root.locator('.xq-piece').count(),last.board.filter(Boolean).length);
+  const destination=line.moves.at(-1).slice(2);
+  assert.equal(await root.locator(`[data-square="${destination}"] .xq-piece`).innerText(),names[last.board[index(destination)]]);
+  await action('undo');await matchState(fen(states.at(-2)));
+  assert.equal(await root.locator('.xq-history button').count(),line.moves.length-1);
+  await action('redo');await matchState(fen(last));
+  await action('first');await matchState(review.startFen);
+  await action('next');await matchState(fen(states[1]));
+  await action('last');await matchState(fen(last));
+ }
  await importFen(fen(replay(game,'main').states[10]).replace(/\d+ \d+$/,'30 99'));
  const value=await fenInput.inputValue();await fenInput.fill('invalid input');await action('import');assert.equal(await fenInput.inputValue(),'invalid input');
  await importFen(value);
@@ -75,5 +113,5 @@ try {
   await matchState(START);
  }
  assert.deepEqual(errors,[]);
- console.log(`Library browser: ${articles.length} article URLs, 149 initial matches, sampled mainline/branch replay, FEN, offline, mobile and recovery passed.`);
+ console.log(`Library browser: ${articles.length} article URLs, 150 initial matches, sampled mainline/branch replay, FEN, offline, mobile and recovery passed.`);
 }finally{await browser.close();}

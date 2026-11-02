@@ -1,7 +1,7 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import {readFileSync} from 'node:fs';
-import {START,parseFen,play} from '../docs/javascripts/xiangqi/rules.mjs';
+import {START,parseFen,play,index} from '../docs/javascripts/xiangqi/rules.mjs';
 import {positionKey,createIndex,lookup,replay} from '../docs/javascripts/xiangqi/library.mjs';
 import {convertRows,parseMoveRow,build} from '../scripts/build-chess-library.mjs';
 import {fileURLToPath} from 'node:url';
@@ -40,17 +40,17 @@ test('source changes, illegal moves and wrong turn fail conversion instead of gu
 });
 
 test('full-site articles and every imported line replay with source provenance',()=>{
- assert.equal(library.coverage.indexedArticles,50);
- assert.equal(library.coverage.processedArticles,56);
+ assert.equal(library.coverage.indexedArticles,51);
+ assert.equal(library.coverage.processedArticles,57);
  assert.equal(library.coverage.pendingArticles.length,6);
- assert.equal(library.games.length,149);
- assert.equal(new Set(library.games.map(g=>g.source)).size,50);
+ assert.equal(library.games.length,150);
+ assert.equal(new Set(library.games.map(g=>g.source)).size,51);
  for(const game of library.games)for(const line of game.lines){
   assert.equal(replay(game,line.id).states.length,line.moves.length+1);
   assert.equal(line.sources.length,line.moves.length);
   assert.ok(line.sources.every(s=>s.sourceLine>0&&s.chinese));
  }
- assert.equal(lookup(library,START).mainlineCount,149);
+ assert.equal(lookup(library,START).mainlineCount,150);
  assert.equal(lookup(library,START).variationCount,0);
 });
 
@@ -66,11 +66,42 @@ test('parenthesized notation, quoted continuations, ellipses and explicit source
 
 test('all article audits are complete and unresolved rows are not silently included',()=>{
  const audit=JSON.parse(readFileSync(new URL('../data/chess/import-audit.json',import.meta.url))).articles;
- assert.equal(audit.length,56);assert.equal(new Set(audit.map(a=>a.source)).size,56);
+ assert.equal(audit.length,57);assert.equal(new Set(audit.map(a=>a.source)).size,57);
  for(const a of audit){
   assert.equal(library.games.filter(g=>g.source===a.source).length,a.games);
   for(const issue of a.issues)if(issue.line)assert.ok(!a.acceptedRows.includes(issue.line));
  }
+});
+
+test('flying-elephant review preserves its mainline, five branches and every numbered source row',()=>{
+ const source='复盘/业8/应对飞象拐角马@2026.11.2.md';
+ const games=library.games.filter(g=>g.source===source);
+ assert.equal(games.length,1);
+ const [game]=games;
+ assert.equal(game.title,'应对飞象拐角马@2026.11.2');
+ assert.equal(game.completeness,'fragment');
+ assert.equal(game.lines[0].sources.at(-1).chinese,'炮5平4');
+ assert.deepEqual(game.lines.map(l=>[l.moves.length,l.fromPly]),[[16,0],[17,11],[27,15],[25,15],[31,15],[14,7]]);
+ const article=readFileSync(new URL('../docs/'+source,import.meta.url),'utf8').split(/\r?\n/);
+ const numbered=article.flatMap((text,i)=>parseMoveRow(text)?[i+1]:[]);
+ const imported=[...new Set(game.lines.flatMap(l=>l.sources.map(s=>s.sourceLine)))].sort((a,b)=>a-b);
+ assert.equal(numbered.length,37);
+ assert.deepEqual(imported,numbered);
+ const audit=JSON.parse(readFileSync(new URL('../data/chess/import-audit.json',import.meta.url))).articles.find(a=>a.source===source);
+ assert.equal(audit.status,'converted');assert.deepEqual(audit.issues,[]);assert.deepEqual(audit.acceptedRows,numbered);
+ for(const line of game.lines){
+  const {states}=replay(game,line.id);
+  assert.equal(states.length,line.moves.length+1);
+  assert.ok(lookup(library,states.at(-1)).hits.some(h=>h.gameId===game.id&&h.lineId===line.id));
+  if(line.kind==='variation'){
+   assert.deepEqual(line.moves.slice(0,line.fromPly),game.lines[0].moves.slice(0,line.fromPly));
+   assert.notEqual(line.moves[line.fromPly],game.lines[0].moves[line.fromPly]);
+  }
+ }
+ // The diagram after 13. 炮八平六 places the black central cannon on e4.
+ const defense=game.lines.find(l=>l.sources.at(-1).chinese==='炮八平六');
+ assert.equal(defense.sources.find(s=>s.sourceLine===167&&s.chinese.startsWith('炮5')).chinese,'炮5进3');
+ assert.equal(replay(game,defense.id).states.at(-1).board[index('e4')],'c');
 });
 
 
