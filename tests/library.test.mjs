@@ -43,14 +43,14 @@ test('full-site articles and every imported line replay with source provenance',
  assert.equal(library.coverage.indexedArticles,51);
  assert.equal(library.coverage.processedArticles,57);
  assert.equal(library.coverage.pendingArticles.length,6);
- assert.equal(library.games.length,150);
+ assert.equal(library.games.length,151);
  assert.equal(new Set(library.games.map(g=>g.source)).size,51);
  for(const game of library.games)for(const line of game.lines){
   assert.equal(replay(game,line.id).states.length,line.moves.length+1);
   assert.equal(line.sources.length,line.moves.length);
   assert.ok(line.sources.every(s=>s.sourceLine>0&&s.chinese));
  }
- assert.equal(lookup(library,START).mainlineCount,150);
+ assert.equal(lookup(library,START).mainlineCount,151);
  assert.equal(lookup(library,START).variationCount,0);
 });
 
@@ -102,6 +102,18 @@ test('flying-elephant review preserves its mainline, five branches and every num
  const defense=game.lines.find(l=>l.sources.at(-1).chinese==='炮八平六');
  assert.equal(defense.sources.find(s=>s.sourceLine===167&&s.chinese.startsWith('炮5')).chinese,'炮5进3');
  assert.equal(replay(game,defense.id).states.at(-1).board[index('e4')],'c');
+});
+
+test('restored June section stays separate from the preceding game and retains its source moves',()=>{
+ const june=library.games.filter(g=>g.source==='复盘/业3～业7/复盘-2025.6.md');
+ const doubleCannon=june.find(g=>g.title.endsWith('双炮过河 对 屏风马 on 6.23'));
+ const singleHorse=june.find(g=>g.title.endsWith('中炮直车双正马对单提马横车 on 6.19'));
+ assert.equal(june.length,17);
+ assert.notEqual(doubleCannon.id,singleHorse.id);
+ assert.equal(doubleCannon.lines[0].moves.length,5);
+ assert.deepEqual(doubleCannon.lines[0].sources.map(s=>s.chinese),['炮二进四','马8进7','炮八进四','马2进3','兵三进一']);
+ assert.equal(singleHorse.lines[0].moves.length,18);
+ assert.equal(singleHorse.lines[0].sources.at(-1).chinese,'士4进5');
 });
 
 

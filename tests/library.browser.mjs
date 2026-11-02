@@ -22,9 +22,9 @@ try {
  await page.route('**/chessdb.php?**',r=>r.fulfill({body:'unknown',headers:{'Access-Control-Allow-Origin':'*'}}));
  await page.goto(base,{waitUntil:'domcontentloaded'});await lib.locator('.xq-library-count').waitFor({state:'attached'});
  assert.equal(await root.locator('.xq-library-toggle').evaluate(e=>e.open),false);
- assert.equal(await root.locator('[data-library-count]').innerText(),'150 局匹配');
+ assert.equal(await root.locator('[data-library-count]').innerText(),'151 局匹配');
  assert.match(await lib.textContent(),/51 \/ 57 篇/);await matchState(START);
- assert.equal(await lib.getByRole('button',{name:'摆上棋谱',exact:true,includeHidden:true}).count(),150);
+ assert.equal(await lib.getByRole('button',{name:'摆上棋谱',exact:true,includeHidden:true}).count(),151);
  assert.equal(await lib.locator('.xq-library-catalog').count(),0);
  for(const removed of ['按棋局去重，区分行棋方','实战归属待核实','仅收录明确编号着法','· 回放'])assert.ok(!(await lib.textContent()).includes(removed));
  await root.locator('[data-square="h2"]').click();await root.locator('[data-square="e2"]').click();await matchState(fen(play(parseFen(START),'h2e2')));
@@ -113,5 +113,5 @@ try {
   await matchState(START);
  }
  assert.deepEqual(errors,[]);
- console.log(`Library browser: ${articles.length} article URLs, 150 initial matches, sampled mainline/branch replay, FEN, offline, mobile and recovery passed.`);
+ console.log(`Library browser: ${articles.length} article URLs, 151 initial matches, sampled mainline/branch replay, FEN, offline, mobile and recovery passed.`);
 }finally{await browser.close();}
