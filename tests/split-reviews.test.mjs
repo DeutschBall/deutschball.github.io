@@ -45,6 +45,8 @@ test('split changes no previously indexed mainline or variation and each indexed
  let indexed=0;
  for(const entry of manifest.articles){
   const games=library.games.filter(g=>g.source===entry.source);
+  assert.equal(games.length,entry.gameIds.length,entry.source);
+  for(const game of games)assert.equal(decodeURIComponent(game.url),entry.source.replace(/\.md$/,'/'));
   const hashes=games.flatMap(g=>g.lines.map(l=>hash(l.moves.join(' ')))).sort();
   if(entry.previousGameIds.length||!entry.corrections)assert.deepEqual(hashes,entry.replayHashes,entry.source);
   for(const correction of entry.corrections||[]){
