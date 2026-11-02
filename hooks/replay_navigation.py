@@ -7,6 +7,7 @@ import re
 
 from mkdocs.plugins import event_priority
 from mkdocs.structure.pages import Page
+from mkdocs.utils.meta import get_data
 
 
 REPLAY_PREFIX = "复盘/"
@@ -74,8 +75,9 @@ def _prepare_replay_tree(item, inside_replay=False):
         uri = _source_uri(item)
         inside_replay = inside_replay or uri == "复盘/index.md" or uri.startswith(REPLAY_PREFIX)
         if _is_replay_article(item):
-            # 导航标题以文件名为准，保留“@日期”。
-            item.title = PurePosixPath(uri).stem
+            # 拆分文章沿用原局标题；其他文章继续以文件名保留“@日期”。
+            _, metadata = get_data(item.file.content_string)
+            item.title = (metadata.get("title") if metadata.get("split_from") else None) or PurePosixPath(uri).stem
 
     children = getattr(item, "children", None) or []
     for child in children:

@@ -40,17 +40,17 @@ test('source changes, illegal moves and wrong turn fail conversion instead of gu
 });
 
 test('full-site articles and every imported line replay with source provenance',()=>{
- assert.equal(library.coverage.indexedArticles,51);
- assert.equal(library.coverage.processedArticles,57);
- assert.equal(library.coverage.pendingArticles.length,6);
- assert.equal(library.games.length,151);
- assert.equal(new Set(library.games.map(g=>g.source)).size,51);
+ assert.equal(library.coverage.indexedArticles,152);
+ assert.equal(library.coverage.processedArticles,161);
+ assert.equal(library.coverage.pendingArticles.length,9);
+ assert.equal(library.games.length,152);
+ assert.equal(new Set(library.games.map(g=>g.source)).size,152);
  for(const game of library.games)for(const line of game.lines){
   assert.equal(replay(game,line.id).states.length,line.moves.length+1);
   assert.equal(line.sources.length,line.moves.length);
   assert.ok(line.sources.every(s=>s.sourceLine>0&&s.chinese));
  }
- assert.equal(lookup(library,START).mainlineCount,151);
+ assert.equal(lookup(library,START).mainlineCount,152);
  assert.equal(lookup(library,START).variationCount,0);
 });
 
@@ -66,7 +66,7 @@ test('parenthesized notation, quoted continuations, ellipses and explicit source
 
 test('all article audits are complete and unresolved rows are not silently included',()=>{
  const audit=JSON.parse(readFileSync(new URL('../data/chess/import-audit.json',import.meta.url))).articles;
- assert.equal(audit.length,57);assert.equal(new Set(audit.map(a=>a.source)).size,57);
+ assert.equal(audit.length,161);assert.equal(new Set(audit.map(a=>a.source)).size,161);
  for(const a of audit){
   assert.equal(library.games.filter(g=>g.source===a.source).length,a.games);
   for(const issue of a.issues)if(issue.line)assert.ok(!a.acceptedRows.includes(issue.line));
@@ -105,9 +105,11 @@ test('flying-elephant review preserves its mainline, five branches and every num
 });
 
 test('restored June section stays separate from the preceding game and retains its source moves',()=>{
- const june=library.games.filter(g=>g.source==='复盘/业3～业7/复盘-2025.6.md');
- const doubleCannon=june.find(g=>g.title.endsWith('双炮过河 对 屏风马 on 6.23'));
- const singleHorse=june.find(g=>g.title.endsWith('中炮直车双正马对单提马横车 on 6.19'));
+ const split=JSON.parse(readFileSync(new URL('../data/chess/split-manifest.json',import.meta.url)));
+ const juneSources=new Set(split.articles.filter(a=>a.originalSource==='复盘/业3～业7/复盘-2025.6.md').map(a=>a.source));
+ const june=library.games.filter(g=>juneSources.has(g.source));
+ const doubleCannon=june.find(g=>g.source.endsWith('/双炮过河 对 屏风马@2025.6.23.md'));
+ const singleHorse=june.find(g=>g.source.endsWith('/中炮直车双正马对单提马横车@2025.6.19.md'));
  assert.equal(june.length,17);
  assert.notEqual(doubleCannon.id,singleHorse.id);
  assert.equal(doubleCannon.lines[0].moves.length,5);

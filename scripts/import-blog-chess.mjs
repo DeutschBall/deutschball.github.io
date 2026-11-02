@@ -8,6 +8,7 @@ import {parseMoveRow,convertRows} from './build-chess-library.mjs';
 const root=resolve(dirname(fileURLToPath(import.meta.url)),'..'),docs=resolve(root,'docs');
 const manifest=resolve(root,'data/chess/games.json');
 const reviewed=JSON.parse(readFileSync(manifest,'utf8')).filter(g=>g.importMethod!=='numbered-source');
+const splitTitles=new Map(JSON.parse(readFileSync(resolve(root,'data/chess/split-manifest.json'),'utf8')).articles.map(a=>[a.source,a.title]));
 const covered=new Set(reviewed.map(g=>g.source)),generated=[],audit=[];
 const paths=[];
 function scan(dir){for(const f of readdirSync(dir,{withFileTypes:true})){const p=resolve(dir,f.name);if(f.isDirectory())scan(p);else if(f.name.endsWith('.md')&&!['index.md','tags.md'].includes(f.name))paths.push(p);}}
@@ -26,7 +27,7 @@ for(const filename of paths) {
  const monthly=/复盘-\d{4}\.\d+\.md$/.test(source);
  let headings=[],callouts=[],quoteId=null,groups=[],group;
  const newGroup=title=>{const g={title,ordinal:groups.length,paths:[],contexts:new Map(),primary:null,main:null};groups.push(g);return g;};
- group=newGroup(basename(filename,'.md'));
+ group=newGroup(splitTitles.get(source)||basename(filename,'.md'));
  let inFrontMatter=false;
  for(let i=0;i<lines.length;i++) {
   const raw=lines[i],n=i+1,expanded=raw.replace(/\t/g,'    '),trim=raw.trim();

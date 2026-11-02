@@ -22,9 +22,9 @@ try {
  await page.route('**/chessdb.php?**',r=>r.fulfill({body:'unknown',headers:{'Access-Control-Allow-Origin':'*'}}));
  await page.goto(base,{waitUntil:'domcontentloaded'});await lib.locator('.xq-library-count').waitFor({state:'attached'});
  assert.equal(await root.locator('.xq-library-toggle').evaluate(e=>e.open),false);
- assert.equal(await root.locator('[data-library-count]').innerText(),'151 局匹配');
- assert.match(await lib.textContent(),/51 \/ 57 篇/);await matchState(START);
- assert.equal(await lib.getByRole('button',{name:'摆上棋谱',exact:true,includeHidden:true}).count(),151);
+ assert.equal(await root.locator('[data-library-count]').innerText(),'152 局匹配');
+ assert.match(await lib.textContent(),/152 \/ 161 篇/);await matchState(START);
+ assert.equal(await lib.getByRole('button',{name:'摆上棋谱',exact:true,includeHidden:true}).count(),152);
  assert.equal(await lib.locator('.xq-library-catalog').count(),0);
  for(const removed of ['按棋局去重，区分行棋方','实战归属待核实','仅收录明确编号着法','· 回放'])assert.ok(!(await lib.textContent()).includes(removed));
  await root.locator('[data-square="h2"]').click();await root.locator('[data-square="e2"]').click();await matchState(fen(play(parseFen(START),'h2e2')));
@@ -39,16 +39,16 @@ try {
  await importFen(unmatched);assert.equal(await lib.locator('.xq-library-match').count(),0);
  assert.match(await lib.textContent(),/暂无匹配/);
  await action('reset');await matchState(START);
- // Check every distinct article URL against the generated site, including monthly compilations.
+ // Check every distinct article URL against the generated site, including split reviews.
  const articles=[...new Map(data.games.map(g=>[g.source,g])).values()];
  for(let i=0;i<articles.length;i+=8)await Promise.all(articles.slice(i,i+8).map(async entry=>{
   const response=await context.request.get(new URL(entry.url,base).href);assert.equal(response.status(),200,entry.source);
  }));
- // Rule tests replay every imported line; browser exercises all curated lines plus a monthly game and a long branch.
+ // Rule tests replay every imported line; browser exercises all curated lines plus a split game and a long branch.
  const curated=data.games.slice(0,5).flatMap(g=>g.lines.map(line=>({entry:g,line})));
- const monthly=data.games.find(g=>g.source.includes('复盘-2025.5.md'));
+ const splitSample=data.games.find(g=>g.source.endsWith('/中炮对单提马 - 兑车控盘@2025.5.2.md'));
  const longest=data.games.flatMap(entry=>entry.lines.map(line=>({entry,line}))).sort((a,b)=>b.line.moves.length-a.line.moves.length)[0];
- for(const {entry,line} of [...curated,{entry:monthly,line:monthly.lines[0]},longest]) {
+ for(const {entry,line} of [...curated,{entry:splitSample,line:splitSample.lines[0]},longest]) {
   await importFen(fen(replay(entry,line.id).states.at(-1)));
   const select=lib.locator(`select[data-game="${entry.id}"]`);if(await select.count())await select.selectOption(line.id);
   await lib.locator(`button[data-game="${entry.id}"][data-line="${line.id}"]`).click();
@@ -113,5 +113,5 @@ try {
   await matchState(START);
  }
  assert.deepEqual(errors,[]);
- console.log(`Library browser: ${articles.length} article URLs, 151 initial matches, sampled mainline/branch replay, FEN, offline, mobile and recovery passed.`);
+ console.log(`Library browser: ${articles.length} article URLs, 152 initial matches, sampled mainline/branch replay, FEN, offline, mobile and recovery passed.`);
 }finally{await browser.close();}
