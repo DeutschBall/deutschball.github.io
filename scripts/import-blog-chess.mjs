@@ -8,7 +8,9 @@ import {parseMoveRow,convertRows} from './build-chess-library.mjs';
 const root=resolve(dirname(fileURLToPath(import.meta.url)),'..'),docs=resolve(root,'docs');
 const manifest=resolve(root,'data/chess/games.json');
 const reviewed=JSON.parse(readFileSync(manifest,'utf8')).filter(g=>g.importMethod!=='numbered-source');
-const splitTitles=new Map(JSON.parse(readFileSync(resolve(root,'data/chess/split-manifest.json'),'utf8')).articles.map(a=>[a.source,a.title]));
+// Keep import identities based on the original section title when display dates change.
+const splitTitles=new Map(JSON.parse(readFileSync(resolve(root,'data/chess/split-manifest.json'),'utf8')).articles.map(a=>[a.source,a.originalTitle||a.title]));
+const displayTitles=new Map(JSON.parse(readFileSync(resolve(root,'data/chess/article-titles.json'),'utf8')).articles.map(a=>[a.source,a.title]));
 const covered=new Set(reviewed.map(g=>g.source)),generated=[],audit=[];
 const paths=[];
 function scan(dir){for(const f of readdirSync(dir,{withFileTypes:true})){const p=resolve(dir,f.name);if(f.isDirectory())scan(p);else if(f.name.endsWith('.md')&&!['index.md','tags.md'].includes(f.name))paths.push(p);}}
@@ -75,7 +77,7 @@ for(const filename of paths) {
    const prefixCount=prefixRows(path.rows,fork).length;
    variations.push({id:`line-${path.line}`,title:`${path.title.replace(/^\?\?\?[+]?\s+\S+\s*/, '').replace(/^"|"$/g,'')} · L${path.line}（分析变着）`,fromPly:fork,branchPly:common,rows:path.rows.slice(prefixCount)});
   }
-  generated.push({id,title:monthly?`${basename(filename,'.md')} · ${g.title}`:g.title,source,date:text.match(/^date:\s*(\d{4}-\d\d-\d\d)/m)?.[1]||null,kind:'article-mainline',completeness:'fragment',provenance:'按原文编号、层级与合法走法转换；缺失或歧义处已停止，详见导入审计。',importMethod:'numbered-source',mainline:main.rows,variations});entry.games++;
+  generated.push({id,title:monthly?`${basename(filename,'.md')} · ${g.title}`:(displayTitles.get(source)||g.title),source,date:text.match(/^date:\s*(\d{4}-\d\d-\d\d)/m)?.[1]||null,kind:'article-mainline',completeness:'fragment',provenance:'按原文编号、层级与合法走法转换；缺失或歧义处已停止，详见导入审计。',importMethod:'numbered-source',mainline:main.rows,variations});entry.games++;
  }
  entry.status=entry.games?(entry.issues.length?'partial':'converted'):'needs-source';
  if(!entry.games&&!entry.issues.length)entry.issues.push({reason:'未发现可从初始局面连续还原的编号棋谱；可能为图片、文字讲解或链接汇总。'});

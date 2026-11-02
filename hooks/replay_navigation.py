@@ -75,9 +75,9 @@ def _prepare_replay_tree(item, inside_replay=False):
         uri = _source_uri(item)
         inside_replay = inside_replay or uri == "复盘/index.md" or uri.startswith(REPLAY_PREFIX)
         if _is_replay_article(item):
-            # 拆分文章沿用原局标题；其他文章继续以文件名保留“@日期”。
+            # 文章元数据统一包含完整日期，原文件路径保持稳定。
             _, metadata = get_data(item.file.content_string)
-            item.title = (metadata.get("title") if metadata.get("split_from") else None) or PurePosixPath(uri).stem
+            item.title = metadata.get("title") or PurePosixPath(uri).stem
 
     children = getattr(item, "children", None) or []
     for child in children:
