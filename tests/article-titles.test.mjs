@@ -34,6 +34,9 @@ test('display title updates preserve all 152 game identities, article URLs and r
   assert.equal(game.source,before.source);
   assert.equal(decodeURIComponent(game.url),before.source.replace(/\.md$/,'/'));
   assert.equal(game.title,article.title);
-  assert.deepEqual(game.lines.map(l=>hash(l.moves.join(' '))).sort(),before.moveHashes,before.source);
+  // The November 3 article revision adds this source-verified opening; all title-era lines remain.
+  const additions=before.source==='布局棋理/疑形/顺炮/顺炮布局疑型总结.md'
+   ? [hash('h2e2 h7e7 h0g2 h9g7 i0h0 b9c7 g3g4 c6c5 h0h5')]:[];
+  assert.deepEqual(game.lines.map(l=>hash(l.moves.join(' '))).sort(),[...before.moveHashes,...additions].sort(),before.source);
  }
 });

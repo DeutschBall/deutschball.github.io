@@ -118,6 +118,46 @@ test('restored June section stays separate from the preceding game and retains i
  assert.equal(singleHorse.lines[0].sources.at(-1).chinese,'士4进5');
 });
 
+test('November same-direction cannon revision keeps the new examples and removes the old duplicate',()=>{
+ const source='布局棋理/疑形/顺炮/顺炮布局疑型总结.md';
+ const game=library.games.find(g=>g.source===source);
+ const article=readFileSync(new URL('../docs/'+source,import.meta.url),'utf8').split(/\r?\n/);
+ assert.ok(!article.includes('## 边炮亮车针对边象保3卒'));
+ const opening=game.lines.find(l=>l.title.startsWith('局例-顺炮直车进三兵对缓开车双正马进三卒'));
+ const relocated=game.lines.find(l=>l.title.startsWith('局例-顺炮直车对横车-红双正马进三兵对黑进三卒'));
+ assert.equal(game.completeness,'fragment');
+ assert.equal(game.lines.length,12);
+ assert.equal(game.lines[0].moves.length,13);
+ assert.deepEqual(opening.moves,['h2e2','h7e7','h0g2','h9g7','i0h0','b9c7','g3g4','c6c5','h0h5']);
+ assert.equal(opening.fromPly,5);
+ const last=replay(game,opening.id).states.at(-1);
+ assert.equal(positionKey(last),'r1bakab1r/9/1cn1c1n2/p3p1p1p/2p4R1/6P2/P1P1P3P/1C2C1N2/9/RNBAKAB2 b');
+ assert.equal(last.turn,'b');assert.equal(last.fullmove,5);
+ assert.equal(relocated.moves.length,20);assert.equal(relocated.fromPly,9);
+ assert.equal(game.lines.filter(l=>JSON.stringify(l.moves)===JSON.stringify(relocated.moves)).length,1);
+ for(const line of [opening,relocated]){
+  const heading=article.findIndex(t=>t==='### '+line.title.split(' · L')[0]);
+  assert.ok(heading>=0);
+  const end=article.findIndex((t,i)=>i>heading&&/^#{1,3} /.test(t));
+  const rows=article.flatMap((text,i)=>i>heading&&(end<0||i<end)&&parseMoveRow(text)?[{line:i+1,text:text.trim()}]:[]);
+  const converted=convertRows(article,rows,parseFen(START)).converted;
+  assert.deepEqual(line.moves,converted.map(m=>m.move));
+  const sourceStart=line.fromPly-(line.fromPly%2);
+  assert.deepEqual(line.sources.slice(sourceStart),converted.slice(sourceStart));
+ }
+ const audit=JSON.parse(readFileSync(new URL('../data/chess/import-audit.json',import.meta.url))).articles.find(a=>a.source===source);
+ assert.equal(audit.status,'partial');assert.equal(audit.issues.length,10);
+ for(const line of game.lines){
+  const {states}=replay(game,line.id);
+  assert.equal(states.length,line.moves.length+1);
+  assert.ok(lookup(library,states.at(-1)).hits.some(h=>h.gameId===game.id&&h.lineId===line.id));
+  if(line.kind==='variation'){
+   assert.deepEqual(line.moves.slice(0,line.fromPly),game.lines[0].moves.slice(0,line.fromPly));
+   assert.notEqual(line.moves[line.fromPly],game.lines[0].moves[line.fromPly]);
+  }
+ }
+});
+
 
 test('move separators accept punctuation and symbols with all four numbering styles',()=>{
  for(const prefix of ['1、','1、 ','1.','1. ']) {
