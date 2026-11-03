@@ -40,17 +40,17 @@ test('source changes, illegal moves and wrong turn fail conversion instead of gu
 });
 
 test('full-site articles and every imported line replay with source provenance',()=>{
- assert.equal(library.coverage.indexedArticles,152);
- assert.equal(library.coverage.processedArticles,161);
- assert.equal(library.coverage.pendingArticles.length,9);
- assert.equal(library.games.length,152);
- assert.equal(new Set(library.games.map(g=>g.source)).size,152);
+ assert.equal(library.coverage.indexedArticles,159);
+ assert.equal(library.coverage.processedArticles,166);
+ assert.equal(library.coverage.pendingArticles.length,7);
+ assert.equal(library.games.length,159);
+ assert.equal(new Set(library.games.map(g=>g.source)).size,159);
  for(const game of library.games)for(const line of game.lines){
   assert.equal(replay(game,line.id).states.length,line.moves.length+1);
   assert.equal(line.sources.length,line.moves.length);
   assert.ok(line.sources.every(s=>s.sourceLine>0&&s.chinese));
  }
- assert.equal(lookup(library,START).mainlineCount,152);
+ assert.equal(lookup(library,START).mainlineCount,159);
  assert.equal(lookup(library,START).variationCount,0);
 });
 
@@ -66,7 +66,7 @@ test('parenthesized notation, quoted continuations, ellipses and explicit source
 
 test('all article audits are complete and unresolved rows are not silently included',()=>{
  const audit=JSON.parse(readFileSync(new URL('../data/chess/import-audit.json',import.meta.url))).articles;
- assert.equal(audit.length,161);assert.equal(new Set(audit.map(a=>a.source)).size,161);
+ assert.equal(audit.length,166);assert.equal(new Set(audit.map(a=>a.source)).size,166);
  for(const a of audit){
   assert.equal(library.games.filter(g=>g.source===a.source).length,a.games);
   for(const issue of a.issues)if(issue.line)assert.ok(!a.acceptedRows.includes(issue.line));
@@ -118,22 +118,24 @@ test('restored June section stays separate from the preceding game and retains i
  assert.equal(singleHorse.lines[0].sources.at(-1).chinese,'士4进5');
 });
 
-test('November same-direction cannon revision keeps the new examples and removes the old duplicate',()=>{
- const source='布局棋理/疑形/顺炮/顺炮布局疑型总结.md';
+test('November same-direction cannon examples belong to the independent rook-and-pawn article',()=>{
+ const source='布局棋理/疑形/顺炮/骑河车抓卒.md';
  const game=library.games.find(g=>g.source===source);
  const article=readFileSync(new URL('../docs/'+source,import.meta.url),'utf8').split(/\r?\n/);
  assert.ok(!article.includes('## 边炮亮车针对边象保3卒'));
  const opening=game.lines.find(l=>l.title.startsWith('局例-顺炮直车进三兵对缓开车双正马进三卒'));
  const relocated=game.lines.find(l=>l.title.startsWith('局例-顺炮直车对横车-红双正马进三兵对黑进三卒'));
  assert.equal(game.completeness,'fragment');
- assert.equal(game.lines.length,12);
- assert.equal(game.lines[0].moves.length,13);
+ assert.equal(game.lines.length,4);
+ assert.equal(game.lines[0].moves.length,21);
  assert.deepEqual(opening.moves,['h2e2','h7e7','h0g2','h9g7','i0h0','b9c7','g3g4','c6c5','h0h5']);
- assert.equal(opening.fromPly,5);
+ assert.equal(opening.fromPly,3);
  const last=replay(game,opening.id).states.at(-1);
  assert.equal(positionKey(last),'r1bakab1r/9/1cn1c1n2/p3p1p1p/2p4R1/6P2/P1P1P3P/1C2C1N2/9/RNBAKAB2 b');
  assert.equal(last.turn,'b');assert.equal(last.fullmove,5);
- assert.equal(relocated.moves.length,20);assert.equal(relocated.fromPly,9);
+ assert.equal(relocated.moves.length,20);assert.equal(relocated.fromPly,3);
+ const failure=game.lines.find(l=>l.title.startsWith('失败局例-顺炮直车对横车-红进三兵对黑进3卒'));
+ assert.equal(failure.moves.length,20);
  assert.equal(game.lines.filter(l=>JSON.stringify(l.moves)===JSON.stringify(relocated.moves)).length,1);
  for(const line of [opening,relocated]){
   const heading=article.findIndex(t=>t==='### '+line.title.split(' · L')[0]);
@@ -146,7 +148,7 @@ test('November same-direction cannon revision keeps the new examples and removes
   assert.deepEqual(line.sources.slice(sourceStart),converted.slice(sourceStart));
  }
  const audit=JSON.parse(readFileSync(new URL('../data/chess/import-audit.json',import.meta.url))).articles.find(a=>a.source===source);
- assert.equal(audit.status,'partial');assert.equal(audit.issues.length,10);
+ assert.equal(audit.status,'converted');assert.equal(audit.issues.length,0);
  for(const line of game.lines){
   const {states}=replay(game,line.id);
   assert.equal(states.length,line.moves.length+1);

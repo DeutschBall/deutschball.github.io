@@ -19,12 +19,16 @@ const matchState=async value=>{
 try {
  // The external music iframe is unrelated to chess and emits browser-policy errors.
  await page.route('https://music.163.com/**',r=>r.fulfill({contentType:'text/html',body:'<!doctype html><title>Music fixture</title>'}));
+ // Chess checks should not depend on remote font and MathJax/CDN timing.
+ await page.route('https://fonts.googleapis.com/**',r=>r.fulfill({contentType:'text/css',body:''}));
+ await page.route('https://cdn.jsdelivr.net/**',r=>r.fulfill({contentType:'text/css',body:''}));
+ await page.route('https://unpkg.com/**',r=>r.fulfill({contentType:'text/javascript',body:'window.MathJax.typesetPromise=()=>Promise.resolve();'}));
  await page.route('**/chessdb.php?**',r=>r.fulfill({body:'unknown',headers:{'Access-Control-Allow-Origin':'*'}}));
  await page.goto(base,{waitUntil:'domcontentloaded'});await lib.locator('.xq-library-count').waitFor({state:'attached'});
  assert.equal(await root.locator('.xq-library-toggle').evaluate(e=>e.open),false);
- assert.equal(await root.locator('[data-library-count]').innerText(),'152 局匹配');
- assert.match(await lib.textContent(),/152 \/ 161 篇/);await matchState(START);
- assert.equal(await lib.getByRole('button',{name:'摆上棋谱',exact:true,includeHidden:true}).count(),152);
+ assert.equal(await root.locator('[data-library-count]').innerText(),'159 局匹配');
+ assert.match(await lib.textContent(),/159 \/ 166 篇/);await matchState(START);
+ assert.equal(await lib.getByRole('button',{name:'摆上棋谱',exact:true,includeHidden:true}).count(),159);
  assert.equal(await lib.locator('.xq-library-catalog').count(),0);
  for(const removed of ['按棋局去重，区分行棋方','实战归属待核实','仅收录明确编号着法','· 回放'])assert.ok(!(await lib.textContent()).includes(removed));
  await root.locator('[data-square="h2"]').click();await root.locator('[data-square="e2"]').click();await matchState(fen(play(parseFen(START),'h2e2')));
@@ -93,43 +97,7 @@ try {
   await action('next');await matchState(fen(states[1]));
   await action('last');await matchState(fen(last));
  }
- // Verify both November 3 examples and every remaining line after removing the old duplicate section.
- const cannon=data.games.find(g=>g.source==='布局棋理/疑形/顺炮/顺炮布局疑型总结.md');
- const cannonMatch=()=>lib.locator('.xq-library-match').filter({has:page.locator(`button[data-game="${cannon.id}"]`)});
- const opening=cannon.lines.find(l=>l.title.startsWith('局例-顺炮直车进三兵对缓开车双正马进三卒'));
- await importFen(fen(replay(cannon,opening.id).states.at(-1)));
- assert.equal(await cannonMatch().locator('.xq-library-title').innerText(),cannon.title);
- const [cannonPage]=await Promise.all([context.waitForEvent('page'),cannonMatch().getByRole('link',{name:'跳转文章'}).click()]);
- cannonPage.on('pageerror',e=>errors.push(e.message));
- await cannonPage.waitForLoadState('domcontentloaded');
- assert.equal(cannonPage.url(),new URL(cannon.url,base).href);
- assert.equal((await context.request.get(cannonPage.url())).status(),200);
- assert.equal(await cannonPage.locator('article h1').innerText(),cannon.title);
- assert.equal(await cannonPage.getByRole('heading',{name:'边炮亮车针对边象保3卒',exact:true}).count(),0);
- assert.equal(await cannonPage.locator('article img[src*="/20261103"]').count(),4);
- assert.ok(!(await cannonPage.locator('article').innerText()).includes('???'));
- await cannonPage.close();
- const sharedCannon=fen(replay(cannon,cannon.lines.find(l=>l.fromPly===8).id).states[10]);
- for(const line of cannon.lines){
-  const {states}=replay(cannon,line.id),last=states.at(-1);
-  await importFen(line.fromPly===8?sharedCannon:fen(last));
-  const select=cannonMatch().locator('select');
-  if(line.fromPly===8)assert.equal(await select.locator('option').count(),2);
-  if(await select.count())await select.selectOption(line.id);
-  await cannonMatch().locator(`button[data-line="${line.id}"]`).click();
-  await matchState(fen(last));
-  assert.deepEqual(await root.locator('.xq-history button').evaluateAll(nodes=>nodes.map(n=>n.title)),line.moves);
-  assert.equal(await root.locator('.xq-piece').count(),last.board.filter(Boolean).length);
-  const destination=line.moves.at(-1).slice(2);
-  assert.equal(await root.locator(`[data-square="${destination}"] .xq-piece`).innerText(),names[last.board[index(destination)]]);
-  await action('undo');await matchState(fen(states.at(-2)));
-  assert.equal(await root.locator('.xq-history button').count(),line.moves.length-1);
-  await action('redo');await matchState(fen(last));
-  await action('first');await matchState(cannon.startFen);
-  // Replaying across the fork must follow the selected branch, including the shared source-row move.
-  for(let ply=1;ply<=line.fromPly+1;ply++){await action('next');await matchState(fen(states[ply]));}
-  await action('last');await matchState(fen(last));
- }
+ // All layout articles and every branch are exercised by layout-format.browser.mjs.
  await importFen(fen(replay(game,'main').states[10]).replace(/\d+ \d+$/,'30 99'));
  const value=await fenInput.inputValue();await fenInput.fill('invalid input');await action('import');assert.equal(await fenInput.inputValue(),'invalid input');
  await importFen(value);
@@ -150,5 +118,5 @@ try {
   await matchState(START);
  }
  assert.deepEqual(errors,[]);
- console.log(`Library browser: ${articles.length} article URLs, 152 initial matches, sampled mainline/branch replay, FEN, offline, mobile and recovery passed.`);
+ console.log(`Library browser: ${articles.length} article URLs, 159 initial matches, sampled mainline/branch replay, FEN, offline, mobile and recovery passed.`);
 }finally{await browser.close();}

@@ -74,8 +74,8 @@ def _prepare_replay_tree(item, inside_replay=False):
     if isinstance(item, Page):
         uri = _source_uri(item)
         inside_replay = inside_replay or uri == "复盘/index.md" or uri.startswith(REPLAY_PREFIX)
-        if _is_replay_article(item):
-            # 文章元数据统一包含完整日期，原文件路径保持稳定。
+        if _is_replay_article(item) or uri.startswith("布局棋理/疑形/"):
+            # 目录链接沿用文章元数据中的标题，原文件路径保持稳定。
             _, metadata = get_data(item.file.content_string)
             item.title = metadata.get("title") or PurePosixPath(uri).stem
 
@@ -134,11 +134,21 @@ def _index_lines(items, current_page, depth=0):
     return lines
 
 
+def _is_directory_article(page):
+    """目录首页承载整篇正文时，显式标记为文章。"""
+    if not isinstance(page, Page):
+        return False
+    _, metadata = get_data(page.file.content_string)
+    return metadata.get("directory_article") is True
+
+
 def _article_count(items):
-    """递归统计目录下的文章，不把各级 index.md 计入篇数。"""
+    """递归统计文章；普通目录页不计数，承载正文的首页计一篇。"""
     count = 0
     for item in items:
-        if isinstance(item, Page) and PurePosixPath(_source_uri(item)).name != "index.md":
+        if isinstance(item, Page) and (
+            PurePosixPath(_source_uri(item)).name != "index.md" or _is_directory_article(item)
+        ):
             count += 1
         count += _article_count(getattr(item, "children", None) or [])
     return count
@@ -161,6 +171,8 @@ def on_page_markdown(markdown, page, **kwargs):
     """在每个 index.md 末尾追加所在目录的自动索引。"""
     source_uri = PurePosixPath(_source_uri(page))
     if source_uri.name != "index.md" or source_uri == PurePosixPath("index.md"):
+        return markdown
+    if _is_directory_article(page):
         return markdown
 
     children = getattr(page, "children", None) or []
