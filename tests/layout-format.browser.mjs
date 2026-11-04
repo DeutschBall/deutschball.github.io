@@ -6,6 +6,7 @@ import {fen,index,names} from '../docs/javascripts/xiangqi/rules.mjs';
 const manifest=JSON.parse(readFileSync(new URL('../data/chess/doubt-split.json',import.meta.url)));
 const library=JSON.parse(readFileSync(new URL('../docs/assets/xiangqi/library.json',import.meta.url)));
 const entries=JSON.parse(readFileSync(new URL('../data/chess/layout-format.json',import.meta.url))).articles;
+const additions=JSON.parse(readFileSync(new URL('../data/chess/additional-articles.json',import.meta.url))).articles;
 const base=process.env.BLOG_URL||'http://127.0.0.1:8001/';
 const artifacts=process.env.DOUBT_ARTIFACTS||'.cache/doubt-split/browser';
 mkdirSync(artifacts,{recursive:true});process.env.PW_TEST_SCREENSHOT_NO_FONTS_READY='1';
@@ -45,7 +46,7 @@ try{
  console.log('Layout pages: all 18 articles and 313 source images, folded diagrams/branches, desktop/mobile layout passed.');
  await page.setViewportSize({width:1440,height:1100});
  for(const [source,count] of [
-  ['布局棋理/index.md',18],['布局棋理/疑形/index.md',14],
+  ['布局棋理/index.md',18+additions.filter(a=>a.source.startsWith('布局棋理/')).length],['布局棋理/疑形/index.md',14],
   ['布局棋理/疑形/中炮对屏风马/index.md',0],['布局棋理/疑形/仙人指路/index.md',3],
   ['布局棋理/疑形/列炮/index.md',2],['布局棋理/疑形/《疑形与攻击》/index.md',2],['布局棋理/疑形/顺炮/index.md',7],
  ]){

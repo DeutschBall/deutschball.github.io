@@ -2,9 +2,10 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import {readFileSync,readdirSync} from 'node:fs';
 import {createHash} from 'node:crypto';
-import {lookup,replay} from '../docs/javascripts/xiangqi/library.mjs';
+import {createIndex,lookup,replay} from '../docs/javascripts/xiangqi/library.mjs';
 const root=new URL('../',import.meta.url);
 const manifest=JSON.parse(readFileSync(new URL('data/chess/layout-format.json',root)));
+const additions=JSON.parse(readFileSync(new URL('data/chess/additional-articles.json',root))).articles;
 const library=JSON.parse(readFileSync(new URL('docs/assets/xiangqi/library.json',root)));
 const audit=JSON.parse(readFileSync(new URL('data/chess/import-audit.json',root))).articles;
 const hash=s=>createHash('sha256').update(s).digest('hex');
@@ -17,7 +18,7 @@ function semantic(text){
   return [line.replace(/^(\d+)\.\s*/,'$1、').replace(/^（(\d+)）\s*/,'$1、')];
  }).join('\n');
 }
-test('all 18 layout articles retain their metadata, paragraphs, labels and 313 source images',()=>{
+test('18 historical layout articles retain their metadata, paragraphs, labels and 313 source images',()=>{
  const sources=[];
  function scan(dir){for(const f of readdirSync(new URL('docs/'+dir+'/',root),{withFileTypes:true})){
   const source=dir+'/'+f.name;
@@ -28,7 +29,7 @@ test('all 18 layout articles retain their metadata, paragraphs, labels and 313 s
   }
  }}
  scan('布局棋理');assert.equal(manifest.articles.length,18);
- assert.deepEqual(sources.sort(),manifest.articles.map(a=>a.source).sort());
+ assert.deepEqual(sources.sort(),[...manifest.articles,...additions.filter(a=>a.source.startsWith('布局棋理/'))].map(a=>a.source).sort());
  let images=0;
  for(const entry of manifest.articles){
   const text=readFileSync(new URL('docs/'+entry.source,root),'utf8');
@@ -57,6 +58,9 @@ test('formatting keeps all 78 legal replay lines and every existing source issue
   }
  }
  assert.equal(games,14);assert.equal(lines,78);
- assert.equal(Object.keys(library.positions).length,3494);
- assert.equal(hash(Object.keys(library.positions).sort().join('\n')),manifest.positionKeysHash);
+ const originalGames=library.games.filter(g=>!additions.some(a=>a.source===g.source));
+ const originalPositions=createIndex(originalGames);
+ assert.equal(Object.keys(originalPositions).length,3494);
+ assert.equal(hash(Object.keys(originalPositions).sort().join('\n')),manifest.positionKeysHash);
+ for(const key of Object.keys(originalPositions))assert.ok(library.positions[key]);
 });

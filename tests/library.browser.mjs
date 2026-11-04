@@ -6,6 +6,8 @@ const {chromium}=await import(process.env.PLAYWRIGHT_MODULE||'playwright');
 const browser=await chromium.launch({channel:'chrome'}),context=await browser.newContext({viewport:{width:1440,height:1200}}),page=await context.newPage();
 const base=process.env.BLOG_URL||'http://127.0.0.1:8001/';
 const data=JSON.parse(readFileSync(new URL('../docs/assets/xiangqi/library.json',import.meta.url))),game=data.games[0];
+const additions=JSON.parse(readFileSync(new URL('../data/chess/additional-articles.json',import.meta.url))).articles;
+const expectedGames=159+additions.filter(a=>a.indexed).length,expectedArticles=166+additions.length;
 const errors=[];page.on('pageerror',e=>errors.push(e.message));
 const lib=page.locator('[data-library]'),root=page.locator('#xiangqi-analysis');
 const action=a=>root.locator(`[data-action="${a}"]`).click(),fenInput=root.locator('textarea');
@@ -26,9 +28,9 @@ try {
  await page.route('**/chessdb.php?**',r=>r.fulfill({body:'unknown',headers:{'Access-Control-Allow-Origin':'*'}}));
  await page.goto(base,{waitUntil:'domcontentloaded'});await lib.locator('.xq-library-count').waitFor({state:'attached'});
  assert.equal(await root.locator('.xq-library-toggle').evaluate(e=>e.open),false);
- assert.equal(await root.locator('[data-library-count]').innerText(),'159 局匹配');
- assert.match(await lib.textContent(),/159 \/ 166 篇/);await matchState(START);
- assert.equal(await lib.getByRole('button',{name:'摆上棋谱',exact:true,includeHidden:true}).count(),159);
+ assert.equal(await root.locator('[data-library-count]').innerText(),`${expectedGames} 局匹配`);
+ assert.match(await lib.textContent(),new RegExp(`${expectedGames} / ${expectedArticles} 篇`));await matchState(START);
+ assert.equal(await lib.getByRole('button',{name:'摆上棋谱',exact:true,includeHidden:true}).count(),expectedGames);
  assert.equal(await lib.locator('.xq-library-catalog').count(),0);
  for(const removed of ['按棋局去重，区分行棋方','实战归属待核实','仅收录明确编号着法','· 回放'])assert.ok(!(await lib.textContent()).includes(removed));
  await root.locator('[data-square="h2"]').click();await root.locator('[data-square="e2"]').click();await matchState(fen(play(parseFen(START),'h2e2')));
@@ -118,5 +120,5 @@ try {
   await matchState(START);
  }
  assert.deepEqual(errors,[]);
- console.log(`Library browser: ${articles.length} article URLs, 159 initial matches, sampled mainline/branch replay, FEN, offline, mobile and recovery passed.`);
+ console.log(`Library browser: ${articles.length} article URLs, ${expectedGames} initial matches, sampled mainline/branch replay, FEN, offline, mobile and recovery passed.`);
 }finally{await browser.close();}

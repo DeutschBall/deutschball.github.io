@@ -79,6 +79,7 @@ python -m mkdocs build
 各级 `index.md` 的下级链接与递归文章数由 `hooks/replay_navigation.py` 在构建时生成；普通索引页和旧链接兼容页不计数，标记 `directory_article: true` 的正文首页计一篇并直接显示内容。
 本次合集拆分的内容、配图与原棋谱校验依据保存在 `data/chess/doubt-split.json`；图片或讲解不足以还原的条目仍需补充棋谱来源。
 布局棋理的图片使用「局面图」折叠框，推演和分析使用嵌套提示框；格式改造前的内容与回放校验依据保存在 `data/chess/layout-format.json`。运行 `node tests/layout-format.browser.mjs` 可检查全部正文、目录计数和研究室回放。
+后续新增文章的审定元数据、配图和回放预期登记在 `data/chess/additional-articles.json`，用于验证增量并保留历史校验基线；可运行 `node tests/additional-articles.browser.mjs` 验收新增文章。
 
 编号支持 `1、着法`、`1、 着法`、`1.着法`、`1. 着法`。
 两着之间可使用空白或 Unicode 标点、符号，例如 `1. 炮二平五；马８进７`，也可用逗号、斜杠或箭头。

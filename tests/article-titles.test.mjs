@@ -5,13 +5,14 @@ import {createHash} from 'node:crypto';
 const root=new URL('../',import.meta.url);
 const manifest=JSON.parse(readFileSync(new URL('data/chess/article-titles.json',root)));
 const split=JSON.parse(readFileSync(new URL('data/chess/doubt-split.json',root)));
+const additions=JSON.parse(readFileSync(new URL('data/chess/additional-articles.json',root))).articles;
 const retired=new Set(split.collections.map(c=>c.originalSource));
-const articles=[...manifest.articles.filter(a=>!retired.has(a.source)),...split.articles];
+const articles=[...manifest.articles.filter(a=>!retired.has(a.source)),...split.articles,...additions];
 const library=JSON.parse(readFileSync(new URL('docs/assets/xiangqi/library.json',root)));
 const hash=s=>createHash('sha256').update(s).digest('hex');
 test('all content titles show their known full date or explicitly retain a missing date',()=>{
- assert.equal(articles.length,166);
- assert.equal(articles.filter(a=>a.date).length,161);
+ assert.equal(articles.length,166+additions.length);
+ assert.equal(articles.filter(a=>a.date).length,161+additions.filter(a=>a.date).length);
  assert.equal(articles.filter(a=>a.needsDate).length,5);
  for(const entry of articles){
   const text=readFileSync(new URL('docs/'+entry.source,root),'utf8');
@@ -30,7 +31,7 @@ test('all content titles show their known full date or explicitly retain a missi
  }
 });
 test('display title baseline preserves surviving identities and follows doubt article migrations',()=>{
- const expectedIds=[...manifest.games.filter(g=>!retired.has(g.source)).map(g=>g.id),...split.articles.filter(a=>a.gameId).map(a=>a.gameId)];
+ const expectedIds=[...manifest.games.filter(g=>!retired.has(g.source)).map(g=>g.id),...split.articles.filter(a=>a.gameId).map(a=>a.gameId),...additions.filter(a=>a.indexed).map(a=>a.gameId)];
  assert.deepEqual(library.games.map(g=>g.id).sort(),expectedIds.sort());
  for(const before of manifest.games){
   if(retired.has(before.source)){

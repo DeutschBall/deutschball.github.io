@@ -7,6 +7,8 @@ import {convertRows,parseMoveRow,build} from '../scripts/build-chess-library.mjs
 import {fileURLToPath} from 'node:url';
 const root=fileURLToPath(new URL('../',import.meta.url));
 const library=JSON.parse(readFileSync(new URL('../docs/assets/xiangqi/library.json',import.meta.url)));
+const additions=JSON.parse(readFileSync(new URL('../data/chess/additional-articles.json',import.meta.url))).articles;
+const expectedGames=159+additions.filter(a=>a.indexed).length,expectedArticles=166+additions.length;
 test('sample converts all mainline and numbered variation moves, with provenance',()=>{
  const g=library.games[0];assert.equal(g.lines[0].moves.length,20);assert.equal(g.lines[1].moves.length,22);
  assert.deepEqual(g.lines[0].moves.slice(0,4),['h2e2','h7e7','h0g2','h9g7']);
@@ -40,17 +42,17 @@ test('source changes, illegal moves and wrong turn fail conversion instead of gu
 });
 
 test('full-site articles and every imported line replay with source provenance',()=>{
- assert.equal(library.coverage.indexedArticles,159);
- assert.equal(library.coverage.processedArticles,166);
- assert.equal(library.coverage.pendingArticles.length,7);
- assert.equal(library.games.length,159);
- assert.equal(new Set(library.games.map(g=>g.source)).size,159);
+ assert.equal(library.coverage.indexedArticles,expectedGames);
+ assert.equal(library.coverage.processedArticles,expectedArticles);
+ assert.equal(library.coverage.pendingArticles.length,7+additions.filter(a=>!a.indexed).length);
+ assert.equal(library.games.length,expectedGames);
+ assert.equal(new Set(library.games.map(g=>g.source)).size,expectedGames);
  for(const game of library.games)for(const line of game.lines){
   assert.equal(replay(game,line.id).states.length,line.moves.length+1);
   assert.equal(line.sources.length,line.moves.length);
   assert.ok(line.sources.every(s=>s.sourceLine>0&&s.chinese));
  }
- assert.equal(lookup(library,START).mainlineCount,159);
+ assert.equal(lookup(library,START).mainlineCount,expectedGames);
  assert.equal(lookup(library,START).variationCount,0);
 });
 
@@ -66,7 +68,7 @@ test('parenthesized notation, quoted continuations, ellipses and explicit source
 
 test('all article audits are complete and unresolved rows are not silently included',()=>{
  const audit=JSON.parse(readFileSync(new URL('../data/chess/import-audit.json',import.meta.url))).articles;
- assert.equal(audit.length,166);assert.equal(new Set(audit.map(a=>a.source)).size,166);
+ assert.equal(audit.length,expectedArticles);assert.equal(new Set(audit.map(a=>a.source)).size,expectedArticles);
  for(const a of audit){
   assert.equal(library.games.filter(g=>g.source===a.source).length,a.games);
   for(const issue of a.issues)if(issue.line)assert.ok(!a.acceptedRows.includes(issue.line));
