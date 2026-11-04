@@ -7,6 +7,7 @@ const manifest=JSON.parse(readFileSync(new URL('../data/chess/doubt-split.json',
 const library=JSON.parse(readFileSync(new URL('../docs/assets/xiangqi/library.json',import.meta.url)));
 const entries=JSON.parse(readFileSync(new URL('../data/chess/layout-format.json',import.meta.url))).articles;
 const additions=JSON.parse(readFileSync(new URL('../data/chess/additional-articles.json',import.meta.url))).articles;
+const directoriesOnly=process.env.LAYOUT_PHASE==='directories';
 const base=process.env.BLOG_URL||'http://127.0.0.1:8001/';
 const artifacts=process.env.DOUBT_ARTIFACTS||'.cache/doubt-split/browser';
 mkdirSync(artifacts,{recursive:true});process.env.PW_TEST_SCREENSHOT_NO_FONTS_READY='1';
@@ -19,9 +20,10 @@ await context.route('https://unpkg.com/**',r=>r.fulfill({contentType:'text/javas
 await context.route('**/chessdb.php?**',r=>r.fulfill({body:'unknown',headers:{'Access-Control-Allow-Origin':'*'}}));
 const watch=p=>p.on('pageerror',e=>errors.push(e.message));
 const url=source=>new URL(source.replace(/index\.md$/,'').replace(/\.md$/,'/').split('/').map(encodeURIComponent).join('/'),base).href;
+async function verify(){
 try{
  const page=await context.newPage();watch(page);
- for(const entry of entries){
+ for(const entry of directoriesOnly?[]:entries){
   await page.setViewportSize({width:1440,height:1100});
   const response=await page.goto(url(entry.source),{waitUntil:'domcontentloaded'});
   assert.equal(response.status(),200,entry.source);
@@ -43,10 +45,16 @@ try{
   assert.ok(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth),entry.source+' mobile overflow');
   results.push({source:entry.source,images:entry.images.length,desktop:true,mobile:true});
  }
- console.log('Layout pages: all 18 articles and 313 source images, folded diagrams/branches, desktop/mobile layout passed.');
+ if(!directoriesOnly)console.log('Layout pages: all 18 articles and 313 source images, folded diagrams/branches, desktop/mobile layout passed.');
  await page.setViewportSize({width:1440,height:1100});
+ const categories=new Map([
+  ['布局棋理/index.md',['定式','疑形']],
+  ['布局棋理/定式/index.md',['中炮对屏风马','仙人指路','顺炮']],
+  ['布局棋理/疑形/index.md',['《疑形与攻击》','中炮对屏风马','仙人指路','列炮','顺炮']],
+ ]);
  for(const [source,count] of [
   ['布局棋理/index.md',18+additions.filter(a=>a.source.startsWith('布局棋理/')).length],['布局棋理/疑形/index.md',14],
+  ['布局棋理/定式/index.md',4+additions.filter(a=>a.source.startsWith('布局棋理/定式/')).length],
   ['布局棋理/疑形/中炮对屏风马/index.md',0],['布局棋理/疑形/仙人指路/index.md',3],
   ['布局棋理/疑形/列炮/index.md',2],['布局棋理/疑形/《疑形与攻击》/index.md',2],['布局棋理/疑形/顺炮/index.md',7],
  ]){
@@ -55,6 +63,16 @@ try{
   const article=page.locator('article');
   if(count)assert.match(await article.innerText(),new RegExp('共 '+count+' 篇'));
   else assert.match(await article.innerText(),/暂无内容/);
+  if(categories.has(source)){
+   const expected=categories.get(source),links=article.locator('li a');
+   assert.deepEqual(await links.allTextContents(),expected,source+' category links');
+   for(let i=0;i<expected.length;i++){
+    const href=new URL(await links.nth(i).getAttribute('href'),page.url()).href;
+    assert.equal(href,new URL(expected[i]+'/',page.url()).href);
+    assert.equal((await context.request.get(href)).status(),200);
+   }
+   if(directoriesOnly)await page.screenshot({path:artifacts+'/'+(source==='布局棋理/index.md'?'布局总目录':source.split('/').at(-2)+'目录')+'.png',fullPage:true});
+  }
   if(source.startsWith('布局棋理/疑形/')&&source!=='布局棋理/疑形/index.md'){
    const expected=entries.filter(e=>(e.source.endsWith('/index.md')?e.source.split('/').slice(0,-2).join('/')+'/':e.source.slice(0,e.source.lastIndexOf('/')+1))===source.slice(0,source.lastIndexOf('/')+1));
    assert.equal(await article.locator('li a').count(),expected.length);
@@ -64,16 +82,33 @@ try{
    }
   }
  }
- await page.goto(new URL('布局棋理/疑形/顺炮/',base).href,{waitUntil:'domcontentloaded'});
- await page.screenshot({path:artifacts+'/顺炮目录.png',fullPage:true});
- await page.goto(url(entries.find(e=>e.source.endsWith('/拆炮补象捉骑河车.md')).source),{waitUntil:'domcontentloaded'});
- await page.screenshot({path:artifacts+'/具体疑形.png',fullPage:true});
+ if(!directoriesOnly){
+  await page.goto(new URL('布局棋理/疑形/顺炮/',base).href,{waitUntil:'domcontentloaded'});
+  await page.screenshot({path:artifacts+'/顺炮目录.png',fullPage:true});
+  await page.goto(url(entries.find(e=>e.source.endsWith('/拆炮补象捉骑河车.md')).source),{waitUntil:'domcontentloaded'});
+  await page.screenshot({path:artifacts+'/具体疑形.png',fullPage:true});
+ }
  for(const collection of manifest.collections){
   const response=await page.goto(url(collection.originalSource),{waitUntil:'domcontentloaded'});
   assert.equal(response.status(),200);
   assert.equal(await page.locator('li a').count(),manifest.articles.concat(manifest.directoryArticles).filter(a=>a.originalSource===collection.originalSource).length);
  }
- console.log('Doubt navigation: all seven directory counts and five legacy URLs passed.');
+ console.log('Layout navigation: all eight directory counts and five legacy URLs passed.');
+ if(directoriesOnly){
+  await page.goto(new URL('布局棋理/定式/',base).href,{waitUntil:'domcontentloaded'});
+  for(const category of ['定式','疑形']){
+   await page.locator('.md-tabs').getByRole('link',{name:'布局棋理',exact:true}).click();
+   assert.equal(page.url(),new URL('布局棋理/',base).href);
+   await page.locator('article').getByRole('link',{name:category,exact:true}).click();
+   assert.equal(page.url(),new URL('布局棋理/'+category+'/',base).href);
+   assert.equal((await page.locator('article h1').innerText()).trim(),category);
+  }
+  await page.setViewportSize({width:390,height:844});
+  await page.waitForFunction(()=>document.documentElement.scrollWidth<=innerWidth,{}, {timeout:2000});
+  assert.deepEqual(errors,[]);
+  console.log('Layout directory regression passed: distinct overview and section pages, clickable categories, counts, mobile and no script errors.');
+  return;
+ }
  await page.goto(base,{waitUntil:'domcontentloaded'});
  const root=page.locator('#xiangqi-analysis'),lib=page.locator('[data-library]'),input=root.locator('textarea');
  await lib.locator('.xq-library-count').waitFor({state:'attached'});
@@ -132,3 +167,5 @@ try{
  writeFileSync(artifacts+'/results.json',JSON.stringify({pages:results,study:{games,lines,switches},errors},null,2));
  console.log('Layout study room: all article links, 78 line selections, fork replay, history, undo and FEN checks passed.');
 }finally{await browser.close();}
+}
+await verify();
