@@ -67,6 +67,11 @@ test('slow-rook study preserves all 30 external diagrams, source prose and revie
  assert.equal(entry.corrections.length,6);
  for(const correction of entry.corrections){assert.ok(text.includes(correction.to));assert.ok(!text.split(/\r?\n/).some(line=>line.trim()===correction.from));}
  assert.deepEqual(entry.sourceNotes,[]);assert.ok(text.includes('退二又遭到马6进7踩'));
+ assert.ok(!/^#{3,6}\s/m.test(text),'only second-level article sections remain in the table of contents');
+ assert.deepEqual([...text.matchAll(/^## (.+)$/gm)].map(m=>m[1]),['马八进七','兵七进一']);
+ assert.match(text,/^\?\?\? question "炮2进4"\n\n    5、\.\.\. 炮2进4/m);
+ assert.match(text,/^    \?\?\? question "马七进六"\n\n        6、马七进六 炮2平7/m);
+ assert.match(text,/^    \?\?\? question "马七进八"\n\n        6、马七进八 车9进1/m);
  assert.ok(!/^\t|[ \t]+$/m.test(text));
 });
 

@@ -34,11 +34,21 @@ try{
    await page.screenshot({path:artifacts+'/article-desktop.png',fullPage:true});
   }else{
    assert.deepEqual(await article.locator('h2').allTextContents(),entry.headings);
+   assert.equal(await article.locator('h3,h4,h5,h6').count(),0);
+   assert.deepEqual((await page.locator('.md-sidebar--secondary nav a.md-nav__link').allTextContents()).map(text=>text.trim()),entry.headings);
    assert.deepEqual(await article.locator('details.question > summary').allTextContents(),entry.questionTitles);
    assert.equal(await article.locator('.admonition.warning').count(),0);
    assert.ok((await article.innerText()).includes('退二又遭到马6进7踩'));
    await article.locator('details.question').first().locator('summary').first().click();
    assert.ok((await article.innerText()).includes('11、兵三进一 卒7进1'));
+   const cannon=article.locator('details.question').filter({has:page.getByText('炮2进4',{exact:true})});
+   assert.equal(await cannon.count(),1);
+   assert.deepEqual(await cannon.locator(':scope > details.question > summary').allTextContents(),['马七进六','马七进八']);
+   await cannon.locator(':scope > summary').click();
+   const horse=cannon.locator(':scope > details.question').filter({has:page.getByText('马七进六',{exact:true})});
+   await horse.locator(':scope > summary').click();
+   assert.ok((await article.innerText()).includes('6、马七进六 炮2平7'));
+   assert.deepEqual(await horse.locator(':scope > details.question > summary').allTextContents(),['车1平2']);
    await page.screenshot({path:artifacts+'/slow-rook-desktop.png',fullPage:true});
   }
   await page.setViewportSize({width:390,height:844});
