@@ -35,8 +35,8 @@ try{
   }else{
    assert.deepEqual(await article.locator('h2').allTextContents(),entry.headings);
    assert.deepEqual(await article.locator('details.question > summary').allTextContents(),entry.questionTitles);
-   assert.equal(await article.locator('.admonition.warning').count(),1);
-   assert.ok((await article.innerText()).includes(entry.sourceNotes[0]));
+   assert.equal(await article.locator('.admonition.warning').count(),0);
+   assert.ok((await article.innerText()).includes('退二又遭到马6进7踩'));
    await article.locator('details.question').first().locator('summary').first().click();
    assert.ok((await article.innerText()).includes('11、兵三进一 卒7进1'));
    await page.screenshot({path:artifacts+'/slow-rook-desktop.png',fullPage:true});

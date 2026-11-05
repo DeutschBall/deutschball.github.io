@@ -3,7 +3,7 @@ import assert from 'node:assert/strict';
 import {readFileSync} from 'node:fs';
 import {createHash} from 'node:crypto';
 import {parseMoveRow,convertRows} from '../scripts/build-chess-library.mjs';
-import {parseFen} from '../docs/javascripts/xiangqi/rules.mjs';
+import {parseFen,play,pseudo,index} from '../docs/javascripts/xiangqi/rules.mjs';
 import {positionKey,lookup,replay} from '../docs/javascripts/xiangqi/library.mjs';
 const root=new URL('../',import.meta.url);
 const entries=JSON.parse(readFileSync(new URL('data/chess/additional-articles.json',root))).articles;
@@ -64,9 +64,9 @@ test('slow-rook study preserves all 30 external diagrams, source prose and revie
  assert.ok(entry.images.every(url=>url.startsWith('https://raw.githubusercontent.com/DeutschBall/picgo/main/')));
  const preserved=text.split(/\r?\n/).map(line=>line.trim()).filter(line=>line&&!/^#{1,6}\s/.test(line)&&!/^\?\?\?|^!!!/.test(line)&&!entry.sourceNotes.includes(line)).map(line=>line.replace(/[ \t]+/g,' ')).join('\n');
  assert.equal(hash(preserved),entry.preservedContentHash);
- assert.equal(entry.corrections.length,5);
+ assert.equal(entry.corrections.length,6);
  for(const correction of entry.corrections){assert.ok(text.includes(correction.to));assert.ok(!text.split(/\r?\n/).some(line=>line.trim()===correction.from));}
- assert.equal(entry.sourceNotes.length,1);assert.ok(text.includes(entry.sourceNotes[0]));
+ assert.deepEqual(entry.sourceNotes,[]);assert.ok(text.includes('退二又遭到马6进7踩'));
  assert.ok(!/^\t|[ \t]+$/m.test(text));
 });
 
@@ -87,9 +87,9 @@ test('all 67 slow-rook rows replay as a six-ply opening and eight distinct analy
   assert.ok(lookup(library,states.at(-1)).hits.some(h=>h.gameId===game.id&&h.lineId===line.id));
   if(line.kind==='variation')assert.deepEqual(line.moves.slice(0,line.fromPly),game.lines[0].moves);
  }
- const trapped=game.lines.find(l=>l.title.startsWith('车4平7：'));
+ const trapped=game.lines.find(l=>l.title.startsWith('车4平7'));
  assert.equal(positionKey(replay(game,trapped.id).states.at(-1)),'rn1ak1b2/4a4/4bc3/p7p/cN4p2/P8/4PRP1P/1C2B4/6r2/1R1AKAB2 b');
- const doubleAttack=game.lines.find(l=>l.title.startsWith('车4进5：'));
+ const doubleAttack=game.lines.find(l=>l.title.startsWith('车4进5'));
  assert.equal(positionKey(replay(game,doubleAttack.id).states.at(-1)),'r1bakab2/9/2N1c1n2/p3p3p/2R3p2/9/P3P1c1P/1r2C1N2/4A4/2BAK1BR1 b');
  for(const diagram of entry.diagramPositions){const line=game.lines.find(l=>l.title.startsWith(diagram.title));assert.equal(positionKey(replay(game,line.id).states.at(-1)),diagram.position);}
  // The original 15...车5平3 contradicts the diagram and cannot lead to 16...车4进4.
@@ -97,4 +97,8 @@ test('all 67 slow-rook rows replay as a six-ply opening and eight distinct analy
  corrupted[row-1]=corrupted[row-1].replace('车5平4','车5平3');
  const rows=[...new Set(trapped.sources.map(s=>s.sourceLine))].map(line=>({line,text:corrupted[line-1].trim()}));
  assert.throws(()=>convertRows(corrupted,rows,parseFen(game.startFen)),/合法着法/);
+ // Author clarified the prose: after 炮五退二, 马6进7 attacks the cannon on e4.
+ const jumped=play(play(replay(game,trapped.id).states[26],'e6e4'),'f5g3');
+ assert.equal(jumped.board[index('e4')],'C');assert.equal(jumped.board[index('g3')],'n');
+ assert.ok(pseudo(jumped.board,index('g3'),index('e4')));
 });
