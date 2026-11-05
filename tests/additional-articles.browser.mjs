@@ -6,7 +6,7 @@ import {fen,index,names} from '../docs/javascripts/xiangqi/rules.mjs';
 const entries=JSON.parse(readFileSync(new URL('../data/chess/additional-articles.json',import.meta.url))).articles;
 const data=JSON.parse(readFileSync(new URL('../docs/assets/xiangqi/library.json',import.meta.url)));
 const base=process.env.BLOG_URL||'http://127.0.0.1:8001/';
-const artifacts='.cache/two-snakes-20261105/browser';mkdirSync(artifacts,{recursive:true});
+const artifacts='.cache/additional-articles/browser';mkdirSync(artifacts,{recursive:true});
 process.env.PW_TEST_SCREENSHOT_NO_FONTS_READY='1';
 const browser=await chromium.launch({channel:'chrome'}),context=await browser.newContext({viewport:{width:1440,height:1100}});
 const errors=[];context.on('page',p=>p.on('pageerror',e=>errors.push(e.message)));
@@ -27,11 +27,19 @@ try{
   assert.equal(await article.locator('details.info img[src*="raw.githubusercontent.com"]').count(),entry.images.length);
   assert.equal(await article.locator('pre, blockquote').count(),0);
   assert.ok(!(await article.innerText()).includes('???'));
-  if(entry.indexed){
+  if(entry.source.endsWith('/顺炮直车两头蛇对双横车@2026.11.4.md')){
    assert.deepEqual(await article.locator('h2').allTextContents(),['马三进四','相七进九','车二进五','炮八平九']);
    assert.deepEqual(await article.locator('details.question > summary').allTextContents(),['车1平6','黑棋此时发难','车4进5','红先补士','红先骑河车']);
    assert.deepEqual(await article.locator('details.failure > summary').allTextContents(),entry.unnumberedAnalysis);
    await page.screenshot({path:artifacts+'/article-desktop.png',fullPage:true});
+  }else{
+   assert.deepEqual(await article.locator('h2').allTextContents(),entry.headings);
+   assert.deepEqual(await article.locator('details.question > summary').allTextContents(),entry.questionTitles);
+   assert.equal(await article.locator('.admonition.warning').count(),1);
+   assert.ok((await article.innerText()).includes(entry.sourceNotes[0]));
+   await article.locator('details.question').first().locator('summary').first().click();
+   assert.ok((await article.innerText()).includes('11、兵三进一 卒7进1'));
+   await page.screenshot({path:artifacts+'/slow-rook-desktop.png',fullPage:true});
   }
   await page.setViewportSize({width:390,height:844});
   await page.waitForFunction(()=>document.documentElement.scrollWidth<=innerWidth,{}, {timeout:2000});
@@ -89,7 +97,7 @@ try{
    await assertState(fen(last));results.push({line:line.id,plies:line.moves.length,fromPly:line.fromPly});
   }
  }
- assert.equal(results.length,8);assert.deepEqual(errors,[]);
+ assert.equal(results.length,17);assert.equal(results.length,entries.reduce((sum,e)=>sum+e.lines.length,0));assert.deepEqual(errors,[]);
  writeFileSync(artifacts+'/results.json',JSON.stringify({articles:entries.map(e=>e.source),lines:results,errors},null,2));
- console.log('New study: two article URLs, 18 folded diagrams, seven branches plus opening, fork selection, history, undo, FEN and mobile checks passed.');
+ console.log('New studies: two article URLs, 48 folded diagrams, 17 mainline/branch replays, fork selection, history, undo, FEN and mobile checks passed.');
 }finally{await browser.close();}
