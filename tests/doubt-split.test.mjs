@@ -4,6 +4,7 @@ import {readFileSync,readdirSync,existsSync} from 'node:fs';
 import {createHash} from 'node:crypto';
 import {parseMoveRow} from '../scripts/build-chess-library.mjs';
 import {lookup,replay} from '../docs/javascripts/xiangqi/library.mjs';
+import {restoreDiagramSources} from './diagram-sources.mjs';
 const root=new URL('../',import.meta.url);
 const manifest=JSON.parse(readFileSync(new URL('data/chess/doubt-split.json',root)));
 const library=JSON.parse(readFileSync(new URL('docs/assets/xiangqi/library.json',root)));
@@ -16,7 +17,7 @@ test('all 12 specific doubts preserve text, 85 diagrams and exactly two content 
  assert.equal(manifest.collections.length,5);assert.equal(entries.length,12);
  let images=0;
  for(const entry of entries){
-  const text=readFileSync(new URL('docs/'+entry.source,root),'utf8');
+  const text=restoreDiagramSources(entry.source,readFileSync(new URL('docs/'+entry.source,root),'utf8'));
   const [,meta,body]=text.split('---\n');
   assert.ok(meta.includes('date: '+entry.date));
   assert.equal(body.match(/^# (.+)$/m)[1],entry.headingTitle);
@@ -46,7 +47,7 @@ test('the book keeps both complete parts on directory homepages, including all 3
  assert.equal(manifest.directoryArticles.length,2);
  let chapters=0,images=0;
  for(const entry of manifest.directoryArticles){
-  const text=readFileSync(new URL('docs/'+entry.source,root),'utf8');
+  const text=restoreDiagramSources(entry.source,readFileSync(new URL('docs/'+entry.source,root),'utf8'));
   const [,meta,body]=text.split('---\n');
   assert.match(meta,/^directory_article: true$/m);
   assert.equal(body.match(/^# (.+)$/m)[1],entry.title);

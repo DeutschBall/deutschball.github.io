@@ -15,15 +15,15 @@ mathjax: true
 
 顺炮横车对直车巡河局面下, 红左马跳正, 勾引黑车8平3杀兵压马
 
-??? info "局面图"
+??? xiang "rnbakab2/9/1c2c1n2/p1p1p1p1p/2r6/9/P1P1P1P1P/1CN1C1N2/3R5/R1BAKAB2 b - - 0 1"
 
-    ![image-20250308180644393](https://raw.githubusercontent.com/DeutschBall/VideoBed/main/image-20250308180644393.png)
+
 
 红方迎难而上挺起七兵然后左马盘河, 然后飞象驱车
 
-??? info "局面图"
+??? xiang "r1bakab2/9/1cn1c1n2/p1p1p1p1p/9/2rN5/P3P1P1P/BC2C1N2/3R5/R2AKAB2 b - - 0 1"
 
-    ![image-20250308181307486](https://raw.githubusercontent.com/DeutschBall/VideoBed/main/image-20250308181307486.png)
+
 
 此局面下黑车只有三个去处, 然而都不是好地方, 或者进炮塞象眼
 
@@ -35,9 +35,9 @@ mathjax: true
 
 顺炮横车对直车 局面下 黑方右马屯边，此时红方立刻车六进六捉炮进行利用
 
-??? info "局面图"
+??? xiang "r1bakabr1/9/nc1Rc1n2/p1p1p1p1p/9/9/P1P1P1P1P/1C2C1N2/9/RNBAKAB2 w - - 0 1"
 
-    ![image-20250322032248959](https://raw.githubusercontent.com/DeutschBall/picbed/main/image-20250322032248959.png)
+
 
 进车一抓黑炮巡河，再退车一抓，黑卒1进1用马给炮生根，此时红跳正马勾引黑炮来打，实际上是勾引黑炮让开2路，红乘机进炮打马然后中炮发射，后面伺机做铁门栓
 
@@ -47,15 +47,15 @@ mathjax: true
 
 走到这个局面黑方基本无了
 
-??? info "局面图"
+??? xiang "r1bak1br1/4a4/n3c1C2/2p1C1p1p/p2R5/9/P1P1P1P1P/R5c2/9/2BAKAB2 b - - 0 1"
 
-    ![image-20250322032734487](https://raw.githubusercontent.com/DeutschBall/picbed/main/image-20250322032734487.png)
+
 
 走到这个局面已经绝杀了，这个铁门栓杀法可以记一下
 
-??? info "局面图"
+??? xiang "r1ba1kbr1/4a4/n3c1C2/2p1C1p1p/p2R5/9/P1P1P1P1P/3R3c1/9/2BAKAB2 b - - 0 1"
 
-    ![image-20250322032955500](https://raw.githubusercontent.com/DeutschBall/picbed/main/image-20250322032955500.png)
+
 
 ### 第3局 兵团大战
 
@@ -63,17 +63,17 @@ mathjax: true
 
 顺炮横车对直车局面下，黑方逆天补士，红方立刻车六进七，准备平二吃死马
 
-??? info "局面图"
+??? xiang "rnbak1br1/4a4/1c2c1n2/p1p1p1p1p/9/9/P1P1P1P1P/1C2C1N2/3R5/RNBAKAB2 w - - 0 1"
 
-    ![image-20250322033451675](https://raw.githubusercontent.com/DeutschBall/picbed/main/image-20250322033451675.png)
+
 
 如果黑跳正马则平车抠，小心黑巡河炮倒钩打车同时打底象抽车，冲七兵防住即可，下面3马抠爽了后面套上左炮狠狠打，伺机车七平三抠7马，上下其手
 
 如果黑马屯边则红进攻矛头指向黑1路，
 
-??? info "局面图"
+??? xiang "r1bak1b2/1R2a4/n3c1n2/2p1p1p1p/7r1/RN7/2P1P1P1P/1C3cN2/C8/2BAKAB2 b - - 0 1"
 
-    ![image-20250322034009296](https://raw.githubusercontent.com/DeutschBall/picbed/main/image-20250322034009296.png)
+
 
 这里空头可以给，黑方一时半会儿不能重炮，红三马还在防守
 
@@ -83,31 +83,31 @@ mathjax: true
 
 在当前局面下, 红方马上车杀卒压马, 黑方有两种应法, 一是飞边象出象位车看马消极防御, 二是巡河炮弹性防御
 
-??? info "局面图"
+??? xiang "r1bakab2/9/1cn1c1n2/p1pRp1p1p/7r1/9/P1P1P1P1P/1CN1C1N2/9/R1BAKAB2 b - - 0 1"
 
-    ![image-20250305150405582](https://raw.githubusercontent.com/DeutschBall/VideoBed/main/image-20250305150405582.png)
+
 
 ??? question "黑巡河炮弹性防御"
 
     假设红车杀兵压马, 此时黑炮貌似可以平3,意图如果红车杀马, 则黑炮打马倒勾打车同时打另一匹马. 但是红可以马七退五迎刃而解, 同时黑3马还是被压, 黑需要再走一个高车保马, 此时红就可以冲兵拱炮了, 黑炮立不住
 
-    ??? info "局面图"
+    ??? xiang "r1bakab2/9/2n1c1n2/p1p1p1p1p/1c5r1/9/P1P1P1P1P/1CN1C1N2/9/R1BAKAB2 w - - 0 1"
 
-        ![平炮打马是假棋](https://raw.githubusercontent.com/DeutschBall/VideoBed/main/image-20250305151119031.png)
+
 
     黑正确走法是高车保马, 此时红方需要挺起七兵防止黑炮2平3瞄着马和底象.
 
     此时黑方有沿河十八打和退炮打车两种手段, 沿河十八打依然解决不了3马被压的问题.因此退炮反击.
 
-    ??? info "局面图"
+    ??? xiang "2bakab2/9/r1n1c1n2/p1R1p1p1p/1c5r1/2P6/P3P1P1P/1CN1C1N2/9/R1BAKAB2 b - - 0 1"
 
-        ![image-20250305152517255](https://raw.githubusercontent.com/DeutschBall/VideoBed/main/image-20250305152517255.png)
+
 
     假设红方没有杀兵压马, 而是先挺七兵, 目的是防止黑炮2平3.
 
-    ??? info "局面图"
+    ??? xiang "r1bakab2/9/2n1c1n2/p1pRp1p1p/1c5r1/2P6/P3P1P1P/1CN1C1N2/9/R1BAKAB2 b - - 0 1"
 
-        ![image-20250305152903688](https://raw.githubusercontent.com/DeutschBall/VideoBed/main/image-20250305152903688.png)
+
 
     那么此时黑方就可以有个想法: 通过兑3卒将8路车调到3路防止压马, 同时在右翼集结了兵力
 
@@ -127,9 +127,9 @@ mathjax: true
 
     到此黑方解决了3马被压的问题
 
-    ??? info "局面图"
+    ??? xiang "r1bakab2/9/2n1c1n2/p2Rp1p1p/2r6/1N7/P3P1P1P/4C1C2/9/R1BAKAB2 w - - 0 1"
 
-        ![image-20250305153730590](https://raw.githubusercontent.com/DeutschBall/VideoBed/main/image-20250305153730590.png)
+
 
 ??? question "黑飞边象消极防御"
 
@@ -137,15 +137,15 @@ mathjax: true
 
     黑出象位车保马, 此时红抬巡河炮, 意图套在车后狠狠打马, 但是慢一步, 黑马退窝心同时以暗车兑红明车, 红方就没有攻势了并且黑方车更明, 反先
 
-    ??? info "局面图"
+    ??? xiang "2rakab2/9/bcn1c1n2/p1R1p1p1p/7r1/9/P1P1P1P1P/1CN1C1N2/9/R1BAKAB2 w - - 0 1"
 
-        ![image-20250305165104913](https://raw.githubusercontent.com/DeutschBall/VideoBed/main/image-20250305165104913.png)
+
 
     红正确走法应该先抬炮, 保留压马的变化, 并且巡河炮有多个打击点位, 使得黑方顾此失彼
 
-    ??? info "局面图"
+    ??? xiang "r2akab2/9/bcn1c1n2/p1pRp1p1p/7r1/1C7/P1P1P1P1P/2N1C1N2/9/R1BAKAB2 b - - 0 1"
 
-        ![image-20250305165957909](https://raw.githubusercontent.com/DeutschBall/VideoBed/main/image-20250305165957909.png)
+
 
     红方巡河炮对黑的最大威胁就是3马, 下一步红就要平车压马, 非常严厉, 因此黑方必须首先防备3马
 
@@ -157,9 +157,9 @@ mathjax: true
 
     马七进六 , 车给马生根后面套着炮打黑车, 红方直接就爽高潮了
 
-    ??? info "局面图"
+    ??? xiang "r2akab2/9/bcn1c1n2/p1pRp1p1p/2r6/1C7/P1P1P1P1P/2N1C1N2/9/R1BAKAB2 w - - 0 1"
 
-        ![image-20250305170320106](https://raw.githubusercontent.com/DeutschBall/VideoBed/main/image-20250305170320106.png)
+
 
     因此只能冲3卒应对
 
@@ -171,9 +171,9 @@ mathjax: true
 
 但是象飞的太早了, 等红车六进五时再飞也不迟, 此时飞可能是为了保住三卒 ,但是也削弱了防御, 联象困难
 
-??? info "局面图"
+??? xiang "r2akab2/9/bcn1c1n2/p1p1p1p1p/7r1/9/P1P1P1P1P/1CN1C1N2/R2R5/2BAKAB2 w - - 0 1"
 
-    ![image-20250305144553845](https://raw.githubusercontent.com/DeutschBall/VideoBed/main/image-20250305144553845.png)
+
 
 那么红方就不要再进车压马了, 黑方不管从心理上还是阵型上都已有了防备, 此后战略上红方将进攻矛头转向黑方左侧
 
@@ -189,9 +189,9 @@ mathjax: true
 
 上马蹬车正确, 引诱黑杀兵压马, 然后红马退窝心, 伺机从右侧跳出, 并且也不怕黑方当头炮, 红河口马可以随时马四进六兑换中炮
 
-??? info "局面图"
+??? xiang "rnbakab2/9/1c2c1n2/p1p1p1p1p/9/6P2/P1PrP3P/1CN1C1N2/9/R1BAKABR1 w - - 0 1"
 
-    ![image-20250305143238353](https://raw.githubusercontent.com/DeutschBall/VideoBed/main/image-20250305143238353.png)
+
 
 ### 第7局 一箭三雕
 
@@ -199,9 +199,9 @@ mathjax: true
 
 顺炮直车对横车 互进三兵 之后, 红进车骑河捉黑3卒, 在此局面下, 黑方有几种应对方法
 
-??? info "局面图"
+??? xiang "rnbakab2/3r5/1c2c1n2/p3p1p1p/2p4R1/6P2/P1P1P3P/1CN1C1N2/9/R1BAKAB2 b - - 0 1"
 
-    ![image-20250308172332634](https://raw.githubusercontent.com/DeutschBall/VideoBed/main/image-20250308172332634.png)
+
 
 1退窝心炮, 设陷阱诱杀红车 ,红方上当黑方血赚 ,红方不上当黑方也不亏
 
@@ -225,15 +225,15 @@ mathjax: true
 
 在顺炮直车对横车 - 两头蛇对双横车局面下,
 
-??? info "局面图"
+??? xiang "2bakab2/r2r5/1cn1c1n2/p1p1p1p1p/9/2P3P2/P3P3P/1CN1C1N2/9/R1BAKABR1 w - - 0 1"
 
-    ![image-20250308173837780](https://raw.githubusercontent.com/DeutschBall/VideoBed/main/image-20250308173837780.png)
+
 
 此局面下红方左炮巡河, 其目的是掩护左马盘河, 再套炮打车
 
-??? info "局面图"
+??? xiang "2bakab2/2rr5/1cn1c1n2/p1p1p1p1p/9/1CP3P2/P3P3P/2N1C1N2/9/R1BAKABR1 w - - 2 2"
 
-    ![image-20250308174856559](https://raw.githubusercontent.com/DeutschBall/VideoBed/main/image-20250308174856559.png)
+
 
 此时黑方的反击重点是红七路, 车1平3藏于马后, 如叶底藏花
 
@@ -257,21 +257,21 @@ mathjax: true
 
 在顺炮直车对横车 - 红两头蛇局面下 ，黑方的最佳应着是双横车， 走成顺炮直车对横车 - 红两头蛇对黑双横车 局面
 
-??? info "局面图"
+??? xiang "r1bakab2/3r5/1cn1c1n2/p1p1p1p1p/9/2P3P2/P3P3P/1CN1C1N2/9/R1BAKABR1 b - - 0 1"
 
-    ![image-20250322010229764](https://raw.githubusercontent.com/DeutschBall/picbed/main/image-20250322010229764.png)
+
 
 然而如果黑没有抬双横车，而是改走炮2平1，企图出直车 ，那么就给了红出直车的机会，黑方将会遭到红左炮封车，形成如图所示局面
 
-??? info "局面图"
+??? xiang "1rbakab2/9/c1n1c1n2/pCp1p1p1p/3r5/2P3P2/P3P3P/2N1C1N2/9/1RBAKABR1 w - - 0 1"
 
-    ![image-20250322010833278](https://raw.githubusercontent.com/DeutschBall/picbed/main/image-20250322010833278.png)
+
 
 在该局面下，黑方巡河车企图兑卒活马，实际上黑方也就只有一个车能走着玩了，另一个车以及两匹马都呆瓜潮脸的
 
-??? info "局面图"
+??? xiang "1rbakab2/7R1/c1n1c1n2/pCp1p1p1p/3r5/2P3P2/P3P3P/2N1C1N2/9/1RBAKAB2 b - - 0 1"
 
-    ![image-20250322011158972](https://raw.githubusercontent.com/DeutschBall/picbed/main/image-20250322011158972.png)
+
 
 红方必须点车二路，马上就要拍马屁
 
@@ -289,9 +289,9 @@ mathjax: true
 
 勾引黑右炮发射打马，使得黑左马脱根，红再用右车压黑马
 
-??? info "局面图"
+??? xiang "rnbakab2/9/1c2c1n2/p1p1p1p1p/9/9/P1P1P1P1P/NC2C1N2/3rA4/R1BAK1BR1 w - - 0 1"
 
-    ![image-20250322014607629](https://raw.githubusercontent.com/DeutschBall/picbed/main/image-20250322014607629.png)
+
 
 ### 第11局 并非急所
 
@@ -303,9 +303,9 @@ mathjax: true
 
 然而误走炮2平3压马
 
-??? info "局面图"
+??? xiang "rnbakab1r/9/4c1n2/p1p1p3p/6p2/2P6/Pc2P1P1P/1CN1C1N2/9/R1BAKABR1 b - - 0 1"
 
-    ![image-20250322015954736](https://raw.githubusercontent.com/DeutschBall/picbed/main/image-20250322015954736.png)
+
 
 走这么一步炮意义不明，相当于让了一先，这将导致黑方右车出不来
 
@@ -315,9 +315,9 @@ mathjax: true
 
 在当前局面下，黑方企图出右直车，红方直接送七兵然后马七进八由车生根，后面套着炮打黑车，爽的一批
 
-??? info "局面图"
+??? xiang "1rbakabr1/9/2n1c1n2/p1p1p3p/6p2/2PR5/P3P1c1P/1CN1C1N1B/9/1RBAKA3 w - - 0 1"
 
-    ![image-20250322020449687](https://raw.githubusercontent.com/DeutschBall/picbed/main/image-20250322020449687.png)
+
 
 把黑车赶回去之后，红再炮八平七打马，黑送3卒之后上马，又暴露了底象，红炮轰底象，取得底线巨大攻势
 
@@ -331,15 +331,15 @@ mathjax: true
 
 顺炮直车对缓开车 - 黑过河炮局面下，当红方跳起正马之后，黑方唯一正着也是跳正马，但是黑方出左横车，看似没有问题，实际上和右炮过河不搭配，不够紧凑。
 
-??? info "局面图"
+??? xiang "rnbakab2/8r/4c1n2/p1p1p3p/6p2/2P6/Pc2P1P1P/1CN1C1N2/9/R1BAKABR1 w - - 0 1"
 
-    ![image-20250322022231413](https://raw.githubusercontent.com/DeutschBall/picbed/main/image-20250322022231413.png)
+
 
 此时黑方左马脱根，但是直接车二进六再平三压的话，黑可以炮2平7打兵倒勾保马。基于上述思考红方立刻兵三进一送兵，让黑右炮打不过来，然后再进车压马就可以了
 
-??? info "局面图"
+??? xiang "rnbakab2/8r/4c1n2/p1p1p2Rp/9/2P3p2/Pc2P3P/1CN1C1N2/9/R1BAKAB2 b - - 0 1"
 
-    ![image-20250322022717748](https://raw.githubusercontent.com/DeutschBall/picbed/main/image-20250322022717748.png)
+
 
 黑左马非常尴尬，如果再车9进1保马，那黑左车相当于白让了一先
 
@@ -351,21 +351,21 @@ mathjax: true
 
 在顺炮直车对缓开车局面下，黑方后手走逆天两头蛇
 
-??? info "局面图"
+??? xiang "rnbakab1r/9/1c2c1n2/p3p3p/2p3p2/9/P1P1P1P1P/1CN1C1N2/9/R1BAKABR1 w - - 0 1"
 
-    ![image-20250322024652326](https://raw.githubusercontent.com/DeutschBall/picbed/main/image-20250322024652326.png)
+
 
 此后红方的思路很可能是巡河车兑兵或者骑河车杀卒
 
-??? info "局面图"
+??? xiang "r1bakab1r/9/n1c1c1n2/p3p3p/2p3p2/9/P1P1P1P1P/C1N1C1N2/9/1RBAKABR1 w - - 4 3"
 
-    ![image-20250322024928912](https://raw.githubusercontent.com/DeutschBall/picbed/main/image-20250322024928912.png)
+
 
 然而如果红方真的车八进五骑河，黑抢出右车，红方如果兑车则失先，如果杀卒则面临黑五七炮叠炮打车打马打底象的攻势
 
-??? info "局面图"
+??? xiang "1rbakab1r/9/n3c1n2/p1c1p3p/2R3p2/9/P1P1P1P1P/C1N1C1N2/9/2BAKABR1 w - - 0 1"
 
-    ![image-20250322025136372](https://raw.githubusercontent.com/DeutschBall/picbed/main/image-20250322025136372.png)
+
 
 因此不如走稳的，直接炮打边卒，两个车一兑，多一个边兵玩残棋
 
@@ -381,9 +381,9 @@ mathjax: true
 
 然而红方误走左马冒进，希望当黑平车捉马时再左炮巡河保马，然后卸中炮套在马后打车爽爽
 
-??? info "局面图"
+??? xiang "2bakab1r/r8/1cn1c1n2/p1p1p3p/6p2/2PN5/P3P1P1P/1C2C1N2/9/R1BAKABR1 b - - 0 1"
 
-    ![image-20250322030416873](https://raw.githubusercontent.com/DeutschBall/picbed/main/image-20250322030416873.png)
+
 
 然而黑方也可以卸中炮格挡，并且随时有炮击底士打车同时捉炮的手段
 

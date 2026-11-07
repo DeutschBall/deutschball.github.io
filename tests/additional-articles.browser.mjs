@@ -3,6 +3,7 @@ import {readFileSync,mkdirSync,writeFileSync} from 'node:fs';
 import {chromium} from 'playwright';
 import {lookup,replay} from '../docs/javascripts/xiangqi/library.mjs';
 import {fen,index} from '../docs/javascripts/xiangqi/rules.mjs';
+import {remainingImages,verifyDiagrams} from './diagram-sources.mjs';
 const entries=JSON.parse(readFileSync(new URL('../data/chess/additional-articles.json',import.meta.url))).articles;
 const data=JSON.parse(readFileSync(new URL('../docs/assets/xiangqi/library.json',import.meta.url)));
 const base=process.env.BLOG_URL||'http://127.0.0.1:8001/';
@@ -23,8 +24,10 @@ try{
   const response=await page.goto(url(entry.source),{waitUntil:'domcontentloaded'});assert.equal(response.status(),200);
   const article=page.locator('article');
   assert.equal((await article.locator('h1').textContent()).trim(),entry.headingTitle);
-  assert.deepEqual(await article.locator('img[src*="raw.githubusercontent.com"]').evaluateAll(nodes=>nodes.map(n=>n.getAttribute('src'))),entry.images);
-  assert.equal(await article.locator('details.info img[src*="raw.githubusercontent.com"]').count(),entry.images.length);
+  const screenshots=remainingImages(entry);
+  assert.deepEqual(await article.locator('img[src*="raw.githubusercontent.com"]').evaluateAll(nodes=>nodes.map(n=>n.getAttribute('src'))),screenshots);
+  assert.equal(await article.locator('details.info img[src*="raw.githubusercontent.com"]').count(),screenshots.length);
+  await verifyDiagrams(article,entry.source);
   assert.equal(await article.locator('pre, blockquote').count(),0);
   assert.ok(!(await article.innerText()).includes('???'));
   if(entry.source.endsWith('/顺炮直车两头蛇对双横车@2026.11.4.md')){

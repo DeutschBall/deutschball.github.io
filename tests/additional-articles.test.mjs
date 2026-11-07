@@ -5,6 +5,7 @@ import {createHash} from 'node:crypto';
 import {parseMoveRow,convertRows} from '../scripts/build-chess-library.mjs';
 import {parseFen,play,pseudo,index} from '../docs/javascripts/xiangqi/rules.mjs';
 import {positionKey,lookup,replay} from '../docs/javascripts/xiangqi/library.mjs';
+import {restoreDiagramSources} from './diagram-sources.mjs';
 const root=new URL('../',import.meta.url);
 const entries=JSON.parse(readFileSync(new URL('data/chess/additional-articles.json',root))).articles;
 const library=JSON.parse(readFileSync(new URL('docs/assets/xiangqi/library.json',root)));
@@ -18,7 +19,7 @@ function semantic(body){return body.split(/\r?\n/).flatMap(raw=>{
 }).join('\n');}
 
 test('November two-snakes study preserves all 18 diagrams and its prose with three reviewed notation corrections',()=>{
- const entry=entries.find(a=>a.indexed),text=readFileSync(new URL('docs/'+entry.source,root),'utf8');
+ const entry=entries.find(a=>a.indexed),text=restoreDiagramSources(entry.source,readFileSync(new URL('docs/'+entry.source,root),'utf8'));
  assert.equal(entry.source,'布局棋理/定式/顺炮/顺炮直车两头蛇对双横车@2026.11.4.md');
  assert.equal(entry.images.length,18);
  assert.equal(hash(semantic(text.split(/---\r?\n/)[2])),entry.contentHash);
@@ -56,7 +57,7 @@ test('all 53 numbered rows replay as a 12-ply opening and seven source-backed br
 });
 
 test('slow-rook study preserves all 30 external diagrams, source prose and reviewed corrections',()=>{
- const entry=entries.find(a=>a.source.endsWith('/顺炮直车对缓开车@2026.11.4.md')),text=readFileSync(new URL('docs/'+entry.source,root),'utf8');
+ const entry=entries.find(a=>a.source.endsWith('/顺炮直车对缓开车@2026.11.4.md')),text=restoreDiagramSources(entry.source,readFileSync(new URL('docs/'+entry.source,root),'utf8'));
  assert.match(text,/^title: "顺炮直车对缓开车@2026\.11\.4"$/m);
  assert.equal(text.match(/^# (.+)$/m)[1],entry.headingTitle);
  assert.equal(entry.images.length,30);

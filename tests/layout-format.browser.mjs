@@ -3,6 +3,7 @@ import {readFileSync,mkdirSync,writeFileSync} from 'node:fs';
 import {chromium} from 'playwright';
 import {lookup,replay} from '../docs/javascripts/xiangqi/library.mjs';
 import {fen,index} from '../docs/javascripts/xiangqi/rules.mjs';
+import {remainingImages,verifyDiagrams} from './diagram-sources.mjs';
 const manifest=JSON.parse(readFileSync(new URL('../data/chess/doubt-split.json',import.meta.url)));
 const library=JSON.parse(readFileSync(new URL('../docs/assets/xiangqi/library.json',import.meta.url)));
 const entries=JSON.parse(readFileSync(new URL('../data/chess/layout-format.json',import.meta.url))).articles;
@@ -35,17 +36,19 @@ try{
    assert.deepEqual(await article.locator('h3').allTextContents(),book.chapters);
    assert.ok(!(await article.innerText()).includes('暂无内容'));
   }
-  assert.deepEqual(await article.locator('img[src*="raw.githubusercontent.com"]').evaluateAll(nodes=>nodes.map(n=>n.getAttribute('src'))),entry.images);
-  assert.equal(await article.locator('details.info img[src*="raw.githubusercontent.com"]').count(),entry.images.length,entry.source);
+  const screenshots=remainingImages(entry);
+  assert.deepEqual(await article.locator('img[src*="raw.githubusercontent.com"]').evaluateAll(nodes=>nodes.map(n=>n.getAttribute('src'))),screenshots);
+  assert.equal(await article.locator('details.info img[src*="raw.githubusercontent.com"]').count(),screenshots.length,entry.source);
+  await verifyDiagrams(article,entry.source);
   assert.equal(await article.locator('pre, blockquote').count(),0,entry.source+' unexpected code or quotation block');
   assert.ok(!(await article.innerText()).includes('???'),entry.source);
   assert.ok(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth),entry.source+' desktop overflow');
   await page.setViewportSize({width:390,height:844});
   await page.waitForFunction(()=>document.documentElement.scrollWidth<=innerWidth,{}, {timeout:2000});
   assert.ok(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth),entry.source+' mobile overflow');
-  results.push({source:entry.source,images:entry.images.length,desktop:true,mobile:true});
+  results.push({source:entry.source,screenshots:screenshots.length,boards:entry.images.length-screenshots.length,desktop:true,mobile:true});
  }
- if(!directoriesOnly)console.log('Layout pages: all 18 articles and 313 source images, folded diagrams/branches, desktop/mobile layout passed.');
+ if(!directoriesOnly)console.log('Layout pages: all 18 articles and 313 diagrams, folded diagrams/branches, desktop/mobile layout passed.');
  await page.setViewportSize({width:1440,height:1100});
  const categories=new Map([
   ['布局棋理/index.md',['定式','疑形']],

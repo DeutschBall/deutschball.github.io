@@ -3,6 +3,7 @@ import assert from 'node:assert/strict';
 import {readFileSync,readdirSync} from 'node:fs';
 import {createHash} from 'node:crypto';
 import {createIndex,lookup,replay} from '../docs/javascripts/xiangqi/library.mjs';
+import {restoreDiagramSources} from './diagram-sources.mjs';
 const root=new URL('../',import.meta.url);
 const manifest=JSON.parse(readFileSync(new URL('data/chess/layout-format.json',root)));
 const additions=JSON.parse(readFileSync(new URL('data/chess/additional-articles.json',root))).articles;
@@ -32,7 +33,7 @@ test('18 historical layout articles retain their metadata, paragraphs, labels an
  assert.deepEqual(sources.sort(),[...manifest.articles,...additions.filter(a=>a.source.startsWith('布局棋理/'))].map(a=>a.source).sort());
  let images=0;
  for(const entry of manifest.articles){
-  const text=readFileSync(new URL('docs/'+entry.source,root),'utf8');
+  const text=restoreDiagramSources(entry.source,readFileSync(new URL('docs/'+entry.source,root),'utf8'));
   const end=text.indexOf('\n---',4)+4,meta=text.slice(0,end),body=text.slice(end);
   assert.equal(hash(meta),entry.metadataHash,entry.source);
   assert.equal(hash(semantic(body)),entry.contentHash,entry.source);

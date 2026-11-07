@@ -3,6 +3,7 @@ import assert from 'node:assert/strict';
 import {readFileSync} from 'node:fs';
 import {createHash} from 'node:crypto';
 import {lookup,replay} from '../docs/javascripts/xiangqi/library.mjs';
+import {restoreDiagramSources} from './diagram-sources.mjs';
 const root=new URL('../',import.meta.url);
 const manifest=JSON.parse(readFileSync(new URL('data/chess/standalone-format-manifest.json',root)));
 const library=JSON.parse(readFileSync(new URL('docs/assets/xiangqi/library.json',root)));
@@ -23,7 +24,7 @@ test('34 older standalone reviews preserve their metadata, text and all 406 imag
  assert.equal(manifest.articles.reduce((n,a)=>n+a.images.length,0),406);
  assert.equal(new Set(manifest.articles.map(a=>a.source)).size,34);
  for(const entry of manifest.articles){
-  const text=readFileSync(new URL('docs/'+entry.source,root),'utf8');
+  const text=restoreDiagramSources(entry.source,readFileSync(new URL('docs/'+entry.source,root),'utf8'));
   const end=text.indexOf('\n---',4)+4,meta=text.slice(0,end),body=text.slice(end);
   assert.equal(hash(meta),entry.metadataHash,entry.source);
   assert.equal(hash(content(body,entry.title)),entry.contentHash,entry.source);

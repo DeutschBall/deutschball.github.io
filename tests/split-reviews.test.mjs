@@ -3,6 +3,7 @@ import assert from 'node:assert/strict';
 import {readFileSync,existsSync} from 'node:fs';
 import {createHash} from 'node:crypto';
 import {lookup,replay,positionKey} from '../docs/javascripts/xiangqi/library.mjs';
+import {restoreDiagramSources} from './diagram-sources.mjs';
 const root=new URL('../',import.meta.url);
 const manifest=JSON.parse(readFileSync(new URL('data/chess/split-manifest.json',root)));
 const library=JSON.parse(readFileSync(new URL('docs/assets/xiangqi/library.json',root)));
@@ -27,7 +28,7 @@ test('all 110 collection entries preserve titles, text, images and existing tags
   }
  }
  for(const entry of manifest.articles){
-  const text=readFileSync(new URL('docs/'+entry.source,root),'utf8');
+  const text=restoreDiagramSources(entry.source,readFileSync(new URL('docs/'+entry.source,root),'utf8'));
   const [,meta,body]=text.split('---\n');
   assert.ok(meta.includes(entry.title),entry.source);
   let originalBody=content(body);

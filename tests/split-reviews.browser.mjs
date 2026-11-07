@@ -3,6 +3,7 @@ import {readFileSync,mkdirSync,writeFileSync} from 'node:fs';
 import {chromium} from 'playwright';
 import {lookup,replay} from '../docs/javascripts/xiangqi/library.mjs';
 import {fen} from '../docs/javascripts/xiangqi/rules.mjs';
+import {remainingImages,verifyDiagrams} from './diagram-sources.mjs';
 // Remote font loading must not stall content/layout screenshots.
 process.env.PW_TEST_SCREENSHOT_NO_FONTS_READY='1';
 const manifest=JSON.parse(readFileSync(new URL('../data/chess/'+(process.env.REVIEW_MANIFEST||'split-manifest.json'),import.meta.url)));
@@ -37,13 +38,15 @@ try{
    assert.equal(await created.count(),entry.date?1:0);
    if(entry.date)assert.equal(await created.textContent(),entry.date);
    const images=await page.locator('article details img').evaluateAll(nodes=>nodes.map(n=>n.getAttribute('src')));
-   assert.deepEqual(images,entry.images,entry.source);
+   const screenshots=remainingImages(entry);
+   assert.deepEqual(images,screenshots,entry.source);
+   await verifyDiagrams(page.locator('article'),entry.source);
    assert.equal(await page.locator('article pre').count(),0,'unexpected code block: '+entry.source);
    assert.equal(await page.locator('article blockquote').count(),0,'unconverted quotation: '+entry.source);
    assert.equal(await page.locator('article').evaluate(el=>el.innerText.includes('???')),false,entry.source);
    const callouts=await page.locator('article details').evaluateAll(nodes=>nodes.map(n=>n.querySelector('summary')?.textContent));
-   assert.equal(await page.locator('article details.info img').count(),entry.images.length,entry.source);
-   if(!process.env.REVIEW_MANIFEST)assert.equal(callouts.filter(s=>s==='局面图').length,entry.images.length,entry.source);
+   assert.equal(await page.locator('article details.info img').count(),screenshots.length,entry.source);
+   if(!process.env.REVIEW_MANIFEST)assert.equal(callouts.filter(s=>s==='局面图').length,screenshots.length,entry.source);
    assert.equal(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth),true,entry.source);
    await page.setViewportSize({width:390,height:844});
    assert.equal(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth),true,entry.source);
