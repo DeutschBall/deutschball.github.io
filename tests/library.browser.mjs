@@ -72,7 +72,10 @@ try {
  assert.equal(articlePage.url(),new URL(review.url,base).href);
  assert.equal((await context.request.get(articlePage.url())).status(),200);
  assert.equal(await articlePage.locator('article h1').innerText(),review.title);
- assert.equal(await articlePage.locator('article img[src*="raw.githubusercontent.com/DeutschBall/picgo/"]').count(),16);
+ const diagrams=articlePage.locator('article details.fen-board .fen-board-figure');
+ assert.equal(await diagrams.count(),16);
+ assert.equal(await diagrams.first().getAttribute('data-fen'),fen(replay(review,'main').states[8]));
+ assert.equal(await articlePage.locator('article img[src*="raw.githubusercontent.com/DeutschBall/picgo/"]').count(),0);
  assert.ok(!(await articlePage.locator('article').innerText()).includes('???'));
  await articlePage.close();
  await root.locator('.xq-history-toggle > summary').click();
