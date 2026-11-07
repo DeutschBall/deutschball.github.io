@@ -22,8 +22,9 @@ ASSETS = (
     "board.css", "loader.js", "board.mjs", "locales.mjs", "xiangqi-rules.mjs",
     "vendor/chess-1.4.0.mjs", "vendor/chess.js-LICENSE.txt",
 )
-SOUND_PRESETS = ("chesscom", "tiantian")
-SOUND_EVENTS = ("move", "capture")
+SOUND_PRESETS = ("chesscom", "tiantian", "lianzhong")
+MOVE_SOUND_EVENTS = ("move", "capture")
+SOUND_EVENTS = (*MOVE_SOUND_EVENTS, "check")
 log = get_plugin_logger(__name__)
 
 
@@ -32,17 +33,24 @@ def load_sounds(root, option):
     if isinstance(option, str):
         if option not in SOUND_PRESETS:
             raise PluginError(f"Unknown chess sound preset {option!r}. Choose {', '.join(SOUND_PRESETS)}.")
-        pack = root / "sound-packs" / option
+        if option == "lianzhong":
+            pack = Path(__file__).with_name("assets") / "themes" / option
+            extension = ".wav"
+            events = SOUND_EVENTS
+        else:
+            pack = root / "sound-packs" / option
+            extension = ".ogg"
+            events = MOVE_SOUND_EVENTS
         if not pack.exists():
             log.info("Sound pack '%s' is unavailable. Building without move sounds.", option)
             return {}
         prefix = f"{option}/"
-        option = {event: str(pack / f"{event}.ogg") for event in SOUND_EVENTS}
+        option = {event: str(pack / f"{event}{extension}") for event in events}
 
     sounds = {}
     for event, source in option.items():
         if event not in SOUND_EVENTS or not isinstance(source, str):
-            raise PluginError("chess sounds accepts move and capture file paths")
+            raise PluginError("chess sounds accepts move, capture and check file paths")
         path = root / source
         suffix = path.suffix.lower()
         if suffix not in (".mp3", ".ogg", ".wav") or not path.is_file():

@@ -358,11 +358,14 @@ async function mount(figure) {
     renderArrows();
     undo.disabled = history.length === 0;
     redo.disabled = future.length === 0;
-    status.textContent = [last?.label, copy[engine.status()]].filter(Boolean).join(' · ') || copy.start;
+    const outcome = engine.status();
+    status.textContent = [last?.label, copy[outcome]].filter(Boolean).join(' · ') || copy.start;
+    return outcome;
   }
 
-  function playSound(capture) {
-    const file = capture ? figure.dataset.soundCapture : figure.dataset.soundMove;
+  function playSound(capture, outcome) {
+    const checkSound = (outcome === 'check' || outcome === 'checkmate') && figure.dataset.soundCheck;
+    const file = checkSound || (capture ? figure.dataset.soundCapture : figure.dataset.soundMove);
     if (!file) return;
     if (!sounds.has(file)) sounds.set(file, new Audio(new URL('sounds/' + file, import.meta.url)));
     const sound = sounds.get(file);
@@ -376,8 +379,8 @@ async function mount(figure) {
     if (restoring) future.pop();
     else future.length = 0;
     resetAfterMove();
-    render();
-    playSound(capture);
+    const outcome = render();
+    playSound(capture, outcome);
   }
 
   function choosePromotion(candidates, index) {
