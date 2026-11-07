@@ -92,7 +92,7 @@ python -m mkdocs build
 可以点选棋子再点合法落点，也可以拖到落点。棋盘下方可以回到上一步或前进到下一步，标题图标随行棋方切换。
 按住鼠标右键拖动可画推演箭头。右键点击箭头尖端或编号可删除单条，走棋后自动清空。
 
-博客通过 `requirements.txt` 从 PyPI 安装 `mkdocs-chess-plugin`，在 `mkdocs.yml` 中以 `chess` 启用。配置和用法见 [插件仓库](https://github.com/DeutschBall/mkdocs-chess-plugin)。
+博客通过 `requirements.txt` 安装仓库内 `plugins/mkdocs-chess-blog/` 的插件，在 `mkdocs.yml` 的 `chess.defaults` 中设置棋盘和棋子。配置和用法见 [插件仓库](https://github.com/DeutschBall/mkdocs-chess-plugin)。
 `npm run test:boards` 会在 Chrome 检查棋盘和推演。收录研究室棋谱仍按来源审计流程执行。
 
 ### 国际象棋研究室
