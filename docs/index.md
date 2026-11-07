@@ -14,7 +14,11 @@ mathjax: true
 <!-- /feature -->
 
 <!-- feature:xiangqi -->
-<div id="xiangqi-analysis"><p>棋盘加载中…请启用 JavaScript。</p></div>
+<div id="xiangqi-analysis" markdown="block">
+
+??? xiang "rnbakabnr/9/1c5c1/p1p1p1p1p/9/9/P1P1P1P1P/1C5C1/9/RNBAKABNR w - - 0 1"
+
+</div>
 <!-- /feature -->
 
 

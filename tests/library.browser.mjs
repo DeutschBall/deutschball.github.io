@@ -1,7 +1,7 @@
 import assert from 'node:assert/strict';
 import {readFileSync} from 'node:fs';
 import {lookup,replay} from '../docs/javascripts/xiangqi/library.mjs';
-import {START,fen,parseFen,play,index,names} from '../docs/javascripts/xiangqi/rules.mjs';
+import {START,fen,parseFen,play,index} from '../docs/javascripts/xiangqi/rules.mjs';
 const {chromium}=await import(process.env.PLAYWRIGHT_MODULE||'playwright');
 const browser=await chromium.launch({channel:'chrome'}),context=await browser.newContext({viewport:{width:1440,height:1200}}),page=await context.newPage();
 const base=process.env.BLOG_URL||'http://127.0.0.1:8001/';
@@ -33,7 +33,7 @@ try {
  assert.equal(await lib.getByRole('button',{name:'摆上棋谱',exact:true,includeHidden:true}).count(),expectedGames);
  assert.equal(await lib.locator('.xq-library-catalog').count(),0);
  for(const removed of ['按棋局去重，区分行棋方','实战归属待核实','仅收录明确编号着法','· 回放'])assert.ok(!(await lib.textContent()).includes(removed));
- await root.locator('[data-square="h2"]').click();await root.locator('[data-square="e2"]').click();await matchState(fen(play(parseFen(START),'h2e2')));
+ await root.locator('button[data-square="h2"]').click();await root.locator('button[data-square="e2"]').click();await matchState(fen(play(parseFen(START),'h2e2')));
  await action('undo');await matchState(START);
  await action('redo');await matchState(fen(play(parseFen(START),'h2e2')));
  await action('undo');await matchState(START);
@@ -44,7 +44,7 @@ try {
  const unmatched='3k5/9/9/9/9/9/9/9/9/4K4 w - - 0 1';
  await importFen(unmatched);assert.equal(await lib.locator('.xq-library-match').count(),0);
  assert.match(await lib.textContent(),/暂无匹配/);
- await action('reset');await matchState(START);
+ await importFen(START);
  // Check every distinct article URL against the generated site, including split reviews.
  const articles=[...new Map(data.games.map(g=>[g.source,g])).values()];
  for(let i=0;i<articles.length;i+=8)await Promise.all(articles.slice(i,i+8).map(async entry=>{
@@ -89,9 +89,9 @@ try {
   await reviewMatch().locator(`button[data-line="${line.id}"]`).click();
   await matchState(fen(last));
   assert.deepEqual(await root.locator('.xq-history button').evaluateAll(nodes=>nodes.map(n=>n.title)),line.moves);
-  assert.equal(await root.locator('.xq-piece').count(),last.board.filter(Boolean).length);
+  assert.equal(await root.locator('.fen-board-pieces [data-piece]').count(),last.board.filter(Boolean).length);
   const destination=line.moves.at(-1).slice(2);
-  assert.equal(await root.locator(`[data-square="${destination}"] .xq-piece`).innerText(),names[last.board[index(destination)]]);
+  assert.equal(await root.locator(`.fen-board-pieces [data-square="${destination}"]`).getAttribute('data-piece'),last.board[index(destination)]);
   await action('undo');await matchState(fen(states.at(-2)));
   assert.equal(await root.locator('.xq-history button').count(),line.moves.length-1);
   await action('redo');await matchState(fen(last));
@@ -104,7 +104,7 @@ try {
  const value=await fenInput.inputValue();await fenInput.fill('invalid input');await action('import');assert.equal(await fenInput.inputValue(),'invalid input');
  await importFen(value);
  for(const scheme of ['default','slate']){await page.evaluate(s=>document.body.setAttribute('data-md-color-scheme',s),scheme);assert.equal(await fenInput.evaluate(e=>getComputedStyle(e).backgroundColor),'rgb(255, 255, 255)');}
- await context.setOffline(true);await action('reset');await matchState(START);await context.setOffline(false);
+ await context.setOffline(true);await importFen(START);await context.setOffline(false);
  await page.setViewportSize({width:390,height:844});assert.equal(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth),true);
  // Cover HTTP errors, blocked connections, and requests that never finish.
  for(const failure of ['http','network','timeout']) {

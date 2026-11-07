@@ -5,6 +5,7 @@ from mkdocs.exceptions import ConfigurationError
 
 DEFAULTS = {
     "xiangqi": True,
+    "chess_laboratory": True,
     "quotes": True,
     "cloud_analysis": True,
     "chess_library": True,
@@ -21,7 +22,8 @@ def on_config(config):
     config["extra"]["feature_flags"] = flags
     for key, path, enabled in (
         ("extra_javascript", "javascripts/xiangqi-loader.js", flags["xiangqi"]),
-        ("extra_css", "stylesheets/xiangqi.css", flags["xiangqi"]),
+        ("extra_javascript", "javascripts/chess-laboratory-loader.js", flags["chess_laboratory"]),
+        ("extra_css", "stylesheets/xiangqi.css", flags["xiangqi"] or flags["chess_laboratory"]),
         ("extra_javascript", "javascripts/music.js", flags["floating_music"]),
         ("extra_css", "stylesheets/music.css", flags["floating_music"]),
     ):

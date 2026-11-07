@@ -4,6 +4,9 @@ const browser=await chromium.launch({channel:'chrome'});
 try {
  const page=await browser.newPage(),requests=[],errors=[];
  page.on('pageerror',e=>errors.push(e.message));
+ await page.route('https://music.163.com/**',route=>route.fulfill({contentType:'text/html',body:'<!doctype html><title>Music fixture</title>'}));
+ await page.route('**/javascripts/mathjax.js',route=>route.fulfill({contentType:'text/javascript',body:''}));
+ await page.route('https://cdn.jsdelivr.net/**',route=>route.fulfill({contentType:'text/css',body:''}));
  await page.route('**/chessdb.php?**',async route=>{
   requests.push(new URL(route.request().url()));
   await new Promise(resolve=>setTimeout(resolve,500));
@@ -11,8 +14,8 @@ try {
  });
  await page.goto(process.env.BLOG_URL||'http://127.0.0.1:8001/',{waitUntil:'domcontentloaded'});
  const root=page.locator('#xiangqi-analysis'),toggle=root.locator('.xq-cloud-toggle'),summary=toggle.locator(':scope > summary');
- await root.locator('.xq-square').first().waitFor();
- const move=async(from,to)=>{await root.locator(`[data-square="${from}"]`).click();await root.locator(`[data-square="${to}"]`).click();};
+ await root.locator('.fen-board-square').first().waitFor();
+ const move=async(from,to)=>{await root.locator(`button[data-square="${from}"]`).press('Enter');await root.locator(`button[data-square="${to}"]`).press('Enter');};
 
  const action=a=>root.locator(`[data-action="${a}"]`).click();
  const currentFen=()=>root.locator('textarea').inputValue();
@@ -34,7 +37,10 @@ try {
  assert.equal(await currentFen(),second);
  await action('undo');await move('b7','e7');
  assert.equal(await root.locator('[data-action="redo"]').isDisabled(),true);
- await action('undo');await action('reset');
+ await action('undo');
+ await root.locator('.xq-fen > summary').click();
+ await root.locator('textarea').fill(start);await action('import');
+ await root.locator('.xq-fen > summary').click();
  assert.equal(await currentFen(),start);
  assert.equal(await root.locator('[data-action="redo"]').isDisabled(),true);
  assert.equal(await root.locator('.xq-footnote').count(),0);

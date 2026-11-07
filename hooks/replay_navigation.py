@@ -6,6 +6,7 @@ import posixpath
 import re
 
 from mkdocs.plugins import event_priority
+from mkdocs.structure.nav import Section
 from mkdocs.structure.pages import Page
 from mkdocs.utils.meta import get_data
 
@@ -159,6 +160,16 @@ def on_nav(nav, **kwargs):
     for item in nav.items:
         _prepare_replay_tree(item)
 
+    home = nav.homepage
+    laboratory = next((page for page in nav.pages if _source_uri(page) == "chess-laboratory/index.md"), None)
+    if home in nav.items and laboratory is not None:
+        _, metadata = get_data(laboratory.file.content_string)
+        laboratory.title = metadata["title"]
+        nav.items.remove(laboratory.parent or laboratory)
+        research = Section("棋局研究室", [home, laboratory])
+        nav.items[nav.items.index(home)] = research
+        home.parent = laboratory.parent = research
+
     # 保持页面上一篇/下一篇链接与新导航顺序一致。
     nav.pages = _flatten_pages(nav.items)
     for index, page in enumerate(nav.pages):
@@ -171,6 +182,8 @@ def on_page_markdown(markdown, page, **kwargs):
     """在每个 index.md 末尾追加所在目录的自动索引。"""
     source_uri = PurePosixPath(_source_uri(page))
     if source_uri.name != "index.md" or source_uri == PurePosixPath("index.md"):
+        return markdown
+    if page.meta.get("hide_directory_index") is True:
         return markdown
     if _is_directory_article(page):
         return markdown

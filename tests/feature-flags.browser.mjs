@@ -53,13 +53,13 @@ build(config)
     assert.equal(await page.locator('.md-content iframe').count(),enabled('home_music')?1:0);
     assert.equal(await page.locator('#blog-music').count(),flags.floating_music?1:0);
     if(enabled('xiangqi')) {
-      await root.locator('.xq-square').first().waitFor();
+      await root.locator('.fen-board-square').first().waitFor();
       assert.equal(await root.locator('[data-quote]').count(),enabled('quotes')?1:0);
       assert.equal(await root.locator('.xq-cloud-toggle').count(),enabled('cloud_analysis')?1:0);
       assert.equal(await root.locator('.xq-library').count(),enabled('chess_library')?1:0);
       const before=await root.locator('textarea').inputValue();
-      await root.locator('[data-square="h2"]').press('Enter');
-      await root.locator('[data-square="e2"]').press('Enter');
+      await root.locator('button[data-square="h2"]').press('Enter');
+      await root.locator('button[data-square="e2"]').press('Enter');
       assert.notEqual(await root.locator('textarea').inputValue(),before);
       await root.locator('[data-action="undo"]').click();
       assert.equal(await root.locator('textarea').inputValue(),before);

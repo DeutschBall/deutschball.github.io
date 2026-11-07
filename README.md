@@ -64,6 +64,7 @@ python -m mkdocs build
 | 开关 | 功能 | 默认 |
 | --- | --- | --- |
 | `xiangqi` | 首页象棋研究室总开关 | `true` |
+| `chess_laboratory` | Chess Laboratory 的国际象棋研究室 | `true` |
 | `quotes` | 研究室随机名言 | `true` |
 | `cloud_analysis` | 云库分析面板及查询 | `true` |
 | `chess_library` | 博客棋谱检索面板及数据加载 | `true` |
@@ -78,6 +79,28 @@ python -m mkdocs build
 首页歌曲在 `docs/index.md` 修改；悬浮播放器曲目列表在 `docs/javascripts/music.js` 修改。
 
 ## 棋谱文字格式
+
+### 在文章中插入可推演的 FEN 棋盘
+
+```markdown
+??? xiang "rnbakabnr/9/1c5c1/p1p1p1p1p/9/9/P1P1P1P1P/1C5C1/9/RNBAKABNR w - - 0 1"
+
+??? chess "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1"
+```
+
+`???` 默认折叠，`???+` 默认展开并可收起，`!!!` 始终显示。旧的 `board` 写法按 FEN 行数识别棋种。
+可以点选棋子再点合法落点，也可以拖到落点。棋盘下方可以回到上一步或前进到下一步，标题图标随行棋方切换。
+按住鼠标右键拖动可画推演箭头。右键点击箭头尖端或编号可删除单条，走棋后自动清空。
+
+博客通过 `requirements.txt` 从 PyPI 安装 `mkdocs-chess-plugin`，在 `mkdocs.yml` 中以 `chess` 启用。配置和用法见 [插件仓库](https://github.com/DeutschBall/mkdocs-chess-plugin)。
+`npm run test:boards` 会在 Chrome 检查棋盘和推演。收录研究室棋谱仍按来源审计流程执行。
+
+### 国际象棋研究室
+
+「棋局研究室」侧栏里的 Chess Laboratory 支持国际象棋推演、FEN、着法回放及 Lichess 云端缓存评估。访客可以在「我的博客棋谱」导入一盘带分支的 PGN，棋谱保存在当前浏览器。
+站点作者可以在 `docs/assets/chess/laboratory-games.json` 登记棋谱。每条包含 `title`、指向本站文章的 `url` 和一盘 `pgn`，支持带 `FEN` 标签的非标准起始局面。登记前核对正文来源和棋谱，构建后用研究室的局面检索检查匹配及回放。
+
+### 编号着法与来源审计
 
 `布局棋理/疑形/` 按具体疑形分篇，每篇使用「典型局面」「局例」两个二级标题。
 《疑形与攻击》保留为两个布局合集，正文直接放在子目录首页。
